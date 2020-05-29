@@ -23,6 +23,8 @@ else
 SRC += $(wildcard ../../Apps/Src/*.c)		# Apps (with  main)
 endif
 
+SRC += $(wildcard ../../RTOS/Simulator/*.c)	# RTOS code
+
 ######################################
 # Objects
 ######################################
