@@ -23,7 +23,12 @@ else
 SRC += $(wildcard ../../Apps/Src/*.c)		# Apps (with  main)
 endif
 
-SRC += $(wildcard ../../RTOS/Simulator/*.c)	# RTOS code
+SRC += \
+$(wildcard ../../RTOS/Simulator/uC-CPU/*.c) \
+$(wildcard ../../RTOS/Simulator/uC-CPU/Posix/GNU/*.c) \
+$(wildcard ../../RTOS/Simulator/uC-LIB/*.c) \
+$(wildcard ../../RTOS/Simulator/uCOS-III/Source/*.c) \
+$(wildcard ../../RTOS/Simulator/uCOS-III/Ports/POSIX/GNU/*.c)	# RTOS code
 
 ######################################
 # Objects
@@ -39,10 +44,20 @@ INC_DIR = \
 -I../../Apps/Inc \
 -I../../BSP/Inc \
 -I../../Config/Inc \
+-I../../RTOS/Simulator/uC-CPU \
+-I../../RTOS/Simulator/uC-CPU/Posix/GNU \
+-I../../RTOS/Simulator/uC-LIB \
+-I../../RTOS/Simulator/uCOS-III/Source \
+-I../../RTOS/Simulator/uCOS-III/Ports/POSIX/GNU \
 
 LIB = -lm -lpthread		# Standard libraries used
 
 FLAGS = -Wall -g -std=c11 $(INC_DIR)
+
+######################################
+# Defines
+######################################
+DEF = -D_XOPEN_SOURCE=600
 
 ######################################
 # Build
@@ -53,7 +68,7 @@ $(TARGET_PATH)/$(TARGET): $(OBJ) $(BUILD_DIR)
 	$(CC) -o $@ $(OBJ) $(FLAGS) $(LIB)
 
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
-	$(CC) -c -o $@ $< $(FLAGS)
+	$(CC) -c -o $@ $< $(FLAGS) $(DEF)
 
 $(BUILD_DIR):
 	mkdir $@
