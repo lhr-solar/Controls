@@ -40,7 +40,7 @@ INC_DIR = \
 -I../../BSP/Inc \
 -I../../Config/Inc \
 
-LIB = # Standard libraries used
+LIB = -lm -lpthread		# Standard libraries used
 
 FLAGS = -Wall -g -std=c11 $(INC_DIR)
 

@@ -1,0 +1,43 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/Apps/Inc",
+                "${workspaceFolder}/Apps/Src",
+
+                "${workspaceFolder}/Config/Inc",
+
+                "${workspaceFolder}/BSP/STM32F413/Src",
+                "${workspaceFolder}/BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Src",
+                "${workspaceFolder}/BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc",
+                "${workspaceFolder}/BSP/Template/Src",
+
+                "${workspaceFolder}/RTOS/Simulator/uC-CPU",
+                "${workspaceFolder}/RTOS/Simulator/uC-CPU/Posix/GNU",
+                "${workspaceFolder}/RTOS/Simulator/uC-LIB",
+                "${workspaceFolder}/RTOS/Simulator/uCOS-III/Source",
+                "${workspaceFolder}/RTOS/Simulator/uCOS-III/Ports/POSIX/GNU",
+                
+                "${workspaceFolder}/RTOS/STM32F413/uC-CPU",
+                "${workspaceFolder}/RTOS/STM32F413/uC-CPU/ARM-Cortex-M4/GNU",
+                "${workspaceFolder}/RTOS/STM32F413/uC-LIB",
+                "${workspaceFolder}/RTOS/STM32F413/uCOS-III/Source",
+                "${workspaceFolder}/RTOS/STM32F413/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU",
+
+                "${workspaceFolder}/CMSIS/Include",
+                "${workspaceFolder}/CMSIS/Device/ST/STM32F4xx/Include"
+            ],
+            "defines": [
+                "STM32F413_423xx",
+                "USE_STDPERIPH_DRIVER"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
