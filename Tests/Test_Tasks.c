@@ -25,7 +25,7 @@ void main(void) {
         (CPU_CHAR*)"Task 1",
         (OS_TASK_PTR)Task1,
         (void*)NULL,
-        (OS_PRIO)33,
+        (OS_PRIO)1,
         (CPU_STK*)Task1Stk,
         (CPU_STK_SIZE)128/10,
         (CPU_STK_SIZE)128,
@@ -52,13 +52,14 @@ void Task1(void* p_arg) {
     OS_ERR err;
 
     CPU_Init();
+    OS_CPU_SysTickInit();
 
     OSTaskCreate(
         (OS_TCB*)&Task2TCB,
         (CPU_CHAR*)"Task 2",
         (OS_TASK_PTR)Task2,
         (void*)NULL,
-        (OS_PRIO)5,
+        (OS_PRIO)2,
         (CPU_STK*)Task2Stk,
         (CPU_STK_SIZE)0,
         (CPU_STK_SIZE)128,
