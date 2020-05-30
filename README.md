@@ -7,8 +7,8 @@ There is currently one option to develop the Controls system. This option is to 
 ### Setup for Terminal Development
 The system can be built and deployed from a terminal.
 1. Ensure that you have some type of linux machine such as Ubuntu, Windows Subsystem for Linux, etc. Windows will not work.
-2. The BPS code supports multiple microcontrollers and different architectures. Depending on which on you're using, make sure you have the correct toolchain.
-    - STM32F413: Follow the instructions in this [repo](https://github.com/SijWoo/ARM-Toolchain-Setup) to setup the toolchains for the current BPS.
+2. The Controls code supports multiple microcontrollers and different architectures. Depending on which on you're using, make sure you have the correct toolchain.
+    - STM32F413: Follow the instructions in this [repo](https://github.com/SijWoo/ARM-Toolchain-Setup) to setup the toolchains for the current Controls system.
     - Simulator: Install gcc and gdb using the following lines
         ```
         sudo apt install gcc gdb
