@@ -1,6 +1,6 @@
 # RTOS
 
-This system uses the $\mu$C/OS - III RTOS from Micrium. The full reference manual can be found [here](https://www.analog.com/media/en/dsp-documentation/software-manuals/Micrium-uCOS-III-UsersManual.pdf)
+This system uses the uC/OS - III RTOS from Micrium. The full reference manual can be found [here](https://www.analog.com/media/en/dsp-documentation/software-manuals/Micrium-uCOS-III-UsersManual.pdf)
 
 ## Setup
 
@@ -11,7 +11,7 @@ This system currently uses the **STM32F4xx** port for the real board and the **L
 
 ### Setup for Linux
 
-In order to use $\mu$C/OS - III, the real-time priority limit must be set to unlimited. The process to do so is different in Windows Subsystem for Linux than it is for a true Linux OS
+In order to use uC/OS - III, the real-time priority limit must be set to unlimited. The process to do so is different in Windows Subsystem for Linux than it is for a true Linux OS
 
 #### Windows Subsystem for Linux
 
@@ -36,7 +36,7 @@ This is a read-only file by default, so make sure to edit the file with ```sudo`
 
 ## Development
 
-Every thread in $\mu$C/OS - III is called a **task**, and every task is created using the ```OSTaskCreate()``` method. All required arguments for that function can be found in the reference manual linked at the top of this document.
+Every thread in uC/OS - III is called a **task**, and every task is created using the ```OSTaskCreate()``` method. All required arguments for that function can be found in the reference manual linked at the top of this document.
 
 ### Basic Task Requirements
 1. The first task created must call ```CPU_Init()``` and ```OS_CPU_SysTickInit()```
