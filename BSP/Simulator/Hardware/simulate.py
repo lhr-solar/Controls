@@ -1,8 +1,10 @@
 import curses
-import time
+import threading
+import getch
 
 # Globals
 stdscr = None
+lights = {"BPS_RDY":0, "ARY_RDY":0, "BPS:FLT":0, "CTRL_FLT":0, "LT":0, "RT":0, "MTR":0, "HDLT":0}
 
 def display():
     """
@@ -85,8 +87,21 @@ def screen_end():
     stdscr = None
 
 
+def user_input():
+    """
+    Gets user input to alter the state of the display
+    """
+    while True:
+        ch = getch.getch().lower()
+        if ch == 'q':
+            screen_end()
+            exit()
+        elif ch == 'r':
+            lights["RT"] = 1
+        stdscr.addstr(13, 0, ch)
 
-def main():
+
+def engine():
     """
     Main engine for the simulator
     """
@@ -95,12 +110,17 @@ def main():
         try:
             display()
         except KeyboardInterrupt:
-            break
+            screen_end()
+            exit()
         except Exception as e:
             screen_end()
             print(e)
-    screen_end()
 
 
 if __name__ == "__main__":
-    main()
+    engine = threading.Thread(target=engine, daemon=True)
+    user_input = threading.Thread(target=user_input, daemon=True)
+    engine.start()
+    user_input.start()
+    screen_end()
+    exit()
