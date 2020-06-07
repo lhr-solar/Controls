@@ -3,6 +3,8 @@ import threading
 import getch
 import os
 
+import Switches
+
 # Globals
 stdscr = None
 lights = {"BPS_RDY":0, "ARY_RDY":0, "BPS:FLT":0, "CTRL_FLT":0, "LT":0, "RT":0, "MTR":0, "HDLT":0}
