@@ -1,74 +1,51 @@
-######################################
-# Target
-######################################
-TARGET = controls-simulator.out
-TARGET_PATH = ../..
+TARGET = bps-simulator.out
+TARGET_PATH = ../../
 
-######################################
-# GCC
-######################################
 CC = gcc
 
-######################################
-# Source
-######################################
-SRC = $(wildcard Src/*.c)	# BSP code
+# since current path is in the BSP folder, go to the top level with ../../
+SRC = \
+$(wildcard ../../BSP/Simulator/Src/*.c) \
+$(wildcard ../../Drivers/Src/*.c) \
+$(wildcard ../../Config/Src/*.c)
 
 ifneq ($(TEST), none)
 TEST_FILE := Test_$(TEST).c
+# This line adds everything in Apps/Src/*.c except for main.c
 SRC += \
-$(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c)) \
-$(wildcard ../../Tests/$(TEST_FILE))		# Apps (not main)
+$(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))	\
+$(wildcard ../../Tests/$(TEST_FILE))
 else
-SRC += $(wildcard ../../Apps/Src/*.c)		# Apps (with  main)
+SRC += $(wildcard ../../Apps/Src/*.c)
 endif
 
-SRC += \
-$(wildcard ../../RTOS/Simulator/uC-CPU/*.c) \
-$(wildcard ../../RTOS/Simulator/uC-CPU/Posix/GNU/*.c) \
-$(wildcard ../../RTOS/Simulator/uC-LIB/*.c) \
-$(wildcard ../../RTOS/Simulator/uCOS-III/Source/*.c) \
-$(wildcard ../../RTOS/Simulator/uCOS-III/Ports/POSIX/GNU/*.c)	# RTOS code
-
-######################################
-# Objects
-######################################
-BUILD_DIR = ../../Objects
-OBJ = $(addprefix $(BUILD_DIR)/,$(notdir $(SRC:.c=.o)))	# Create object file list
-vpath %.c $(sort $(dir $(SRC)))		# In case files aren't found
-
-######################################
-# Flags
-######################################
 INC_DIR = \
 -I../../Apps/Inc \
 -I../../BSP/Inc \
--I../../Config/Inc \
--I../../RTOS/Simulator/uC-CPU \
--I../../RTOS/Simulator/uC-CPU/Posix/GNU \
--I../../RTOS/Simulator/uC-LIB \
--I../../RTOS/Simulator/uCOS-III/Source \
--I../../RTOS/Simulator/uCOS-III/Ports/POSIX/GNU \
+-I../../Drivers/Inc \
+-I../../Config/Inc
 
-LIB = -lm -lpthread		# Standard libraries used
+LIB = \
+-lm
 
 FLAGS = -Wall -g -std=c11 $(INC_DIR)
 
-######################################
-# Defines
-######################################
-DEF = -D_XOPEN_SOURCE=600
+BUILD_DIR = ../../Objects
+OBJ = $(addprefix $(BUILD_DIR)/,$(notdir $(SRC:.c=.o)))
+vpath %.c $(sort $(dir $(SRC)))
 
-######################################
-# Build
-######################################
 all: $(TARGET_PATH)/$(TARGET)
+
+$(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
+	$(CC) -c -o $@ $< $(FLAGS)
 
 $(TARGET_PATH)/$(TARGET): $(OBJ) $(BUILD_DIR)
 	$(CC) -o $@ $(OBJ) $(FLAGS) $(LIB)
 
-$(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
-	$(CC) -c -o $@ $< $(FLAGS) $(DEF)
-
 $(BUILD_DIR):
 	mkdir $@
+
+.PHONY: clean
+
+clean:
+	rm -fR $(BUILD_DIR)
