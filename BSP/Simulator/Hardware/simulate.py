@@ -1,6 +1,7 @@
 import curses
 import threading
 import getch
+import os
 
 # Globals
 stdscr = None
@@ -95,10 +96,9 @@ def user_input():
         ch = getch.getch().lower()
         if ch == 'q':
             screen_end()
-            exit()
+            os._exit(0)
         elif ch == 'r':
             lights["RT"] = 1
-        stdscr.addstr(13, 0, ch)
 
 
 def engine():
@@ -111,7 +111,7 @@ def engine():
             display()
         except KeyboardInterrupt:
             screen_end()
-            exit()
+            os._exit(1)
         except Exception as e:
             screen_end()
             print(e)
@@ -123,4 +123,5 @@ if __name__ == "__main__":
     engine.start()
     user_input.start()
     screen_end()
-    exit()
+    while True:
+        pass
