@@ -17,12 +17,7 @@ def toggle(switch):
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
         open(file, 'w')
-    states = []
-    with open(file, 'r') as csvfile:
-        csvreader = csv.reader(csvfile)
-        for row in csvreader:
-            states.append(row)
-    states = 0 if states == [] else int(states[0][0])
+    states = read()
     for i, sw in enumerate(switches):
         if sw == switch:
             states ^= 1<<i
@@ -30,3 +25,22 @@ def toggle(switch):
     with open(file, 'w') as csvfile:
         csvreader = csv.writer(csvfile)
         csvreader.writerow(states)
+
+
+def read():
+    """Reads switch states
+
+    Returns:
+        int: bit string of switch states
+    """
+    states = []
+    with open(file, 'r') as csvfile:
+        csvreader = csv.reader(csvfile)
+        for row in csvreader:
+            states.append(row)
+    states = 0 if states == [] else int(states[0][0])
+    return states
+
+if __name__ == '__main__':
+    toggle("RT")
+    print(read())
