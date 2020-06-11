@@ -40,7 +40,3 @@ def read():
             states.append(row)
     states = 0 if states == [] else int(states[0][0])
     return states
-
-if __name__ == '__main__':
-    toggle("RT")
-    print(read())

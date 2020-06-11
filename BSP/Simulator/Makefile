@@ -57,7 +57,7 @@ FLAGS = -Wall -g -std=c11 $(INC_DIR)
 ######################################
 # Defines
 ######################################
-DEF = -D_XOPEN_SOURCE=600
+DEF = -D_XOPEN_SOURCE=600 -DSIMULATOR
 
 ######################################
 # Build
