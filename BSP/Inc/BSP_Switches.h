@@ -7,8 +7,9 @@
 #define __BSP_SWITCHES_H
 
 #include "common.h"
+#include "config.h"
 
-typedef enum {LT, RT, HDLT, FWD_REV, HZD, CRS_SET, CRS_EN, REGEN} switch_t;
+typedef enum {LT=0, RT, HDLT, FWD_REV, HZD, CRS_SET, CRS_EN, REGEN} switch_t;
 
 /**
  * @brief   Initializes all switches
@@ -21,9 +22,9 @@ void BSP_Switches_Init(void);
 /**
  * @brief   Reads the current state of 
  *          the specified switch
- * @param   None
- * @return  None
+ * @param   sw the switch to read
+ * @return  State of the switch (ON/OFF)
  */ 
-void BSP_Switches_Read(switch_t sw);
+state_t BSP_Switches_Read(switch_t sw);
 
 #endif
