@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 
 import Switches
+import Pedals
 
 
 def update_buttons():
@@ -49,7 +50,7 @@ if os.environ.get('DISPLAY','') == '':
 # Sets up window
 window = tk.Tk()
 window.rowconfigure([0], minsize=200, weight=1)
-window.columnconfigure([0, 1], minsize=200, weight=1)
+window.columnconfigure([0, 1, 2], minsize=200, weight=1)
 
 # Sets up frames
 button_frame = tk.Frame(master=window)
@@ -57,10 +58,15 @@ button_frame.rowconfigure([0, 1, 2], minsize=50, weight=1)
 button_frame.columnconfigure([0, 1, 2], minsize=100, weight=1)
 button_frame.grid(row=0, column=0, sticky='nsew')
 
+pedal_frame = tk.Frame(master=window)
+pedal_frame.rowconfigure([0], minsize=50, weight=1)
+pedal_frame.columnconfigure([0, 1], minsize=100, weight=1)
+pedal_frame.grid(row=0, column=1, sticky='nsew')
+
 display_frame = tk.Frame(master=window)
 display_frame.rowconfigure([0, 1, 2], minsize=50, weight=1)
 display_frame.columnconfigure([0, 1, 2], minsize=100, weight=1)
-display_frame.grid(row=0, column=1, sticky='nsew')
+display_frame.grid(row=0, column=2, sticky='nsew')
 
 # Creates all buttons
 left_turn = tk.Button(master=button_frame, text="LT", command=lambda:Switches.toggle("LT"))
@@ -79,6 +85,15 @@ crs_en = tk.Button(master=button_frame, text="CRS_EN", command=lambda:Switches.t
 crs_en.grid(row=2, column=0, sticky='nsew')
 regen = tk.Button(master=button_frame, text="REGEN", command=lambda:Switches.toggle("REGEN"))
 regen.grid(row=2, column=1, sticky='nsew')
+
+# Create both pedals
+accelerator = tk.Scale(pedal_frame, from_=1, to=0, resolution=-1, label='accelerator')
+accelerator.grid(row=0, column=0, sticky='nsew')
+brake = tk.Scale(pedal_frame, from_=1, to=0, resolution=-1, label='brake')
+brake.grid(row=0, column=1, sticky='nsew')
+
+accelerator.configure(command=lambda pos : Pedals.set_pedals(pos, brake.get()))
+brake.configure(command=lambda pos : Pedals.set_pedals(accelerator.get(), pos))
 
 # Sets up periodic updates
 window.after(1, update_buttons)
