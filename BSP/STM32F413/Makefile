@@ -26,10 +26,10 @@ $(wildcard ../../Drivers/Src/*.c)	\
 $(wildcard ../../BSP/STM32F413/Src/*.c)	\
 $(wildcard ../../CMSIS/DSP_Lib/Source/*.c)	\
 $(wildcard ../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Src/*.c) \
-$(wildcard ../../RTOS/STM32F413/uCOS-III/Source/*.c)	\
-$(wildcard ../../RTOS/STM32F413/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/*.c) \
-$(wildcard ../../RTOS/STM32F413/uC-CPU/*.c) \
-$(wildcard ../../RTOS/STM32F413/uC-CPU/ARM-Cortex-M4/GNU/*.c)
+$(wildcard ../../uCOS-III-STM32F4/uCOS-III/Source/*.c)	\
+$(wildcard ../../uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/*.c) \
+$(wildcard ../../uCOS-III-STM32F4/uC-CPU/*.c) \
+$(wildcard ../../uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/*.c)
 
 ifneq ($(TEST), none)
 TEST_FILE := Test_$(TEST).c
@@ -44,8 +44,8 @@ endif
 # ASM sources
 ASM_SOURCES =  \
 ../../BSP/STM32F413/Src/startup_stm32f413xx.s \
-../../RTOS/STM32F413/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/os_cpu_a.s \
-../../RTOS/STM32F413/uC-CPU/ARM-Cortex-M4/GNU/cpu_a.s
+../../uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/os_cpu_a.s \
+../../uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/cpu_a.s
 
 
 #######################################
@@ -109,11 +109,11 @@ C_INCLUDES =  \
 -I../../CMSIS/Device/ST/STM32F4xx/Include	\
 -I../../CMSIS/Include	\
 -I../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc \
--I../../RTOS/STM32F413/uCOS-III/Source/ \
--I../../RTOS/STM32F413/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ \
--I../../RTOS/STM32F413/uC-CPU/ \
--I../../RTOS/STM32F413/uC-CPU/ARM-Cortex-M4/GNU/ \
--I../../RTOS/STM32F413/uC-LIB/
+-I../../uCOS-III-STM32F4/uCOS-III/Source/ \
+-I../../uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ \
+-I../../uCOS-III-STM32F4/uC-CPU/ \
+-I../../uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ \
+-I../../uCOS-III-STM32F4/uC-LIB/
 
 
 # compile gcc flags

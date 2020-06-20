@@ -41,4 +41,4 @@ help:
 
 clean:
 	rm -fR Objects
-	rm *.out
+	rm -f *.out

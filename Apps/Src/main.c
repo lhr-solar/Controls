@@ -19,13 +19,18 @@ static CPU_STK  TaskPrint2Stk[TASK_PRINT_STK_SIZE];
 static void TaskPrint2(void *p_arg);
 
 // Interrupt functions
+#ifndef SIMULATION
 static void __enable_irq() { asm("CPSIE I"); }
 static void __disable_irq(){ asm("CPSID I"); }
+#endif
 
 int main(void) {
     OS_ERR err;
 
+    #ifndef SIMULATION
     __disable_irq();
+    #endif
+    
     OSInit(&err);
     if(err != OS_ERR_NONE) {
         /* Something didn't work quite right. 
@@ -53,8 +58,10 @@ int main(void) {
         while(1) y++;
     }
 
+    #ifndef SIMULATION
     // I'm not sure if this was done by the OS already, but just in case.
     __enable_irq();
+    #endif
     
     OSStart(&err);
     
@@ -69,9 +76,14 @@ int main(void) {
 void TaskPrint(void *p_arg) {
     OS_ERR err;
 
+    #ifndef SIMULATION
     OS_CPU_SysTickInit(80000u); // Assuming an 16MHz clk, this gets us delays of 5ms
                                 // This should be tweaked, since higher precision means
                                 // larger overhead
+    #else
+    OS_CPU_SysTickInit();
+    #endif
+
     BSP_UART_Init();
 
     OSTaskCreate((OS_TCB     *)&TaskPrint2TCB,
