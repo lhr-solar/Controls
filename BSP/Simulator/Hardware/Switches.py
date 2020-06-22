@@ -13,10 +13,6 @@ def toggle(switch):
     Args:
         switch (string): name of the switch to toggle
     """
-    # Creates file if it doesn't exist
-    os.makedirs(os.path.dirname(file), exist_ok=True)
-    if not os.path.exists(file):
-        open(file, 'w')
     states = read()
     for i, sw in enumerate(switches):
         if sw == switch:
@@ -33,6 +29,10 @@ def read():
     Returns:
         int: bit string of switch states
     """
+    # Creates file if it doesn't exist
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    if not os.path.exists(file):
+        open(file, 'w')
     states = []
     with open(file, 'r') as csvfile:
         csvreader = csv.reader(csvfile)
