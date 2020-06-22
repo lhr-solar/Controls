@@ -24,11 +24,11 @@ SRC += $(wildcard ../../Apps/Src/*.c)		# Apps (with  main)
 endif
 
 SRC += \
-$(wildcard ../../uCOS-III-Simulator/uC-CPU/*.c) \
-$(wildcard ../../uCOS-III-Simulator/uC-CPU/Posix/GNU/*.c) \
-$(wildcard ../../uCOS-III-Simulator/uC-LIB/*.c) \
-$(wildcard ../../uCOS-III-Simulator/uCOS-III/Source/*.c) \
-$(wildcard ../../uCOS-III-Simulator/uCOS-III/Ports/POSIX/GNU/*.c)   \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uC-CPU/*.c) \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uC-CPU/Posix/GNU/*.c) \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uC-LIB/*.c) \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uCOS-III/Source/*.c) \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uCOS-III/Ports/POSIX/GNU/*.c) # RTOS
 
 ######################################
 # Objects
@@ -44,20 +44,20 @@ INC_DIR = \
 -I../../Apps/Inc \
 -I../../BSP/Inc \
 -I../../Config/Inc \
--I../../uCOS-III-Simulator/uC-CPU \
--I../../uCOS-III-Simulator/uC-CPU/Posix/GNU \
--I../../uCOS-III-Simulator/uC-LIB \
--I../../uCOS-III-Simulator/uCOS-III/Source \
--I../../uCOS-III-Simulator/uCOS-III/Ports/POSIX/GNU \
+-I../../RTOS/uCOS-III-Simulator/uC-CPU \
+-I../../RTOS/uCOS-III-Simulator/uC-CPU/Posix/GNU \
+-I../../RTOS/uCOS-III-Simulator/uC-LIB \
+-I../../RTOS/uCOS-III-Simulator/uCOS-III/Source \
+-I../../RTOS/uCOS-III-Simulator/uCOS-III/Ports/POSIX/GNU \
 
 LIB = -lm -lpthread		# Standard libraries used
 
-FLAGS = -Wall -g -std=c11 $(INC_DIR) -DSIMULATION
+FLAGS = -Wall -g -std=c11 $(INC_DIR)
 
 ######################################
 # Defines
 ######################################
-DEF = -D_XOPEN_SOURCE=600
+DEF = -D_XOPEN_SOURCE=600 -DSIMULATOR
 
 ######################################
 # Build
