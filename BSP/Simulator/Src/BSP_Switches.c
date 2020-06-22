@@ -37,12 +37,20 @@ state_t BSP_Switches_Read(switch_t sw) {
         printf("ADC not available\n\r");
         return 2;
     }
+    // Lock file
+    int fno = fileno(fp);
+    flock(fno, LOCK_EX);
+
     // Get raw CSV string
     char csv[16];
     fgets(csv, 16, fp);
 
     // Convert to integer
     uint8_t switchStates = atoi(csv);
+    
+    // Unlock
+    flock(fno, LOCK_UN);
+    fclose(fp);
     
     // Check state
     if (switchStates & (1 << sw)) {

@@ -7,6 +7,8 @@
 #include "BSP_Switches.h"
 #include "BSP_Timer.h"
 
+#include <sys/file.h>
+
 #ifdef SIMULATOR
 #define DATA_PATH(f) "BSP/Simulator/Hardware/Data/" f
 #endif
