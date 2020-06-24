@@ -87,9 +87,9 @@ regen = tk.Button(master=button_frame, text="REGEN", command=lambda:Switches.tog
 regen.grid(row=2, column=1, sticky='nsew')
 
 # Create both pedals
-accelerator = tk.Scale(pedal_frame, from_=1, to=0, resolution=-1, label='accelerator')
+accelerator = tk.Scale(pedal_frame, from_=1, to=0, resolution=0.001, label='accelerator')
 accelerator.grid(row=0, column=0, sticky='nsew')
-brake = tk.Scale(pedal_frame, from_=1, to=0, resolution=-1, label='brake')
+brake = tk.Scale(pedal_frame, from_=1, to=0, resolution=0.001, label='brake')
 brake.grid(row=0, column=1, sticky='nsew')
 
 accelerator.configure(command=lambda pos : Pedals.set_pedals(pos, brake.get()))
