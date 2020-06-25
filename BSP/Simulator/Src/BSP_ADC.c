@@ -20,7 +20,8 @@ int ADCvalueAccel, ADCValueBrake;
 float ADCPercentageAccel, ADCPercentageBrake;
 
 void ADC_Init(void) {
-    // TODO
+    // Maybe check if the csv file exists?
+    // There really isn't much we have to do in the simulator
 }
 
 //helper function that returns percentage value of ADC value 
@@ -28,6 +29,7 @@ float convert_ADC_to_Percent(int ADCvalue) {
     return (((float)ADCvalue) / 4096) * 100;
 }
 
+// reads the ADC values from the csv file, and converts them to floats in the range [0.0, 1.0]
 void calculate_ADC_Values(void) {
     //opening file in read mode
     FILE *filePointer = fopen(FILE_NAME, "r");
