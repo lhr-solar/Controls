@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "BSP_ADC.h"
 #include "common.h"
 #include "config.h"
@@ -20,7 +21,10 @@ int ADCvalueAccel, ADCValueBrake;
 float ADCPercentageAccel, ADCPercentageBrake;
 
 void ADC_Init(void) {
-    // Maybe check if the csv file exists?
+    // Checking if file exists
+    if(access(FILE_NAME, F_OK) == -1){
+        printf("File not found inside BSP/Simulator/Hardware/Data/");
+    }
     // There really isn't much we have to do in the simulator
 }
 
