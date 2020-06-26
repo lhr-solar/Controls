@@ -5,7 +5,12 @@ import os
 file = "BSP/Simulator/Hardware/Data/Switches.csv"
 
 # Names of switches
-switches = ["LT", "RT", "HDLT", "FWD/REV", "HZD", "CRS_SET", "CRS_EN", "REGEN"]
+switches = ["LT", "RT", "HDLT", "FWD/REV", "HZD", "CRS_SET", "CRS_EN", "REGEN", "IGN_1", "IGN_2"]
+
+
+def get_switches():
+    return switches
+
 
 def toggle(switch):
     """Toggles a specified switch state
@@ -17,6 +22,8 @@ def toggle(switch):
     for i, sw in enumerate(switches):
         if sw == switch:
             states ^= 1<<i
+            if sw == "IGN_2":
+                states ^=1<<(i-1)
     states = [states]
     with open(file, 'w') as csvfile:
         csvreader = csv.writer(csvfile)

@@ -9,7 +9,7 @@
 #include "common.h"
 #include "config.h"
 
-typedef enum {LT=0, RT, HDLT, FWD_REV, HZD, CRS_SET, CRS_EN, REGEN} switch_t;   // TODO: Ignition switches
+typedef enum {LT=0, RT, HDLT, FWD_REV, HZD, CRS_SET, CRS_EN, REGEN, IGN_1, IGN_2} switch_t;
 
 /**
  * @brief   Initializes all switches

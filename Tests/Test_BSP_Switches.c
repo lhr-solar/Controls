@@ -12,9 +12,9 @@
 
 int main() {
     BSP_Switches_Init();
-    printf("LT\tRT\tHDLT\tFWD/REV\tHZD\tCRS_SET\tCRS_EN\tREGEN\n");
+    printf("LT\tRT\tHDLT\tFWD/REV\tHZD\tCRS_SET\tCRS_EN\tREGEN\tIGN_1\tIGN_2\n");
     while(1) {
-        printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\r", 
+        printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\r", 
                 BSP_Switches_Read(LT),
                 BSP_Switches_Read(RT),
                 BSP_Switches_Read(HDLT),
@@ -22,7 +22,9 @@ int main() {
                 BSP_Switches_Read(HZD),
                 BSP_Switches_Read(CRS_SET),
                 BSP_Switches_Read(CRS_EN),
-                BSP_Switches_Read(REGEN));
+                BSP_Switches_Read(REGEN),
+                BSP_Switches_Read(IGN_1),
+                BSP_Switches_Read(IGN_2));
     }
     printf("\n");
 }

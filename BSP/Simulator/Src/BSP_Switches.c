@@ -46,7 +46,7 @@ state_t BSP_Switches_Read(switch_t sw) {
     fgets(csv, 16, fp);
 
     // Convert to integer
-    uint8_t switchStates = atoi(csv);
+    uint16_t switchStates = atoi(csv);
     
     // Unlock
     flock(fno, LOCK_UN);
