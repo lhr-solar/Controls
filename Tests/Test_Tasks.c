@@ -1,5 +1,6 @@
 #include "common.h"
 #include "config.h"
+#include <os.h>
 
 // Globals
 static OS_TCB Task1TCB;
