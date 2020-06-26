@@ -8,7 +8,7 @@
 
 #include "BSP_Switches.h"
 
-#define FILE_NAME DATA_PATH("Switches.csv")
+#define FILE_NAME DATA_PATH(SWITCHES_CSV)
 
 /**
  * @brief   Confirms that the CSV file
@@ -20,7 +20,7 @@
 void BSP_Switches_Init(void) {
     if (access(FILE_NAME, F_OK) != 0) {
         // File doesn't exist if true
-        perror("Switches.csv");
+        perror(SWITCHES_CSV);
         exit(EXIT_FAILURE);
     }
 }
