@@ -1,3 +1,12 @@
+/**
+ * Test file for library to interact with switches
+ * 
+ * Run this test in conjunction with the simulator 
+ * GUI. As you press buttons on the GUI, the respective
+ * switches will change from '0' to '1' on the CLI display
+ * to show that pressing the buttons is read by the BSP
+ */ 
+
 #include "common.h"
 #include "config.h"
 

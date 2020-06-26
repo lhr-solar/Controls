@@ -34,7 +34,7 @@ void BSP_Switches_Init(void) {
 state_t BSP_Switches_Read(switch_t sw) {
     FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {
-        printf("ADC not available\n\r");
+        printf("Switches not available\n\r");
         return 2;
     }
     // Lock file
