@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from functools import partial
+import csv
 
 import Switches
 
@@ -15,6 +16,28 @@ def update_buttons():
             button.config(relief=tk.RAISED)
     window.after(1, update_buttons)
 
+def update_timer():
+	""" Updates Timer.csv every 1 ms """
+
+	currentValue = 0 # If exception is caught, skip writing by initializing to 0
+	with open("Timer.csv", 'r') as csvfile:
+		reader = csv.reader(csvfile, delimiter=',')
+		
+		try:
+			for row in reader: # Should only be a single row
+				currentValue = int(row[0])
+
+		except IndexError: # If the csv is blank
+			print("Blank CSV")
+
+
+	if currentValue > 0: # Systick stops at 0
+		with open("Timer.csv", 'w') as csvfile:
+			writer = csv.writer(csvfile, delimiter=',')
+
+			writer.writerow([currentValue - 1])
+
+	window.after(1, update_timer)
 
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
@@ -47,4 +70,5 @@ for i, switch in enumerate(Switches.get_switches()):
 
 # Sets up periodic updates
 window.after(1, update_buttons)
+window.after(1, update_timer)
 window.mainloop()
