@@ -3,16 +3,16 @@
 #include "Timer.h"
 
 
-int update_Time(int row)
+int8_t BSP_Timer_Update(int8_t row)
 {
     FILE *file = fopen("Timer.csv", "r");
     char arr[256];
 
-    int counter=0;
+    int8_t counter=0;
 
-    int current;
+    int8_t current;
 
-    int reload;
+    int8_t reload;
 
 
     while(fgets(arr,sizeof(arr),file))
@@ -27,7 +27,7 @@ int update_Time(int row)
 
     }
  
- int subt = reload - current ;
+ int8_t subt = reload - current ;
 
  return subt; 
     
@@ -36,9 +36,9 @@ int update_Time(int row)
 
 }
 
-int writeReload(int reload)
+int8_t BSP_Timer_Init(int8_t reload)
 {
-  FILE *CANdata = fopen("CAN.csv","w");
-  fprintf(CANdata,"0x%x,%d",reload,reload);
-  fclose(CANdata);
+  FILE *TIMERdata = fopen("Timer.csv","w");
+  fprintf(TIMERdata,"0x%x",reload);
+  fclose(TIMERdata);
 }
