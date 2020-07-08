@@ -16,6 +16,8 @@
 
 int main() {
     BSP_ADC_Init();
+    
+    printf("test, %d\n", BSP_ADC_Get_Value(Accelerator));
 /* INDIVUDAL TESTS FOR EACH FUNCTION
     printf("TESTS\n");
     int numberOfChannels = BSP_ADC_Number_Values();
@@ -43,10 +45,10 @@ int main() {
     printf("Accelerator millivolts:  %f\n", BSP_ADC_Accel_GetMillivoltage());
     printf("Brake millivolts: %f\n", BSP_ADC_Brake_GetMillivoltage());
     */
-    while(1) {
+    /*while(1) {
         printf("Accelerator: %5.1f\tBrake: %5.1f\r", 
             BSP_ADC_Accel_GetPercentage(), BSP_ADC_Brake_GetPercentage());
-    }
+    }*/
 
     
 
