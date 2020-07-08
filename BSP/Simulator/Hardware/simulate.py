@@ -13,7 +13,7 @@ def update_buttons():
             button.config(relief=tk.SUNKEN)
         else:
             button.config(relief=tk.RAISED)
-    window.after(1, update_buttons)
+    window.after(10, update_buttons)
 
 
 # Sets up the display environment variable
@@ -46,5 +46,5 @@ for i, switch in enumerate(Switches.get_switches()):
     buttons.append(button)
 
 # Sets up periodic updates
-window.after(1, update_buttons)
+window.after(10, update_buttons)
 window.mainloop()
