@@ -9,6 +9,7 @@
 
 #include "common.h"
 #include "config.h"
+#include <bsp.h>
 
 int main() {
     BSP_Switches_Init();
