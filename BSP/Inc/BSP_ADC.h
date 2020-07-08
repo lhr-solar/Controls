@@ -1,9 +1,15 @@
+/**
+ * Header file for the library to interact
+ * with the Analog to Digital Converter (ADC)
+ */
+
 #ifndef __BSP_ADC_H
 #define __BSP_ADC_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <bsp.h>
 #include "common.h"
 #include "config.h"
 

@@ -10,7 +10,7 @@ the distance (percentage for now) and millivolts from this library.
 
 #include "BSP_ADC.h"
 
-#define FILE_NAME "BSP/Simulator/Hardware/Data/Pedals.csv"
+#define FILE_NAME DATA_PATH(PEDALS_CSV)
 /**
  * @brief   Confirms that the CSV file
  *          has been created and prints and 
@@ -21,7 +21,9 @@ the distance (percentage for now) and millivolts from this library.
 void BSP_ADC_Init(void) {
     // Checking if file exists
    if(access(FILE_NAME, F_OK) != 0){
-        printf("File not found inside BSP/Simulator/Hardware/Data/");
+        // File doesn't exist if true
+        perror(PEDALS_CSV);
+        exit(EXIT_FAILURE);
     }
     // There really isn't much we have to do in the simulator
 }
