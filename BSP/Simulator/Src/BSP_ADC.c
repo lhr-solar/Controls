@@ -53,7 +53,7 @@ void read_ADC_Values(int16_t *rawADCValues) {
     //opening file in read mode
     FILE *filePointer = fopen(FILE_NAME, "r");
     //TODO: Correct the following function, read all values till the end of file
-    for(int i = 0; i < 2; i++){
+    for(int i = 0; i < MAX_CHANNELS; i++){
         fscanf(filePointer,"%d,", &(rawADCValues[i]));
     }
     //closing the file
