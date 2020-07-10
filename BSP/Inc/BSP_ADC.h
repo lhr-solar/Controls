@@ -15,10 +15,11 @@
 
 #define MAX_CHANNELS 10
 
-typedef enum pedal_t 
+typedef enum 
 {
-    Accelerator, 
-    Brake
+    ACCELERATOR, 
+    BRAKE,
+    NUMBEROFPEDALS
 } pedal_t;
 
 /**
@@ -40,6 +41,6 @@ int16_t BSP_ADC_Get_Value(pedal_t hardwareDevice);
  * @param   indexOfValue, index of value in the array of all ADC values obtained with read_ADC_Values
  * @return  ADC value in millivolts
  */ 
-int BSP_ADC_Get_Millivoltage(pedal_t hardwareDevice);
+int16_t BSP_ADC_Get_Millivoltage(pedal_t hardwareDevice);
 
 #endif

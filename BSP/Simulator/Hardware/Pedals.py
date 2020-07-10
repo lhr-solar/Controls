@@ -25,7 +25,3 @@ def set_pedals(accel_pos, brake_pos):
     with open(file, "w") as csvfile:
         csvreader = csv.writer(csvfile)
         csvreader.writerow(states)
-
-
-if __name__ == '__main__':
-    set_pedals(0.7, 0.0)

@@ -24,11 +24,11 @@ int main() {
     printf("ADC at channel of Accelerator is %d\n", BSP_ADC_Get_Value(Accelerator));
     printf("ADC at channel of Brake is %d\n", BSP_ADC_Get_Value(Brake));
 
-    printf("ADC at channel of Accelerator in mV is %f\n", BSP_ADC_Get_Millivoltage(Accelerator));
-    printf("ADC at channel of Brake in mV is %f\n", BSP_ADC_Get_Millivoltage(Brake));
+    printf("ADC at channel of Accelerator in mV is %d\n", BSP_ADC_Get_Millivoltage(Accelerator));
+    printf("ADC at channel of Brake in mV is %d\n", BSP_ADC_Get_Millivoltage(Brake));
     */
     while(1) {
         printf("Accelerator: %5.1d\tBrake: %5.1d\r", 
-            BSP_ADC_Get_Value(Accelerator), BSP_ADC_Get_Value(Brake));
+            BSP_ADC_Get_Value(ACCELERATOR), BSP_ADC_Get_Value(BRAKE));
     }
 }
