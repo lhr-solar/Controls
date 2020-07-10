@@ -3,16 +3,20 @@ import tkinter as tk
 from functools import partial
 
 import Switches
+import Contactor
 
 
 def update_buttons():
     """Periodically update the display state of buttons"""
     switches = Switches.read()
+    contactorState = Contactor.Read_Contactor()
     for i, button in enumerate(buttons):
         if switches & 1<<i:
             button.config(relief=tk.SUNKEN)
         else:
             button.config(relief=tk.RAISED)
+    contactor_status = tk.Label(master=window, text="Motor Contactor:" + contactorState[0]+"\nArray Contactor:" + contactorState[1], font=("Helvetica", 8))
+    contactor_status.place(x=325, y= 10)
     window.after(10, update_buttons)
 
 
@@ -44,6 +48,11 @@ for i, switch in enumerate(Switches.get_switches()):
     button = tk.Button(master=button_frame, text=switch, command=partial(Switches.toggle, switch))
     button.grid(row=i//max(button_frame_rows), column=i%len(button_frame_columns), sticky='nsew')
     buttons.append(button)
+
+#Creates text that displays Contactor states
+contactor_status = tk.Label(master=window, text="Motor Contactor: \nArray Contactor:", font=("Helvetica", 8))
+contactor_status.place(x=325, y= 10)
+
 
 # Sets up periodic updates
 window.after(10, update_buttons)
