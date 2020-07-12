@@ -2,6 +2,7 @@
 #define __BSP_UART_H
 
 #include "common.h"
+#include <bsp.h>
 
 /**
  * @brief   Initializes the UART peripheral
@@ -11,8 +12,7 @@ void BSP_UART_Init(void);
 /**
  * @brief   Gets one line of ASCII text that was received.
  * @pre     str should be at least 128bytes long.
- * @param   str : pointer to string to store the string. This buffer should be initialized
- *                  before hand.
+ * @param   str pointer to string to store the string
  * @return  number of bytes that was read
  */
 uint32_t BSP_UART_Read(char *str);

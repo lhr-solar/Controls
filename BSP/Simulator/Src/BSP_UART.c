@@ -7,6 +7,8 @@
 #include "BSP_UART.h"
 
 #define FILE_NAME DATA_PATH(UART_CSV)
+#define RX_SIZE 64
+#define TX_SIZE 128
 
 /**
  * @brief   Confirms that the CSV file
@@ -24,14 +26,33 @@ void BSP_UART_Init(void) {
 }
 
 /**
- * @brief   Gets one line of ASCII text that was received.
+ * @brief   Reads one line from the CSV file
  * @pre     str should be at least 128bytes long.
- * @param   str : pointer to buffer to store the string. This buffer should be initialized
- *                  before hand.
+ * @param   str pointer to buffer to store the string
  * @return  number of bytes that was read
  */
-uint32_t BSP_UART_Read(char *str) {
+uint32_t BSP_UART_Read(char* str) {
+    FILE* fp = fopen(FILE_NAME, "r");
+    if (!fp) {
+        printf("UART not available\n\r");
+        return 0;
+    }
+    // Lock file
+    int fno = fileno(fp);
+    flock(fno, LOCK_EX);
 
+    // Get raw CSV string
+    char csv[RX_SIZE];
+    fgets(csv, RX_SIZE, fp);
+
+    // Put string into return buffer
+    strcpy(str, csv);
+
+    // Unlock file
+    flock(fno, LOCK_UN);
+    fclose(fp);
+
+    return strlen(str);
 }
 
 /**
@@ -40,6 +61,6 @@ uint32_t BSP_UART_Read(char *str) {
  * @param   len : size of buffer
  * @return  numer of bytes that were sent
  */
-uint32_t BSP_UART_Write(char *str, uint32_t len) {
+uint32_t BSP_UART_Write(char* str, uint32_t len) {
 
 }
