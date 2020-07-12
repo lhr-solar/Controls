@@ -15,7 +15,7 @@ void BSP_UART_Init(void);
  *                  before hand.
  * @return  number of bytes that was read
  */
-uint32_t BSP_UART_ReadLine(char *str);
+uint32_t BSP_UART_Read(char *str);
 
 /**
  * @brief   Transmits data to through UART line
