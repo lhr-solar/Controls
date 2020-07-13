@@ -1,0 +1,40 @@
+import csv
+import os
+
+# Path of file
+file = "BSP/Simulator/Hardware/Data/UART.csv"
+
+# Data
+data = {
+    "speed" : 0,
+    "cruise_control_en" : 0,
+    "cruise_control_set" : 0,
+    "regen_en" : 0,
+    "CAN_err" : 0
+}
+
+
+def get_display():
+    return data.keys()
+
+
+def read():
+    global data
+    # Creates file if it doesn't exist
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    if not os.path.exists(file):
+        open(file, 'w')
+    uart = list()
+    with open(file, 'r') as csvfile:
+        csvreader = csv.reader(csvfile)
+        for row in csvreader:
+            uart.append(row)
+    uart = uart[0]
+    if len(uart):
+        for i, d in enumerate(data.keys()):
+            data[d] = uart[i]
+    return data
+
+
+if __name__ == '__main__':
+    print(read())
