@@ -18,6 +18,7 @@ def update_buttons():
 
 
 def update_display():
+    """Periodically update the display state of display"""
     global display_text
     display = Display.read()
     for i, text in enumerate(display.keys()):

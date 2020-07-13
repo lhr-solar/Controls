@@ -15,10 +15,20 @@ data = {
 
 
 def get_display():
-    return data
+    """Getter function for the display keys
+
+    Returns:
+        list: list of dictionary keys
+    """
+    return data.keys()
 
 
 def read():
+    """Reads the UART line
+
+    Returns:
+        dict: dictionary with filled in values
+    """    
     global data
     # Creates file if it doesn't exist
     os.makedirs(os.path.dirname(file), exist_ok=True)
