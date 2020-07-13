@@ -44,7 +44,3 @@ def read():
         for i, d in enumerate(data.keys()):
             data[d] = uart[i]
     return data
-
-
-if __name__ == '__main__':
-    print(read())

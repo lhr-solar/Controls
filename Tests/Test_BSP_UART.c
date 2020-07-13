@@ -1,3 +1,12 @@
+/**
+ * Test file for library to interact with UART
+ * 
+ * Run this test in conjunction with the simulator
+ * GUI. As this generates randomized values, the display
+ * will update the values accordingly to show that the
+ * display is reading the UART properly
+ */
+
 #include "common.h"
 #include "config.h"
 #include "BSP_UART.h"
