@@ -15,7 +15,7 @@ data = {
 
 
 def get_display():
-    return data.keys()
+    return data
 
 
 def read():
@@ -29,8 +29,8 @@ def read():
         csvreader = csv.reader(csvfile)
         for row in csvreader:
             uart.append(row)
-    uart = uart[0]
     if len(uart):
+        uart = uart[0]
         for i, d in enumerate(data.keys()):
             data[d] = uart[i]
     return data

@@ -80,5 +80,5 @@ uint32_t BSP_UART_Write(char* str, uint32_t len) {
     flock(fno, LOCK_UN);
     fclose(fp);
 
-    return len;
+    return strlen(str);
 }
