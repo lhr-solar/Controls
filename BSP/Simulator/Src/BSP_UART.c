@@ -37,6 +37,7 @@ uint32_t BSP_UART_Read(char* str) {
         printf("UART not available\n\r");
         return 0;
     }
+
     // Lock file
     int fno = fileno(fp);
     flock(fno, LOCK_EX);
@@ -62,5 +63,22 @@ uint32_t BSP_UART_Read(char* str) {
  * @return  numer of bytes that were sent
  */
 uint32_t BSP_UART_Write(char* str, uint32_t len) {
+    FILE* fp = fopen(FILE_NAME, "w");
+    if (!fp) {
+        printf("UART not available\n\r");
+        return 0;
+    }
 
+    // Lock file
+    int fno = fileno(fp);
+    flock(fno, LOCK_EX);
+
+    // Write to the file
+    fprintf(fp, "%s", str);
+
+    // Unlock file
+    flock(fno, LOCK_UN);
+    fclose(fp);
+
+    return len;
 }
