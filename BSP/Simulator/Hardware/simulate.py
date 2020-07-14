@@ -20,23 +20,30 @@ def update_timer():
 	""" Updates Timer.csv every 1 ms """
 
 	currentValue = 0 # If exception is caught, skip writing by initializing to 0
-	with open("Timer.csv", 'r') as csvfile:
-		reader = csv.reader(csvfile, delimiter=',')
-		
-		try:
-			for row in reader: # Should only be a single row
-				currentValue = int(row[0])
+	simulatorFile = "Timer.csv"
 
-		except IndexError: # If the csv is blank
-			print("Blank CSV")
+	try:
+		with open(simulatorFile, 'r') as csvfile:
+			reader = csv.reader(csvfile, delimiter=',')
+			
+			try:
+				for row in reader: # Should only be a single row
+					currentValue = int(row[0])
+					reloadValue = int(row[1]) # Save so we can rewrite below
+
+			except IndexError: # If the csv is blank. Not sure what to do in this case so I just print for debugging.
+				print("Blank CSV")
 
 
-	if currentValue > 0: # Systick stops at 0
-		with open("Timer.csv", 'w') as csvfile:
-			writer = csv.writer(csvfile, delimiter=',')
+		if currentValue > 0: # Systick stops at 0
+			with open(simulatorFile, 'w') as csvfile:
+				writer = csv.writer(csvfile, delimiter=',')
 
-			writer.writerow([currentValue - 1])
+				writer.writerow([currentValue - 1, reloadValue])
 
+	except FileNotFoundError:
+		print("File " + simulatorFile + " not found")
+	
 	window.after(1, update_timer)
 
 # Sets up the display environment variable
