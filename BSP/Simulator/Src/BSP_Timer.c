@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include "Timer.h"
+#include "BSP_Timer.h"
 
 
 // function keeps updating time and will interrupt at the right time to go to specefic functions
