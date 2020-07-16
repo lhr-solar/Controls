@@ -14,12 +14,14 @@
 #include "config.h"
 
 #define MAX_CHANNELS 10
+#define ADC_PRECISION_BITS 12
+#define ADC_RANGE_MILLIVOLTS 3300
 
 typedef enum 
 {
     ACCELERATOR, 
     BRAKE,
-    NUMBEROFPEDALS
+    NUMBER_OF_PEDALS
 } pedal_t;
 
 /**

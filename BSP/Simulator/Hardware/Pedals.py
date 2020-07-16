@@ -19,8 +19,11 @@ def set_pedals(accel_pos, brake_pos):
     accel_value = int(float(accel_pos) * 4096) # ADC conversion
     brake_value = int(float(brake_pos) * 4096) # ADC conversion
     # The slider goes from 0.0 to 1.0, but we want to cap the ADC value at 4095
-    if accel_value == 4096: accel_value = 4095
-    if brake_value == 4096: brake_value = 4095
+    if accel_value == 4096:
+        accel_value = 4095
+    if brake_value == 4096:
+        brake_value = 4095
+    
     states = [accel_value, brake_value]
     with open(file, "w") as csvfile:
         csvreader = csv.writer(csvfile)

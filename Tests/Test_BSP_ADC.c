@@ -29,6 +29,6 @@ int main() {
     */
     while(1) {
         printf("Accelerator: %5.1d\tBrake: %5.1d\r", 
-            BSP_ADC_Get_Value(ACCELERATOR), BSP_ADC_Get_Value(BRAKE));
+            BSP_ADC_Get_Millivoltage(ACCELERATOR), BSP_ADC_Get_Millivoltage(BRAKE));
     }
 }

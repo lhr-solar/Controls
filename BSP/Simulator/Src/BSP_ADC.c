@@ -31,14 +31,14 @@ void BSP_ADC_Init(void) {
 
 /**
  * @brief   Helper function which returns a 
- *          milivoltage based on the raw ADC value
+ *          millivoltage based on the raw ADC value
  *          compared to the 3.3 volt range of the 
  *          pedals' potentiometers
  * @param   raw ADC value
- * @return  milivolts 
+ * @return  millivolts 
  */ 
-int16_t convert_ADC_to_Voltage(int16_t ADCvalue){
-    return (((float)ADCvalue / 4096) * 3300);
+static int16_t convert_ADC_to_Voltage(int16_t ADCvalue){
+    return ((int32_t)ADCvalue)*ADC_RANGE_MILLIVOLTS >> ADC_PRECISION_BITS;
 }
 
 /**
@@ -49,12 +49,13 @@ int16_t convert_ADC_to_Voltage(int16_t ADCvalue){
  * @param   none
  * @return  rawADCValues, pointer to array that contains the ADC values in the array
  */ 
-void read_ADC_Values(int16_t *rawADCValues) {
+static void read_ADC_Values(int16_t *rawADCValues) {
     //opening file in read mode
     FILE *filePointer = fopen(FILE_NAME, "r");
     //TODO: Correct the following function, read all values till the end of file
     for(int i = 0; i < MAX_CHANNELS; i++){
-        fscanf(filePointer,"%d,", &(rawADCValues[i]));
+        // If the file doesn't contain any more values, stop early
+        if (fscanf(filePointer,"%hd,", &(rawADCValues[i])) <= 0) break;
     }
     //closing the file
     fclose(filePointer);
@@ -73,7 +74,7 @@ int16_t BSP_ADC_Get_Value(pedal_t hardwareDevice){
     //reading all values and storing them in an int array
     read_ADC_Values(rawADCValues);
     //checking if hardwareDevice is out of bounds
-    if(hardwareDevice >  NUMBEROFPEDALS - 1 || hardwareDevice < 0){
+    if(hardwareDevice >  NUMBER_OF_PEDALS - 1 || hardwareDevice < 0){
         //throwing an error
         fprintf(stderr, "Argument passed doesn't exit in ADC file\n");
         exit(EXIT_SUCCESS);
