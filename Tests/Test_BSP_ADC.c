@@ -17,7 +17,7 @@
 
 int main() {
     BSP_ADC_Init();
-    /* INDIVUDAL TESTS FOR EACH FUNCTION
+    /* INDIVIDUAL TESTS FOR EACH FUNCTION
     printf("TESTS\n");
 
     printf("TESTING VALUE AND MILLIVOLTAGE\n");

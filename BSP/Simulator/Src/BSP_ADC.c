@@ -37,8 +37,8 @@ void BSP_ADC_Init(void) {
  * @param   raw ADC value
  * @return  millivolts 
  */ 
-static int16_t convert_ADC_to_Voltage(int16_t ADCvalue){
-    return ((int32_t)ADCvalue)*ADC_RANGE_MILLIVOLTS >> ADC_PRECISION_BITS;
+static int16_t convert_ADC_to_Voltage(int16_t rawADCValue){
+    return ((int32_t)rawADCValue)*ADC_RANGE_MILLIVOLTS >> ADC_PRECISION_BITS;
 }
 
 /**
