@@ -20,7 +20,7 @@ int main()
 {
     void (*functOnepoiner)= &functionOne;
     void (*functTwopoiner)= &functionTwo;
-    int count=0;
+    int8_t count=0;
 
 
     BSP_Timer_Init(1000,functOnepoiner,functTwopoiner);
