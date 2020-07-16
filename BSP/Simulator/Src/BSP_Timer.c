@@ -45,7 +45,7 @@ void BSP_Update_Time(int8_t row)
 
 }
 //Function for timer intialization in which the reload value is written on CSV and the function pointers are stored in global variables to be accessed later by Update function
-void BSP_Timer_Init(int8_t reload,int *func1,int *func2)
+void BSP_Timer_Init(int8_t reload,void *func1,void *func2)
 {
   FILE *TimerData = fopen("Timer.csv","w");
   fprintf(TimerData,"0x%x,%d",reload,reload);
