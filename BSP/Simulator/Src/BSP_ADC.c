@@ -51,11 +51,15 @@ static int16_t convert_ADC_to_Voltage(int16_t rawADCValue){
 static void read_ADC_Values(int16_t *rawADCValues) {
     // Opening file in read mode
     FILE *filePointer = fopen(FILE_NAME, "r");
+    // Lock file
+    int fno = fileno(filePointer);
+    flock(fno, LOCK_EX);
     for(int i = 0; i < MAX_CHANNELS; i++){
         // If the file doesn't contain any more values, stop early
         if (fscanf(filePointer,"%hd,", &(rawADCValues[i])) <= 0) break;
     }
     // Closing the file
+    flock(fno, LOCK_UN);
     fclose(filePointer);
 }
 
