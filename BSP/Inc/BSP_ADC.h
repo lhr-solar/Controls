@@ -33,14 +33,14 @@ void BSP_ADC_Init(void);
 
 /**
  * @brief   Provides the ADC value of the channel at the specified index
- * @param   hardwareDevice, index of value in the array of all ADC values obtained with read_ADC_Values
- * @return  rawADCValue
+ * @param   hardwareDevice pedal enum that represents the specific device
+ * @return  Raw ADC value without conversion
  */ 
 int16_t BSP_ADC_Get_Value(pedal_t hardwareDevice);
 
 /**
  * @brief   Provides the ADC value in millivolts of the channel at the specified index
- * @param   indexOfValue, index of value in the array of all ADC values obtained with read_ADC_Values
+ * @param   hardwareDevice pedal enum that represents the specific device
  * @return  ADC value in millivolts
  */ 
 int16_t BSP_ADC_Get_Millivoltage(pedal_t hardwareDevice);
