@@ -49,8 +49,5 @@ To build a new test, you need to use the following command:
 ## Rules
 Commit frequently into your own branches. Create a Pull Request whenever you are ready to add you working code to the master branch. You must select 1 reviewer for approval. Follow the coding guidelines in the Solar Google Drive. The reviewers will make sure everything is up to par with the coding standards.
 
-### Sub-Rules
-These are the rules below the rules
-
 Reviewers:
 1. Rishi Ponnekanti
