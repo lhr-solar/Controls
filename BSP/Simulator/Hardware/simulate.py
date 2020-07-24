@@ -15,6 +15,11 @@ def update_buttons():
             button.config(relief=tk.RAISED)
     window.after(1, update_buttons)
 
+def update_timers():
+	""" Periodically calls Timer.udpate to update the timers."""
+	Timer.update()
+	window.after(1, update_timers)
+
 
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
@@ -47,5 +52,5 @@ for i, switch in enumerate(Switches.get_switches()):
 
 # Sets up periodic updates
 window.after(1, update_buttons)
-window.after(1, Timer.update_timers)
+window.after(1, update_timers)
 window.mainloop()

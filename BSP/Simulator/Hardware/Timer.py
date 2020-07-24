@@ -4,7 +4,7 @@ import os
 # Path of file
 file = "Data/Timer.csv"
 
-def update_timers():
+def update():
 	""" Decrements the current value of the two timer simulations in Timer.csv every 1 ms """
 
 	# Create the file if it doesn't exist yet
