@@ -1,19 +1,28 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include "BSP_Timer.h"
+#include "Timer.h"
 
+static void (*function1);
+static void (*function2);
+int row=0;
+/** 
 
-// function keeps updating time and will interrupt at the right time to go to specefic functions
-void BSP_Update_Time(int8_t row)           
+ * @brief   Updates the time by reading the CSV file and calling relevant functions at the right time 
+
+ * @param   none
+
+ * @return  none
+
+ */  
+
+void BSP_Timer_Update()
 {
     FILE *file = fopen("Timer.csv", "r");
-    char arr[256];
+    char arr[300];
 
-    int8_t counter=0;
+    int counter=0;
 
-    int8_t current;
+    int current1;
 
-    int8_t reload;
+    int current2;
 
 
     while(fgets(arr,sizeof(arr),file))
@@ -21,7 +30,8 @@ void BSP_Update_Time(int8_t row)
         counter++;
         if(counter == row)
         {
-            fscanf(file,"%x , %x",&current,&reload);
+            fscanf(file,"%x , %x",&current1,&current2);
+            row++;
             break;
 
         }
@@ -29,27 +39,35 @@ void BSP_Update_Time(int8_t row)
     }
  fclose(file);
  
- int8_t subt = reload - current ;
 
-     if(subt==100)
+     if(current1==100)
       {
           (*function1);//sendDashboard func called
       }
-      if(subt==10)
+      if(current2==10)
       {
          (*function2); //sendMC func called
       }
     
-    
+
     
 
 }
-//Function for timer intialization in which the reload value is written on CSV and the function pointers are stored in global variables to be accessed later by Update function
-void BSP_Timer_Init(int8_t reload,void *func1,void *func2)
+/** 
+
+ * @brief   Intializes the Timer
+
+ * @param   2 reload values for two timers, Two function pointers 
+
+ * @return  none
+
+ */  
+
+void BSP_Timer_Init(int Timer1Reload,int Timer2Reload,void *func1,void *func2)
 {
   FILE *TimerData = fopen("Timer.csv","w");
-  fprintf(TimerData,"0x%x,%d",reload,reload);
+  fprintf(TimerData,"0x%x , 0x%x",Timer1Reload,Timer2Reload);
   fclose(TimerData);
   function1 = func1;
-  function2 = func2;   //function pointers declared in Timer.h file
+  function2 = func2;
 }
