@@ -1,8 +1,8 @@
-#include "Timer.h"
+#include "BSP_Timer.h"
 
 static void (*function1);
 static void (*function2);
-int row=0;
+int row=0; //keeps track of row number in CSV file
 /** 
 
  * @brief   Updates the time by reading the CSV file and calling relevant functions at the right time 
