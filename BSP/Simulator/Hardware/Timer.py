@@ -2,7 +2,7 @@ import csv
 import os
 
 # Path of file
-file = "Data/Timer.csv"
+file = "BSP/Simulator/Hardware/Data/Timer.csv"
 
 def update():
 	""" Decrements the current value of the two timer simulations in Timer.csv every 1 ms """
@@ -18,20 +18,20 @@ def update():
 	with open(file, 'r') as csvfile:
 		reader = csv.reader(csvfile, delimiter=',')
 		
-		try:
-			for row in reader: # Should be 2 rows
-				current_values.append(int(row[0]))
-				reload_values.append(int(row[1]))
-
-		except IndexError: # If the csv is blank.
-			current_values.extend([0x100000, 0x1000000]) # 0xFFFFFF + 1 since we are decrementing below
-			reload_values.extend([0xFFFFFF, 0xFFFFFF])
+		for row in reader: # Should be 2 rows
+			current_values.append(int(row[0]))
+			reload_values.append(int(row[1]))
 
 	with open(file, 'w') as csvfile:
 		writer = csv.writer(csvfile, delimiter=',')
 
 		for timer in range(0,2):
-			if current_values[timer] > 0: # If timer is still running
-				writer.writerow([current_values[timer] - 1, reload_values[timer]])
-			else: # When timer hits 0, reload
-				writer.writerow([reload_values[timer], reload_values[timer]])
+
+			try:
+				if current_values[timer] > 0: # If timer is still running
+					writer.writerow([current_values[timer] - 1, reload_values[timer]])
+				else: # When timer hits 0, reload
+					writer.writerow([reload_values[timer], reload_values[timer]])
+
+			except IndexError: # If a row is blank
+				writer.writerow([0xFFFFFF, 0xFFFFFF])
