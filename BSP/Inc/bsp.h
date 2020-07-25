@@ -6,6 +6,7 @@
 #include "BSP_SPI.h"
 #include "BSP_Switches.h"
 #include "BSP_Timer.h"
+#include "BSP_Contactors.h"
 
 #include <sys/file.h>
 #include <unistd.h>
