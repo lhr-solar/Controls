@@ -40,11 +40,11 @@ void BSP_Timer_Update()
  fclose(file);
  
 
-     if(current1==100)
+     if(current1==0)
       {
           (*function1);//sendDashboard func called
       }
-      if(current2==10)
+      if(current2==0)
       {
          (*function2); //sendMC func called
       }
