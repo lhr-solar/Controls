@@ -1,12 +1,21 @@
 #include "BSP_Timer.h"
 
-//temporary test function
+/** 
+ * @brief   Test function to see if the first Timer works
+ * @param   none
+ * @return  none (will print a string on console)
+ */  
 void functionOne()
 {
   printf("First Function worked");
 
 }
 
+/** 
+ * @brief   Test function to see of the second Timer works 
+ * @param   none
+ * @return  none (will print a string on console)
+ */  
 void functionTwo()
 {
   printf("Second Function worked");
