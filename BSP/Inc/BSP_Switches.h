@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "config.h"
+#include <bsp.h>
 
 typedef enum {LT=0, RT, HDLT, FWD_REV, HZD, CRS_SET, CRS_EN, REGEN, IGN_1, IGN_2} switch_t;
 
