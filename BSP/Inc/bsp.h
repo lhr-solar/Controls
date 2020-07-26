@@ -3,7 +3,7 @@
 
 #include "BSP_ADC.h"
 #include "BSP_CAN.h"
-#include "BSP_SPI.h"
+#include "BSP_UART.h"
 #include "BSP_Switches.h"
 #include "BSP_Timer.h"
 
@@ -16,6 +16,7 @@
 #define SWITCHES_CSV "Switches.csv"
 #define PEDALS_CSV "Pedals.csv"
 #define UART_CSV "UART.csv"
+#define CAN_CSV "CAN.csv"
 #endif
 
 #endif
