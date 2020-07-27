@@ -22,6 +22,17 @@ void BSP_CAN_Init(void) {
     }
 }
 
+/**
+ * @brief   Writes the id, message, and length 
+ *          of the message to the proper 
+ *          bus line in the CSV file
+ * @param   bus the proper CAN line to write to
+ *          defined by the CAN_t enum
+ * @param   id the hex ID for the message to be sent
+ * @param   data pointer to the array containing the message
+ * @param   len length of the message in bytes
+ * @return  number of bytes transmitted (0 if unsuccessful)
+ */
 uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
     // Get current values in CSV
     FILE* fp = fopen(FILE_NAME, "r");
@@ -80,6 +91,15 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
     return len;
 }
 
+/**
+ * @brief   Reads the message currently on the 
+ *          specified CAN line in the CSV file
+ * @param   id pointer to integer to store the 
+ *          message ID that was read
+ * @param   data pointer to integer array to store
+ *          the message in bytes
+ * @return  number of bytes read (0 if unsuccessful)
+ */
 uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {

@@ -87,7 +87,3 @@ def update_velocity(v):
         CURRENT_VELOCITY += 0.5
     elif CURRENT_VELOCITY > v:
         CURRENT_VELOCITY -= 0.5
-
-
-if __name__ == '__main__':
-    confirm_drive()

@@ -39,6 +39,7 @@ def update_CAN():
 
 
 def update_motor():
+    """Periodically update the velocity and display of the motor"""
     global desired_velocity_text, current_velocity_text
     desired_velocity, current_velocity = MotorController.confirm_drive()
     desired_velocity_text.set(f"Desired Velocity: {round(desired_velocity, 3)} m/s")

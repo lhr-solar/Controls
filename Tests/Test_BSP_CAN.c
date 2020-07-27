@@ -1,3 +1,18 @@
+/**
+ * Test file for library to interact with CAN
+ * 
+ * Run this test in conjunction with the simulator.
+ * 
+ * testCAN1 will simply write a message to the CAN1 line
+ * that will then be displayed by the GUI in the CAN seciton.
+ * 
+ * testCAN2 will periodically send the MOTOR DRIVE command to
+ * CAN2 (the line connected to the motor controller). It writes
+ * a desired velocity, which will be displayed on the GUI. 
+ * If the program terminates, the motor simulator will go into
+ * neutral, meaning it will stop changing velocity.
+ */ 
+
 #include "common.h"
 #include "config.h"
 #include <bsp.h>
