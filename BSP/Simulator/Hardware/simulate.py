@@ -6,6 +6,7 @@ import Switches
 import Pedals
 import Display
 import CAN
+import MotorController
 
 
 def update_buttons():
@@ -29,12 +30,21 @@ def update_display():
 
 
 def update_CAN():
-    """Periodically update the dispaly state of the CAN bus"""
+    """Periodically update the display state of the CAN bus"""
     global id_text, message_text
     can = CAN.read()
     id_text.set(f"ID: {can[0]}")
     message_text.set(f"Message: {can[1]}")
     window.after(20, update_CAN)
+
+
+def update_motor():
+    global desired_velocity_text, current_velocity_text
+    desired_velocity, current_velocity = MotorController.confirm_drive()
+    desired_velocity_text.set(f"Desired Velocity: {round(desired_velocity, 3)} m/s")
+    current_velocity_text.set(f"Current Velocity: {round(current_velocity, 3)} m/s")
+    window.after(250, update_motor)
+
 
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
@@ -72,6 +82,13 @@ can_frame.rowconfigure(can_frame_rows, minsize=50, weight=1)
 can_frame.columnconfigure(can_frame_columns, minsize=100, weight=1)
 can_frame.grid(row=1, column=0, sticky='nsew')
 
+motor_frame = tk.LabelFrame(master=window, text='Motor')
+motor_frame_rows = [0, 1]
+motor_frame_columns = [0]
+motor_frame.rowconfigure(motor_frame_rows, minsize=50, weight=1)
+motor_frame.columnconfigure(motor_frame_columns, minsize=100, weight=1)
+motor_frame.grid(row=1, column=1, sticky='nsew')
+
 ### Switches ###
 buttons = []
 for i, switch in enumerate(Switches.get_switches()):
@@ -106,8 +123,17 @@ message = tk.Label(master=can_frame, textvariable=message_text)
 message.grid(row=1, column=0, sticky='nsew')
 
 
+### Motor ###
+desired_velocity_text = tk.StringVar(value='Desired Velocity: ')
+desired_velocity = tk.Label(master=motor_frame, textvariable=desired_velocity_text)
+desired_velocity.grid(row=0, column=0, sticky='nsew')
+current_velocity_text = tk.StringVar(value='Current Velocity: ')
+current_velocity = tk.Label(master=motor_frame, textvariable=current_velocity_text)
+current_velocity.grid(row=1, column=0, sticky='nsew')
+
 # Sets up periodic updates
 window.after(10, update_buttons)
 window.after(20, update_CAN)
 window.after(50, update_display)
+window.after(250, update_motor)
 window.mainloop()

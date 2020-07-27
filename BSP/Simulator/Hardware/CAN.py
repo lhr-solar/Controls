@@ -8,7 +8,7 @@ def read():
     """Reads CAN1 bus
 
     Returns:
-        list: [ID, Message]
+        list: [ID, Message, Length]
     """
     # Creates file if it doesn't exist
     os.makedirs(os.path.dirname(file), exist_ok=True)
@@ -19,5 +19,5 @@ def read():
         csvreader = csv.reader(csvfile)
         for row in csvreader:
             message.append(row)
-    message = [0, 0] if message == [] else message[0][:-1]
+    message = [0, 0] if message == [] else message[0]
     return message
