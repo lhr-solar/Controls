@@ -5,6 +5,7 @@ from functools import partial
 import Switches
 import Pedals
 import Display
+import CAN
 
 
 def update_buttons():
@@ -26,13 +27,22 @@ def update_display():
         display_text[i].set(f"{text}: {display[text]}")
     window.after(50, update_display)
 
+
+def update_CAN():
+    """Periodically update the dispaly state of the CAN bus"""
+    global id_text, message_text
+    can = CAN.read()
+    id_text.set(f"ID: {can[0]}")
+    message_text.set(f"Message: {can[1]}")
+    window.after(20, update_CAN)
+
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
     os.environ.__setitem__('DISPLAY', ':0')
 
 # Sets up window
 window = tk.Tk()
-window.rowconfigure([0], minsize=200, weight=1)
+window.rowconfigure([0, 1], minsize=200, weight=1)
 window.columnconfigure([0, 1, 2], minsize=200, weight=1)
 
 # Sets up frames
@@ -54,6 +64,13 @@ display_frame_columns = [0]
 display_frame.rowconfigure(display_frame_rows, minsize=50, weight=1)
 display_frame.columnconfigure(display_frame_columns, minsize=100, weight=1)
 display_frame.grid(row=0, column=2, sticky='nsew')
+
+can_frame = tk.LabelFrame(master=window, text='CAN')
+can_frame_rows = [0, 1]
+can_frame_columns = [0]
+can_frame.rowconfigure(can_frame_rows, minsize=50, weight=1)
+can_frame.columnconfigure(can_frame_columns, minsize=100, weight=1)
+can_frame.grid(row=1, column=0, sticky='nsew')
 
 ### Switches ###
 buttons = []
@@ -80,7 +97,17 @@ for i, label in enumerate(Display.get_display()):
     cell.grid(row=i//len(display_frame_columns), column=i%len(display_frame_columns), sticky='nsew')
 
 
+### CAN ###
+id_text = tk.StringVar(value='ID: ')
+id_ = tk.Label(master=can_frame, textvariable=id_text)
+id_.grid(row=0, column=0, sticky='nsew')
+message_text = tk.StringVar(value='Message: ')
+message = tk.Label(master=can_frame, textvariable=message_text)
+message.grid(row=1, column=0, sticky='nsew')
+
+
 # Sets up periodic updates
 window.after(10, update_buttons)
+window.after(20, update_CAN)
 window.after(50, update_display)
 window.mainloop()
