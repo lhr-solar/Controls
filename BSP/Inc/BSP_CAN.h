@@ -1,6 +1,6 @@
 /**
  * Header file for the library to interact
- * with the switches on the steering wheel
+ * with both CAN lines in the car
  */
 
 #ifndef __BSP_CAN_H
@@ -8,7 +8,9 @@
 
 #include "common.h"
 #include <bsp.h>
+#include <math.h>
 
+typedef enum {CAN1=0, CAN2} CAN_t;
 
 /**
  * @brief   Initializes both CAN lines to
@@ -19,12 +21,8 @@
  */ 
 void BSP_CAN_Init(void);
 
-uint8_t BSP_CAN1_Write(uint32_t id, uint8_t data[8], uint8_t len);
+uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len);
 
-uint8_t BSP_CAN1_Read(uint32_t *id, uint8_t *data);
-
-uint8_t BSP_CAN2_Write(uint32_t id, uint8_t data[8], uint8_t len);
-
-uint8_t BSP_CAN2_Read(uint32_t *id, uint8_t *data);
+uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data);
 
 #endif
