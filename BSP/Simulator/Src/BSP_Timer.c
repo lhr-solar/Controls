@@ -1,8 +1,8 @@
 #include "BSP_Timer.h"
 
-static void (*function1);
-static void (*function2);
-int row=0; //keeps track of row number in CSV file
+static void (*Timer1Handler)(int);
+static void (*Timer2Handler)(int);
+//had to pass some sort of parameter to the pointer or it doesn't work
 /** 
 
  * @brief   Updates the time by reading the CSV file and calling relevant functions at the right time 
@@ -15,39 +15,41 @@ int row=0; //keeps track of row number in CSV file
 
 void BSP_Timer_Update()
 {
-    FILE *file = fopen("Timer.csv", "r");
-    char arr[300];
+   FILE *file = fopen("Timer.csv", "r");
+    int arr[4];
 
-    int counter=0;
+    int current;
 
-    int current1;
+    int reload;
 
-    int current2;
+    int i=0;
+
+    int index=0;
 
 
-    while(fgets(arr,sizeof(arr),file))
+    while(i<2)
     {
-        counter++;
-        if(counter == row)
-        {
-            fscanf(file,"%x , %x",&current1,&current2);
-            row++;
-            break;
-
-        }
-
+        fscanf(file,"%d , %d",&current,&reload);
+        arr[index]=current;
+        arr[index+1]=reload;
+        index=+2;
+        i++;
+        
     }
- fclose(file);
+     
+    fclose(file);
  
 
-     if(current1==0)
+     if(arr[0]==0)
       {
-          (*function1);//sendDashboard func called
+          Timer1Handler(0);
       }
-      if(current2==0)
+      if(arr[2]==0)
       {
-         (*function2); //sendMC func called
+          Timer2Handler(0); 
       }
+    
+
     
 
     
@@ -66,8 +68,9 @@ void BSP_Timer_Update()
 void BSP_Timer_Init(int Timer1Reload,int Timer2Reload,void *func1,void *func2)
 {
   FILE *TimerData = fopen("Timer.csv","w");
-  fprintf(TimerData,"0x%x , 0x%x",Timer1Reload,Timer2Reload);
+  fprintf(TimerData,"%d , %d",Timer1Reload,Timer1Reload);
+  fprintf(TimerData,"\n%d , %d",Timer2Reload,Timer2Reload);
   fclose(TimerData);
-  function1 = func1;
-  function2 = func2;
+  Timer1Handler = func1;
+  Timer2Handler = func2;
 }
