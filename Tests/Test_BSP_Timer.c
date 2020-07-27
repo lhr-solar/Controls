@@ -2,32 +2,28 @@
 
 /** 
  * @brief   Test function to see if the first Timer works
- * @param   none
+ * @param   Had to pass a parameter in order for pointer to work in BSP_Timer.c
  * @return  none (will print a string on console)
  */  
-void functionOne()
+void functionOne(int i)
 {
-  printf("First Function worked");
+  printf("First Function worked\n");
 
 }
 
 /** 
  * @brief   Test function to see of the second Timer works 
- * @param   none
+ * @param   Had to pass a parameter in order for pointer to work in BSP_Timer.c
  * @return  none (will print a string on console)
  */  
-void functionTwo()
+void functionTwo(int j)
 {
-  printf("Second Function worked");
+  printf("Second Function worked\n");
 }
 
 
 int main()
 {
-    void (*functOnepointer)= &functionOne;
-    void (*functTwopointer)= &functionTwo;
-    int count=0;
-
 
     BSP_Timer_Init(100,10,functOnepointer,functTwopointer);
 
