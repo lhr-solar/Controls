@@ -3,7 +3,7 @@ import os
 import fcntl
 
 
-file = "BSP/Simulator/Hardware/Data/Contactor.csv"
+file = "BSP/Simulator/Hardware/Data/Contactors.csv"
 
 #Reads file and returns 1 or 0, 1 is on, 0 is off
 def Read_Contactor():

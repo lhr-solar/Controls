@@ -1,5 +1,5 @@
-#ifndef __BSP_SWITCHES_H
-#define __BSP_SWITCHES_H
+#ifndef __BSP_CONTACTORS_H
+#define __BSP_CONTACTORS_H
 
 #include "common.h"
 #include "config.h"

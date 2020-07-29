@@ -1,7 +1,7 @@
 #include "BSP_Contactors.h"
 #include <stdio.h>
 
-#define FILE_NAME "Contactors.csv"
+#define FILE_NAME DATA_PATH(CONTACTORS_CSV)
 
 /**
  * @brief   Confirms that the CSV file
@@ -38,7 +38,7 @@ void read_Contactor_States(int16_t *contactorStates) {
         if (fscanf(filePointer,"%hd,", &(contactorStates[i])) <= 0) break;
     }
     // Closing the file
-    //flock(fno, LOCK_UN);
+    flock(fno, LOCK_UN);
     fclose(filePointer);
 } 
 

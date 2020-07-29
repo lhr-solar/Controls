@@ -15,6 +15,7 @@
 #define DATA_PATH(f) "BSP/Simulator/Hardware/Data/" f
 
 #define SWITCHES_CSV "Switches.csv"
+#define CONTACTORS_CSV "Contactors.csv"
 #endif
 
 #endif
