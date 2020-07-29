@@ -13,9 +13,8 @@
 void BSP_Contactors_Init(void) {
     if (access(FILE_NAME, F_OK) != 0) {
         // File doesn't exist if true
-        // Contactors.csv file is created
-        FILE* file_ptr = fopen(FILE_NAME, "w");
-        fclose(file_ptr);
+        perror(CONTACTORS_CSV);
+        exit(EXIT_FAILURE);
     }
 }
 
