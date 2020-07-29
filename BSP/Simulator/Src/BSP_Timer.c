@@ -15,15 +15,13 @@ void BSP_Timer_Update()
     int fno = fileno(file);
     flock(fno, LOCK_EX);
     int timeCurrent[2];
-    int current;
     int reload;
     int i=0;
     int index=0;
     
     while(i<2)
     {
-        fscanf(file,"%d , %d",&current,&reload);
-        timeCurrent[index]=current;
+        fscanf(file,"%d , %d",timeCurrent+index,&reload);
         index++;
         i++;
         
