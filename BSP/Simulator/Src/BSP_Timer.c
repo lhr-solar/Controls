@@ -1,7 +1,7 @@
 #include "BSP_Timer.h"
 
-static void (*Timer1Handler)(int);
-static void (*Timer2Handler)(int);
+static void (*Timer1Handler)(void);
+static void (*Timer2Handler)(void);
 //had to pass some sort of parameter to the pointer or it doesn't work
 
 /** 
@@ -16,15 +16,12 @@ void BSP_Timer_Update()
     flock(fno, LOCK_EX);
     int timeCurrent[2];
     int reload;
-    int i=0;
     int index=0;
     
-    while(i<2)
+    for(int i=0;i<2;i++)
     {
         fscanf(file,"%d , %d",timeCurrent+index,&reload);
         index++;
-        i++;
-        
     }
     flock(fno, LOCK_UN);
     fclose(file);
@@ -32,11 +29,11 @@ void BSP_Timer_Update()
 
      if(timeCurrent[0]==0)
       {
-          Timer1Handler(0);
+          Timer1Handler();
       }
       if(timeCurrent[1]==0)
       {
-          Timer2Handler(0); 
+          Timer2Handler(); 
       }
   }
 
@@ -51,10 +48,13 @@ void BSP_Timer_Update()
 
 void BSP_Timer_Init(int Timer1Reload,int Timer2Reload,void *func1,void *func2)
 {
-  FILE *TimerData = fopen("Timer.csv","w");
-  fprintf(TimerData,"%d,%d",Timer1Reload,Timer1Reload);
-  fprintf(TimerData,"\n%d,%d",Timer2Reload,Timer2Reload);
-  fclose(TimerData);
+  FILE *file = fopen("Timer.csv","w");
+  int fno = fileno(file);
+  flock(fno, LOCK_EX);
+  fprintf(file,"%d,%d",Timer1Reload,Timer1Reload);
+  fprintf(file,"\n%d,%d",Timer2Reload,Timer2Reload);
+  flock(fno, LOCK_UN);
+  fclose(file);
   Timer1Handler = func1;
   Timer2Handler = func2;
 }
