@@ -5,7 +5,7 @@
 #include "common.h"
 #include <bsp.h>
 
-typedef enum {Time1=0, Time2=1} Time_t;
+typedef enum {TIME_1=0, TIME_2} Time_t;
 
 
 /** 
