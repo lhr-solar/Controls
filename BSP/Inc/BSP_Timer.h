@@ -17,8 +17,10 @@ void BSP_Timer_Update();
 
 /** 
  * @brief   Intializes the Timer
- * @param   2 reload values for two timers, Two function pointers 
+ * @param   Reload vlaue of Timer
+ * @param   Pointer to function
+ * @param   Specefic Timer
  * @return  none
  */  
-void BSP_Timer_Init(int TimerReload,void *func1, Timer_t time);
+void BSP_Timer_Init(int TimerReload,void *func1, Time_t time);
 
