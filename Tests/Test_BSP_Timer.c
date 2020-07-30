@@ -25,8 +25,8 @@ void functionTwo()
 int main()
 {
 
-    BSP_Timer_Init(1000,functionOne,0);
-    BSP_Timer_Init(100,functionTwo,1);
+    BSP_Timer_Init(1000,functionOne,TIMER_1);
+    BSP_Timer_Init(100,functionTwo,TIMER_2);
     while(1){
       BSP_Timer_Update();
     }
