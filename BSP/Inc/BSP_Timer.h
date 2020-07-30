@@ -5,6 +5,9 @@
 #include "common.h"
 #include <bsp.h>
 
+typedef enum {Time1=0, Time2=1} Time_t;
+
+
 /** 
  * @brief   Updates the time by reading the CSV file and calling relevant functions at the right time 
  * @param   none
