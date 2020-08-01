@@ -9,7 +9,7 @@
 
 #include "common.h"
 #include "config.h"
-#include "BSP_UART.h"
+#include <bsp.h>
 
 #define TX_SIZE 128
 
