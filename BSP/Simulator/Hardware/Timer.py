@@ -1,5 +1,6 @@
 import csv
 import os
+import fcntl
 
 # Path of file
 file = "BSP/Simulator/Hardware/Data/Timer.csv"
@@ -11,18 +12,22 @@ def update():
 	os.makedirs(os.path.dirname(file), exist_ok=True)
 	if not os.path.exists(file):
 		open(file, 'w')
+		file.close()
 
 	current_values = []
 	reload_values = []
 
 	with open(file, 'r') as csvfile:
+		fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
 		reader = csv.reader(csvfile, delimiter=',')
 		
 		for row in reader: # Should be 2 rows
 			current_values.append(int(row[0]))
 			reload_values.append(int(row[1]))
+		fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
 	with open(file, 'w') as csvfile:
+		fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
 		writer = csv.writer(csvfile, delimiter=',')
 
 		for timer in range(0,2):
@@ -35,3 +40,4 @@ def update():
 
 			except IndexError: # If a row is blank
 				pass
+		fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)

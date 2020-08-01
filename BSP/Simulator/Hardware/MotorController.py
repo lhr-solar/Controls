@@ -1,5 +1,6 @@
 import csv
 import os
+import fcntl
 import CAN
 
 # Path of file
@@ -24,11 +25,14 @@ def read():
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
         open(file, 'w')
+        file.close()
     message = []
     with open(file, 'r') as csvfile:
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
         csvreader = csv.reader(csvfile)
         for row in csvreader:
             message.append(row)
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
     message = [0, 0] if message == [] else message[1]
     return message
 
@@ -42,9 +46,11 @@ def write(id_, message):
     """    
     CAN1 = CAN.read()
     with open(file, 'w') as csvfile:
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(CAN1)
         csvwriter.writerow([hex(id_), hex(message), len(hex(message)[2:])//2])
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
 
 def confirm_drive():

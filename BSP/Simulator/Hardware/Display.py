@@ -1,5 +1,6 @@
 import csv
 import os
+import fcntl
 
 # Path of file
 file = "BSP/Simulator/Hardware/Data/UART.csv"
@@ -34,11 +35,14 @@ def read():
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
         open(file, 'w')
+        file.close()
     uart = list()
     with open(file, 'r') as csvfile:
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
         csvreader = csv.reader(csvfile)
         for row in csvreader:
             uart.append(row)
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
     if len(uart):
         uart = uart[0]
         for i, d in enumerate(data.keys()):

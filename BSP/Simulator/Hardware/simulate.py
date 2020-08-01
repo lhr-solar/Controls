@@ -24,6 +24,7 @@ def update_timers():
 	Timer.update()
 	window.after(TIMER_FREQ, update_timers)
 
+
 def update_contactors():
     """Periodically update the display state of the Motor and Array Contactors"""
     global motor_status, array_status
@@ -31,6 +32,7 @@ def update_contactors():
     motor_status.set(f"Motor Contactor: {contactors_status[0]}")
     array_status.set(f"Array Contactor: {contactors_status[1]}")
     window.after(CONTACTOR_FREQ, update_contactors)
+
 
 def update_display():
     """Periodically update the display state of display"""

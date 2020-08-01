@@ -1,5 +1,6 @@
 import csv
 import os
+import fcntl
 import tkinter as tk
 
 # Path of file
@@ -33,8 +34,10 @@ def toggle(switch, gui):
                 gui[i-1].config(relief=tk.SUNKEN)
     states = [states]
     with open(file, 'w') as csvfile:
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
         csvreader = csv.writer(csvfile)
         csvreader.writerow(states)
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
 
 def read():
@@ -47,10 +50,13 @@ def read():
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
         open(file, 'w')
+        file.close()
     states = []
     with open(file, 'r') as csvfile:
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
         csvreader = csv.reader(csvfile)
         for row in csvreader:
             states.append(row)
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
     states = 0 if states == [] else int(states[0][0])
     return states
