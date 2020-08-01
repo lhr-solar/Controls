@@ -3,6 +3,7 @@ import tkinter as tk
 from functools import partial
 
 import Switches
+import Timer
 import Contactor
 import Pedals
 import Display
@@ -19,6 +20,11 @@ def update_buttons():
         else:
             button.config(relief=tk.RAISED)
     window.after(10, update_buttons)
+
+def update_timers():
+	""" Periodically calls Timer.udpate to update the timers."""
+	Timer.update()
+	window.after(1, update_timers)
 
 def update_contactors():
     """Periodically update the display state of the Motor and Array Contactors"""
@@ -158,9 +164,10 @@ current_velocity = tk.Label(master=motor_frame, textvariable=current_velocity_te
 current_velocity.grid(row=1, column=0, sticky='nsew')
 
 # Sets up periodic updates
-window.after(10, update_buttons)
+window.after(1, update_timers)
 window.after(20, update_CAN)
 window.after(30, update_contactors)
 window.after(50, update_display)
+window.after(100, update_buttons)
 window.after(250, update_motor)
 window.mainloop()
