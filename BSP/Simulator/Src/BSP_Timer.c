@@ -4,7 +4,6 @@
 
 static void (*Timer1Handler)(void);
 static void (*Timer2Handler)(void);
-int TempValue = 0xFFFFFF; //variable to store reload value written to CSV previously because everyhtime soemthing new is written previous values are erased
 
 
 /** 
@@ -50,7 +49,24 @@ void BSP_Timer_Update()
 
 void BSP_Timer_Init(int TimerReload,void *func,Time_t time)
 {
-  if(time==Time1)
+  int reload;
+  int current;
+  int storage[4];
+  int index=0;
+  FILE *file1 = fopen(FILE_NAME,"r");
+  int sfno = fileno(file1);
+  flock(sfno, LOCK_EX);
+  for(int i=0;i<2;i++)
+  {
+     fscanf(file1,"%d,%d",&current,&reload);
+     storage[index]=current;
+     storage[index+1]=reload;
+     index+=2;
+  }
+  flock(sfno, LOCK_UN);
+  fclose(file1);
+    
+  if(time==TIME_1)
   {
     FILE *file = fopen(FILE_NAME,"w");
     int fno = fileno(file);
@@ -60,7 +76,6 @@ void BSP_Timer_Init(int TimerReload,void *func,Time_t time)
     flock(fno, LOCK_UN);
     fclose(file);
     Timer1Handler = func;
-    TempValue=TimerReload;
   }
   else
   {
@@ -72,7 +87,6 @@ void BSP_Timer_Init(int TimerReload,void *func,Time_t time)
     flock(fno, LOCK_UN);
     fclose(file);
     Timer2Handler = func;
-    TempValue=TimerReload;
     
   }
 }
