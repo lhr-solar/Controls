@@ -1,5 +1,4 @@
 #include "BSP_Contactors.h"
-#include <stdio.h>
 
 #define FILE_NAME DATA_PATH(CONTACTORS_CSV)
 
@@ -20,29 +19,48 @@ void BSP_Contactors_Init(void) {
 
 /**
  * @brief   Reads contactor states from a file 
- *          and stores all values in local 
- *          array of max capacity 10
- * @param   contactorStates pointer to array that contains the contactor states
- * @return  None
- *  (adapted from read_ADC_Values in BSP_ADC.c)
+ *          and returns the current state of 
+ *          a specified contactor
+ * @param   contactor specifies the contactor for 
+ *          which the user would like to know its state (MOTOR/ARRAY)
+ * @return  The contactor's state (ON/OFF)
  */ 
-void read_Contactor_States(int16_t *contactorStates) {
+state_t BSP_Contactors_Get(ContactorType_t contactor) {
     // Opening file in read mode
     FILE *filePointer = fopen(FILE_NAME, "r");
     // Lock file
     int fno = fileno(filePointer);
     //flock(fno, LOCK_EX);
-    for(int i = 0; i < 10; i++){
+    uint16_t contactorStates[2];
+    for(int i = 0; i < 2; i++){
         // If the file doesn't contain any more values, stop early
-        if (fscanf(filePointer,"%hd,", &(contactorStates[i])) <= 0) break;
+        if (fscanf(filePointer,"%hd,", &contactorStates[i]) <= 0) break;
     }
     // Closing the file
     flock(fno, LOCK_UN);
     fclose(filePointer);
+    return contactorStates[contactor];
 } 
 
-void BSP_Contactor_Set(int16_t motorContactorState, int16_t arrayContactorState) {
+/**
+ * @brief   Sets the state of a specified contactor
+ *          by updating csv file
+ * @param   contactor specifies the contactor for 
+ *          which the user would like to set its state (MOTOR/ARRAY)
+ * @param   state specifies the state that 
+ *          the user would like to set (ON/OFF)
+ * @return  The contactor's state (ON/OFF)
+ */ 
+void BSP_Contactor_Set(ContactorType_t contactor, state_t state) {
+    state_t state1 = BSP_Contactors_Get(MOTOR);
+    state_t state2 = BSP_Contactors_Get(ARRAY);
     FILE *filePointer = fopen(FILE_NAME, "w");
-    fprintf(filePointer, "%d, %d", motorContactorState, arrayContactorState);
-    fclose(filePointer);
+    if(contactor == MOTOR) {
+        fprintf(filePointer, "%d, %d", state, state2);
+        fclose(filePointer);
+    }
+    else {
+        fprintf(filePointer, "%d, %d", state1, state);
+        fclose(filePointer);  
+    }
 }
