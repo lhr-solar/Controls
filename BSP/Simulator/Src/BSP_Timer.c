@@ -22,7 +22,7 @@ void BSP_Timer_Update()
     
     for(int i=0;i<2;i++)
     {
-        fscanf(file,"%d , %d",timeCurrent+index,&reload);
+        fscanf(file,"%d , %d", timeCurrent+index, &reload);
         index++;
     }
     flock(fno, LOCK_UN);
@@ -47,7 +47,7 @@ void BSP_Timer_Update()
 * @return  none
  */  
 
-void BSP_Timer_Init(int TimerReload,void *func,Time_t time)
+void BSP_Timer_Init(int TimerReload,void *func, ticker_t time)
 {
   int reload;
   int current;

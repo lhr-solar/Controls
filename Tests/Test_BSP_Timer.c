@@ -27,7 +27,7 @@ int main()
 
     BSP_Timer_Init(1000,functionOne,TIME_1);
     BSP_Timer_Init(100,functionTwo,TIME_2);
-    while(1){
+    while(1) {
       BSP_Timer_Update();
     }
     

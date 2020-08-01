@@ -16,6 +16,7 @@
 #define SWITCHES_CSV "Switches.csv"
 #define PEDALS_CSV "Pedals.csv"
 #define UART_CSV "UART.csv"
+#define TIMER_CSV "Timer.csv"
 #endif
 
 #endif

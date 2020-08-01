@@ -2,10 +2,14 @@
  * Header file for the library to interact
  * with the timers
  */
+
+#ifndef __BSP_TIMER_H
+#define __BSP_TIMER_H
+
 #include "common.h"
 #include <bsp.h>
 
-typedef enum {TIME_1=0, TIME_2} Time_t;
+typedef enum {TIME_1=0, TIME_2} ticker_t;
 
 
 /** 
@@ -22,5 +26,6 @@ void BSP_Timer_Update();
  * @param   Specefic Timer
  * @return  none
  */  
-void BSP_Timer_Init(int TimerReload,void *func1, Time_t time);
+void BSP_Timer_Init(int TimerReload, void *func1, ticker_t time);
 
+#endif
