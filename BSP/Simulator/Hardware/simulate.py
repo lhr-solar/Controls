@@ -11,20 +11,18 @@ import CAN
 import MotorController
 
 
-def update_buttons():
-    """Periodically update the display state of buttons"""
-    switches = Switches.read()
-    for i, button in enumerate(buttons):
-        if switches & 1<<i:
-            button.config(relief=tk.SUNKEN)
-        else:
-            button.config(relief=tk.RAISED)
-    window.after(10, update_buttons)
+# Update Frequencies (ms)
+TIMER_FREQ = 1
+MOTOR_FREQ = 250
+CAN_FREQ = 500
+CONTACTOR_FREQ = 500
+DISPLAY_FREQ = 500
+
 
 def update_timers():
 	""" Periodically calls Timer.udpate to update the timers."""
 	Timer.update()
-	window.after(1, update_timers)
+	window.after(TIMER_FREQ, update_timers)
 
 def update_contactors():
     """Periodically update the display state of the Motor and Array Contactors"""
@@ -32,7 +30,7 @@ def update_contactors():
     contactors_status = Contactor.read()
     motor_status.set(f"Motor Contactor: {contactors_status[0]}")
     array_status.set(f"Array Contactor: {contactors_status[1]}")
-    window.after(30, update_contactors)
+    window.after(CONTACTOR_FREQ, update_contactors)
 
 def update_display():
     """Periodically update the display state of display"""
@@ -40,7 +38,7 @@ def update_display():
     display = Display.read()
     for i, text in enumerate(display.keys()):
         display_text[i].set(f"{text}: {display[text]}")
-    window.after(50, update_display)
+    window.after(DISPLAY_FREQ, update_display)
 
 
 def update_CAN():
@@ -49,7 +47,7 @@ def update_CAN():
     can = CAN.read()
     id_text.set(f"ID: {can[0]}")
     message_text.set(f"Message: {can[1]}")
-    window.after(20, update_CAN)
+    window.after(CAN_FREQ, update_CAN)
 
 
 def update_motor():
@@ -58,7 +56,7 @@ def update_motor():
     desired_velocity, current_velocity = MotorController.confirm_drive()
     desired_velocity_text.set(f"Desired Velocity: {round(desired_velocity, 3)} m/s")
     current_velocity_text.set(f"Current Velocity: {round(current_velocity, 3)} m/s")
-    window.after(250, update_motor)
+    window.after(MOTOR_FREQ, update_motor)
 
 
 # Sets up the display environment variable
@@ -115,9 +113,12 @@ contactor_frame.grid(row=1, column=2, sticky='nsew')
 ### Switches ###
 buttons = []
 for i, switch in enumerate(Switches.get_switches()):
-    button = tk.Button(master=button_frame, text=switch, command=partial(Switches.toggle, switch))
+    button = tk.Button(master=button_frame, text=switch)
     button.grid(row=i//len(button_frame_columns), column=i%len(button_frame_columns), sticky='nsew')
     buttons.append(button)
+for i, switch in enumerate(Switches.get_switches()):
+    buttons[i].config(command=partial(Switches.toggle, switch, buttons))
+
 
 ### Contactors ###
 motor_status = tk.StringVar(value= 'Motor Contactor: ')
@@ -164,10 +165,9 @@ current_velocity = tk.Label(master=motor_frame, textvariable=current_velocity_te
 current_velocity.grid(row=1, column=0, sticky='nsew')
 
 # Sets up periodic updates
-window.after(1, update_timers)
-window.after(20, update_CAN)
-window.after(30, update_contactors)
-window.after(50, update_display)
-window.after(100, update_buttons)
-window.after(250, update_motor)
+window.after(TIMER_FREQ, update_timers)
+can_frame.after(CAN_FREQ, update_CAN)
+contactor_frame.after(CONTACTOR_FREQ, update_contactors)
+display_frame.after(DISPLAY_FREQ, update_display)
+motor_frame.after(MOTOR_FREQ, update_motor)
 window.mainloop()

@@ -34,4 +34,4 @@ def update():
 					writer.writerow([reload_values[timer], reload_values[timer]])
 
 			except IndexError: # If a row is blank
-				writer.writerow([0xFFFFFF, 0xFFFFFF])
+				pass

@@ -1,5 +1,6 @@
 import csv
 import os
+import tkinter as tk
 
 # Path of file
 file = "BSP/Simulator/Hardware/Data/Switches.csv"
@@ -12,18 +13,24 @@ def get_switches():
     return switches
 
 
-def toggle(switch):
+def toggle(switch, gui):
     """Toggles a specified switch state
 
     Args:
         switch (string): name of the switch to toggle
+        gui (tk.Button list): Button object list
     """
     states = read()
     for i, sw in enumerate(switches):
         if sw == switch:
             states ^= 1<<i
+            if states & 1<<i:
+                gui[i].config(relief=tk.SUNKEN)
+            else:
+                gui[i].config(relief=tk.RAISED)
             if sw == "IGN_2" and states & 1<<i:
                 states |= 1<<(i-1)
+                gui[i-1].config(relief=tk.SUNKEN)
     states = [states]
     with open(file, 'w') as csvfile:
         csvreader = csv.writer(csvfile)
