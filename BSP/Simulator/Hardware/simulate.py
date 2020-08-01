@@ -20,7 +20,7 @@ DISPLAY_FREQ = 500
 
 
 def update_timers():
-	""" Periodically calls Timer.udpate to update the timers."""
+	""" Periodically calls Timer.update to update the timers."""
 	Timer.update()
 	window.after(TIMER_FREQ, update_timers)
 
@@ -71,19 +71,19 @@ window.rowconfigure([0, 1], minsize=200, weight=1)
 window.columnconfigure([0, 1, 2], minsize=200, weight=1)
 
 # Sets up frames
-button_frame = tk.Frame(master=window)
+button_frame = tk.LabelFrame(master=window, text='Switches')
 button_frame_rows = [0, 1, 2, 3]
 button_frame_columns = [0, 1, 2]
 button_frame.rowconfigure(button_frame_rows, minsize=50, weight=1)
 button_frame.columnconfigure(button_frame_columns, minsize=100, weight=1)
 button_frame.grid(row=0, column=0, sticky='nsew')
 
-pedal_frame = tk.Frame(master=window)
+pedal_frame = tk.LabelFrame(master=window, text='Pedals')
 pedal_frame.rowconfigure([0], minsize=50, weight=1)
 pedal_frame.columnconfigure([0, 1], minsize=100, weight=1)
 pedal_frame.grid(row=0, column=1, sticky='nsew')
 
-display_frame = tk.Frame(master=window)
+display_frame = tk.LabelFrame(master=window, text='Display')
 display_frame_rows = [0, 1, 2, 3, 4]
 display_frame_columns = [0]
 display_frame.rowconfigure(display_frame_rows, minsize=50, weight=1)
