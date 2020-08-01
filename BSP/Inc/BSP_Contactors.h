@@ -34,6 +34,6 @@ state_t BSP_Contactors_Get(ContactorType_t contactor);
  *          the user would like to set (ON/OFF)
  * @return  The contactor's state (ON/OFF)
  */ 
-void BSP_Contactor_Set(ContactorType_t contactor, state_t state);
+void BSP_Contactors_Set(ContactorType_t contactor, state_t state);
 
 #endif

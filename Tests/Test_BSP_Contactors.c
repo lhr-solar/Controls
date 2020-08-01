@@ -24,28 +24,26 @@ int main() {
     char off[] = "OFF";
     char state[4];
     state_t result;
-    //BSP_Contactor_Set(MOTOR, ON);
-    //BSP_Contactor_Set(ARRAY, OFF);
     while(1) {
         printf("Enter the Contactor you wish to set followed by the state you would like to set it to\n");
         scanf("%s %s", &input, &state);
         if (strcmp(input, motor) == 0){
             if (strcmp(state, on) == 0){
-                BSP_Contactor_Set(MOTOR, ON);
+                BSP_Contactors_Set(MOTOR, ON);
                 result = BSP_Contactors_Get(MOTOR);
             }
             else {
-                BSP_Contactor_Set(MOTOR, OFF);
+                BSP_Contactors_Set(MOTOR, OFF);
                 result = BSP_Contactors_Get(MOTOR);
             }
         }
         if (strcmp(input, array) == 0){
             if (strcmp(state, on) == 0){
-                BSP_Contactor_Set(ARRAY, ON);
+                BSP_Contactors_Set(ARRAY, ON);
                 result = BSP_Contactors_Get(ARRAY);
             }
             else {
-                BSP_Contactor_Set(ARRAY, OFF);
+                BSP_Contactors_Set(ARRAY, OFF);
                 result = BSP_Contactors_Get(ARRAY);
             }
         }

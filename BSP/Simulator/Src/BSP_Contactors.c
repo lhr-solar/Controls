@@ -51,7 +51,7 @@ state_t BSP_Contactors_Get(ContactorType_t contactor) {
  *          the user would like to set (ON/OFF)
  * @return  The contactor's state (ON/OFF)
  */ 
-void BSP_Contactor_Set(ContactorType_t contactor, state_t state) {
+void BSP_Contactors_Set(ContactorType_t contactor, state_t state) {
     state_t state1 = BSP_Contactors_Get(MOTOR);
     state_t state2 = BSP_Contactors_Get(ARRAY);
     FILE *filePointer = fopen(FILE_NAME, "w");
