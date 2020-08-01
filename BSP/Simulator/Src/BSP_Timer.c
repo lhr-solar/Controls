@@ -19,6 +19,7 @@ void BSP_Timer_Update()
     int timeCurrent[2];
     int reload;
     int index=0;
+    static bool called[2] = {false, false};
     
     for(int i=0;i<2;i++)
     {
@@ -29,15 +30,23 @@ void BSP_Timer_Update()
     fclose(file);
  
 
-     if(timeCurrent[0]==0)
-      {
-          Timer1Handler();
+    if (timeCurrent[0] == 0) {
+      if (!called[0]) {
+        Timer1Handler();
+        called[0] = true;
       }
-      if(timeCurrent[1]==0)
-      {
-          Timer2Handler(); 
+    } else {
+      called[0] = false;
+    }
+    if (timeCurrent[1] == 0) {
+      if (!called[1]) {
+        Timer2Handler();
+        called[1] = true;
       }
-  }
+    } else {
+      called[1] = false;
+    }
+}
 
 /** 
 * @brief   Intializes the Timer
