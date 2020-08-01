@@ -22,8 +22,8 @@ def toggle(switch):
     for i, sw in enumerate(switches):
         if sw == switch:
             states ^= 1<<i
-            if sw == "IGN_2":
-                states ^=1<<(i-1)
+            if sw == "IGN_2" and states & 1<<i:
+                states |= 1<<(i-1)
     states = [states]
     with open(file, 'w') as csvfile:
         csvreader = csv.writer(csvfile)
