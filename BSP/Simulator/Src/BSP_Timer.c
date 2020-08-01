@@ -72,7 +72,7 @@ void BSP_Timer_Init(int TimerReload,void *func,Time_t time)
     int fno = fileno(file);
     flock(fno, LOCK_EX);
     fprintf(file,"%d,%d",TimerReload,TimerReload);
-    fprintf(file,"\n%d,%d",TempValue,TempValue);
+    fprintf(file,"\n%d,%d",storage[2],storage[3]);
     flock(fno, LOCK_UN);
     fclose(file);
     Timer1Handler = func;
@@ -82,7 +82,7 @@ void BSP_Timer_Init(int TimerReload,void *func,Time_t time)
     FILE *file = fopen(FILE_NAME,"w");
     int fno = fileno(file);
     flock(fno, LOCK_EX);
-    fprintf(file,"%d,%d",TempValue,TempValue);
+    fprintf(file,"%d,%d",storage[0],storage[1]);
     fprintf(file,"\n%d,%d",TimerReload,TimerReload);
     flock(fno, LOCK_UN);
     fclose(file);
