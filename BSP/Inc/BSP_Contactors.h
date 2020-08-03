@@ -5,15 +5,14 @@
 #include "config.h"
 #include <bsp.h>
 
-typedef enum {MOTOR=0, ARRAY} ContactorType_t;
+typedef enum {MOTOR=0, ARRAY, NUM_CONTACTORS} contactor_t;
 /**
- * @brief   Confirms that the CSV file
- *          has been created and creates
- *          one if not
- * @param   None
+ * @brief   Initializes contactors to be used
+ *          in connection with the Motor and Array
+ * @param   contactor the contactor to initialize
  * @return  None
  */ 
-void BSP_Contactors_Init(void);
+void BSP_Contactors_Init(contactor_t contactor);
 
 /**
  * @brief   Reads contactor states from a file 
@@ -23,7 +22,7 @@ void BSP_Contactors_Init(void);
  *          which the user would like to know its state (MOTOR/ARRAY)
  * @return  The contactor's state (ON/OFF)
  */ 
-state_t BSP_Contactors_Get(ContactorType_t contactor);
+state_t BSP_Contactors_Get(contactor_t contactor);
 
 /**
  * @brief   Sets the state of a specified contactor
@@ -34,6 +33,6 @@ state_t BSP_Contactors_Get(ContactorType_t contactor);
  *          the user would like to set (ON/OFF)
  * @return  The contactor's state (ON/OFF)
  */ 
-void BSP_Contactors_Set(ContactorType_t contactor, state_t state);
+void BSP_Contactors_Set(contactor_t contactor, state_t state);
 
 #endif

@@ -16,7 +16,8 @@
 #include <bsp.h>
 
 int main() {
-    BSP_Contactors_Init();
+    BSP_Contactors_Init(MOTOR);
+    BSP_Contactors_Init(ARRAY);
     char input[6];
     char motor[] = "MOTOR";
     char array[] = "ARRAY";

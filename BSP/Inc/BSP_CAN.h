@@ -9,16 +9,16 @@
 #include "common.h"
 #include <bsp.h>
 
-typedef enum {CAN1=0, CAN2} CAN_t;
+typedef enum {CAN_1=0, CAN_2, NUM_CAN} CAN_t;
 
 /**
  * @brief   Initializes both CAN lines to
  *          communicate with the motor controllers
  *          and other car systems
- * @param   None
+ * @param   bus the CAN line to initialize
  * @return  None
  */ 
-void BSP_CAN_Init(void);
+void BSP_CAN_Init(CAN_t bus);
 
 /**
  * @brief   Writes a message to the specified CAN line

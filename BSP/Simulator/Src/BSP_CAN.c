@@ -11,10 +11,11 @@
  * @brief   Confirms that the CSV file
  *          has been created and throws
  *          an error if not
- * @param   None
+ * @param   bus the CAN line to initialize
+ *          (not used for simulator)
  * @return  None
  */ 
-void BSP_CAN_Init(void) {
+void BSP_CAN_Init(CAN_t bus) {
     if (access(FILE_NAME, F_OK) != 0) {
         // File doesn't exist if true
         perror(CAN_CSV);
@@ -45,7 +46,7 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
     int fno = fileno(fp);
     flock(fno, LOCK_EX);
 
-    if (len > 8 || bus > CAN2) {
+    if (len > 8 || bus >= NUM_CAN) {
         flock(fno, LOCK_UN);
         fclose(fp);
         return 0;
@@ -69,21 +70,33 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
     flock(fno, LOCK_EX);
 
     // Write ID & Data
-    if (bus == CAN1) {
-        fprintf(fp, "0x%.3x,0x", id);
-        for (uint8_t i = 0; i < len; i++) {
-            fprintf(fp, "%.2x", data[i]);
+    for (uint8_t i = 0; i < NUM_CAN; i++) {
+        if (bus == i) {
+            fprintf(fp, "0x%.3x,0x", id);
+            for (uint8_t i = 0; i < len; i++) {
+                fprintf(fp, "%.2x", data[i]);
+            }
+            fprintf(fp, ",%d\n", len);
+        } else {
+            fprintf(fp, "%s", currentCAN[i]);
         }
-        fprintf(fp, ",%d", len);
-        fprintf(fp, "\n%s", currentCAN[1]);
-    } else {
-        fprintf(fp, "%s", currentCAN[0]);
-        fprintf(fp, "0x%.3x,0x", id);
-        for (uint8_t i = 0; i < len; i++) {
-            fprintf(fp, "%.2x", data[i]);
-        }
-        fprintf(fp, ",%d", len);
     }
+
+    // if (bus == CAN_1) {
+    //     fprintf(fp, "0x%.3x,0x", id);
+    //     for (uint8_t i = 0; i < len; i++) {
+    //         fprintf(fp, "%.2x", data[i]);
+    //     }
+    //     fprintf(fp, ",%d", len);
+    //     fprintf(fp, "\n%s", currentCAN[1]);
+    // } else {
+    //     fprintf(fp, "%s", currentCAN[0]);
+    //     fprintf(fp, "0x%.3x,0x", id);
+    //     for (uint8_t i = 0; i < len; i++) {
+    //         fprintf(fp, "%.2x", data[i]);
+    //     }
+    //     fprintf(fp, ",%d", len);
+    // }
 
     // Close file
     flock(fno, LOCK_UN);

@@ -16,10 +16,11 @@
  * @brief   Confirms that the CSV file
  *          has been created and prints and 
  *          error message if not
- * @param   None
+ * @param   pedal the pedal to initialize the ADC for
+ *          (not used for the simulator)
  * @return  None
  */ 
-void BSP_ADC_Init(void) {
+void BSP_ADC_Init(pedal_t pedal) {
     // Checking if file exists
    if(access(FILE_NAME, F_OK) != 0){
         // File doesn't exist if true

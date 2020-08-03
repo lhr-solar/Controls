@@ -16,7 +16,8 @@
 #include <bsp.h>
 
 int main() {
-    BSP_ADC_Init();
+    BSP_ADC_Init(ACCELERATOR);
+    BSP_ADC_Init(BRAKE);
     /* INDIVIDUAL TESTS FOR EACH FUNCTION
     printf("TESTS\n");
 

@@ -6,10 +6,7 @@
 #ifndef __BSP_ADC_H
 #define __BSP_ADC_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <bsp.h>
+#include "bsp.h"
 #include "common.h"
 #include "config.h"
 
@@ -26,10 +23,10 @@ typedef enum
 
 /**
  * @brief   Initialize the ADC module
- * @param   None
+ * @param   pedal the pedal to initialize the ADC for
  * @return  None
  */ 
-void BSP_ADC_Init(void);
+void BSP_ADC_Init(pedal_t pedal);
 
 /**
  * @brief   Provides the ADC value of the channel at the specified index
