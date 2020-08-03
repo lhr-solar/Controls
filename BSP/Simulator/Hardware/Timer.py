@@ -22,8 +22,9 @@ def update():
 		reader = csv.reader(csvfile, delimiter=',')
 		
 		for row in reader: # Should be 2 rows
-			current_values.append(int(row[0]))
-			reload_values.append(int(row[1]))
+			if row is not []:
+				current_values.append(int(row[0]))
+				reload_values.append(int(row[1]))
 		fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
 	with open(file, 'w') as csvfile:

@@ -2,100 +2,74 @@
 
 #define FILE_NAME DATA_PATH(TIMER_CSV)
 
-static void (*Timer1Handler)(void);
-static void (*Timer2Handler)(void);
-
+static void (*handlers[NUM_TIMERS]) (void);
 
 /** 
-* @brief   Updates the time by reading the CSV file and calling relevant functions at the right time 
-* @param   none
-* @return  none
+ * @brief   Intializes the Timer by writing
+ *          the proper reload value to the CSV file
+ * @param   reload value of Timer
+ * @param   handler interrupt handler
+ * @param   timer specified by ticker_t
+ * @return  None
+ */
+void BSP_Timer_Init(int reload, void (*handler) (void), ticker_t timer) {
+    // Reads current values
+    int current[NUM_TIMERS][2];
+    FILE *fp = fopen(FILE_NAME, "r");
+    int fno = fileno(fp);
+    flock(fno, LOCK_EX);
+    for (uint8_t i = 0; i < NUM_TIMERS; i++) {
+        fscanf(fp, "%d,%d", current[i], current[i]+1);
+    }
+    flock(fno, LOCK_UN);
+    fclose(fp);
+
+    // Writes new values
+    fp = fopen(FILE_NAME, "w");
+    fno = fileno(fp);
+    flock(fno, LOCK_EX);
+
+    for (uint8_t i = 0; i < NUM_TIMERS; i++) {
+        if (timer == i) {
+            fprintf(fp, "%d,%d\n", reload, reload);
+            handlers[i] = handler;
+        } else {
+            fprintf(fp, "%d,%d\n", current[i][0], current[i][1]);
+        }
+    }
+
+    flock(fno, LOCK_UN);
+    fclose(fp);
+}
+
+/**
+* @brief   Updates the time by reading the CSV file
+*          and calling relevant handler at the right time 
+* @param   None
+* @return  None
 */  
-void BSP_Timer_Update()
-{
+void BSP_Timer_Update() {
+    int current[NUM_TIMERS][2];
+    static bool called[NUM_TIMERS];
     FILE *file = fopen(FILE_NAME, "r");
     int fno = fileno(file);
     flock(fno, LOCK_EX);
-    int timeCurrent[2];
-    int reload;
-    int index=0;
-    static bool called[2] = {false, false};
-    
-    for(int i=0;i<2;i++)
-    {
-        fscanf(file,"%d , %d", timeCurrent+index, &reload);
-        index++;
+
+    for (uint8_t i = 0; i < NUM_TIMERS; i++) {
+        fscanf(file, "%d,%d", current[i], current[i]+1);
     }
+
     flock(fno, LOCK_UN);
     fclose(file);
- 
 
-    if (timeCurrent[0] == 0) {
-      if (!called[0]) {
-        Timer1Handler();
-        called[0] = true;
-      }
-    } else {
-      called[0] = false;
+    for (uint8_t i = 0; i < NUM_TIMERS; i++) {
+        if (current[i][0] == 0) {
+            if (!called[i]) {
+                handlers[i]();
+                called[i] = true;
+            }
+        } else {
+            called[i] = false;
+        }
     }
-    if (timeCurrent[1] == 0) {
-      if (!called[1]) {
-        Timer2Handler();
-        called[1] = true;
-      }
-    } else {
-      called[1] = false;
-    }
-}
-
-/** 
-* @brief   Intializes the Timer
-* @param   Timer Reload value 
-* @param   Function Pointer
-* @param   Specefic Timer (Timer 1 = 0 and Timer 2 = 1)
-* @return  none
- */  
-
-void BSP_Timer_Init(int TimerReload,void *func, ticker_t time)
-{
-  int reload;
-  int current;
-  int storage[4];
-  int index=0;
-  FILE *file1 = fopen(FILE_NAME,"r");
-  int sfno = fileno(file1);
-  flock(sfno, LOCK_EX);
-  for(int i=0;i<2;i++)
-  {
-     fscanf(file1,"%d,%d",&current,&reload);
-     storage[index]=current;
-     storage[index+1]=reload;
-     index+=2;
-  }
-  flock(sfno, LOCK_UN);
-  fclose(file1);
-    
-  if(time==TIME_1)
-  {
-    FILE *file = fopen(FILE_NAME,"w");
-    int fno = fileno(file);
-    flock(fno, LOCK_EX);
-    fprintf(file,"%d,%d",TimerReload,TimerReload);
-    fprintf(file,"\n%d,%d",storage[2],storage[3]);
-    flock(fno, LOCK_UN);
-    fclose(file);
-    Timer1Handler = func;
-  }
-  else
-  {
-    FILE *file = fopen(FILE_NAME,"w");
-    int fno = fileno(file);
-    flock(fno, LOCK_EX);
-    fprintf(file,"%d,%d",storage[0],storage[1]);
-    fprintf(file,"\n%d,%d",TimerReload,TimerReload);
-    flock(fno, LOCK_UN);
-    fclose(file);
-    Timer2Handler = func;
-    
-  }
 }
