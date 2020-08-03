@@ -82,22 +82,6 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
         }
     }
 
-    // if (bus == CAN_1) {
-    //     fprintf(fp, "0x%.3x,0x", id);
-    //     for (uint8_t i = 0; i < len; i++) {
-    //         fprintf(fp, "%.2x", data[i]);
-    //     }
-    //     fprintf(fp, ",%d", len);
-    //     fprintf(fp, "\n%s", currentCAN[1]);
-    // } else {
-    //     fprintf(fp, "%s", currentCAN[0]);
-    //     fprintf(fp, "0x%.3x,0x", id);
-    //     for (uint8_t i = 0; i < len; i++) {
-    //         fprintf(fp, "%.2x", data[i]);
-    //     }
-    //     fprintf(fp, ",%d", len);
-    // }
-
     // Close file
     flock(fno, LOCK_UN);
     fclose(fp);
