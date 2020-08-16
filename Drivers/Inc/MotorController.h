@@ -2,13 +2,14 @@
 #define __MOTORCONTROLLER_H
 
 #include <bsp.h>
+#include "CAN.h"
 
 /**
  * @brief   Initializes the motor controller
  * @param   None
  * @return  None
  */ 
-void Motor_Controller_Init(void);
+void MotorController_Init(void);
 
 /**
  * @brief   Sends MOTOR DRIVE command on CAN2
@@ -16,7 +17,7 @@ void Motor_Controller_Init(void);
  * @param   motorCurrent desired motor current setpoint as a percentage of max current setting
  * @return  None
  */ 
-void Motor_Controller_Drive(uint32_t newVelocity, uint32_t motorCurrent);
+void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent);
 
 /**
  * @brief   Reads VELOCITY command from CAN2
@@ -24,6 +25,6 @@ void Motor_Controller_Drive(uint32_t newVelocity, uint32_t motorCurrent);
  * @param   mpsBuff the car's velocity in m/s
  * @return  true if the ID on the bus is the expected ID for VELOCITY
  */ 
-bool Motor_Controller_ReadVelocity(uint32_t *rpmBuff, uint32_t *mpsBuff);
+bool MotorController_ReadVelocity(uint32_t *rpmBuff, uint32_t *mpsBuff);
 
 #endif
