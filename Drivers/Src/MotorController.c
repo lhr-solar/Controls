@@ -2,15 +2,6 @@
 
 
 #define MOTOR_DRIVE 0x221
-#define CAR_STATE 0x580
-#define MOTORCONTROLLER_BUS 0x242
-#define PHASE_CURRENT 0x244
-#define VOLTAGE_VECTOR 0x245
-#define CURRENT_VECTOR 0x246
-#define BACK_EMF 0x247
-#define TEMPERATURE_ID 0x24B
-#define ODOMETER 0x24E
-#define VELOCITY_ID 0x243
 
 #define SUCCESS     1
 #define FAILURE     0
