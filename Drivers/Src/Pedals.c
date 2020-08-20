@@ -5,6 +5,7 @@
  */
 
 #include "Pedals.h"
+#include "BSP_ADC.h"
 
 /**
  * @brief   Initializes the brake and accelerator by using the 
@@ -28,7 +29,7 @@ void Pedals_Init(){
  */
 int8_t Pedals_Read(pedal_t pedal){
     int16_t millivolts_Pedal = BSP_ADC_Get_Millivoltage(pedal);
-    int8_t percentage = (((float)millivolts_Pedal) / 3299) * 100;
+    int8_t percentage = millivolts_Pedal * 100 / ADC_RANGE_MILLIVOLTS;
     return percentage;
 }
 
