@@ -4,6 +4,13 @@
 #include <bsp.h>
 #include "CAN.h"
 
+typedef struct 
+{
+    uint32_t id;
+    uint32_t firstNum;
+    uint32_t secondNum;
+} CANbuff;
+
 /**
  * @brief   Initializes the motor controller
  * @param   None
@@ -20,11 +27,11 @@ void MotorController_Init(void);
 void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent);
 
 /**
- * @brief   Reads VELOCITY command from CAN2
- * @param   rpmBuff the car's velocity in rpm
- * @param   mpsBuff the car's velocity in m/s
- * @return  true if the ID on the bus is the expected ID for VELOCITY
+ * @brief   Reads desired command from CAN2
+ * @param   message the car's information regarding the desired command
+ * @param   expectedID the id for the command the user wants to check CAN2 for
+ * @return  true if the ID on the bus is the expected ID 
  */ 
-bool MotorController_ReadVelocity(uint32_t *rpmBuff, uint32_t *mpsBuff);
+bool MotorController_Read(CANbuff *message, uint32_t expectedID);
 
 #endif

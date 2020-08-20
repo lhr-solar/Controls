@@ -2,9 +2,20 @@
 
 
 #define MOTOR_DRIVE 0x221
+#define CAR_STATE 0x580
+#define MOTORCONTROLLER_BUS 0x242
+#define PHASE_CURRENT 0x244
+#define VOLTAGE_VECTOR 0x245
+#define CURRENT_VECTOR 0x246
+#define BACK_EMF 0x247
+#define TEMPERATURE_ID 0x24B
+#define ODOMETER 0x24E
 #define VELOCITY_ID 0x243
+
 #define SUCCESS     1
 #define FAILURE     0
+
+
 
 void MotorController_Init(){
     BSP_CAN_Init(CAN_2);
@@ -29,39 +40,40 @@ void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent){
     BSP_CAN_Write(CAN_2, MOTOR_DRIVE, data, 8);
 }
 
-bool MotorController_ReadVelocity(uint32_t *rpmBuff, uint32_t *mpsBuff){
+bool MotorController_Read(CANbuff *message, uint32_t expectedID){
     uint32_t id;
     uint8_t data[8] = {0};
     uint32_t length = BSP_CAN_Read(CAN_2, &id, data);
-    uint32_t rpmSum = 0;
-    uint32_t mpsSum = 0;
-    if((length>0) && (id == VELOCITY_ID)){
+    uint32_t firstSum = 0;
+    uint32_t secondSum = 0;
+    if((length>0) && (id == expectedID)){
+        message->id = expectedID;
         if(length < 5){
             for(int i = 0; i < length; i++){
-                rpmSum += data[i] & 0xFF;
+                firstSum += data[i] & 0xFF;
                 if(i != length-1){
-                    rpmSum = rpmSum << 8;
+                    firstSum = firstSum << 8;
                 }
             }
         }else{
-            //get rpm
+            //get first number (bits 0-31)
             for(int j = 0; j < 4; j++){
-                rpmSum += data[j] & 0xFF;
+                firstSum += data[j] & 0xFF;
                 if(j != 3){
-                    rpmSum = rpmSum << 8;
+                    firstSum = firstSum << 8;
                 }
                 
             }
-            //get velocity in m/s
+            //get second number (bits 32-63)
             for(int k = 4; k < length; k++){
-                mpsSum += data[k] & 0xFF;
+                secondSum += data[k] & 0xFF;
                 if(k != length-1){
-                    mpsSum = mpsSum << 8;
+                    secondSum = secondSum << 8;
                 }
             }
         }
-        *rpmBuff = rpmSum;
-        *mpsBuff = mpsSum;
+        message->firstNum = firstSum;
+        message->secondNum = secondSum;
         return SUCCESS;
     }
     return FAILURE;
