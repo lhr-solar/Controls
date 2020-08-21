@@ -13,12 +13,12 @@
 #include "common.h"
 #include "config.h"
 #include "BSP_ADC.h"
-#include "Pedals.h"
 #include <bsp.h>
 
 int main() {
     BSP_ADC_Init(ADC_0);
     BSP_ADC_Init(ADC_1);
+    
     /* INDIVIDUAL TESTS FOR EACH FUNCTION
     printf("TESTS\n");
 
@@ -29,6 +29,7 @@ int main() {
     printf("ADC at channel of Accelerator in mV is %d\n", BSP_ADC_Get_Millivoltage(Accelerator));
     printf("ADC at channel of Brake in mV is %d\n", BSP_ADC_Get_Millivoltage(Brake));
     */
+
     while(1) {
         printf("Accelerator: %5.1d\tBrake: %5.1d\r", 
             BSP_ADC_Get_Millivoltage(ADC_0), BSP_ADC_Get_Millivoltage(ADC_1));
