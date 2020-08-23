@@ -1,6 +1,8 @@
 #ifndef CAN_H__
 #define CAN_H__
 
+
+// Not sure if these are the ids we want but I took them from BPS as placeholders
 typedef enum {
 	TRIP = 0x02,
     ALL_CLEAR = 0x101,
