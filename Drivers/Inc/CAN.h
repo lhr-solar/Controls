@@ -40,4 +40,13 @@ void CANbus_Init(void);
  */
 int CANbus_Send(CANId_t id, CANPayload_t payload);
 
+/**
+ * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
+ * @param   CAN line bus
+ * @param   CAN message ID
+ * @param   pointer to buffer array to store message
+ * @return  0 if ID matches and 1 if it doesn't
+ */
+int CANbus_Read(CAN_t bus, uint32_t id, uint8_t* buffer);
+
 #endif

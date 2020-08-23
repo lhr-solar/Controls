@@ -86,3 +86,31 @@ static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
 		bytes_array[bytes-1-i] = temp 
 	}
 }
+
+/**
+ * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
+ * @param   CAN line bus
+ * @param   CAN message ID
+ * @param   pointer to buffer array to store message
+ * @return  0 if ID matches and 1 if it doesn't
+ */
+
+int CANbus_Read(CAN_t bus, uint32_t Expected_ID, uint8_t* buffer)
+{
+    uint32_t ID;
+    uint8_t data[];
+    uint8_t count = BSP_CAN_READ(bus,*ID,data);
+    if(Expected_ID == ID)
+    {
+        for(int i=0;i<count;i++)
+        {
+            buffer[i]=data[i];
+        }
+	return 0;
+    }
+    else
+    {
+      return 1;
+    }
+    
+}
