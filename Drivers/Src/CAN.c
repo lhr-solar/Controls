@@ -72,16 +72,17 @@ static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
 			float float_variable;
 			uint8_t temp_array[bytes];
 	} u;
-	// Overite bytes of union with float variable
+	// Overwrite bytes of union with float variable
 	u.float_variable = val;
 	// Assign bytes to input array
 	memcpy(bytes_array, u.temp_array, bytes);
 
+	// Reverse the array. I don't know why this has to be done, to be honest, but that's what
+	// they did in floatTo4Bytes in BPS/Drivers/Src/CANbus.c . This is a generalized version of
+	// what was done in that file so that we can reverse an array of any length.
 	for(i=0; i<bytes/2; i++){
 		temp = bytes_array[i];
 		bytes_array[i] = bytes_array[bytes-1-i]
 		bytes_array[bytes-1-i] = temp 
 	}
-
-	return(bytes_array);
 }
