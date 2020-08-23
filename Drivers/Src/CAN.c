@@ -7,6 +7,8 @@ static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes);
  * @param   None
  * @return  None
  */
+
+// Not sure if we want CAN1 to be an argument to CAN_Init or not
 void CAN_Init(void) {
     BSP_CAN_Init(CAN1);
 }
@@ -14,13 +16,15 @@ void CAN_Init(void) {
 /**
  * @brief   Transmits data onto the CANbus
  * @param   id : CAN id of the message
- * @param   packet : the data that will be sent.
+ * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
 int CANbus_Send(CANId_t id, CANPayload_t payload) {
 
-	uint8_t bytes = 4;
+	uint8_t bytes = 4; // Not sure how we want to decide the number of wanted bytes. An extra paramter to this function?
 	
+
+	// Not sure if these are the ids we want but I took them from BPS as placeholders
 	switch (id) {
 		case TRIP:
 			return BSP_CAN_Write(id, &payload.data.b, 1);
