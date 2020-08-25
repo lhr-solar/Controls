@@ -5,7 +5,6 @@
  */
 
 #include "Pedals.h"
-#include "BSP_ADC.h"
 
 /**
  * @brief   Initializes the brake and accelerator by using the 
