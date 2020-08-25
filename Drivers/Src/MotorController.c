@@ -31,14 +31,14 @@ void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent){
     BSP_CAN_Write(CAN_2, MOTOR_DRIVE, data, 8);
 }
 
-bool MotorController_Read(CANbuff *message, uint32_t expectedID){
+bool MotorController_Read(CANbuff *message){
     uint32_t id;
     uint8_t data[8] = {0};
     uint32_t length = BSP_CAN_Read(CAN_2, &id, data);
     uint32_t firstSum = 0;
     uint32_t secondSum = 0;
-    if((length>0) && (id == expectedID)){
-        message->id = expectedID;
+    if(length>0){
+        message->id = id;
         if(length < 5){
             for(int i = 0; i < length; i++){
                 firstSum += data[i] & 0xFF;

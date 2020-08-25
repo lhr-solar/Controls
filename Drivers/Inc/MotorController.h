@@ -2,7 +2,6 @@
 #define __MOTORCONTROLLER_H
 
 #include <bsp.h>
-#include "CAN.h"
 
 typedef struct 
 {
@@ -32,6 +31,6 @@ void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent);
  * @param   expectedID the id for the command the user wants to check CAN2 for
  * @return  true if the ID on the bus is the expected ID 
  */ 
-bool MotorController_Read(CANbuff *message, uint32_t expectedID);
+bool MotorController_Read(CANbuff *message);
 
 #endif
