@@ -31,7 +31,7 @@ void BSP_UART_Init(void) {
  * @param   str pointer to buffer string
  * @return  number of bytes that was read
  */
-uint32_t BSP_UART_Read(char* str) {
+uint32_t BSP_UART_Read(UART_t uart, char* str) {
     FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {
         printf("UART not available\n\r");
@@ -42,12 +42,12 @@ uint32_t BSP_UART_Read(char* str) {
     int fno = fileno(fp);
     flock(fno, LOCK_EX);
 
-    // Get raw CSV string
-    char csv[RX_SIZE];
-    fgets(csv, RX_SIZE, fp);
+    // Get raw CSV strings
+    char csv[NUM_UART][RX_SIZE];
+    for (int i=0; fgets(csv[i], RX_SIZE, fp); i++);
 
     // Put string into return buffer
-    strcpy(str, csv);
+    strcpy(str, csv[uart]);
 
     // Unlock file
     flock(fno, LOCK_UN);
