@@ -9,25 +9,32 @@
 #include "common.h"
 #include <bsp.h>
 
+typedef enum {UART_1, UART_2, NUM_UART} UART_t;
 /**
  * @brief   Initializes the UART peripheral
  */
 void BSP_UART_Init(void);
 
 /**
- * @brief   Gets one line of ASCII text that was received.
+ * @brief   Gets one line of ASCII text that was received 
+ *          from a specified UART device (represented as a 
+ *          line of data in csv file). 
  * @pre     str should be at least 128bytes long.
+ * @param   uart device selecte
  * @param   str pointer to buffer string
  * @return  number of bytes that was read
  */
-uint32_t BSP_UART_Read(char *str);
+uint32_t BSP_UART_Read(UART_t uart, char *str);
 
 /**
- * @brief   Transmits data to through UART line
+ * @brief   Transmits data to through a specific 
+ *          UART device (represented as a line of data 
+ *          in csv file).
+ * @param   uart device selected
  * @param   str pointer to buffer with data to send.
  * @param   len size of buffer
  * @return  number of bytes that were sent
  */
-uint32_t BSP_UART_Write(char *str, uint32_t len);
+uint32_t BSP_UART_Write(UART_t uart ,char *str, uint32_t len);
 
 #endif
