@@ -33,6 +33,6 @@ int main(void) {
         sprintf(str1, "%f, %d, %d, %d, %d", speed1, cruiseEn1, cruiseSet1, regenEn1, CANerr1);
 
         BSP_UART_Write(UART_1, str , TX_SIZE);
-        BSP_UART_Write(UART_2, str2, TX_SIZE);
+        BSP_UART_Write(UART_2, str1, TX_SIZE);
     }
 }

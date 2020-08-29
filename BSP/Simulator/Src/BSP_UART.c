@@ -87,10 +87,10 @@ uint32_t BSP_UART_Write(UART_t uart, char* str, uint32_t len) {
     fclose(fp);
 
     // Open to write
-    FILE* fp = fopen(FILE_NAME, "w");
+    fp = fopen(FILE_NAME, "w");
     
     // Lock file
-    int fno = fileno(fp);
+    fno = fileno(fp);
     flock(fno, LOCK_EX);
 
     // Write to the file
