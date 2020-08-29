@@ -100,6 +100,7 @@ uint32_t BSP_UART_Write(UART_t uart, char* str, uint32_t len) {
         }else{
             fprintf(fp, "%s", currentUART[i]);
         }
+        //fputc('\n', fp);
     }
     
     // Unlock file
