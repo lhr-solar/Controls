@@ -20,7 +20,7 @@
  *          (not used for the simulator)
  * @return  None
  */ 
-void BSP_ADC_Init(pedal_t pedal) {
+void BSP_ADC_Init(ADC_t ADC_Channel) {
     // Checking if file exists
    if(access(FILE_NAME, F_OK) != 0){
         // File doesn't exist if true
@@ -69,13 +69,13 @@ static void read_ADC_Values(int16_t *rawADCValues) {
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  Raw ADC value without conversion
  */ 
-int16_t BSP_ADC_Get_Value(pedal_t hardwareDevice){
+int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice){
     // Array we'll use to get all the values from csv file
     int16_t rawADCValues[MAX_CHANNELS];
     // Reading all values and storing them in an int array
     read_ADC_Values(rawADCValues);
     // Checking if hardwareDevice is out of bounds
-    if(hardwareDevice >  NUMBER_OF_PEDALS - 1 || hardwareDevice < 0){
+    if(hardwareDevice >  NUMBER_OF_CHANNELS - 1 || hardwareDevice < 0){
         //throwing an error
         fprintf(stderr, "Argument passed doesn't exit in ADC file\n");
         exit(EXIT_SUCCESS);
@@ -91,7 +91,7 @@ int16_t BSP_ADC_Get_Value(pedal_t hardwareDevice){
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  ADC value in millivolts
  */ 
-int16_t BSP_ADC_Get_Millivoltage(pedal_t hardwareDevice){
+int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice){
     // Getting rawADCValue at the specified index
     int16_t rawADCValue = BSP_ADC_Get_Value(hardwareDevice);
     // Converting the rawADCValue to millivolts and returning it
