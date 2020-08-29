@@ -15,7 +15,7 @@
 
 int main(void) {
     BSP_UART_Init();
-    //while (1) {
+    while (1) {
         float speed = (rand() % 500) / 10.0;
         int cruiseEn = rand() % 2;
         int cruiseSet = rand() % 2;
@@ -38,6 +38,8 @@ int main(void) {
         char out[2][TX_SIZE];
         BSP_UART_Read(UART_1, out[UART_1]);
         BSP_UART_Read(UART_2, out[UART_2]);
-        printf("UART 1: %s\tUART 2: %s\n", out[UART_1], out[UART_2]);
-    //}
+        out[UART_1][strlen(out[UART_1])-1] = 0; // remove the newline, so we can print both in one line for now
+        out[UART_2][strlen(out[UART_2])-1] = 0;
+        printf("UART 1: %s\tUART 2: %s\r", out[UART_1], out[UART_2]);
+    }
 }

@@ -96,7 +96,7 @@ uint32_t BSP_UART_Write(UART_t uart, char* str, uint32_t len) {
     // Write to the file
     for(uint8_t i = 0; i < NUM_UART; i++){
         if(uart == i){
-            fprintf(fp, "%s", str);
+            fprintf(fp, "%s\n", str);
         }else{
             fprintf(fp, "%s", currentUART[i]);
         }
