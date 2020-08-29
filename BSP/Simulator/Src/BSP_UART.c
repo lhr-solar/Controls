@@ -60,10 +60,11 @@ uint32_t BSP_UART_Read(char* str) {
  * @brief   Writes a string to the CSV file
  * @param   str pointer to buffer with data to send.
  * @param   len size of buffer
- * @return  numer of bytes that were sent
+ * @return  number of bytes that were sent
  */
-uint32_t BSP_UART_Write(char* str, uint32_t len) {
-    FILE* fp = fopen(FILE_NAME, "w");
+uint32_t BSP_UART_Write(UART_t uart, char* str, uint32_t len) {
+    // Get current values in CSV
+    FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {
         printf("UART not available\n\r");
         return 0;
@@ -73,9 +74,34 @@ uint32_t BSP_UART_Write(char* str, uint32_t len) {
     int fno = fileno(fp);
     flock(fno, LOCK_EX);
 
-    // Write to the file
-    fprintf(fp, "%s", str);
+    // Copying current contents
+    char currentUART[NUM_UART][128];
+    char csv[128];
 
+    for(uint8_t i = 0; fgets(csv, 128, fp); i++){
+        strcpy(currentUART[i], csv);
+    }
+
+    // Close file
+    flock(fno, LOCK_UN);
+    fclose(fp);
+
+    // Open to write
+    FILE* fp = fopen(FILE_NAME, "w");
+    
+    // Lock file
+    int fno = fileno(fp);
+    flock(fno, LOCK_EX);
+
+    // Write to the file
+    for(uint8_t i = 0; i < NUM_UART; i++){
+        if(uart == i){
+            fprintf(fp, "%s", str);
+        }else{
+            fprintf(fp, "%s", currentUART[i]);
+        }
+    }
+    
     // Unlock file
     flock(fno, LOCK_UN);
     fclose(fp);

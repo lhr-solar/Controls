@@ -29,6 +29,6 @@ uint32_t BSP_UART_Read(char *str);
  * @param   len size of buffer
  * @return  number of bytes that were sent
  */
-uint32_t BSP_UART_Write(char *str, uint32_t len);
+uint32_t BSP_UART_Write(UART_t uart ,char *str, uint32_t len);
 
 #endif
