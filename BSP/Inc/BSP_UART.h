@@ -21,7 +21,7 @@ void BSP_UART_Init(void);
  * @param   str pointer to buffer string
  * @return  number of bytes that was read
  */
-uint32_t BSP_UART_Read(char *str);
+uint32_t BSP_UART_Read(UART_t uart, char *str);
 
 /**
  * @brief   Transmits data to through UART line
