@@ -31,7 +31,7 @@ void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent){
     BSP_CAN_Write(CAN_2, MOTOR_DRIVE, data, 8);
 }
 
-bool MotorController_Read(CANbuff *message){
+error_t MotorController_Read(CANbuff *message){
     uint32_t id;
     uint8_t data[8] = {0};
     uint32_t length = BSP_CAN_Read(CAN_2, &id, data);
@@ -39,28 +39,18 @@ bool MotorController_Read(CANbuff *message){
     uint32_t secondSum = 0;
     if(length>0){
         message->id = id;
-        if(length < 5){
-            for(int i = 0; i < length; i++){
-                firstSum += data[i] & 0xFF;
-                if(i != length-1){
-                    firstSum = firstSum << 8;
-                }
+        //get first number (bits 0-31)
+        for(int j = 0; j < 4; j++){
+            firstSum += data[j] & 0xFF;
+            if(j != 3){
+                firstSum = firstSum << 8;
             }
-        }else{
-            //get first number (bits 0-31)
-            for(int j = 0; j < 4; j++){
-                firstSum += data[j] & 0xFF;
-                if(j != 3){
-                    firstSum = firstSum << 8;
-                }
-                
-            }
-            //get second number (bits 32-63)
-            for(int k = 4; k < length; k++){
-                secondSum += data[k] & 0xFF;
-                if(k != length-1){
-                    secondSum = secondSum << 8;
-                }
+        }
+        //get second number (bits 32-63)
+        for(int k = 4; k < length; k++){
+            secondSum += data[k] & 0xFF;
+            if(k != length-1){
+                secondSum = secondSum << 8;
             }
         }
         message->firstNum = firstSum;

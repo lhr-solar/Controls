@@ -26,11 +26,10 @@ void MotorController_Init(void);
 void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent);
 
 /**
- * @brief   Reads desired command from CAN2
- * @param   message the car's information regarding the desired command
- * @param   expectedID the id for the command the user wants to check CAN2 for
- * @return  true if the ID on the bus is the expected ID 
+ * @brief   Reads most recent command from CAN2 bus
+ * @param   message the buffer in which the info for the CAN message will be stored
+ * @return  true if a message is read
  */ 
-bool MotorController_Read(CANbuff *message);
+error_t MotorController_Read(CANbuff *message);
 
 #endif

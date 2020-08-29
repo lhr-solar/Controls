@@ -12,9 +12,9 @@ int main(){
     CANbuff *tester;
     uint32_t id = 0x243;
     uint8_t data[8] = {0x00, 0x55, 0x55, 0x22,     0x11, 0x11, 0x11, 0x11};
-    BSP_CAN_Write(CAN_2, id, data, 2);
+    BSP_CAN_Write(CAN_2, id, data, 8);
     bool check = MotorController_Read(tester);
-    printf("The ID on the bus was: %x\n\rMessage: %x, %x",tester->id, tester->firstNum, tester->secondNum); 
+    printf("The ID on the bus was: %x\n\rMessage: %x, %x\n\rSuccess: %d",tester->id, tester->firstNum, tester->secondNum, check); 
     exit(0);
     
 }
