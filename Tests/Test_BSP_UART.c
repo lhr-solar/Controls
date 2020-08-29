@@ -15,7 +15,7 @@
 
 int main(void) {
     BSP_UART_Init();
-    while (1) {
+    //while (1) {
         float speed = (rand() % 500) / 10.0;
         int cruiseEn = rand() % 2;
         int cruiseSet = rand() % 2;
@@ -33,6 +33,11 @@ int main(void) {
         sprintf(str1, "%f, %d, %d, %d, %d", speed1, cruiseEn1, cruiseSet1, regenEn1, CANerr1);
 
         BSP_UART_Write(UART_1, str , TX_SIZE);
-        BSP_UART_Write(UART_2, str2, TX_SIZE);
-    }
+        BSP_UART_Write(UART_2, str1, TX_SIZE);
+
+        char out[2][TX_SIZE];
+        BSP_UART_Read(UART_1, out[UART_1]);
+        BSP_UART_Read(UART_2, out[UART_2]);
+        printf("UART 1: %s\tUART 2: %s\n", out[UART_1], out[UART_2]);
+    //}
 }
