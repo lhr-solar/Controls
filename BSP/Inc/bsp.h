@@ -4,7 +4,6 @@
 #include "BSP_ADC.h"
 #include "BSP_CAN.h"
 #include "BSP_UART.h"
-#include "BSP_UART2.h"
 #include "BSP_Switches.h"
 #include "BSP_Timer.h"
 #include "BSP_Contactors.h"

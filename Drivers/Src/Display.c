@@ -8,7 +8,7 @@
  */
 void Display_Init() {
     // Initialize the UART comm. channel
-    BSP_UART2_Init();
+    BSP_UART_Init();
 }
 
 /*
@@ -32,5 +32,5 @@ void Display_SetData(display_data_t *status) {
     #endif
 
     // Send the string of info to the Gecko controller
-    BSP_UART2_Write(msg, rc);
+    BSP_UART_Write(UART_1, msg, rc);
 }

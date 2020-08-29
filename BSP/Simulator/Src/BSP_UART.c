@@ -26,8 +26,11 @@ void BSP_UART_Init(void) {
 }
 
 /**
- * @brief   Reads one line from the CSV file
+ * @brief   Reads a specific line of the CSV file 
+ *          based on the UART device selected to 
+ *          get the information from.
  * @pre     str should be at least 128bytes long.
+ * @param   uart device selected
  * @param   str pointer to buffer string
  * @return  number of bytes that was read
  */
@@ -57,7 +60,10 @@ uint32_t BSP_UART_Read(UART_t uart, char* str) {
 }
 
 /**
- * @brief   Writes a string to the CSV file
+ * @brief   Writes a string to the CSV file in the 
+ *          line respective to the UART device selected
+ *          to write information to.
+ * @param   uart device selected
  * @param   str pointer to buffer with data to send.
  * @param   len size of buffer
  * @return  number of bytes that were sent
