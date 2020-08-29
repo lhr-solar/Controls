@@ -2,10 +2,6 @@
 
 
 #define MOTOR_DRIVE 0x221
-
-#define SUCCESS     1
-#define FAILURE     0
-
 #define MAX_CAN_LEN 8
 
 void MotorController_Init(){
