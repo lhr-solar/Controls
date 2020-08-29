@@ -75,10 +75,10 @@ uint32_t BSP_UART_Write(UART_t uart, char* str, uint32_t len) {
     flock(fno, LOCK_EX);
 
     // Copying current contents
-    char currentUART[NUM_UART][128];
-    char csv[128];
+    char currentUART[NUM_UART][TX_SIZE];
+    char csv[TX_SIZE];
 
-    for(uint8_t i = 0; fgets(csv, 128, fp); i++){
+    for(uint8_t i = 0; fgets(csv, TX_SIZE, fp); i++){
         strcpy(currentUART[i], csv);
     }
 
