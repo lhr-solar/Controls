@@ -9,6 +9,7 @@
 #include "common.h"
 #include <bsp.h>
 
+typedef enum {UART_1, UART_2, NUM_UART} UART_t;
 /**
  * @brief   Initializes the UART peripheral
  */
