@@ -34,10 +34,14 @@ int main(void) {
 
         BSP_UART_Write(UART_1, str , TX_SIZE);
         BSP_UART_Write(UART_2, str1, TX_SIZE);
+<<<<<<< HEAD
 
         char out[2][TX_SIZE];
         BSP_UART_Read(UART_1, out[UART_1]);
         BSP_UART_Read(UART_2, out[UART_2]);
         printf("UART 1: %s\tUART 2: %s\n", out[UART_1], out[UART_2]);
     //}
+=======
+    }
+>>>>>>> 2ece6b8454b79418897f1e052f7ffea2324869e2
 }
