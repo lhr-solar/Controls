@@ -18,7 +18,6 @@
 #define CONTACTORS_CSV "Contactors.csv"
 #define PEDALS_CSV "Pedals.csv"
 #define UART_CSV "UART.csv"
-#define UART2_CSV "UART2.csv"
 #define TIMER_CSV "Timer.csv"
 #define CAN_CSV "CAN.csv"
 #endif

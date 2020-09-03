@@ -13,12 +13,11 @@ typedef enum {UART_1, UART_2, NUM_UART} UART_t;
 /**
  * @brief   Initializes the UART peripheral
  */
-void BSP_UART_Init(void);
+void BSP_UART_Init(UART_t);
 
 /**
  * @brief   Gets one line of ASCII text that was received 
- *          from a specified UART device (represented as a 
- *          line of data in csv file). 
+ *          from a specified UART device
  * @pre     str should be at least 128bytes long.
  * @param   uart device selecte
  * @param   str pointer to buffer string
