@@ -14,7 +14,8 @@
 #define TX_SIZE 128
 
 int main(void) {
-    BSP_UART_Init();
+    BSP_UART_Init(UART_1);
+    BSP_UART_Init(UART_2);
     while (1) {
         float speed = (rand() % 500) / 10.0;
         int cruiseEn = rand() % 2;
