@@ -13,11 +13,12 @@ void CAN_Init(void) {
 
 /**
  * @brief   Transmits data onto the CANbus
+ * @param   CAN bus line
  * @param   id : CAN id of the message
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CAN_Send(CANId_t id, CANPayload_t payload) {
+int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 
 	// Not sure if these are the ids we want but I took them from BPS as placeholders
 	switch (id) {
@@ -30,7 +31,7 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
 		case TEMPERATURE:
 		case ODOMETER_AMPHOURS:
 		case CAR_STATE:
-			return BSP_CAN_WRITE(id, &payload.data.b, payload.bytes)
+			return BSP_CAN_WRITE(bus,id, &payload.data.b, payload.bytes)
 
 		default:
 			return 0;
