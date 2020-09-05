@@ -9,6 +9,7 @@ import Pedals
 import Display
 import CAN
 import MotorController
+import UART
 
 
 # Update Frequencies (ms)
@@ -68,7 +69,7 @@ if os.environ.get('DISPLAY','') == '':
 # Sets up window
 window = tk.Tk()
 window.rowconfigure([0, 1], minsize=200, weight=1)
-window.columnconfigure([0, 1, 2], minsize=200, weight=1)
+window.columnconfigure([0, 1, 2, 3], minsize=200, weight=1)
 
 # Sets up frames
 button_frame = tk.LabelFrame(master=window, text='Switches')
@@ -110,6 +111,13 @@ contactor_frame_columns = [0]
 contactor_frame.rowconfigure(contactor_frame_rows, minsize=50, weight = 1)
 contactor_frame.columnconfigure(contactor_frame_columns, minsize=50, weight=1)
 contactor_frame.grid(row=1, column=2, sticky='nsew')
+
+messages_frame = tk.LabelFrame(master=window, text='Controls System Messages')
+messages_frame_rows = [0, 1]
+messages_frame_columns = [0]
+messages_frame.rowconfigure(messages_frame_rows, minsize=20, weight=1)
+messages_frame.columnconfigure(messages_frame_columns, minsize=20, weight=1)
+messages_frame.grid(row=0, column=3, sticky='nsew')
 
 
 ### Switches ###
@@ -165,6 +173,12 @@ desired_velocity.grid(row=0, column=0, sticky='nsew')
 current_velocity_text = tk.StringVar(value='Current Velocity: ')
 current_velocity = tk.Label(master=motor_frame, textvariable=current_velocity_text)
 current_velocity.grid(row=1, column=0, sticky='nsew')
+
+### UART messages input ###
+uart_input = tk.Entry(master=messages_frame)
+uart_input.grid(row=0, column=0)
+uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get(), 2))
+uart_button.grid(row=1, column=0)
 
 # Sets up periodic updates
 window.after(TIMER_FREQ, update_timers)
