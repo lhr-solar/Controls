@@ -30,10 +30,10 @@ int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 		case BACKEMF:
 		case TEMPERATURE:
 		case ODOMETER_AMPHOURS:
+			return BSP_CAN_WRITE(bus,id, &payload.data.d, payload.bytes)
 		case CAR_STATE:
 			return BSP_CAN_WRITE(bus,id, &payload.data.b, payload.bytes)
-
-		default:
+                default:
 			return 0;
 
 	}
@@ -47,7 +47,7 @@ int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
  * @return  None
  */
 
-static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
+/*static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
 	uint8_t temp;
 	// Create union of shared memory space
 	union {
@@ -67,7 +67,7 @@ static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
 		bytes_array[i] = bytes_array[bytes-1-i]
 		bytes_array[bytes-1-i] = temp 
 	}
-}
+}*/
 
 /**
  * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
