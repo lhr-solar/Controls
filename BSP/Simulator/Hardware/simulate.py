@@ -10,6 +10,7 @@ import Display
 import CAN
 import MotorController
 import UART
+import Lights
 
 
 # Update Frequencies (ms)
@@ -18,6 +19,7 @@ MOTOR_FREQ = 250
 CAN_FREQ = 500
 CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
+LIGHTS_FREQ = 500
 
 
 def update_timers():
@@ -60,6 +62,16 @@ def update_motor():
     desired_velocity_text.set(f"Desired Velocity: {round(desired_velocity, 3)} m/s")
     current_velocity_text.set(f"Current Velocity: {round(current_velocity, 3)} m/s")
     window.after(MOTOR_FREQ, update_motor)
+
+
+def update_lights():
+    """Periodically update the display state of the lights"""
+    global lights_text
+    lights_state = Lights.read()
+    lights = Lights.get_lights()
+    for i, light in enumerate(lights_text):
+        light.set(f"{lights[i]}: {(lights_state >> i) & 0x01}")
+    window.after(LIGHTS_FREQ, update_lights)
 
 
 # Sets up the display environment variable
@@ -119,6 +131,13 @@ messages_frame.rowconfigure(messages_frame_rows, minsize=20, weight=1)
 messages_frame.columnconfigure(messages_frame_columns, minsize=20, weight=1)
 messages_frame.grid(row=0, column=3, sticky='nsew')
 
+lights_frame = tk.LabelFrame(master=window, text="Lights")
+lights_frame_rows = [0, 1, 2, 3]
+lights_frame_columns = [0, 1]
+lights_frame.rowconfigure(lights_frame_rows, minsize=50, weight=1)
+lights_frame.columnconfigure(lights_frame_columns, minsize=50, weight=1)
+lights_frame.grid(row=1, column=3, sticky='nsew')
+
 
 ### Switches ###
 buttons = []
@@ -129,6 +148,14 @@ for i, switch in enumerate(Switches.get_switches()):
 for i, switch in enumerate(Switches.get_switches()):
     buttons[i].config(command=partial(Switches.toggle, switch, buttons))
 
+
+### Lights ###
+lights_text = list()
+for i, light in enumerate(Lights.get_lights()):
+    light_text = tk.StringVar(value=f'{light}: ')
+    light = tk.Label(master=lights_frame, textvar=light_text)
+    light.grid(row=i//len(lights_frame_columns), column=i%len(lights_frame_columns), sticky='nsew')
+    lights_text.append(light_text)
 
 ### Contactors ###
 motor_status = tk.StringVar(value= 'Motor Contactor: ')
@@ -186,4 +213,5 @@ can_frame.after(CAN_FREQ, update_CAN)
 contactor_frame.after(CONTACTOR_FREQ, update_contactors)
 display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
+lights_frame.after(LIGHTS_FREQ, update_lights)
 window.mainloop()
