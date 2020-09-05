@@ -10,18 +10,15 @@ typedef enum {
 	BACKEMF = 0x247,
 	TEMPERATURE = 0x24B,
 	ODOMETER_AMPHOURS = 0x24E,
-	CAR_STATE = 0x580
+	CAR_STATE = 0x580;
+	MOTOR_DISABLE = 0x10A;
 } CANId_t;
 
-typedef enum{
-	MOTOR_DISABLE = 0x10A;
-}BPSID_t;
 
 typedef union {
 	uint8_t b;
 	uint16_t h;
 	uint32_t w;
-	float f;
 	uint64_t d;
 } CANData_t;
 
@@ -45,7 +42,7 @@ void CAN_Init(void);
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CANbus_Send(CAN_t bus,CANId_t id, CANPayload_t payload);
+int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload);
 
 /**
  * @brief   Checks if the CAN ID matches with Motor disable ID
@@ -53,7 +50,7 @@ int CANbus_Send(CAN_t bus,CANId_t id, CANPayload_t payload);
  * @param   pointer to buffer array to store message
  * @return  0 if ID matches and 1 if it doesn't
  */
-int CANbus_Read(CAN_t bus, uint8_t* buffer);
+int CAN_Read(CAN_t bus, uint8_t* buffer);
 
 
 
