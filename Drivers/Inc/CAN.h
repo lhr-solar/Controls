@@ -13,12 +13,16 @@ typedef enum {
 	CAR_STATE = 0x580
 } CANId_t;
 
+typedef enum{
+	MOTOR_DISABLE = 0x10A;
+}BPSID_t;
 
 typedef union {
 	uint8_t b;
 	uint16_t h;
 	uint32_t w;
 	float f;
+	uint64_t d;
 } CANData_t;
 
 typedef struct {
