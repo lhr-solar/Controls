@@ -46,15 +46,13 @@ void CAN_Init(void);
 int CAN_Send(CANId_t id, CANPayload_t payload);
 
 /**
- * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
+ * @brief   Checks if the CAN ID matches with Motor disable ID
  * @param   CAN line bus
  * @param   pointer to buffer array to store message
  * @return  0 if ID matches and 1 if it doesn't
  */
-<<<<<<< Updated upstream
 int CANbus_Read(CAN_t bus, uint8_t* buffer);
-=======
-int CAN_Read(CAN_t bus, uint32_t id, uint8_t* buffer);
->>>>>>> Stashed changes
+
+
 
 #endif
