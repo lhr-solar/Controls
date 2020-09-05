@@ -5,9 +5,10 @@
 #include "common.h"
 #include "config.h"
 
-typedef enum {LIGHT_0,LIGHT_1,NUMBER_OF_LIGHTS} LIGHT_t;
-
-void BSP_Lights_Init(LIGHT_t LightChannel);
+typedef enum {M_CNCTR=0,RSVD_LED,CTRL_FAULT,RIGHT_BLINK,HeadlightPWR,A_CNCTR,BPS_FAULT,LEFT_BLINK,BPS_PWR,BrakeLight} LIGHT_t;
+//external: turn signals (left,right); brake lights; internal: 
+void BSP_Lights_Init();
+state_t BSP_Lights_Read(LIGHT_t LightChannel);
 
 
 
