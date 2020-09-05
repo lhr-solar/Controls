@@ -11,6 +11,34 @@ void BSP_Lights_Init(void){
     }
 }
 
-void BSP_Lights_Set(){
+state_t BSP_Lights_Read(LIGHT_t LightChannel){
+    FILE* fp = fopen(FILE_NAME, "r");
+    //will this error case ever be reached? Init function won't fire if file is unavailable
+    if (!fp) {
+        printf("Lights not available\n\r");
+        return 2;
+    }
+
+    //Exclusive lock the file open
+    flock((fileno(fp)), LOCK_EX);
+
+    //get raw CSV string 
+    char csv[16];
+    fgets(csv,16,fp);
+
+    //convert to integer
+    uint16_t switchInt = atoi(csv);
+
+    //unlock file
+    flock((fileno(fp)), LOCK_UN);
+    fclose(fp);
+
+    //bitwise AND with CSV integer and 1 at the bit position of the selected light
+    if(switchInt & (1<<LightChannel)){
+        return ON;
+    } else {
+        return OFF;
+    }
+
 
 }
