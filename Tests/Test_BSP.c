@@ -46,8 +46,8 @@ int main() {
         printf("-----PLEASE RUN THIS TEST FILE IN CONJUCTION WITH THE GUI-----\n");
         //BSP_ADC TEST -----------------------------------------------------------
         printf("-------------------------ADC TEST-----------------------------\n");
-        printf("As you move the pedals their voltage values should change\n");
         printf("--------------------------------------------------------------\n");
+        printf("As you move the pedals their voltage values should change\n");
         printf("Accelerator: %5.1d mV\tBrake: %5.1d mV\n", 
                 BSP_ADC_Get_Millivoltage(ADC_0), BSP_ADC_Get_Millivoltage(ADC_1));
 
