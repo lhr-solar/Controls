@@ -2,10 +2,12 @@
 #define CAN_H__
 
 typedef enum {
-	MOTOR_DRIVE = 0x221,
+    MOTOR_DRIVE = 0x221,
     MOTOR_POWER = 0x222,
     RESET = 0x223,
     VELOCITY = 0x243
+    MOTOR_DISABLE = 0x10A;
+	  
 } CANId_t;
 
 
