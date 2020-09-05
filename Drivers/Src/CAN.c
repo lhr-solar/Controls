@@ -17,7 +17,7 @@ void CAN_Init(void) {
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
+int CAN_SEND(CANId_t id, CANPayload_t payload) {
 
 	switch (id) {
 		case MC_BUS:
@@ -28,9 +28,9 @@ int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 		case BACKEMF:
 		case TEMPERATURE:
 		case ODOMETER_AMPHOURS:
-			return BSP_CAN_WRITE(bus,id, &payload.data.d, payload.bytes)
+			return BSP_CAN_WRITE(CAN1,id, &payload.data.d, payload.bytes)
 		case CAR_STATE:
-			return BSP_CAN_WRITE(bus,id, &payload.data.b, payload.bytes)
+			return BSP_CAN_WRITE(CAN1,id, &payload.data.b, payload.bytes)
         default:
 			return 0;
 
@@ -45,11 +45,11 @@ int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
  * @return  0 if ID matches and 1 if it doesn't
  */
 
-int CAN_Read(CAN_t bus, uint8_t* buffer)
+int CAN_Read(uint8_t* buffer)
 {
     uint32_t ID;
     uint8_t data[8];
-    uint8_t count = BSP_CAN_READ(bus,&ID,data);
+    uint8_t count = BSP_CAN_READ(CAN1,&ID,data);
     if(ID == MOTOR_DISABLE)
     {
         for(int i=0;i<count;i++)

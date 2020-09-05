@@ -1,6 +1,8 @@
 #ifndef CAN_H__
 #define CAN_H__
 
+#include "../../BSP/Inc/BSP_CAN.h"
+
 typedef enum {
 	MC_BUS = 0x242,
 	VELOCITY = 0x243,
@@ -11,7 +13,7 @@ typedef enum {
 	TEMPERATURE = 0x24B,
 	ODOMETER_AMPHOURS = 0x24E,
 	CAR_STATE = 0x580,
-	MOTOR_DISABLE = 0x10AS
+	MOTOR_DISABLE = 0x10A
 } CANId_t;
 
 
