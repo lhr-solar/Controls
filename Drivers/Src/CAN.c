@@ -19,7 +19,6 @@ void CAN_Init(void) {
  */
 int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 
-	// Not sure if these are the ids we want but I took them from BPS as placeholders
 	switch (id) {
 		case MC_BUS:
 		case VELOCITY:
@@ -32,7 +31,7 @@ int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 			return BSP_CAN_WRITE(bus,id, &payload.data.d, payload.bytes)
 		case CAR_STATE:
 			return BSP_CAN_WRITE(bus,id, &payload.data.b, payload.bytes)
-                default:
+        default:
 			return 0;
 
 	}
@@ -48,7 +47,6 @@ int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 
 int CAN_Read(CAN_t bus, uint8_t* buffer)
 {
-    // ID 0x10A is Motor Disable
     uint32_t ID;
     uint8_t data[8];
     uint8_t count = BSP_CAN_READ(bus,&ID,data);
