@@ -79,7 +79,7 @@ int CANbus_Read(CAN_t bus, uint8_t* buffer)
     uint32_t ID;
     uint8_t data[];
     uint8_t count = BSP_CAN_READ(bus,&ID,data);
-    if(ID == 0x10A)
+    if(ID == MOTOR_DISABLE)
     {
         for(int i=0;i<count;i++)
         {
