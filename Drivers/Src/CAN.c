@@ -73,7 +73,7 @@ static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
  * @return  0 if ID matches and 1 if it doesn't
  */
 
-int CAN_Read(CAN_t bus, uint8_t* buffer)
+int CANbus_Read(CAN_t bus, uint8_t* buffer)
 {
     // ID 0x10A is Motor Disable
     uint32_t ID;
