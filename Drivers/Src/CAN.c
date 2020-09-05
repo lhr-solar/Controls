@@ -18,7 +18,7 @@ void CAN_Init(void) {
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
+int CANbus_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 
 	// Not sure if these are the ids we want but I took them from BPS as placeholders
 	switch (id) {
