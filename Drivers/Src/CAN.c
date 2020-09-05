@@ -7,8 +7,6 @@ static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes);
  * @param   None
  * @return  None
  */
-
-// Not sure if we want CAN1 to be an argument to CAN_Init or not
 void CAN_Init(void) {
     BSP_CAN_Init(CAN1);
 }
@@ -19,44 +17,21 @@ void CAN_Init(void) {
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CANbus_Send(CANId_t id, CANPayload_t payload) {
-
-	uint8_t bytes = 4; // Not sure how we want to decide the number of wanted bytes. An extra paramter to this function?
-	
+int CAN_Send(CANId_t id, CANPayload_t payload) {
 
 	// Not sure if these are the ids we want but I took them from BPS as placeholders
 	switch (id) {
-		case TRIP:
-			return BSP_CAN_Write(id, &payload.data.b, 1);
+		case MOTOR_DRIVE:
+			return BSP_CAN_Write(id, &payload.data.b, payload.bytes);
 
-		case ALL_CLEAR:
-			return BSP_CAN_Write(id, &payload.data.b, 1);
+		case MOTOR_POWER:
+			return BSP_CAN_Write(id, &payload.data.b, payload.bytes);
 
-		case CONTACTOR_STATE:
-			return BSP_CAN_Write(id, &payload.data.b, 1);
+		case RESET:
+			return BSP_CAN_Write(id, &payload.data.b, payload.bytes);
 
-		case CURRENT_DATA:
-			uint8_t txdata[bytes];
-			floatToBytes(payload.data.f, &txdata[0]);
-			return BSP_CAN_Write(id, txdata, bytes);
-
-		case VOLT_DATA:
-		case TEMP_DATA:
-			uint8_t txdata[bytes+1];
-			txdata[0] = payload.idx;
-			floatToBytes(payload.data.f, &txdata[1]);
-			return BSP_CAN_Write(id, txdata, bytes);
-
-		case SOC_DATA:
-			uint8_t txdata[bytes];
-			floatToBytes(payload.data.f, &txdata[0]);
-			return BSP_CAN_Write(id, txdata, bytes);
-
-		case WDOG_TRIGGERED:
-			return BSP_CAN_Write(id, &payload.data.b, 1);
-
-		case CAN_ERROR:
-			return BSP_CAN_Write(id, &payload.data.b, 1);
+		case VELOCITY:
+			return BSP_CAN_Write(id, &payload.data.b, payload.bytes);
 	}
 	return 0;
 }
@@ -99,7 +74,7 @@ static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
  * @return  0 if ID matches and 1 if it doesn't
  */
 
-int CANbus_Read(CAN_t bus, uint32_t Expected_ID, uint8_t* buffer)
+int CAN_Read(CAN_t bus, uint32_t Expected_ID, uint8_t* buffer)
 {
     uint32_t ID;
     uint8_t data[];

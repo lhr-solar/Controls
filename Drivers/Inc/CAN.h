@@ -1,18 +1,11 @@
 #ifndef CAN_H__
 #define CAN_H__
 
-
-// Not sure if these are the ids we want but I took them from BPS as placeholders
 typedef enum {
-	TRIP = 0x02,
-    ALL_CLEAR = 0x101,
-    CONTACTOR_STATE = 0x102,
-    CURRENT_DATA = 0x103,
-    VOLT_DATA = 0x104,
-    TEMP_DATA = 0x105,
-    SOC_DATA = 0x106,
-    WDOG_TRIGGERED = 0x107,
-    CAN_ERROR = 0x108
+	MOTOR_DRIVE = 0x221,
+    MOTOR_POWER = 0x222,
+    RESET = 0x223,
+    VELOCITY = 0x243
 } CANId_t;
 
 
@@ -25,6 +18,7 @@ typedef union {
 
 typedef struct {
 	uint8_t idx : 8;
+	uint8_t bytes : 8; // Default
 	CANData_t data;
 } CANPayload_t;
 
