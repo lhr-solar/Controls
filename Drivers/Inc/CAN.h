@@ -1,7 +1,7 @@
 #ifndef CAN_H__
 #define CAN_H__
 
-#include "../../BSP/Inc/BSP_CAN.h"
+#include "BSP_CAN.h"
 
 typedef enum {
 	MC_BUS = 0x242,
@@ -44,7 +44,7 @@ void CAN_Init(void);
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload);
+int CAN_Send(CANId_t id, CANPayload_t payload);
 
 /**
  * @brief   Checks if the CAN ID matches with Motor disable ID
@@ -52,7 +52,7 @@ int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload);
  * @param   pointer to buffer array to store message
  * @return  0 if ID matches and 1 if it doesn't
  */
-int CAN_Read(CAN_t bus, uint8_t* buffer);
+int CAN_Read(uint8_t* buffer);
 
 
 

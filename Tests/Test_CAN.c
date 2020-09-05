@@ -1,5 +1,5 @@
-#include "../Apps/Inc/common.h"
-#include "../Drivers/Inc/CAN.h"
+#include "common.h"
+#include "CAN.h"
 
 int main(void){
    uint8_t ids[10] = {0x242, 0x243, 0x244, 0x245, 0x246, 0x247, 0x24B, 0x24E, 0x580, 0x10A};
@@ -13,9 +13,9 @@ int main(void){
    
    CAN_Init();
 
-   for(int i=0; i<sizeof(messages)/sizeof(messages[0]); i++){
-   	CAN_Send(bus, ids[i], payload);
-   	printf(CAN_Read(bus, buffer));
+   for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
+   	CAN_Send(ids[i], payload);
+   	printf(CAN_Read(buffer));
    }
 
    exit(0);

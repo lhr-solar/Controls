@@ -1,2 +1,5 @@
 *Objects
 *.out
+__pycache__
+*.csv
+.vscode

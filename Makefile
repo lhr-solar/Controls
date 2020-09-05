@@ -22,6 +22,9 @@ simulator:
 stm32f413:
 	$(MAKE) -C BSP -C STM32F413
 
+flash:
+	$(MAKE) -C BSP -C STM32F413 flash
+
 help:
 	@echo "Format: ${ORANGE}make ${BLUE}<BSP type>${NC}${ORANGE}TEST=${PURPLE}<Test type>${NC}"
 	@echo "BSP types (required):"
@@ -38,4 +41,4 @@ help:
 
 clean:
 	rm -fR Objects
-	rm *.out
+	rm -f *.out

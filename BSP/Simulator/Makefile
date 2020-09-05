@@ -14,6 +14,9 @@ CC = gcc
 ######################################
 SRC = $(wildcard Src/*.c)	# BSP code
 
+SRC += \
+$(wildcard ../../Drivers/Src/*.c)	# Driver code
+
 ifneq ($(TEST), none)
 TEST_FILE := Test_$(TEST).c
 SRC += \
@@ -24,11 +27,11 @@ SRC += $(wildcard ../../Apps/Src/*.c)		# Apps (with  main)
 endif
 
 SRC += \
-$(wildcard ../../RTOS/Simulator/uC-CPU/*.c) \
-$(wildcard ../../RTOS/Simulator/uC-CPU/Posix/GNU/*.c) \
-$(wildcard ../../RTOS/Simulator/uC-LIB/*.c) \
-$(wildcard ../../RTOS/Simulator/uCOS-III/Source/*.c) \
-$(wildcard ../../RTOS/Simulator/uCOS-III/Ports/POSIX/GNU/*.c)	# RTOS code
+$(wildcard ../../RTOS/uCOS-III-Simulator/uC-CPU/*.c) \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uC-CPU/Posix/GNU/*.c) \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uC-LIB/*.c) \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uCOS-III/Source/*.c) \
+$(wildcard ../../RTOS/uCOS-III-Simulator/uCOS-III/Ports/POSIX/GNU/*.c) # RTOS
 
 ######################################
 # Objects
@@ -42,13 +45,14 @@ vpath %.c $(sort $(dir $(SRC)))		# In case files aren't found
 ######################################
 INC_DIR = \
 -I../../Apps/Inc \
+-I../../Drivers/Inc \
 -I../../BSP/Inc \
 -I../../Config/Inc \
--I../../RTOS/Simulator/uC-CPU \
--I../../RTOS/Simulator/uC-CPU/Posix/GNU \
--I../../RTOS/Simulator/uC-LIB \
--I../../RTOS/Simulator/uCOS-III/Source \
--I../../RTOS/Simulator/uCOS-III/Ports/POSIX/GNU \
+-I../../RTOS/uCOS-III-Simulator/uC-CPU \
+-I../../RTOS/uCOS-III-Simulator/uC-CPU/Posix/GNU \
+-I../../RTOS/uCOS-III-Simulator/uC-LIB \
+-I../../RTOS/uCOS-III-Simulator/uCOS-III/Source \
+-I../../RTOS/uCOS-III-Simulator/uCOS-III/Ports/POSIX/GNU \
 
 LIB = -lm -lpthread		# Standard libraries used
 
@@ -57,7 +61,7 @@ FLAGS = -Wall -g -std=c11 $(INC_DIR)
 ######################################
 # Defines
 ######################################
-DEF = -D_XOPEN_SOURCE=600
+DEF = -D_XOPEN_SOURCE=600 -DSIMULATOR
 
 ######################################
 # Build
