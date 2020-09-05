@@ -177,7 +177,7 @@ current_velocity.grid(row=1, column=0, sticky='nsew')
 ### UART messages input ###
 uart_input = tk.Entry(master=messages_frame)
 uart_input.grid(row=0, column=0)
-uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get(), 2))
+uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get()))
 uart_button.grid(row=1, column=0)
 
 # Sets up periodic updates

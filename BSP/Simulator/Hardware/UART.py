@@ -6,9 +6,8 @@ import fcntl
 file = "BSP/Simulator/Hardware/Data/UART.csv"
 
 
-def write(msg, uart_num):
-    """ Writes the message to the specified UART
-    1 => UART_1, 2 => UART_2
+def write(msg):
+    """ Writes the message to UART_2
     Doesn't return anything
     """
 
@@ -33,7 +32,7 @@ def write(msg, uart_num):
     # Write back the UART data, modifying the specified one
     with open(file, "w") as csv:
         for (i, line) in enumerate(lines):
-            if i+1 == uart_num:
+            if i == 1:
                 csv.write(msg)
                 csv.write('\n')
             else:
