@@ -1,6 +1,5 @@
 #include "CAN.h"
 
-static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes);
 
 /**
  * @brief   Initializes the CAN system
@@ -39,35 +38,6 @@ int CANbus_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 	}
 }
 
-/**
- * @brief   Converts float to array of designated number of bytes
- * @param   val : The flaot you want to convert
- * @param	bytes_array: Pointer to array where you want the bytes to be put
- * @param   bytes : The number of bytes you want the float to be converted into.
- * @return  None
- */
-
-/*static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
-	uint8_t temp;
-	// Create union of shared memory space
-	union {
-			float float_variable;
-			uint8_t temp_array[bytes];
-	} u;
-	// Overwrite bytes of union with float variable
-	u.float_variable = val;
-	// Assign bytes to input array
-	memcpy(bytes_array, u.temp_array, bytes);
-
-	// Reverse the array. I don't know why this has to be done, to be honest, but that's what
-	// they did in floatTo4Bytes in BPS/Drivers/Src/CANbus.c . This is a generalized version of
-	// what was done in that file so that we can reverse an array of any length.
-	for(i=0; i<bytes/2; i++){
-		temp = bytes_array[i];
-		bytes_array[i] = bytes_array[bytes-1-i]
-		bytes_array[bytes-1-i] = temp 
-	}
-}*/
 
 /**
  * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
@@ -80,7 +50,7 @@ int CANbus_Read(CAN_t bus, uint8_t* buffer)
 {
     // ID 0x10A is Motor Disable
     uint32_t ID;
-    uint8_t data[];
+    uint8_t data[8];
     uint8_t count = BSP_CAN_READ(bus,&ID,data);
     if(ID == MOTOR_DISABLE)
     {
