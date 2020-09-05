@@ -17,7 +17,7 @@ void CAN_Init(void) {
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CANbus_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
+int CAN_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
 
 	// Not sure if these are the ids we want but I took them from BPS as placeholders
 	switch (id) {
@@ -46,7 +46,7 @@ int CANbus_Send(CAN_t bus,CANId_t id, CANPayload_t payload) {
  * @return  0 if ID matches and 1 if it doesn't
  */
 
-int CANbus_Read(CAN_t bus, uint8_t* buffer)
+int CAN_Read(CAN_t bus, uint8_t* buffer)
 {
     // ID 0x10A is Motor Disable
     uint32_t ID;
