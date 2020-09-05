@@ -14,6 +14,7 @@
 #include <bsp.h>
 
 #define TX_SIZE 128
+#define LEN 4
 /**
  * Moves the cursor n lines
  */
@@ -24,11 +25,27 @@ static void moveCursorUp(int n) {
 }
 
 static void timerTest(){
-    printf("-----PLEASE RUN THIS TEST FILE IN CONJUCTION WITH THE GUI-----\n");
+         
+}
+
+int main() {
+    BSP_ADC_Init(ADC_0);
+    BSP_ADC_Init(ADC_1);
+
+    BSP_CAN_Init(CAN_1);
+    //BSP_CAN_Init(CAN_2);
+
+    BSP_Contactors_Init(MOTOR);
+    BSP_Contactors_Init(ARRAY);
+
+    BSP_UART_Init();
+
+    BSP_Switches_Init();
+
+    while(1) {
+        printf("-----PLEASE RUN THIS TEST FILE IN CONJUCTION WITH THE GUI-----\n");
         //BSP_ADC TEST -----------------------------------------------------------
-        //printf("--------------------------------------------------------------\n");
         printf("-------------------------ADC TEST-----------------------------\n");
-        printf("--------------------------------------------------------------\n");
         printf("As you move the pedals their voltage values should change\n");
         printf("--------------------------------------------------------------\n");
         printf("Accelerator: %5.1d mV\tBrake: %5.1d mV\n", 
@@ -37,13 +54,15 @@ static void timerTest(){
         //BSP_CAN TEST -----------------------------------------------------------
         //NOTE: The can test file has two possible test cases: CAN1 OR CAN2 and the
         // test file has them separated
-        //TODO: Implement a variation of the CAN tests to unify both tests
-        //printf("--------------------------------------------------------------\n");
-        printf("-------------------------CAN TEST----------------------------\n");
+        printf("-------------------------CANs TEST----------------------------\n");
         printf("--------------------------------------------------------------\n");
+        printf("CAN bus 1 sends an ID and Message, those can be seen in the GUI\n");
+        // CAN 1 TEST
+        uint8_t txData[LEN] = {0x00, 0x12, 0x42, 0x5A};
+        BSP_CAN_Write(CAN_1, 0x201, txData, LEN);
+        uint8_t rxData[LEN] = {0};
 
         //BSP_SWITCHES TEST ------------------------------------------------------
-        //printf("--------------------------------------------------------------\n");
         printf("---------------------- SWITCHES TEST--------------------------\n");
         printf("--------------------------------------------------------------\n");
         printf("Press switches on the GUI, their state will be displayed:\n");
@@ -96,12 +115,11 @@ static void timerTest(){
         printf("UART 2: %s\n", out[UART_2]);
 
         //BSP_Contactors -----------------------------------------------------
-        //NOTE: The contactors test file requires input from the user
-        //TODO: Implement a variation of the contactors test in here
+        //NOTE: The contactors test file requires input from the user in the original test
         //printf("--------------------------------------------------------------\n");
         printf("----------------------CONTACTORS TEST-------------------------\n");
         printf("--------------------------------------------------------------\n");
-        printf("Contactors state is constatly updated, changes visible in GUI\n");
+        printf("Contactors are constatly updated randomly, changes visible in GUI\n");
         int motorOrArray = rand() % 2;
         int onOrOff = rand() % 2;
                                                                                                                    
@@ -123,32 +141,6 @@ static void timerTest(){
 
         // Moving cursor back up
         moveCursorUp(23);
-        
-        // Erasing lines 
-        /*for(int i = 0; i < 27; i++){
-            printf("                                                                              \n");
-        }
-        // Move cursor back up
-        moveCursorUp(27);*/
-        
-}
-
-int main() {
-    BSP_ADC_Init(ADC_0);
-    BSP_ADC_Init(ADC_1);
-
-    BSP_Contactors_Init(MOTOR);
-    BSP_Contactors_Init(ARRAY);
-
-    BSP_UART_Init();
-
-    BSP_Switches_Init();
-    
-    BSP_Timer_Init(20, timerTest, TIMER_1);
-
-    while(1) {
-        //BSP_Timer TEST ---------------------------------------------------------
-        BSP_Timer_Update();
     }
     printf("\n");
     return 0; 
