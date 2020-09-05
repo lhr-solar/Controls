@@ -69,17 +69,17 @@ static void floatToBytes(float val, uint8_t* bytes_array, uint8_t bytes) {
 /**
  * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
  * @param   CAN line bus
- * @param   CAN message ID
  * @param   pointer to buffer array to store message
  * @return  0 if ID matches and 1 if it doesn't
  */
 
-int CAN_Read(CAN_t bus, uint32_t Expected_ID, uint8_t* buffer)
+int CAN_Read(CAN_t bus, uint8_t* buffer)
 {
+    // ID 0x10A is Motor Disable
     uint32_t ID;
     uint8_t data[];
-    uint8_t count = BSP_CAN_READ(bus,*ID,data);
-    if(Expected_ID == ID)
+    uint8_t count = BSP_CAN_READ(bus,&ID,data);
+    if(ID == 0x10A)
     {
         for(int i=0;i<count;i++)
         {
