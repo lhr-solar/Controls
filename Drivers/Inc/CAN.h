@@ -2,12 +2,15 @@
 #define CAN_H__
 
 typedef enum {
-    MOTOR_DRIVE = 0x221,
-    MOTOR_POWER = 0x222,
-    RESET = 0x223,
-    VELOCITY = 0x243
-    MOTOR_DISABLE = 0x10A;
-	  
+	MC_BUS = 0x242,
+	VELOCITY = 0x243,
+	MC_PHASE_CURRENT = 0x244,
+	VOLTAGE_VEC = 0x245,
+	CURRENT_VEC = 0x246,
+	BACKEMF = 0x247,
+	TEMPERATURE = 0x24B,
+	ODOMETER_AMPHOURS = 0x24E,
+	CAR_STATE = 0x580
 } CANId_t;
 
 
@@ -29,14 +32,14 @@ typedef struct {
  * @param   None
  * @return  None
  */
-void CANbus_Init(void);
+void CAN_Init(void);
 
 /**
  * @brief   Transmits data onto the CANbus
  * @param   id : CAN id of the message
  * @param   payload : the data that will be sent.
  */
-int CANbus_Send(CANId_t id, CANPayload_t payload);
+int CAN_Send(CANId_t id, CANPayload_t payload);
 
 /**
  * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
@@ -44,6 +47,10 @@ int CANbus_Send(CANId_t id, CANPayload_t payload);
  * @param   pointer to buffer array to store message
  * @return  0 if ID matches and 1 if it doesn't
  */
+<<<<<<< Updated upstream
 int CANbus_Read(CAN_t bus, uint8_t* buffer);
+=======
+int CAN_Read(CAN_t bus, uint32_t id, uint8_t* buffer);
+>>>>>>> Stashed changes
 
 #endif

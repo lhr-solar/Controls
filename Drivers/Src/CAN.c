@@ -21,19 +21,21 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
 
 	// Not sure if these are the ids we want but I took them from BPS as placeholders
 	switch (id) {
-		case MOTOR_DRIVE:
-			return BSP_CAN_Write(id, &payload.data.b, payload.bytes);
-
-		case MOTOR_POWER:
-			return BSP_CAN_Write(id, &payload.data.b, payload.bytes);
-
-		case RESET:
-			return BSP_CAN_Write(id, &payload.data.b, payload.bytes);
-
+		case MC_BUS:
 		case VELOCITY:
-			return BSP_CAN_Write(id, &payload.data.b, payload.bytes);
+		case MC_PHASE_CURRENT:
+		case VOLTAGE_VEC:
+		case CURRENT_VEC:
+		case BACKEMF:
+		case TEMPERATURE:
+		case ODOMETER_AMPHOURS:
+		case CAR_STATE:
+			return BSP_CAN_WRITE(id, &payload.data.b, payload.bytes)
+
+		default:
+			return 0;
+
 	}
-	return 0;
 }
 
 /**
