@@ -4,16 +4,26 @@
 #define MOTOR_DRIVE 0x221
 #define MAX_CAN_LEN 8
 
+/**
+ * @brief   Initializes the motor controller
+ * @param   None
+ * @return  None
+ */ 
 void MotorController_Init(){
     BSP_CAN_Init(CAN_2);
 }
 
-
+/**
+ * @brief   Sends MOTOR DRIVE command on CAN2
+ * @param   newVelocity desired motor velocity setpoint in m/s
+ * @param   motorCurrent desired motor current setpoint as a percentage of max current setting
+ * @return  None
+ */ 
 void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent){
     uint8_t data[8] = {0};
     int index = 0;
     while(index < MAX_CAN_LEN/2){
-        data[index] = (newVelocity >> (8 * (MAX_CAN_LEN/2-index-1))) & 0xFF;    //split inputs into bytes
+        data[index] = (newVelocity >> (8 * (MAX_CAN_LEN/2-index-1))) & 0xFF; //split inputs into bytes
         index++;
         
     }
@@ -27,6 +37,11 @@ void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent){
     BSP_CAN_Write(CAN_2, MOTOR_DRIVE, data, MAX_CAN_LEN);
 }
 
+/**
+ * @brief   Reads most recent command from CAN2 bus
+ * @param   message the buffer in which the info for the CAN message will be stored
+ * @return  SUCCESS if a message is read
+ */ 
 error_t MotorController_Read(CANbuff *message){
     uint32_t id;
     uint8_t data[8] = {0};
