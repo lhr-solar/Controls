@@ -17,6 +17,10 @@ jobs:
       run: |
         sudo apt -y update
         sudo apt -y install gcc-arm-none-eabi
+    - name: Initialize Submodules
+      run: |
+        git submodule init
+        git submodule update
     - name: make simulator
       run: make simulator
     - name: clean
