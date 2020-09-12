@@ -11,8 +11,8 @@ def update():
 	# Create the file if it doesn't exist yet
 	os.makedirs(os.path.dirname(file), exist_ok=True)
 	if not os.path.exists(file):
-		open(file, 'w')
-		file.close()
+		with open(file, 'w'):
+			pass
 
 	current_values = []
 	reload_values = []

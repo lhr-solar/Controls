@@ -49,8 +49,8 @@ def read():
     # Creates file if it doesn't exist
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
-        open(file, 'w')
-        file.close()
+        with open(file, 'w'):
+            pass
     states = []
     with open(file, 'r') as csvfile:
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
