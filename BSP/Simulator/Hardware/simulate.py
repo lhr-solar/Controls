@@ -132,7 +132,7 @@ messages_frame.columnconfigure(messages_frame_columns, minsize=20, weight=1)
 messages_frame.grid(row=0, column=3, sticky='nsew')
 
 lights_frame = tk.LabelFrame(master=window, text="Lights")
-lights_frame_rows = [0, 1, 2, 3]
+lights_frame_rows = [0, 1, 2, 3, 4]
 lights_frame_columns = [0, 1]
 lights_frame.rowconfigure(lights_frame_rows, minsize=50, weight=1)
 lights_frame.columnconfigure(lights_frame_columns, minsize=50, weight=1)
