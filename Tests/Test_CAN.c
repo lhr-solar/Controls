@@ -6,15 +6,16 @@ int main(void){
    uint8_t buffer[8];
 
    CANData_t data;
-   data.b = 0x11;
+   data.d = 0x1234567887654321;
    CANPayload_t payload;
    payload.data = data;
+   payload.bytes = 8;
    
    CAN_Init();
 
    for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
    	CAN_Send(ids[i], payload);
-   	//printf("Success/Failure: %d\n", CAN_Read(buffer));
+   	printf("Success/Failure: %d\n", CAN_Read(buffer));
    }
 
    exit(0);

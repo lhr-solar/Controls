@@ -26,7 +26,7 @@ typedef union {
 
 typedef struct {
 	uint8_t idx : 8;
-	uint8_t bytes : 8; // Default
+	uint8_t bytes : 8;
 	CANData_t data;
 } CANPayload_t;
 
