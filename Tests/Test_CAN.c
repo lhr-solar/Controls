@@ -15,7 +15,7 @@ int main(void){
 
    for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
    	CAN_Send(ids[i], payload);
-   	printf("Success(1)/Failure(0): %d\n", CAN_Read(buffer));
+   	printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CAN_Read(buffer));
    }
 
    exit(0);
