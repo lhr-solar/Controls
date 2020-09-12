@@ -24,10 +24,6 @@ static void moveCursorUp(int n) {
     printf("%c[%dA", 0x1B, n);
 }
 
-static void timerTest(){
-         
-}
-
 int main() {
     BSP_ADC_Init(ADC_0);
     BSP_ADC_Init(ADC_1);
@@ -38,9 +34,13 @@ int main() {
     BSP_Contactors_Init(MOTOR);
     BSP_Contactors_Init(ARRAY);
 
-    BSP_UART_Init();
+    BSP_UART_Init(UART_1);
+    BSP_UART_Init(UART_2);
 
     BSP_Switches_Init();
+
+    uint8_t txData[LEN] = {0x00, 0x12, 0x42, 0x5A};
+    bool negativeAcc = false;
 
     while(1) {
         printf("-----PLEASE RUN THIS TEST FILE IN CONJUCTION WITH THE GUI-----\n");
@@ -52,15 +52,34 @@ int main() {
                 BSP_ADC_Get_Millivoltage(ADC_0), BSP_ADC_Get_Millivoltage(ADC_1));
 
         //BSP_CAN TEST -----------------------------------------------------------
-        //NOTE: The can test file has two possible test cases: CAN1 OR CAN2 and the
-        // CAN test file has them in separate functions
+        //NOTE: The can test file can test both CAN1 ot CAN2 and
+        // it has them in separate functions
         printf("-------------------------CANs TEST----------------------------\n");
         printf("--------------------------------------------------------------\n");
-        printf("CAN bus 1 sends an ID and Message, those can be seen in the GUI\n");
-        // CAN 1 TEST
-        uint8_t txData[LEN] = {0x00, 0x12, 0x42, 0x5A};
-        BSP_CAN_Write(CAN_1, 0x201, txData, LEN);
+        printf("CAN bus 1 sends an ID and Message, which can be seen in the GUI\n");
+        // CAN 1 TEST - BASICALLY JUST COPIED IT FROM BSP_CAN.c
+        if(txData[3] > 0x70){
+            negativeAcc = true; 
+        }else if(txData[3] < 0x40){
+            negativeAcc = false;
+        }
+
+        if(!negativeAcc){
+            txData[3] = txData[3]+1;
+        }else{
+            txData[3] = txData[3]-1;
+        }
+
+        uint32_t id;
+        BSP_CAN_Write(CAN_1, 0x221, txData, LEN);
+        
         uint8_t rxData[LEN] = {0};
+        uint8_t len = BSP_CAN_Read(CAN_1, &id, rxData);
+        printf("ID: 0x%x\nData: ", id);
+        for (uint8_t i = 0; i < len; i++) {
+            printf("0x%x ", rxData[i]);
+        }
+        printf("\n");
 
         //BSP_SWITCHES TEST ------------------------------------------------------
         printf("---------------------- SWITCHES TEST--------------------------\n");
@@ -83,8 +102,8 @@ int main() {
         //printf("--------------------------------------------------------------\n");
         printf("-------------------------UART TEST----------------------------\n");
         printf("--------------------------------------------------------------\n");
-        printf("The UARTs are printing random values, UART 1 communicates with\n");
-        printf("the gecko display while UART2 with the user for input and display\n");
+        printf("The UARTs are showing random values, UART 1 communicates with\n");
+        printf("the gecko display while UART2 with the user direclty \n");
         float speed = (rand() % 500) / 10.0;
         int cruiseEn = rand() % 2;
         int cruiseSet = rand() % 2;
@@ -116,19 +135,17 @@ int main() {
 
         //BSP_Contactors -----------------------------------------------------
         //NOTE: The contactors test file requires input from the user in the original test
-        //printf("--------------------------------------------------------------\n");
         printf("----------------------CONTACTORS TEST-------------------------\n");
         printf("--------------------------------------------------------------\n");
-        printf("Contactors are constatly updated randomly, changes visible in GUI\n");
+        printf("Contactors are constantly updated randomly, changes also visible in GUI\n");
         int motorOrArray = rand() % 2;
-        int onOrOff = rand() % 2;
-                                                                                                                   
+        int onOrOff = rand() % 2;                                                                                                           
         if (motorOrArray == 1){
             if (onOrOff == 1){
-                BSP_Contactors_Set(MOTOR, ON);  
+                BSP_Contactors_Set(MOTOR, ON);
             }
             else {
-                BSP_Contactors_Set(MOTOR, OFF);
+                BSP_Contactors_Set(MOTOR, OFF);  
             }
         }else{
             if (onOrOff == 1){
@@ -138,9 +155,11 @@ int main() {
                 BSP_Contactors_Set(ARRAY, OFF);
             }
         }
+        printf("MOTOR CONTACTOR STATE: %d\n", BSP_Contactors_Get(MOTOR));
+        printf("ARRAY CONTACTOR STATE: %d\n", BSP_Contactors_Get(ARRAY));
 
         // Moving cursor back up
-        moveCursorUp(23);
+        moveCursorUp(27);
     }
     printf("\n");
     return 0; 
