@@ -9,7 +9,7 @@
 #include <bsp.h>
 
 int main() {
-    char input[6];
+    char board[6];
     char status[4];
     char* motor = "MOTOR";
     char* array = "ARRAY";
@@ -17,10 +17,13 @@ int main() {
     char* off = "OFF";
     
     while(1){
-        printf("Enter the board you wish to set followed by the status (MOTOR | ARRAY) (ON | OFF)\n");
-        scanf("%s %s", input, status);
-        if(!strcmp(input, motor)){
+        printf("Enter the board you wish to set\n");
+        gets(board);
+        printf("Enter the status you wish to set\n");
+        gets(status);
+        if(!strcmp(board, motor)){
             if(!strcmp(status,on)){
+                printf("Writing to csv...\n");
                 BSP_Precharge_write(Motor, ON);
             }
             else if(!strcmp(status,off)){
@@ -30,7 +33,7 @@ int main() {
                 printf("unrecognized status\n");
             }
         }
-        else if(!strcmp(input,array)){
+        else if(!strcmp(board,array)){
             if(!strcmp(status,on)){
                 BSP_Precharge_write(Array, ON);
             }
