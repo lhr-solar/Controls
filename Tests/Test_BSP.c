@@ -47,13 +47,13 @@ int main() {
         //BSP_ADC TEST -----------------------------------------------------------
         printf("-------------------------ADC TEST-----------------------------\n");
         printf("--------------------------------------------------------------\n");
-        printf("As you move the pedals their voltage values should change\n");
+        printf("As you move the pedals in the GUI their voltage values should change\n");
         printf("Accelerator: %5.1d mV\tBrake: %5.1d mV\n", 
                 BSP_ADC_Get_Millivoltage(ADC_0), BSP_ADC_Get_Millivoltage(ADC_1));
 
         //BSP_CAN TEST -----------------------------------------------------------
         //NOTE: The can test file has two possible test cases: CAN1 OR CAN2 and the
-        // test file has them separated
+        // CAN test file has them in separate functions
         printf("-------------------------CANs TEST----------------------------\n");
         printf("--------------------------------------------------------------\n");
         printf("CAN bus 1 sends an ID and Message, those can be seen in the GUI\n");
