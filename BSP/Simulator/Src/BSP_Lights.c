@@ -53,7 +53,30 @@ void BSP_Lights_Switch(LIGHT_t LightChannel){
     //Exclusive lock the file open
     flock((fileno(fp)), LOCK_EX);
 
+    //get data in file
+    char csv[16];
+    fgets(csv,16,fp);
 
+    //convert to integer
+    uint16_t switchInt = atoi(csv);
 
+    //switch from low->high/high->low using XOR
+    switchInt = switchInt^(1<<LightChannel);
+
+    //unlock + close file
+    flock((fileno(fp)), LOCK_UN);
+    fclose(fp);
+
+    //reopen cleared file
+    FILE* fp1 = fopen(FILE_NAME, "w");
+    //Exclusive lock the file open
+    flock((fileno(fp1)), LOCK_EX);
+
+    //enter updated data string
+    fprintf(fp1,"%d",switchInt);
+
+    //unlock + close file
+    flock((fileno(fp1)), LOCK_UN);
+    fclose(fp1);
 
 }
