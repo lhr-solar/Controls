@@ -1,4 +1,5 @@
 #include "CAN.h"
+#include "config.h"
 
 
 /**
@@ -19,6 +20,8 @@ void CAN_Init(void) {
  */
 int CAN_Send(CANId_t id, CANPayload_t payload) {
 
+    printf("ID Sent: %x - ", id);
+
 	switch (id) {
 		case MC_BUS:
 		case VELOCITY:
@@ -28,9 +31,9 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
 		case BACKEMF:
 		case TEMPERATURE:
 		case ODOMETER_AMPHOURS:
-			return BSP_CAN_Write(CAN_1,id, &payload.data.d, payload.bytes);
+			return BSP_CAN_Write(CAN_1, id, &payload.data.d, payload.bytes);
 		case CAR_STATE:
-			return BSP_CAN_Write(CAN_1,id, &payload.data.b, payload.bytes);
+			return BSP_CAN_Write(CAN_1, id, &payload.data.b, payload.bytes);
         default:
 			return 0;
 
@@ -45,22 +48,23 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
  * @return  0 if ID matches and 1 if it doesn't
  */
 
-int CAN_Read(uint8_t* buffer)
+error_t CAN_Read(uint8_t* buffer)
 {
     uint32_t ID;
     uint8_t data[8];
     uint8_t count = BSP_CAN_Read(CAN_1,&ID,data);
+    printf("Count: %i - ID Received: %x - ", count,ID);
     if(ID == MOTOR_DISABLE)
     {
         for(int i=0;i<count;i++)
         {
             buffer[i]=data[i];
         }
-	return 0;
+	return SUCCESS;
     }
     else
     {
-      return 1;
+      return FAILURE;
     }
     
 }

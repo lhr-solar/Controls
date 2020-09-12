@@ -52,7 +52,7 @@ int CAN_Send(CANId_t id, CANPayload_t payload);
  * @param   pointer to buffer array to store message
  * @return  0 if ID matches and 1 if it doesn't
  */
-int CAN_Read(uint8_t* buffer);
+error_t CAN_Read(uint8_t* buffer);
 
 
 
