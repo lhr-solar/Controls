@@ -124,6 +124,10 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
         data[i] = (fullData >> (8 * (len-i-1))) & 0xFF;
     }
 
+    // Clear entry that was read
+    // By reopening stream with "w"
+    freopen(FILE_NAME, "w", fp);
+
     // Close file
     flock(fno, LOCK_UN);
     fclose(fp);
