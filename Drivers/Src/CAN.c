@@ -31,6 +31,7 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
 		case BACKEMF:
 		case TEMPERATURE:
 		case ODOMETER_AMPHOURS:
+        case MOTOR_DISABLE:
 			return BSP_CAN_Write(CAN_1, id, &payload.data.d, payload.bytes);
 		case CAR_STATE:
 			return BSP_CAN_Write(CAN_1, id, &payload.data.b, payload.bytes);
@@ -53,7 +54,7 @@ error_t CAN_Read(uint8_t* buffer)
     uint32_t ID;
     uint8_t data[8];
     uint8_t count = BSP_CAN_Read(CAN_1,&ID,data);
-    printf("Count: %i - ID Received: %x - ", count,ID);
+    printf("ID Received: %x - ", ID);
     if(ID == MOTOR_DISABLE)
     {
         for(int i=0;i<count;i++)
