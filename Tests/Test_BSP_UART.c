@@ -25,7 +25,7 @@ int main(void) {
         char str[TX_SIZE];
         sprintf(str, "%f, %d, %d, %d, %d", speed, cruiseEn, cruiseSet, regenEn, CANerr);
 
-        BSP_UART_Write(UART_3, str , TX_SIZE);
+        BSP_UART_Write(UART_2, str , TX_SIZE);
 
         char out[2][TX_SIZE];
         BSP_UART_Read(UART_2, out[UART_2]);
