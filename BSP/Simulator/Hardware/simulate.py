@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 12 11:00:15 2020
+
+@author: JordanDoan
+"""
+
 import os
 import tkinter as tk
 from functools import partial
@@ -9,6 +16,8 @@ import Pedals
 import Display
 import CAN
 import MotorController
+import UART
+import PreCharge
 
 
 # Update Frequencies (ms)
@@ -17,6 +26,7 @@ MOTOR_FREQ = 250
 CAN_FREQ = 500
 CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
+PRECHARGE_FREQ = 500;
 
 
 def update_timers():
@@ -33,6 +43,13 @@ def update_contactors():
     array_status.set(f"Array Contactor: {contactors_status[1]}")
     window.after(CONTACTOR_FREQ, update_contactors)
 
+
+def update_precharge():
+    global prechargebools
+    pcarr = PreCharge.read();
+    prechargebools = bool[2];
+    prechargebools[0,1] = pcarr[0,1];
+    window.after(PRECHARGE_FREQ, update_precharge);      
 
 def update_display():
     """Periodically update the display state of display"""
@@ -67,8 +84,8 @@ if os.environ.get('DISPLAY','') == '':
 
 # Sets up window
 window = tk.Tk()
-window.rowconfigure([0, 1], minsize=200, weight=1)
-window.columnconfigure([0, 1, 2], minsize=200, weight=1)
+window.rowconfigure([0, 1, 2], minsize=200, weight=1)
+window.columnconfigure([0, 1, 2, 3], minsize=200, weight=1)
 
 # Sets up frames
 button_frame = tk.LabelFrame(master=window, text='Switches')
@@ -111,6 +128,20 @@ contactor_frame.rowconfigure(contactor_frame_rows, minsize=50, weight = 1)
 contactor_frame.columnconfigure(contactor_frame_columns, minsize=50, weight=1)
 contactor_frame.grid(row=1, column=2, sticky='nsew')
 
+messages_frame = tk.LabelFrame(master=window, text='Controls System Messages')
+messages_frame_rows = [0, 1]
+messages_frame_columns = [0]
+messages_frame.rowconfigure(messages_frame_rows, minsize=20, weight=1)
+messages_frame.columnconfigure(messages_frame_columns, minsize=20, weight=1)
+messages_frame.grid(row=0, column=3, sticky='nsew')
+
+precharge_frame = tk.LabelFrame(master=window, text="PreCharge");
+precharge_frame_rows = [0,1]
+precharge_frame_columns = [0];
+precharge_frame.rowconfigure(precharge_frame_rows, minesize=50, weight = 1)
+precharge_frame.columnconfigure(precharge_frame_columns, minsize=50, weight = 1);
+precharge_frame.grid(row = 2, column = 0);
+
 
 ### Switches ###
 buttons = []
@@ -149,6 +180,14 @@ for i, label in enumerate(Display.get_display()):
     cell.grid(row=i//len(display_frame_columns), column=i%len(display_frame_columns), sticky='nsew')
 
 
+### PreCharge ###
+prechargetext = ["PreCharge 1: " + prechargebools[0], "PreCharge 2: " + prechargebools[1]];
+prechargelabelone = tk.Label(master = precharge_frame, textvariable = prechargetext[0]);
+prechargelabeltwo = tk.Label(master = precharge_frame, textvariable = prechargetext[1]);
+prechargelabelone.grid(row=0,column=0, sticky='nsew');
+prechargelabeltwo.grid(row = 1, column = 0, sticky = 'nsew');
+
+
 ### CAN ###
 id_text = tk.StringVar(value='ID: ')
 id_ = tk.Label(master=can_frame, textvariable=id_text)
@@ -166,10 +205,17 @@ current_velocity_text = tk.StringVar(value='Current Velocity: ')
 current_velocity = tk.Label(master=motor_frame, textvariable=current_velocity_text)
 current_velocity.grid(row=1, column=0, sticky='nsew')
 
+### UART messages input ###
+uart_input = tk.Entry(master=messages_frame)
+uart_input.grid(row=0, column=0)
+uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get()))
+uart_button.grid(row=1, column=0)
+
 # Sets up periodic updates
 window.after(TIMER_FREQ, update_timers)
 can_frame.after(CAN_FREQ, update_CAN)
 contactor_frame.after(CONTACTOR_FREQ, update_contactors)
 display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
+precharge_frame.after(PRECHARGE_FREQ, update_precharge);
 window.mainloop()
