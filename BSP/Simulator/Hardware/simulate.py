@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Sep 12 11:00:15 2020
-
-@author: JordanDoan
-"""
-
 import os
 import tkinter as tk
 from functools import partial
@@ -16,7 +9,7 @@ import Pedals
 import Display
 import CAN
 import MotorController
-import UART
+#import UART
 import PreCharge
 
 
@@ -26,7 +19,7 @@ MOTOR_FREQ = 250
 CAN_FREQ = 500
 CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
-PRECHARGE_FREQ = 500;
+PRECHARGE_FREQ = 500
 
 
 def update_timers():
@@ -44,12 +37,20 @@ def update_contactors():
     window.after(CONTACTOR_FREQ, update_contactors)
 
 
+# def update_precharge():
+#     global prechargebools
+#     pcarr = PreCharge.read();
+#     prechargebools = bool[2];
+#     prechargebools[0,1] = pcarr[0,1];
+#     window.after(PRECHARGE_FREQ, update_precharge);
+
 def update_precharge():
-    global prechargebools
-    pcarr = PreCharge.read();
-    prechargebools = bool[2];
-    prechargebools[0,1] = pcarr[0,1];
-    window.after(PRECHARGE_FREQ, update_precharge);      
+    """Periodically update the display state of the Motor and Array precharge boards"""
+    global motor_precharge_status, array_precharge_status
+    precharge_status = PreCharge.read()
+    motor_precharge_status.set(f"Motor Precharge: {precharge_status[0]}")
+    array_precharge_status.set(f"Array Precharge: {precharge_status[1]}")
+    window.after(PRECHARGE_FREQ, update_precharge)      
 
 def update_display():
     """Periodically update the display state of display"""
@@ -138,9 +139,9 @@ messages_frame.grid(row=0, column=3, sticky='nsew')
 precharge_frame = tk.LabelFrame(master=window, text="PreCharge");
 precharge_frame_rows = [0,1]
 precharge_frame_columns = [0];
-precharge_frame.rowconfigure(precharge_frame_rows, minesize=50, weight = 1)
+precharge_frame.rowconfigure(precharge_frame_rows, minsize=50, weight = 1)
 precharge_frame.columnconfigure(precharge_frame_columns, minsize=50, weight = 1);
-precharge_frame.grid(row = 2, column = 0);
+precharge_frame.grid(row = 1, column = 3, sticky='nsew');
 
 
 ### Switches ###
@@ -160,6 +161,14 @@ motor_.grid(row = 0, column = 0, sticky='nsew')
 array_status = tk.StringVar(value= 'Array Contactor: ')
 array_txt = tk.Label(master=contactor_frame, textvariable=array_status)
 array_txt.grid(row=1, column=0, sticky='nsew')
+
+### Precharge ###
+precharge_motor_status = tk.StringVar(value= 'Motor Precharge: ')
+precharge_motor_ = tk.Label(master=precharge_frame, textvariable=precharge_motor_status)
+precharge_motor_.grid(row = 0, column = 0, sticky='nsew')
+precharge_array_status = tk.StringVar(value= 'Array Precharge: ')
+precharge_array_txt = tk.Label(master=precharge_frame, textvariable=precharge_array_status)
+precharge_array_txt.grid(row=1, column=0, sticky='nsew')
 
 
 ### Pedals ###
@@ -181,11 +190,11 @@ for i, label in enumerate(Display.get_display()):
 
 
 ### PreCharge ###
-prechargetext = ["PreCharge 1: " + prechargebools[0], "PreCharge 2: " + prechargebools[1]];
-prechargelabelone = tk.Label(master = precharge_frame, textvariable = prechargetext[0]);
-prechargelabeltwo = tk.Label(master = precharge_frame, textvariable = prechargetext[1]);
-prechargelabelone.grid(row=0,column=0, sticky='nsew');
-prechargelabeltwo.grid(row = 1, column = 0, sticky = 'nsew');
+# prechargetext = ["PreCharge 1: " + prechargebools[0], "PreCharge 2: " + prechargebools[1]];
+# prechargelabelone = tk.Label(master = precharge_frame, textvariable = prechargetext[0]);
+# prechargelabeltwo = tk.Label(master = precharge_frame, textvariable = prechargetext[1]);
+# prechargelabelone.grid(row=0,column=0, sticky='nsew');
+# prechargelabeltwo.grid(row = 1, column = 0, sticky = 'nsew');
 
 
 ### CAN ###

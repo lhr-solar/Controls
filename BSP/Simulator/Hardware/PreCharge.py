@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Sep  5 10:57:53 2020
-
-@author: JordanDoan
-"""
 # import time
 # import tkinter as tk
 import os
@@ -28,7 +22,7 @@ def read():
         chargearr = int[2];
         chargearr[0] = charges % 1;
         chargearr[1] = charges /2;
-        return chargearr;
+        return chargearr
             
     
 
