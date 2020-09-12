@@ -1,6 +1,6 @@
 [submodule "uCOS-III-Simulator"]
 	path = RTOS/uCOS-III-Simulator
-	url = git@github.com:lhr-solar/uCOS-III-Simulator.git
+	url = https://github.com/lhr-solar/uCOS-III-Simulator.git
 [submodule "uCOS-III-STM32F4"]
 	path = RTOS/uCOS-III-STM32F4
-	url = git@github.com:lhr-solar/uCOS-III-STM32F4.git
+	url = https://github.com/lhr-solar/uCOS-III-STM32F4.git
