@@ -16,10 +16,9 @@ int main() {
     char* on = "ON";
     char* off = "OFF";
     
-    state_t result;
     while(1){
         printf("Enter the board you wish to set followed by the status (MOTOR | ARRAY) (ON | OFF)\n");
-        scanf("%s %s", &input, &status);
+        scanf("%s %s", input, status);
         if(!strcmp(input, motor)){
             if(!strcmp(status,on)){
                 BSP_Precharge_write(Motor, ON);
