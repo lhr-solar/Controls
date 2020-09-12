@@ -3,6 +3,11 @@
 
 #define FILE_NAME DATA_PATH(LIGHTS_CSV)
 
+
+/**
+* @brief  Initialize Lights module by checking whether data file exists and exiting if it doesn't.
+* @return  void
+*/ 
 void BSP_Lights_Init(void){
     if(access(FILE_NAME, F_OK) != 0){
         // File doesn't exist if true
@@ -11,6 +16,11 @@ void BSP_Lights_Init(void){
     }
 }
 
+/**
+* @brief   Opens Lights Data file and reads relevant bit for selected light to return ON/OFF
+* @param   LightChannel The light you want to read the state of
+* @return  state_t enum: ON/OFF 
+*/ 
 state_t BSP_Lights_Read(LIGHT_t LightChannel){
     FILE* fp = fopen(FILE_NAME, "r");
     //will this error case ever be reached? Init function won't fire if file is unavailable
@@ -42,6 +52,12 @@ state_t BSP_Lights_Read(LIGHT_t LightChannel){
 
 
 }
+
+/**
+* @brief   Switch the selected light between ON/OFF
+* @param   LightChannel Which Light you want to switch
+* @return  void
+*/ 
 void BSP_Lights_Switch(LIGHT_t LightChannel){
     FILE* fp = fopen(FILE_NAME, "r");
     //will this error case ever be reached? Init function won't fire if file is unavailable
