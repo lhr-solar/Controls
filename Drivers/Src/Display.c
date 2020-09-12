@@ -8,7 +8,7 @@
  */
 void Display_Init() {
     // Initialize the UART comm. channel
-    BSP_UART_Init();
+    BSP_UART_Init(UART_1); // which one is which?
 }
 
 /*

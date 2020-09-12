@@ -17,7 +17,7 @@
  * @param   None
  * @return  None
  */
-void BSP_UART_Init(void) {
+void BSP_UART_Init(UART_t uart) {
     if (access(FILE_NAME, F_OK) != 0) {
         // File doesn't exist if true
         perror(UART_CSV);
