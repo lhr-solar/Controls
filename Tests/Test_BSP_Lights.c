@@ -17,6 +17,16 @@ int main() {
                 BSP_Lights_Read(LEFT_BLINK),
                 BSP_Lights_Read(BPS_PWR),
                 BSP_Lights_Read(BrakeLight));
+        BSP_Lights_Switch(M_CNCTR);
+        BSP_Lights_Switch(RSVD_LED);
+        BSP_Lights_Switch(CTRL_FAULT);
+        BSP_Lights_Switch(RIGHT_BLINK);
+        BSP_Lights_Switch(HeadlightPWR);
+        BSP_Lights_Switch(A_CNCTR);
+        BSP_Lights_Switch(BPS_FAULT);
+        BSP_Lights_Switch(LEFT_BLINK);
+        BSP_Lights_Switch(BPS_PWR);
+        BSP_Lights_Switch(BrakeLight);
     }
     printf("\n");
 }
