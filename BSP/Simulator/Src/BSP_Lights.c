@@ -42,3 +42,16 @@ state_t BSP_Lights_Read(LIGHT_t LightChannel){
 
 
 }
+void BSP_Lights_Update(LIGHT_t LightChannel, LIGHT_state lightState){
+    FILE* fp = fopen(FILE_NAME, "r");
+    //will this error case ever be reached? Init function won't fire if file is unavailable
+    if (!fp) {
+        printf("Lights not available\n\r");
+        return 2;
+    }
+
+    //Exclusive lock the file open
+    flock((fileno(fp)), LOCK_EX);
+    
+
+}
