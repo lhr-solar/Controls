@@ -34,8 +34,8 @@ def read():
     # Creates file if it doesn't exist
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
-        open(file, 'w')
-        file.close()
+        with open(file, 'w'):
+            pass
     uart = list()
     with open(file, 'r') as csvfile:
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
@@ -46,5 +46,8 @@ def read():
     if len(uart):
         uart = uart[0]
         for i, d in enumerate(data.keys()):
-            data[d] = uart[i]
+            try:
+                data[d] = uart[i]
+            except:
+                pass
     return data

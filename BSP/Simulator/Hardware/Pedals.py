@@ -16,8 +16,8 @@ def set_pedals(accel_pos, brake_pos):
     # Create the file if it doesn't exist yet
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
-        open(file, 'w')
-        file.close()
+        with open(file, 'w'):
+            pass
     accel_value = int(float(accel_pos) * 4096) # ADC conversion
     brake_value = int(float(brake_pos) * 4096) # ADC conversion
     # The slider goes from 0.0 to 1.0, but we want to cap the ADC value at 4095
