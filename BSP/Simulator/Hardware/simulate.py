@@ -46,10 +46,10 @@ def update_contactors():
 
 def update_precharge():
     """Periodically update the display state of the Motor and Array precharge boards"""
-    global motor_precharge_status, array_precharge_status
+    global precharge_motor_status, precharge_array_status
     precharge_status = PreCharge.read()
-    motor_precharge_status.set(f"Motor Precharge: {precharge_status[0]}")
-    array_precharge_status.set(f"Array Precharge: {precharge_status[1]}")
+    precharge_motor_status.set(f"Motor Precharge: {precharge_status[1]}")
+    precharge_array_status.set(f"Array Precharge: {precharge_status[0]}")
     window.after(PRECHARGE_FREQ, update_precharge)      
 
 def update_display():

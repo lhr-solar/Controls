@@ -21,7 +21,7 @@
 #define UART_CSV "UART.csv"
 #define TIMER_CSV "Timer.csv"
 #define CAN_CSV "CAN.csv"
-#define PRECHARGE_CSV "Precharge.csv"
+#define PRECHARGE_CSV "PreCharge.csv"
 #endif
 
 #endif

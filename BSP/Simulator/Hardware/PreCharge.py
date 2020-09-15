@@ -15,14 +15,14 @@ def read():
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX);
         try:
             csvreader = csv.reader(csvfile);
-            charges = int(next(csvreader));
+            charges = next(csvreader);
         except StopIteration:
             charges = 0;
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN);
-        chargearr = int[2];
-        chargearr[0] = charges % 1;
-        chargearr[1] = charges /2;
-        return chargearr
+        states = []
+        states.append(int(charges[0]) % 2)
+        states.append(int(charges[0])>>1 % 2)
+        return states
             
     
 
