@@ -9,7 +9,7 @@ import Pedals
 import Display
 import CAN
 import MotorController
-#import UART
+import UART
 import PreCharge
 
 
@@ -36,13 +36,15 @@ def update_contactors():
     array_status.set(f"Array Contactor: {contactors_status[1]}")
     window.after(CONTACTOR_FREQ, update_contactors)
 
+
 def update_precharge():
     """Periodically update the display state of the Motor and Array precharge boards"""
     global precharge_motor_status, precharge_array_status
     precharge_status = PreCharge.read()
     precharge_motor_status.set(f"Motor Precharge: {precharge_status[1]}")
     precharge_array_status.set(f"Array Precharge: {precharge_status[0]}")
-    window.after(PRECHARGE_FREQ, update_precharge)      
+    window.after(PRECHARGE_FREQ, update_precharge)  
+
 
 def update_display():
     """Periodically update the display state of display"""
@@ -77,7 +79,7 @@ if os.environ.get('DISPLAY','') == '':
 
 # Sets up window
 window = tk.Tk()
-window.rowconfigure([0, 1, 2], minsize=200, weight=1)
+window.rowconfigure([0, 1], minsize=200, weight=1)
 window.columnconfigure([0, 1, 2, 3], minsize=200, weight=1)
 
 # Sets up frames
@@ -154,6 +156,7 @@ array_status = tk.StringVar(value= 'Array Contactor: ')
 array_txt = tk.Label(master=contactor_frame, textvariable=array_status)
 array_txt.grid(row=1, column=0, sticky='nsew')
 
+
 ### Precharge ###
 precharge_motor_status = tk.StringVar(value= 'Motor Precharge: ')
 precharge_motor_ = tk.Label(master=precharge_frame, textvariable=precharge_motor_status)
@@ -179,6 +182,7 @@ for i, label in enumerate(Display.get_display()):
     display_text.append(text)
     cell = tk.Label(master=display_frame, textvariable=text)
     cell.grid(row=i//len(display_frame_columns), column=i%len(display_frame_columns), sticky='nsew')
+
 
 ### CAN ###
 id_text = tk.StringVar(value='ID: ')

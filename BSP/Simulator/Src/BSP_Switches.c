@@ -31,7 +31,7 @@ void BSP_Switches_Init(void) {
  * @param   sw the switch to read
  * @return  State of the switch (ON/OFF)
  */ 
-state_t BSP_Switches_Read(switch_t sw) {
+State BSP_Switches_Read(switch_t sw) {
     FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {
         printf("Switches not available\n\r");
