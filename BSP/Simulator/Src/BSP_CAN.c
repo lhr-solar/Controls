@@ -52,7 +52,7 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
         return 0;
     }
 
-    char currentCAN[2][128];
+    char currentCAN[NUM_CAN][128];
     char csv[128];
     for (uint8_t i = 0; fgets(csv, 128, fp); i++) {
         strcpy(currentCAN[i], csv);
@@ -91,6 +91,8 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
 /**
  * @brief   Reads the message currently on the 
  *          specified CAN line in the CSV file
+ * @param   bus the proper CAN line to write to
+ *          defined by the CAN_t enum
  * @param   id pointer to integer to store the 
  *          message ID that was read
  * @param   data pointer to integer array to store
@@ -108,7 +110,7 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     int fno = fileno(fp);
     flock(fno, LOCK_EX);
 
-    char currentCAN[2][256];
+    char currentCAN[NUM_CAN][256];
     char csv[256];
     for (uint8_t i = 0; fgets(csv, 256, fp); i++) {
         strcpy(currentCAN[i], csv);
@@ -124,9 +126,19 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
         data[i] = (fullData >> (8 * (len-i-1))) & 0xFF;
     }
 
+    freopen(FILE_NAME, "w", fp);
+
+    for (uint8_t i = 0; i < NUM_CAN; i++) {
+            if (bus == i) {
+                fprintf(fp, "\n");
+            } else {
+                fprintf(fp, "%s", currentCAN[i]);
+            }
+        }
+
     // Clear entry that was read
     // By reopening stream with "w"
-    freopen(FILE_NAME, "w", fp);
+    //freopen(FILE_NAME, "w", fp);
 
     // Close file
     flock(fno, LOCK_UN);
