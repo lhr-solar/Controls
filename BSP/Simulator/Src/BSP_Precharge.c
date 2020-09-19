@@ -10,7 +10,7 @@
  * 
  * @return none
 */
-void BSP_Precharge_Write(board_t board, state_t status){
+void BSP_Precharge_Write(board_t board, State status){
     // first get previous board states from csv file
     FILE* fp = fopen(FILE_NAME, "r");
 
