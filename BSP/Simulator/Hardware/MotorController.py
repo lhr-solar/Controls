@@ -14,7 +14,11 @@ VELOCITY_ID = 0x243
 # State values
 CURRENT_VELOCITY = 0
 
+mode = 0    # 0 = Velocity control mode, 1 = Torque control mode
 
+velocity_increase = 0.5 #how much CURRENT_VELOCITY is increased by in update_velocity()
+
+MAX_CURRENT = 1.0 #max available current
 def read():
     """Reads CAN2 bus
 
@@ -62,6 +66,7 @@ def confirm_drive():
     Returns:
         tuple: desired and current velocities to display
     """
+    global MAX_CURRENT
     try:      
         id_, message, _ = read()
         id_ = int(id_, 16)
@@ -70,6 +75,10 @@ def confirm_drive():
             # Read the message and separate
             desired_current = (message >> 32) & 0xFFFFFFFF
             desired_velocity = message & 0xFFFFFFFF
+            toggle_torque(desired_velocity)     #enable torque control mode if desired_velocity is an extremely large number
+            #update max available current value
+            if mode != 1:
+                MAX_CURRENT = MAX_CURRENT * (desired_current/100.0)
             update_velocity(desired_velocity)
             # Write the current velocity value
             tx_message = int(CURRENT_VELOCITY) << 32 + int(CURRENT_VELOCITY)
@@ -80,6 +89,23 @@ def confirm_drive():
     except ValueError:
         return CURRENT_VELOCITY, CURRENT_VELOCITY
 
+def toggle_torque():
+    global mode
+    if velocity > 1000:
+        mode = 1
+    else:
+        mode = 0
+
+def torque_control(pedalPercent):
+    global MAX_CURRENT, velocity_increase
+    if mode == 1:
+        MAX_CURRENT = MAX_CURRENT * pedalPercent    #param will be a value from 0.0 to 1.0
+        velocity_increase = MAX_CURRENT     #update rate
+
+def velocity_control(velocity):
+    global velocity_increase, mode
+    mode = 0
+    velocity_increase = MAX_CURRENT
 
 def update_velocity(v):
     """Acts as the motor controller increasing
@@ -88,8 +114,8 @@ def update_velocity(v):
     Args:
         v (float): desired velocity received by the Controls system
     """
-    global CURRENT_VELOCITY
+    global CURRENT_VELOCITY, velocity_increase
     if CURRENT_VELOCITY < v:
-        CURRENT_VELOCITY += 0.5
+        CURRENT_VELOCITY += velocity_increase
     elif CURRENT_VELOCITY > v:
         CURRENT_VELOCITY -= 0.5

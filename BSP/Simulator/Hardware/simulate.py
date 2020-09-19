@@ -58,6 +58,7 @@ def update_motor():
     desired_velocity, current_velocity = MotorController.confirm_drive()
     desired_velocity_text.set(f"Desired Velocity: {round(desired_velocity, 3)} m/s")
     current_velocity_text.set(f"Current Velocity: {round(current_velocity, 3)} m/s")
+    MotorController.torque_control(accelerator.get())
     window.after(MOTOR_FREQ, update_motor)
 
 
