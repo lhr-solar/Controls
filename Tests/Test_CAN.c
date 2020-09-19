@@ -1,5 +1,5 @@
 #include "common.h"
-#include "CAN.h"
+#include "CANbus.h"
 
 int main(void){
    uint32_t ids[10] = {0x242, 0x243, 0x244, 0x245, 0x246, 0x247, 0x24B, 0x24E, 0x580, 0x10A};
@@ -12,11 +12,11 @@ int main(void){
    payload.data = data;
    payload.bytes = 4;
    
-   CAN_Init();
+   CANbus_Init();
 
    for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
-   	CAN_Send(ids[i], payload);
-   	printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CAN_Read(buffer));
+   	CANbus_Send(ids[i], payload);
+   	printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CANbus_Read(buffer));
    }
 
    exit(0);

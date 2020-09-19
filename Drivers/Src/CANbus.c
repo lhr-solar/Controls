@@ -1,4 +1,4 @@
-#include "CAN.h"
+#include "CANbus.h"
 #include "config.h"
 
 
@@ -7,7 +7,7 @@
  * @param   None
  * @return  None
  */
-void CAN_Init(void) {
+void CANbus_Init(void) {
     BSP_CAN_Init(CAN_1);
 }
 
@@ -18,7 +18,7 @@ void CAN_Init(void) {
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CAN_Send(CANId_t id, CANPayload_t payload) {
+int CANbus_Send(CANId_t id, CANPayload_t payload) {
 
     int8_t data[payload.bytes];
 
@@ -42,7 +42,7 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
  * @return  0 if ID matches and 1 if it doesn't
  */
 
-ErrorStatus CAN_Read(uint8_t* buffer)
+ErrorStatus CANbus_Read(uint8_t* buffer)
 {
     uint32_t ID;
     uint8_t data[8];
