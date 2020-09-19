@@ -35,7 +35,7 @@ typedef struct {
  * @param   None
  * @return  None
  */
-void CAN_Init(void);
+void CANbus_Init(void);
 
 /**
  * @brief   Transmits data onto the CANbus
@@ -44,7 +44,7 @@ void CAN_Init(void);
  * @param 	payload : the data that will be sent.
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CAN_Send(CANId_t id, CANPayload_t payload);
+int CANbus_Send(CANId_t id, CANPayload_t payload);
 
 /**
  * @brief   Checks if the CAN ID matches with Motor disable ID
@@ -52,7 +52,7 @@ int CAN_Send(CANId_t id, CANPayload_t payload);
  * @param   pointer to buffer array to store message
  * @return  0 if ID matches and 1 if it doesn't
  */
-ErrorStatus CAN_Read(uint8_t* buffer);
+ErrorStatus CANbus_Read(uint8_t* buffer);
 
 
 
