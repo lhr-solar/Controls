@@ -104,10 +104,6 @@ def torque_control(pedalPercent):
         velocity_increase = MAX_CURRENT     #update rate
         print("torque mode on, max current =" + str(MAX_CURRENT))
 
-def velocity_control(velocity):
-    global velocity_increase, mode
-    mode = 0
-    velocity_increase = MAX_CURRENT
 
 def update_velocity(v):
     """Acts as the motor controller increasing
