@@ -42,7 +42,7 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
  * @return  0 if ID matches and 1 if it doesn't
  */
 
-error_t CAN_Read(uint8_t* buffer)
+ErrorStatus CAN_Read(uint8_t* buffer)
 {
     uint32_t ID;
     uint8_t data[8];
@@ -57,7 +57,7 @@ error_t CAN_Read(uint8_t* buffer)
     }
     else
     {
-      return FAILURE;
+      return ERROR;
     }
     
 }
