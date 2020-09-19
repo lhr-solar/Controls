@@ -22,7 +22,7 @@ void BSP_Precharge_Write(board_t board, state_t status){
     int fno = fileno(fp);
     flock(fno,LOCK_EX);
 
-    int data;
+    int data = 0;
     fscanf(fp,"%d", &data);
     // update bit of data accordingly
 
