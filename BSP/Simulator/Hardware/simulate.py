@@ -119,6 +119,12 @@ messages_frame.rowconfigure(messages_frame_rows, minsize=20, weight=1)
 messages_frame.columnconfigure(messages_frame_columns, minsize=20, weight=1)
 messages_frame.grid(row=0, column=3, sticky='nsew')
 
+CAN_messages_frame = tk.LabelFrame(master=window, text='CAN System Messages')
+CAN_messages_frame_rows = [0, 1]
+CAN_messages_frame_columns = [0]
+CAN_messages_frame.rowconfigure(messages_frame_rows, minsize=20, weight=1)
+CAN_messages_frame.columnconfigure(messages_frame_columns, minsize=20, weight=1)
+CAN_messages_frame.grid(row=0, column=4, sticky='nsew')
 
 ### Switches ###
 buttons = []
@@ -179,6 +185,14 @@ uart_input = tk.Entry(master=messages_frame)
 uart_input.grid(row=0, column=0)
 uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get()))
 uart_button.grid(row=1, column=0)
+
+### CAN messages input ###
+can_id_input = tk.Entry(master=CAN_messages_frame)
+can_id_input.grid(row=0, column=0)
+can_msg_input = tk.Entry(master=CAN_messages_frame)
+can_msg_input.grid(row=1, column=0)
+can_button = tk.Button(master=CAN_messages_frame, text="Send", command=lambda : CAN.write(can_id_input.get(), can_msg_input.get()))
+can_button.grid(row=2, column=0)
 
 # Sets up periodic updates
 window.after(TIMER_FREQ, update_timers)
