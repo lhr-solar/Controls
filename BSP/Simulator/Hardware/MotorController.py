@@ -10,7 +10,7 @@ file = "BSP/Simulator/Hardware/Data/CAN.csv"
 # Relevant IDs
 MOTOR_DRIVE_ID = 0x221
 VELOCITY_ID = 0x243
-MOTOR_POWER = 0x221
+MOTOR_POWER_ID = 0x221
 
 # State values
 CURRENT_VELOCITY = 0
@@ -19,7 +19,10 @@ mode = 0    # 0 = Velocity control mode, 1 = Torque control mode
 
 velocity_increase = 0.5 #how much CURRENT_VELOCITY is increased by in update_velocity()
 
-MAX_CURRENT = 1.0 #max available current, this is set by user
+
+CURRENT_SETPOINT = 0.0 #set by user via MOTOR_DRIVE commands
+
+MAX_CURRENT = 1.0 #max available current, this is a percent of the Absolute bus current
 
 ABSOLUTE_CURRENT = 5.0  #physical limitation
 
@@ -60,6 +63,20 @@ def write(id_, message):
         csvwriter.writerow([hex(id_), hex(message), len(hex(message)[2:])//2])
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
+def confirm_power():
+    global ABSOLUTE_CURRENT, MAX_CURRENT
+    try:
+        id_, message = read()
+        id_ = int(id_, 16)
+        message = int(message, 16)
+        if id_ == MOTOR_POWER:
+            # Read the message and separate
+            desired_current = (message >> 32) & 0xFFFFFFFF
+            MAX_CURRENT = ABSOLUTE_CURRENT * (desired_current/100.0)
+    except ValueError:
+        pass
+
+            
 
 def confirm_drive():
     """Acts as the motor controller confirming
@@ -70,7 +87,7 @@ def confirm_drive():
     Returns:
         tuple: desired and current velocities to display
     """
-    global MAX_CURRENT
+    global MAX_CURRENT, CURRENT_SETPOINT
     try:      
         id_, message, _ = read()
         id_ = int(id_, 16)
@@ -82,7 +99,7 @@ def confirm_drive():
             toggle_torque(desired_velocity)     #enable torque control mode if desired_velocity is an extremely large number
             #update max available current value
             if mode != 1:
-                MAX_CURRENT = MAX_CURRENT * (desired_current/100.0)
+                CURRENT_SETPOINT = MAX_CURRENT * (desired_current/100.0)
             update_velocity(desired_velocity)
             # Write the current velocity value
             tx_message = int(CURRENT_VELOCITY) << 32 + int(CURRENT_VELOCITY)
@@ -104,9 +121,9 @@ def torque_control(pedalPercent):
     global MAX_CURRENT, velocity_increase
     #following code will only execute if motor is in torque control mode
     if mode == 1:
-        MAX_CURRENT = pedalPercent    #param will be a value from 0.0 to 1.0
-        velocity_increase = MAX_CURRENT     #update rate
-        #print("torque mode on, max current =" + str(MAX_CURRENT))
+        CURRENT_SETPOINT = pedalPercent * MAX_CURRENT    #param will be a value from 0.0 to 1.0
+        velocity_increase = CURRENT_SETPOINT     #update rate
+        #print("torque mode on, current set point is " + str(MAX_CURRENT) + "A")
 
 
 def update_velocity(v):
