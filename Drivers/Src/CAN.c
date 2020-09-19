@@ -20,6 +20,17 @@ void CAN_Init(void) {
  */
 int CAN_Send(CANId_t id, CANPayload_t payload) {
 
+    int8_t data[payload.bytes];
+
+    uint64_t temp_data = payload.data.d;
+    uint8_t mask = 0xFF;
+
+    for(int i=payload.bytes-1; i>=0; i--){
+        data[i] = temp_data&mask;
+        temp_data = temp_data>>8;
+    }
+
+
 	switch (id) {
 		case MC_BUS:
 		case VELOCITY:
@@ -29,10 +40,9 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
 		case BACKEMF:
 		case TEMPERATURE:
 		case ODOMETER_AMPHOURS:
-        case MOTOR_DISABLE:
-			return BSP_CAN_Write(CAN_1, id, &payload.data.d, payload.bytes);
 		case CAR_STATE:
-			return BSP_CAN_Write(CAN_1, id, &payload.data.b, payload.bytes);
+        case MOTOR_DISABLE:
+			return BSP_CAN_Write(CAN_1, id, data, payload.bytes);
         default:
 			return 0;
 
