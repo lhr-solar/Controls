@@ -1,11 +1,11 @@
-#ifndef _BSP_PRECHARGE_H_
-#define _BSP_PRECHARGE_H_
+#ifndef __BSP_PRECHARGE_H
+#define __BSP_PRECHARGE_H
 
 #include "common.h"
 #include "config.h"
 #include <bsp.h>
 
-typedef enum {Array = 0, Motor} board_t;
+typedef enum {ARRAY_PRECHARGE = 0, MOTOR_PRECHARGE} board_t;
 
 /**
  * @brief writes the status (ON/OFF) of a board to a CSV file

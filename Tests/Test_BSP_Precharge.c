@@ -24,10 +24,10 @@ int main() {
         if(!strcmp(board, motor)){
             if(!strcmp(status,on)){
                 printf("Writing to csv...\n");
-                BSP_Precharge_write(Motor, ON);
+                BSP_Precharge_write(MOTOR_PRECHARGE, ON);
             }
             else if(!strcmp(status,off)){
-                BSP_Precharge_write(Motor, OFF);
+                BSP_Precharge_write(MOTOR_PRECHARGE, OFF);
             }
             else{
                 printf("unrecognized status\n");
@@ -35,10 +35,10 @@ int main() {
         }
         else if(!strcmp(board,array)){
             if(!strcmp(status,on)){
-                BSP_Precharge_write(Array, ON);
+                BSP_Precharge_write(ARRAY_PRECHARGE, ON);
             }
             else if(!strcmp(status,off)){
-                BSP_Precharge_write(Array, OFF);
+                BSP_Precharge_write(ARRAY_PRECHARGE, OFF);
             }
             else{
                 printf("unrecognized status\n");

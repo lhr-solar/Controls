@@ -36,14 +36,6 @@ def update_contactors():
     array_status.set(f"Array Contactor: {contactors_status[1]}")
     window.after(CONTACTOR_FREQ, update_contactors)
 
-
-# def update_precharge():
-#     global prechargebools
-#     pcarr = PreCharge.read();
-#     prechargebools = bool[2];
-#     prechargebools[0,1] = pcarr[0,1];
-#     window.after(PRECHARGE_FREQ, update_precharge);
-
 def update_precharge():
     """Periodically update the display state of the Motor and Array precharge boards"""
     global precharge_motor_status, precharge_array_status
@@ -187,15 +179,6 @@ for i, label in enumerate(Display.get_display()):
     display_text.append(text)
     cell = tk.Label(master=display_frame, textvariable=text)
     cell.grid(row=i//len(display_frame_columns), column=i%len(display_frame_columns), sticky='nsew')
-
-
-### PreCharge ###
-# prechargetext = ["PreCharge 1: " + prechargebools[0], "PreCharge 2: " + prechargebools[1]];
-# prechargelabelone = tk.Label(master = precharge_frame, textvariable = prechargetext[0]);
-# prechargelabeltwo = tk.Label(master = precharge_frame, textvariable = prechargetext[1]);
-# prechargelabelone.grid(row=0,column=0, sticky='nsew');
-# prechargelabeltwo.grid(row = 1, column = 0, sticky = 'nsew');
-
 
 ### CAN ###
 id_text = tk.StringVar(value='ID: ')

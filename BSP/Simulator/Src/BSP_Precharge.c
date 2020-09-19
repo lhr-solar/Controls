@@ -30,8 +30,6 @@ void BSP_Precharge_write(board_t board, state_t status){
     data = data & (~mask);
     data = data | (status << board);
 
-    printf("%d\n",data);
-
     flock(fno,LOCK_UN);
     fclose(fp);
 
