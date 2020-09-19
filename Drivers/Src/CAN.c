@@ -31,22 +31,7 @@ int CAN_Send(CANId_t id, CANPayload_t payload) {
     }
 
 
-	switch (id) {
-		case MC_BUS:
-		case VELOCITY:
-		case MC_PHASE_CURRENT:
-		case VOLTAGE_VEC:
-		case CURRENT_VEC:
-		case BACKEMF:
-		case TEMPERATURE:
-		case ODOMETER_AMPHOURS:
-		case CAR_STATE:
-        case MOTOR_DISABLE:
-			return BSP_CAN_Write(CAN_1, id, data, payload.bytes);
-        default:
-			return 0;
-
-	}
+	return BSP_CAN_Write(CAN_1, id, data, payload.bytes);
 }
 
 
