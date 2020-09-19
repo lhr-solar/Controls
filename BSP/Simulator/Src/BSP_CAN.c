@@ -118,7 +118,7 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
 
     // Read values
     uint64_t fullData;
-    uint8_t len;
+    uint8_t len = 0;
     sscanf(currentCAN[bus], "%x,%lx,%hhd", id, &fullData, &len);
 
     // Split hex data into bytes
