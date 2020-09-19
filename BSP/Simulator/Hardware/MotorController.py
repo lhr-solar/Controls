@@ -10,6 +10,7 @@ file = "BSP/Simulator/Hardware/Data/CAN.csv"
 # Relevant IDs
 MOTOR_DRIVE_ID = 0x221
 VELOCITY_ID = 0x243
+MOTOR_POWER = 0x221
 
 # State values
 CURRENT_VELOCITY = 0
@@ -18,7 +19,10 @@ mode = 0    # 0 = Velocity control mode, 1 = Torque control mode
 
 velocity_increase = 0.5 #how much CURRENT_VELOCITY is increased by in update_velocity()
 
-MAX_CURRENT = 1.0 #max available current
+MAX_CURRENT = 1.0 #max available current, this is set by user
+
+ABSOLUTE_CURRENT = 5.0  #physical limitation
+
 def read():
     """Reads CAN2 bus
 
@@ -102,7 +106,7 @@ def torque_control(pedalPercent):
     if mode == 1:
         MAX_CURRENT = pedalPercent    #param will be a value from 0.0 to 1.0
         velocity_increase = MAX_CURRENT     #update rate
-        print("torque mode on, max current =" + str(MAX_CURRENT))
+        #print("torque mode on, max current =" + str(MAX_CURRENT))
 
 
 def update_velocity(v):
