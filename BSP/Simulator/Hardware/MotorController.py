@@ -89,7 +89,7 @@ def confirm_drive():
     except ValueError:
         return CURRENT_VELOCITY, CURRENT_VELOCITY
 
-def toggle_torque():
+def toggle_torque(velocity):
     global mode
     if velocity > 1000:
         mode = 1
@@ -98,9 +98,11 @@ def toggle_torque():
 
 def torque_control(pedalPercent):
     global MAX_CURRENT, velocity_increase
+    #following code will only execute if motor is in torque control mode
     if mode == 1:
-        MAX_CURRENT = MAX_CURRENT * pedalPercent    #param will be a value from 0.0 to 1.0
+        MAX_CURRENT = pedalPercent    #param will be a value from 0.0 to 1.0
         velocity_increase = MAX_CURRENT     #update rate
+        print("torque mode on, max current =" + str(MAX_CURRENT))
 
 def velocity_control(velocity):
     global velocity_increase, mode
