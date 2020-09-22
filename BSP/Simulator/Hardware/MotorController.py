@@ -2,6 +2,7 @@ import csv
 import os
 import fcntl
 import CAN
+import math
 
 # Path of file
 file = "BSP/Simulator/Hardware/Data/CAN.csv"
@@ -18,6 +19,14 @@ MOTOR_CURRENT_VECTOR_ID = 0x246
 MOTOR_BACKEMF_ID = 0x247
 MOTOR_TEMP_ID = 0x24B
 
+motor_info = [MOTOR_BUS_ID, VELOCITY_ID, MOTOR_PHASE_CURRENT_ID, MOTOR_VOLTAGE_VECTOR_ID, MOTOR_CURRENT_VECTOR_ID, MOTOR_BACKEMF_ID, MOTOR_TEMP_ID]
+
+
+
+infoIdx = 0 
+
+radius = 1  #to be changed, used for m/s to rpm conversion
+
 # State values
 CURRENT_VELOCITY = 0
 
@@ -25,12 +34,36 @@ mode = 0    # 0 = Velocity control mode, 1 = Torque control mode
 
 velocity_increase = 0.5 #how much CURRENT_VELOCITY is increased by in update_velocity()
 
-
 CURRENT_SETPOINT = 0.0 #set by user via MOTOR_DRIVE commands
 
 MAX_CURRENT = 1.0 #max available current, this is a percent of the Absolute bus current
 
 ABSOLUTE_CURRENT = 5.0  #physical limitation
+
+def sendTouC():
+    global motor_info, infoIdx
+
+    currentID = motor_info[infoIdx]
+
+    if currentID == VELOCITY_ID:
+        tx_message = CURRENT_VELOCITY
+        tx_message = (tx_message << 32) + (60 * CURRENT_VELOCITY)/(math.pi * 2 * radius)
+    elif currentID == MOTOR_BUS_ID:
+        
+    elif currentID == MOTOR_PHASE_CURRENT_ID:
+
+    elif currentID == MOTOR_VOLTAGE_VECTOR_ID:
+
+    elif currentID == MOTOR_CURRENT_VECTOR_ID:
+
+    elif currentID == MOTOR_BACKEMF_ID:
+
+    elif currentID == MOTOR_TEMP_ID:
+
+    
+    write(currentID, tx_message)
+
+    infoIdx = (infoIdx+1) %  7   #increment index
 
 def read():
     """Reads CAN2 bus
@@ -82,7 +115,6 @@ def confirm_power():
     except ValueError:
         pass
 
-            
 
 def confirm_drive():
     """Acts as the motor controller confirming
@@ -124,12 +156,12 @@ def toggle_torque(velocity):
         mode = 0
 
 def torque_control(pedalPercent):
-    global MAX_CURRENT, velocity_increase
+    global MAX_CURRENT, velocity_increase, CURRENT_SETPOINT
     #following code will only execute if motor is in torque control mode
     if mode == 1:
         CURRENT_SETPOINT = pedalPercent * MAX_CURRENT    #param will be a value from 0.0 to 1.0
         velocity_increase = CURRENT_SETPOINT     #update rate
-        #print("torque mode on, current set point is " + str(MAX_CURRENT) + "A")
+        #print("torque mode on, current set point is " + str(CURRENT_SETPOINT) + "A")
 
 
 def update_velocity(v):
