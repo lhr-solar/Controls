@@ -25,10 +25,16 @@ motor_info = [MOTOR_BUS_ID, VELOCITY_ID, MOTOR_PHASE_CURRENT_ID, MOTOR_VOLTAGE_V
 
 infoIdx = 0 
 
-radius = 1  #to be changed, used for m/s to rpm conversion
+radius = 21.67  # in inches
 
 # State values
 CURRENT_VELOCITY = 0
+
+BUS_VOLTAGE = 5
+
+# Phase Currents
+PHASE_C_CUR = 1 
+PHASE_B_CUR = 1
 
 mode = 0    # 0 = Velocity control mode, 1 = Torque control mode
 
@@ -41,17 +47,27 @@ MAX_CURRENT = 1.0 #max available current, this is a percent of the Absolute bus 
 ABSOLUTE_CURRENT = 5.0  #physical limitation
 
 def sendTouC():
-    global motor_info, infoIdx
+    """Simulates motors sending CAN messages back to the uC 
+        
+        Returns:
+        CAN ID of the last message sent
+    """
+    global motor_info, infoIdx, CURRENT_VELOCITY, ABSOLUTE_CURRENT, BUS_VOLTAGE, PHASE_B_CUR, PHASE_C_CUR
 
     currentID = motor_info[infoIdx]
 
     if currentID == VELOCITY_ID:
-        tx_message = CURRENT_VELOCITY
-        tx_message = (tx_message << 32) + (60 * CURRENT_VELOCITY)/(math.pi * 2 * radius)
+        tx_message = int(CURRENT_VELOCITY, 16)
+        tx_message = (tx_message << 32) + int((60 * CURRENT_VELOCITY)/(math.pi * 2 * radius), 16)
+    
     elif currentID == MOTOR_BUS_ID:
-        
+        tx_message = int(ABSOLUTE_CURRENT, 16)
+        tx_message = (tx_message << 32) + int(BUS_VOLTAGE, 16)
+    
     elif currentID == MOTOR_PHASE_CURRENT_ID:
-
+        tx_message = int(PHASE_C_CUR, 16)
+        tx_message = (tx_message << 32) + int(PHASE_B_CUR, 16)
+    
     elif currentID == MOTOR_VOLTAGE_VECTOR_ID:
 
     elif currentID == MOTOR_CURRENT_VECTOR_ID:
@@ -62,8 +78,8 @@ def sendTouC():
 
     
     write(currentID, tx_message)
-
     infoIdx = (infoIdx+1) %  7   #increment index
+    return currentID
 
 def read():
     """Reads CAN2 bus
