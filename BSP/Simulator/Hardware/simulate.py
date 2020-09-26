@@ -11,6 +11,7 @@ import CAN
 import MotorController
 import UART
 import Lights
+import PreCharge
 
 
 # Update Frequencies (ms)
@@ -20,6 +21,7 @@ CAN_FREQ = 500
 CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
 LIGHTS_FREQ = 500
+PRECHARGE_FREQ = 500
 
 
 def update_timers():
@@ -63,6 +65,13 @@ def update_motor():
     current_velocity_text.set(f"Current Velocity: {round(current_velocity, 3)} m/s")
     window.after(MOTOR_FREQ, update_motor)
 
+def update_precharge():
+    """Periodically update the display state of the Motor and Array precharge boards"""
+    global precharge_motor_status, precharge_array_status
+    precharge_status = PreCharge.read()
+    precharge_motor_status.set(f"Motor Precharge: {precharge_status[1]}")
+    precharge_array_status.set(f"Array Precharge: {precharge_status[0]}")
+    window.after(PRECHARGE_FREQ, update_precharge)  
 
 def update_lights():
     """Periodically update the display state of the lights"""
@@ -81,7 +90,7 @@ if os.environ.get('DISPLAY','') == '':
 # Sets up window
 window = tk.Tk()
 window.rowconfigure([0, 1], minsize=200, weight=1)
-window.columnconfigure([0, 1, 2, 3], minsize=200, weight=1)
+window.columnconfigure([0, 1, 2, 3, 4], minsize=200, weight=1)
 
 # Sets up frames
 button_frame = tk.LabelFrame(master=window, text='Switches')
@@ -131,12 +140,19 @@ messages_frame.rowconfigure(messages_frame_rows, minsize=20, weight=1)
 messages_frame.columnconfigure(messages_frame_columns, minsize=20, weight=1)
 messages_frame.grid(row=0, column=3, sticky='nsew')
 
+precharge_frame = tk.LabelFrame(master=window, text="PreCharge")
+precharge_frame_rows = [0,1]
+precharge_frame_columns = [0]
+precharge_frame.rowconfigure(precharge_frame_rows, minsize=50, weight = 1)
+precharge_frame.columnconfigure(precharge_frame_columns, minsize=50, weight = 1)
+precharge_frame.grid(row = 1, column = 3, sticky='nsew')
+
 lights_frame = tk.LabelFrame(master=window, text="Lights")
 lights_frame_rows = [0, 1, 2, 3, 4]
 lights_frame_columns = [0, 1]
 lights_frame.rowconfigure(lights_frame_rows, minsize=50, weight=1)
 lights_frame.columnconfigure(lights_frame_columns, minsize=50, weight=1)
-lights_frame.grid(row=1, column=3, sticky='nsew')
+lights_frame.grid(row=1, column=4, sticky='nsew')
 
 
 ### Switches ###
@@ -147,6 +163,7 @@ for i, switch in enumerate(Switches.get_switches()):
     buttons.append(button)
 for i, switch in enumerate(Switches.get_switches()):
     buttons[i].config(command=partial(Switches.toggle, switch, buttons))
+
 
 
 ### Lights ###
@@ -201,6 +218,14 @@ current_velocity_text = tk.StringVar(value='Current Velocity: ')
 current_velocity = tk.Label(master=motor_frame, textvariable=current_velocity_text)
 current_velocity.grid(row=1, column=0, sticky='nsew')
 
+### Precharge ###
+precharge_motor_status = tk.StringVar(value= 'Motor Precharge: ')
+precharge_motor_ = tk.Label(master=precharge_frame, textvariable=precharge_motor_status)
+precharge_motor_.grid(row = 0, column = 0, sticky='nsew')
+precharge_array_status = tk.StringVar(value= 'Array Precharge: ')
+precharge_array_txt = tk.Label(master=precharge_frame, textvariable=precharge_array_status)
+precharge_array_txt.grid(row=1, column=0, sticky='nsew')
+
 ### UART messages input ###
 uart_input = tk.Entry(master=messages_frame)
 uart_input.grid(row=0, column=0)
@@ -214,4 +239,5 @@ contactor_frame.after(CONTACTOR_FREQ, update_contactors)
 display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
 lights_frame.after(LIGHTS_FREQ, update_lights)
+precharge_frame.after(PRECHARGE_FREQ, update_precharge)
 window.mainloop()

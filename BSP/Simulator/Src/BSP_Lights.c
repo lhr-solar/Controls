@@ -21,7 +21,7 @@ void BSP_Lights_Init(void){
 * @param   LightChannel The light you want to read the state of
 * @return  state_t enum: ON/OFF 
 */ 
-state_t BSP_Lights_Read(LIGHT_t LightChannel){
+State BSP_Lights_Read(Light_t LightChannel){
     FILE* fp = fopen(FILE_NAME, "r");
     //will this error case ever be reached? Init function won't fire if file is unavailable
     if (!fp) {
@@ -53,7 +53,7 @@ state_t BSP_Lights_Read(LIGHT_t LightChannel){
 
 }
 
-void BSP_Lights_Set(LIGHT_t LightChannel, state_t State) {
+void BSP_Lights_Set(Light_t LightChannel, State State) {
     FILE* fp = fopen(FILE_NAME, "r");
     //will this error case ever be reached? Init function won't fire if file is unavailable
     if (!fp) {

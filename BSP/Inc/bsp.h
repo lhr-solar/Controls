@@ -8,6 +8,7 @@
 #include "BSP_Timer.h"
 #include "BSP_Contactors.h"
 #include "BSP_Lights.h"
+#include "BSP_Precharge.h"
 
 #include <sys/file.h>
 #include <unistd.h>
@@ -22,6 +23,7 @@
 #define TIMER_CSV "Timer.csv"
 #define CAN_CSV "CAN.csv"
 #define LIGHTS_CSV "Lights.csv"
+#define PRECHARGE_CSV "PreCharge.csv"
 #endif
 
 #endif

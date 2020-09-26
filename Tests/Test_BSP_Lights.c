@@ -18,8 +18,8 @@ int main() {
                 BSP_Lights_Read(BPS_PWR),
                 BSP_Lights_Read(BrakeLight));
         
-        LIGHT_t light = rand() % 10;
-        state_t state = BSP_Lights_Read(light);
+        Light_t light = rand() % 10;
+        State state = BSP_Lights_Read(light);
         BSP_Lights_Set(light, state==ON?OFF:ON);
     }
     printf("\n");
