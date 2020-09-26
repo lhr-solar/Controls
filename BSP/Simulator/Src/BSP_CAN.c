@@ -52,7 +52,7 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
         return 0;
     }
 
-    char currentCAN[2][128];
+    char currentCAN[NUM_CAN][128];
     char csv[128];
     for (uint8_t i = 0; fgets(csv, 128, fp); i++) {
         strcpy(currentCAN[i], csv);
@@ -91,6 +91,8 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
 /**
  * @brief   Reads the message currently on the 
  *          specified CAN line in the CSV file
+ * @param   bus the proper CAN line to write to
+ *          defined by the CAN_t enum
  * @param   id pointer to integer to store the 
  *          message ID that was read
  * @param   data pointer to integer array to store
@@ -108,7 +110,7 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     int fno = fileno(fp);
     flock(fno, LOCK_EX);
 
-    char currentCAN[2][256];
+    char currentCAN[NUM_CAN][256];
     char csv[256];
     for (uint8_t i = 0; fgets(csv, 256, fp); i++) {
         strcpy(currentCAN[i], csv);
@@ -116,13 +118,33 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
 
     // Read values
     uint64_t fullData;
-    uint8_t len;
+    uint8_t len = 0;
     sscanf(currentCAN[bus], "%x,%lx,%hhd", id, &fullData, &len);
 
     // Split hex data into bytes
     for (uint8_t i = 0; i < len; i++) {
         data[i] = (fullData >> (8 * (len-i-1))) & 0xFF;
     }
+
+    // Clear entries from file
+    freopen(FILE_NAME, "w", fp);
+
+    // Re-write entry that wasn't read
+    // Leave entry that was read as a blank line
+    for (uint8_t i = 0; i < NUM_CAN; i++) {
+            if (bus == i) {
+                fprintf(fp, "\n");
+            } else {
+                // As long as it wasn't empty or a blank line,
+                // Print back data, otherwise, print newline
+                if((strcmp(currentCAN[i], "/n")!=0) && (strcmp(currentCAN[i], "")!=0)){
+                fprintf(fp, "%s", currentCAN[i]);
+                }
+                else{
+                    fprintf(fp, "\n");
+                }
+            }
+        }
 
     // Close file
     flock(fno, LOCK_UN);
