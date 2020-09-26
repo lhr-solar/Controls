@@ -119,6 +119,13 @@ can_frame.rowconfigure(can_frame_rows, minsize=50, weight=1)
 can_frame.columnconfigure(can_frame_columns, minsize=100, weight=1)
 can_frame.grid(row=1, column=0, sticky='nsew')
 
+CAN_messages_frame = tk.LabelFrame(master=window, text='CAN System Messages')
+CAN_messages_frame_rows = [0, 1]
+CAN_messages_frame_columns = [0]
+CAN_messages_frame.rowconfigure(CAN_messages_frame_rows, minsize=20, weight=1)
+CAN_messages_frame.columnconfigure(CAN_messages_frame_columns, minsize=20, weight=1)
+CAN_messages_frame.grid(row=0, column=4, sticky='nsew')
+
 motor_frame = tk.LabelFrame(master=window, text='Motor')
 motor_frame_rows = [0, 1]
 motor_frame_columns = [0]
@@ -208,6 +215,14 @@ id_.grid(row=0, column=0, sticky='nsew')
 message_text = tk.StringVar(value='Message: ')
 message = tk.Label(master=can_frame, textvariable=message_text)
 message.grid(row=1, column=0, sticky='nsew')
+
+### CAN messages input ###
+can_id_input = tk.Entry(master=CAN_messages_frame)
+can_id_input.grid(row=0, column=0)
+can_msg_input = tk.Entry(master=CAN_messages_frame)
+can_msg_input.grid(row=1, column=0)
+can_button = tk.Button(master=CAN_messages_frame, text="Send", command=lambda : CAN.write(can_id_input.get(), can_msg_input.get()))
+can_button.grid(row=2, column=0)
 
 
 ### Motor ###
