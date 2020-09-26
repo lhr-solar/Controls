@@ -7,8 +7,7 @@
  * Initialize the Wonder Gecko communications.
  */
 void Display_Init() {
-    // Initialize the UART comm. channel
-    BSP_UART_Init(UART_1); // which one is which?
+    BSP_UART_Init(UART_2);
 }
 
 /*
@@ -32,5 +31,5 @@ void Display_SetData(display_data_t *status) {
     #endif
 
     // Send the string of info to the Gecko controller
-    BSP_UART_Write(UART_1, msg, rc);
+    BSP_UART_Write(UART_2, msg, rc);
 }

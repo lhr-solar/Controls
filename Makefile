@@ -17,10 +17,10 @@ all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
 
 simulator:
-	$(MAKE) -C BSP -C Simulator
+	$(MAKE) -C BSP -C Simulator -j
 
 stm32f413:
-	$(MAKE) -C BSP -C STM32F413
+	$(MAKE) -C BSP -C STM32F413 -j
 
 flash:
 	$(MAKE) -C BSP -C STM32F413 flash

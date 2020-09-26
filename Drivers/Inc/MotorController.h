@@ -30,6 +30,6 @@ void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent);
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
-error_t MotorController_Read(CANbuff *message);
+ErrorStatus MotorController_Read(CANbuff *message);
 
 #endif

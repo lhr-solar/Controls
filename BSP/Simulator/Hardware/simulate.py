@@ -10,6 +10,7 @@ import Display
 import CAN
 import MotorController
 import UART
+import PreCharge
 
 
 # Update Frequencies (ms)
@@ -18,6 +19,7 @@ MOTOR_FREQ = 250
 CAN_FREQ = 500
 CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
+PRECHARGE_FREQ = 500
 
 
 def update_timers():
@@ -33,6 +35,15 @@ def update_contactors():
     motor_status.set(f"Motor Contactor: {contactors_status[0]}")
     array_status.set(f"Array Contactor: {contactors_status[1]}")
     window.after(CONTACTOR_FREQ, update_contactors)
+
+
+def update_precharge():
+    """Periodically update the display state of the Motor and Array precharge boards"""
+    global precharge_motor_status, precharge_array_status
+    precharge_status = PreCharge.read()
+    precharge_motor_status.set(f"Motor Precharge: {precharge_status[1]}")
+    precharge_array_status.set(f"Array Precharge: {precharge_status[0]}")
+    window.after(PRECHARGE_FREQ, update_precharge)  
 
 
 def update_display():
@@ -98,6 +109,13 @@ can_frame.rowconfigure(can_frame_rows, minsize=50, weight=1)
 can_frame.columnconfigure(can_frame_columns, minsize=100, weight=1)
 can_frame.grid(row=1, column=0, sticky='nsew')
 
+CAN_messages_frame = tk.LabelFrame(master=window, text='CAN System Messages')
+CAN_messages_frame_rows = [0, 1]
+CAN_messages_frame_columns = [0]
+CAN_messages_frame.rowconfigure(CAN_messages_frame_rows, minsize=20, weight=1)
+CAN_messages_frame.columnconfigure(CAN_messages_frame_columns, minsize=20, weight=1)
+CAN_messages_frame.grid(row=0, column=4, sticky='nsew')
+
 motor_frame = tk.LabelFrame(master=window, text='Motor')
 motor_frame_rows = [0, 1]
 motor_frame_columns = [0]
@@ -115,9 +133,16 @@ contactor_frame.grid(row=1, column=2, sticky='nsew')
 messages_frame = tk.LabelFrame(master=window, text='Controls System Messages')
 messages_frame_rows = [0, 1]
 messages_frame_columns = [0]
-messages_frame.rowconfigure(messages_frame_rows, minsize=20, weight=1)
-messages_frame.columnconfigure(messages_frame_columns, minsize=20, weight=1)
+messages_frame.rowconfigure(CAN_messages_frame_rows, minsize=20, weight=1)
+messages_frame.columnconfigure(CAN_messages_frame_columns, minsize=20, weight=1)
 messages_frame.grid(row=0, column=3, sticky='nsew')
+
+precharge_frame = tk.LabelFrame(master=window, text="PreCharge");
+precharge_frame_rows = [0,1]
+precharge_frame_columns = [0];
+precharge_frame.rowconfigure(precharge_frame_rows, minsize=50, weight = 1)
+precharge_frame.columnconfigure(precharge_frame_columns, minsize=50, weight = 1);
+precharge_frame.grid(row = 1, column = 3, sticky='nsew');
 
 
 ### Switches ###
@@ -137,6 +162,15 @@ motor_.grid(row = 0, column = 0, sticky='nsew')
 array_status = tk.StringVar(value= 'Array Contactor: ')
 array_txt = tk.Label(master=contactor_frame, textvariable=array_status)
 array_txt.grid(row=1, column=0, sticky='nsew')
+
+
+### Precharge ###
+precharge_motor_status = tk.StringVar(value= 'Motor Precharge: ')
+precharge_motor_ = tk.Label(master=precharge_frame, textvariable=precharge_motor_status)
+precharge_motor_.grid(row = 0, column = 0, sticky='nsew')
+precharge_array_status = tk.StringVar(value= 'Array Precharge: ')
+precharge_array_txt = tk.Label(master=precharge_frame, textvariable=precharge_array_status)
+precharge_array_txt.grid(row=1, column=0, sticky='nsew')
 
 
 ### Pedals ###
@@ -180,10 +214,19 @@ uart_input.grid(row=0, column=0)
 uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get()))
 uart_button.grid(row=1, column=0)
 
+### CAN messages input ###
+can_id_input = tk.Entry(master=CAN_messages_frame)
+can_id_input.grid(row=0, column=0)
+can_msg_input = tk.Entry(master=CAN_messages_frame)
+can_msg_input.grid(row=1, column=0)
+can_button = tk.Button(master=CAN_messages_frame, text="Send", command=lambda : CAN.write(can_id_input.get(), can_msg_input.get()))
+can_button.grid(row=2, column=0)
+
 # Sets up periodic updates
 window.after(TIMER_FREQ, update_timers)
 can_frame.after(CAN_FREQ, update_CAN)
 contactor_frame.after(CONTACTOR_FREQ, update_contactors)
 display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
+precharge_frame.after(PRECHARGE_FREQ, update_precharge);
 window.mainloop()
