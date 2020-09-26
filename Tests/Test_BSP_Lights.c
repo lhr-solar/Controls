@@ -18,7 +18,7 @@ int main() {
                 BSP_Lights_Read(BPS_PWR),
                 BSP_Lights_Read(BrakeLight));
         
-        Light_t light = rand() % 10;
+        light_t light = rand() % 10;
         State state = BSP_Lights_Read(light);
         BSP_Lights_Set(light, state==ON?OFF:ON);
     }
