@@ -36,6 +36,22 @@ BUS_VOLTAGE = 5
 PHASE_C_CUR = 1 
 PHASE_B_CUR = 1
 
+# Voltage Vectors
+V_REAL = 0
+V_IMAGINE = 0
+
+#Current Vectors
+I_REAL = 0
+I_IMAGINE = 0
+
+#Motor BackEMF components
+REAL_COMP = 0
+NUETRAL_MOTOR = 0
+
+#Temperature
+PHASEC_TEMP = 0
+INTERNAL_TEMP = 0
+
 mode = 0    # 0 = Velocity control mode, 1 = Torque control mode
 
 velocity_increase = 0.5 #how much CURRENT_VELOCITY is increased by in update_velocity()
@@ -52,7 +68,7 @@ def sendTouC():
         Returns:
         CAN ID of the last message sent
     """
-    global motor_info, infoIdx, CURRENT_VELOCITY, ABSOLUTE_CURRENT, BUS_VOLTAGE, PHASE_B_CUR, PHASE_C_CUR
+    global motor_info, infoIdx, CURRENT_VELOCITY, ABSOLUTE_CURRENT, BUS_VOLTAGE, PHASE_B_CUR, PHASE_C_CUR, V_REAL, V_IMAGINE, I_REAL, I_IMAGINE, REAL_COMP, NEUTRAL_MOTOR, PHASEC_TEMP, INTERNAL_TEMP
 
     currentID = motor_info[infoIdx]
 
@@ -69,12 +85,20 @@ def sendTouC():
         tx_message = (tx_message << 32) + int(PHASE_B_CUR, 16)
     
     elif currentID == MOTOR_VOLTAGE_VECTOR_ID:
+        tx_message = int(V_REAL, 16)
+        tx_message = (tx_message << 32) + int(V_IMAGINE, 16)
 
     elif currentID == MOTOR_CURRENT_VECTOR_ID:
+        tx_message = int(I_REAL, 16)
+        tx_message = (tx_message << 32) + int(I_IMAGINE, 16)
 
     elif currentID == MOTOR_BACKEMF_ID:
+        tx_message = int(REAL_COMP, 16)
+        tx_message = (tx_message << 32) + int(NEUTRAL_MOTOR, 16)
 
     elif currentID == MOTOR_TEMP_ID:
+        tx_message = int(PHASEC_TEMP, 16)
+        tx_message = (tx_message << 32) + int(INTERNAL_TEMP, 16)
 
     
     write(currentID, tx_message)
