@@ -22,11 +22,12 @@ void BSP_Lights_Init();
 state_t BSP_Lights_Read(LIGHT_t LightChannel);
 
 /**
-* @brief   Switch light between ON/OFF states
-* @param   LightChannel Which light to switch
-* @return  void
-*/ 
-void BSP_Lights_Switch(LIGHT_t LightChannel);
+ * @brief   Set light to given state
+ * @param   LightChanel which light to set
+ * @param   State what state to set the light to
+ * @return  void
+ */
+void BSP_Lights_Set(LIGHT_t LightChannel, state_t State);
 
 
 

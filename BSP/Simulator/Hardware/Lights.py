@@ -6,7 +6,7 @@ import fcntl
 file = "BSP/Simulator/Hardware/Data/Lights.csv"
 
 # Names of lights
-lights = ["HeadlightPWR","BrakeLight","RIGHT_BLINK","LEFT_BLINK","BPS_FAULT","BPS_PWR","CTRL_FAULT","M_CNCTR","RSVD_LED","A_CNCTR"]
+lights = ["M_CNCTR","RSVD_LED","CTRL_FAULT","RIGHT_BLINK","HeadlightPWR","A_CNCTR","BPS_FAULT","LEFT_BLINK","BPS_PWR","BrakeLight"]
  
 
 def get_lights():

@@ -53,17 +53,12 @@ state_t BSP_Lights_Read(LIGHT_t LightChannel){
 
 }
 
-/**
-* @brief   Switch the selected light between ON/OFF
-* @param   LightChannel Which Light you want to switch
-* @return  void
-*/ 
-void BSP_Lights_Switch(LIGHT_t LightChannel){
+void BSP_Lights_Set(LIGHT_t LightChannel, state_t State) {
     FILE* fp = fopen(FILE_NAME, "r");
     //will this error case ever be reached? Init function won't fire if file is unavailable
     if (!fp) {
         printf("Lights not available\n\r");
-        return 2;
+        return;
     }
 
     //Exclusive lock the file open
@@ -76,23 +71,26 @@ void BSP_Lights_Switch(LIGHT_t LightChannel){
     //convert to integer
     uint16_t switchInt = atoi(csv);
 
-    //switch from low->high/high->low using XOR
-    switchInt = switchInt^(1<<LightChannel);
+
+    if (State == ON) {
+        switchInt |= (1<<LightChannel); // set the light
+    } else {
+        switchInt &= ~(1<<LightChannel); // reset the light
+    }
 
     //unlock + close file
     flock((fileno(fp)), LOCK_UN);
     fclose(fp);
 
     //reopen cleared file
-    FILE* fp1 = fopen(FILE_NAME, "w");
+    fp = fopen(FILE_NAME, "w");
     //Exclusive lock the file open
-    flock((fileno(fp1)), LOCK_EX);
+    flock((fileno(fp)), LOCK_EX);
 
     //enter updated data string
-    fprintf(fp1,"%d",switchInt);
+    fprintf(fp,"%d",switchInt);
 
     //unlock + close file
-    flock((fileno(fp1)), LOCK_UN);
-    fclose(fp1);
-
+    flock((fileno(fp)), LOCK_UN);
+    fclose(fp);
 }
