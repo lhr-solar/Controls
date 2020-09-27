@@ -46,7 +46,7 @@ I_IMAGINE = 0
 
 #Motor BackEMF components
 REAL_COMP = 0
-NUETRAL_MOTOR = 0
+NEUTRAL_MOTOR = 0
 
 #Temperature
 PHASEC_TEMP = 0
@@ -73,32 +73,32 @@ def sendTouC():
     currentID = motor_info[infoIdx]
 
     if currentID == VELOCITY_ID:
-        tx_message = int(CURRENT_VELOCITY, 16)
-        tx_message = (tx_message << 32) + int((60 * CURRENT_VELOCITY)/(math.pi * 2 * radius), 16)
+        tx_message = int(CURRENT_VELOCITY)
+        tx_message = (tx_message << 32) + int((60 * CURRENT_VELOCITY)/(math.pi * 2 * radius))
     
     elif currentID == MOTOR_BUS_ID:
-        tx_message = int(ABSOLUTE_CURRENT, 16)
-        tx_message = (tx_message << 32) + int(BUS_VOLTAGE, 16)
+        tx_message = int(ABSOLUTE_CURRENT)
+        tx_message = (tx_message << 32) + int(BUS_VOLTAGE)
     
     elif currentID == MOTOR_PHASE_CURRENT_ID:
-        tx_message = int(PHASE_C_CUR, 16)
-        tx_message = (tx_message << 32) + int(PHASE_B_CUR, 16)
+        tx_message = int(PHASE_C_CUR)
+        tx_message = (tx_message << 32) + int(PHASE_B_CUR)
     
     elif currentID == MOTOR_VOLTAGE_VECTOR_ID:
-        tx_message = int(V_REAL, 16)
-        tx_message = (tx_message << 32) + int(V_IMAGINE, 16)
+        tx_message = int(V_REAL)
+        tx_message = (tx_message << 32) + int(V_IMAGINE)
 
     elif currentID == MOTOR_CURRENT_VECTOR_ID:
-        tx_message = int(I_REAL, 16)
-        tx_message = (tx_message << 32) + int(I_IMAGINE, 16)
+        tx_message = int(I_REAL)
+        tx_message = (tx_message << 32) + int(I_IMAGINE)
 
     elif currentID == MOTOR_BACKEMF_ID:
-        tx_message = int(REAL_COMP, 16)
-        tx_message = (tx_message << 32) + int(NEUTRAL_MOTOR, 16)
+        tx_message = int(REAL_COMP)
+        tx_message = (tx_message << 32) + int(NEUTRAL_MOTOR)
 
     elif currentID == MOTOR_TEMP_ID:
-        tx_message = int(PHASEC_TEMP, 16)
-        tx_message = (tx_message << 32) + int(INTERNAL_TEMP, 16)
+        tx_message = int(PHASEC_TEMP)
+        tx_message = (tx_message << 32) + int(INTERNAL_TEMP)
 
     
     write(currentID, tx_message)
@@ -124,6 +124,7 @@ def read():
             message.append(row)
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
     message = [0, 0] if message == [] else message[1]
+    canId = sendTouC()
     return message
 
 

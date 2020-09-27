@@ -58,6 +58,6 @@ void testCAN2(void) {
 }
 
 int main(void) {
-    testCAN1();
-    // testCAN2();
+    //testCAN1();
+    testCAN2();
 }
