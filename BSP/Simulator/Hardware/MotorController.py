@@ -149,7 +149,7 @@ def confirm_power():
         id_, message = read()
         id_ = int(id_, 16)
         message = int(message, 16)
-        if id_ == MOTOR_POWER:
+        if id_ == MOTOR_POWER_ID:
             # Read the message and separate
             desired_current = (message >> 32) & 0xFFFFFFFF
             MAX_CURRENT = ABSOLUTE_CURRENT * (desired_current/100.0)
@@ -202,7 +202,6 @@ def torque_control(pedalPercent):
     if mode == 1:
         CURRENT_SETPOINT = pedalPercent * MAX_CURRENT    #param will be a value from 0.0 to 1.0
         velocity_increase = CURRENT_SETPOINT     #update rate
-        #print("torque mode on, current set point is " + str(CURRENT_SETPOINT) + "A")
 
 
 def update_velocity(v):

@@ -14,7 +14,7 @@ import MotorController
 # Update Frequencies (ms)
 TIMER_FREQ = 1
 MOTOR_FREQ = 250
-CAN_FREQ = 500
+CAN1_FREQ = 500
 CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
 
@@ -49,7 +49,7 @@ def update_CAN():
     can = CAN.read()
     id_text.set(f"ID: {can[0]}")
     message_text.set(f"Message: {can[1]}")
-    window.after(CAN_FREQ, update_CAN)
+    window.after(CAN1_FREQ, update_CAN)
 
 def update_CAN2():
     """Periodally update the display state of the CAN2 bus"""
@@ -57,8 +57,7 @@ def update_CAN2():
     can2 = MotorController.read()
     id_text2.set(f"ID: {can2[0]}")
     message_text2.set(f"Message: {can2[1]}")
-    print("message is" + can2[1])
-    window.after(CAN_FREQ, update_CAN2)
+    window.after(MOTOR_FREQ, update_CAN2)
 
 
 def update_motor():
@@ -200,9 +199,8 @@ current_velocity.grid(row=1, column=0, sticky='nsew')
 
 # Sets up periodic updates
 window.after(TIMER_FREQ, update_timers)
-can_frame.after(CAN_FREQ, update_CAN)
-# TODO:
-can2_frame.after(CAN_FREQ,update_CAN2)
+can_frame.after(CAN1_FREQ, update_CAN)
+can2_frame.after(MOTOR_FREQ,update_CAN2)
 contactor_frame.after(CONTACTOR_FREQ, update_contactors)
 display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
