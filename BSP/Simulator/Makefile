@@ -14,6 +14,9 @@ CC = gcc
 ######################################
 SRC = $(wildcard Src/*.c)	# BSP code
 
+SRC += \
+$(wildcard ../../Drivers/Src/*.c)	# Driver code
+
 ifneq ($(TEST), none)
 TEST_FILE := Test_$(TEST).c
 SRC += \
@@ -42,6 +45,7 @@ vpath %.c $(sort $(dir $(SRC)))		# In case files aren't found
 ######################################
 INC_DIR = \
 -I../../Apps/Inc \
+-I../../Drivers/Inc \
 -I../../BSP/Inc \
 -I../../Config/Inc \
 -I../../RTOS/uCOS-III-Simulator/uC-CPU \

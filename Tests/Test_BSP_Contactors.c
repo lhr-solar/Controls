@@ -24,7 +24,7 @@ int main() {
     char on[] = "ON";
     char off[] = "OFF";
     char state[4];
-    state_t result;
+    State result;
     while(1) {
         printf("Enter the Contactor you wish to set followed by the state you would like to set it to\n");
         scanf("%s %s", &input, &state);

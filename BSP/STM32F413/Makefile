@@ -24,8 +24,8 @@ BUILD_DIR = ../../Objects
 C_SOURCES =  \
 $(wildcard ../../Drivers/Src/*.c)	\
 $(wildcard ../../BSP/STM32F413/Src/*.c)	\
-$(wildcard ../../CMSIS/DSP_Lib/Source/*.c)	\
 $(wildcard ../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Src/*.c) \
+$(wildcard ../../CMSIS/DSP_Lib/Source/*.c)	\
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/*.c)	\
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/*.c) \
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/*.c) \

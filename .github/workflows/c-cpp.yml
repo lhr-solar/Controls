@@ -1,0 +1,27 @@
+name: Verify Build
+
+on:
+  push:
+    branches: [ master, simulator ]
+  pull_request:
+    branches: [ master, simulator ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install tools
+      run: |
+        sudo apt -y update
+        sudo apt -y install gcc-arm-none-eabi
+    - name: Initialize Submodules
+      run: git submodule update --init --recursive
+    - name: make simulator
+      run: make simulator
+    - name: clean
+      run: make clean
+    - name: make stm32f413
+      run: make stm32f413
