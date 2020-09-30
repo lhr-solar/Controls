@@ -17,7 +17,7 @@ import PreCharge
 # Update Frequencies (ms)
 TIMER_FREQ = 1
 MOTOR_FREQ = 250
-CAN_FREQ = 500
+CAN1_FREQ = 500
 CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
 LIGHTS_FREQ = 500
@@ -54,7 +54,15 @@ def update_CAN():
     can = CAN.read()
     id_text.set(f"ID: {can[0]}")
     message_text.set(f"Message: {can[1]}")
-    window.after(CAN_FREQ, update_CAN)
+    window.after(CAN1_FREQ, update_CAN)
+
+def update_CAN2():
+    """Periodally update the display state of the CAN2 bus"""
+    global id_text2, message_text2
+    can2 = MotorController.read()
+    id_text2.set(f"ID: {can2[0]}")
+    message_text2.set(f"Message: {can2[1]}")
+    window.after(MOTOR_FREQ, update_CAN2)
 
 
 def update_motor():
@@ -63,6 +71,7 @@ def update_motor():
     desired_velocity, current_velocity = MotorController.confirm_drive()
     desired_velocity_text.set(f"Desired Velocity: {round(desired_velocity, 3)} m/s")
     current_velocity_text.set(f"Current Velocity: {round(current_velocity, 3)} m/s")
+    MotorController.torque_control(accelerator.get())
     window.after(MOTOR_FREQ, update_motor)
 
 def update_precharge():
@@ -112,12 +121,26 @@ display_frame.rowconfigure(display_frame_rows, minsize=50, weight=1)
 display_frame.columnconfigure(display_frame_columns, minsize=100, weight=1)
 display_frame.grid(row=0, column=2, sticky='nsew')
 
-can_frame = tk.LabelFrame(master=window, text='CAN')
+cans_frame = tk.Frame(master=window)
+cans_frame_rows = [0, 1]
+cans_frame_columns = [0]
+cans_frame.rowconfigure(cans_frame_rows, minsize=50, weight=1)
+cans_frame.columnconfigure(cans_frame_columns, minsize=100, weight=1)
+cans_frame.grid(row=1, column=0, sticky='nsew')
+
+can_frame = tk.LabelFrame(master=cans_frame, text='CAN')
 can_frame_rows = [0, 1]
 can_frame_columns = [0]
 can_frame.rowconfigure(can_frame_rows, minsize=50, weight=1)
 can_frame.columnconfigure(can_frame_columns, minsize=100, weight=1)
-can_frame.grid(row=1, column=0, sticky='nsew')
+can_frame.grid(row=0, column=0, sticky='nsew')
+
+can2_frame = tk.LabelFrame(master=cans_frame, text="CAN2")
+can2_frame_rows = [0, 1]
+can2_frame_columns = [0]
+can2_frame.rowconfigure(can2_frame_rows, minsize=50, weight=1)
+can2_frame.columnconfigure(can2_frame_columns, minsize=100, weight=1)
+can2_frame.grid(row=1, column=0, sticky='nsew')
 
 CAN_messages_frame = tk.LabelFrame(master=window, text='CAN System Messages')
 CAN_messages_frame_rows = [0, 1]
@@ -216,6 +239,15 @@ message_text = tk.StringVar(value='Message: ')
 message = tk.Label(master=can_frame, textvariable=message_text)
 message.grid(row=1, column=0, sticky='nsew')
 
+### CAN2 ###
+id_text2 = tk.StringVar(value='ID: ')
+id2_ = tk.Label(master=can2_frame, textvariable=id_text2)
+id2_.grid(row=0, column=0, sticky='nsew')
+message_text2 = tk.StringVar(value='Message: ')
+message2 = tk.Label(master=can2_frame, textvariable=message_text2)
+message2.grid(row=1, column=0, sticky='nsew')
+
+
 ### CAN messages input ###
 can_id_input = tk.Entry(master=CAN_messages_frame)
 can_id_input.grid(row=0, column=0)
@@ -249,7 +281,8 @@ uart_button.grid(row=1, column=0)
 
 # Sets up periodic updates
 window.after(TIMER_FREQ, update_timers)
-can_frame.after(CAN_FREQ, update_CAN)
+can_frame.after(CAN1_FREQ, update_CAN)
+can2_frame.after(MOTOR_FREQ,update_CAN2)
 contactor_frame.after(CONTACTOR_FREQ, update_contactors)
 display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
