@@ -14,8 +14,8 @@ def write(msg):
     # Creates file if it doesn't exist
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
-        open(file, 'w')
-        file.close()
+        with open(file, 'w'):
+            pass
     
     lines = []
     # Grab the current UART data

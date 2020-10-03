@@ -22,7 +22,7 @@ void BSP_Contactors_Init(contactor_t contactor);
  *          which the user would like to know its state (MOTOR/ARRAY)
  * @return  The contactor's state (ON/OFF)
  */ 
-state_t BSP_Contactors_Get(contactor_t contactor);
+State BSP_Contactors_Get(contactor_t contactor);
 
 /**
  * @brief   Sets the state of a specified contactor
@@ -33,6 +33,6 @@ state_t BSP_Contactors_Get(contactor_t contactor);
  *          the user would like to set (ON/OFF)
  * @return  The contactor's state (ON/OFF)
  */ 
-void BSP_Contactors_Set(contactor_t contactor, state_t state);
+void BSP_Contactors_Set(contactor_t contactor, State state);
 
 #endif

@@ -42,7 +42,7 @@ void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent){
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
-error_t MotorController_Read(CANbuff *message){
+ErrorStatus MotorController_Read(CANbuff *message){
     uint32_t id;
     uint8_t data[8] = {0};
     uint32_t length = BSP_CAN_Read(CAN_2, &id, data);
@@ -68,5 +68,5 @@ error_t MotorController_Read(CANbuff *message){
         message->secondNum = secondSum;
         return SUCCESS;
     }
-    return FAILURE;
+    return ERROR;
 }

@@ -26,7 +26,7 @@ void BSP_Contactors_Init(contactor_t contactor) {
  *          which the user would like to know its state (MOTOR/ARRAY)
  * @return  The contactor's state (ON/OFF)
  */ 
-state_t BSP_Contactors_Get(contactor_t contactor) {
+State BSP_Contactors_Get(contactor_t contactor) {
     // Opening file in read mode
     FILE *filePointer = fopen(FILE_NAME, "r");
     // Lock file
@@ -40,7 +40,7 @@ state_t BSP_Contactors_Get(contactor_t contactor) {
     // Closing the file
     flock(fno, LOCK_UN);
     fclose(filePointer);
-    return (state_t) contactorStates[contactor];
+    return (State) contactorStates[contactor];
 } 
 
 /**
@@ -52,9 +52,9 @@ state_t BSP_Contactors_Get(contactor_t contactor) {
  *          the user would like to set (ON/OFF)
  * @return  The contactor's state (ON/OFF)
  */ 
-void BSP_Contactors_Set(contactor_t contactor, state_t state) {
+void BSP_Contactors_Set(contactor_t contactor, State state) {
     // Get current values
-    state_t currentStates[NUM_CONTACTORS];
+    State currentStates[NUM_CONTACTORS];
     for (uint8_t i = 0; i < NUM_CONTACTORS; i++) {
         currentStates[i] = BSP_Contactors_Get(i);
     }
