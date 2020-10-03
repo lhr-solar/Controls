@@ -24,12 +24,6 @@ LIGHTS_FREQ = 500
 PRECHARGE_FREQ = 500
 
 
-def update_timers():
-	""" Periodically calls Timer.update to update the timers."""
-	Timer.update()
-	window.after(TIMER_FREQ, update_timers)
-
-
 def update_contactors():
     """Periodically update the display state of the Motor and Array Contactors"""
     global motor_status, array_status
@@ -280,7 +274,6 @@ uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UAR
 uart_button.grid(row=1, column=0)
 
 # Sets up periodic updates
-window.after(TIMER_FREQ, update_timers)
 can_frame.after(CAN1_FREQ, update_CAN)
 can2_frame.after(MOTOR_FREQ,update_CAN2)
 contactor_frame.after(CONTACTOR_FREQ, update_contactors)
