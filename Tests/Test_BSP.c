@@ -34,13 +34,21 @@ int main() {
     BSP_Contactors_Init(MOTOR);
     BSP_Contactors_Init(ARRAY);
 
-    BSP_UART_Init(UART_1);
+    BSP_UART_Init(UART_3);
     BSP_UART_Init(UART_2);
 
     BSP_Switches_Init();
 
     uint8_t txData[LEN] = {0x00, 0x12, 0x42, 0x5A};
+
+    uint8_t txData2[LEN] = {0};
+    
+    uint32_t id2 = 0x321;
+
     bool negativeAcc = false;
+
+    int threshold = 1000 * 10;
+    int writevsread = threshold;
 
     while(1) {
         printf("-----PLEASE RUN THIS TEST FILE IN CONJUCTION WITH THE GUI-----\n");
@@ -79,6 +87,49 @@ int main() {
         for (uint8_t i = 0; i < len; i++) {
             printf("0x%x ", rxData[i]);
         }
+        printf("\n");
+
+        // CAN 2 test by random values
+        uint8_t rxData2[LEN] = {0};
+
+        if(writevsread == threshold){
+            writevsread = 0;
+            id2 = rand() % 0xFFF;
+            for(int i = 0; i < LEN; i++){
+                txData2[i] = rand() % 0xFF;
+            }
+
+            BSP_CAN_Write(CAN_2, id2, txData2, LEN);
+        } else {
+            writevsread++;
+        }
+
+        printf("Expected values to CAN_2\n");
+        printf("ID: 0x%x\n", id2);
+        for(int i = 0; i < LEN; i++){
+            printf("0x%x ", txData2[i]);
+        }
+        printf("\n");
+
+        int can2len = BSP_CAN_Read(CAN_2, &id2, rxData2);
+        printf("Actual values read from CAN_2\n");
+        printf("ID: 0x%x length: %d\n", id2, can2len);
+        for(int i = 0; i < can2len; i++){
+            printf("0x%x ",rxData2[i]);
+        }
+
+        int same = 1;
+        for(int i = 0; i < can2len; i++){
+            if(rxData2[i] != txData2[i]){
+                same = 0;
+            }
+        }
+        if(same){
+            printf("CAN_2 as expected\n");
+        } else {
+            printf("CAN_2 not as expected\n");
+        }
+
         printf("\n");
 
         //BSP_SWITCHES TEST ------------------------------------------------------
@@ -120,17 +171,17 @@ int main() {
         char str1[TX_SIZE];
         sprintf(str1, "%f, %d, %d, %d, %d", speed1, cruiseEn1, cruiseSet1, regenEn1, CANerr1);
 
-        BSP_UART_Write(UART_1, str , TX_SIZE);
+        BSP_UART_Write(UART_3, str , TX_SIZE);
         BSP_UART_Write(UART_2, str1, TX_SIZE);
 
         char out[2][TX_SIZE];
-        BSP_UART_Read(UART_1, out[UART_1]);
+        BSP_UART_Read(UART_3, out[UART_3]);
         BSP_UART_Read(UART_2, out[UART_2]);
-        out[UART_1][strlen(out[UART_1])-1] = 0; // remove the newline, so we can print both in one line for now
+        out[UART_3][strlen(out[UART_3])-1] = 0; // remove the newline, so we can print both in one line for now
         out[UART_2][strlen(out[UART_2])-1] = 0;
 
         printf("        SPEED  CRS_EN  CRS_SET REGEN CAN_ERROR\n");
-        printf("UART 1: %s\n", out[UART_1]);
+        printf("UART 1: %s\n", out[UART_3]);
         printf("UART 2: %s\n", out[UART_2]);
 
         //BSP_Contactors -----------------------------------------------------
@@ -158,8 +209,38 @@ int main() {
         printf("MOTOR CONTACTOR STATE: %d\n", BSP_Contactors_Get(MOTOR));
         printf("ARRAY CONTACTOR STATE: %d\n", BSP_Contactors_Get(ARRAY));
 
+        //BSP_Precharge -----------------------------------------------------
+        //NOTE: The contactors test file requires input from the user in the original test
+        printf("----------------------Precharge TEST--------------------------\n");
+        printf("--------------------------------------------------------------\n");
+        uint8_t precBoard = rand() % 2;
+        uint8_t precsStatus = rand() % 2;
+        uint8_t precCase = precsStatus | (precBoard << 1);
+
+        switch (precCase)
+        {
+        case 0:
+            BSP_Precharge_Write(MOTOR, OFF);
+            printf("MOTOR PRECHARGE STATE SET TO: OFF\n");
+            break;
+        case 1:
+            BSP_Precharge_Write(MOTOR, ON);
+            printf("MOTOR PRECHARGE STATE SET TO: ON \n");
+            break;
+        case 2:
+            BSP_Precharge_Write(ARRAY, OFF);
+            printf("ARRAY PRECHARGE STATE SET TO: OFF\n");
+            break;
+        case 3:
+            BSP_Precharge_Write(ARRAY, ON);
+            printf("ARRAY PRECHARGE STATE SET TO: ON \n");
+            break;
+        default:
+            break;
+        }
+
         // Moving cursor back up
-        moveCursorUp(27);
+        moveCursorUp(37);
     }
     printf("\n");
     return 0; 
