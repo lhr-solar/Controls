@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 #ifndef __COMMON_H
 #define __COMMON_H
 

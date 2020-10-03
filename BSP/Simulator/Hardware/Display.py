@@ -1,3 +1,5 @@
+# Copyright (c) 2020 UT Longhorn Racing Solar
+
 import csv
 import os
 import fcntl

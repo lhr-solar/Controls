@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 /**
  * Header file for the library to interact
  * with the Analog to Digital Converter (ADC)

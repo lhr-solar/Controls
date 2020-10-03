@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 #ifndef __MOTORCONTROLLER_H
 #define __MOTORCONTROLLER_H
 
