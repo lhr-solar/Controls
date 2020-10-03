@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 /* Driver for the display board. This communicates
  * with the Wonder Gecko development board over UART
  * to indicate what needs to be displayed to the driver

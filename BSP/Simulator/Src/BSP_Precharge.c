@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 #include "BSP_Precharge.h"
 
 #define FILE_NAME DATA_PATH(PRECHARGE_CSV)

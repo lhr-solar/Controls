@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 /**
  * Configuration file to hold
  * shared constants, enumerations, structs
