@@ -47,6 +47,9 @@ def update_CAN():
     global id_text, message_text
     can = CAN.read()
 
+    if not can: # If can is empty list
+        can.extend(["Empty", "Empty"])
+
     id_text.set(f"ID: {can[0]}")
     message_text.set(f"Message: {can[1]}")
 
