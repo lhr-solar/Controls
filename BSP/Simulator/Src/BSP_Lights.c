@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 #include "BSP_Lights.h"
 
 

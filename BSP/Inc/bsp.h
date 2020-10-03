@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 #ifndef __BSP_H
 #define __BSP_H
 

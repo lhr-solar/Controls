@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 /**
  * Source file to mimic UART communication
  * that will be used to communicate with the

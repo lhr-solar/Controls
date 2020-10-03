@@ -1,3 +1,5 @@
+# Copyright (c) 2020 UT Longhorn Racing Solar
+
 import os
 import tkinter as tk
 from functools import partial

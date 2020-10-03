@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 #ifndef CAN_H__
 #define CAN_H__
 

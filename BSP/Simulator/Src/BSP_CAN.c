@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 /**
  * Source file for the library to interact
  * with both CAN lines in the car
