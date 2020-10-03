@@ -18,31 +18,49 @@ int testCAN(void){
     BSP_CAN_Init(CAN_1);
     BSP_CAN_Init(CAN_2);
 
+    int maxlen = 8; // max length of desired data in bytes to generate
+
+    int lencan1 = 4; // data length of can1
+    int lencan2 = 8; // data length of can2
+
     uint8_t txData[4];
-    uint8_t rxData[4] = {0};
+    uint8_t rxData1[4] = {0};
+    uint8_t rxData2[8] = {0};
+
+    int idcan1 = 0;
+    int idcan2 = 0;
 
     // generate expected values and id
     uint32_t id = rand() % 0xFFF;
-    for(int i = 0; i < 4; i++){
+    for(int i = 0; i < 8; i++){
         txData[i] = rand() % 0xFF;
     }
 
     printf("Expected values to CAN\n");
     printf("ID: 0x%x\n", id);
-    for(int i = 0; i < 4; i++){
+    for(int i = 0; i < maxlen; i++){
         printf("0x%x ", txData[i]);
     }
     printf("\n");
 
     // write to can 
     BSP_CAN_Write(CAN_1, id, txData, 4);
+    BSP_CAN_Write(CAN_2, id, txData, 8);
     
     // actual read
-    uint8_t len = BSP_CAN_Read(CAN_1, &id, rxData);
-    printf("Actual values read from CAN\n");
-    printf("ID: 0x%x length: %d\n", id, len);
-    for(int i = 0; i < 4; i++){
-        printf("0x%x ",rxData[i]);
+    lencan1 = BSP_CAN_Read(CAN_1, &idcan1, rxData1);
+    printf("Actual values read from CAN1\n");
+    printf("ID: 0x%x length: %d\n", idcan1, lencan1);
+    for(int i = 0; i < lencan1; i++){
+        printf("0x%x ",rxData1[i]);
+    }
+    printf("\n");
+
+    lencan2 = BSP_CAN_Read(CAN_2, &idcan2, rxData2);
+    printf("Actual values read from CAN1\n");
+    printf("ID: 0x%x length: %d\n", idcan2, lencan2);
+    for(int i = 0; i < lencan2; i++){
+        printf("0x%x ",rxData2[i]);
     }
     printf("\n");
 }
@@ -186,11 +204,11 @@ int main(){
     // BSP_Timer_Init();
 
     // testADC();
-    // testCAN();
+    testCAN();
     // testContactors();
     // testPrecharge();
     // testSwitches();
-    testUART();
+    // testUART();
 
     return 0;
 }
