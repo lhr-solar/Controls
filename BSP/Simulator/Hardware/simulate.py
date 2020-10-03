@@ -3,7 +3,6 @@ import tkinter as tk
 from functools import partial
 
 import Switches
-import Timer
 import Contactor
 import Pedals
 import Display
@@ -15,7 +14,6 @@ import PreCharge
 
 
 # Update Frequencies (ms)
-TIMER_FREQ = 1
 MOTOR_FREQ = 250
 CAN1_FREQ = 500
 CONTACTOR_FREQ = 500
