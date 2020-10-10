@@ -14,7 +14,6 @@ lights = ["M_CNCTR","RSVD_LED","CTRL_FAULT","RIGHT_BLINK","HeadlightPWR","A_CNCT
 def get_lights():
     return lights
 
-
 def read():
     """Reads lights states
 
