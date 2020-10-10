@@ -72,11 +72,11 @@ void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen) {
     char csv[128];
     uint64_t fullData;
     fgets(csv, 128, fp);
-    sscanf(csv, "%x", &fullData);
+    sscanf(csv, "%lx", &fullData);
 
     // Split hex data into bytes
     for (uint8_t i = 0; i < rxLen; i++) {
-        rxBuf[i] = (fullData >> (8 * (len-i-1))) & 0xFF;
+        rxBuf[i] = (fullData >> (8 * (rxLen-i-1))) & 0xFF;
     }
 
     // Close file

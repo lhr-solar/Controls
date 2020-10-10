@@ -84,8 +84,10 @@ class ShiftRegister:
         0x15: 'OLATB'
     }
 
+    REGISTER_ADDR = [REGISTER_ADDR_0, REGISTER_ADDR_1]
 
-    def write_register(self, register, data):
+    def write_register(self, register_addr, data):
+        register = self.REGISTER_ADDR[self.REGISTER_DATA['IOCON'] & 0x80][register_addr]
         if register[0:-1] == 'GPIO':
             # Make sure only inputs are written
             io = self.REGISTER_DATA[f'IODIR{register[-1]}']
@@ -101,23 +103,51 @@ class ShiftRegister:
             self.REGISTER_DATA[register] = data
 
 
-    def read_register(self, register):
-        pass
+    def read_register(self, register_addr):
+        return self.REGISTER_DATA[self.REGISTER_ADDR[self.REGISTER_DATA['IOCON'] & 0x80][register_addr]]
     
 
 
 # Global register
 reg = ShiftRegister()
 
-def read():
-    pass
+def read_spi():
+    # Creates file if it doesn't exist
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    if not os.path.exists(file):
+        with open(file, 'w'):
+            pass
+    data = None
+    message = None
+    with open(file, 'r') as csvfile:
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
+        csvreader = csv.reader(csvfile)
+        try:
+            message = bin(int(next(csvreader)[0]))[2:]
+            diff = 24 - len(message)
+            message = '0'*diff + message    # ZEXT
+        except StopIteration:
+            message = None
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
+    if message:
+        # Check proper opcode
+        if int(message[0:7], 2) == reg.OPCODE:
+            addr = int(message[8:16], 2)
+            data = int(message[16:], 2)
+            if int(message[7], 2) == 0:
+                # Write
+                reg.write_register(addr, data)
+                # Clear CSV
+                with open(file, 'w'):
+                    pass
+            else:
+                # Read
+                data = reg.read_register(addr)
+                write_spi(data)
 
 
-def write():
-    pass
-
-
-if __name__ == '__main__':
-    reg.write_register('IODIRA', 0x32)
-    reg.write_register('GPIOA', 0x42)
-    print(reg.REGISTER_DATA['GPIOA'])
+def write_spi(data):
+    with open(file, 'w') as csvfile:
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
+        csvfile.write(str(data))
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
