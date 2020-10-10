@@ -21,10 +21,11 @@
 static void moveCursorUp(int n) {
     if (n < 1) n = 1;
     if (n > 99) n = 99;
-    printf("%c[%dA", 0x1B, n);
+    printf("%c[%d;%dH", 0x1B, 1, 1);
 }
 
 int main() {
+
     BSP_ADC_Init(ADC_0);
     BSP_ADC_Init(ADC_1);
 
@@ -51,6 +52,7 @@ int main() {
     int writevsread = threshold;
 
     while(1) {
+        printf("%c[%d;%dH", 0x1B, 1, 1);
         printf("-----PLEASE RUN THIS TEST FILE IN CONJUCTION WITH THE GUI-----\n");
         //BSP_ADC TEST -----------------------------------------------------------
         printf("-------------------------ADC TEST-----------------------------\n");
@@ -86,6 +88,7 @@ int main() {
         printf("ID: 0x%x\nData: ", id);
         for (uint8_t i = 0; i < len; i++) {
             printf("0x%x ", rxData[i]);
+            fflush(stdout);
         }
         printf("\n");
 
@@ -98,16 +101,17 @@ int main() {
             for(int i = 0; i < LEN; i++){
                 txData2[i] = rand() % 0xFF;
             }
-
-            BSP_CAN_Write(CAN_2, id2, txData2, LEN);
         } else {
             writevsread++;
         }
+
+        BSP_CAN_Write(CAN_2, id2, txData2, LEN);
 
         printf("Expected values to CAN_2\n");
         printf("ID: 0x%x\n", id2);
         for(int i = 0; i < LEN; i++){
             printf("0x%x ", txData2[i]);
+            fflush(stdout);
         }
         printf("\n");
 
@@ -116,20 +120,8 @@ int main() {
         printf("ID: 0x%x length: %d\n", id2, can2len);
         for(int i = 0; i < can2len; i++){
             printf("0x%x ",rxData2[i]);
+            fflush(stdout);
         }
-
-        int same = 1;
-        for(int i = 0; i < can2len; i++){
-            if(rxData2[i] != txData2[i]){
-                same = 0;
-            }
-        }
-        if(same){
-            printf("CAN_2 as expected\n");
-        } else {
-            printf("CAN_2 not as expected\n");
-        }
-
         printf("\n");
 
         //BSP_SWITCHES TEST ------------------------------------------------------
@@ -213,9 +205,7 @@ int main() {
         //NOTE: The contactors test file requires input from the user in the original test
         printf("----------------------Precharge TEST--------------------------\n");
         printf("--------------------------------------------------------------\n");
-        uint8_t precBoard = rand() % 2;
-        uint8_t precsStatus = rand() % 2;
-        uint8_t precCase = precsStatus | (precBoard << 1);
+        uint8_t precCase = rand() % 3;
 
         switch (precCase)
         {
@@ -240,7 +230,8 @@ int main() {
         }
 
         // Moving cursor back up
-        moveCursorUp(37);
+        //moveCursorUp(40);
+        //break;
     }
     printf("\n");
     return 0; 
