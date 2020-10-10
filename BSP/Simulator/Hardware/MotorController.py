@@ -9,7 +9,6 @@ import math
 # Path of file
 file = "BSP/Simulator/Hardware/Data/CAN.csv"
 
-
 # Relevant IDs
 MOTOR_DRIVE_ID = 0x221
 VELOCITY_ID = 0x243
@@ -22,8 +21,6 @@ MOTOR_BACKEMF_ID = 0x247
 MOTOR_TEMP_ID = 0x24B
 
 motor_info = [MOTOR_BUS_ID, VELOCITY_ID, MOTOR_PHASE_CURRENT_ID, MOTOR_VOLTAGE_VECTOR_ID, MOTOR_CURRENT_VECTOR_ID, MOTOR_BACKEMF_ID, MOTOR_TEMP_ID]
-
-
 
 infoIdx = 0 
 
@@ -63,6 +60,7 @@ CURRENT_SETPOINT = 0.0 #set by user via MOTOR_DRIVE commands
 MAX_CURRENT = 1.0 #max available current, this is a percent of the Absolute bus current
 
 ABSOLUTE_CURRENT = 5.0  #physical limitation
+
 
 def sendTouC():
     """Simulates motors sending CAN messages back to the uC 
@@ -129,7 +127,6 @@ def read():
     canId = sendTouC()
     return message
 
-
 def write(id_, message):
     """Writes message to CAN2
 
@@ -157,7 +154,6 @@ def confirm_power():
             MAX_CURRENT = ABSOLUTE_CURRENT * (desired_current/100.0)
     except ValueError:
         pass
-
 
 def confirm_drive():
     """Acts as the motor controller confirming
@@ -204,7 +200,6 @@ def torque_control(pedalPercent):
     if mode == 1:
         CURRENT_SETPOINT = pedalPercent * MAX_CURRENT    #param will be a value from 0.0 to 1.0
         velocity_increase = CURRENT_SETPOINT     #update rate
-
 
 def update_velocity(v):
     """Acts as the motor controller increasing

@@ -15,7 +15,6 @@ switches = ["LT", "RT", "HDLT", "FWD/REV", "HZD", "CRS_SET", "CRS_EN", "REGEN", 
 def get_switches():
     return switches
 
-
 def toggle(switch, gui):
     """Toggles a specified switch state
 
@@ -40,7 +39,6 @@ def toggle(switch, gui):
         csvreader = csv.writer(csvfile)
         csvreader.writerow(states)
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
-
 
 def read():
     """Reads switch states

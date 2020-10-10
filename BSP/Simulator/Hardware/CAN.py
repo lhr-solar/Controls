@@ -7,9 +7,9 @@ import fcntl
 # Path of file
 file = "BSP/Simulator/Hardware/Data/CAN.csv"
 
+
 def read():
     """Reads CAN1 bus
-
     Returns:
         list: [ID, Message, Length]
     """

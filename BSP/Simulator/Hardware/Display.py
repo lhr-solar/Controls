@@ -25,7 +25,6 @@ def get_display():
     """
     return data.keys()
 
-
 def read():
     """Reads the UART line
 
