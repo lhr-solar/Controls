@@ -202,7 +202,7 @@ int main() {
         printf("ARRAY CONTACTOR STATE: %d\n", BSP_Contactors_Get(ARRAY));
 
         //BSP_Precharge -----------------------------------------------------
-        //NOTE: The contactors test file requires input from the user in the original test
+        //NOTE: The precharge test file requires input from the user in the original test
         printf("----------------------Precharge TEST--------------------------\n");
         printf("--------------------------------------------------------------\n");
         int precCase = rand() % 4;
