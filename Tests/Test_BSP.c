@@ -205,24 +205,24 @@ int main() {
         //NOTE: The contactors test file requires input from the user in the original test
         printf("----------------------Precharge TEST--------------------------\n");
         printf("--------------------------------------------------------------\n");
-        uint8_t precCase = rand() % 3;
+        int precCase = rand() % 4;
 
         switch (precCase)
         {
         case 0:
-            BSP_Precharge_Write(MOTOR, OFF);
+            BSP_Precharge_Write(MOTOR_PRECHARGE, OFF);
             printf("MOTOR PRECHARGE STATE SET TO: OFF\n");
             break;
         case 1:
-            BSP_Precharge_Write(MOTOR, ON);
+            BSP_Precharge_Write(MOTOR_PRECHARGE, ON);
             printf("MOTOR PRECHARGE STATE SET TO: ON \n");
             break;
         case 2:
-            BSP_Precharge_Write(ARRAY, OFF);
+            BSP_Precharge_Write(ARRAY_PRECHARGE, OFF);
             printf("ARRAY PRECHARGE STATE SET TO: OFF\n");
             break;
         case 3:
-            BSP_Precharge_Write(ARRAY, ON);
+            BSP_Precharge_Write(ARRAY_PRECHARGE, ON);
             printf("ARRAY PRECHARGE STATE SET TO: ON \n");
             break;
         default:
