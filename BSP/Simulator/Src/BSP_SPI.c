@@ -41,10 +41,12 @@ void BSP_SPI_Write(uint8_t* txBuf, uint8_t txLen) {
     int fno = fileno(fp);
     flock(fno, LOCK_EX);
 
-    // Write data
+    // Build integer
+    uint32_t data = 0;
     for (uint8_t i = 0; i < txLen; i++) {
-        fprintf(fp, "%x", txBuf[i]);
+        data += txBuf[i] << (8 * (txLen-i-1));
     }
+    fprintf(fp, "%d", data);
 
     // CLose file
     flock(fno, LOCK_UN);
@@ -70,9 +72,9 @@ void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen) {
 
     // Read file
     char csv[128];
-    uint64_t fullData;
+    uint32_t fullData;
     fgets(csv, 128, fp);
-    sscanf(csv, "%lx", &fullData);
+    sscanf(csv, "%x", &fullData);
 
     // Split hex data into bytes
     for (uint8_t i = 0; i < rxLen; i++) {

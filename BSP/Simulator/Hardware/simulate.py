@@ -13,6 +13,7 @@ import MotorController
 import UART
 import Lights
 import PreCharge
+import ShiftRegister
 
 
 # Update Frequencies (ms)
@@ -22,6 +23,7 @@ CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
 LIGHTS_FREQ = 500
 PRECHARGE_FREQ = 500
+SHIFTREG_FREQ = 500
 
 
 def update_contactors():
@@ -84,6 +86,11 @@ def update_lights():
     for i, light in enumerate(lights_text):
         light.set(f"{lights[i]}: {(lights_state >> i) & 0x01}")
     window.after(LIGHTS_FREQ, update_lights)
+
+
+def update_shift():
+    ShiftRegister.read_spi()
+    window.after(SHIFTREG_FREQ, update_shift)
 
 
 # Sets up the display environment variable
@@ -281,4 +288,5 @@ display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
 lights_frame.after(LIGHTS_FREQ, update_lights)
 precharge_frame.after(PRECHARGE_FREQ, update_precharge)
+window.after(SHIFTREG_FREQ, update_shift)
 window.mainloop()
