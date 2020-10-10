@@ -228,10 +228,6 @@ int main() {
         default:
             break;
         }
-
-        // Moving cursor back up
-        //moveCursorUp(40);
-        //break;
     }
     printf("\n");
     return 0; 
