@@ -1,3 +1,5 @@
+# Copyright (c) 2020 UT Longhorn Racing Solar
+
 import csv
 import os
 import fcntl
@@ -24,6 +26,9 @@ def read():
             message.append(row)
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
     message = [0, 0] if message == [] else message[0]
+
+    if not message: # If can is empty list
+        message.extend(["Empty", "Empty"])
     return message
 
 def write(id, msg):

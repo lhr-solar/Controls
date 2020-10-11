@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 /**
  * C file that reads the raw ADC data from the CSV file, 
  * converts it back to a distance pressed (percentage for now), and stores both.
