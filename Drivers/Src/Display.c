@@ -14,6 +14,8 @@ static void encodeByte(uint8_t byte, uint8_t *buf) {
     uint8_t lo = byte & 0x0F;
     buf[0] = hi < 10 ? (hi + '0') : (hi - 10 + 'A');
     buf[1] = lo < 10 ? (lo + '0') : (lo - 10 + 'A');
+    // e.g encoding the byte `42` will write the characters
+    // '2' and 'A' to the locations pointed at by buf and buf+1
 }
 
 /*
@@ -36,6 +38,7 @@ void Display_SetData(display_data_t *status) {
     // will be encoded in the order they're declared in the struct,
     // starting at bit 3 and going til bit 0 of the fifth byte
     uint8_t msg[GECKO_DATA_LENGTH];
+    // Pack the flags into a byte
     int flags = (status->cruiseEnabled << 3) |
         (status->cruiseSet << 2) |
         (status->regenEnabled << 1) |
@@ -48,11 +51,17 @@ void Display_SetData(display_data_t *status) {
     static union fi {float f; int i;} data; // So we can interpret the float as a bitvector
     data.f = status->speed;
     for (int j=0; j<4; j++) {
-        encodeByte(data.i & 0xFF, msg+j*2);
-        data.i >>= 8; // shift the data down by a byte
+        encodeByte(data.i & 0xFF, msg+j*2); // enocde each byte of the float as two hex digits
+        data.i >>= 8; // Get rid of the bit we just encoded and prepare the next one
     }
+
+    // Say, for example, that the speed is 38.0
+    // In IEEE-754 floating point format, it is represented as 0x42180000
+    // At this point in the code, the msg array will have "00001842" as its first eight bytes
     
     encodeByte((uint8_t) flags, msg+4*2);
+
+    // At this point, the last byte of the msg array represents the flags
 
 
     // Send the bit vector of info to the Gecko controller
