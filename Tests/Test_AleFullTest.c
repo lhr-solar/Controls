@@ -11,11 +11,16 @@ int main() {
     MotorController_Init();
     BSP_Switches_Init();
     display_data_t packet;
-    int acceleratorPercentage;
-    int brakePercentage;
-    int cruiseEnabled;
-    int cruiseSet;
-    int regenEnabled;
+    uint32_t acceleratorPercentage;
+    uint32_t brakePercentage;
+    uint8_t cruiseEnabled;
+    uint8_t cruiseSet;
+    uint8_t regenEnabled;
+    uint32_t driveVelocity;
+    uint32_t driveCurrent;
+    uint32_t cruiseVelocity;
+    uint32_t cruiseCurrent;
+    // bool cruiseLock = false;
     while(1) {
         
         // Pedal Test
@@ -44,16 +49,28 @@ int main() {
         Display_SetData(&packet);
 
         // Motor Controller
-        uint32_t input1 = 0x5053;
-        uint32_t input2 = 0x4056;
-        MotorController_Drive(input1,input2);
+        driveVelocity = 0x1000;   //max RPM's desired
+        driveCurrent = acceleratorPercentage;   //percentage of current to be used
+        cruiseVelocity = 400;   //constant to show "cruise" enabled
+        cruiseCurrent = 100;    //max current needed to cruise
+        if(cruiseSet==1){
+            MotorController_Drive(cruiseVelocity, cruiseCurrent);
+        }
+        else{
+            MotorController_Drive(driveVelocity, driveCurrent);
+        }
+        // MotorController_Drive(0x1000, 0x1111);
         
-        CANbuff tester = {0, 0, 0};
-        uint32_t id = 0x243;
-        uint8_t data[8] = {0x00, 0x55, 0x55, 0x22,     0x11, 0x11, 0x11, 0x11};
-        BSP_CAN_Write(CAN_2, id, data, 8);
-        bool check = MotorController_Read(&tester);
-        printf("BusID: %x\tMsg: %x, %x\tSuccess: %d\n",tester.id, tester.firstNum, tester.secondNum, check); 
+        // Motor portion of UI is no longer being updated at all?
+
+        
+        // CANbuff tester = {0, 0, 0};
+        // uint32_t id = 0x243;
+        // uint8_t data[8] = {0x00, 0x55, 0x55, 0x22,     0x11, 0x11, 0x11, 0x11};
+        // BSP_CAN_Write(CAN_2, id, data, 8);
+        //torque has non-achievable velocity (go with current, not velocity)
+        //cruise control uses what current's available to achieve desired velocity (and maintain it)
+        // printf("BusID: %x\tMsg: %x, %x\tSuccess: %d\n",tester.id, tester.firstNum, tester.secondNum, check); 
 
 
         system("clear");
