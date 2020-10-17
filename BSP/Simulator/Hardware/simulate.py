@@ -46,8 +46,10 @@ def update_CAN():
     """Periodically update the display state of the CAN bus"""
     global id_text, message_text
     can = CAN.read()
+
     id_text.set(f"ID: {can[0]}")
     message_text.set(f"Message: {can[1]}")
+
     window.after(CAN1_FREQ, update_CAN)
 
 def update_CAN2():
