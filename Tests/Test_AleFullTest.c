@@ -3,6 +3,7 @@
 #include "Pedals.h"
 #include "Display.h"
 #include "MotorController.h"
+#include "CANbus.h"
 #include <bsp.h>
 
 int main() {
@@ -10,6 +11,7 @@ int main() {
     Display_Init();
     MotorController_Init();
     BSP_Switches_Init();
+    CANbus_Init();
     display_data_t packet;
     uint32_t acceleratorPercentage;
     uint32_t brakePercentage;
@@ -20,6 +22,12 @@ int main() {
     uint32_t driveCurrent;
     uint32_t cruiseVelocity;
     uint32_t cruiseCurrent;
+    uint32_t ids[10] = {0x242, 0x243, 0x244, 0x245, 0x246, 0x247, 0x24B, 0x24E, 0x580, 0x10A};
+    uint8_t buffer[8];
+    CANData_t data;
+    data.d = 0x87654321;
+   CANPayload_t payload;
+
     // bool cruiseLock = false;
     while(1) {
         
@@ -71,6 +79,15 @@ int main() {
         //torque has non-achievable velocity (go with current, not velocity)
         //cruise control uses what current's available to achieve desired velocity (and maintain it)
         // printf("BusID: %x\tMsg: %x, %x\tSuccess: %d\n",tester.id, tester.firstNum, tester.secondNum, check); 
+
+        //CANBus
+        payload.data = data;
+        payload.bytes = 4;
+        // for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
+        uint8_t i = 1;
+        CANbus_Send(ids[i], payload);
+        printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CANbus_Read(buffer));
+        // }
 
 
         system("clear");
