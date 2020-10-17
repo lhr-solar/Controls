@@ -123,7 +123,7 @@ def read_spi():
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
         csvreader = csv.reader(csvfile)
         try:
-            message = bin(int(next(csvreader)[0]))[2:]
+            message = bin(int(next(csvreader)[0], 16))[2:]
             diff = 24 - len(message)
             message = '0'*diff + message    # ZEXT
         except StopIteration:

@@ -46,7 +46,7 @@ void BSP_SPI_Write(uint8_t* txBuf, uint8_t txLen) {
     for (uint8_t i = 0; i < txLen; i++) {
         data += txBuf[i] << (8 * (txLen-i-1));
     }
-    fprintf(fp, "%d", data);
+    fprintf(fp, "%x", data);
 
     // CLose file
     flock(fno, LOCK_UN);
