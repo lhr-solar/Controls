@@ -31,6 +31,7 @@ def read():
         message.extend(["Empty", "Empty"])
     return message
 
+
 def write(id, msg):
     """ Writes the msg and id to CAN1
         Format: id, msg, msg_length
