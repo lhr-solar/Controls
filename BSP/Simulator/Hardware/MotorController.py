@@ -104,6 +104,7 @@ def sendTouC():
     CarState.infoIdx = (CarState.infoIdx + 1) %  7   #increment index
     return currentID
 
+
 def read():
     """Reads CAN2 bus
 
@@ -126,6 +127,7 @@ def read():
     canId = sendTouC()
     return message
 
+
 def write(id_, message):
     """Writes message to CAN2
 
@@ -141,6 +143,7 @@ def write(id_, message):
         csvwriter.writerow([hex(id_), hex(message), len(hex(message)[2:])//2])
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
+
 def confirm_power():
     try:
         id_, message = read()
@@ -152,6 +155,7 @@ def confirm_power():
             CarState.MAX_CURRENT = CarState.ABSOLUTE_CURRENT * (desired_current/100.0)
     except ValueError:
         pass
+
 
 def confirm_drive():
     """Acts as the motor controller confirming
@@ -184,17 +188,20 @@ def confirm_drive():
     except ValueError:
         return CarState.CURRENT_VELOCITY, CarState.CURRENT_VELOCITY
 
+
 def toggle_torque(velocity):
     if velocity > 1000:
         CarState.mode = 1
     else:
         CarState.mode = 0
 
+
 def torque_control(pedalPercent):
     #following code will only execute if motor is in torque control mode
     if CarState.mode == 1:
         CarState.CURRENT_SETPOINT = pedalPercent * CarState.MAX_CURRENT    #param will be a value from 0.0 to 1.0
         CarState.velocity_increase = CarState.CURRENT_SETPOINT     #update rate
+
 
 def update_velocity(v):
     """Acts as the motor controller increasing

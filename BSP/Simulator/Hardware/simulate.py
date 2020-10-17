@@ -32,6 +32,7 @@ def update_contactors():
     array_status.set(f"Array Contactor: {contactors_status[1]}")
     window.after(CONTACTOR_FREQ, update_contactors)
 
+
 def update_display():
     """Periodically update the display state of display"""
     global display_text
@@ -39,6 +40,7 @@ def update_display():
     for i, text in enumerate(display.keys()):
         display_text[i].set(f"{text}: {display[text]}")
     window.after(DISPLAY_FREQ, update_display)
+
 
 def update_CAN():
     """Periodically update the display state of the CAN bus"""
@@ -50,6 +52,7 @@ def update_CAN():
 
     window.after(CAN1_FREQ, update_CAN)
 
+
 def update_CAN2():
     """Periodally update the display state of the CAN2 bus"""
     global id_text2, message_text2
@@ -57,6 +60,7 @@ def update_CAN2():
     id_text2.set(f"ID: {can2[0]}")
     message_text2.set(f"Message: {can2[1]}")
     window.after(MOTOR_FREQ, update_CAN2)
+
 
 def update_motor():
     """Periodically update the velocity and display of the motor"""
@@ -67,6 +71,7 @@ def update_motor():
     MotorController.torque_control(accelerator.get())
     window.after(MOTOR_FREQ, update_motor)
 
+
 def update_precharge():
     """Periodically update the display state of the Motor and Array precharge boards"""
     global precharge_motor_status, precharge_array_status
@@ -74,6 +79,7 @@ def update_precharge():
     precharge_motor_status.set(f"Motor Precharge: {precharge_status[1]}")
     precharge_array_status.set(f"Array Precharge: {precharge_status[0]}")
     window.after(PRECHARGE_FREQ, update_precharge)  
+
 
 def update_lights():
     """Periodically update the display state of the lights"""
@@ -83,6 +89,7 @@ def update_lights():
     for i, light in enumerate(lights_text):
         light.set(f"{lights[i]}: {(lights_state >> i) & 0x01}")
     window.after(LIGHTS_FREQ, update_lights)
+
 
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
