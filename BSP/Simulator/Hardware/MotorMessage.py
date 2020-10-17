@@ -20,9 +20,9 @@ def sendMotorDisable(message):
 	MDCommand = 0x10A
 
 	if message == SAFE:
-		write(MDCommand, 0x1)
+		write(MDCommand, "0x1")
 	elif message == UNSAFE:
-		write(MDCommand, 0x0)
+		write(MDCommand, "0x0")
 
 
 

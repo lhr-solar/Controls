@@ -13,6 +13,7 @@ import MotorController
 import UART
 import Lights
 import PreCharge
+import MotorMessage
 
 
 # Update Frequencies (ms)
@@ -284,7 +285,8 @@ uart_button.grid(row=1, column=0)
 
 ### Charging Checkbox
 chargingBool = tk.BooleanVar()
-charging_checkbox = tk.Checkbutton(master=charging_frame, text="Charging? Check if Yes", variable=chargingBool).grid(row=0, sticky='nsew')
+chargingBool.set(0)
+charging_checkbox = tk.Checkbutton(master=charging_frame, text="Charging? Check if Yes", command=MotorMessage.sendMotorDisable(chargingBool.get()), variable=chargingBool).grid(row=0, sticky='nsew')
 
 # Sets up periodic updates
 can_frame.after(CAN1_FREQ, update_CAN)
