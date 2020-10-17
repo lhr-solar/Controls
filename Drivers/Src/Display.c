@@ -35,7 +35,7 @@ void Display_SetData(display_data_t *status) {
     // The float will be sent in little endian format, and the flags
     // will be encoded in the order they're declared in the struct,
     // starting at bit 3 and going til bit 0 of the fifth byte
-    char msg[GECKO_DATA_LENGTH];
+    uint8_t msg[GECKO_DATA_LENGTH];
     int flags = (status->cruiseEnabled << 3) |
         (status->cruiseSet << 2) |
         (status->regenEnabled << 1) |
@@ -45,7 +45,7 @@ void Display_SetData(display_data_t *status) {
     assert(sizeof(float) == 4); // Just a sanity check
     #endif
 
-    static union fi {float f; int i} data; // So we can interpret the float as a bitvector
+    static union fi {float f; int i;} data; // So we can interpret the float as a bitvector
     data.f = status->speed;
     for (int j=0; j<4; j++) {
         encodeByte(data.i & 0xFF, msg+j*2);
@@ -56,5 +56,5 @@ void Display_SetData(display_data_t *status) {
 
 
     // Send the bit vector of info to the Gecko controller
-    BSP_UART_Write(UART_2, msg, GECKO_DATA_LENGTH);
+    BSP_UART_Write(UART_2, (char *) msg, GECKO_DATA_LENGTH);
 }
