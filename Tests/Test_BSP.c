@@ -9,6 +9,7 @@
 #include "common.h"
 #include "config.h"
 #include <unistd.h>
+
 #include "BSP_ADC.h"
 #include <bsp.h>
 
@@ -42,8 +43,10 @@ int main() {
     uint8_t txData[LEN] = {0x00, 0x12, 0x42, 0x5A};
 
     uint8_t txData2[LEN] = {0};
+    uint8_t rxData[LEN] = {0};
+    uint8_t rxData2[LEN] = {0};
     
-    uint32_t id2 = 0x321;
+    int id2 = 0x321;
 
     bool negativeAcc = false;
 
@@ -82,17 +85,14 @@ int main() {
         uint32_t id;
         BSP_CAN_Write(CAN_1, 0x221, txData, LEN);
         
-        uint8_t rxData[LEN] = {0};
         uint8_t len = BSP_CAN_Read(CAN_1, &id, rxData);
         printf("ID: 0x%x\nData: ", id);
         for (uint8_t i = 0; i < len; i++) {
             printf("0x%x ", rxData[i]);
-            fflush(stdout);
         }
         printf("\n");
 
         // CAN 2 test by random values
-        uint8_t rxData2[LEN] = {0};
 
         if(writevsread == threshold){
             writevsread = 0;
@@ -114,7 +114,7 @@ int main() {
         }
         printf("\n");
 
-        int can2len = BSP_CAN_Read(CAN_2, &id2, rxData2);
+        uint8_t can2len = BSP_CAN_Read(CAN_2, &id2, rxData2);
         printf("Actual values read from CAN_2\n");
         printf("ID: 0x%x length: %d\n", id2, can2len);
         for(int i = 0; i < can2len; i++){
