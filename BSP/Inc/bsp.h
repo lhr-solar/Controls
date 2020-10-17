@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 #ifndef __BSP_H
 #define __BSP_H
 
@@ -5,7 +7,6 @@
 #include "BSP_CAN.h"
 #include "BSP_UART.h"
 #include "BSP_Switches.h"
-#include "BSP_Timer.h"
 #include "BSP_Contactors.h"
 #include "BSP_Lights.h"
 #include "BSP_Precharge.h"
@@ -20,8 +21,6 @@
 #define CONTACTORS_CSV "Contactors.csv"
 #define PEDALS_CSV "Pedals.csv"
 #define UART_CSV "UART.csv"
-#define UART2_CSV "UART2.csv"
-#define TIMER_CSV "Timer.csv"
 #define CAN_CSV "CAN.csv"
 #define LIGHTS_CSV "Lights.csv"
 #define PRECHARGE_CSV "PreCharge.csv"

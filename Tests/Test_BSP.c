@@ -9,7 +9,6 @@
 #include "common.h"
 #include "config.h"
 #include <unistd.h>
-#include "BSP_Timer.h"
 #include "BSP_ADC.h"
 #include <bsp.h>
 

@@ -1,9 +1,10 @@
+# Copyright (c) 2020 UT Longhorn Racing Solar
+
 import os
 import tkinter as tk
 from functools import partial
 
 import Switches
-import Timer
 import Contactor
 import Pedals
 import Display
@@ -15,19 +16,12 @@ import PreCharge
 
 
 # Update Frequencies (ms)
-TIMER_FREQ = 1
 MOTOR_FREQ = 250
 CAN1_FREQ = 500
 CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
 LIGHTS_FREQ = 500
 PRECHARGE_FREQ = 500
-
-
-def update_timers():
-	""" Periodically calls Timer.update to update the timers."""
-	Timer.update()
-	window.after(TIMER_FREQ, update_timers)
 
 
 def update_contactors():
@@ -52,8 +46,10 @@ def update_CAN():
     """Periodically update the display state of the CAN bus"""
     global id_text, message_text
     can = CAN.read()
+
     id_text.set(f"ID: {can[0]}")
     message_text.set(f"Message: {can[1]}")
+
     window.after(CAN1_FREQ, update_CAN)
 
 def update_CAN2():
@@ -280,7 +276,6 @@ uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UAR
 uart_button.grid(row=1, column=0)
 
 # Sets up periodic updates
-window.after(TIMER_FREQ, update_timers)
 can_frame.after(CAN1_FREQ, update_CAN)
 can2_frame.after(MOTOR_FREQ,update_CAN2)
 contactor_frame.after(CONTACTOR_FREQ, update_contactors)
