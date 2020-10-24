@@ -136,8 +136,7 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     for (uint8_t i = 0; i < NUM_CAN; i++) {
             if (bus == i) {
                 fprintf(fp, "\n");
-            } 
-            else {
+            } else {
                 // As long as it wasn't empty or a blank line,
                 // Print back data, otherwise, print newline
                 if((strcmp(currentCAN[i], "\n")!=0) && (strcmp(currentCAN[i], "")!=0)){
