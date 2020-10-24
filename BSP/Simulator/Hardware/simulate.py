@@ -23,6 +23,7 @@ CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
 LIGHTS_FREQ = 500
 PRECHARGE_FREQ = 500
+MOTOR_DISABLE_FREQ = 500
 
 
 def update_contactors():
@@ -88,6 +89,9 @@ def update_lights():
         light.set(f"{lights[i]}: {(lights_state >> i) & 0x01}")
     window.after(LIGHTS_FREQ, update_lights)
 
+def update_MotorDisable():
+    """Sends MOTOR_DISABLE message when checkbox is checked/unchecked"""
+    MotorMessage.sendMotorDisable(chargingBool.get())
 
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
@@ -283,10 +287,11 @@ uart_input.grid(row=0, column=0)
 uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get()))
 uart_button.grid(row=1, column=0)
 
-### Charging Checkbox
+### Charging Checkbox ###
 chargingBool = tk.BooleanVar()
 chargingBool.set(0)
-charging_checkbox = tk.Checkbutton(master=charging_frame, text="Charging? Check if Yes", command=MotorMessage.sendMotorDisable(chargingBool.get()), variable=chargingBool).grid(row=0, sticky='nsew')
+charging_checkbox = tk.Checkbutton(master=charging_frame, text="Charging? Check if Yes", command=update_MotorDisable, variable=chargingBool)
+charging_checkbox.grid(row=0, sticky='nsew')
 
 # Sets up periodic updates
 can_frame.after(CAN1_FREQ, update_CAN)
@@ -296,4 +301,5 @@ display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
 lights_frame.after(LIGHTS_FREQ, update_lights)
 precharge_frame.after(PRECHARGE_FREQ, update_precharge)
+charging_frame.after(MOTOR_DISABLE_FREQ, update_MotorDisable)
 window.mainloop()
