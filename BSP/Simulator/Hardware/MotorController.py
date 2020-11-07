@@ -189,11 +189,13 @@ def confirm_drive():
         return CarState.CURRENT_VELOCITY, CarState.CURRENT_VELOCITY
 
 
+
 def toggle_torque(velocity):
     if velocity > 1000:
         CarState.mode = 1
     else:
         CarState.mode = 0
+
 
 
 def torque_control(pedalPercent):
