@@ -17,12 +17,9 @@ def sendMotorDisable(message):
 		and all other messages are ignored.
 	"""
 
-	MDCommand = 0x10A
+	MDCommand = hex(266)
 
-	if message == SAFE:
-		write(MDCommand, "0x1")
-	elif message == UNSAFE:
-		write(MDCommand, "0x0")
+	write(MDCommand, hex(message))
 
 
 
