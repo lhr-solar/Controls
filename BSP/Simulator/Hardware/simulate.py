@@ -92,6 +92,7 @@ def update_lights():
 def update_MotorDisable():
     """Sends MOTOR_DISABLE message when checkbox is checked/unchecked"""
     MotorMessage.sendMotorDisable(chargingBool.get())
+    window.after(MOTOR_DISABLE_FREQ, update_MotorDisable)
 
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
