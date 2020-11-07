@@ -6,6 +6,7 @@ import fcntl
 
 file = "BSP/Simulator/Hardware/Data/Contactors.csv"
 
+
 def read():
     """Reads contactor file and returns 1 (on) or 0 (off)
     Returns:

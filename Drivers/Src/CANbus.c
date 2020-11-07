@@ -22,12 +22,12 @@ int CANbus_Send(CANId_t id, CANPayload_t payload) {
 
     int8_t data[payload.bytes];
 
-    uint64_t temp_data = payload.data.d;
+    uint64_t tempData = payload.data.d;
     uint8_t mask = 0xFF;
 
     for(int i=payload.bytes-1; i>=0; i--){
-        data[i] = temp_data&mask;
-        temp_data = temp_data>>8;
+        data[i] = tempData&mask;
+        tempData = tempData>>8;
     }
 
 

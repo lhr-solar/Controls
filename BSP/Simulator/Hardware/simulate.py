@@ -54,6 +54,7 @@ def update_CAN():
 
     window.after(CAN1_FREQ, update_CAN)
 
+
 def update_CAN2():
     """Periodally update the display state of the CAN2 bus"""
     global id_text2, message_text2
@@ -72,6 +73,7 @@ def update_motor():
     MotorController.torque_control(accelerator.get())
     window.after(MOTOR_FREQ, update_motor)
 
+
 def update_precharge():
     """Periodically update the display state of the Motor and Array precharge boards"""
     global precharge_motor_status, precharge_array_status
@@ -79,6 +81,7 @@ def update_precharge():
     precharge_motor_status.set(f"Motor Precharge: {precharge_status[1]}")
     precharge_array_status.set(f"Array Precharge: {precharge_status[0]}")
     window.after(PRECHARGE_FREQ, update_precharge)  
+
 
 def update_lights():
     """Periodically update the display state of the lights"""
@@ -186,13 +189,13 @@ lights_frame.rowconfigure(lights_frame_rows, minsize=50, weight=1)
 lights_frame.columnconfigure(lights_frame_columns, minsize=50, weight=1)
 lights_frame.grid(row=1, column=4, sticky='nsew')
 
+
 charging_frame = tk.LabelFrame(master=window, text="Charging")
 charging_frame_rows = [0]
 charging_frame_columns = [0]
 charging_frame.rowconfigure(charging_frame_rows, minsize=50, weight=0)
 charging_frame.columnconfigure(charging_frame_columns, minsize=100, weight=0)
 charging_frame.grid(row=0, column=5, sticky='nsew')
-
 
 ### Switches ###
 buttons = []
@@ -202,8 +205,6 @@ for i, switch in enumerate(Switches.get_switches()):
     buttons.append(button)
 for i, switch in enumerate(Switches.get_switches()):
     buttons[i].config(command=partial(Switches.toggle, switch, buttons))
-
-
 
 ### Lights ###
 lights_text = list()
@@ -239,7 +240,6 @@ for i, label in enumerate(Display.get_display()):
     cell = tk.Label(master=display_frame, textvariable=text)
     cell.grid(row=i//len(display_frame_columns), column=i%len(display_frame_columns), sticky='nsew')
 
-
 ### CAN ###
 id_text = tk.StringVar(value='ID: ')
 id_ = tk.Label(master=can_frame, textvariable=id_text)
@@ -256,7 +256,6 @@ message_text2 = tk.StringVar(value='Message: ')
 message2 = tk.Label(master=can2_frame, textvariable=message_text2)
 message2.grid(row=1, column=0, sticky='nsew')
 
-
 ### CAN messages input ###
 can_id_input = tk.Entry(master=CAN_messages_frame)
 can_id_input.grid(row=0, column=0)
@@ -264,7 +263,6 @@ can_msg_input = tk.Entry(master=CAN_messages_frame)
 can_msg_input.grid(row=1, column=0)
 can_button = tk.Button(master=CAN_messages_frame, text="Send", command=lambda : CAN.write(can_id_input.get(), can_msg_input.get()))
 can_button.grid(row=2, column=0)
-
 
 ### Motor ###
 desired_velocity_text = tk.StringVar(value='Desired Velocity: ')
