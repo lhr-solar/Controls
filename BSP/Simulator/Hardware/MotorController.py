@@ -9,58 +9,6 @@ import math
 # Path of file
 file = "BSP/Simulator/Hardware/Data/CAN.csv"
 
-# Relevant IDs
-MOTOR_DRIVE_ID = 0x221
-VELOCITY_ID = 0x243
-MOTOR_POWER_ID = 0x222
-MOTOR_BUS_ID = 0x242
-MOTOR_PHASE_CURRENT_ID = 0x244
-MOTOR_VOLTAGE_VECTOR_ID = 0x245
-MOTOR_CURRENT_VECTOR_ID = 0x246
-MOTOR_BACKEMF_ID = 0x247
-MOTOR_TEMP_ID = 0x24B
-
-motor_info = [MOTOR_BUS_ID, VELOCITY_ID, MOTOR_PHASE_CURRENT_ID, MOTOR_VOLTAGE_VECTOR_ID, MOTOR_CURRENT_VECTOR_ID, MOTOR_BACKEMF_ID, MOTOR_TEMP_ID]
-
-infoIdx = 0 
-
-radius = 21.67  # in inches
-
-# State values
-CURRENT_VELOCITY = 0
-
-BUS_VOLTAGE = 5
-
-# Phase Currents
-PHASE_C_CUR = 1 
-PHASE_B_CUR = 1
-
-# Voltage Vectors
-V_REAL = 0
-V_IMAGINE = 0
-
-#Current Vectors
-I_REAL = 0
-I_IMAGINE = 0
-
-#Motor BackEMF components
-REAL_COMP = 0
-NEUTRAL_MOTOR = 0
-
-#Temperature
-PHASEC_TEMP = 0
-INTERNAL_TEMP = 0
-
-mode = 0    # 0 = Velocity control mode, 1 = Torque control mode
-
-velocity_increase = 0.5 #how much CURRENT_VELOCITY is increased by in update_velocity()
-
-CURRENT_SETPOINT = 0.0 #set by user via MOTOR_DRIVE commands
-
-MAX_CURRENT = 1.0 #max available current, this is a percent of the Absolute bus current
-
-ABSOLUTE_CURRENT = 5.0  #physical limitation
-
 
 def sendTouC():
     """Simulates motors sending CAN messages back to the uC 
