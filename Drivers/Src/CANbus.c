@@ -42,22 +42,20 @@ int CANbus_Send(CANId_t id, CANPayload_t payload) {
  * @return  1 if ID matches and 0 if it doesn't
  */
 
-ErrorStatus CANbus_Read(uint8_t* buffer)
-{
+ErrorStatus CANbus_Read(uint8_t* buffer){
+    
     uint32_t ID;
     uint8_t data[8];
     uint8_t count = BSP_CAN_Read(CAN_1,&ID,data);
-    if(ID == MOTOR_DISABLE)
-    {
-        for(int i=0;i<count;i++)
-        {
+    
+    if(ID == MOTOR_DISABLE){
+        for(int i=0;i<count;i++){
             buffer[i]=data[i];
         }
-	return SUCCESS;
+        return SUCCESS;
+    
     }
-    else
-    {
-      return ERROR;
-    }
+
+    return ERROR;
     
 }

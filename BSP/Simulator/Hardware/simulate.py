@@ -13,6 +13,7 @@ import MotorController
 import UART
 import Lights
 import PreCharge
+import MotorMessage
 
 
 # Update Frequencies (ms)
@@ -22,6 +23,7 @@ CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
 LIGHTS_FREQ = 500
 PRECHARGE_FREQ = 500
+MOTOR_DISABLE_FREQ = 500
 
 
 def update_contactors():
@@ -87,6 +89,10 @@ def update_lights():
         light.set(f"{lights[i]}: {(lights_state >> i) & 0x01}")
     window.after(LIGHTS_FREQ, update_lights)
 
+def update_MotorDisable():
+    """Sends MOTOR_DISABLE message when checkbox is checked/unchecked"""
+    MotorMessage.sendMotorDisable(chargingBool.get())
+    window.after(MOTOR_DISABLE_FREQ, update_MotorDisable)
 
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
@@ -95,7 +101,7 @@ if os.environ.get('DISPLAY','') == '':
 # Sets up window
 window = tk.Tk()
 window.rowconfigure([0, 1], minsize=200, weight=1)
-window.columnconfigure([0, 1, 2, 3, 4], minsize=200, weight=1)
+window.columnconfigure([0, 1, 2, 3, 4, 5], minsize=200, weight=1)
 
 # Sets up frames
 button_frame = tk.LabelFrame(master=window, text='Switches')
@@ -179,6 +185,13 @@ lights_frame_columns = [0, 1]
 lights_frame.rowconfigure(lights_frame_rows, minsize=50, weight=1)
 lights_frame.columnconfigure(lights_frame_columns, minsize=50, weight=1)
 lights_frame.grid(row=1, column=4, sticky='nsew')
+
+charging_frame = tk.LabelFrame(master=window, text="Charging")
+charging_frame_rows = [0]
+charging_frame_columns = [0]
+charging_frame.rowconfigure(charging_frame_rows, minsize=50, weight=0)
+charging_frame.columnconfigure(charging_frame_columns, minsize=100, weight=0)
+charging_frame.grid(row=0, column=5, sticky='nsew')
 
 
 ### Switches ###
@@ -275,6 +288,12 @@ uart_input.grid(row=0, column=0)
 uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get()))
 uart_button.grid(row=1, column=0)
 
+### Charging Checkbox ###
+chargingBool = tk.BooleanVar()
+chargingBool.set(0)
+charging_checkbox = tk.Checkbutton(master=charging_frame, text="Charging? Check if Yes", command=update_MotorDisable, variable=chargingBool)
+charging_checkbox.grid(row=0, sticky='nsew')
+
 # Sets up periodic updates
 can_frame.after(CAN1_FREQ, update_CAN)
 can2_frame.after(MOTOR_FREQ,update_CAN2)
@@ -283,4 +302,5 @@ display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
 lights_frame.after(LIGHTS_FREQ, update_lights)
 precharge_frame.after(PRECHARGE_FREQ, update_precharge)
+charging_frame.after(MOTOR_DISABLE_FREQ, update_MotorDisable)
 window.mainloop()
