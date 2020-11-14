@@ -102,12 +102,13 @@ int main() {
         }
     }
 
+    //CAN module was crashing due to invalid symbol
     if(CANTest){
             // //CANBus
             for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
-            uint8_t i = 1;
+            // uint8_t i = 1;
             CANbus_Send(ids[i], payload);
-            printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CANbus_Read(buffer));
+            // printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CANbus_Read(buffer));
             }
         }
 }
