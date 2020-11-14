@@ -5,6 +5,8 @@ import csv
 import fcntl
  
 file = "BSP/Simulator/Hardware/Data/PreCharge.csv";
+
+
 def read():
     os.makedirs(os.path.dirname(file), exist_ok = True);
     if not os.path.exists(file):

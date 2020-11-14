@@ -1,0 +1,20 @@
+#!/bin/bash
+#make sure to run make first and startup XLaunch before running this script
+
+function simulate()
+{
+    cd "$(dirname "$0")"
+
+    if [[ $(uname -a | grep Microsoft) ]]; then
+        echo "Running a new WSL window/shell..."
+        cmd.exe /c start cmd.exe /c "mode con: cols=103 lines=33 && wsl.exe ./controls-simulator.out" &
+        cmd.exe /c start cmd.exe /c "mode con: cols=103 lines=33 && wsl.exe python3 BSP/Simulator/Hardware/simulate.py" &
+    else
+        echo "Running gnome-terminal..."
+        gnome-terminal --working-directory="$(pwd)" --geometry=103x33 -- ./controls-simulator.out
+        gnome-terminal --working-directory="$(pwd)" --geometry=103x33 -- python3 BSP/Simulator/Hardware/simulate.py 
+    fi
+
+}
+
+simulate

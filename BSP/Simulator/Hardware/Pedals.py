@@ -7,6 +7,7 @@ import fcntl
 # Path of file
 file = "BSP/Simulator/Hardware/Data/Pedals.csv"
 
+
 def set_pedals(accel_pos, brake_pos):
     """Sets the accelerator and brake pedals to the
        specified position between zero and one
