@@ -13,6 +13,7 @@ import MotorController
 import UART
 import Lights
 import PreCharge
+import ShiftRegister
 import MotorMessage
 
 
@@ -23,6 +24,7 @@ CONTACTOR_FREQ = 500
 DISPLAY_FREQ = 500
 LIGHTS_FREQ = 500
 PRECHARGE_FREQ = 500
+SHIFTREG_FREQ = 500
 MOTOR_DISABLE_FREQ = 500
 
 
@@ -96,6 +98,11 @@ def update_MotorDisable():
     """Sends MOTOR_DISABLE message when checkbox is checked/unchecked"""
     MotorMessage.sendMotorDisable(chargingBool.get())
     window.after(MOTOR_DISABLE_FREQ, update_MotorDisable)
+
+def update_shift():
+    ShiftRegister.read_spi()
+    window.after(SHIFTREG_FREQ, update_shift)
+
 
 # Sets up the display environment variable
 if os.environ.get('DISPLAY','') == '':
@@ -301,4 +308,5 @@ motor_frame.after(MOTOR_FREQ, update_motor)
 lights_frame.after(LIGHTS_FREQ, update_lights)
 precharge_frame.after(PRECHARGE_FREQ, update_precharge)
 charging_frame.after(MOTOR_DISABLE_FREQ, update_MotorDisable)
+window.after(SHIFTREG_FREQ, update_shift)
 window.mainloop()
