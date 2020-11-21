@@ -14,43 +14,15 @@
 */
 void BSP_Precharge_Write(board_t board, State status){
     // first get previous board states from csv file
-    FILE* fp = fopen(FILE_NAME, "r");
-
-    if(!fp){
-        printf("Precharge file is not found\n");
-        return;
-    }
-
-    int fno = fileno(fp);
-    flock(fno,LOCK_EX);
-
-    int data = 0;
-    fscanf(fp,"%d", &data);
+    int data = BSP_GPIO_Read();
+    
     // update bit of data accordingly
 
     int mask = (1 << board);
     data = data & (~mask);
     data = data | (status << board);
 
-    flock(fno,LOCK_UN);
-    fclose(fp);
-
-    // only single value should be kept in csv file
-    // this part is to write data after read to clean csv file
-    fp = fopen(FILE_NAME, "w");
-
-    if(!fp){
-        printf("Precharge file is not found\n");
-        return;
-    }
-
-    fno = fileno(fp);
-    flock(fno,LOCK_EX);
-
-    fprintf(fp, "%d", data);
-
-    flock(fno,LOCK_UN);
-    fclose(fp);
+    BSP_GPIO_Write(data);
 }
 
 
