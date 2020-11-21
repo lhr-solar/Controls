@@ -7,9 +7,9 @@ import fcntl
 # Path of file
 file = "BSP/Simulator/Hardware/Data/CAN.csv"
 
+
 def read():
     """Reads CAN1 bus
-
     Returns:
         list: [ID, Message, Length]
     """
@@ -30,6 +30,7 @@ def read():
     if not message: # If can is empty list
         message.extend(["Empty", "Empty"])
     return message
+
 
 def write(id, msg):
     """ Writes the msg and id to CAN1

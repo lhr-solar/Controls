@@ -9,6 +9,7 @@ import math
 # Path of file
 file = "BSP/Simulator/Hardware/Data/CAN.csv"
 
+
 def sendTouC():
     """Simulates motors sending CAN messages back to the uC 
         
@@ -51,6 +52,7 @@ def sendTouC():
     CarState.infoIdx = (CarState.infoIdx + 1) %  7   #increment index
     return currentID
 
+
 def read():
     """Reads CAN2 bus
 
@@ -88,6 +90,7 @@ def write(id_, message):
         csvwriter.writerow(CAN1)
         csvwriter.writerow([hex(id_), hex(message), len(hex(message)[2:])//2])
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
+
 
 def confirm_power():
     try:
@@ -133,11 +136,15 @@ def confirm_drive():
     except ValueError:
         return CarState.CURRENT_VELOCITY, CarState.CURRENT_VELOCITY
 
+
+
 def toggle_torque(velocity):
     if velocity > 1000:
         CarState.mode = 1
     else:
         CarState.mode = 0
+
+
 
 def torque_control(pedalPercent):
     #following code will only execute if motor is in torque control mode
