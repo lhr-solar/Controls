@@ -4,6 +4,7 @@ import csv
 import os
 import fcntl
 import tkinter as tk
+import ShiftRegister as sr
 
 # Path of file
 file = "BSP/Simulator/Hardware/Data/Switches.csv"
@@ -23,6 +24,9 @@ def toggle(switch, gui):
         switch (string): name of the switch to toggle
         gui (tk.Button list): Button object list
     """
+
+    #needs to be updated to use ShiftRegister register_write() function (bank=1 but if this throws error, check SPI_init)
+
     states = read()
     for i, sw in enumerate(switches):
         if sw == switch:
@@ -34,12 +38,8 @@ def toggle(switch, gui):
             if sw == "IGN_2" and states & 1<<i:
                 states |= 1<<(i-1)
                 gui[i-1].config(relief=tk.SUNKEN)
-    states = [states]
-    with open(file, 'w') as csvfile:
-        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
-        csvreader = csv.writer(csvfile)
-        csvreader.writerow(states)
-        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
+    sr.register_write(states)
+
 
 
 def read():
@@ -48,17 +48,6 @@ def read():
     Returns:
         int: bit string of switch states
     """
-    # Creates file if it doesn't exist
-    os.makedirs(os.path.dirname(file), exist_ok=True)
-    if not os.path.exists(file):
-        with open(file, 'w'):
-            pass
-    states = []
-    with open(file, 'r') as csvfile:
-        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
-        csvreader = csv.reader(csvfile)
-        for row in csvreader:
-            states.append(row)
-        fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
-    states = 0 if states == [] else int(states[0][0])
+    # should be updated to use ShiftRegister.py register_read function where Bank is set to 1 (if this throws an error check the SPI_init)
+    states = sr.register_read(hex(9))
     return states
