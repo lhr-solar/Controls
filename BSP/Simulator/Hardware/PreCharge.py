@@ -8,7 +8,21 @@ import GPIO
 file = "BSP/Simulator/Hardware/Data/GPIO.csv";
 
 def write(data, port=2):
-    GPIO_write(data, port)
+    os.makedirs(os.path.dirname(file), exist_ok = True);
+    if not os.path.exists(file):
+        open(file, 'w')
+        with open(file, 'w'):
+            pass
+
+    with open(file, 'r') as csvfile:
+        fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX);
+        lines = csvfile.readlines()
+    
+    lines[port-1] = str(data) + '\n'
+
+    with open(file, "w") as csvfile:
+        csvfile.writelines(lines)
+        fcntl.flock(csv.fileno(), fcntl.LOCK_UN)
     
 def read():
     os.makedirs(os.path.dirname(file), exist_ok = True);
