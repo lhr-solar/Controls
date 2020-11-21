@@ -14,6 +14,7 @@ import UART
 import Lights
 import PreCharge
 import ShiftRegister
+import MotorMessage
 
 
 # Update Frequencies (ms)
@@ -24,6 +25,7 @@ DISPLAY_FREQ = 500
 LIGHTS_FREQ = 500
 PRECHARGE_FREQ = 500
 SHIFTREG_FREQ = 500
+MOTOR_DISABLE_FREQ = 500
 
 
 def update_contactors():
@@ -48,9 +50,12 @@ def update_CAN():
     """Periodically update the display state of the CAN bus"""
     global id_text, message_text
     can = CAN.read()
+
     id_text.set(f"ID: {can[0]}")
     message_text.set(f"Message: {can[1]}")
+
     window.after(CAN1_FREQ, update_CAN)
+
 
 def update_CAN2():
     """Periodally update the display state of the CAN2 bus"""
@@ -70,6 +75,7 @@ def update_motor():
     MotorController.torque_control(accelerator.get())
     window.after(MOTOR_FREQ, update_motor)
 
+
 def update_precharge():
     """Periodically update the display state of the Motor and Array precharge boards"""
     global precharge_motor_status, precharge_array_status
@@ -77,6 +83,7 @@ def update_precharge():
     precharge_motor_status.set(f"Motor Precharge: {precharge_status[1]}")
     precharge_array_status.set(f"Array Precharge: {precharge_status[0]}")
     window.after(PRECHARGE_FREQ, update_precharge)  
+
 
 def update_lights():
     """Periodically update the display state of the lights"""
@@ -87,6 +94,10 @@ def update_lights():
         light.set(f"{lights[i]}: {(lights_state >> i) & 0x01}")
     window.after(LIGHTS_FREQ, update_lights)
 
+def update_MotorDisable():
+    """Sends MOTOR_DISABLE message when checkbox is checked/unchecked"""
+    MotorMessage.sendMotorDisable(chargingBool.get())
+    window.after(MOTOR_DISABLE_FREQ, update_MotorDisable)
 
 def update_shift():
     ShiftRegister.read_spi()
@@ -100,7 +111,7 @@ if os.environ.get('DISPLAY','') == '':
 # Sets up window
 window = tk.Tk()
 window.rowconfigure([0, 1], minsize=200, weight=1)
-window.columnconfigure([0, 1, 2, 3, 4], minsize=200, weight=1)
+window.columnconfigure([0, 1, 2, 3, 4, 5], minsize=200, weight=1)
 
 # Sets up frames
 button_frame = tk.LabelFrame(master=window, text='Switches')
@@ -186,6 +197,13 @@ lights_frame.columnconfigure(lights_frame_columns, minsize=50, weight=1)
 lights_frame.grid(row=1, column=4, sticky='nsew')
 
 
+charging_frame = tk.LabelFrame(master=window, text="Charging")
+charging_frame_rows = [0]
+charging_frame_columns = [0]
+charging_frame.rowconfigure(charging_frame_rows, minsize=50, weight=0)
+charging_frame.columnconfigure(charging_frame_columns, minsize=100, weight=0)
+charging_frame.grid(row=0, column=5, sticky='nsew')
+
 ### Switches ###
 buttons = []
 for i, switch in enumerate(Switches.get_switches()):
@@ -194,8 +212,6 @@ for i, switch in enumerate(Switches.get_switches()):
     buttons.append(button)
 for i, switch in enumerate(Switches.get_switches()):
     buttons[i].config(command=partial(Switches.toggle, switch, buttons))
-
-
 
 ### Lights ###
 lights_text = list()
@@ -231,7 +247,6 @@ for i, label in enumerate(Display.get_display()):
     cell = tk.Label(master=display_frame, textvariable=text)
     cell.grid(row=i//len(display_frame_columns), column=i%len(display_frame_columns), sticky='nsew')
 
-
 ### CAN ###
 id_text = tk.StringVar(value='ID: ')
 id_ = tk.Label(master=can_frame, textvariable=id_text)
@@ -248,7 +263,6 @@ message_text2 = tk.StringVar(value='Message: ')
 message2 = tk.Label(master=can2_frame, textvariable=message_text2)
 message2.grid(row=1, column=0, sticky='nsew')
 
-
 ### CAN messages input ###
 can_id_input = tk.Entry(master=CAN_messages_frame)
 can_id_input.grid(row=0, column=0)
@@ -256,7 +270,6 @@ can_msg_input = tk.Entry(master=CAN_messages_frame)
 can_msg_input.grid(row=1, column=0)
 can_button = tk.Button(master=CAN_messages_frame, text="Send", command=lambda : CAN.write(can_id_input.get(), can_msg_input.get()))
 can_button.grid(row=2, column=0)
-
 
 ### Motor ###
 desired_velocity_text = tk.StringVar(value='Desired Velocity: ')
@@ -280,6 +293,12 @@ uart_input.grid(row=0, column=0)
 uart_button = tk.Button(master=messages_frame, text="Send", command=lambda : UART.write(uart_input.get()))
 uart_button.grid(row=1, column=0)
 
+### Charging Checkbox ###
+chargingBool = tk.BooleanVar()
+chargingBool.set(0)
+charging_checkbox = tk.Checkbutton(master=charging_frame, text="Charging? Check if Yes", command=update_MotorDisable, variable=chargingBool)
+charging_checkbox.grid(row=0, sticky='nsew')
+
 # Sets up periodic updates
 can_frame.after(CAN1_FREQ, update_CAN)
 can2_frame.after(MOTOR_FREQ,update_CAN2)
@@ -288,5 +307,6 @@ display_frame.after(DISPLAY_FREQ, update_display)
 motor_frame.after(MOTOR_FREQ, update_motor)
 lights_frame.after(LIGHTS_FREQ, update_lights)
 precharge_frame.after(PRECHARGE_FREQ, update_precharge)
+charging_frame.after(MOTOR_DISABLE_FREQ, update_MotorDisable)
 window.after(SHIFTREG_FREQ, update_shift)
 window.mainloop()
