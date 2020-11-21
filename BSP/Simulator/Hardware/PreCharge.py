@@ -3,7 +3,6 @@
 import os
 import csv
 import fcntl
-import GPIO
  
 file = "BSP/Simulator/Hardware/Data/GPIO.csv";
 
