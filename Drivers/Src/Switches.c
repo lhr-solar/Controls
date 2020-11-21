@@ -17,7 +17,7 @@ void Switches_Init(void){
 };
 
 State Switches_Read(switches_t sw){
-    uint8_t query[2]={0x41,0x00};
+    uint8_t query[2]={0x41,0x09}; //query GPIOA
     BSP_SPI_Write(query,2);
     uint8_t SwitchReadData;
     BSP_SPI_Read(SwitchReadData,1);
