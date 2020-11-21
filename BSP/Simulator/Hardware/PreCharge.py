@@ -3,10 +3,13 @@
 import os
 import csv
 import fcntl
+import GPIO
  
-file = "BSP/Simulator/Hardware/Data/PreCharge.csv";
+file = "BSP/Simulator/Hardware/Data/GPIO.csv";
 
-
+def write(data, port=2):
+    GPIO_write(data, port)
+    
 def read():
     os.makedirs(os.path.dirname(file), exist_ok = True);
     if not os.path.exists(file):
