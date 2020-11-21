@@ -139,7 +139,11 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     // Write newline for read entry and any entry that should be there but isn't
     uint8_t index = 0;
     for (; index < actualNumCan; index++) {
-        fprintf(fp, "%s", bus == index ? "\n" : currentCAN[index]);
+        if (bus == index) {
+            fprintf(fp, "\n");
+        } else if (currentCAN[index][0] != '\n') {
+            fprintf(fp, "%s", currentCAN[index]);
+        }
     }
     for (; index < NUM_CAN; index++) {
         fprintf(fp, "\n");
