@@ -32,7 +32,7 @@ int main() {
         // but we send the data to the gecko over UART_1 (probably)
         // So we'll just read from the UART for debugging purposes
 
-        BSP_UART_Read(UART_1, in);
+        BSP_UART_Read(UART_2, in);
         in[strlen(in)-1] = '\0'; // remove the newline
         printf("Gecko Data: %s\r", in);
     }
