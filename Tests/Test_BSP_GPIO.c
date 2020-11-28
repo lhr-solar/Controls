@@ -12,7 +12,7 @@ int main(void) {
     uint16_t data = 0;
 
     while (1) {
-        printf("Choose Port (A-B): ");
+        printf("Choose Port (A-D): ");
         port = getchar();
         getchar();
 

@@ -12,7 +12,7 @@
 #include "config.h"
 #include <bsp.h>
 
-typedef enum {PORTA = 0, PORTB, NUM_PORTS} port_t; 
+typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t; 
 
 /**
  * @brief   Initializes a GPIO port
