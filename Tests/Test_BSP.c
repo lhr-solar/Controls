@@ -86,11 +86,12 @@ int main() {
         BSP_CAN_Write(CAN_1, 0x221, txData, LEN);
         
         uint8_t len = BSP_CAN_Read(CAN_1, &id, rxData);
-        printf("ID: 0x%x\nData: ", id);
-        for (uint8_t i = 0; i < len; i++) {
-            printf("0x%x ", rxData[i]);
-        }
-        printf("\n");
+
+        // printf("ID: 0x%x\nData: ", id);
+        // for (uint8_t i = 0; i < len; i++) {
+        //     printf("0x%x ", rxData[i]);
+        // }
+        // printf("\n");
 
         // CAN 2 test by random values
 
@@ -104,21 +105,12 @@ int main() {
             writevsread++;
         }
 
-        BSP_CAN_Write(CAN_2, id2, txData2, LEN);
-
-        printf("Expected values to CAN_2\n");
-        printf("ID: 0x%x\n", id2);
-        for(int i = 0; i < LEN; i++){
-            printf("0x%x ", txData2[i]);
-            fflush(stdout);
-        }
-        printf("\n");
 
         uint8_t can2len = BSP_CAN_Read(CAN_2, &id2, rxData2);
-        printf("Actual values read from CAN_2\n");
+        printf("Values read from CAN_2\n");
         printf("ID: 0x%x length: %d\n", id2, can2len);
         for(int i = 0; i < can2len; i++){
-            printf("0x%x ",rxData2[i]);
+            printf("0x%x ", rxData2[i]);
             fflush(stdout);
         }
         printf("\n");
@@ -146,13 +138,14 @@ int main() {
         printf("--------------------------------------------------------------\n");
         printf("The UARTs are showing random values, UART 1 communicates with\n");
         printf("the gecko display while UART2 with the user direclty \n");
-        float speed = (rand() % 500) / 10.0;
-        int cruiseEn = rand() % 2;
-        int cruiseSet = rand() % 2;
-        int regenEn = rand() % 2;
-        int CANerr = rand() % 10;
+
+        uint8_t byte1 = rand() % 256;
+        uint8_t byte2 = rand() % 256;
+        uint8_t byte3 = rand() % 256;
+        uint8_t byte4 = rand() % 256;
+        uint8_t byte5 = rand() % 256;
         char str[TX_SIZE];
-        sprintf(str, "%f, %d, %d, %d, %d", speed, cruiseEn, cruiseSet, regenEn, CANerr);
+        sprintf(str, "%x%x%x%x%x", byte1, byte2, byte3, byte4, byte5);
 
         float speed1 = (rand() % 500) / 10.0;
         int cruiseEn1 = rand() % 2;
@@ -162,8 +155,8 @@ int main() {
         char str1[TX_SIZE];
         sprintf(str1, "%f, %d, %d, %d, %d", speed1, cruiseEn1, cruiseSet1, regenEn1, CANerr1);
 
-        BSP_UART_Write(UART_3, str , TX_SIZE);
-        BSP_UART_Write(UART_2, str1, TX_SIZE);
+        BSP_UART_Write(UART_2, str , TX_SIZE);
+        BSP_UART_Write(UART_3, str1, TX_SIZE);
 
         char out[2][TX_SIZE];
         BSP_UART_Read(UART_3, out[UART_3]);
