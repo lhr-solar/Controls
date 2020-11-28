@@ -12,9 +12,9 @@
  * 
  * @return none
 */
-void BSP_Precharge_Write(board_t board, State status){
+void BSP_Precharge_Write(board_t board, port_t port, State status){
     // first get previous board states from csv file
-    int data = BSP_GPIO_Read();
+    int data = BSP_GPIO_Read(port);
     
     // update bit of data accordingly
 
@@ -22,7 +22,7 @@ void BSP_Precharge_Write(board_t board, State status){
     data = data & (~mask);
     data = data | (status << board);
 
-    BSP_GPIO_Write(data);
+    BSP_GPIO_Write(port, data);
 }
 
 

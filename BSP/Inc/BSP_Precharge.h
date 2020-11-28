@@ -17,6 +17,6 @@ typedef enum {ARRAY_PRECHARGE = 0, MOTOR_PRECHARGE} board_t;
  * 
  * @return none
 */
-void BSP_Precharge_Write(board_t board, State status);
+void BSP_Precharge_Write(board_t board, port_t port, State status);
 
 #endif
