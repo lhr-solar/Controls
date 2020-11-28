@@ -10,9 +10,7 @@
 #define FILE_NAME DATA_PATH(SPI_CSV)
 
 /**
- * @brief   Confirms that the CSV file
- *          has been created and throws
- *          an error if not
+ * @brief   Activates SPI to use IOCON.BANK = 1
  * @param   None
  * @return  None
  */
@@ -22,6 +20,9 @@ void BSP_SPI_Init(void) {
         perror(CAN_CSV);
         exit(EXIT_FAILURE);
     }
+
+    uint8_t txBuf[3] = {SPI_OPCODE_W, 0x0A, 0x80};
+    BSP_SPI_Write(txBuf, 3);
 }
 
 /**
