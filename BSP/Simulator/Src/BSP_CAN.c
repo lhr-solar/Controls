@@ -85,6 +85,7 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
     }
 
     // Close file
+    fsync(fno);
     flock(fno, LOCK_UN);
     fclose(fp);
     return len;
@@ -114,9 +115,12 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
 
     char currentCAN[NUM_CAN][256];
     char csv[256];
-    for (uint8_t i = 0; fgets(csv, 256, fp); i++) {
-        strcpy(currentCAN[i], csv);
+    uint8_t actualNumCan = 0;
+    for (; fgets(csv, 256, fp); actualNumCan++) {
+        strcpy(currentCAN[actualNumCan], csv);
     }
+    // Count how many CAN lines are actually in the csv file
+    if (actualNumCan > NUM_CAN) actualNumCan = NUM_CAN;
 
     // Read values
     uint64_t fullData;
@@ -131,24 +135,22 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     // Clear entries from file
     freopen(FILE_NAME, "w", fp);
 
-    // Re-write entry that wasn't read
-    // Leave entry that was read as a blank line
-    for (uint8_t i = 0; i < NUM_CAN; i++) {
-            if (bus == i) {
-                fprintf(fp, "\n");
-            } else {
-                // As long as it wasn't empty or a blank line,
-                // Print back data, otherwise, print newline
-                if((strcmp(currentCAN[i], "/n")!=0) && (strcmp(currentCAN[i], "")!=0)){
-                fprintf(fp, "%s", currentCAN[i]);
-                }
-                else{
-                    fprintf(fp, "\n");
-                }
-            }
+    // Rewrite unread entries
+    // Write newline for read entry and any entry that should be there but isn't
+    uint8_t index = 0;
+    for (; index < actualNumCan; index++) {
+        if (bus == index) {
+            fprintf(fp, "\n");
+        } else if (currentCAN[index][0] != '\n') {
+            fprintf(fp, "%s", currentCAN[index]);
         }
+    }
+    for (; index < NUM_CAN; index++) {
+        fprintf(fp, "\n");
+    }
 
     // Close file
+    fsync(fno);
     flock(fno, LOCK_UN);
     fclose(fp);
     return len;

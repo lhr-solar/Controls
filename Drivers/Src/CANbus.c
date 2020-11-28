@@ -22,12 +22,12 @@ int CANbus_Send(CANId_t id, CANPayload_t payload) {
 
     int8_t data[payload.bytes];
 
-    uint64_t temp_data = payload.data.d;
+    uint64_t tempData = payload.data.d;
     uint8_t mask = 0xFF;
 
     for(int i=payload.bytes-1; i>=0; i--){
-        data[i] = temp_data&mask;
-        temp_data = temp_data>>8;
+        data[i] = tempData&mask;
+        tempData = tempData>>8;
     }
 
 
@@ -39,25 +39,23 @@ int CANbus_Send(CANId_t id, CANPayload_t payload) {
  * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
  * @param   CAN line bus
  * @param   pointer to buffer array to store message
- * @return  0 if ID matches and 1 if it doesn't
+ * @return  1 if ID matches and 0 if it doesn't
  */
 
-ErrorStatus CANbus_Read(uint8_t* buffer)
-{
+ErrorStatus CANbus_Read(uint8_t* buffer){
+    
     uint32_t ID;
     uint8_t data[8];
     uint8_t count = BSP_CAN_Read(CAN_1,&ID,data);
-    if(ID == MOTOR_DISABLE)
-    {
-        for(int i=0;i<count;i++)
-        {
+    
+    if(ID == MOTOR_DISABLE){
+        for(int i=0;i<count;i++){
             buffer[i]=data[i];
         }
-	return SUCCESS;
+        return SUCCESS;
+    
     }
-    else
-    {
-      return ERROR;
-    }
+
+    return ERROR;
     
 }

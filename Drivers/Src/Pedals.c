@@ -27,8 +27,8 @@ void Pedals_Init(){
  * @return  distance the pedal has been pressed in percentage
  */
 int8_t Pedals_Read(pedal_t pedal){
-    int16_t millivolts_Pedal = BSP_ADC_Get_Millivoltage(pedal);
-    int8_t percentage = millivolts_Pedal * 100 / ADC_RANGE_MILLIVOLTS;
+    int16_t millivoltsPedal = BSP_ADC_Get_Millivoltage(pedal);
+    int8_t percentage = millivoltsPedal * 100 / ADC_RANGE_MILLIVOLTS;
     return percentage;
 }
 
