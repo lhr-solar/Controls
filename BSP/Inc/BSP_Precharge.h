@@ -13,6 +13,7 @@ typedef enum {ARRAY_PRECHARGE = 0, MOTOR_PRECHARGE} board_t;
  * @brief writes the status (ON/OFF) of a board to a CSV file
  * 
  * @param board to get status (Array | Motor)
+ * port to write to (A|B|C)
  * status of board (ON | OFF)
  * 
  * @return none
