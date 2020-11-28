@@ -8,7 +8,13 @@
 #include "common.h"
 #include "config.h"
 
+#define LIGHTS_PORT     PORTC
+#define HEADLIGHT_PIN   6
+#define BRAKELIGHT_PIN  7
+#define RIGHT_BLINK_PIN 8
+#define LEFT_BLINK_PIN  9
 
+// Ordered by pin of minion board
 typedef enum {  
     A_CNCTR = 0,
     M_CNCTR,

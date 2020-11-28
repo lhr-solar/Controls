@@ -155,7 +155,7 @@ def read_spi():
 def write_spi(data):
     with open(file, "w") as csvfile:
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
-        csvfile.write(str(data))
+        csvfile.write(hex(data)[2:])
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
 

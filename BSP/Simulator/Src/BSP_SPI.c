@@ -20,9 +20,6 @@ void BSP_SPI_Init(void) {
         perror(CAN_CSV);
         exit(EXIT_FAILURE);
     }
-
-    uint8_t txBuf[3] = {SPI_OPCODE_W, 0x0A, 0x80};
-    BSP_SPI_Write(txBuf, 3);
 }
 
 /**
