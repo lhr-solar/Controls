@@ -86,6 +86,7 @@ int main() {
         BSP_CAN_Write(CAN_1, 0x221, txData, LEN);
         
         uint8_t len = BSP_CAN_Read(CAN_1, &id, rxData);
+
         // printf("ID: 0x%x\nData: ", id);
         // for (uint8_t i = 0; i < len; i++) {
         //     printf("0x%x ", rxData[i]);
@@ -103,6 +104,7 @@ int main() {
         } else {
             writevsread++;
         }
+
 
         uint8_t can2len = BSP_CAN_Read(CAN_2, &id2, rxData2);
         printf("Values read from CAN_2\n");
@@ -136,6 +138,7 @@ int main() {
         printf("--------------------------------------------------------------\n");
         printf("The UARTs are showing random values, UART 1 communicates with\n");
         printf("the gecko display while UART2 with the user direclty \n");
+
         uint8_t byte1 = rand() % 256;
         uint8_t byte2 = rand() % 256;
         uint8_t byte3 = rand() % 256;
