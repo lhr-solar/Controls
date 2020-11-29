@@ -152,8 +152,3 @@ def write_spi(data):
         csvfile.write(str(data))
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
-def register_read(address):
-    data=reg.read_register(address)
-    return data
-def register_write(address,data):
-    reg.write_register(address,data)

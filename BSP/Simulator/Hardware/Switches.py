@@ -4,7 +4,7 @@ import csv
 import os
 import fcntl
 import tkinter as tk
-import ShiftRegister as sr
+from ShiftRegister import reg 
 
 # Path of file
 file = "BSP/Simulator/Hardware/Data/Switches.csv"
@@ -38,7 +38,8 @@ def toggle(switch, gui):
             if sw == "IGN_2" and states & 1<<i:
                 states |= 1<<(i-1)
                 gui[i-1].config(relief=tk.SUNKEN)
-    sr.register_write(states)
+    #write to register
+    reg.write_register(0x09,states)
 
 
 
@@ -49,5 +50,5 @@ def read():
         int: bit string of switch states
     """
     # should be updated to use ShiftRegister.py register_read function where Bank is set to 1 (if this throws an error check the SPI_init)
-    states = sr.register_read(hex(9))
+    states = reg.read_register(0x09)
     return states
