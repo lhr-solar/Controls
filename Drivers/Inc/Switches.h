@@ -5,7 +5,7 @@
 #include "config.h"
 
 
-typedef enum {CRUZ_st=0, CRUZ_EN, HZD_SQ, FR_SW, Headlight_SW, LEFT_SW, RIGHT_SW, RSVD_LED} switches_t;
+typedef enum {CRUZ_st=0, CRUZ_EN, HZD_SQ, FR_SW, Headlight_SW, LEFT_SW, RIGHT_SW, RSVD_SW} switches_t;
 
 /**
  * @brief   Initializes all switches
