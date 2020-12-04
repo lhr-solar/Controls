@@ -12,17 +12,18 @@
 void Switches_Init(void){
     BSP_SPI_Init();
     //1)Read IODIRA: Address x00
-    uint8_t initData[3]={SPI_OPCODE_R, SPI_IODIRA, 0x00};
-    BSP_SPI_Write(initData,3);
-    uint8_t initReadData[1] = {0};
-    //do{
-        BSP_SPI_Read(initReadData, 1);
-    //}while(initReadData[0] == SPI_IODIRA);
+    uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0x00};
+    uint8_t initRxBuf[2] = {0,0}; 
+    BSP_SPI_Write(initTxBuf,3);
+    do{
+        BSP_SPI_Read(initRxBuf, 2);
+    }while(initRxBuf[0] == SPI_IODIRA);
+    
     // OR IODIRA to isolate pins 0-6
-    initData[2] = initReadData[0]|0x7F;
+    initTxBuf[2] = initRxBuf[1]|0x7F;
     //Write result of OR to IODIRA
-    initData[0]=0x40;
-    BSP_SPI_Write(initData,3);
+    initTxBuf[0]=SPI_OPCODE_W;
+    BSP_SPI_Write(initTxBuf,3);
 };
 
 /**
@@ -32,15 +33,15 @@ void Switches_Init(void){
  * @return  ON/OFF State
  */ 
 State Switches_Read(switches_t sw){
-    uint8_t query[2]={0x41,0x09}; //query GPIOA
-    BSP_SPI_Write(query,2);
-    uint8_t SwitchReadData[1] = {0};
+    uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA,0x00}; //query GPIOA
+    uint8_t SwitchReadData[2] = {0};
+    BSP_SPI_Write(query,3);
     //BSP_SPI_Read(SwitchReadData,1);
-    //do{
-        BSP_SPI_Read(SwitchReadData,1);
-    //}while(SwitchReadData[0] == SPI_IODIRA);
+    do{
+        BSP_SPI_Read(SwitchReadData,2);
+    }while(SwitchReadData[0] == SPI_GPIOA);
 
-     if (SwitchReadData[0] & (1 << sw)) {
+     if (SwitchReadData[1] & (1 << sw)) {
         return ON;
     } else {
         return OFF;
