@@ -13,12 +13,12 @@ void Switches_Init(void){
     BSP_SPI_Init();
     //1)Read IODIRA: Address x00
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0x00};
-    uint8_t initRxBuf[2] = {0,0}; 
+    uint8_t initRxBuf[2] = {0}; 
     BSP_SPI_Write(initTxBuf,3);
     do{
         BSP_SPI_Read(initRxBuf, 2);
-    }while(initRxBuf[0] == SPI_IODIRA);
-    
+        printf("INITRXBUFVAL: %d|%d\r",initRxBuf[0],initRxBuf[1]);
+    }while(initRxBuf[1] == 0x00);
     // OR IODIRA to isolate pins 0-6
     initTxBuf[2] = initRxBuf[1]|0x7F;
     //Write result of OR to IODIRA
@@ -36,7 +36,6 @@ State Switches_Read(switches_t sw){
     uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA,0x00}; //query GPIOA
     uint8_t SwitchReadData[2] = {0};
     BSP_SPI_Write(query,3);
-    //BSP_SPI_Read(SwitchReadData,1);
     do{
         BSP_SPI_Read(SwitchReadData,2);
     }while(SwitchReadData[0] == SPI_GPIOA);
