@@ -21,7 +21,7 @@ class ShiftRegister:
         'DEFVALB': 0x00,
         'INTCONA': 0x00,
         'INTCONB': 0x00,
-        'IOCON': 0x00,
+        'IOCON': 0x80,
         'GPPUA': 0x00,
         'GPPUB': 0x00,
         'INTFA': 0x00,
@@ -87,7 +87,7 @@ class ShiftRegister:
     REGISTER_ADDR = [REGISTER_ADDR_0, REGISTER_ADDR_1]
 
     def write_register(self, register_addr, data):
-        register = self.REGISTER_ADDR[self.REGISTER_DATA['IOCON'] & 0x80][register_addr]
+        register = self.REGISTER_ADDR[(self.REGISTER_DATA['IOCON'] & 0x80)>>7][register_addr]
         if register[0:-1] == 'GPIO':
             # Make sure only inputs are written
             io = self.REGISTER_DATA[f'IODIR{register[-1]}']
@@ -104,7 +104,7 @@ class ShiftRegister:
 
 
     def read_register(self, register_addr):
-        return self.REGISTER_DATA[self.REGISTER_ADDR[self.REGISTER_DATA['IOCON'] & 0x80][register_addr]]
+        return self.REGISTER_DATA[self.REGISTER_ADDR[(self.REGISTER_DATA['IOCON'] & 0x80)>>7][register_addr]]
     
 
 
@@ -113,6 +113,7 @@ reg = ShiftRegister()
 
 def read_spi():
     # Creates file if it doesn't exist
+    #print(reg.REGISTER_DATA["GPIOA"])
     os.makedirs(os.path.dirname(file), exist_ok=True)
     if not os.path.exists(file):
         with open(file, 'w'):
@@ -129,6 +130,10 @@ def read_spi():
         except StopIteration:
             message = None
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
+    # Switches Testing
+    print("GPIOA CURRVAL: "+bin(reg.REGISTER_DATA["GPIOA"])[2:])
+    print("SPI LINE: "+ message)
+    # Switches Testing End
     if message:
         # Check proper opcode
         if int(message[0:7], 2) == reg.OPCODE:
@@ -142,6 +147,9 @@ def read_spi():
                     pass
             else:
                 # Read
+                #Switches Testing
+                print(addr)
+                #Switches Testing End
                 data = reg.read_register(addr)
                 write_spi(data)
 
@@ -149,6 +157,6 @@ def read_spi():
 def write_spi(data):
     with open(file, 'w') as csvfile:
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
-        csvfile.write(str(data))
+        csvfile.write(hex(data)[2:])
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
 
