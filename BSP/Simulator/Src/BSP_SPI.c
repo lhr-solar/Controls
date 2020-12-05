@@ -10,9 +10,7 @@
 #define FILE_NAME DATA_PATH(SPI_CSV)
 
 /**
- * @brief   Confirms that the CSV file
- *          has been created and throws
- *          an error if not
+ * @brief   Activates SPI to use IOCON.BANK = 1
  * @param   None
  * @return  None
  */
