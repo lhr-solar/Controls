@@ -1,4 +1,8 @@
 #include "Switches.h"
+#include <time.h>
+
+
+
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
 //Readwrite bit = Read: 1, Write: 0
@@ -34,13 +38,14 @@ void Switches_Init(void){
  */ 
 State Switches_Read(switches_t sw){
     uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA,0x00}; //query GPIOA
-    uint8_t SwitchReadData[2] = {0};
+    uint8_t SwitchReadData[4] = {0};
     BSP_SPI_Write(query,3);
     do{
-        BSP_SPI_Read(SwitchReadData,2);
-    }while(SwitchReadData[0] == SPI_GPIOA);
+        BSP_SPI_Read(SwitchReadData,3);
+        printf("DOWHILE-READ: %d|%d|%d|%d\n",SwitchReadData[0],SwitchReadData[1],SwitchReadData[2],SwitchReadData[3]);
+    }while(SwitchReadData[0] == SPI_OPCODE_R);
 
-     if (SwitchReadData[1] & (1 << sw)) {
+     if (SwitchReadData[2] & (1 << sw)) {
         return ON;
     } else {
         return OFF;
