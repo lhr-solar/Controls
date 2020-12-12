@@ -7,7 +7,7 @@ import tkinter as tk
 from ShiftRegister import reg 
 
 # Path of file
-file = "BSP/Simulator/Hardware/Data/Switches.csv"
+file = "BSP/Simulator/Hardware/Data/GPIO.csv"
 
 # Names of switches
 switches = ["CRUZ_ST", "CRUZ_EN", "HZD_SQ", "FR_SW", "Headlight_SW", "LEFT_SW", "RIGHT_SW", "REGEN", "IGN_1", "IGN_2"]
@@ -39,15 +39,50 @@ def toggle(switch, gui):
                 states |= 1<<(i-1)
                 gui[i-1].config(relief=tk.SUNKEN)
     #check the length of the states variable; if its 9 bits, then ign1 is on, if its 10, ign2 is on, and if its less than 10 neither is on
-    if len(bin(states)[2:])>8:
-        ignstates = states & 3>>8
+    if len(bin(states)[2:]) > 8:
+        print("inside if statement")
+        print("states" + str(states))
+        ignStates = states & 3<<8
+        print("ignStates"  + str(ignStates))
+        writeGPIO(ignStates)
     else: 
-        pass
+        writeGPIO(0)
     # set both ignitions to 0
     
     #set Register Data
     reg.REGISTER_DATA["GPIOA"]=states
 
+def writeGPIO(ignStates):
+    # Creates file if it doesn't exist
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    if not os.path.exists(file):
+        with open(file, 'w'):
+            pass
+    
+    lines = []
+    # Grab the current CAN data
+    with open(file, "r") as csv:
+        fcntl.flock(csv.fileno(), fcntl.LOCK_EX)
+        lines = csv.readlines()
+
+    #If the file hasn't been initialzed yet, set the two entries to empty
+    length = len(lines)
+    if length < 4:
+        for i in range(length,2):
+            lines.append('\n')
+    
+    # Write back the CAN data, modifying the specified one
+    #CANtext = "%s,%s,%d" % (id, msg, round((len(msg)-2)/2.0+0.1))
+    #CANtext = (id + ', ' + msg ', ' + (str)(len(msg)))
+    with open(file, "w") as csv:
+        for (i, line) in enumerate(lines):
+            if i == 0:
+                csv.write(str(ignStates))
+                csv.write('\n')
+            else:
+                csv.write(line)
+
+        fcntl.flock(csv.fileno(), fcntl.LOCK_UN)
 
 
 def read():
