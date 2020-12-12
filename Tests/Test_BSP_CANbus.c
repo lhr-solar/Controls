@@ -66,15 +66,18 @@ void testCAN3(void) {
 
     uint8_t rxData[LEN] = {0};
     uint8_t len = BSP_CAN_Read(CAN_1, &id, rxData);
-    printf("ID: 0x%x\nData: ", id);
-    for (uint8_t i = 0; i < len; i++) {
-        printf("0x%x ", rxData[i]);
+    
+    if(len!=0){
+        printf("ID: 0x%x\nData: ", id);
+        for (uint8_t i = 0; i < len; i++) {
+            printf("0x%x ", rxData[i]);
+        }
+        printf("\n");
     }
-    printf("\n");
 }
 
 int main(void) {
-    // testCAN1();
+    testCAN1();
     // testCAN2();
-    testCAN3();
+    //testCAN3();
 }

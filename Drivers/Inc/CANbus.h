@@ -52,7 +52,7 @@ int CANbus_Send(CANId_t id, CANPayload_t payload);
  * @brief   Checks if the CAN ID matches with Motor disable ID
  * @param   CAN line bus
  * @param   pointer to buffer array to store message
- * @return  0 if ID matches and 1 if it doesn't
+ * @return  1 if ID matches and 0 if it doesn't
  */
 ErrorStatus CANbus_Read(uint8_t* buffer);
 
