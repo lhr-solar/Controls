@@ -13,11 +13,11 @@
 
 #include "common.h"
 #include "config.h"
-#include <bsp.h>
+#include "Contactors.h"
 
 int main() {
-    BSP_Contactors_Init(MOTOR);
-    BSP_Contactors_Init(ARRAY);
+    Contactors_Init(MOTOR);
+    Contactors_Init(ARRAY);
     char input[6];
     char motor[] = "MOTOR";
     char array[] = "ARRAY";
@@ -30,22 +30,22 @@ int main() {
         scanf("%s %s", &input, &state);
         if (strcmp(input, motor) == 0){
             if (strcmp(state, on) == 0){
-                BSP_Contactors_Set(MOTOR, ON);
-                result = BSP_Contactors_Get(MOTOR);
+                Contactors_Set(MOTOR, ON);
+                result = Contactors_Get(MOTOR);
             }
             else {
-                BSP_Contactors_Set(MOTOR, OFF);
-                result = BSP_Contactors_Get(MOTOR);
+                Contactors_Set(MOTOR, OFF);
+                result = Contactors_Get(MOTOR);
             }
         }
         if (strcmp(input, array) == 0){
             if (strcmp(state, on) == 0){
-                BSP_Contactors_Set(ARRAY, ON);
-                result = BSP_Contactors_Get(ARRAY);
+                Contactors_Set(ARRAY, ON);
+                result = Contactors_Get(ARRAY);
             }
             else {
-                BSP_Contactors_Set(ARRAY, OFF);
-                result = BSP_Contactors_Get(ARRAY);
+                Contactors_Set(ARRAY, OFF);
+                result = Contactors_Get(ARRAY);
             }
         }
         usleep(1000);
