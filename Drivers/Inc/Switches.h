@@ -1,6 +1,7 @@
 #ifndef SWITCHES_H
 #define SWITCHES_H
 #include "BSP_SPI.h"
+#include "BSP_GPIO.h"
 #include "common.h"
 #include "config.h"
 

@@ -40,19 +40,33 @@ State Switches_Read(switches_t sw){
     uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA,0x00}; //query GPIOA
     uint8_t SwitchReadData[4] = {0};
     BSP_SPI_Write(query,3);
-    //for loop is for addressing bug where register address is returned as the data of that register
-    for (uint8_t i = 0; i <= 1; i++)
-    {
-        do{
-            BSP_SPI_Read(SwitchReadData,3);
-            //printf("DOWHILE-READ: %x|%x|%x|%x\n",SwitchReadData[0],SwitchReadData[1],SwitchReadData[2],SwitchReadData[3]);
-        }while(SwitchReadData[0] == SPI_OPCODE_R);
-    }
 
-    if (SwitchReadData[2] & (1 << sw)) {
-        return ON;
-    } else {
-        return OFF;
+    // If we are not trying to get the state of the ignition switches
+    if(sw != IGN_1 && sw != IGN_2){
+        //for loop is for addressing bug where register address is returned as the data of that register
+        for (uint8_t i = 0; i <= 1; i++)
+        {
+            do{
+                BSP_SPI_Read(SwitchReadData,3);
+                //printf("DOWHILE-READ: %x|%x|%x|%x\n",SwitchReadData[0],SwitchReadData[1],SwitchReadData[2],SwitchReadData[3]);
+            }while(SwitchReadData[0] == SPI_OPCODE_R);
+        }
+
+        if (SwitchReadData[2] & (1 << sw)) {
+            return ON;
+        } else {
+            return OFF;
+        }
     }
+    // If we are trying to get the state of the ignition switches
+    else{ 
+        int ignStates = BSP_GPIO_Read(PORTA);
+        if(sw == IGN_1){
+            return ignStates & 0x1;
+        }else{
+            return (ignStates & 0x2) >> 1;
+        }
+    }
+    
 }
 
