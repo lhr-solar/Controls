@@ -11,6 +11,13 @@
 #include "common.h"
 #include "bsp.h"
 
+typedef struct _spi_message {
+    int8_t opcode;
+    int8_t requestedPort;
+    int8_t data;
+} spi_message;
+
+
 // Opcodes
 #define SPI_OPCODE_R    0x41
 #define SPI_OPCODE_W    0x40
