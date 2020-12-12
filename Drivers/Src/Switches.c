@@ -45,7 +45,7 @@ State Switches_Read(switches_t sw){
     {
         do{
             BSP_SPI_Read(SwitchReadData,3);
-            printf("DOWHILE-READ: %x|%x|%x|%x\n",SwitchReadData[0],SwitchReadData[1],SwitchReadData[2],SwitchReadData[3]);
+            //printf("DOWHILE-READ: %x|%x|%x|%x\n",SwitchReadData[0],SwitchReadData[1],SwitchReadData[2],SwitchReadData[3]);
         }while(SwitchReadData[0] == SPI_OPCODE_R);
     }
 
@@ -54,5 +54,5 @@ State Switches_Read(switches_t sw){
     } else {
         return OFF;
     }
-};
+}
 
