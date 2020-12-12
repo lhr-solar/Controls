@@ -7,6 +7,21 @@ import fcntl
 # path to the file
 file = "BSP/Simulator/Hardware/Data/UART.csv"
 
+def _digit(c):
+    if c > 9:
+        return chr(c + 87)
+    else:
+        return chr(c + 48)
+
+def _convert_to(msg):
+    out = ""
+    for c in msg:
+        hi = ord(c) >> 4
+        lo = ord(c) & 15
+        out += _digit(hi)
+        out += _digit(lo)
+    return out
+
 
 def write(msg):
     """ Writes the message to UART_2
@@ -35,7 +50,7 @@ def write(msg):
     with open(file, "w") as csv:
         for (i, line) in enumerate(lines):
             if i == 1:
-                csv.write(msg)
+                csv.write(_convert_to(msg))
                 csv.write('\n')
             else:
                 csv.write(line)
