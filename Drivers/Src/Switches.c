@@ -40,12 +40,16 @@ State Switches_Read(switches_t sw){
     uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA,0x00}; //query GPIOA
     uint8_t SwitchReadData[4] = {0};
     BSP_SPI_Write(query,3);
-    do{
-        BSP_SPI_Read(SwitchReadData,3);
-        printf("DOWHILE-READ: %d|%d|%d|%d\n",SwitchReadData[0],SwitchReadData[1],SwitchReadData[2],SwitchReadData[3]);
-    }while(SwitchReadData[0] == SPI_OPCODE_R);
+    //for loop is for addressing bug where register address is returned as the data of that register
+    for (uint8_t i = 0; i <= 1; i++)
+    {
+        do{
+            BSP_SPI_Read(SwitchReadData,3);
+            printf("DOWHILE-READ: %x|%x|%x|%x\n",SwitchReadData[0],SwitchReadData[1],SwitchReadData[2],SwitchReadData[3]);
+        }while(SwitchReadData[0] == SPI_OPCODE_R);
+    }
 
-     if (SwitchReadData[2] & (1 << sw)) {
+    if (SwitchReadData[2] & (1 << sw)) {
         return ON;
     } else {
         return OFF;
