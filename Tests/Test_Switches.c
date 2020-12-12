@@ -17,14 +17,5 @@ int main() {
         printf("%d\t\t", Switches_Read(RIGHT_SW));
         printf("%d\t", Switches_Read(IGN_1));
         printf("%d\n", Switches_Read(IGN_2));
-
-        /*printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
-            Switches_Read(CRUZ_st),
-            Switches_Read(CRUZ_EN),
-            Switches_Read(HZD_SQ),
-            Switches_Read(FR_SW),
-            Switches_Read(Headlight_SW),
-            Switches_Read(LEFT_SW),
-            Switches_Read(RIGHT_SW));*/
     }
 }
