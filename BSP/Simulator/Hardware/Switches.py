@@ -40,10 +40,14 @@ def toggle(switch, gui):
                 gui[i-1].config(relief=tk.SUNKEN)
     #check the length of the states variable; if its 9 bits, then ign1 is on, if its 10, ign2 is on, and if its less than 10 neither is on
     if len(bin(states)[2:]) > 8:
-        print("inside if statement")
-        print("states" + str(states))
+        #print("inside if statement")
+        #print("states" + str(states))
         ignStates = states & 3<<8
-        print("ignStates"  + str(ignStates))
+        
+        # Deleting ignition switches from state 
+        #states = states & 0b0011111111
+
+        #print("ignStates"  + str(ignStates))
         writeGPIO(ignStates)
     else: 
         writeGPIO(0)
@@ -77,7 +81,7 @@ def writeGPIO(ignStates):
     with open(file, "w") as csv:
         for (i, line) in enumerate(lines):
             if i == 0:
-                csv.write(str(ignStates))
+                csv.write(str(ignStates>>8))
                 csv.write('\n')
             else:
                 csv.write(line)
