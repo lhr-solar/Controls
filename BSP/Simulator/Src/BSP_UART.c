@@ -19,8 +19,7 @@
  * @return void
  * Note that strlen(output) == 2 * strlen(input), so ensure correct sizing
  */
-static void convertTo(const char *in, char *out) {
-    int len = strlen(in);
+static void convertTo(const uint8_t *in, char *out, int len) {
     for (int i=0; i<len; i++) {
         int hi = in[i] >> 4;
         int lo = in[i] & 0xf;
@@ -126,7 +125,7 @@ uint32_t BSP_UART_Write(UART_t uart, char* str, uint32_t len) {
     }
 
     // Put the converted string in variable for later
-    convertTo(str, csv);
+    convertTo(str, csv, len);
 
     // Close file
     flock(fno, LOCK_UN);

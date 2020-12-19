@@ -16,6 +16,24 @@
 int main(void) {
     BSP_UART_Init(UART_2);
     BSP_UART_Init(UART_3);
+
+    const char *str1 = "Hello World!";
+    const char *str2 = "Different Text";
+    char out1[TX_SIZE];
+    char out2[TX_SIZE];
+
+    BSP_UART_Write(UART_2, str1, strlen(str1));
+    BSP_UART_Write(UART_3, str2, strlen(str2));
+
+    
+    BSP_UART_Read(UART_3, out2);
+    BSP_UART_Read(UART_2, out1);
+    printf("%s\t%s\n", out1, out2);
+}
+
+int main2(void) {
+    BSP_UART_Init(UART_2);
+    BSP_UART_Init(UART_3);
     while (1) {
         float speed = (rand() % 500) / 10.0;
         int cruiseEn = rand() % 2;
