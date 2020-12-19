@@ -4,9 +4,8 @@ import os
 import csv
 import fcntl
  
-file = "BSP/Simulator/Hardware/Data/PreCharge.csv";
-
-
+file = "BSP/Simulator/Hardware/Data/GPIO.csv";
+    
 def read():
     os.makedirs(os.path.dirname(file), exist_ok = True);
     if not os.path.exists(file):
@@ -18,11 +17,13 @@ def read():
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX);
         try:
             csvreader = csv.reader(csvfile);
+            next(csvreader) # skip first line
+            next(csvreader) # skip second line
             charges = next(csvreader);
         except StopIteration:
             charges = [0];
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN);
         states = [0, 0]
         states[0] = (int(charges[0]) % 2)
-        states[1] = (int(charges[0])>>1 % 2)
+        states[1] = ((int(charges[0])>>3) % 2)
         return states
