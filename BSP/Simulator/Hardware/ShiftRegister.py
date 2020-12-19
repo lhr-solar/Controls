@@ -21,7 +21,7 @@ class ShiftRegister:
         "DEFVALB": 0x00,
         "INTCONA": 0x00,
         "INTCONB": 0x00,
-        "IOCON": 0x00,
+        "IOCON": 0x80,
         "GPPUA": 0x00,
         "GPPUB": 0x00,
         "INTFA": 0x00,
@@ -145,12 +145,19 @@ def read_spi():
                     pass
             else:
                 # Read
-                data = reg.read_register(addr)
+                try:
+                    data = reg.read_register(addr)
+                except KeyError:
+                    print("Invalid register access. Make sure to initialize properly")
                 write_spi(data)
 
 
 def write_spi(data):
     with open(file, "w") as csvfile:
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX)
-        csvfile.write(str(data))
+        csvfile.write(hex(data)[2:])
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_UN)
+
+
+if __name__ == "__main__":
+    read_spi()

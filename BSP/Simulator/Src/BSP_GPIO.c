@@ -71,15 +71,12 @@ void BSP_GPIO_Write(port_t port, uint16_t data) {
     int fno = fileno(fp);
     flock(fno, LOCK_EX);
 
-    int csvContents[NUM_PORTS];
+    int csvContents[NUM_PORTS] = {0};
 
     for(int i = 0; i < NUM_PORTS; i++){
         int tok;
-        fscanf(fp, "%d", &tok);
-        if(tok){
+        if (fscanf(fp, "%d", &tok) != EOF) {
             csvContents[i] = tok;
-        } else {
-            csvContents[i] = -1;
         }
     }
 

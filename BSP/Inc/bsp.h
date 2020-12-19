@@ -8,8 +8,7 @@
 #include "BSP_UART.h"
 #include "BSP_SPI.h"
 #include "BSP_Switches.h"
-#include "BSP_Contactors.h"
-#include "BSP_Lights.h"
+#include "BSP_Precharge.h"
 #include "BSP_GPIO.h"
 
 #include <sys/file.h>
