@@ -7,6 +7,9 @@
 #include "config.h"
 #include "BSP_GPIO.h"
 
+#define PRECHARGE_PORT PORTC
+#define MOTOR_BIT 3
+
 typedef enum {ARRAY_PRECHARGE = 0, MOTOR_PRECHARGE} board_t;
 
 /**

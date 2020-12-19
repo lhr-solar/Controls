@@ -3,8 +3,6 @@
 #include "Precharge.h"
 
 #define FILE_NAME DATA_PATH(PRECHARGE_CSV)
-#define PRECHARGE_PORT PORTC
-#define MOTOR_BIT 3
 
 /**
  * @brief writes the status (ON/OFF) of a board to a CSV file

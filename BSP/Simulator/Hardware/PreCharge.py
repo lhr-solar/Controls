@@ -9,7 +9,6 @@ file = "BSP/Simulator/Hardware/Data/GPIO.csv";
 def write(data, port=2):
     os.makedirs(os.path.dirname(file), exist_ok = True);
     if not os.path.exists(file):
-        open(file, 'w')
         with open(file, 'w'):
             pass
 
@@ -17,7 +16,11 @@ def write(data, port=2):
         fcntl.flock(csvfile.fileno(), fcntl.LOCK_EX);
         lines = csvfile.readlines()
     
-    lines[port-1] = str(data) + '\n'
+    try:
+        lines[port-1] = str(data) + '\n'
+        
+    except IndexError:
+        pass
 
     with open(file, "w") as csvfile:
         csvfile.writelines(lines)
