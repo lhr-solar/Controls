@@ -1,6 +1,7 @@
 #include "common.h"
 #include "config.h"
 #include "Lights.h"
+#include <unistd.h>
 
 int main() {
     Lights_Init();
@@ -17,11 +18,11 @@ int main() {
                 Lights_Read(LEFT_BLINK),
                 Lights_Read(BPS_PWR),
                 Lights_Read(BrakeLight));
-        fflush(stdout);
-        
+        fflush(stdout);  
         light_t light = rand() % 10;
         State state = Lights_Read(light);
         Lights_Set(light, !state);
+        usleep(10000);
     }
     printf("\n");
 }
