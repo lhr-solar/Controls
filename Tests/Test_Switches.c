@@ -5,7 +5,7 @@
 int main() {
     Switches_Init();
     printf("\n");
-    printf("CRUZ_st\tCRUZ_EN\tHZD_SQ\tFR_SW\tHeadlight_SW\tLEFT_SW\tRIGHT_SW\tIGN_1\tIGN_2\n");
+    printf("CRUZ_st\tCRUZ_EN\tHZD_SQ\tFR_SW\tHeadlight_SW\tLEFT_SW\tRIGHT_SW\tIGN_1\tIGN_2\tREV_SW\n");
     while(1){
 
         printf("%d\t", Switches_Read(CRUZ_st));
@@ -16,6 +16,7 @@ int main() {
         printf("%d\t", Switches_Read(LEFT_SW));
         printf("%d\t\t", Switches_Read(RIGHT_SW));
         printf("%d\t", Switches_Read(IGN_1));
-        printf("%d\n", Switches_Read(IGN_2));
+        printf("%d\t", Switches_Read(IGN_2));
+        printf("%d\n", Switches_Read(REV_SW));
     }
 }
