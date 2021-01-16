@@ -51,7 +51,15 @@ State Switches_Read(switches_t sw){
     uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA,0x00}; //query GPIOA
     uint8_t SwitchReadData[2] = {0};
     // If we are not trying to get the state of the ignition switches, or the Reverse switch
-    if(sw != IGN_1 && sw != IGN_2 && sw != REV_SW){
+    switch(sw) {
+    case CRUZ_SW:
+    case CRUZ_EN:
+    case HZD_SQ: 
+    case FR_SW: 
+    case HEADLIGHT_SW: 
+    case LEFT_SW: 
+    case RIGHT_SW: 
+    case REGEN_SW:
         BSP_SPI_Write(query,3);
         do{
             BSP_SPI_Read(SwitchReadData,2);
@@ -61,9 +69,8 @@ State Switches_Read(switches_t sw){
         } else {
             return OFF;
         }
-    }
-    // If we are trying to get the state of the reverse switch
-    else if (sw == REV_SW){
+
+    case REV_SW:
         query[1] = SPI_GPIOB;
         BSP_SPI_Write(query,3);
         do{
@@ -74,15 +81,19 @@ State Switches_Read(switches_t sw){
         } else {
             return OFF;
         }
-    }
-    // If we are trying to get the state of the ignition switches
-    else{ 
+
+    case IGN_1: {
         int ignStates = BSP_GPIO_Read(PORTA);
-        if(sw == IGN_1){
-            return (ignStates & 0x2) >> 1;
-        }else{
-            return (ignStates & 0x1);
-        }
+        return (ignStates & 0x2) >> 1;
+    }
+    case IGN_2: {
+        int ignStates = BSP_GPIO_Read(PORTA);
+        return (ignStates & 0x1);
+    }
+
+    default:
+        // Shouldn't happen
+        return -1;
     }
     
 }
