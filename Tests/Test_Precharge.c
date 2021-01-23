@@ -1,12 +1,12 @@
 /**
- * Test file for prechagre board
+ * Test file for precharge board
  * 
  * 
  */ 
 
 #include "common.h"
 #include "config.h"
-#include <bsp.h>
+#include "Precharge.h"
 
 int main() {
     char board[6];
@@ -23,11 +23,11 @@ int main() {
         gets(status);
         if(!strcmp(board, motor)){
             if(!strcmp(status,on)){
-                printf("Writing to csv...\n");
-                BSP_Precharge_Write(MOTOR_PRECHARGE, ON);
+                printf("Writing to board...\n");
+                Precharge_Write(MOTOR_PRECHARGE, ON);
             }
             else if(!strcmp(status,off)){
-                BSP_Precharge_Write(MOTOR_PRECHARGE, OFF);
+                Precharge_Write(MOTOR_PRECHARGE, OFF);
             }
             else{
                 printf("unrecognized status\n");
@@ -35,10 +35,10 @@ int main() {
         }
         else if(!strcmp(board,array)){
             if(!strcmp(status,on)){
-                BSP_Precharge_Write(ARRAY_PRECHARGE, ON);
+                Precharge_Write(ARRAY_PRECHARGE, ON);
             }
             else if(!strcmp(status,off)){
-                BSP_Precharge_Write(ARRAY_PRECHARGE, OFF);
+                Precharge_Write(ARRAY_PRECHARGE, OFF);
             }
             else{
                 printf("unrecognized status\n");
@@ -47,6 +47,8 @@ int main() {
         else{
             printf("unrecognized board\n");
         }
+        printf("State of board:\n");
+        printf("Array: %d  Motor: %d\n", Precharge_Read(ARRAY_PRECHARGE), Precharge_Read(MOTOR_PRECHARGE));
         usleep(1000);
     }
 }
