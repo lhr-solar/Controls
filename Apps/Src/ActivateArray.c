@@ -3,6 +3,9 @@
 #include "ActivateArray.h"
 
 void Task_ArrayConnection(void *p_arg) {
+
+    (void) p_arg;
+
     OS_ERR err;
     CPU_TS  ts;
 
@@ -13,7 +16,7 @@ void Task_ArrayConnection(void *p_arg) {
     Precharge_Write(ARRAY_PRECHARGE, ON); // Turn on the array precharge
     Contactors_Init(ARRAY); //  Initialize the contactors
 
-    OSTimeDlyHMSM(0, 0, 5, 0, (OS_OPT_TIME_HMSM_STRICT | OS_OPT_TIME_DLY), &err);
+    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     // TODO: error handling
 
     Contactors_Set(ARRAY, ON); // Actually activate the contactor
