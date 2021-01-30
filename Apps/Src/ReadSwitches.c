@@ -1,5 +1,7 @@
 //#include "Tasks.h"
 #include <os.h>
+#include "Switches.h"
+#include "Tasks.h"
 
 // Needs to Read the Switches states (Driver level switches code) and trigger appropriate RTOS events
 // Needs to Signal:
@@ -8,8 +10,8 @@
 // LightsChange_Sem4 : Counting Semaphore
 // CarCAN_Sem4 : Counting Semaphore
 //
-// ActivateArray_Sem4 : Binary Semaphore : IGN_1
-// ActivateMotor_Sem4 : Binary Semaphore : IGN_2
+// ActivateArray_Sem4 : Binary Semaphore : IGN_1 : done
+// ActivateMotor_Sem4 : Binary Semaphore : IGN_2 : done
 // BlinkLight_Sem4  : Binary Semaphore
 
 /**
@@ -20,27 +22,59 @@ void Task_ReadSwitches (void* p_arg) {
     Switches_Init();
     OS_ERR err;
     while(1){
-       if (Switches_Read(IGN_2)) {
-           //Should post to both ActivateMotor and ActivateArray
-           OSSemSet(
-              (OS_SEM) &ActivateMotor_Sem4,
-               (OS_SEM_CTR) 1,
+
+        //check ignition
+        if(Switches_Read(IGN_2)&&Switches_Read(IGN_1)){ //if both ignitions are on
+            OSSemPost(
+               &ActivateMotor_Sem4,
+               (OS_OPT) OS_OPT_POST_ALL,
                (OS_ERR*)&err
            );
-           OSSemSet(
-               (OS_SEM) &ActivateArray_Sem4,
-               (OS_SEM_CTR) 1,
+           OSSemPost(
+               &ActivateArray_Sem4,
+               (OS_OPT) OS_OPT_POST_ALL,
                (OS_ERR*)&err
            );
-       } else if (Switches_Read(IGN_1)) {
-           //Should post to only ActivateArray and not ActivateMotor
-           OSSemSet(
-               (OS_SEM) &ActivateArray_Sem4,
-               (OS_SEM_CTR) 1,
+        }else if (Switches_Read(IGN_1)){ //if only IGN1 is on
+            OSSemPost(
+               &ActivateArray_Sem4,
+               (OS_OPT) OS_OPT_POST_ALL,
                (OS_ERR*)&err
            );
-       }
-       //Check other switches
-        
+        } else {
+            //TODO: neither ignition is turned on
+        }
+
+        //blinkers check
+        if(Switches_Read(LEFT_SW)&&(!Switches_Read(RIGHT_SW))){
+            switches.LEFT_SW = 1;
+            switches.RIGHT_SW = 0;
+            OSSemPost(
+               &BlinkLight_Sem4,
+               (OS_OPT) OS_OPT_POST_ALL,
+               (OS_ERR*)&err
+           );
+        } else if (Switches_Read(RIGHT_SW)&&(!Switches_Read(LEFT_SW))){
+            switches.LEFT_SW = 0;
+            switches.RIGHT_SW = 1;
+            OSSemPost(
+               &BlinkLight_Sem4,
+               (OS_OPT) OS_OPT_POST_ALL,
+               (OS_ERR*)&err
+           );
+        } else if (Switches_Read(RIGHT_SW)&&Switches_Read(LEFT_SW)){
+            switches.LEFT_SW = 1;
+            switches.RIGHT_SW = 1;
+            OSSemPost(
+               &BlinkLight_Sem4,
+               (OS_OPT) OS_OPT_POST_ALL,
+               (OS_ERR*)&err
+           );
+        } else {
+            switches.LEFT_SW = 0;
+            switches.RIGHT_SW = 0;
+        }
+
+        return 0;
     }
 }
