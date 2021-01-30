@@ -19,5 +19,8 @@ void Task_MotorConnection(void *p_arg) {
 
     Contactors_Set(MOTOR, ON); // Actually activate motor contactors
 
+    OSSemPost(&SendTritium_Sem4, OS_OPT_POST_1, &err);
+    // TODO: check for errors
+
     OSTaskDel(NULL, &err);
 }
