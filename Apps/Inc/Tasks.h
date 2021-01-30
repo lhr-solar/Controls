@@ -3,6 +3,7 @@
 #ifndef __TASKS_H
 #define __TASKS_H
 
+#include "common.h"
 #include "os.h"
 
 /**
