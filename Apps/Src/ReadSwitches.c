@@ -23,28 +23,36 @@ void Task_ReadSwitches (void* p_arg) {
     OS_ERR err;
     while(1){
 
-        //check ignition
-        if(Switches_Read(IGN_2)&&Switches_Read(IGN_1)){ //if both ignitions are on
+        //ignition check
+        uint8_t ignstates = 0x00;
+        ignstates = ignstates || (Switches_Read(IGN_2)<<1);
+        ignstates = ignstates || (Switches_Read(IGN_1));
+        switch(ignstates){
+            //TODO: add 0b00 case where car turns off
+            case 0b01:
+            //IGN1 is on
+            OSSemPost(
+                &ActivateArray_Sem4,
+                (OS_OPT) OS_OPT_POST_ALL,
+                (OS_ERR*)&err
+            );
+            case 0b11:
+            //Both are on
             OSSemPost(
                &ActivateMotor_Sem4,
                (OS_OPT) OS_OPT_POST_ALL,
                (OS_ERR*)&err
-           );
-           OSSemPost(
-               &ActivateArray_Sem4,
-               (OS_OPT) OS_OPT_POST_ALL,
-               (OS_ERR*)&err
-           );
-        }else if (Switches_Read(IGN_1)){ //if only IGN1 is on
+            );
             OSSemPost(
-               &ActivateArray_Sem4,
-               (OS_OPT) OS_OPT_POST_ALL,
-               (OS_ERR*)&err
-           );
-        } else {
-            //TODO: neither ignition is turned on
+                &ActivateArray_Sem4,
+                (OS_OPT) OS_OPT_POST_ALL,
+                (OS_ERR*)&err
+            );
+            case 0b10:
+                return -1; //Shouldn't happen - error case
+            
         }
-
+       
         //blinkers check
         if(Switches_Read(LEFT_SW)&&(!Switches_Read(RIGHT_SW))){
             switches.LEFT_SW = 1;
@@ -73,7 +81,9 @@ void Task_ReadSwitches (void* p_arg) {
         } else {
             switches.LEFT_SW = 0;
             switches.RIGHT_SW = 0;
-        }
+        };
+
+
 
         return 0;
     }
