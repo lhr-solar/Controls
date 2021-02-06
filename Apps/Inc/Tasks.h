@@ -4,6 +4,10 @@
 #define __TASKS_H
 
 #include "os.h"
+<<<<<<< HEAD
+=======
+#include "StateTypes.h"
+>>>>>>> RTOS_SwitchRead
 
 /**
  * Priority Definitions
@@ -133,5 +137,8 @@ extern OS_SEM SendCarCAN_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
+
+extern SwitchStates switches;
+extern LightStates lights;
 
 #endif
