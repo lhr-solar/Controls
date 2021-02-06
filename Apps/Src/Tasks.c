@@ -63,3 +63,4 @@ OS_SEM SendCarCAN_Sem4;
  */
 // TODO: Put all global state variables here
 SwitchStates switches;
+LightStates lights;
