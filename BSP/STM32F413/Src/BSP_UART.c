@@ -47,6 +47,9 @@ static void getUSARTReferences(UART_t uartSelect, USART_TypeDef **uart, UartFifo
 
 /**
  * @brief   Initializes the UART peripheral
+ * 
+ * On our board, this is the UART peripheral
+ * used for USB communications.
  */
 static void BSP_UART2_Init(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -62,12 +65,12 @@ static void BSP_UART2_Init(void) {
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-    GPIO_Init(GPIOD, &GPIO_InitStruct);
+    GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource8, GPIO_AF_USART2);
-    GPIO_PinAFConfig(GPIOD, GPIO_PinSource9, GPIO_AF_USART2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
 
-    UART_InitStruct.USART_BaudRate = 9600;
+    UART_InitStruct.USART_BaudRate = 115200;
     UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     UART_InitStruct.USART_Parity = USART_Parity_No;
@@ -90,7 +93,6 @@ static void BSP_UART2_Init(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
 }
 
-#define NUCLEO_TARGET
 #ifdef NUCLEO_TARGET
 /**
  * @brief   Initializes the UART peripheral
