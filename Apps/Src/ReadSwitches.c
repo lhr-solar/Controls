@@ -27,105 +27,101 @@ void Task_ReadSwitches (void* p_arg) {
     while(1){
 
         //ActivateArray_SEM4 + ActivateMotor_SEM4
-        uint8_t ignstates = 0x00;
-        ignstates = ignstates || (Switches_Read(IGN_2)<<1);
-        ignstates = ignstates || (Switches_Read(IGN_1));
-        switch(ignstates){
-            case 0x00:
-                //neither is on
-                switches.IGN_1 = 0;
-                switches.IGN_2 = 0;
-                //TODO: add car turn off code?
-            case 0x01:
-            //IGN1 is on
-                switches.IGN_1=1;
-                switches.IGN_2=0;
+        uint8_t ignStates = 0x00; //holds states read from Switches Driver
+        uint8_t ignStored = 0x00; //holds states stored in globals
+        ignStates = ignStates || (Switches_Read(IGN_2)<<1);
+        ignStates = ignStates || (Switches_Read(IGN_1));
+        ignStored = ignStored || ((ign.IGN2&0x01)<<1);
+        ignStored = ignStored || (ign.IGN1&0x01);
+        if (ignStored!=ignStates){
+            switch(ignStates){
+                case 0x00:
+                    //neither is on
+                    switches.IGN_1 = 0;
+                    switches.IGN_2 = 0;
+                    //TODO: add car turn off code?
+                case 0x01:
+                //IGN1 is on
+                    switches.IGN_1=1;
+                    switches.IGN_2=0;
+                    OSSemPost(
+                        &ActivateArray_Sem4,
+                        (OS_OPT) OS_OPT_POST_ALL,
+                        (OS_ERR*)&err
+                    );
+                case 0x03:
+                //Both are on
+                    switches.IGN_2=1;
+                    switches.IGN_1=1;
+                    OSSemPost(
+                    &ActivateMotor_Sem4,
+                    (OS_OPT) OS_OPT_POST_ALL,
+                    (OS_ERR*)&err
+                    );
+                    OSSemPost(
+                        &ActivateArray_Sem4,
+                        (OS_OPT) OS_OPT_POST_ALL,
+                        (OS_ERR*)&err
+                );
+                case 0x02:
+                    return -1; //Shouldn't happen - error case; only IGN2 is on
+                
+            }
+       
+        }
+        
+        //BlinkLight_Sem4 + LightsChange_Sem4
+        uint8_t lightSwitchStates = 0x00; //holds states read from Switches_Driver
+        uint8_t lightSwitchStored = 0x00; //holds states stored in global
+        switches_t lightSwitches[]={LEFT_SW,RIGHT_SW,HEADLIGHT_SW}; //the three switches that we need to check
+        uint8_t storeLightSwitches[]={switches.LEFT_SW,switches.RIGHT_SW,switches.HEADLIGHT_SW}; //three global switch states we need
+        for(uint8_t i = 0; i<3; i++){
+            lightSwitchStates = lightSwitchStates || (Switches_Read(lightSwitches[i])<<i);
+            lightSwitchStored = lightSwitchStored || (storeLightSwitches[i]<<i);
+        }
+        if(lightSwitchStored!=lightSwitchStates){
+            //if any of the bits dont match, LightsChange must get signaled. If the Blinker bits dont match blinker sem must ALSO get signaled
+            //left sw: bit 0, right sw: bit 1, head sw: bit 2
+            for(uint8_t i = 0; i<3; i++){
+                storeLightSwitches[i]=(lightSwitchStates&(1<<i)); //store read values of states in buffer
+            }
+            switches.LEFT_SW = storeLightSwitches[0];
+            switches.RIGHT_SW = storeLightSwitches[1];
+            switches.HEADLIGHT_SW = storeLightSwitches[2];
+            if((lightSwitchStored&0xFB)!=(lightSwitchStates&0xFB)){
+                //Headlight bit was cleared, and they were still not equal -> blinkers states are new and blinklight has to be signaled
                 OSSemPost(
-                    &ActivateArray_Sem4,
+                    &BlinkLight_Sem4,
                     (OS_OPT) OS_OPT_POST_ALL,
                     (OS_ERR*)&err
                 );
-            case 0x03:
-            //Both are on
-                switches.IGN_2=1;
-                switches.IGN_1=1;
-                OSSemPost(
-                &ActivateMotor_Sem4,
+            }
+            OSSemPost(
+                &LightsChange_Sem4,
                 (OS_OPT) OS_OPT_POST_ALL,
                 (OS_ERR*)&err
-                );
-                OSSemPost(
-                    &ActivateArray_Sem4,
-                    (OS_OPT) OS_OPT_POST_ALL,
-                    (OS_ERR*)&err
             );
-            case 0x02:
-                return -1; //Shouldn't happen - error case; only IGN2 is on
-            
-        }
-       
-        //BlinkLight_Sem4
-        uint8_t blinkStates = 0x00;
-        blinkStates = blinkStates || (Switches_Read(LEFT_SW)<<1);
-        blinkStates = blinkStates || (Switches_Read(RIGHT_SW));       
-        switch(blinkStates){
-            case 0x03:
-            //both are on
-                switches.LEFT_SW = 1;
-                switches.RIGHT_SW = 1;
-                OSSemPost(
-                    &BlinkLight_Sem4,
-                    (OS_OPT) OS_OPT_POST_ALL,
-                    (OS_ERR*)&err
-                );
-            case 0x02:
-            //Left Switch is on
-                switches.LEFT_SW = 1;
-                switches.RIGHT_SW = 0;
-                OSSemPost(
-                    &BlinkLight_Sem4,
-                    (OS_OPT) OS_OPT_POST_ALL,
-                    (OS_ERR*)&err
-                );
-            case 0x01:
-            //Right Switch is on
-                switches.LEFT_SW = 0;
-                switches.RIGHT_SW = 1;
-                OSSemPost(
-                    &BlinkLight_Sem4,
-                     (OS_OPT) OS_OPT_POST_ALL,
-                    (OS_ERR*)&err
-                );
-            case 0x00:
-            //neither are on
-                switches.LEFT_SW = 0;
-                switches.RIGHT_SW = 0;
-            // OSSemSet(
-            //     &BlinkLight_Sem4,
-            //     (OS_SEM_CTR) 0,
-            //     (OS_ERR*)&err
-            // );
         }
 
         //VelocityChange_Sem4
         switches_t velSwitches[] = {CRUZ_SW, CRUZ_EN, FR_SW, REV_SW, REGEN_SW};
-        uint8_t storeSwitches[] = {switches.CRUZ_SW,switches.CRUZ_EN,switches.FR_SW,switches.REV_SW,switches.REGEN_SW};
-        uint8_t velReadStates = 0x00; //holds read states of switches in least sig 5 bits
-        uint8_t velStoreStates = 0x00; //hold stored global states of velocity switches in least sig bits
-        for(int i = 0; i<5;i++){
-            velReadStates = velReadStates || (Switches_Read(velSwitches[i])<<i);
-            velStoreStates = velStoreStates || (storeSwitches[i]<<i);
+        uint8_t storeVelSwitches[] = {switches.CRUZ_SW,switches.CRUZ_EN,switches.FR_SW,switches.REV_SW,switches.REGEN_SW};
+        uint8_t velStates = 0x00; //holds read states of switches in least sig 5 bits
+        uint8_t velStored = 0x00; //hold stored global states of velocity switches in least sig bits
+        for(uint8_t i = 0; i<5;i++){
+            velStates = velStates || (Switches_Read(velSwitches[i])<<i);
+            velStored = velStored || ((storeVelSwitches[i]&1)<<i);
         }
-        if(velReadStates!=velStoreStates){
+        if(velStates!=velStored){
             //stored states and read states dont match up
-            for(int i = 0; i<5; i++){
-                storeSwitches[i]=(velReadStates&(1<<i));
+            for(uint8_t i = 0; i<5; i++){
+                storeVelSwitches[i]=(velStates&(1<<i));
             }
-            switches.CRUZ_SW = storeSwitches[0];
-            switches.CRUZ_EN=storeSwitches[1];
-            switches.FR_SW=storeSwitches[2];
-            switches.REV_SW=storeSwitches[3];
-            switches.REGEN_SW=storeSwitches[4];
+            switches.CRUZ_SW = storeVelSwitches[0];
+            switches.CRUZ_EN=storeVelSwitches[1];
+            switches.FR_SW=storeVelSwitches[2];
+            switches.REV_SW=storeVelSwitches[3];
+            switches.REGEN_SW=storeVelSwitches[4];
             OSSemPost(
                 &VelocityChange_Sem4,
                 (OS_OPT) OS_OPT_POST_ALL,
@@ -133,8 +129,9 @@ void Task_ReadSwitches (void* p_arg) {
             );
         }
 
-        //LightsChange_SEM4
-        
+        //LightsChange_Sem4 ; LEFT_BLINK, RIGHT_BLINK, Headlight_ON
+
+
 
 
         return 0;
