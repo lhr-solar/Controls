@@ -30,12 +30,17 @@ void Task_ReadPedals(void *p_arg){
         accelerator_percentage = Pedals_Read(ACCELERATOR);
         brake_percentage = Pedals_Read(BRAKE);
 
-        // Post to semaphores (velocityChange, lightsChange)
-        OSSemPost (&VelocityChange_Sem4, OS_OPT_POST_ALL, &err);
-        OSSemPost (&LightsChange_Sem4, OS_OPT_POST_ALL, &err);
 
-        // Delay 
-        
+        // The velocity and lights threads can run without blocking
+        // semaphores, the delay added an the end of this loop will allow
+        // them to run
+
+        // Post to semaphores (velocityChange, lightsChange) 
+        // OSSemPost (&VelocityChange_Sem4, OS_OPT_POST_ALL, &err);
+        // OSSemPost (&LightsChange_Sem4, OS_OPT_POST_ALL, &err);
+
+        // Delay for 0.01 sec
+        OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 }
 
