@@ -2,6 +2,10 @@
 
 #include "RTOSPedals.h"
 
+//Accelerator and Brake Percentage
+int8_t accelerator_percentage;
+int8_t brake_percentage;
+
 /**
 * @brief   Initialize both pedals to 0%
 * @param   None
@@ -29,7 +33,28 @@ void Task_ReadPedals(void *p_arg){
         // Post to semaphores (velocityChange, lightsChange)
         OSSemPost (&VelocityChange_Sem4, OS_OPT_POST_ALL, &err);
         OSSemPost (&LightsChange_Sem4, OS_OPT_POST_ALL, &err);
+
+        // Delay 
+        
     }
+}
+
+/**
+* @brief   Getter function for local variable brake_percentage
+* @param   None
+* @return  brake_percentage
+*/ 
+uint8_t RTOSPedals_GetBrakePercentage(void){
+    return brake_percentage;
+}
+
+/**
+* @brief   Getter function for local variable accelerator_percentage
+* @param   None
+* @return  accelerator_percentage
+*/ 
+uint8_t RTOSPedals_GetAcceleratorPercentage(void){
+    return accelerator_percentage;
 }
 
 

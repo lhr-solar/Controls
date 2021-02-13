@@ -10,10 +10,6 @@
 #include "Tasks.h"
 #include "os.h"
 
-//Globals located in task.h
-extern int8_t accelerator_percentage;
-extern int8_t brake_percentage;
-
 // Semaphores
 extern OS_SEM VelocityChange_Sem4;
 extern OS_SEM LightsChange_Sem4;
@@ -24,5 +20,19 @@ extern OS_SEM LightsChange_Sem4;
 * @return  None
 */ 
 void Task_ReadPedals(void *p_arg);
+
+/**
+* @brief   Getter function for local variable brake_percentage
+* @param   None
+* @return  brake_percentage
+*/ 
+uint8_t RTOSPedals_GetBrakePercentage(void);
+
+/**
+* @brief   Getter function for local variable accelerator_percentage
+* @param   None
+* @return  accelerator_percentage
+*/ 
+uint8_t RTOSPedals_GetAcceleratorPercentage(void);
 
 #endif
