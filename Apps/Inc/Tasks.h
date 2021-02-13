@@ -3,6 +3,7 @@
 #ifndef __TASKS_H
 #define __TASKS_H
 
+#include "common.h"
 #include "os.h"
 
 /**
@@ -133,5 +134,7 @@ extern OS_SEM SendCarCAN_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
+int8_t brake_percentage;
+int8_t accelerator_percentage;
 
 #endif
