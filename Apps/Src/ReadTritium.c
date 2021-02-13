@@ -13,4 +13,23 @@ void Task_ReadTritium(void* p_arg){
 
 	uint8_t *message;
 	ErrorStatus status = CANbus_Read(message);
+
+	if(message){
+
+		err = OSQPost(CANbus_MsgQ, (void *)message);
+		
+		switch(err){
+			case OS_Q_FULL:
+				break;
+			case OS_ERR_EVENT_TYPE:
+				break;
+			case OS_ERR_PEVENT_NULL:
+				break;
+			case OS_ERR_POST_NULL_PTR:
+				// This shouldn't happen since we check if message was null earlier
+				break;
+		}
+
+	}
+	// Not sure what to do if message returns null
 }
