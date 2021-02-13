@@ -31,8 +31,8 @@ void Task_ReadSwitches (void* p_arg) {
         uint8_t ignStored = 0x00; //holds states stored in globals
         ignStates = ignStates || (Switches_Read(IGN_2)<<1);
         ignStates = ignStates || (Switches_Read(IGN_1));
-        ignStored = ignStored || ((switches.IGN_2&0x01)<<1);
-        ignStored = ignStored || (switches.IGN_1&0x01);
+        ignStored = ignStored || ((switches.IGN_2&&0x01)<<1);
+        ignStored = ignStored || (switches.IGN_1&&0x01);
         if (ignStored!=ignStates){
             switch(ignStates){
                 case 0x00:
@@ -82,15 +82,10 @@ void Task_ReadSwitches (void* p_arg) {
         if(lightSwitchStored!=lightSwitchStates){
             //if any of the bits dont match, LightsChange must get signaled. If the Blinker bits dont match blinker sem must ALSO get signaled
             //left sw: bit 0, right sw: bit 1, head sw: bit 2
-            for(uint8_t i = 0; i<3; i++){
-                storeLightSwitches[i]=(lightSwitchStates&(1<<i)); //store read values of states in buffer
-            }
-
-            switches.LEFT_SW = storeLightSwitches[0];
-            switches.RIGHT_SW = storeLightSwitches[1];
-            switches.HEADLIGHT_SW = storeLightSwitches[2];
-
-            if((lightSwitchStored&0xFB)!=(lightSwitchStates&0xFB)){
+            switches.LEFT_SW = (lightSwitchStates&&1);
+            switches.RIGHT_SW = (lightSwitchStates&&2);
+            switches.HEADLIGHT_SW = (lightSwitchStates&&4);
+            if((lightSwitchStored&&0xFB)!=(lightSwitchStates&&0xFB)){
                 //Headlight bit was cleared, and they were still not equal -> blinkers states are new and blinklight has to be signaled
                 OSSemPost(
                     &BlinkLight_Sem4,
@@ -112,18 +107,15 @@ void Task_ReadSwitches (void* p_arg) {
         uint8_t velStored = 0x00; //hold stored global states of velocity switches in least sig bits
         for(uint8_t i = 0; i<5;i++){
             velStates = velStates || (Switches_Read(velSwitches[i])<<i);
-            velStored = velStored || ((storeVelSwitches[i]&1)<<i);
+            velStored = velStored || ((storeVelSwitches[i]&&1)<<i);
         }
         if(velStates!=velStored){
             //stored states and read states dont match up
-            for(uint8_t i = 0; i<5; i++){
-                storeVelSwitches[i]=(velStates&(1<<i));
-            }
-            switches.CRUZ_SW = storeVelSwitches[0];
-            switches.CRUZ_EN=storeVelSwitches[1];
-            switches.FR_SW=storeVelSwitches[2];
-            switches.REV_SW=storeVelSwitches[3];
-            switches.REGEN_SW=storeVelSwitches[4];
+            switches.CRUZ_SW = (velStates&&1);
+            switches.CRUZ_EN=(velStates&&2);
+            switches.FR_SW=(velStates&&4);
+            switches.REV_SW=(velStates&&8);
+            switches.REGEN_SW=(velStates&&16);
             OSSemPost(
                 &VelocityChange_Sem4,
                 (OS_OPT) OS_OPT_POST_ALL,
@@ -131,9 +123,26 @@ void Task_ReadSwitches (void* p_arg) {
             );
         }
 
+        //DisplayChange_Sem4
+        switches_t dispSwitches[] = {CRUZ_EN,CRUZ_SW,REGEN_SW};
+        uint8_t storeDispSwitches[] = {switches.CRUZ_EN,switches.CRUZ_SW,switches.REGEN_SW};
+        uint8_t dispStates = 0x00;
+        uint8_t dispStored = 0x00;
+        for(uint8_t i=0;i<3;i++){
+            dispStates = dispStates || ((Switches_Read(dispSwitches[i]))<<i);
+            dispStored = dispStored || ((storeDispSwitches[i])<<i);
+        }
+        if(dispStates != dispStored){
+            switches.CRUZ_EN = (dispStates&&1);
+            switches.CRUZ_SW = (dispStates&&2);
+            switches.REGEN_SW = (dispStates&&4);
+            OSSemPost(
+                &DisplayChange_Sem4,
+                (OS_OPT) OS_OPT_POST_ALL,
+                (OS_ERR*)&err
+            );
+        }
 
 
-
-        return 0;
     }
 }
