@@ -204,7 +204,7 @@ void BSP_UART_Init(UART_t uartSelect) {
  * @param   str pointer to buffer string
  * @return  number of bytes that was read
  */
-uint32_t BSP_UART_ReadLine(UART_t uartSelect, char *str) {
+uint32_t BSP_UART_Read(UART_t uartSelect, char *str) {
     USART_TypeDef *uart;
     UartFifo_t *fifo;
     getUSARTReferences(uartSelect, &uart, &fifo);
