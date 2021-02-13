@@ -62,7 +62,6 @@ OS_SEM SendCarCAN_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
-//Will this initialization of all fields to 0 be okay?
-static SwitchStates switches={0};
-static LightStates lights={0};
-static IgnitionStates ign={0};
+
+static switches = (SwitchStates){0};
+static lights = (LightStates){0};

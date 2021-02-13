@@ -31,8 +31,8 @@ void Task_ReadSwitches (void* p_arg) {
         uint8_t ignStored = 0x00; //holds states stored in globals
         ignStates = ignStates || (Switches_Read(IGN_2)<<1);
         ignStates = ignStates || (Switches_Read(IGN_1));
-        ignStored = ignStored || ((ign.IGN2&0x01)<<1);
-        ignStored = ignStored || (ign.IGN1&0x01);
+        ignStored = ignStored || ((switches.IGN_2&0x01)<<1);
+        ignStored = ignStored || (switches.IGN_1&0x01);
         if (ignStored!=ignStates){
             switch(ignStates){
                 case 0x00:
@@ -71,10 +71,10 @@ void Task_ReadSwitches (void* p_arg) {
         }
         
         //BlinkLight_Sem4 + LightsChange_Sem4
-        uint8_t lightSwitchStates = 0x00; //holds states read from Switches_Driver
-        uint8_t lightSwitchStored = 0x00; //holds states stored in global
         switches_t lightSwitches[]={LEFT_SW,RIGHT_SW,HEADLIGHT_SW}; //the three switches that we need to check
         uint8_t storeLightSwitches[]={switches.LEFT_SW,switches.RIGHT_SW,switches.HEADLIGHT_SW}; //three global switch states we need
+        uint8_t lightSwitchStates = 0x00; //holds states read from Switches_Driver
+        uint8_t lightSwitchStored = 0x00; //holds states stored in global
         for(uint8_t i = 0; i<3; i++){
             lightSwitchStates = lightSwitchStates || (Switches_Read(lightSwitches[i])<<i);
             lightSwitchStored = lightSwitchStored || (storeLightSwitches[i]<<i);
@@ -85,9 +85,11 @@ void Task_ReadSwitches (void* p_arg) {
             for(uint8_t i = 0; i<3; i++){
                 storeLightSwitches[i]=(lightSwitchStates&(1<<i)); //store read values of states in buffer
             }
+
             switches.LEFT_SW = storeLightSwitches[0];
             switches.RIGHT_SW = storeLightSwitches[1];
             switches.HEADLIGHT_SW = storeLightSwitches[2];
+
             if((lightSwitchStored&0xFB)!=(lightSwitchStates&0xFB)){
                 //Headlight bit was cleared, and they were still not equal -> blinkers states are new and blinklight has to be signaled
                 OSSemPost(
@@ -128,8 +130,6 @@ void Task_ReadSwitches (void* p_arg) {
                 (OS_ERR*)&err
             );
         }
-
-        //LightsChange_Sem4 ; LEFT_BLINK, RIGHT_BLINK, Headlight_ON
 
 
 

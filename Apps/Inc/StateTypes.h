@@ -29,7 +29,3 @@ typedef struct LightStates {
     uint8_t RSVD_LED;
 } LightStates;
 
-typedef struct IgnitionStates {
-    uint8_t IGN1;
-    uint8_t IGN2;
-} IgnitionStates

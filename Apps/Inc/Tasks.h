@@ -134,7 +134,7 @@ extern OS_SEM SendCarCAN_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
-extern SwitchStates switches;
-extern LightStates lights;
-extern IgnitionStates ign;
+
+extern SwitchStates switches; //global switch states
+extern LightStates lights; //global Light states 
 #endif
