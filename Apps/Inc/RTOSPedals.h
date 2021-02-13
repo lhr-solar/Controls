@@ -10,9 +10,6 @@
 #include "Tasks.h"
 #include "os.h"
 
-// Semaphores
-extern OS_SEM VelocityChange_Sem4;
-extern OS_SEM LightsChange_Sem4;
 
 /**
 * @brief   Read both pedal percentage values
@@ -21,18 +18,5 @@ extern OS_SEM LightsChange_Sem4;
 */ 
 void Task_ReadPedals(void *p_arg);
 
-/**
-* @brief   Getter function for local variable brake_percentage
-* @param   None
-* @return  brake_percentage
-*/ 
-uint8_t RTOSPedals_GetBrakePercentage(void);
-
-/**
-* @brief   Getter function for local variable accelerator_percentage
-* @param   None
-* @return  accelerator_percentage
-*/ 
-uint8_t RTOSPedals_GetAcceleratorPercentage(void);
 
 #endif

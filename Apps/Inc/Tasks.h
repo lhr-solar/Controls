@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "os.h"
+#include "StateTypes.h"
 
 /**
  * Priority Definitions
@@ -134,7 +135,6 @@ extern OS_SEM SendCarCAN_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
-int8_t brake_percentage;
-int8_t accelerator_percentage;
+PedalStates_t pedals;
 
 #endif
