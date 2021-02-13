@@ -14,7 +14,8 @@
 // ActivateMotor_Sem4 : Binary Semaphore : IGN_2 : done
 // BlinkLight_Sem4  : Binary Semaphore : LEFT_SW + RIGHT_SW : done
 
-
+extern SwitchStates switches;
+extern LightStates lights;
 
 
 /**
