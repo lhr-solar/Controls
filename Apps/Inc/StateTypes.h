@@ -25,4 +25,4 @@ typedef struct LightStates {
     uint8_t BPS_PWR : 1;
     uint8_t  BrakeLight : 1;
     uint8_t RSVD_LED : 1;
-} LightStates
+} LightStates;

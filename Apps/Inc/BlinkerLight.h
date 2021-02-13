@@ -7,6 +7,8 @@
 #include "Tasks.h"
 #include "os.h"
 
+#include "Lights.h"
+
 
 
 #endif

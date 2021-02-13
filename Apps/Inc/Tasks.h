@@ -4,10 +4,8 @@
 #define __TASKS_H
 
 #include "os.h"
-<<<<<<< HEAD
-=======
 #include "StateTypes.h"
->>>>>>> RTOS_SwitchRead
+
 
 /**
  * Priority Definitions
