@@ -11,7 +11,7 @@ void Task_BlinkLight(void *p_arg){
     OS_ERR err;
     CPU_TS ts;
 
-    while(OSSemPend(&BlinkLight_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err)){
+    while(true){
         if(switches.LEFT_SW && switches.RIGHT_SW){
             //Both lights blink at the same rate
             Lights_Set(LEFT_BLINK, !Lights_Read(LEFT_BLINK));
@@ -31,10 +31,5 @@ void Task_BlinkLight(void *p_arg){
         // Wait 0.64 seconds
         OSTimeDlyHMSM (0, 0, 0, 640, OS_OPT_TIME_HMSM_STRICT, &err);
     }
-
-    // Turn both lights off
-    Lights_Set(LEFT_BLINK, 0); 
-    Lights_Set(RIGHT_BLINK, 0); 
-
 }
 
