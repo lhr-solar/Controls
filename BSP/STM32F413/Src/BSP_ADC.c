@@ -41,15 +41,15 @@ static void ADC_InitDMA(void) {
  */
 void BSP_ADC_Init(void) {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	// Enable the ADC clock
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);	// Enable the PA clock
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	// Enable the PC clock
 
 	ADC_InitDMA();
 
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_2;	// Using pins PA2 and PA3 for the ADC
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;	// Using pins PC0 and PC1 for the ADC
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;						// Analog Input
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;				// High impedence
-	GPIO_Init(GPIOA,&GPIO_InitStruct);
+	GPIO_Init(GPIOC,&GPIO_InitStruct);
 
 	// ADC Common Init
 	ADC_CommonInitTypeDef ADC_CommonStruct;
