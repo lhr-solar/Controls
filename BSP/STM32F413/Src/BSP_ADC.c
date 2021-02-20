@@ -39,8 +39,7 @@ static void ADC_InitDMA(void) {
  * @param   None
  * @return  None
  */
-void BSP_ADC_Init(ADC_t ADC_Channel) {
-    (void) ADC_Channel; // Initialization is the same for both
+void BSP_ADC_Init(void) {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	// Enable the ADC clock
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);	// Enable the PA clock
 
