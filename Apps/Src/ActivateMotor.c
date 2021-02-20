@@ -2,6 +2,14 @@
 
 #include "ActivateMotor.h"
 
+
+// TODO: remove dummy function definitions!
+void Task_SendCarCAN (void *p_arg) {}
+void Task_ReadCarCAN (void *p_arg) {}
+void Task_ReadTritium(void *p_arg) {}
+void Task_SendTritium(void *p_arg) {}
+
+
 void Task_MotorConnection(void *p_arg) {
     (void) p_arg;
 
