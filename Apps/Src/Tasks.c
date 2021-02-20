@@ -62,3 +62,6 @@ OS_SEM SendCarCAN_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
+
+float RequestedMotorRPM; // Requested motor RPM (set by VelocityChange)
+float RequestedMotorCurrentPercent; // Requested motor current as fraction of max (set by VelocityChange)
