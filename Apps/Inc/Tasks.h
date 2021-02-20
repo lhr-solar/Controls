@@ -4,6 +4,8 @@
 #define __TASKS_H
 
 #include "os.h"
+#include "common.h"
+#include "Contactors.h"
 
 /**
  * Priority Definitions
@@ -128,10 +130,13 @@ extern OS_SEM ActivateArray_Sem4;
 extern OS_SEM ActivateMotor_Sem4;
 extern OS_SEM BlinkLight_Sem4;
 extern OS_SEM SendCarCAN_Sem4;
+extern OS_SEM ArrayConnectionChange_Sem4;
 
 /**
  * Global Variables
  */
 // TODO: Put all global state variables here
+
+extern State ShouldArrayBeActivated;
 
 #endif
