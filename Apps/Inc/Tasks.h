@@ -6,6 +6,7 @@
 #include "os.h"
 #include "CarState.h"
 
+
 /**
  * Priority Definitions
  */
@@ -134,6 +135,8 @@ extern OS_SEM SendCarCAN_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
+
 extern car_state_t carState;
+
 
 #endif
