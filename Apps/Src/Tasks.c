@@ -62,6 +62,3 @@ OS_SEM SendCarCAN_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
-
-static switches = (SwitchStates){0};
-static lights = (LightStates){0};

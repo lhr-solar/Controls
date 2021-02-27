@@ -4,7 +4,11 @@
 #define __TASKS_H
 
 #include "os.h"
+<<<<<<< HEAD
 #include "StateTypes.h"
+=======
+#include "CarState.h"
+>>>>>>> 245e9bf624c59f73fd247d70fb23e496b839cab7
 
 /**
  * Priority Definitions
@@ -135,6 +139,4 @@ extern OS_SEM SendCarCAN_Sem4;
  */
 // TODO: Put all global state variables here
 
-extern SwitchStates switches; //global switch states
-extern LightStates lights; //global Light states 
 #endif
