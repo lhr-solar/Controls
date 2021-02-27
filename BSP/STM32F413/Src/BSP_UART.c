@@ -131,14 +131,14 @@ static void USART_USB_Init() {
 /**
  * @brief   Initializes the UART peripheral
  */
-void BSP_UART_Init(callback_t rxCallback, callback_t txCallback, UART_Port usart) {
-    switch(usart){
-    case UART_USB:
+static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback, UART_t uart) {
+    switch(uart){
+    case UART_3: // their UART_USB
         USART_USB_Init();
         usbRxCallback = rxCallback;
         usbTxCallback = txCallback;
         break;
-    case UART_BLE:
+    case UART_2: // their UART_BLE
         USART_BLE_Init();
         bleRxCallback = rxCallback;
         bleTxCallback = txCallback;
@@ -149,6 +149,11 @@ void BSP_UART_Init(callback_t rxCallback, callback_t txCallback, UART_Port usart
     }
 }
 
+void BSP_UART_Init(UART_t uart) {
+    // Not using callbacks for now
+    BSP_UART_Init_Internal(NULL, NULL, uart);
+}
+
 /**
  * @brief   Gets one line of ASCII text that was received. The '\n' and '\r' characters will not be stored (tested on Putty on Windows)
  * @pre     str should be at least 128bytes long.
@@ -157,7 +162,7 @@ void BSP_UART_Init(callback_t rxCallback, callback_t txCallback, UART_Port usart
  * @param   usart : which usart to read from (2 or 3)
  * @return  number of bytes that was read
  */
-uint32_t BSP_UART_ReadLine(char *str, UART_Port usart) {
+uint32_t BSP_UART_Read(UART_t usart, char *str) {
     char data = 0;
     uint32_t recvd = 0;
 
@@ -196,7 +201,7 @@ uint32_t BSP_UART_ReadLine(char *str, UART_Port usart) {
  *       space to open up. Do not call from timing-critical
  *       sections of code.
  */
-uint32_t BSP_UART_Write(char *str, uint32_t len, UART_Port usart) {
+uint32_t BSP_UART_Write(UART_t usart, char *str, uint32_t len) {
     uint32_t sent = 0;
 
     USART_TypeDef *usart_handle = handles[usart];
