@@ -135,7 +135,5 @@ extern OS_SEM SendCarCAN_Sem4;
  */
 // TODO: Put all global state variables here
 
-extern float RequestedMotorRPM;
-extern float RequestedMotorCurrentPercent;
 
 #endif
