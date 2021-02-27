@@ -18,6 +18,7 @@ void Task_ReadTritium(void* p_arg){
 
 		err = OSQPost(CANbus_MsgQ, (void *)message);
 		
+		// Not sure how we want to handle each error
 		switch(err){
 			case OS_Q_FULL:
 				break;
