@@ -11,25 +11,24 @@ void Task_ReadSwitches (void* p_arg) {
     Switches_Init();
     OS_ERR err;
     while(1){
-
         //Spawns arrayConnection thread and MotorConnection thread when it is appropriate
         uint8_t ignStates = 0x00; //holds states read from Switches Driver
         uint8_t ignStored = 0x00; //holds states stored in globals
         ignStates = ignStates || (Switches_Read(IGN_2)<<1);
         ignStates = ignStates || (Switches_Read(IGN_1));
-        ignStored = ignStored || ((switches.IGN_2&&0x01)<<1);
-        ignStored = ignStored || (switches.IGN_1&&0x01);
+        ignStored = ignStored || ((carState.SwitchStates.IGN_2&&0x01)<<1);
+        ignStored = ignStored || (carState.SwitchStates.IGN_1&&0x01);
         if (ignStored!=ignStates){
             switch(ignStates){
                 case 0x00:
                     //neither is on
-                    switches.IGN_1 = 0;
-                    switches.IGN_2 = 0;
+                    carState.SwitchStates.IGN_1 = 0;
+                    carState.SwitchStates.IGN_2 = 0;
                     //TODO: add car turn off code?
                 case 0x01:
                 //IGN1 is on
-                    switches.IGN_1=1;
-                    switches.IGN_2=0;
+                    carState.SwitchStates.IGN_1=1;
+                    carState.SwitchStates.IGN_2=0;
                     //OSTASK CREATE activate array
                     // OSSemPost(
                     //     &ActivateArray_Sem4,
@@ -53,8 +52,8 @@ void Task_ReadSwitches (void* p_arg) {
                     );
                 case 0x03:
                 //Both are on
-                    switches.IGN_2=1;
-                    switches.IGN_1=1;
+                    carState.SwitchStates.IGN_2=1;
+                    carState.SwitchStates.IGN_1=1;
                     //OSTASKCREATE activate array, OSTASKCREATE activate motor
                     OSTaskCreate(
                         (OS_TCB*)&ArrayConnection_TCB,
@@ -96,7 +95,7 @@ void Task_ReadSwitches (void* p_arg) {
         
         //Signal LightsChange_Sem4 for UpdateLights Thread
         switches_t lightSwitches[]={LEFT_SW,RIGHT_SW,HEADLIGHT_SW}; //the three switches that we need to check
-        uint8_t storeLightSwitches[]={switches.LEFT_SW,switches.RIGHT_SW,switches.HEADLIGHT_SW}; //three global switch states we need
+        State storeLightSwitches[]={carState.SwitchStates.LEFT_SW,carState.SwitchStates.RIGHT_SW,carState.SwitchStates.HEADLIGHT_SW}; //three global switch states we need
         uint8_t lightSwitchStates = 0x00; //holds states read from Switches_Driver
         uint8_t lightSwitchStored = 0x00; //holds states stored in global
         for(uint8_t i = 0; i<3; i++){
@@ -108,9 +107,9 @@ void Task_ReadSwitches (void* p_arg) {
             //left sw: bit 0, right sw: bit 1, head sw: bit 2
 
             //set globals
-            switches.LEFT_SW = (lightSwitchStates&&1);
-            switches.RIGHT_SW = (lightSwitchStates&&2);
-            switches.HEADLIGHT_SW = (lightSwitchStates&&4);
+            carState.SwitchStates.LEFT_SW = (lightSwitchStates&&1);
+            carState.SwitchStates.RIGHT_SW = (lightSwitchStates&&2);
+            carState.SwitchStates.HEADLIGHT_SW = (lightSwitchStates&&4);
             
             //post to lightschange
             OSSemPost(
@@ -122,7 +121,7 @@ void Task_ReadSwitches (void* p_arg) {
 
         //VelocityChange_Sem4
         switches_t velSwitches[] = {CRUZ_SW, CRUZ_EN, FR_SW, REV_SW, REGEN_SW};
-        uint8_t storeVelSwitches[] = {switches.CRUZ_SW,switches.CRUZ_EN,switches.FR_SW,switches.REV_SW,switches.REGEN_SW};
+        uint8_t storeVelSwitches[] = {carState.SwitchStates.CRUZ_SW,carState.SwitchStates.CRUZ_EN,carState.SwitchStates.FR_SW,carState.SwitchStates.REV_SW,carState.SwitchStates.REGEN_SW};
         uint8_t velStates = 0x00; //holds read states of switches in least sig 5 bits
         uint8_t velStored = 0x00; //hold stored global states of velocity switches in least sig bits
         for(uint8_t i = 0; i<5;i++){
@@ -131,11 +130,11 @@ void Task_ReadSwitches (void* p_arg) {
         }
         if(velStates!=velStored){
             //stored states and read states dont match up
-            switches.CRUZ_SW = (velStates&&1);
-            switches.CRUZ_EN=(velStates&&2);
-            switches.FR_SW=(velStates&&4);
-            switches.REV_SW=(velStates&&8);
-            switches.REGEN_SW=(velStates&&16);
+            carState.SwitchStates.CRUZ_SW = (velStates&&1);
+            carState.SwitchStates.CRUZ_EN=(velStates&&2);
+            carState.SwitchStates.FR_SW=(velStates&&4);
+            carState.SwitchStates.REV_SW=(velStates&&8);
+            carState.SwitchStates.REGEN_SW=(velStates&&16);
             OSSemPost(
                 &VelocityChange_Sem4,
                 (OS_OPT) OS_OPT_POST_ALL,
@@ -145,7 +144,7 @@ void Task_ReadSwitches (void* p_arg) {
 
         //DisplayChange_Sem4
         switches_t dispSwitches[] = {CRUZ_EN,CRUZ_SW,REGEN_SW};
-        uint8_t storeDispSwitches[] = {switches.CRUZ_EN,switches.CRUZ_SW,switches.REGEN_SW};
+        uint8_t storeDispSwitches[] = {carState.SwitchStates.CRUZ_EN,carState.SwitchStates.CRUZ_SW,carState.SwitchStates.REGEN_SW};
         uint8_t dispStates = 0x00;
         uint8_t dispStored = 0x00;
         for(uint8_t i=0;i<3;i++){
@@ -153,9 +152,9 @@ void Task_ReadSwitches (void* p_arg) {
             dispStored = dispStored || ((storeDispSwitches[i])<<i);
         }
         if(dispStates != dispStored){
-            switches.CRUZ_EN = (dispStates&&1);
-            switches.CRUZ_SW = (dispStates&&2);
-            switches.REGEN_SW = (dispStates&&4);
+            carState.SwitchStates.CRUZ_EN = (dispStates&&1);
+            carState.SwitchStates.CRUZ_SW = (dispStates&&2);
+            carState.SwitchStates.REGEN_SW = (dispStates&&4);
             OSSemPost(
                 &DisplayChange_Sem4,
                 (OS_OPT) OS_OPT_POST_ALL,
