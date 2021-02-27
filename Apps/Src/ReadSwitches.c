@@ -3,30 +3,16 @@
 #include "Switches.h"
 #include "Tasks.h"
 
-// Needs to Read the Switches states (Driver level switches code) and trigger appropriate RTOS events
-// Needs to Signal:
-// VelocityChange_Sem4 : Counting Semaphore : DONE
-// DisplayChange_Sem4 : Counting Semaphore
-// LightsChange_Sem4 : Counting Semaphore
-// CarCAN_Sem4 : Counting Semaphore
-//
-// ActivateArray_Sem4 : Binary Semaphore : IGN_1 : done
-// ActivateMotor_Sem4 : Binary Semaphore : IGN_2 : done
-// BlinkLight_Sem4  : Binary Semaphore : LEFT_SW + RIGHT_SW : done
-
-
-
-
 /**
  * @brief Reads Switches using Switches Driver and signals appropriate
- * Semaphores when Switches state changes.
+ * Semaphores when Switches state changes. Also updates a switches global defined in StateTypes.h, declared in Tasks.c and externed in Tasks.h
 */
 void Task_ReadSwitches (void* p_arg) {
     Switches_Init();
     OS_ERR err;
     while(1){
 
-        //ActivateArray_SEM4 + ActivateMotor_SEM4
+        //Spawns arrayConnection thread and MotorConnection thread when it is appropriate
         uint8_t ignStates = 0x00; //holds states read from Switches Driver
         uint8_t ignStored = 0x00; //holds states stored in globals
         ignStates = ignStates || (Switches_Read(IGN_2)<<1);
@@ -44,25 +30,63 @@ void Task_ReadSwitches (void* p_arg) {
                 //IGN1 is on
                     switches.IGN_1=1;
                     switches.IGN_2=0;
-                    OSSemPost(
-                        &ActivateArray_Sem4,
-                        (OS_OPT) OS_OPT_POST_ALL,
+                    //OSTASK CREATE activate array
+                    // OSSemPost(
+                    //     &ActivateArray_Sem4,
+                    //     (OS_OPT) OS_OPT_POST_ALL,
+                    //     (OS_ERR*)&err
+                    // );
+                    OSTaskCreate(
+                        (OS_TCB*)&ArrayConnection_TCB,
+                        (CPU_CHAR*)"Array Connection",
+                        (OS_TASK_PTR)Task_ArrayConnection,
+                        (void*)NULL,
+                        (OS_PRIO)10,
+                        (CPU_STK*)ArrayConnection_Stk,
+                        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+                        (CPU_STK_SIZE)TASK_ARRAY_CONNECTION_STACK_SIZE,
+                        (OS_MSG_QTY)NULL,
+                        (OS_TICK)NULL,
+                        (void*)NULL,
+                        (OS_OPT)(OS_OPT_TASK_STK_CLR),
                         (OS_ERR*)&err
                     );
                 case 0x03:
                 //Both are on
                     switches.IGN_2=1;
                     switches.IGN_1=1;
-                    OSSemPost(
-                    &ActivateMotor_Sem4,
-                    (OS_OPT) OS_OPT_POST_ALL,
-                    (OS_ERR*)&err
-                    );
-                    OSSemPost(
-                        &ActivateArray_Sem4,
-                        (OS_OPT) OS_OPT_POST_ALL,
+                    //OSTASKCREATE activate array, OSTASKCREATE activate motor
+                    OSTaskCreate(
+                        (OS_TCB*)&ArrayConnection_TCB,
+                        (CPU_CHAR*)"Array Connection",
+                        (OS_TASK_PTR)Task_ArrayConnection,
+                        (void*)NULL,
+                        (OS_PRIO)TASK_ARRAY_CONNECTION_PRIO,
+                        (CPU_STK*)ArrayConnection_Stk,
+                        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+                        (CPU_STK_SIZE)TASK_ARRAY_CONNECTION_STACK_SIZE,
+                        (OS_MSG_QTY)NULL,
+                        (OS_TICK)NULL,
+                        (void*)NULL,
+                        (OS_OPT)(OS_OPT_TASK_STK_CLR),
                         (OS_ERR*)&err
-                );
+                    );
+
+                    OSTaskCreate(
+                        (OS_TCB*)&MotorConnection_TCB,
+                        (CPU_CHAR*)"Motor Connection",
+                        (OS_TASK_PTR)Task_MotorConnection,
+                        (void*)NULL,
+                        (OS_PRIO)TASK_MOTOR_CONNECTION_PRIO,
+                        (CPU_STK*)ArrayConnection_Stk,
+                        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+                        (CPU_STK_SIZE)TASK_MOTOR_CONNECTION_STACK_SIZE,
+                        (OS_MSG_QTY)NULL,
+                        (OS_TICK)NULL,
+                        (void*)NULL,
+                        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+                        (OS_ERR*)&err
+                    );
                 case 0x02:
                     return -1; //Shouldn't happen - error case; only IGN2 is on
                 
@@ -70,7 +94,7 @@ void Task_ReadSwitches (void* p_arg) {
        
         }
         
-        //BlinkLight_Sem4 + LightsChange_Sem4
+        //Signal LightsChange_Sem4 for UpdateLights Thread
         switches_t lightSwitches[]={LEFT_SW,RIGHT_SW,HEADLIGHT_SW}; //the three switches that we need to check
         uint8_t storeLightSwitches[]={switches.LEFT_SW,switches.RIGHT_SW,switches.HEADLIGHT_SW}; //three global switch states we need
         uint8_t lightSwitchStates = 0x00; //holds states read from Switches_Driver
@@ -82,17 +106,13 @@ void Task_ReadSwitches (void* p_arg) {
         if(lightSwitchStored!=lightSwitchStates){
             //if any of the bits dont match, LightsChange must get signaled. If the Blinker bits dont match blinker sem must ALSO get signaled
             //left sw: bit 0, right sw: bit 1, head sw: bit 2
+
+            //set globals
             switches.LEFT_SW = (lightSwitchStates&&1);
             switches.RIGHT_SW = (lightSwitchStates&&2);
             switches.HEADLIGHT_SW = (lightSwitchStates&&4);
-            if((lightSwitchStored&&0xFB)!=(lightSwitchStates&&0xFB)){
-                //Headlight bit was cleared, and they were still not equal -> blinkers states are new and blinklight has to be signaled
-                OSSemPost(
-                    &BlinkLight_Sem4,
-                    (OS_OPT) OS_OPT_POST_ALL,
-                    (OS_ERR*)&err
-                );
-            }
+            
+            //post to lightschange
             OSSemPost(
                 &LightsChange_Sem4,
                 (OS_OPT) OS_OPT_POST_ALL,
