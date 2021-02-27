@@ -9,7 +9,7 @@
 
 int _write(int fd, char *buffer, unsigned int len) {
     if(buffer != NULL) {
-        BSP_UART_Write(UART_3, buffer, len);
+        BSP_UART_Write(UART_2, buffer, len);
     }
     return len;
 }

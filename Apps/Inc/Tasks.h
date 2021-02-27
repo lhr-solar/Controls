@@ -4,6 +4,7 @@
 #define __TASKS_H
 
 #include "os.h"
+#include "CarState.h"
 
 /**
  * Priority Definitions
