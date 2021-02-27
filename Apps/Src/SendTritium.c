@@ -1,10 +1,11 @@
 #include "SendTritium.h"
 #include "CarState.h"
+#include <math.h>
 
 
 static float velocity_to_rpm(float velocity) {
-    // TODO: fill this in
-    return velocity;
+    float wheel_rpm = velocity * WHEEL_DIAMETER * M_PI * 2;
+    return wheel_rpm * GEAR_REDUCTION;
 }
 
 
