@@ -45,7 +45,7 @@ static void USART_DISPLAY_Init() {
 
     // Initialize clocks
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-    RCC_APB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
     // Initialize pins
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
