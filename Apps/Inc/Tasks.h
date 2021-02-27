@@ -6,7 +6,6 @@
 #include "os.h"
 #include "CarState.h"
 
-
 /**
  * Priority Definitions
  */

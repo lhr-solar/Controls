@@ -12,6 +12,7 @@
  * Stores the current state of each of
  * the switches that control this system
  */
+
 typedef struct switch_states_t {
     State CRUZ_SW;
     State CRUZ_EN;
@@ -25,6 +26,7 @@ typedef struct switch_states_t {
     State IGN_2;
     State REV_SW;
 }switch_states_t;
+
 
 /**
  * Blinker States
