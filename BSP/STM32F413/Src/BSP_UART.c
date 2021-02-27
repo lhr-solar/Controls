@@ -2,6 +2,7 @@
 
 #include "BSP_UART.h"
 #include "stm32f4xx.h"
+#include "os.h"
 
 #define TX_SIZE     128
 #define RX_SIZE     64
@@ -13,31 +14,31 @@
 #define FIFO_NAME txfifo
 #include "fifo.h"
 static txfifo_t usbTxFifo;
-static txfifo_t bleTxFifo;
+static txfifo_t displayTxFifo;
 
 #define FIFO_TYPE char
 #define FIFO_SIZE RX_SIZE
 #define FIFO_NAME rxfifo
 #include "fifo.h"
 static rxfifo_t usbRxFifo;
-static rxfifo_t bleRxFifo;
+static rxfifo_t displayRxFifo;
 
 static bool usbLineReceived = false;
-static bool bleLineReceived = false;
+static bool displayLineReceived = false;
 
 static callback_t usbRxCallback = NULL;
 static callback_t usbTxCallback = NULL;
-static callback_t bleRxCallback = NULL;
-static callback_t bleTxCallback = NULL;
+static callback_t displayRxCallback = NULL;
+static callback_t displayTxCallback = NULL;
 
-static rxfifo_t *rx_fifos[NUM_UART]     = {&usbRxFifo, &bleRxFifo};
-static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &bleTxFifo};
-static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &bleLineReceived};
+static rxfifo_t *rx_fifos[NUM_UART]     = {&usbRxFifo, &displayRxFifo};
+static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &displayTxFifo};
+static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceived};
 static USART_TypeDef *handles[NUM_UART] = {USART3, USART2};
 
-static void USART_BLE_Init() {
-    bleTxFifo = txfifo_new();
-    bleRxFifo = rxfifo_new();
+static void USART_DISPLAY_Init() {
+    displayTxFifo = txfifo_new();
+    displayRxFifo = rxfifo_new();
 
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     USART_InitTypeDef UART_InitStruct = {0};
@@ -138,10 +139,10 @@ static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback,
         usbRxCallback = rxCallback;
         usbTxCallback = txCallback;
         break;
-    case UART_2: // their UART_BLE
-        USART_BLE_Init();
-        bleRxCallback = rxCallback;
-        bleTxCallback = txCallback;
+    case UART_2: // their UART_DISPLAY
+        USART_DISPLAY_Init();
+        displayRxCallback = rxCallback;
+        displayTxCallback = txCallback;
         break;
     default:
         // Error
@@ -229,32 +230,30 @@ uint32_t BSP_UART_Write(UART_t usart, char *str, uint32_t len) {
 }
 
 void USART2_IRQHandler(void) {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-#endif
 
     if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
         uint8_t data = USART2->DR;
         bool removeSuccess = 1;
         if(data == '\r'){
-            bleLineReceived = true;
-            if(bleRxCallback != NULL)
-                bleRxCallback();
+            displayLineReceived = true;
+            if(displayRxCallback != NULL)
+                displayRxCallback();
         }
         // Check if it was a backspace.
         // '\b' for minicmom
         // '\177' for putty
-        if(data != '\b' && data != '\177') rxfifo_put(&bleRxFifo, data);
+        if(data != '\b' && data != '\177') rxfifo_put(&displayRxFifo, data);
         // Sweet, just a "regular" key. Put it into the fifo
         // Doesn't matter if it fails. If it fails, then the data gets thrown away
         // and the easiest solution for this is to increase RX_SIZE
         else {
             char junk;
             // Delete the last entry!
-            removeSuccess = rxfifo_popback(&bleRxFifo, &junk);
+            removeSuccess = rxfifo_popback(&displayRxFifo, &junk);
         }
         if(removeSuccess) {
             USART2->DR = data;
@@ -264,24 +263,22 @@ void USART2_IRQHandler(void) {
         // If getting data from fifo fails i.e. the tx fifo is empty, then turn off the TX interrupt
         if(!txfifo_get(&usbTxFifo, (char*)&(USART2->DR))) {
             USART_ITConfig(USART2, USART_IT_TC, RESET); // Turn off the interrupt
-            if(bleTxCallback != NULL)
-                bleTxCallback();    // Callback
+            if(displayTxCallback != NULL)
+                displayTxCallback();    // Callback
         }
     }
     if(USART_GetITStatus(USART2, USART_IT_ORE) != RESET);
 
-#ifdef RTOS
+
     OSIntExit();
-#endif
+
 }
 
 void USART3_IRQHandler(void) {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-#endif
 
     if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) {
         uint8_t data = USART3->DR;
@@ -317,7 +314,5 @@ void USART3_IRQHandler(void) {
     }
     if(USART_GetITStatus(USART3, USART_IT_ORE) != RESET);
 
-#ifdef RTOS
     OSIntExit();
-#endif
 }
