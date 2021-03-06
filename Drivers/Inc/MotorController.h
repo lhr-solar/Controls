@@ -21,11 +21,11 @@ void MotorController_Init(void);
 
 /**
  * @brief   Sends MOTOR DRIVE command on CAN2
- * @param   newVelocity desired motor velocity setpoint in m/s
- * @param   motorCurrent desired motor current setpoint as a percentage of max current setting
+ * @param   newVelocity desired motor velocity setpoint in rpm
+ * @param   motorCurrent desired motor current setpoint as a fraction of max current setting
  * @return  None
  */ 
-void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent);
+void MotorController_Drive(float newVelocity, float motorCurrent);
 
 /**
  * @brief   Reads most recent command from CAN2 bus

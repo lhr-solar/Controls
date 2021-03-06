@@ -5,7 +5,7 @@
 
 #include "os.h"
 #include "common.h"
-#include "Contactors.h"
+#include "CarState.h"
 
 /**
  * Priority Definitions
@@ -137,6 +137,5 @@ extern OS_SEM ArrayConnectionChange_Sem4;
  */
 // TODO: Put all global state variables here
 
-extern State ShouldArrayBeActivated;
 
 #endif

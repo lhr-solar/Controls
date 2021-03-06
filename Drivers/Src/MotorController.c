@@ -19,17 +19,21 @@ void MotorController_Init(){
  * @param   motorCurrent desired motor current setpoint as a percentage of max current setting
  * @return  None
  */ 
-void MotorController_Drive(uint32_t newVelocity, uint32_t motorCurrent){
+void MotorController_Drive(float newVelocity, float motorCurrent){
+
+    uint32_t nv = *((uint32_t *)((void *) &newVelocity));
+    uint32_t mc = *((uint32_t *)((void *) &motorCurrent));
+
     uint8_t data[8] = {0};
     int index = 0;
     while(index < MAX_CAN_LEN/2){
-        data[index] = (motorCurrent >> (8 * (MAX_CAN_LEN/2-index-1))) & 0xFF; //split inputs into bytes
+        data[index] = (mc >> (8 * (MAX_CAN_LEN/2-index-1))) & 0xFF; //split inputs into bytes
         index++;
         
     }
     int i = 0;
     while(index < MAX_CAN_LEN){
-        data[index] = (newVelocity >> (8 * (MAX_CAN_LEN/2-i-1))) & 0xFF;
+        data[index] = (nv >> (8 * (MAX_CAN_LEN/2-i-1))) & 0xFF;
         index++;
         i++;
     }
