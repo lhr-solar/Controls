@@ -28,7 +28,7 @@ void Task_ReadTritium(void* p_arg){
 				break;
 			case OS_ERR_POST_NULL_PTR:
 				break;
-			case default:
+			default:
 				break;
 
 		}
