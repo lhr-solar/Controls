@@ -10,6 +10,7 @@
 
 #include "common.h"
 #include "bsp.h"
+#include "os.h"
 
 // Opcodes
 #define SPI_OPCODE_R    0x41
@@ -37,6 +38,9 @@
 #define SPI_INTCAPB     0x18
 #define SPI_GPIOB       0x19
 #define SPI_OLATB       0x1A
+
+// For synchronizing SPI
+extern OS_SEM SPI_Update_Sem4;
 
 /**
  * @brief   Initializes the SPI communication

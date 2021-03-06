@@ -3,17 +3,23 @@
 #include "BSP_SPI.h"
 #include "stm32f4xx.h"
 #include "os.h"
-//#include "BSP_OS.h"
 
 
 #define SPI_PORT SPI3
 
-static void spi_post(void) {
+OS_SEM SPI_Update_Sem4;
 
+static void spi_post(void) {
+	OS_ERR err;
+	OSSemPost(&SPI_Update_Sem4, OS_OPT_POST_1, &err);
+	// TODO: error handling
 }
 
 static void spi_pend(void) {
-
+	OS_ERR err;
+	CPU_TS ts;
+	OSSemPend(&SPI_Update_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+	// TODO: error handling
 }
 
 // Use this inline function to wait until SPI communication is complete
@@ -117,7 +123,7 @@ void BSP_SPI_Init(void) {
  */
 void BSP_SPI_Write(uint8_t *txBuf, uint32_t txLen) {
     for(uint32_t i = 0; i < txLen; i++){
-		SPI_WriteRead(SPI_PORT, txBuf[i]);
+		SPI_WriteRead(txBuf[i]);
 	}
 }
 
@@ -130,7 +136,7 @@ void BSP_SPI_Write(uint8_t *txBuf, uint32_t txLen) {
  */
 void BSP_SPI_Read(spi_port_t port, uint8_t *rxBuf, uint32_t rxLen) {
     for(uint32_t i = 0; i < rxLen; i++){
-		rxBuf[i] = SPI_WriteRead(SPI_PORT, 0x00);
+		rxBuf[i] = SPI_WriteRead(0x00);
 	}
 
 }
