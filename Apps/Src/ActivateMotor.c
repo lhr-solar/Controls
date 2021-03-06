@@ -3,25 +3,25 @@
 #include "ActivateMotor.h"
 
 
-// TODO: remove dummy function definitions!
-void Task_SendCarCAN (void *p_arg) {}
-void Task_ReadCarCAN (void *p_arg) {}
-void Task_ReadTritium(void *p_arg) {}
-void Task_SendTritium(void *p_arg) {}
-
-
-void Task_MotorConnection(void *p_arg) {
-    (void) p_arg;
-
-    OS_ERR err;
-
+static void motor_startup(OS_ERR *err) {
     Precharge_Write(MOTOR_PRECHARGE, ON); // Activate the motor recharge
-    Contactors_Init(MOTOR);
 
     OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     // TODO: check for errors
 
     Contactors_Set(MOTOR, ON); // Actually activate motor contactors
+    Precharge_Write(MOTOR_PRECHARGE, OFF);
+}
+
+
+void Task_MotorConnection(void *p_arg) {
+    car_state_t *car_state = (car_state_t *) p_arg;
+
+    OS_ERR err;
+    CPU_TS ts;
+
+    Contactors_Init(MOTOR);
+    motor_startup(&err);
 
     // Now we need to spawn the four CAN related tasks
 
@@ -98,5 +98,21 @@ void Task_MotorConnection(void *p_arg) {
     );
     // TODO: check for task creation error
 
-    OSTaskDel(NULL, &err); // we're done 
+    while (1) {
+        // Wait until some change needs to be made to the motor state
+        OSSemPend(&MotorConnectionChange_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+
+        State desiredState = car_state->ShouldMotorBeActivated;
+        State currentState = Contactors_Get(MOTOR);
+
+        if (desiredState == ON && currentState == OFF) {
+            // Reactivate the array
+            motor_startup(&err);
+        } else if (desiredState == OFF && currentState == ON) {
+            // Deactivate the array
+            Contactors_Set(MOTOR, OFF);
+        }
+
+    }
+
 }
