@@ -54,8 +54,8 @@ State Switches_Read(switches_t sw){
     switch(sw) {
     case CRUZ_SW:
     case CRUZ_EN:
-    case HZD_SQ: 
-    case FR_SW: 
+    case HZD_SW: 
+    case FWD_SW: 
     case HEADLIGHT_SW: 
     case LEFT_SW: 
     case RIGHT_SW: 

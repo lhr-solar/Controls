@@ -4,8 +4,7 @@
 #define __TASKS_H
 
 #include "os.h"
-#include "StateTypes.h"
-
+#include "CarState.h"
 
 /**
  * Priority Definitions
@@ -130,10 +129,14 @@ extern OS_SEM ActivateArray_Sem4;
 extern OS_SEM ActivateMotor_Sem4;
 extern OS_SEM BlinkLight_Sem4;
 extern OS_SEM SendCarCAN_Sem4;
+extern OS_SEM ArrayConnectionChange_Sem4;
+extern OS_SEM MotorConnectionChange_Sem4;
 
 /**
  * Global Variables
  */
 // TODO: Put all global state variables here
+
+
 
 #endif

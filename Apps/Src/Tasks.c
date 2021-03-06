@@ -1,6 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "Tasks.h"
+#include "CarState.h"
 #include "os.h"
 
 /**
@@ -57,11 +58,11 @@ OS_SEM ActivateArray_Sem4;
 OS_SEM ActivateMotor_Sem4;
 OS_SEM BlinkLight_Sem4;
 OS_SEM SendCarCAN_Sem4;
+OS_SEM ArrayConnectionChange_Sem4;
+OS_SEM MotorConnectionChange_Sem4;
 
 /**
  * Global Variables
  */
 // TODO: Put all global state variables here
 
-SwitchStates switches;
-LightStates lights;
