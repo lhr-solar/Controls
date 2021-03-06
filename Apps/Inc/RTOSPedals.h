@@ -10,7 +10,7 @@
 #include "Tasks.h"
 #include "os.h"
 
-extern PedalStates_t pedals;
+extern car_state_t car_state;
 
 /**
 * @brief   Read both pedal percentage values
