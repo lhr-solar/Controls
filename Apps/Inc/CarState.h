@@ -16,8 +16,8 @@
 typedef struct switch_states_t {
     State CRUZ_SW;
     State CRUZ_EN;
-    State HZD_SQ;
-    State FR_SW;
+    State HZD_SW;
+    State FWD_SW;
     State HEADLIGHT_SW;
     State LEFT_SW;
     State RIGHT_SW;
