@@ -121,7 +121,7 @@ void BSP_SPI_Init(void) {
  * @param   txLen   length of data array.
  * @return  None
  */
-void BSP_SPI_Write(uint8_t *txBuf, uint32_t txLen) {
+void BSP_SPI_Write(uint8_t *txBuf, uint8_t txLen) {
     for(uint32_t i = 0; i < txLen; i++){
 		SPI_WriteRead(txBuf[i]);
 	}
@@ -134,7 +134,7 @@ void BSP_SPI_Write(uint8_t *txBuf, uint32_t txLen) {
  * @param   rxLen   length of data array.
  * @return  None
  */
-void BSP_SPI_Read(spi_port_t port, uint8_t *rxBuf, uint32_t rxLen) {
+void BSP_SPI_Read(uint8_t *rxBuf, uint8_t rxLen) {
     for(uint32_t i = 0; i < rxLen; i++){
 		rxBuf[i] = SPI_WriteRead(0x00);
 	}
