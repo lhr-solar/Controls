@@ -30,6 +30,8 @@ void Task_ReadSwitches (void* p_arg) {
 
     Switches_Init();
     OS_ERR err;
+    bool arrayConThreadSpawned = false;
+    bool motorConThreadSpawned = false;
     while(1){
         //Spawns arrayConnection thread and MotorConnection thread when it is appropriate
         uint8_t ignStates = 0x00; //holds states read from Switches Driver
@@ -45,64 +47,81 @@ void Task_ReadSwitches (void* p_arg) {
                     storedSwitchStates->IGN_1 = 0;
                     storedSwitchStates->IGN_2 = 0;
                     //TODO: add car turn off code?
+                    ((car_state_t*)p_arg)->ShouldArrayBeActivated = 0;
+                    ((car_state_t*)p_arg)->ShouldMotorBeActivated = 0;
+                    OSSemPost(
+                        &ArrayConnectionChange_Sem4,
+                        (OS_OPT) OS_OPT_POST_ALL,
+                        (OS_ERR*)&err
+                    );
+                    OSSemPost(
+                        &MotorConnectionChange_Sem4,
+                        (OS_OPT) OS_OPT_POST_ALL,
+                        (OS_ERR*)&err
+                    );
                 case 0x01:
                 //IGN1 is on
                     storedSwitchStates->IGN_1=1;
                     storedSwitchStates->IGN_2=0;
-                    #pragma region 
-                    OSTaskCreate(
-                        (OS_TCB*)&ArrayConnection_TCB,
-                        (CPU_CHAR*)"Array Connection",
-                        (OS_TASK_PTR)Task_ArrayConnection,
-                        (void*)NULL,
-                        (OS_PRIO)10,
-                        (CPU_STK*)ArrayConnection_Stk,
-                        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-                        (CPU_STK_SIZE)TASK_ARRAY_CONNECTION_STACK_SIZE,
-                        (OS_MSG_QTY)NULL,
-                        (OS_TICK)NULL,
-                        (void*)NULL,
-                        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-                        (OS_ERR*)&err
-                    );
+                    #pragma region
+                    if (arrayConThreadSpawned=false){ 
+                        OSTaskCreate(
+                            (OS_TCB*)&ArrayConnection_TCB,
+                            (CPU_CHAR*)"Array Connection",
+                            (OS_TASK_PTR)Task_ArrayConnection,
+                            (void*)NULL,
+                            (OS_PRIO)10,
+                            (CPU_STK*)ArrayConnection_Stk,
+                            (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+                            (CPU_STK_SIZE)TASK_ARRAY_CONNECTION_STACK_SIZE,
+                            (OS_MSG_QTY)NULL,
+                            (OS_TICK)NULL,
+                            (void*)NULL,
+                            (OS_OPT)(OS_OPT_TASK_STK_CLR),
+                            (OS_ERR*)&err
+                        );
+                    }
                     #pragma endregion
                 case 0x03:
                 //Both are on
                     storedSwitchStates->IGN_2=1;
                     storedSwitchStates->IGN_1=1;
                     //OSTASKCREATE activate array, OSTASKCREATE activate motor
-                    #pragma region 
-                    OSTaskCreate(
-                        (OS_TCB*)&ArrayConnection_TCB,
-                        (CPU_CHAR*)"Array Connection",
-                        (OS_TASK_PTR)Task_ArrayConnection,
-                        (void*)NULL,
-                        (OS_PRIO)TASK_ARRAY_CONNECTION_PRIO,
-                        (CPU_STK*)ArrayConnection_Stk,
-                        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-                        (CPU_STK_SIZE)TASK_ARRAY_CONNECTION_STACK_SIZE,
-                        (OS_MSG_QTY)NULL,
-                        (OS_TICK)NULL,
-                        (void*)NULL,
-                        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-                        (OS_ERR*)&err
-                    );
-
-                    OSTaskCreate(
-                        (OS_TCB*)&MotorConnection_TCB,
-                        (CPU_CHAR*)"Motor Connection",
-                        (OS_TASK_PTR)Task_MotorConnection,
-                        (void*)NULL,
-                        (OS_PRIO)TASK_MOTOR_CONNECTION_PRIO,
-                        (CPU_STK*)ArrayConnection_Stk,
-                        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-                        (CPU_STK_SIZE)TASK_MOTOR_CONNECTION_STACK_SIZE,
-                        (OS_MSG_QTY)NULL,
-                        (OS_TICK)NULL,
-                        (void*)NULL,
-                        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-                        (OS_ERR*)&err
-                    );
+                    #pragma region
+                    if(arrayConThreadSpawned=false){ 
+                        OSTaskCreate(
+                            (OS_TCB*)&ArrayConnection_TCB,
+                            (CPU_CHAR*)"Array Connection",
+                            (OS_TASK_PTR)Task_ArrayConnection,
+                            (void*)NULL,
+                            (OS_PRIO)TASK_ARRAY_CONNECTION_PRIO,
+                            (CPU_STK*)ArrayConnection_Stk,
+                            (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+                            (CPU_STK_SIZE)TASK_ARRAY_CONNECTION_STACK_SIZE,
+                            (OS_MSG_QTY)NULL,
+                            (OS_TICK)NULL,
+                            (void*)NULL,
+                            (OS_OPT)(OS_OPT_TASK_STK_CLR),
+                            (OS_ERR*)&err
+                        );
+                    }
+                    if(motorConThreadSpawned){
+                        OSTaskCreate(
+                            (OS_TCB*)&MotorConnection_TCB,
+                            (CPU_CHAR*)"Motor Connection",
+                            (OS_TASK_PTR)Task_MotorConnection,
+                            (void*)NULL,
+                            (OS_PRIO)TASK_MOTOR_CONNECTION_PRIO,
+                            (CPU_STK*)ArrayConnection_Stk,
+                            (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+                            (CPU_STK_SIZE)TASK_MOTOR_CONNECTION_STACK_SIZE,
+                            (OS_MSG_QTY)NULL,
+                            (OS_TICK)NULL,
+                            (void*)NULL,
+                            (OS_OPT)(OS_OPT_TASK_STK_CLR),
+                            (OS_ERR*)&err
+                        );
+                    }
                     #pragma endregion
                 case 0x02:
                     return -1; //Shouldn't happen - error case; only IGN2 is on
