@@ -7,6 +7,7 @@
 #include "BSP_SPI.h"
 #include "common.h"
 #include "config.h"
+#include "GPIOExpander.h"
 
 #define LIGHTS_PORT     PORTC
 #define HEADLIGHT_PIN   6
