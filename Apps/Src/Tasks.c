@@ -64,7 +64,7 @@ OS_SEM MotorConnectionChange_Sem4;
 /**
  * Global Variables
  */
-car_state_t car_state;
+
 
 
 // TODO: Put all global state variables here

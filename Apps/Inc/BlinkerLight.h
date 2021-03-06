@@ -9,7 +9,6 @@
 
 #include "Lights.h"
 
-extern car_state_t car_state;
 
 /**
 * @brief   Toggle proper indicator lights
