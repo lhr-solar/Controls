@@ -9,8 +9,7 @@
 
 #include "Lights.h"
 
-extern SwitchStates switches;
-extern LightStates lights;
+extern car_state_t car_state;
 
 /**
 * @brief   Toggle proper indicator lights
