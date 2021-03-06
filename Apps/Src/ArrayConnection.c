@@ -15,7 +15,7 @@ static void arrayStartup(OS_ERR *err) {
 
 void Task_ArrayConnection(void *p_arg) {
 
-    (void) p_arg;
+    car_state_t *car_state = (car_state_t *) p_arg;
 
     OS_ERR err;
     CPU_TS ts;
@@ -45,7 +45,7 @@ void Task_ArrayConnection(void *p_arg) {
         // Wait until some change needs to be made to the array state
         OSSemPend(&ArrayConnectionChange_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
 
-        State desiredState = ShouldArrayBeActivated;
+        State desiredState = car_state->ShouldArrayBeActivated;
         State currentState = Contactors_Get(ARRAY);
 
         if (desiredState == ON && currentState == OFF) {
