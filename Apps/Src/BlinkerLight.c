@@ -8,21 +8,23 @@
 * @return  None
 */ 
 void Task_BlinkLight(void *p_arg){
+    car_state_t *carStates = ((car_state_t*)p_arg);
+    
     OS_ERR err;
     CPU_TS ts;
 
     while(true){
-        if(switches.LEFT_SW && switches.RIGHT_SW){
+        if(carStates->BlinkerStates.HZD){
             //Both lights blink at the same rate
             Lights_Set(LEFT_BLINK, !Lights_Read(LEFT_BLINK));
             Lights_Set(RIGHT_BLINK, !Lights_Read(LEFT_BLINK));
 
-        }else if(switches.LEFT_SW){
+        }else if(carStates->BlinkerStates.LT){
             // Only the left light blinks
             Lights_Set(LEFT_BLINK, !Lights_Read(LEFT_BLINK));
             Lights_Set(RIGHT_BLINK, 0);
 
-        }else if(switches.RIGHT_SW){
+        }else if(carStates->BlinkerStates.RT){
             // Only the right light blinks
             Lights_Set(RIGHT_BLINK, !Lights_Read(RIGHT_BLINK));
             Lights_Set(LEFT_BLINK, 0);
