@@ -7,14 +7,14 @@ void Task_ReadTritium(void* p_arg){
 	OS_ERR err;
 	CPU_TS ts;
 
-	OSSEMPend(&READTritium_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+	OSSEMPend(&ReadTritium_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
 
 	CANbus_Init();
 
 	uint8_t *message;
 	ErrorStatus status = CANbus_Read(message);
 
-	if(message){
+	if(status){
 
 		err = OSQPost(CANbus_MsgQ, (void *)message);
 		
@@ -27,8 +27,10 @@ void Task_ReadTritium(void* p_arg){
 			case OS_ERR_PEVENT_NULL:
 				break;
 			case OS_ERR_POST_NULL_PTR:
-				// This shouldn't happen since we check if message was null earlier
 				break;
+			case default:
+				break;
+
 		}
 
 	}
