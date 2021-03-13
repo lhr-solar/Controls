@@ -4,6 +4,7 @@
 #include "BSP_GPIO.h"
 #include "common.h"
 #include "config.h"
+#include "GPIOExpander.h"
 
 
 typedef enum {CRUZ_SW=0, CRUZ_EN, HZD_SQ, FR_SW, HEADLIGHT_SW, LEFT_SW, RIGHT_SW, REGEN_SW, IGN_1, IGN_2, REV_SW} switches_t;

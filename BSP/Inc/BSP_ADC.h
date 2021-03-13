@@ -25,10 +25,9 @@ typedef enum
 
 /**
  * @brief   Initialize the ADC module
- * @param   ADC_Channel, the channel to initialize the ADC for
  * @return  None
  */ 
-void BSP_ADC_Init(ADC_t ADC_Channel);
+void BSP_ADC_Init(void);
 
 /**
  * @brief   Provides the ADC value of the channel at the specified index
