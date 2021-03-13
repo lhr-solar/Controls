@@ -9,6 +9,9 @@
 
 #include "Lights.h"
 
+extern SwitchStates switches;
+extern LightStates lights;
+
 /**
 * @brief   Toggle proper indicator lights
 * @param   None
