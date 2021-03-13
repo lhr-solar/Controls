@@ -13,7 +13,7 @@ void Task_BlinkLight(void *p_arg){
     OS_ERR err;
     CPU_TS ts;
 
-    while(true){
+    while(1){
         if(carStates->BlinkerStates.HZD){
             //Both lights blink at the same rate
             Lights_Set(LEFT_BLINK, !Lights_Read(LEFT_BLINK));

@@ -9,13 +9,5 @@
 
 #include "Lights.h"
 
-
-/**
-* @brief   Toggle proper indicator lights
-* @param   None
-* @return  None
-*/ 
-void Task_BlinkLight(void *p_arg);
-
 #endif
 
