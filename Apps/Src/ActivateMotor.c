@@ -30,7 +30,7 @@ void Task_MotorConnection(void *p_arg) {
         (OS_TCB*)&SendCarCAN_TCB,
         (CPU_CHAR*)"SendCarCAN",
         (OS_TASK_PTR)Task_SendCarCAN,
-        (void*)NULL,
+        (void*) p_arg,
         (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
         (CPU_STK*)SendCarCAN_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
@@ -48,7 +48,7 @@ void Task_MotorConnection(void *p_arg) {
         (OS_TCB*)&ReadCarCAN_TCB,
         (CPU_CHAR*)"ReadCarCAN",
         (OS_TASK_PTR)Task_ReadCarCAN,
-        (void*)NULL,
+        (void*) p_arg,
         (OS_PRIO)TASK_READ_CAR_CAN_PRIO,
         (CPU_STK*)ReadCarCAN_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
@@ -66,7 +66,7 @@ void Task_MotorConnection(void *p_arg) {
         (OS_TCB*)&ReadTritium_TCB,
         (CPU_CHAR*)"ReadTritium",
         (OS_TASK_PTR)Task_ReadTritium,
-        (void*)NULL,
+        (void*) p_arg,
         (OS_PRIO)TASK_READ_TRITIUM_PRIO,
         (CPU_STK*)ReadTritium_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
@@ -85,7 +85,7 @@ void Task_MotorConnection(void *p_arg) {
         (OS_TCB*)&SendTritium_TCB,
         (CPU_CHAR*)"SendTritium",
         (OS_TASK_PTR)Task_SendTritium,
-        (void*)NULL,
+        (void*) p_arg,
         (OS_PRIO)TASK_SEND_TRITIUM_PRIO,
         (CPU_STK*)SendTritium_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
@@ -100,7 +100,7 @@ void Task_MotorConnection(void *p_arg) {
 
     while (1) {
         // Wait until some change needs to be made to the motor state
-        OSSemPend(&MotorConnectionChange_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+        OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
 
         State desiredState = car_state->ShouldMotorBeActivated;
         State currentState = Contactors_Get(MOTOR);
