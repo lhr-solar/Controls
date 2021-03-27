@@ -7,6 +7,6 @@
 #include "Pedals.h"
 
 // MAX_VELOCITY IN M/S
-#define MAX_VELOCITY 50
+#define MAX_VELOCITY 50.0f
 
 #endif 
