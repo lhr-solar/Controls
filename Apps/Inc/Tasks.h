@@ -136,9 +136,5 @@ extern OS_SEM SendCarCAN_Sem4;
 
 
 // TODO: Put all global state variables here
-//const switch_states_t switchStates = {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF};
-//const blinker_states_t blinkerStates = {OFF, OFF, OFF};
-
-//car_state_t carState = {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, switchStates, blinkerStates, OFF, OFF};
 
 #endif
