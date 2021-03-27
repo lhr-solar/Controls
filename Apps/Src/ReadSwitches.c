@@ -10,11 +10,12 @@
  * Semaphores when Switches state changes. Also updates a switches global defined in StateTypes.h, declared in Tasks.c and externed in Tasks.h
 */
 void Task_ReadSwitches (void* p_arg) {
-    switch_states_t *storedSwitchStates = &(((car_state_t*)p_arg)->SwitchStates); //pointer to global switchstates
-    switch_states_t readSwitchStates; //holds states read from driver reads
+    car_state_t *prevCarState= (car_state_t*)p_arg;
+    switch_states_t *prevSwitchStates = &(prevCarState->SwitchStates); //pointer to global switchstates
+    switch_states_t currSwitchStates; //holds states read from driver reads
 
-    // load readSwitchStates
-    readSwitchStates = (switch_states_t){
+    // load newSwitchStates
+    currSwitchStates = (switch_states_t){
         Switches_Read(CRUZ_SW),
         Switches_Read(CRUZ_EN),
         Switches_Read(HZD_SW),
@@ -30,25 +31,21 @@ void Task_ReadSwitches (void* p_arg) {
 
     Switches_Init();
     OS_ERR err;
-    bool arrayConThreadSpawned = false;
-    bool motorConThreadSpawned = false;
+    static bool arrayConThreadSpawned = false; //these booleans need to be persistent
+    static bool motorConThreadSpawned = false;
     while(1){
         //Spawns arrayConnection thread and MotorConnection thread when it is appropriate
         uint8_t ignStates = 0x00; //holds states read from Switches Driver
         uint8_t ignStored = 0x00; //holds states stored in globals
-        ignStates = ignStates|((readSwitchStates.IGN_2&1)<<1); //shift IGN_2 over 1 and set it in ignStates
-        ignStates = ignStates|(readSwitchStates.IGN_1&1);
-        ignStored = ignStored|((storedSwitchStates->IGN_2&1)<<1);
-        ignStored = ignStates|(storedSwitchStates->IGN_1&1);
+        ignStates|=((currSwitchStates.IGN_2&1)<<1); //shift IGN_2 over 1 and set it in ignStates
+        ignStates|=(currSwitchStates.IGN_1&1);
+        ignStored|=((prevSwitchStates->IGN_2&1)<<1);
+        ignStored|=(prevSwitchStates->IGN_1&1);
         if (ignStored!=ignStates){
             switch(ignStates){
                 case 0x00:
-                    //neither is on
-                    storedSwitchStates->IGN_1 = 0;
-                    storedSwitchStates->IGN_2 = 0;
-                    //TODO: add car turn off code?
-                    ((car_state_t*)p_arg)->ShouldArrayBeActivated = 0;
-                    ((car_state_t*)p_arg)->ShouldMotorBeActivated = 0;
+                    prevCarState->ShouldArrayBeActivated = 0;
+                    prevCarState->ShouldMotorBeActivated = 0;
                     OSSemPost(
                         &ArrayConnectionChange_Sem4,
                         (OS_OPT) OS_OPT_POST_ALL,
@@ -61,10 +58,9 @@ void Task_ReadSwitches (void* p_arg) {
                     );
                 case 0x01:
                 //IGN1 is on
-                    storedSwitchStates->IGN_1=1;
-                    storedSwitchStates->IGN_2=0;
-                    #pragma region
-                    if (arrayConThreadSpawned=false){ 
+                    prevCarState->ShouldArrayBeActivated = 1;
+                    prevCarState->ShouldMotorBeActivated = 0;
+                    if (arrayConThreadSpawned==false){ 
                         OSTaskCreate(
                             (OS_TCB*)&ArrayConnection_TCB,
                             (CPU_CHAR*)"Array Connection",
@@ -80,15 +76,14 @@ void Task_ReadSwitches (void* p_arg) {
                             (OS_OPT)(OS_OPT_TASK_STK_CLR),
                             (OS_ERR*)&err
                         );
+                        arrayConThreadSpawned=true;
                     }
-                    #pragma endregion
+                
                 case 0x03:
                 //Both are on
-                    storedSwitchStates->IGN_2=1;
-                    storedSwitchStates->IGN_1=1;
-                    //OSTASKCREATE activate array, OSTASKCREATE activate motor
-                    #pragma region
-                    if(arrayConThreadSpawned=false){ 
+                    prevCarState->ShouldArrayBeActivated = 1;
+                    prevCarState->ShouldMotorBeActivated = 1;
+                    if(arrayConThreadSpawned==false){ 
                         OSTaskCreate(
                             (OS_TCB*)&ArrayConnection_TCB,
                             (CPU_CHAR*)"Array Connection",
@@ -104,8 +99,9 @@ void Task_ReadSwitches (void* p_arg) {
                             (OS_OPT)(OS_OPT_TASK_STK_CLR),
                             (OS_ERR*)&err
                         );
+                        arrayConThreadSpawned=true;
                     }
-                    if(motorConThreadSpawned){
+                    if(motorConThreadSpawned==false){
                         OSTaskCreate(
                             (OS_TCB*)&MotorConnection_TCB,
                             (CPU_CHAR*)"Motor Connection",
@@ -121,8 +117,8 @@ void Task_ReadSwitches (void* p_arg) {
                             (OS_OPT)(OS_OPT_TASK_STK_CLR),
                             (OS_ERR*)&err
                         );
-                    }
-                    #pragma endregion
+                        motorConThreadSpawned=true;
+                    };
                 case 0x02:
                     return -1; //Shouldn't happen - error case; only IGN2 is on
             }
@@ -130,23 +126,23 @@ void Task_ReadSwitches (void* p_arg) {
         }
         
         //Signal LightsChange_Sem4 for UpdateLights Thread
-        State readlightSwitches[]={
-            readSwitchStates.LEFT_SW,
-            readSwitchStates.RIGHT_SW,
-            readSwitchStates.HEADLIGHT_SW,
-            readSwitchStates.HZD_SW
+        State curLightSwitches[]={
+            currSwitchStates.LEFT_SW,
+            currSwitchStates.RIGHT_SW,
+            currSwitchStates.HEADLIGHT_SW,
+            currSwitchStates.HZD_SW
         }; 
-        State storeLightSwitches[]={
-            storedSwitchStates->LEFT_SW,
-            storedSwitchStates->RIGHT_SW,
-            storedSwitchStates->HEADLIGHT_SW,
-            storedSwitchStates->HZD_SW
+        State prevLightSwitches[]={
+            prevSwitchStates->LEFT_SW,
+            prevSwitchStates->RIGHT_SW,
+            prevSwitchStates->HEADLIGHT_SW,
+            prevSwitchStates->HZD_SW
         };       
         uint8_t lightSwitchStates = 0x00; //holds states read from Switches_Driver
         uint8_t lightSwitchStored = 0x00; //holds states stored in global
         for(uint8_t i = 0; i<3; i++){
-            lightSwitchStates = lightSwitchStates | (readlightSwitches[i]<<i);
-            lightSwitchStored = lightSwitchStored | (storeLightSwitches[i]<<i);
+            lightSwitchStates |= (curLightSwitches[i]<<i);
+            lightSwitchStored |= (prevLightSwitches[i]<<i);
         }
         if(lightSwitchStored!=lightSwitchStates){
             //if any of the bits dont match, LightsChange must get signaled       
@@ -159,24 +155,24 @@ void Task_ReadSwitches (void* p_arg) {
 
         //VelocityChange_Sem4
         State readVelSwitches[] = {
-            readSwitchStates.CRUZ_SW,
-            readSwitchStates.CRUZ_EN,
-            readSwitchStates.FWD_SW,
-            readSwitchStates.REV_SW,
-            readSwitchStates.REGEN_SW
+            currSwitchStates.CRUZ_SW,
+            currSwitchStates.CRUZ_EN,
+            currSwitchStates.FWD_SW,
+            currSwitchStates.REV_SW,
+            currSwitchStates.REGEN_SW
         };
         State storeVelSwitches[] = {
-            storedSwitchStates->CRUZ_SW,
-            storedSwitchStates->CRUZ_EN,
-            storedSwitchStates->FWD_SW,
-            storedSwitchStates->REV_SW,
-            storedSwitchStates->REGEN_SW
+            prevSwitchStates->CRUZ_SW,
+            prevSwitchStates->CRUZ_EN,
+            prevSwitchStates->FWD_SW,
+            prevSwitchStates->REV_SW,
+            prevSwitchStates->REGEN_SW
         };
         uint8_t velStates = 0x00; //holds read states of switches in least sig 5 bits
         uint8_t velStored = 0x00; //hold stored global states of velocity switches in least sig bits
         for(uint8_t i = 0; i<5;i++){
-            velStates = velStates | ((readVelSwitches[i]&1)<<i);
-            velStored = velStored | ((storeVelSwitches[i]&1)<<i);
+            velStates |=((readVelSwitches[i]&1)<<i);
+            velStored |=((storeVelSwitches[i]&1)<<i);
         }
         if(velStates!=velStored){
             //stored states and read states dont match up
@@ -189,20 +185,20 @@ void Task_ReadSwitches (void* p_arg) {
 
         //DisplayChange_Sem4
         State readDispSwitches[] = {
-            readSwitchStates.CRUZ_EN,
-            readSwitchStates.CRUZ_SW,
-            readSwitchStates.REGEN_SW
+            currSwitchStates.CRUZ_EN,
+            currSwitchStates.CRUZ_SW,
+            currSwitchStates.REGEN_SW
         };
         State storeDispSwitches[] = {
-            storedSwitchStates->CRUZ_EN,
-            storedSwitchStates->CRUZ_SW,
-            storedSwitchStates->REGEN_SW
+            prevSwitchStates->CRUZ_EN,
+            prevSwitchStates->CRUZ_SW,
+            prevSwitchStates->REGEN_SW
         };
         uint8_t dispStates = 0x00;
         uint8_t dispStored = 0x00;
         for(uint8_t i=0;i<3;i++){
-            dispStates = dispStates | ((readDispSwitches[i])<<i);
-            dispStored = dispStored | ((storeDispSwitches[i])<<i);
+            dispStates |= ((readDispSwitches[i])<<i);
+            dispStored |= ((storeDispSwitches[i])<<i);
         }
         if(dispStates != dispStored){ //if any of the states don't match up sem4 needs a signal
             OSSemPost(
@@ -214,7 +210,7 @@ void Task_ReadSwitches (void* p_arg) {
 
 
         //set global state to match what was read
-        *storedSwitchStates = readSwitchStates; 
+        *prevSwitchStates = currSwitchStates; 
 
     }
 }
