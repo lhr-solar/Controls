@@ -12,19 +12,21 @@
  * Stores the current state of each of
  * the switches that control this system
  */
-typedef struct {
-    State LT;
-    State RT;
-    State FWD;
-    State REV;
-    State CRS_EN;
-    State CRS_SET;
-    State REGEN;
-    State HZD;
-    State HDLT;
+
+typedef struct switch_states_t {
+    State CRUZ_SW;
+    State CRUZ_EN;
+    State HZD_SW;
+    State FWD_SW;
+    State HEADLIGHT_SW;
+    State LEFT_SW;
+    State RIGHT_SW;
+    State REGEN_SW;
     State IGN_1;
     State IGN_2;
-} switch_states_t;
+    State REV_SW;
+}switch_states_t;
+
 
 /**
  * Blinker States
@@ -60,6 +62,9 @@ typedef struct {
 
     State CruiseControlEnable;
     State CruiseControlSet;
+
+    State ShouldArrayBeActivated;
+    State ShouldMotorBeActivated;
 } car_state_t;
 
 #endif
