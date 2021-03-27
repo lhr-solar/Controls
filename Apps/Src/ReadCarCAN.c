@@ -2,8 +2,14 @@
 
 #include "ReadCarCAN.h"
 
+#define THRESHOLD 1
+
 void Task_ReadCarCAN(void *p_arg) {
     car_state_t *car = (car_state_t *) p_arg;
+
+    uint8_t buffer[8]; // buffer for CAN message
+
+    static int faultCounter = 0;
 
     OS_ERR err;
     CPU_TS ts;
@@ -22,7 +28,21 @@ void Task_ReadCarCAN(void *p_arg) {
 
         // Normal task countinues here
 
-        printf("hello there\n");
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+        // Check if BPS told us to shut down the motor at least THRESHOLD times
+        if (CANbus_Read(buffer) == SUCCESS && (++faultCounter == THRESHOLD)) {
+            // turn off the array and motor
+
+            car->ShouldArrayBeActivated = OFF;
+            car->ShouldMotorBeActivated = OFF;
+
+            OSTaskSemPost(&MotorConnection_TCB, OS_OPT_POST_NONE, &err);
+            // TODO: error handling
+
+            OSTaskSemPost(&ArrayConnection_TCB, OS_OPT_POST_NONE, &err);
+            // TODO: error handling
+
+            faultCounter = 0;
+        }
+        
     }
 }
