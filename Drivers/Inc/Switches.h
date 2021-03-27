@@ -4,6 +4,7 @@
 #include "BSP_GPIO.h"
 #include "common.h"
 #include "config.h"
+#include "GPIOExpander.h"
 
 
 typedef enum {

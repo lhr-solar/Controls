@@ -65,5 +65,3 @@ OS_SEM MotorConnectionChange_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
-
-
