@@ -1,6 +1,15 @@
 #include "CANbus.h"
 #include "config.h"
+#include "os.h"
+static OS_SEM CANMail_Sem4;
+static OS_MUTEX CANbus_TxMutex;
 
+
+
+void CANbus_Release(){ 
+    //function that releases the mailbox semaphores
+    //this will get passed to the BSP_CAN_Init function which will bind the release function to the tx ending handler provided by STFM
+};
 
 /**
  * @brief   Initializes the CAN system
@@ -8,6 +17,19 @@
  * @return  None
  */
 void CANbus_Init(void) {
+    //initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
+    //initialize tx
+    OS_ERR err;
+
+	OSMutexCreate(&CANbus_TxMutex, //create mutex to lock the TX line
+				  "CAN TX Lock",
+				  &err);
+
+	OSSemCreate(&CANMail_Sem4, //create mailbox sem4s to check on send funcs
+                "CAN Mailbox Semaphore",
+                3,	// Number of mailboxes on the board
+                &err);
+
     BSP_CAN_Init(CAN_1);
 }
 
@@ -16,12 +38,36 @@ void CANbus_Init(void) {
  * @param   CAN bus line
  * @param   id : CAN id of the message
  * @param 	payload : the data that will be sent.
+ * @param blocking: Whether or not this should be a blocking call
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-int CANbus_Send(CANId_t id, CANPayload_t payload) {
+ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, bool blocking) {
+    CPU_TS timestamp;
+    OS_ERR err;
+    //make sure that Can mailbox is available
+    if (blocking){ 
+        OSSemPend(
+            &CANMail_Sem4,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            &timestamp,
+            &err
+        );
+    } else {
+        OSSemPend(
+            &CANMail_Sem4,
+            0,
+            OS_OPT_PEND_NON_BLOCKING,
+            &timestamp,
+            &err
+        );
+    }
+    if (err != OS_ERR_NONE){
+        return ERROR;
+    }
 
+    
     int8_t data[payload.bytes];
-
     uint64_t tempData = payload.data.d;
     uint8_t mask = 0xFF;
 
@@ -31,7 +77,27 @@ int CANbus_Send(CANId_t id, CANPayload_t payload) {
     }
 
 
-	return BSP_CAN_Write(CAN_1, id, data, payload.bytes);
+
+    OSMutexPend( //ensure that tx write is locked to single write call
+        &CANbus_TxMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err
+    );
+    int retval = BSP_CAN_Write(CAN_1, id, data, payload.bytes);
+
+    OSMutexPost( //unlock the TX line
+        &CANbus_TxMutex,
+        OS_OPT_POST_1,
+        &err
+    );
+
+    if (retval){
+        return SUCCESS;
+    } else {
+        return ERROR;
+    }
 }
 
 
@@ -59,3 +125,5 @@ ErrorStatus CANbus_Read(uint8_t* buffer){
     return ERROR;
     
 }
+
+
