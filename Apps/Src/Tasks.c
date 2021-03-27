@@ -57,7 +57,7 @@ OS_SEM ActivateArray_Sem4;
 OS_SEM ActivateMotor_Sem4;
 OS_SEM BlinkLight_Sem4;
 OS_SEM SendCarCAN_Sem4;
-
+OS_SEM CANMail_Sem4;
 /**
  * Global Variables
  */
