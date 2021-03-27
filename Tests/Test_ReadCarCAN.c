@@ -2,6 +2,8 @@
 #include "config.h"
 #include "os.h"
 #include "Tasks.h"
+#include "CarState.h"
+#include "CANbus.h"
 
 void Task1(void *);
 
@@ -49,6 +51,14 @@ void Task1(void *p_arg) {
     OS_ERR err;
     CPU_TS ts;
 
+    car_state_t car;
+    car.ShouldArrayBeActivated = ON;
+    car.ShouldMotorBeActivated = ON;
+
+    CANPayload_t payload;
+    payload.bytes = 4;
+    payload.data.w = 42;
+
     CPU_Init();
     OS_CPU_SysTickInit();
 
@@ -56,7 +66,7 @@ void Task1(void *p_arg) {
         (OS_TCB*)&ReadCarCAN_TCB,
         (CPU_CHAR*)"ReadCarCAN",
         (OS_TASK_PTR)Task_ReadCarCAN,
-        (void*)NULL,
+        (void*)&car,
         (OS_PRIO)4,
         (CPU_STK*)ReadCarCAN_Stk,
         (CPU_STK_SIZE)128/10,
@@ -70,10 +80,10 @@ void Task1(void *p_arg) {
 
     printf("Spawned ReadCarCAN\n");
 
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    printf("Delayed for 3 seconds\n");
-    OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    printf("Delayed for 3 seconds\n");
-    OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
+    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    printf("Array is %d\n", car.ShouldArrayBeActivated);
+    CANbus_Send(MOTOR_DISABLE, payload);
+    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+    printf("Array is %d\n", car.ShouldArrayBeActivated);
+    OSTaskDel(NULL, &err);
 }

@@ -32,17 +32,23 @@ void Task_ReadCarCAN(void *p_arg) {
         if (CANbus_Read(buffer) == SUCCESS && (++faultCounter == THRESHOLD)) {
             // turn off the array and motor
 
-            car->ShouldArrayBeActivated = OFF;
-            car->ShouldMotorBeActivated = OFF;
+            if (car->ShouldArrayBeActivated == ON) {
+                car->ShouldArrayBeActivated = OFF;
+                OSTaskSemPost(&ArrayConnection_TCB, OS_OPT_POST_NONE, &err);
+                // TODO: error handling
+            }
 
-            OSTaskSemPost(&MotorConnection_TCB, OS_OPT_POST_NONE, &err);
-            // TODO: error handling
-
-            OSTaskSemPost(&ArrayConnection_TCB, OS_OPT_POST_NONE, &err);
-            // TODO: error handling
+            if (car->ShouldMotorBeActivated == ON) {
+                car->ShouldMotorBeActivated = OFF;
+                OSTaskSemPost(&MotorConnection_TCB, OS_OPT_POST_NONE, &err);
+                // TODO: error handling
+            }
 
             faultCounter = 0;
         }
+
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        // TODO: error handling
         
     }
 }
