@@ -15,7 +15,6 @@ void Task_ReadTritium(void* p_arg) {
 
 		if(status == SUCCESS) {
 
-			// Is using strlen here correct?
 			OSQPost(&CANBus_MsgQ, (void *) &buf, sizeof(buf), OS_OPT_POST_FIFO, &err);
 			
 			if (err != OS_ERR_NONE) {
