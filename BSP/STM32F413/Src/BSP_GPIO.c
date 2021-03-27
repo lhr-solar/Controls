@@ -3,6 +3,8 @@
 #include "BSP_GPIO.h"
 #include "stm32f4xx.h"
 
+OS_SEM GPIO_Update_Sem4;
+
 /**
  * @brief   Initializes a GPIO port
  * @param   port to initialize
@@ -37,13 +39,35 @@ void BSP_GPIO_Init(port_t port){
 
 }
 
+static void gpio_pend(void) {
+	OS_ERR err;
+	CPU_TS ts;
+	OSSemPend(&GPIO_Update_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+	// TODO: error handling
+}
+
+// Use this inline function to wait until GPIO communication is complete
+static inline void GPIO_Wait(){
+	gpio_pend();
+}
+
+static uint8_t GPIO_WriteRead(port_t port, uint16_t data){
+
+	GPIOI_TypeDef *gpio_port = port;
+	
+	GPIO_Wait(gpio_port);
+	gpio_port->DR = data & 0x00FFFF;
+	GPIO_Wait(gpio_port);
+	return gpio_port->DR & 0x00FFFF;
+}
+
 /**
  * @brief   Reads value of the specified port
  * @param   port to read
  * @return  data of the port
  */ 
 uint16_t BSP_GPIO_Read(port_t port){
-
+	uint16_t = GPIO_WriteRead(port, 0x0000);
 }
 
 /**
@@ -53,5 +77,5 @@ uint16_t BSP_GPIO_Read(port_t port){
  * @return  None
  */ 
 void BSP_GPIO_Write(port_t port, uint16_t data){
-
+	GPIO_WriteRead(port, data);
 }
