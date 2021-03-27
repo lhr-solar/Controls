@@ -3,7 +3,7 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
-#include "CANbus.h"
+#include "MotorController.h"
 
 void Task1(void *);
 
@@ -81,19 +81,15 @@ void Task1(void *p_arg) {
 
     printf("Created ReadTritium\n");
 
-    CANPayload_t payload;
-    payload.idx = 0;
-    payload.bytes = 8;
+    CANbuff *buf;
     int counter = 0;
     int size;
 
     while (1) {
-        payload.data.d = counter++;
-        CANbus_Send(MOTOR_DISABLE, payload);
+        MotorController_Drive(0, counter++);
         printf("sent data\n");
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        int *m = (int *) OSQPend(&CANBus_MsgQ, 0, OS_OPT_PEND_BLOCKING, &size, &ts, &err);
-        printf("Received a message \"%d\" of size %d\tcounter is %d\n", *m, size, counter);
-        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        buf = OSQPend(&CANBus_MsgQ, 0, OS_OPT_PEND_BLOCKING, &size, &ts, &err);
+        printf("Received firstNum: %d\n", buf->firstNum);
     }
 }
