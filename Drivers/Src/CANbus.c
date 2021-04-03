@@ -2,13 +2,14 @@
 #include "config.h"
 #include "os.h"
 static OS_SEM CANMail_Sem4;
+static OS_SEM CANBus_RecieveQ; 
 static OS_MUTEX CANbus_TxMutex;
+static OS_MUTEX CANbus_RxMutex;
 
-
-
+//function that releases the mailbox semaphores
+//this will get passed to the BSP_CAN_Init function which will bind the release function to the tx ending handler provided by STFM
 void CANbus_Release(){ 
-    //function that releases the mailbox semaphores
-    //this will get passed to the BSP_CAN_Init function which will bind the release function to the tx ending handler provided by STFM
+    
 };
 
 /**
@@ -21,15 +22,13 @@ void CANbus_Init(void) {
     //initialize tx
     OS_ERR err;
 
-	OSMutexCreate(&CANbus_TxMutex, //create mutex to lock the TX line
-				  "CAN TX Lock",
-				  &err);
+	OSMutexCreate(&CANbus_TxMutex,"CAN TX Lock",&err);
 
-	OSSemCreate(&CANMail_Sem4, //create mailbox sem4s to check on send funcs
-                "CAN Mailbox Semaphore",
-                3,	// Number of mailboxes on the board
-                &err);
+    OSMutexCreate(&CANbus_RxMutex,"CAN RX Lock",&err);
 
+	OSSemCreate(&CANMail_Sem4, "CAN Mailbox Semaphore", 3,&err); //there's 3 hardware mailboxes on the board, so 3 software mailboxes
+
+    OSSemCreate(&CANBus_RecieveQ, "CAN Recieved Msg queue",0,&err); //create a queue to hold the messages in as they come in
     BSP_CAN_Init(CAN_1);
 }
 
@@ -41,11 +40,11 @@ void CANbus_Init(void) {
  * @param blocking: Whether or not this should be a blocking call
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, bool blocking) {
+ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blocking) {
     CPU_TS timestamp;
     OS_ERR err;
     //make sure that Can mailbox is available
-    if (blocking){ 
+    if (blocking == CANBLOCKING){ 
         OSSemPend(
             &CANMail_Sem4,
             0,
@@ -66,7 +65,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, bool blocking) {
         return ERROR;
     }
 
-    
+    //OLD CANWRITING SYS
     int8_t data[payload.bytes];
     uint64_t tempData = payload.data.d;
     uint8_t mask = 0xFF;
@@ -74,6 +73,30 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, bool blocking) {
     for(int i=payload.bytes-1; i>=0; i--){
         data[i] = tempData&mask;
         tempData = tempData>>8;
+    }
+
+    //NEW CANWRITING SYS
+    uint8_t txdata[8];
+    uint8_t datalen;
+
+    switch(id){
+    //Handle 64bit precision case (no idx)
+       case MC_BUS:
+       case VELOCITY:
+       case MC_PHASE_CURRENT:
+       case VOLTAGE_VEC:
+       case CURRENT_VEC:
+       case BACKEMF:
+       case TEMPERATURE:
+       case ODOMETER_AMPHOURS:
+            datalen = 8;
+            memcpy(&txdata,payload.data.d,sizeof(payload.data.d));
+
+    //Handle 8bit precision case (0b0000xxxx) (no idx)
+       case CAR_STATE:
+            uint8_t datalen = 1;
+            memcpy(&txdata,payload.data.b,sizeof(payload.data.b)); //copy into txdata array  the 8 bits of the payload
+
     }
 
 
@@ -85,7 +108,8 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, bool blocking) {
         &timestamp,
         &err
     );
-    int retval = BSP_CAN_Write(CAN_1, id, data, payload.bytes);
+
+    int retval = BSP_CAN_Write(CAN_1, id, txdata, datalen);
 
     OSMutexPost( //unlock the TX line
         &CANbus_TxMutex,
