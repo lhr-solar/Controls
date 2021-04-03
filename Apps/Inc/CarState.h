@@ -63,6 +63,8 @@ typedef struct {
 
     State ShouldArrayBeActivated;
     State ShouldMotorBeActivated;
+
+    State IsRegenBrakingAllowed;
 } car_state_t;
 
 #endif

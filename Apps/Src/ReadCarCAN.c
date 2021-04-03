@@ -2,7 +2,7 @@
 
 #include "ReadCarCAN.h"
 
-#define THRESHOLD 1
+#define THRESHOLD 3
 
 void Task_ReadCarCAN(void *p_arg) {
     car_state_t *car = (car_state_t *) p_arg;
@@ -26,23 +26,21 @@ void Task_ReadCarCAN(void *p_arg) {
 
         // Normal task countinues here
 
-        // Check if BPS told us to shut down the motor at least THRESHOLD times
-        if (CANbus_Read(buffer) == SUCCESS && (++faultCounter == THRESHOLD)) {
-            // turn off the array and motor
-
-            if (car->ShouldArrayBeActivated == ON) {
-                car->ShouldArrayBeActivated = OFF;
-                OSTaskSemPost(&ArrayConnection_TCB, OS_OPT_POST_NONE, &err);
-                // TODO: error handling
-            }
-
-            if (car->ShouldMotorBeActivated == ON) {
-                car->ShouldMotorBeActivated = OFF;
-                OSTaskSemPost(&MotorConnection_TCB, OS_OPT_POST_NONE, &err);
-                // TODO: error handling
+        // Check if BPS sent us a message
+        if (CANbus_Read(buffer) == SUCCESS) {
+            if (buffer[0] == 0) {
+                car->IsRegenBrakingAllowed = OFF;
+            } else {
+                car->IsRegenBrakingAllowed = ON;
             }
 
             faultCounter = 0;
+        } else {
+            faultCounter++;
+        }
+
+        if (faultCounter >= THRESHOLD) {
+            car->IsRegenBrakingAllowed = ON;
         }
 
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
