@@ -35,6 +35,7 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len);
 
 /**
  * @brief   Reads the message on the specified CAN line
+ * @param   bus the bus line 
  * @param   id pointer to integer to store the 
  *          message ID that was read
  * @param   data pointer to integer array to store

@@ -2,7 +2,7 @@
 #include "config.h"
 #include "os.h"
 static OS_SEM CANMail_Sem4;
-static OS_SEM CANBus_RecieveQ; 
+static OS_SEM CANBus_RecieveSem4; 
 static OS_MUTEX CANbus_TxMutex;
 static OS_MUTEX CANbus_RxMutex;
 
@@ -28,9 +28,26 @@ void CANbus_Init(void) {
 
 	OSSemCreate(&CANMail_Sem4, "CAN Mailbox Semaphore", 3,&err); //there's 3 hardware mailboxes on the board, so 3 software mailboxes
 
-    OSSemCreate(&CANBus_RecieveQ, "CAN Recieved Msg queue",0,&err); //create a queue to hold the messages in as they come in
+    OSSemCreate(&CANBus_RecieveSem4, "CAN Recieved Msg queue",0,&err); //create a mailbox counter to hold the messages in as they come in
     BSP_CAN_Init(CAN_1);
 }
+
+/**
+ * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly.
+*/
+void CANbus_RxHandler(){
+    OS_ERR err;
+    OSSemPost(&CANBus_RecieveSem4, OS_OPT_POST_1, &err);
+}
+
+/**
+ * @brief this function will be passed down to the BSP layer to trigger on TXend. Releases hold of the mailbox semaphore (Increments it to show mailbox available). Do not access directly.
+*/
+void CANbus_TxHandler(){
+    OS_ERR err;
+    OSSemPost(&CANMail_Sem4, OS_OPT_POST_1, &err);
+}
+
 
 /**
  * @brief   Transmits data onto the CANbus
@@ -120,27 +137,65 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
 
 /**
  * @brief   Checks if the CAN ID matches with expected ID and then copies message to given buffer array
- * @param   CAN line bus
+ * @param   CAN line bus (variable buses not implemented, this function currently works with CAN1)
+ * @param   ID pointer to where to store the CAN id of the recieved msg
  * @param   pointer to buffer array to store message
+ * @param   blocking whether or not this read should be blocking
  * @return  1 if ID matches and 0 if it doesn't
  */
 
-ErrorStatus CANbus_Read(uint8_t* buffer){
-    
-    uint32_t ID;
-    uint8_t data[8];
-    uint8_t count = BSP_CAN_Read(CAN_1,&ID,data);
-    
-    if(ID == MOTOR_DISABLE){
-        for(int i=0;i<count;i++){
-            buffer[i]=data[i];
-        }
-        return SUCCESS;
-    
+ErrorStatus CANbus_Read(CAN_t canLine,CANId_t *ID,uint8_t* buffer,CAN_blocking_t blocking){
+    CPU_TS timestamp;
+    OS_ERR err;
+
+    if(blocking == CANBLOCKING){
+        OSSemPend(
+            &CANBus_RecieveSem4,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            timestamp,
+            &err
+        );
+    } else {
+        OSSemPend(
+            &CANBus_RecieveSem4,
+            0,
+            OS_OPT_PEND_NON_BLOCKING,
+            timestamp,
+            &err
+        );
+    }
+    if(err != OS_ERR_NONE) {
+        return ERROR;
     }
 
-    return ERROR;
+    OSMutexPend( //ensure that RX line is available
+        &CANbus_RxMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err
+    );
+    if (err != OS_ERR_NONE){ 
+        //couldn't lock RX line
+        return ERROR;
+    }
+
+    //GETMSG
+    uint8_t status = BSP_CAN_Read(CAN_1,ID,buffer);
     
+
+    OSMutexPost( //unlock RX line
+        &CANbus_RxMutex,
+        OS_OPT_POST_1,
+        &err
+    );
+    if(status){
+        return SUCCESS;
+    } else {
+        return ERROR;
+    }
+
 }
 
 

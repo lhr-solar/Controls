@@ -40,6 +40,8 @@ typedef struct {
 	CANId_t id;
 }CANMSG_t;
 
+typedef enum __CAN_blocking_t {CANBLOCKING=0, NONBLOCKING} CAN_blocking_t;
+
 /**
  * @brief   Initializes the CAN system
  * @param   None
@@ -54,7 +56,7 @@ void CANbus_Init(void);
  * @param blocking: Whether or not the Send should be blocking or not
  * @return  ERROR if data wasn't sent, otherwise it was sent.
  */
-ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,bool blocking);
+ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,CAN_blocking_t blocking);
 
 
 /**
