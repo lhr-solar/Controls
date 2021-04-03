@@ -20,9 +20,7 @@ void Task_ReadCarCAN(void *p_arg) {
             // A signal was received, so the task should wait until signaled again
             OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
             // TODO: error handling
-        }
-
-        if (err != OS_ERR_PEND_WOULD_BLOCK) {
+        } else if (err != OS_ERR_PEND_WOULD_BLOCK) {
             // TODO: error handling
         }
 
