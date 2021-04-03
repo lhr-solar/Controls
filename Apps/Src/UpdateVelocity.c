@@ -26,10 +26,7 @@ void Task_UpdateVelocity(void* p_arg){
         }else{
             car_state->DesiredVelocity = MAX_VELOCITY;
             car_state->DesiredMotorCurrent = convertPedaltoMotorPercent(pedalPercentage);
-        }
-
-        printf("desired velocity: %f, desired motor current: %f\n", car_state->DesiredVelocity, car_state->DesiredMotorCurrent);
-        
+        }        
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
     }

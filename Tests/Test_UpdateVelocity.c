@@ -2,10 +2,10 @@
 #include "config.h"
 #include "UpdateVelocity.h"
 
-const switch_states_t switchStates = {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF};
-const blinker_states_t blinkerStates = {OFF, OFF, OFF};
+#define INITIAL_SWITCH_STATES {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF}
+#define INITIAL_BLINKER_STATES {OFF, OFF, OFF}
 
-car_state_t carState = {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, switchStates, blinkerStates, OFF, OFF};
+car_state_t carState = {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, INITIAL_SWITCH_STATES, INITIAL_BLINKER_STATES, OFF, OFF};
 
 OS_TCB UpdateRandomPedal_TCB;
 CPU_STK UpdateRandomPedal_Stk[DEFAULT_STACK_SIZE];
@@ -15,12 +15,15 @@ void Task_UpdateRandomPedal(void* p_arg){
 
     OS_ERR err;
 
+    car_state->CruiseControlVelocity = 20;
     while(1){    
         car_state->AccelPedalPercent = rand() % 100;
         
         car_state->CruiseControlEnable = rand() % 2;
         car_state->CruiseControlSet = rand() % 2;
 
+        printf("Accel: %d | CC Enable: %d | CC Set: %d\n", car_state->AccelPedalPercent, car_state->CruiseControlEnable, car_state->CruiseControlSet);
+        printf("desired velocity: %f, desired motor current: %f\n", car_state->DesiredVelocity, car_state->DesiredMotorCurrent);
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
     }
