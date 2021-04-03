@@ -65,16 +65,6 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         return ERROR;
     }
 
-    //OLD CANWRITING SYS
-    int8_t data[payload.bytes];
-    uint64_t tempData = payload.data.d;
-    uint8_t mask = 0xFF;
-
-    for(int i=payload.bytes-1; i>=0; i--){
-        data[i] = tempData&mask;
-        tempData = tempData>>8;
-    }
-
     //NEW CANWRITING SYS
     uint8_t txdata[8];
     uint8_t datalen;
@@ -99,21 +89,24 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
 
     }
 
-
-
-    OSMutexPend( //ensure that tx write is locked to single write call
+    OSMutexPend( //ensure that tx line is available
         &CANbus_TxMutex,
         0,
         OS_OPT_PEND_BLOCKING,
         &timestamp,
         &err
     );
+    if (err != OS_ERR_NONE){
+        //couldn't lock tx line
+        return ERROR;
+    }
+    //tx line locked
 
     int retval = BSP_CAN_Write(CAN_1, id, txdata, datalen);
 
     OSMutexPost( //unlock the TX line
         &CANbus_TxMutex,
-        OS_OPT_POST_1,
+        OS_OPT_POST_NONE,
         &err
     );
 
