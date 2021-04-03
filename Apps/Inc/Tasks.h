@@ -162,9 +162,6 @@ extern OS_SEM MotorConnectionChange_Sem4;
  */
 
 
-<<<<<<< HEAD
-=======
 // TODO: Put all global state variables here
->>>>>>> origin/master
 
 #endif

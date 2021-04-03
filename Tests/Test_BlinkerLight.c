@@ -1,5 +1,10 @@
 #include "BlinkerLight.h"
 
+#define INITIAL_SWITCH_STATES {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF}
+#define INITIAL_BLINKER_STATES {OFF, OFF, OFF}
+
+car_state_t carState = {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, INITIAL_SWITCH_STATES, INITIAL_BLINKER_STATES, OFF, OFF};
+
 int main(void){
     OS_ERR err;
     OSInit(&err);
@@ -12,7 +17,7 @@ int main(void){
         (OS_TCB*)&ReadSwitches_TCB,
         (CPU_CHAR*)"ReadSwitches",
         (OS_TASK_PTR)Task_ReadSwitches,
-        (void*)NULL,
+        (void*)&carState,
         (OS_PRIO)6,
         (CPU_STK*)ReadSwitches_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT/10,
