@@ -10,12 +10,6 @@
 #include "Tasks.h"
 #include "os.h"
 
-/**
-* @brief   Read both pedal percentage values
-* @param   None
-* @return  None
-*/ 
-void Task_ReadPedals(void *p_arg);
-
 
 #endif
+

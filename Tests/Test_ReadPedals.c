@@ -5,6 +5,11 @@
  */
 #include "RTOSPedals.h"
 
+#define INITIAL_SWITCH_STATES {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF}
+#define INITIAL_BLINKER_STATES {OFF, OFF, OFF}
+
+car_state_t carState = {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, INITIAL_SWITCH_STATES, INITIAL_BLINKER_STATES, OFF, OFF};
+
 int main(void){
     OS_ERR err;
     OSInit(&err);
@@ -17,8 +22,8 @@ int main(void){
         (OS_TCB*)&ReadPedals_TCB,
         (CPU_CHAR*)"ReadPedals",
         (OS_TASK_PTR)Task_ReadPedals,
-        (void*)NULL,
-        (OS_PRIO)4,
+        (void*)&carState,
+        (OS_PRIO)TASK_READ_PEDALS_PRIO,
         (CPU_STK*)ReadPedals_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT/10,
         (CPU_STK_SIZE)TASK_READ_PEDALS_STACK_SIZE,
