@@ -158,7 +158,8 @@ extern OS_SEM SendCarCAN_Sem4;
 /**
  * Global Variables
  */
-// TODO: Put all global state variables here
 
+
+// TODO: Put all global state variables here
 
 #endif
