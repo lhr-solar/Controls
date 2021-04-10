@@ -97,12 +97,12 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
        case TEMPERATURE:
        case ODOMETER_AMPHOURS:
             datalen = 8;
-            memcpy(&txdata,payload.data.d,sizeof(payload.data.d));
+            memcpy(&txdata,&payload.data.d,sizeof(payload.data.d));
 
     //Handle 8bit precision case (0b0000xxxx) (no idx)
        case CAR_STATE:
-            uint8_t datalen = 1;
-            memcpy(&txdata,payload.data.b,sizeof(payload.data.b)); //copy into txdata array  the 8 bits of the payload
+            datalen = 1;
+            memcpy(&txdata,&payload.data.b,sizeof(payload.data.b)); //copy into txdata array  the 8 bits of the payload
 
     }
 
@@ -153,7 +153,7 @@ ErrorStatus CANbus_Read(CAN_t canLine,CANId_t *ID,uint8_t* buffer,CAN_blocking_t
             &CANBus_RecieveSem4,
             0,
             OS_OPT_PEND_BLOCKING,
-            timestamp,
+            &timestamp,
             &err
         );
     } else {
@@ -161,7 +161,7 @@ ErrorStatus CANbus_Read(CAN_t canLine,CANId_t *ID,uint8_t* buffer,CAN_blocking_t
             &CANBus_RecieveSem4,
             0,
             OS_OPT_PEND_NON_BLOCKING,
-            timestamp,
+            &timestamp,
             &err
         );
     }

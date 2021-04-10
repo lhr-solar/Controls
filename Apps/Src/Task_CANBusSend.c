@@ -15,7 +15,7 @@ void Task_SendCarCAN(void *p_arg){
             &CANBus_MsgQ,
             0,
             OS_OPT_PEND_BLOCKING,
-            msgSize,
+            &msgSize,
             &timestamp,
             &err
         );
