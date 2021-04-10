@@ -52,12 +52,14 @@ void Task1(void *p_arg) {
     CPU_TS ts;
 
     car_state_t car;
-    car.ShouldArrayBeActivated = ON;
-    car.ShouldMotorBeActivated = ON;
 
-    CANPayload_t payload;
-    payload.bytes = 4;
-    payload.data.w = 42;
+    CANPayload_t payload1;
+    payload1.bytes = 8;
+    payload1.data.w = 1;
+
+    CANPayload_t payload2;
+    payload2.bytes = 8;
+    payload2.data.w = 0;
 
     CPU_Init();
     OS_CPU_SysTickInit();
@@ -80,10 +82,23 @@ void Task1(void *p_arg) {
 
     printf("Spawned ReadCarCAN\n");
 
-    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    printf("Array is %d\n", car.ShouldArrayBeActivated);
-    CANbus_Send(MOTOR_DISABLE, payload);
-    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    printf("Array is %d\n", car.ShouldArrayBeActivated);
+    // Simulate BPS enabling and disabling charge
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no");
+    CANbus_Send(CHARGE_ENABLE, payload2); // disable charging
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no");
+    CANbus_Send(CHARGE_ENABLE, payload1); // enable charging
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no");
+
+    // Make sure the task can't fault when suspended
+    OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
+    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err); // If task was active, this would trigger a fault
+    OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
+    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no"); // should be yes
+    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err); // should trigger a fault now
+    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no"); // should be no
+    
     OSTaskDel(NULL, &err);
 }
