@@ -10,6 +10,8 @@
 
 #include "common.h"
 #include "bsp.h"
+#include "os.h"
+
 
 
 /**
@@ -26,6 +28,7 @@ void BSP_SPI_Init(void);
  * @param   txBuf data to transmit
  * @param   txLen length of the data packet
  * @return  None
+ * Do not call from an ISR
  */
 void BSP_SPI_Write(uint8_t* txBuf, uint8_t txLen);
 
@@ -34,6 +37,7 @@ void BSP_SPI_Write(uint8_t* txBuf, uint8_t txLen);
  * @param   rxBuf buffer to store the received data
  * @param   rxLen length of the buffer
  * @return  None
+ * Do not call from an ISR
  */
 void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen);
 

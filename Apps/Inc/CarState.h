@@ -46,9 +46,10 @@ typedef struct {
  * This is used by all the tasks to communicate
  */
 typedef struct {
-    uint8_t DesiredVelocity;
-    uint8_t CruiseControlVelocity;
-    uint8_t CurrentVelocity;
+    float DesiredVelocity;
+    float CruiseControlVelocity;
+    float CurrentVelocity;
+    float DesiredMotorCurrent;
 
     uint8_t AccelPedalPercent;
     uint8_t BrakePedalPercent;
@@ -61,6 +62,9 @@ typedef struct {
     State CruiseControlSet;
 
     State ShouldArrayBeActivated;
+    State ShouldMotorBeActivated;
+
+    State IsRegenBrakingAllowed;
 } car_state_t;
 
 #endif

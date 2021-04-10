@@ -62,6 +62,6 @@ OS_SEM ArrayConnectionChange_Sem4;
 /**
  * Global Variables
  */
+
 // TODO: Put all global state variables here
 
-State ShouldArrayBeActivated;

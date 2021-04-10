@@ -14,8 +14,7 @@
  * @return  None
  */
 void Pedals_Init(){
-    BSP_ADC_Init(ACCELERATOR);
-    BSP_ADC_Init(BRAKE);
+    BSP_ADC_Init();
 }
 
 /**
