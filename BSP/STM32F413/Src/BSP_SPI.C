@@ -23,7 +23,7 @@ static void spi_pend(void) {
 }
 
 // Use this inline function to wait until SPI communication is complete
-static inline void SPI_Wait(){
+static inline void SPI_Wait(void) {
 	spi_pend();
 }
 
@@ -36,9 +36,9 @@ static uint8_t SPI_WriteRead(uint8_t txData){
 
 	SPI_TypeDef *bus = SPI_PORT;
 	
-	SPI_Wait(bus);
+	SPI_Wait();
 	bus->DR = txData & 0x00FF;
-	SPI_Wait(bus);
+	SPI_Wait();
 	return bus->DR & 0x00FF;
 }
 
@@ -77,9 +77,9 @@ void BSP_SPI_Init(void) {
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_SPI3);
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_SPI3);
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_SPI3);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_SPI3);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_SPI3);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_SPI3);
 	
 	// Initialize SPI port
 	SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
