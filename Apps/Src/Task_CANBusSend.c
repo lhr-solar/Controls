@@ -20,7 +20,7 @@ void Task_SendCarCAN(void *p_arg){
             &err
         );
         if (err == OS_ERR_NONE){ //if a message is recieved
-            CANbus_BlockSend(msg->id,msg->payload); //send message
+            CANbus_Send(msg->id,msg->payload,CANBLOCKING); //send message
         }
     }
     

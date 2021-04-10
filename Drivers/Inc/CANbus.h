@@ -53,7 +53,7 @@ void CANbus_Init(void);
  * @brief   Transmits data onto the CANbus.
  * @param   id : CAN id of the message
  * @param 	payload : the data that will be sent.
- * @param blocking: Whether or not the Send should be blocking or not
+ * @param   blocking: Whether or not the Send should be blocking or not
  * @return  ERROR if data wasn't sent, otherwise it was sent.
  */
 ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,CAN_blocking_t blocking);
@@ -61,10 +61,13 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,CAN_blocking_t blocking
 
 /**
  * @brief   Checks if the CAN ID matches with Motor disable ID
- * @param   pointer to buffer array to store message
+ * @param   canline (not implemented, default is CAN1) can line to read from
+ * @param 	ID CAN msg ID
+ * @param 	buffer pointer to buffer in which to store the can msg
+ * @param   blocking whether or not this Read should be a blocking read or a nonblocking read
  * @return  1 if ID matches and 0 if it doesn't
  */
-ErrorStatus CANbus_Read(uint8_t* buffer);
+ErrorStatus CANbus_Read(CAN_t canLine,CANId_t *ID,uint8_t* buffer,CAN_blocking_t blocking);
 
 
 #endif
