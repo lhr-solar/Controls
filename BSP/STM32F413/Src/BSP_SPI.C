@@ -7,7 +7,7 @@
 
 #define SPI_PORT SPI3
 
-OS_SEM SPI_Update_Sem4;
+static OS_SEM SPI_Update_Sem4;
 
 static void spi_post(void) {
 	OS_ERR err;
@@ -120,6 +120,7 @@ void BSP_SPI_Init(void) {
  * @param   txBuf   data array that contains the data to be sent.
  * @param   txLen   length of data array.
  * @return  None
+ * Do not call from an ISR
  */
 void BSP_SPI_Write(uint8_t *txBuf, uint8_t txLen) {
     for(uint32_t i = 0; i < txLen; i++){
@@ -133,6 +134,7 @@ void BSP_SPI_Write(uint8_t *txBuf, uint8_t txLen) {
  * @param   rxBuf   data array to store the data that is received.
  * @param   rxLen   length of data array.
  * @return  None
+ * Do not call from an ISR
  */
 void BSP_SPI_Read(uint8_t *rxBuf, uint8_t rxLen) {
     for(uint32_t i = 0; i < rxLen; i++){
