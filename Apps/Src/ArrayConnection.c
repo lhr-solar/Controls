@@ -28,7 +28,7 @@ void Task_ArrayConnection(void *p_arg) {
         (OS_TCB*)&ReadCarCAN_TCB,
         (CPU_CHAR*)"ReadCarCAN",
         (OS_TASK_PTR)Task_ReadCarCAN,
-        (void*)NULL,
+        (void*) car_state,
         (OS_PRIO)TASK_READ_CAR_CAN_PRIO,
         (CPU_STK*)ReadCarCAN_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
@@ -49,11 +49,11 @@ void Task_ArrayConnection(void *p_arg) {
         State currentState = Contactors_Get(ARRAY);
 
         if (desiredState == ON && currentState == OFF) {
-            // Reactivate the array
-            arrayStartup(&err);
+            arrayStartup(&err); // Reactivate the array
+            OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
         } else if (desiredState == OFF && currentState == ON) {
-            // Deactivate the array
-            Contactors_Set(ARRAY, OFF);
+            Contactors_Set(ARRAY, OFF); // Deactivate the array
+            OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
         }
         
     }
