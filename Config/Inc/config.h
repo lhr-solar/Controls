@@ -17,7 +17,7 @@ typedef enum {OFF = 0, ON} State;
 // Defined as motor velocity / wheel velocity
 #define GEAR_REDUCTION 1.0f
 
-#define PRECHARGE_ARRAY_DELAY(err) (OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err))
+#define PRECHARGE_ARRAY_DELAY 5
 
 #ifndef __STM32F4xx_H
 typedef enum {ERROR = 0, SUCCESS = !ERROR} ErrorStatus;
