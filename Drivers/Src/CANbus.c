@@ -6,11 +6,22 @@ static OS_SEM CANBus_RecieveSem4;
 static OS_MUTEX CANbus_TxMutex;
 static OS_MUTEX CANbus_RxMutex;
 
-//function that releases the mailbox semaphores
-//this will get passed to the BSP_CAN_Init function which will bind the release function to the tx ending handler provided by STFM
-void CANbus_Release(){ 
-    
-};
+
+/**
+ * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly.
+*/
+void CANbus_RxHandler(){
+    OS_ERR err;
+    OSSemPost(&CANBus_RecieveSem4, OS_OPT_POST_1, &err);
+}
+
+/**
+ * @brief this function will be passed down to the BSP layer to trigger on TXend. Releases hold of the mailbox semaphore (Increments it to show mailbox available). Do not access directly.
+*/
+void CANbus_TxHandler(){
+    OS_ERR err;
+    OSSemPost(&CANMail_Sem4, OS_OPT_POST_1, &err);
+}
 
 /**
  * @brief   Initializes the CAN system
@@ -32,26 +43,9 @@ void CANbus_Init(void) {
     BSP_CAN_Init(CAN_1);
 }
 
-/**
- * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly.
-*/
-void CANbus_RxHandler(){
-    OS_ERR err;
-    OSSemPost(&CANBus_RecieveSem4, OS_OPT_POST_1, &err);
-}
-
-/**
- * @brief this function will be passed down to the BSP layer to trigger on TXend. Releases hold of the mailbox semaphore (Increments it to show mailbox available). Do not access directly.
-*/
-void CANbus_TxHandler(){
-    OS_ERR err;
-    OSSemPost(&CANMail_Sem4, OS_OPT_POST_1, &err);
-}
-
 
 /**
  * @brief   Transmits data onto the CANbus
- * @param   CAN bus line
  * @param   id : CAN id of the message
  * @param 	payload : the data that will be sent.
  * @param blocking: Whether or not this should be a blocking call
@@ -144,7 +138,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
  * @return  1 if ID matches and 0 if it doesn't
  */
 
-ErrorStatus CANbus_Read(CAN_t canLine,CANId_t *ID,uint8_t* buffer,CAN_blocking_t blocking){
+ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking){
     CPU_TS timestamp;
     OS_ERR err;
 
@@ -182,7 +176,8 @@ ErrorStatus CANbus_Read(CAN_t canLine,CANId_t *ID,uint8_t* buffer,CAN_blocking_t
     }
 
     //GETMSG
-    uint8_t status = BSP_CAN_Read(CAN_1,ID,buffer);
+    CANId_t *ret;
+    uint8_t status = BSP_CAN_Read(CAN_1,ret,buffer);
     
 
     OSMutexPost( //unlock RX line
@@ -190,7 +185,7 @@ ErrorStatus CANbus_Read(CAN_t canLine,CANId_t *ID,uint8_t* buffer,CAN_blocking_t
         OS_OPT_POST_1,
         &err
     );
-    if(status){
+    if(status&&(*ret == MOTOR_DISABLE)){
         return SUCCESS;
     } else {
         return ERROR;

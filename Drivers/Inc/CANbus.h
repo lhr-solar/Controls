@@ -14,7 +14,9 @@ typedef enum {
 	BACKEMF = 0x247,
 	TEMPERATURE = 0x24B,
 	ODOMETER_AMPHOURS = 0x24E,
-	CAR_STATE = 0x580
+	CAR_STATE = 0x580,
+	MOTOR_DISABLE = 0x10A,
+	CHARGE_ENABLE = 0x10C
 } CANId_t;
 
 
@@ -66,7 +68,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,CAN_blocking_t blocking
  * @param   blocking whether or not this Read should be a blocking read or a nonblocking read
  * @return  1 if ID matches and 0 if it doesn't
  */
-ErrorStatus CANbus_Read(CAN_t canLine,CANId_t *ID,uint8_t* buffer,CAN_blocking_t blocking);
+ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking);
 
 
 #endif
