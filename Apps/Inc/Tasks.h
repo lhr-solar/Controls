@@ -3,8 +3,34 @@
 #ifndef __TASKS_H
 #define __TASKS_H
 
+#include "common.h"
 #include "os.h"
 #include "CarState.h"
+
+/**
+ * Task initialization macro
+ * @param task name of the task
+ * @param prio the task's priority
+ * @param arg the argument to pass to the task
+ * @param err the local OS_ERR variable
+ */
+
+#define _CONCAT(A, B) A ## B
+#define CONCAT(A, B) _CONCAT(A, B)
+#define INIT_TASK(task, prio, arg, err) \
+        OSTaskCreate(&CONCAT(task, _TCB),\
+                     #task,\
+                     task,\
+                     (void*) arg,\
+                     prio,\
+                     CONCAT(task, _Stk),\
+                     WATERMARK_STACK_LIMIT,\
+                     DEFAULT_STACK_SIZE,\
+                     0,\
+                     0,\
+                     (void *)0,\
+                     OS_OPT_TASK_STK_CLR,\
+                     &err);
 
 /**
  * Priority Definitions
@@ -134,6 +160,8 @@ extern OS_SEM SendCarCAN_Sem4;
 /**
  * Global Variables
  */
+
+
 // TODO: Put all global state variables here
 
 #endif
