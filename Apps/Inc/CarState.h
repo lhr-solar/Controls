@@ -60,6 +60,11 @@ typedef struct {
 
     State CruiseControlEnable;
     State CruiseControlSet;
+
+    State ShouldArrayBeActivated;
+    State ShouldMotorBeActivated;
+
+    State IsRegenBrakingAllowed;
 } car_state_t;
 
 #endif
