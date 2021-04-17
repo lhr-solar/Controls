@@ -8,8 +8,12 @@ static OS_MUTEX CANbus_RxMutex;
 
 //function that releases the mailbox semaphores
 //this will get passed to the BSP_CAN_Init function which will bind the release function to the tx ending handler provided by STFM
+//do not call this directly
 void CANbus_Release(){ 
-    
+    OS_ERR err;
+
+    //release one of the mailboxes
+    OSSemPost(&CANMail_Sem4,OS_OPT_POST_1,&err);
 };
 
 /**
