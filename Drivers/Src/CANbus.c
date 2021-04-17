@@ -48,7 +48,7 @@ ErrorStatus CANbus_Read(uint8_t* buffer){
     uint8_t data[8];
     uint8_t count = BSP_CAN_Read(CAN_1,&ID,data);
     
-    if(ID == MOTOR_DISABLE){
+    if(ID == CHARGE_ENABLE){
         for(int i=0;i<count;i++){
             buffer[i]=data[i];
         }
