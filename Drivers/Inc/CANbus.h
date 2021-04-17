@@ -41,7 +41,7 @@ typedef struct {
 	CANId_t id;
 }CANMSG_t;
 
-typedef enum __CAN_blocking_t {CANBLOCKING=0, NONBLOCKING} CAN_blocking_t;
+typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
 
 /**
  * @brief   Initializes the CAN system

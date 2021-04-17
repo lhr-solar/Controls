@@ -1,10 +1,10 @@
 #include "CANbus.h"
 #include "config.h"
 #include "os.h"
-static OS_SEM CANMail_Sem4;
-static OS_SEM CANBus_RecieveSem4; 
-static OS_MUTEX CANbus_TxMutex;
-static OS_MUTEX CANbus_RxMutex;
+static OS_SEM CANMail_Sem4; //sem4 to count how many sending hardware mailboxes we have left (start at 3)
+static OS_SEM CANBus_RecieveSem4; //sem4 to count how many msgs in our recieving queue
+static OS_MUTEX CANbus_TxMutex; //mutex to lock tx line 
+static OS_MUTEX CANbus_RxMutex; //mutex to lock Rx line
 
 
 /**
@@ -12,7 +12,7 @@ static OS_MUTEX CANbus_RxMutex;
 */
 void CANbus_RxHandler(){
     OS_ERR err;
-    OSSemPost(&CANBus_RecieveSem4, OS_OPT_POST_1, &err);
+    OSSemPost(&CANBus_RecieveSem4, OS_OPT_POST_1, &err); //increment our queue counter
 }
 
 /**
@@ -55,7 +55,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
     CPU_TS timestamp;
     OS_ERR err;
     //make sure that Can mailbox is available
-    if (blocking == CANBLOCKING){ 
+    if (blocking == CAN_BLOCKING){ 
         OSSemPend(
             &CANMail_Sem4,
             0,
@@ -142,8 +142,8 @@ ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking){
     CPU_TS timestamp;
     OS_ERR err;
 
-    if(blocking == CANBLOCKING){
-        OSSemPend(
+    if(blocking == CAN_BLOCKING){
+        OSSemPend( //check if the queue actually has anything
             &CANBus_RecieveSem4,
             0,
             OS_OPT_PEND_BLOCKING,
@@ -176,8 +176,8 @@ ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking){
     }
 
     //GETMSG
-    CANId_t *ret;
-    uint8_t status = BSP_CAN_Read(CAN_1,ret,buffer);
+    CANId_t ret;
+    uint8_t status = BSP_CAN_Read(CAN_1,&ret,buffer);
     
 
     OSMutexPost( //unlock RX line
@@ -185,7 +185,7 @@ ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking){
         OS_OPT_POST_1,
         &err
     );
-    if(status&&(*ret == MOTOR_DISABLE)){
+    if(status&&(ret == CHARGE_ENABLE)){
         return SUCCESS;
     } else {
         return ERROR;
