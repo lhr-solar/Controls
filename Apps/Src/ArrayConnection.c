@@ -48,10 +48,11 @@ void Task_ArrayConnection(void *p_arg) {
         State desiredState = car_state->ShouldArrayBeActivated;
         State currentState = Contactors_Get(ARRAY);
 
-        if (desiredState == ON && currentState == OFF) {
+
+        if (desiredState == ON && currentState != ON) {
             arrayStartup(&err); // Reactivate the array
             OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-        } else if (desiredState == OFF && currentState == ON) {
+        } else if (desiredState != ON && currentState == ON) {
             Contactors_Set(ARRAY, OFF); // Deactivate the array
             OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
         }
