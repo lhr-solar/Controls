@@ -6,7 +6,7 @@
 static void arrayStartup(OS_ERR *err) {
     Precharge_Write(ARRAY_PRECHARGE, ON); // Turn on the array precharge
 
-    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err); // wait 5 seconds
+    PRECHARGE_ARRAY_DELAY(err); // wait 5 seconds
     // TODO: error handling
 
     Contactors_Set(ARRAY, ON); // Actually activate the contactor
