@@ -11,13 +11,31 @@ OS_SEM GPIO_Update_Sem4;
  * @param   port to initialize
  * @return  None
  */ 
-void BSP_GPIO_Init(port_t port){
+void BSP_GPIO_Init(port_t port, uint16_t mask, uint8_t write){
+	/*
+	GPIO_InitTypeDef GPIO_InitStruct;
+
+	RCC_AHB1PeriphClockCmd(1 << port, ENABLE);
+	// Configure the pins to be generic GPIO
+    GPIO_InitStruct.GPIO_Pin   = mask;
+    GPIO_InitStruct.GPIO_Mode  = write ? GPIO_Mode_OUT : GPIO_Mode_IN;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Low_Speed;
+    GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_NOPULL;  // TODO: verify
+
+    // Compute the offset for the port handle from the port passed in
+    GPIO_TypeDef *portHandle = GET_HANDLE_FROM_ENUM(port);
+
+    // Initialize the GPIO
+    GPIO_Init(portHandle, &GPIO_InitStruct);
+	*/
+	
 	GPIO_InitTypeDef GPIO_InitStruct;
 
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;	
 	GPIO_InitStruct.GPIO_PuPd =  GPIO_PuPd_NOPULL;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
+	
 		switch(port){
 			case PORTA:
 				// Port used by Switches 
@@ -54,45 +72,14 @@ void BSP_GPIO_Init(port_t port){
 				// Don't init any port 
 				break;
 		}
-
-}
-
-static void gpio_pend(void) {
-	OS_ERR err;
-	CPU_TS ts;
-	OSSemPend(&GPIO_Update_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
 	
-	if(err != OS_ERR_NONE){
-        printf("OS error code %d\n", err);
-    }
-}
 
-// Use this inline function to wait until GPIO communication is complete
-static inline void GPIO_Wait(){
-	gpio_pend();
 }
 
 static GPIO_TypeDef* GPIO_GetPort(port_t port){
-	GPIO_TypeDef *gpio_port;
+	const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
 
-	switch(port){
-		case PORTA:
-		gpio_port = GPIOA;
-		break;
-		case PORTB:
-		gpio_port = GPIOB;
-		break;
-		case PORTC:
-		gpio_port = GPIOC;
-		break;
-		case PORTD:
-		gpio_port = GPIOD;
-		break;
-		default:
-		return;
-	}
-
-	return gpio_port;
+	return gpio_mapping[port];
 }
 
 /**
@@ -102,8 +89,7 @@ static GPIO_TypeDef* GPIO_GetPort(port_t port){
  */ 
 uint16_t BSP_GPIO_Read(port_t port){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
-	
-	GPIO_Wait(gpio_port);
+
 	return GPIO_ReadInputData(gpio_port);
 }
 
@@ -116,7 +102,6 @@ uint16_t BSP_GPIO_Read(port_t port){
 void BSP_GPIO_Write(port_t port, uint16_t data){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
 	
-	GPIO_Wait(gpio_port);
 	GPIO_Write(gpio_port, data);
 }
 
@@ -128,8 +113,7 @@ void BSP_GPIO_Write(port_t port, uint16_t data){
  */ 
 uint8_t BSP_GPIO_Read_Pin(port_t port, uint8_t pin){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
-	
-	GPIO_Wait(gpio_port);
+
 	GPIO_ReadInputDataBit(gpio_port, pin);
 }
 
@@ -142,8 +126,7 @@ uint8_t BSP_GPIO_Read_Pin(port_t port, uint8_t pin){
  */ 
 void BSP_GPIO_Write_Pin(port_t port, uint8_t pin, uint8_t enable){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
-	
-	GPIO_Wait(gpio_port);
+
 	GPIO_WriteBit(gpio_port, pin, enable);
 }
 
@@ -156,7 +139,6 @@ void BSP_GPIO_Write_Pin(port_t port, uint8_t pin, uint8_t enable){
 uint8_t BSP_GPIO_Get_State(port_t port, uint8_t pin){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
 
-	GPIO_Wait(gpio_port);
 	GPIO_ReadOutputDataBit(gpio_port, pin);	
 }
 
