@@ -17,9 +17,11 @@ typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t;
 /**
  * @brief   Initializes a GPIO port
  * @param   port to initialize
+ * @param   mask the pins to initialize
+ * @param   write whether the pins are outputs (true) or inputs (false)
  * @return  None
  */ 
-void BSP_GPIO_Init(port_t port);
+void BSP_GPIO_Init(port_t port, uint16_t mask, bool write);
 
 /**
  * @brief   Reads value of the specified port

@@ -7,7 +7,11 @@
 * @return  void
 */ 
 void Lights_Init(void) {
-    BSP_GPIO_Init(LIGHTS_PORT);
+    uint16_t pinMask = (1 << HEADLIGHT_PIN)
+                     | (1 << BRAKELIGHT_PIN)
+                     | (1 << RIGHT_BLINK_PIN)
+                     | (1 << LEFT_BLINK_PIN);
+    BSP_GPIO_Init(LIGHTS_PORT, pinMask, true);
     BSP_SPI_Init();
 }
 
