@@ -22,7 +22,7 @@
  *          (not used for the simulator)
  * @return  None
  */ 
-void BSP_ADC_Init(ADC_t ADC_Channel) {
+void BSP_ADC_Init(void) {
     // Checking if file exists
    if(access(FILE_NAME, F_OK) != 0){
         // File doesn't exist if true
