@@ -11,7 +11,7 @@ OS_SEM GPIO_Update_Sem4;
  * @param   port to initialize
  * @return  None
  */ 
-void BSP_GPIO_Init(port_t port, uint16_t mask, uint8_t write){
+void BSP_GPIO_Init(port_t port){
 	/*
 	GPIO_InitTypeDef GPIO_InitStruct;
 
