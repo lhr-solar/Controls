@@ -21,7 +21,7 @@
 #define INIT_TASK(task, prio, arg, err) \
         OSTaskCreate(&CONCAT(task, _TCB),\
                      #task,\
-                     task,\
+                     CONCAT(Task_, task),\
                      (void*) arg,\
                      prio,\
                      CONCAT(task, _Stk),\
@@ -157,6 +157,7 @@ extern OS_SEM ActivateMotor_Sem4;
 extern OS_SEM BlinkLight_Sem4;
 extern OS_SEM SendCarCAN_Sem4;
 extern OS_SEM ArrayConnectionChange_Sem4;
+extern OS_SEM MotorConnectionChange_Sem4;
 
 /**
  * Global Variables
