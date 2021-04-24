@@ -27,17 +27,8 @@ void Contactors_Init(contactor_t contactor) {
  * @return  The contactor's state (ON/OFF)
  */ 
 State Contactors_Get(contactor_t contactor) {
-    uint16_t data = BSP_GPIO_Read(CONTACTORS_PORT);
-    switch (contactor) {
-        case MOTOR:
-            data = (data >> MOTOR_CNCTR_PIN) & 0x01;
-            break;
-        case ARRAY:
-            data = (data >> ARRAY_CNCTR_PIN) & 0x01;
-            break;
-        default:
-            break;
-    }
+    uint16_t data = BSP_GPIO_Get_State(CONTACTORS_PORT, 
+                    contactor == MOTOR ? MOTOR_CNCTR_PIN : ARRAY_CNCTR_PIN);
     return data;
 }
 
@@ -51,18 +42,6 @@ State Contactors_Get(contactor_t contactor) {
  * @return  The contactor's state (ON/OFF)
  */ 
 void Contactors_Set(contactor_t contactor, State state) {
-    uint16_t data = BSP_GPIO_Read(CONTACTORS_PORT);
-    switch (contactor) {
-        case MOTOR:
-            data &= ~(0x01 << MOTOR_CNCTR_PIN);
-            data |= (state << MOTOR_CNCTR_PIN);
-            break;
-        case ARRAY:
-            data &= ~(0x01 << ARRAY_CNCTR_PIN);
-            data |= (state << ARRAY_CNCTR_PIN);
-            break;
-        default:
-            break;
-    }
-    BSP_GPIO_Write(CONTACTORS_PORT, data);
+    uint8_t pin = contactor == MOTOR ? MOTOR_CNCTR_PIN : ARRAY_CNCTR_PIN;
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, pin, state);
 }

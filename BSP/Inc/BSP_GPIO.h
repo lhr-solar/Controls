@@ -38,4 +38,29 @@ uint16_t BSP_GPIO_Read(port_t port);
  */ 
 void BSP_GPIO_Write(port_t port, uint16_t data);
 
+/**
+ * @brief   Reads from a specific pin
+ * @param   port The port to read from
+ * @param   pin  The pin to read from
+ * @return  True if the pin is high
+ */
+bool BSP_GPIO_Read_Pin(port_t port, uint8_t pin);
+
+/**
+ * @brief   Writes data to a specific pin
+ * @param   port The port to write to
+ * @param   pin  The pin to write to
+ * @param   data True if the pin should be set to high
+ * @return  None
+ */
+void BSP_GPIO_Write_Pin(port_t port, uint8_t pin, bool enable);
+
+/**
+ * @brief   Returns the state of the output pin
+ * @param   port The port to read from
+ * @param   pin  The pin, which is configured as an output, to get the state
+ * @return  True if the pin is set, false otherwise
+ */
+bool BSP_GPIO_Get_State(port_t port, uint8_t pin);
+
 #endif
