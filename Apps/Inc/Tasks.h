@@ -21,7 +21,7 @@
 #define INIT_TASK(task, prio, arg, err) \
         OSTaskCreate(&CONCAT(task, _TCB),\
                      #task,\
-                     task,\
+                     CONCAT(Task_, task),\
                      (void*) arg,\
                      prio,\
                      CONCAT(task, _Stk),\
