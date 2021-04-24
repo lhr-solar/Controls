@@ -1,6 +1,6 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-#include "ActivateMotor.h"
+#include "MotorConnection.h"
 
 
 static void motor_startup(OS_ERR *err) {
