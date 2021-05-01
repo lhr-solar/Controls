@@ -11,8 +11,8 @@ OS_SEM GPIO_Update_Sem4;
  * @param   port to initialize
  * @return  None
  */ 
-void BSP_GPIO_Init(port_t port){
-	/*
+void BSP_GPIO_Init(port_t port, uint16_t mask, uint8_t write){
+	
 	GPIO_InitTypeDef GPIO_InitStruct;
 
 	RCC_AHB1PeriphClockCmd(1 << port, ENABLE);
@@ -28,52 +28,6 @@ void BSP_GPIO_Init(port_t port){
 
     // Initialize the GPIO
     GPIO_Init(portHandle, &GPIO_InitStruct);
-	*/
-	
-	GPIO_InitTypeDef GPIO_InitStruct;
-
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;	
-	GPIO_InitStruct.GPIO_PuPd =  GPIO_PuPd_NOPULL;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	
-		switch(port){
-			case PORTA:
-				// Port used by Switches 
-				// Pin 0 to 7 are inputs
-				// THIS MIGHT NOT BE NEEDED BECAUSE IT MIGHT BE INIT IN BSP_SPI
-				RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-				GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
-				GPIO_InitStruct.GPIO_Mode =  GPIO_Mode_IN;
-				GPIO_Init(GPIOA, &GPIO_InitStruct);
-				break;
-			case PORTB:
-				// Port used by Switches
-				// Pin 7 is input	
-				// THIS MIGHT NOT BE NEEDED BECAUSE IT MIGHT BE INIT IN BSP_SPI
-				RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-				GPIO_InitStruct.GPIO_Pin = GPIO_Pin_7;
-				GPIO_InitStruct.GPIO_Mode =  GPIO_Mode_IN;
-				GPIO_Init(GPIOB, &GPIO_InitStruct);
-				break;
-			case PORTC:
-				// Port used by Lights, Contactors and Precharge
-				// All pins are outputs
-				RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-				GPIO_InitStruct.GPIO_Pin = GPIO_Pin_All;
-				GPIO_InitStruct.GPIO_Mode =  GPIO_Mode_OUT;
-				GPIO_Init(GPIOC, &GPIO_InitStruct);
-				break;
-			case PORTD:
-				// Not used (I think)
-				RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-				GPIO_Init(GPIOD, &GPIO_InitStruct);
-				break;
-			default:
-				// Don't init any port 
-				break;
-		}
-	
-
 }
 
 static GPIO_TypeDef* GPIO_GetPort(port_t port){
