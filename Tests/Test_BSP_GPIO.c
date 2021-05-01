@@ -21,7 +21,7 @@ int main(void) {
             continue;
         }*/
 
-        printf("All pins in Port A are only read, all pins in Port B is only write\n");
+        printf("All pins in Port A are only read, all pins in Port B are only write\n");
         printf("Choose read (from Port A) or write (to Port B)(r/w): ");
         rw = getchar();
         getchar();

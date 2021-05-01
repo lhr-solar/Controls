@@ -49,8 +49,8 @@ uint16_t BSP_GPIO_Read(port_t port){
 
 /**
  * @brief   Writes data to a specified port 
- * @param   port to write to
- * @param   data to write 
+ * @param   port port to write to
+ * @param   data data to write 
  * @return  None
  */ 
 void BSP_GPIO_Write(port_t port, uint16_t data){
@@ -85,7 +85,7 @@ void BSP_GPIO_Write_Pin(port_t port, uint8_t pin, uint8_t enable){
 }
 
 /**
- * @brief   Returns state of output pin
+ * @brief   Returns state of output pin (not applicable to input pins)
  * @param   port The port to get state from
  * @param   pin The pin to get state from
  * @return  1 if pin is high, 0 if low
