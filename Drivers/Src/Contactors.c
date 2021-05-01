@@ -13,7 +13,7 @@
  * @return  None
  */ 
 void Contactors_Init(contactor_t contactor) {
-    BSP_GPIO_Init(CONTACTORS_PORT, 0xFFFF, 1); //All pins in Port C are output
+    BSP_GPIO_Init(CONTACTORS_PORT, 0x6, 1); //Pins 1 and 2 in Port C are output (0b110)
 }
 
 /**

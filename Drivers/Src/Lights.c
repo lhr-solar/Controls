@@ -7,7 +7,7 @@
 * @return  void
 */ 
 void Lights_Init(void) {
-    BSP_GPIO_Init(LIGHTS_PORT, 0xFFFF, 1); // All pins from Port C are out
+    BSP_GPIO_Init(LIGHTS_PORT, 0x3C0, 1); // Pins 6,7,8,9 from Port C are out (0b1111000000)
     BSP_SPI_Init();
 }
 

@@ -4,11 +4,11 @@
 #include "stm32f4xx.h"
 #include "Tasks.h"
 
-OS_SEM GPIO_Update_Sem4;
-
 /**
  * @brief   Initializes a GPIO port
- * @param   port -port to initialize, mask - pins, write - input or output
+ * @param   port - port to initialize
+ * @param	mask - pins
+ * @param	write - input or output
  * @return  None
  */ 
 void BSP_GPIO_Init(port_t port, uint16_t mask, uint8_t write){
@@ -24,7 +24,7 @@ void BSP_GPIO_Init(port_t port, uint16_t mask, uint8_t write){
     GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_NOPULL;  // TODO: verify
 
     // Compute the offset for the port handle from the port passed in
-    GPIO_TypeDef *portHandle = GET_HANDLE_FROM_ENUM(port);
+    GPIO_TypeDef *portHandle = GPIO_GetPort(port);
 
     // Initialize the GPIO
     GPIO_Init(portHandle, &GPIO_InitStruct);
@@ -60,7 +60,7 @@ void BSP_GPIO_Write(port_t port, uint16_t data){
 }
 
 /**
- * @brief   Reads data to a specified pin
+ * @brief   Reads data to a specified input pin (not applicable to output pins)
  * @param   port The port to read from
  * @param   pin The pin to read from 
  * @return  State of the pin
