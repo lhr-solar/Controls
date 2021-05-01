@@ -4,6 +4,13 @@
 #include "stm32f4xx.h"
 #include "Tasks.h"
 
+static GPIO_TypeDef* GPIO_GetPort(port_t port){
+	const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
+
+	return gpio_mapping[port];
+}
+
+
 /**
  * @brief   Initializes a GPIO port
  * @param   port - port to initialize
@@ -28,12 +35,6 @@ void BSP_GPIO_Init(port_t port, uint16_t mask, uint8_t write){
 
     // Initialize the GPIO
     GPIO_Init(portHandle, &GPIO_InitStruct);
-}
-
-static GPIO_TypeDef* GPIO_GetPort(port_t port){
-	const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
-
-	return gpio_mapping[port];
 }
 
 /**
