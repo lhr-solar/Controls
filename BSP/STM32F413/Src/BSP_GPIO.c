@@ -8,7 +8,7 @@ OS_SEM GPIO_Update_Sem4;
 
 /**
  * @brief   Initializes a GPIO port
- * @param   port to initialize
+ * @param   port -port to initialize, mask - pins, write - input or output
  * @return  None
  */ 
 void BSP_GPIO_Init(port_t port, uint16_t mask, uint8_t write){
