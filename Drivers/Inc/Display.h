@@ -18,13 +18,9 @@ typedef struct _display_data {
 } display_data_t;
 
 /*
- * Initialize the Wonder Gecko communications.
+ * Initialize the Nextion display
  */
 void Display_Init();
 
-/*
- * Updates the Gecko display with the data provided.
- */
-void Display_SetData(display_data_t *status);
 
 #endif
