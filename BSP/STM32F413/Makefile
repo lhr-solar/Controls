@@ -8,7 +8,7 @@ TARGET = controls-leader
 # building variables
 ######################################
 # optimization
-OPT = -Og
+OPT = -g -Og
 
 #######################################
 # paths
@@ -183,7 +183,7 @@ clean:
 #######################################
 # flash
 #######################################
-flash: $(BUILD_DIR)/$(TARGET).bin
+flash:
 	$(SF) write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 
 #######################################

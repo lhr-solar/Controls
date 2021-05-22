@@ -26,7 +26,8 @@ typedef enum {
     BPS_FAULT,
     BPS_PWR,
     BrakeLight,
-    RSVD_LED
+    RSVD_LED,
+    NUM_LIGHTS
 } light_t;
 
 /**

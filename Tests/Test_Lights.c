@@ -3,26 +3,32 @@
 #include "Lights.h"
 #include <unistd.h>
 
+void all_on() {
+    for(int i = 0; i < NUM_LIGHTS; i++) {
+        Lights_Set(i, ON);
+    }
+}
+
+void all_off() {
+    for(int i = 0; i < NUM_LIGHTS; i++) {
+        Lights_Set(i, OFF);
+    }
+}
+
 int main() {
     Lights_Init();
-    printf("M_CNCTR\tRSVD_LED\tCTRL_FAULT\tRIGHT_BLINK\tHeadlightPWR\tA_CNCTR\tBPS_FAULT\tLEFT_BLINK\tBPS_PWR\tBrakeLight\n");
-    while (1) {
-        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t%d\t\t%d\t\t%d\t%d\r", 
-                Lights_Read(M_CNCTR),
-                Lights_Read(RSVD_LED),
-                Lights_Read(CTRL_FAULT),
-                Lights_Read(RIGHT_BLINK),
-                Lights_Read(Headlight_ON),
-                Lights_Read(A_CNCTR),
-                Lights_Read(BPS_FAULT),
-                Lights_Read(LEFT_BLINK),
-                Lights_Read(BPS_PWR),
-                Lights_Read(BrakeLight));
-        fflush(stdout);  
-        light_t light = rand() % 10;
-        State state = Lights_Read(light);
-        Lights_Set(light, !state);
-        usleep(10000);
+
+    while(1) {
+        all_on();
+
+        for(volatile int i = 0; i < 10000000; i++) {
+            // Delay
+        }
+
+        all_off();
+
+        for(volatile int i = 0; i < 10000000; i++) {
+            // Delay
+        }
     }
-    printf("\n");
 }

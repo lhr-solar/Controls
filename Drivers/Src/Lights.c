@@ -53,17 +53,12 @@ void Lights_Set(light_t light, State state) {
     uint8_t txBuf[3] = {SPI_OPCODE_R, SPI_GPIOB, 0x00};
     uint8_t rxBuf[2] = {0};
     BSP_SPI_Write(txBuf, 3);
-
-    // Busy wait until SPI data changes
-    // (Should be changed with RTOS later on)
-    do {
-        BSP_SPI_Read(rxBuf, 2);
-    } while (rxBuf[0] == SPI_GPIOB);
-
-    uint8_t portc = BSP_GPIO_Read(LIGHTS_PORT);
+    BSP_SPI_Read(rxBuf, 2);
+    
+    uint16_t portc = BSP_GPIO_Read(LIGHTS_PORT);
     if (light == BrakeLight) {
         portc &= ~(0x01 << BRAKELIGHT_PIN);
-        portc |= (state << BRAKELIGHT_PIN);
+        portc |= (!state << BRAKELIGHT_PIN);
     } else {
         uint8_t currData = rxBuf[1];
         uint8_t newData = currData & ~(0x01 << light);
@@ -75,15 +70,15 @@ void Lights_Set(light_t light, State state) {
         switch (light) {
             case LEFT_BLINK:
                 portc &= ~(0x01 << LEFT_BLINK_PIN);
-                portc |= (state << LEFT_BLINK_PIN);
+                portc |= (!state << LEFT_BLINK_PIN);
                 break;
             case RIGHT_BLINK:
                 portc &= ~(0x01 << RIGHT_BLINK_PIN);
-                portc |= (state << RIGHT_BLINK_PIN);
+                portc |= (!state << RIGHT_BLINK_PIN);
                 break;
             case Headlight_ON:
                 portc &= ~(0x01 << HEADLIGHT_PIN);
-                portc |= (state << HEADLIGHT_PIN);
+                portc |= (!state << HEADLIGHT_PIN);
                 break;
             default:
                 break;

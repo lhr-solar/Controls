@@ -143,7 +143,6 @@ void BSP_SPI_Read(uint8_t *rxBuf, uint8_t rxLen) {
 
 }
 
-
 void SPI3_Handler(){
 	// Save the CPU registers
 	CPU_SR_ALLOC();
@@ -159,6 +158,3 @@ void SPI3_Handler(){
 	//make the kernel aware that the interrupt has ended
 	OSIntExit();
 }
-
-
-
