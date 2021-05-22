@@ -40,7 +40,7 @@ void CANbus_Init(void) {
 	OSSemCreate(&CANMail_Sem4, "CAN Mailbox Semaphore", 3,&err); //there's 3 hardware mailboxes on the board, so 3 software mailboxes
 
     OSSemCreate(&CANBus_RecieveSem4, "CAN Recieved Msg queue",0,&err); //create a mailbox counter to hold the messages in as they come in
-    BSP_CAN_Init(CAN_1);
+    BSP_CAN_Init(CAN_1,&CANbus_TxHandler,&CANbus_RxHandler);
 }
 
 
@@ -76,7 +76,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         return ERROR;
     }
 
-    //NEW CANWRITING SYS
+
     uint8_t txdata[8];
     uint8_t datalen;
 
