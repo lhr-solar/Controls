@@ -22,5 +22,8 @@ typedef struct _display_data {
  */
 void Display_Init();
 
+ErrorStatus Display_SetVelocity(float vel);
+ErrorStatus Display_SetMainView(void);
+
 
 #endif

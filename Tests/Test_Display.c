@@ -13,27 +13,9 @@
 #include "Display.h"
 #include <bsp.h>
 
-#define TX_SIZE 128
 
 int main() {
     Display_Init();
-    display_data_t packet;
-    char in[TX_SIZE];
-    while(1) {
-        packet.speed = (rand() % 500) / 10.0;
-        packet.cruiseEnabled = rand() % 2;
-        packet.cruiseSet = rand() % 2;
-        packet.regenEnabled = rand() % 2;
-        packet.canError = rand() % 10;
-
-        Display_SetData(&packet);
-
-        // We have no way of showing what's on the screen right now
-        // but we send the data to the gecko over UART_1 (probably)
-        // So we'll just read from the UART for debugging purposes
-
-        BSP_UART_Read(UART_2, in);
-        in[strlen(in)-1] = '\0'; // remove the newline
-        printf("Gecko Data: %s\r", in);
-    }
+    Display_SetMainView();
+    Display_SetVelocity(13.4f);
 }
