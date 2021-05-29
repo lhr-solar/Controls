@@ -5,6 +5,7 @@
 
 #define NEXTION_INSTRUCTION_SUCCESSFUL 0xffffff01
 
+// List of names of possible strings to build a command out of
 static enum CommandString_t {
     VELOCITY,
     CRUISE_ENABLE,
@@ -17,6 +18,7 @@ static enum CommandString_t {
     PAGE
 };
 
+// The command strings themselves
 static char *CommandStrings[] = {
     "x0",
     "t1",
@@ -86,11 +88,18 @@ void Display_Init() {
     // before we initialize our UART
 }
 
+/**
+ * Set the displayed velocity to vel 
+ */
 ErrorStatus Display_SetVelocity(float vel) {
     int32_t vel_fix = (uint32_t) floor(vel * 10.0f);
     return updateValue(VELOCITY, VALUE, vel_fix);
 }
 
+
+/**
+ * Set the display to the main view
+ */
 ErrorStatus Display_SetMainView(void) {
     return updateValue(SYSTEM, PAGE, 1);
 }
