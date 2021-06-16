@@ -18,9 +18,11 @@ typedef enum {CAN_1=0, CAN_2, NUM_CAN} CAN_t;
  *          communicate with the motor controllers
  *          and other car systems
  * @param   bus the CAN line to initialize
+ * @param txHandler the Function that will be called every time TX completes
+ * @param rxHanlder the function that will be called on every RX event
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus);
+void BSP_CAN_Init(CAN_t bus,void (*txHandler)(void), void (*rxHander)(void));
 
 /**
  * @brief   Writes a message to the specified CAN line
@@ -35,6 +37,7 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len);
 
 /**
  * @brief   Reads the message on the specified CAN line
+ * @param   bus the bus line 
  * @param   id pointer to integer to store the 
  *          message ID that was read
  * @param   data pointer to integer array to store

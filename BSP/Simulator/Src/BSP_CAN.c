@@ -6,8 +6,12 @@
  */
 
 #include "BSP_CAN.h"
+#include "os.h"
 
 #define FILE_NAME DATA_PATH(CAN_CSV)
+
+static void (*txEvent)(void);
+static void (*rxEvent)(void);
 
 /**
  * @brief   Confirms that the CSV file
@@ -17,7 +21,9 @@
  *          (not used for simulator)
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus) {
+void BSP_CAN_Init(CAN_t bus,void (*txHandler)(void),void (*rxHandler)(void)) {
+    txEvent=txHandler; //bind the handler functions
+    rxEvent=rxHandler;
     if (access(FILE_NAME, F_OK) != 0) {
         // File doesn't exist if true
         perror(CAN_CSV);
@@ -88,6 +94,9 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
     fsync(fno);
     flock(fno, LOCK_UN);
     fclose(fp);
+    txEvent();
+    //post to recieve queue semaphore here?
+    rxEvent();
     return len;
 }
 
@@ -153,5 +162,6 @@ uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     fsync(fno);
     flock(fno, LOCK_UN);
     fclose(fp);
+    rxEvent();
     return len;
 }

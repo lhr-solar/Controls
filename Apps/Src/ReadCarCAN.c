@@ -27,7 +27,7 @@ void Task_ReadCarCAN(void *p_arg) {
         // Normal task countinues here
 
         // Check if BPS sent us a message
-        if (CANbus_Read(buffer) == SUCCESS) {
+        if (CANbus_Read(buffer,CAN_NON_BLOCKING) == SUCCESS) {
             long msg = *((long *)(&buffer[0]));
             if (msg == 0) {
                 car->IsRegenBrakingAllowed = OFF;

@@ -4,7 +4,7 @@
 
 int generalTest(void){
    // Tests sending and receiving messages
-   uint32_t ids[10] = {0x242, 0x243, 0x244, 0x245, 0x246, 0x247, 0x24B, 0x24E, 0x580, 0x10A};
+   uint32_t ids[10] = {0x242, 0x243, 0x244, 0x245, 0x246, 0x247, 0x24B, 0x24E, 0x580, CHARGE_ENABLE};
    uint8_t buffer[8];
 
    CANData_t data;
@@ -15,21 +15,21 @@ int generalTest(void){
    payload.bytes = 4;
 
    for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
-      CANbus_Send(ids[i], payload);
-      printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CANbus_Read(buffer));
+      CANbus_Send(ids[i], payload,CAN_BLOCKING);
+      printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CANbus_Read(buffer,CAN_BLOCKING));
    }
 
    exit(0);
 }
 
-int Motor_Disable_Test(void){
+int Charge_Enable_Test(void){
    // Tests receiving the MOTOR_DISABLE message
 
    uint8_t buffer[8];
 
    while(true){
-      if(CANbus_Read(buffer)==SUCCESS){
-         printf("MOTOR_DISABLE Command Received");
+      if(CANbus_Read(buffer,CAN_BLOCKING)==SUCCESS){
+         printf("CHARGE_ENABLE Command Received");
       }
    }
 
@@ -39,7 +39,7 @@ int Motor_Disable_Test(void){
 int main(void){
    CANbus_Init();
    // generalTest();
-   Motor_Disable_Test();
+   Charge_Enable_Test();
 
 
 }

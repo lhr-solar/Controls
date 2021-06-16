@@ -10,7 +10,7 @@ int main() {
     //CAN Test
     printf("Testing CAN module:");
     CANbus_Init();
-    uint32_t ids[10] = {0x242, 0x243, 0x244, 0x245, 0x246, 0x247, 0x24B, 0x24E, 0x580, 0x10A};
+    uint32_t ids[10] = {0x242, 0x243, 0x244, 0x245, 0x246, 0x247, 0x24B, 0x24E, 0x580, CHARGE_ENABLE};
     uint8_t buffer[8];
     CANData_t data;
     data.w = 0x87654321;
@@ -19,9 +19,9 @@ int main() {
     payload.bytes = 4;
 
     for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
-        CANbus_Send(ids[i], payload);
-        ErrorStatus read = CANbus_Read(buffer);
-        printf("\nSent ID: 0x%x - Motor Disable Detected?: %d\n", ids[i], CANbus_Read(buffer));
+        CANbus_Send(ids[i], payload,CAN_BLOCKING);
+        ErrorStatus read = CANbus_Read(buffer,CAN_BLOCKING);
+        printf("\nSent ID: 0x%x - Charge Enable Detected?: %d\n", ids[i], read);
         if(read==SUCCESS){
 
             printf("Payload/Buffer Match?: \n\r");
