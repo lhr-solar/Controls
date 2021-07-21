@@ -74,7 +74,7 @@
 /**
  * Task Prototypes
  */
-void Task_SendTritium(void* p_arg);
+void Task_SendTritium(void* p_arg); 
 
 void Task_UpdateVelocity(void* p_arg);
 
