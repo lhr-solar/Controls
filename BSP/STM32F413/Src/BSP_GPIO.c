@@ -98,6 +98,7 @@ void BSP_GPIO_Write_Pin(port_t port, uint16_t pin, State state){
 
 
 /**
+
  * @brief   Returns state of output pin (not applicable to input pins)
  * @param   port The port to get state from
  * @param   pin The pin to get state from
