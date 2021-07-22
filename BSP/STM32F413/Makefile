@@ -8,7 +8,7 @@ TARGET = controls-leader
 # building variables
 ######################################
 # optimization
-OPT = -Og
+OPT = -Og -g
 
 #######################################
 # paths
