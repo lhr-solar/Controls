@@ -1,4 +1,4 @@
-* Copyright (c) 2020 UT Longhorn Racing Solar */
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 /**
  * Header file for the library to interact
@@ -10,7 +10,6 @@
 
 #include "common.h"
 #include "config.h"
-#include "stm32f4xx_gpio.h"
 #include <bsp.h>
 
 typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t; 

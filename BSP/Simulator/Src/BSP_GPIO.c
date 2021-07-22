@@ -13,9 +13,11 @@
  *          has been created and throws
  *          an error if not
  * @param   port to initialize
+ * @param	mask - pins
+ * @param	direction - input or output
  * @return  None
  */ 
-void BSP_GPIO_Init(port_t port, uint16_t mask, uint8_t write) {
+void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction) {
     if (access(FILE_NAME, F_OK) != 0) {
         // File doesn't exist if true
         perror(GPIO_CSV);

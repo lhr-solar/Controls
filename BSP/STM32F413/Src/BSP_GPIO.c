@@ -1,8 +1,8 @@
 /* Copyright (c) 2021 UT Longhorn Racing Solar */
 
 #include "BSP_GPIO.h"
-#include "stm32f4xx.h"
 #include "Tasks.h"
+#include "stm32f4xx.h"
 
 static GPIO_TypeDef* GPIO_GetPort(port_t port){
  	const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
