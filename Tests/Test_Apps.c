@@ -17,7 +17,5 @@
 
 int main(void){
     // Plan 
-    while(1){
-        
-    }
+    int variable = 1;
 }
