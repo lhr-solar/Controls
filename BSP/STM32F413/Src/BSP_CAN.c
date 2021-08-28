@@ -1,42 +1,60 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-/**
- * Pin Configuration:
- * 
- * CAN1 RX - PA11
- * CAN1 TX - PA12
- */
-
 #include "BSP_CAN.h"
 #include "stm32f4xx.h"
+#include "os.h"
 
-static CanTxMsg TxMessage;
-static CanRxMsg RxMessage;
-static bool RxFlag = false;
+// The message information that we care to receive
+typedef struct _msg {
+    uint32_t id;
+    uint8_t data[8];
+} msg_t;
+
+// Set up a fifo for receiving
+#define FIFO_TYPE msg_t
+#define FIFO_SIZE 10
+#define FIFO_NAME msg_queue
+#include "fifo.h"
+
+static msg_queue_t gRxQueue;
+
+// Required for receiving CAN messages
+static CanTxMsg gTxMessage;
+static CanRxMsg gRxMessage;
+
+// User parameters for CAN events
+static void (*gRxEvent)(void);
+static void (*gTxEnd)(void);
 
 /**
- * @brief   Initializes both CAN lines to
- *          communicate with the motor controllers
- *          and other car systems
- * @param   bus the CAN line to initialize
+ * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
+ * @param   rxEvent : the function to execute when recieving a message. NULL for no action.
+ * @param   txEnd   : the function to execute after transmitting a message. NULL for no action.
  * @return  None
- */ 
-void BSP_CAN_Init(CAN_t bus) {
+ */
+void BSP_CAN_Init(CAN_t bus, void (*rxEvent)(void), void (*txEnd)(void)) {
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
     CAN_FilterInitTypeDef CAN_FilterInitStruct;
 
-    /* CAN GPIO Configuration *****************************/
-    
-    // Clock
+    // Configure event handles
+    gRxEvent  = rxEvent;
+    gTxEnd    = txEnd;
+
+    // Initialize the queue
+    gRxQueue = msg_queue_new();
+
+    /* CAN GPIOs configuration **************************************************/
+
+    /* Enable GPIO clock */
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
     // Alternate Function 9
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_CAN1);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_CAN1);
 
-    // Pin config
+    /* Configure CAN RX and TX pins */
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
@@ -44,12 +62,14 @@ void BSP_CAN_Init(CAN_t bus) {
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    /* CAN Configuration **********************************/
-    
-    // Clock
+    /* CAN configuration ********************************************************/  
+    /* Enable CAN clock */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
 
-    // CAN Cell Init
+    /* CAN register init */
+    //CAN_DeInit(CAN1);
+
+    /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
     CAN_InitStruct.CAN_ABOM = DISABLE;
     CAN_InitStruct.CAN_AWUM = DISABLE;
@@ -59,17 +79,16 @@ void BSP_CAN_Init(CAN_t bus) {
     CAN_InitStruct.CAN_Mode = CAN_Mode_LoopBack; // TODO: change back to Normal after testing
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
-    /**
-     * CAN Baudrate = 125 KBps
-     * 1/(prescaler + (prescaler*(BS1+1)) + (prescaler*(BS2+1))) * Clk = CAN Baudrate
-     * The AHB1 clk which drives CAN seems to be set to around 20MHz, but this should be verified.
-     */
+    /* CAN Baudrate = 125 KBps
+        * 1/(prescalar + (prescalar*BS1) + (prescalar*BS2)) * Clk = CAN Baudrate
+        * The CAN clk is currently set to 20MHz (APB1 clock set to 20MHz in BSP_PLL_Init())
+    */
     CAN_InitStruct.CAN_BS1 = CAN_BS1_3tq;
     CAN_InitStruct.CAN_BS2 = CAN_BS2_4tq;
     CAN_InitStruct.CAN_Prescaler = 16;
     CAN_Init(CAN1, &CAN_InitStruct);
 
-    // CAN Filter Init
+    /* CAN filter init */
     CAN_FilterInitStruct.CAN_FilterNumber = 0;
     CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
     CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
@@ -81,75 +100,135 @@ void BSP_CAN_Init(CAN_t bus) {
     CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
     CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
 
-    // Transmit Structure
-    TxMessage.ExtId = 0x5;
-    TxMessage.RTR = CAN_RTR_DATA;
-    TxMessage.IDE = CAN_ID_STD;
-    TxMessage.DLC = 1;
+    /* Transmit Structure preparation */
+    gTxMessage.ExtId = 0x5;
+    gTxMessage.RTR = CAN_RTR_DATA;
+    gTxMessage.IDE = CAN_ID_STD;
+    gTxMessage.DLC = 1;
 
-    // Receive Structure
-    RxMessage.StdId = 0x00;
-    RxMessage.ExtId = 0x00;
-    RxMessage.IDE = CAN_ID_STD;
-    RxMessage.DLC = 0;
-    RxMessage.FMI = 0;
+    /* Receive Structure preparation */
+    gRxMessage.StdId = 0x00;
+    gRxMessage.ExtId = 0x00;
+    gRxMessage.IDE = CAN_ID_STD;
+    gRxMessage.DLC = 0;
+    gRxMessage.FMI = 0;
 
-    // FIFO 0 Interrupt Config
+    /* Enable FIFO 0 message pending Interrupt */
     CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
 
-    // Enable Rx Interrupts
+    // Enable Rx interrupts
     NVIC_InitStruct.NVIC_IRQChannel = CAN1_RX0_IRQn;
     NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
-}
+    NVIC_Init(&NVIC_InitStruct);	
 
-/**
- * @brief   Writes a message to the specified CAN line
- * @param   bus the proper CAN line to write to
- *          defined by the CAN_t enum
- * @param   id the hex ID for the message to be sent
- * @param   data pointer to the array containing the message
- * @param   len length of the message in bytes
- * @return  number of bytes transmitted (0 if unsuccessful)
- */
-uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
-    TxMessage.StdId = id;
-    TxMessage.DLC = len;
-    for (uint8_t i = 0; i < len; i++) {
-        TxMessage.Data[i] = data[i];
+    if(NULL != txEnd) {
+        // Enable Tx Interrupts
+        NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
+        NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
+        NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+        NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn;
+        NVIC_Init(&NVIC_InitStruct);
     }
-    return CAN_Transmit(CAN1, &TxMessage);
 }
 
 /**
- * @brief   Reads the message on the specified CAN line
- * @param   id pointer to integer to store the 
- *          message ID that was read
- * @param   data pointer to integer array to store
- *          the message in bytes (must be at least 8 bytes or hardfault may occur)
- * @return  number of bytes read (0 if unsuccessful)
+ * @brief   Transmits the data onto the CAN bus with the specified id
+ * @param   id : Message of ID. Also indicates the priority of message. The lower the value, the higher the priority.
+ * @param   data : data to be transmitted. The max is 8 bytes.
+ * @param   length : num of bytes of data to be transmitted. This must be <= 8 bytes or else the rest of the message is dropped.
+ * @return  ERROR if module was unable to transmit the data onto the CAN bus. SUCCESS indicates data was transmitted.
  */
-uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
-    if (RxFlag) {
-        for (uint8_t i = 0; i < 8; i++) {
-            data[i] = RxMessage.Data[i];
-        }
-        *id = RxMessage.StdId;
-        RxFlag = false;
-        return 1;
+ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t length) {
+    
+    gTxMessage.StdId = id;
+    gTxMessage.DLC = length;
+	for(int i = 0; i < length; i++){
+        gTxMessage.Data[i] = data[i];
     }
-    return 0;
+	
+    ErrorStatus retVal = (ErrorStatus) (CAN_Transmit(CAN1, &gTxMessage) != 0);
+
+    return retVal;
 }
 
 /**
- * Interrupt Handler
+ * @brief   Gets the data that was received from the CAN bus.
+ * @note    Non-blocking statement
+ * @pre     The data parameter must be at least 8 bytes or hardfault may occur.
+ * @param   id : pointer to store id of the message that was received.
+ * @param   data : pointer to store data that was received. Must be 8bytes or bigger.
+ * @return  ERROR if nothing was received so ignore id and data that was received. SUCCESS indicates data was received and stored.
  */
+ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t *id, uint8_t *data) {
+    // If the queue is empty, return err
+    if(msg_queue_is_empty(&gRxQueue)) {
+        return ERROR;
+    }
+    
+    // Get the message
+    msg_t msg;
+    msg_queue_get(&gRxQueue, &msg);
+
+    // Transfer the message to the provided pointers
+    for(int i = 0; i < 8; i++){
+        data[i] = msg.data[i];
+    }
+    *id = msg.id;
+
+    return SUCCESS;
+}
+
 void CAN1_RX0_IRQHandler(void) {
-   CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-    if ((RxMessage.StdId == 0x005) && (RxMessage.IDE == CAN_ID_STD) && (RxMessage.DLC == 1)) {
-        RxFlag = true;
+    #ifdef RTOS
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
+    #endif
+
+    // Take any pending messages into a queue
+    while(CAN_MessagePending(CAN1, CAN_FIFO0)) {
+        CAN_Receive(CAN1, CAN_FIFO0, &gRxMessage);
+
+        msg_t rxMsg;
+        rxMsg.id = gRxMessage.StdId;
+        memcpy(&rxMsg.data[0], gRxMessage.Data, 8);
+
+        // Place the message in the queue
+        if(msg_queue_put(&gRxQueue, rxMsg)) {
+            // If the queue was not already full...
+            // Call the driver-provided function, if it is not null
+            if(gRxEvent != NULL) {
+                gRxEvent();
+            }
+        } else {
+            // If the queue is already full, then we can't really do anything else
+            break;
+        }
     }
+
+    #ifdef RTOS
+    OSIntExit();      // Signal to uC/OS
+    #endif
 }
 
+void CAN1_TX_IRQHandler(void) {
+    #ifdef RTOS
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
+    #endif
+
+    // Acknowledge 
+    CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
+
+    // Call the function provided
+    gTxEnd();
+
+    #ifdef RTOS
+    OSIntExit();      // Signal to uC/OS
+    #endif
+}
