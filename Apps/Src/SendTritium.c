@@ -3,6 +3,7 @@
 #include <math.h>
 
 
+// Convert a float velocity to a desired RPM
 static float velocity_to_rpm(float velocity) {
     float velocity_mpm = velocity * 60.0f; // velocity in meters per minute
     const float circumfrence = WHEEL_DIAMETER * M_PI;
