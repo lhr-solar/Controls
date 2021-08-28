@@ -61,7 +61,25 @@ int main(void){ //startup OS stuff, spawn test task
     if(err != OS_ERR_NONE){
         printf("OS error code %d\n",err);
     }
-    INIT_TASK(Task1,4,NULL,err);
+    OSTaskCreate(
+        (OS_TCB*)&Task1_TCB,
+        (CPU_CHAR*)"Task1",
+        (OS_TASK_PTR)Task1,
+        (void*)NULL,
+        (OS_PRIO)4,
+        (CPU_STK*)Task1_Stk,
+        (CPU_STK_SIZE)128/10,
+        (CPU_STK_SIZE)128,
+        (OS_MSG_QTY)NULL,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+
+
+
+    // INIT_TASK(Task1,4,NULL,err);
      if (err != OS_ERR_NONE) {
         printf("Task1 error code %d\n", err);
     }
@@ -70,4 +88,10 @@ int main(void){ //startup OS stuff, spawn test task
         printf("OS error code %d\n", err);
     }
     return 0;
+}
+
+void HardFault_Handler(){
+    while(1){
+        volatile int x = 0;
+    }
 }

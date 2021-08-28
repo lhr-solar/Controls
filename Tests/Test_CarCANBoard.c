@@ -28,7 +28,7 @@ int main(void){
     uint8_t output;
 
 
-    output = CANbus_Send(ids[0], payload);
+    output = CANbus_Send(ids[0], payload,CAN_BLOCKING);
 
     //for (volatile int i = 0; i < 1000000; i++);
 
