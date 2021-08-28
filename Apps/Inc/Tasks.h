@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "os.h"
+#include "common.h"
 #include "CarState.h"
 
 /**
@@ -155,7 +156,7 @@ extern OS_SEM ActivateArray_Sem4;
 extern OS_SEM ActivateMotor_Sem4;
 extern OS_SEM BlinkLight_Sem4;
 extern OS_SEM SendCarCAN_Sem4;
-
+extern OS_SEM ArrayConnectionChange_Sem4;
 
 /**
  * Global Variables
@@ -163,5 +164,6 @@ extern OS_SEM SendCarCAN_Sem4;
 
 
 // TODO: Put all global state variables here
+
 
 #endif
