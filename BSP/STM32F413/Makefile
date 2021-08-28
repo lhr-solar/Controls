@@ -29,7 +29,8 @@ $(wildcard ../../CMSIS/DSP_Lib/Source/*.c)	\
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/*.c)	\
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/*.c) \
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/*.c) \
-$(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/*.c)
+$(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/*.c) \
+$(wildcard ../../RTOS/uCOS-III-STM32F4/uC-LIB/*.c)
 
 ifneq ($(TEST), none)
 TEST_FILE := Test_$(TEST).c

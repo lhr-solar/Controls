@@ -1,9 +1,11 @@
 #include "Tasks.h"
 #include "CANbus.h"
+#include "stm32f4xx.h"
 
 void Task1(void *p_arg){
     CPU_Init();
-    OS_CPU_SysTickInit();
+    // OS_CPU_SysTickInit();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
     CPU_TS ts;
     OSQCreate(&CANBus_MsgQ, "CANBus Q", 16, &err); //initializes CAN Send queue
