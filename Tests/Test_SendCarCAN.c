@@ -2,6 +2,9 @@
 #include "CANbus.h"
 #include "stm32f4xx.h"
 
+static OS_TCB Task1_TCB;
+static CPU_STK Task1_Stk[128];
+
 void Task1(void *p_arg){
     CPU_Init();
     // OS_CPU_SysTickInit();
@@ -18,12 +21,12 @@ void Task1(void *p_arg){
         (void*)NULL,
         (OS_PRIO)3,
         (CPU_STK*)SendCarCAN_Stk,
-        (CPU_STK_SIZE)128/10,
-        (CPU_STK_SIZE)128,
+        (CPU_STK_SIZE)sizeof(SendCarCAN_Stk)/10,
+        (CPU_STK_SIZE)sizeof(SendCarCAN_Stk),
         (OS_MSG_QTY)NULL,
         (OS_TICK)NULL,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
 
@@ -54,8 +57,7 @@ void Task1(void *p_arg){
     }
 }
 int main(void){ //startup OS stuff, spawn test task
-    static OS_TCB Task1_TCB;
-    static CPU_STK Task1_Stk[128];
+    
     OS_ERR err;
     OSInit(&err);
     if(err != OS_ERR_NONE){
@@ -68,19 +70,16 @@ int main(void){ //startup OS stuff, spawn test task
         (void*)NULL,
         (OS_PRIO)4,
         (CPU_STK*)Task1_Stk,
-        (CPU_STK_SIZE)128/10,
-        (CPU_STK_SIZE)128,
+        (CPU_STK_SIZE)sizeof(Task1_Stk)/10,
+        (CPU_STK_SIZE)sizeof(Task1_Stk),
         (OS_MSG_QTY)NULL,
         (OS_TICK)NULL,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
 
-
-
-    // INIT_TASK(Task1,4,NULL,err);
-     if (err != OS_ERR_NONE) {
+    if (err != OS_ERR_NONE) {
         printf("Task1 error code %d\n", err);
     }
     OSStart(&err);
@@ -90,6 +89,7 @@ int main(void){ //startup OS stuff, spawn test task
     return 0;
 }
 
+// DEBUG hardfault tracker
 void HardFault_Handler(){
     while(1){
         volatile int x = 0;
