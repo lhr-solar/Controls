@@ -41,7 +41,8 @@ void Task1(void *p_arg){
     payload.idx = 0;
     msg.id = CAR_STATE; //ON-OFF 
     msg.payload = payload;
-    while(1){
+    uint8_t i = 0;
+    while(i<4){
         //post a message to the queue
         OSQPost(
             &CANBus_MsgQ,
@@ -51,9 +52,10 @@ void Task1(void *p_arg){
             &err
         );
         //Test the reading functionality
-        CANbus_Read(&buffer[0],CAN_NON_BLOCKING);
-        printf("Read Result: %i\n",buffer[0]);
-        msg.payload.data.b ^= 0x01; //toggle bit 0  to swap data
+        // CANbus_Read(&buffer[0],CAN_NON_BLOCKING);
+        // printf("Read Result: %i\n",buffer[0]);
+        // msg.payload.data.b ^= 0x01; //toggle bit 0  to swap data
+        i++;
     }
 }
 int main(void){ //startup OS stuff, spawn test task
@@ -90,8 +92,8 @@ int main(void){ //startup OS stuff, spawn test task
 }
 
 // DEBUG hardfault tracker
-void HardFault_Handler(){
-    while(1){
-        volatile int x = 0;
-    }
-}
+// void HardFault_Handler(){
+//     while(1){
+//         volatile int x = 0;
+//     }
+// }
