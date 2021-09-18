@@ -25,15 +25,57 @@ void Task_MotorConnection(void *p_arg) {
     motor_startup(&err);
 
     // Spawn SendCarCAN
-    INIT_TASK(SendCarCAN, TASK_SEND_CAR_CAN_PRIO, p_arg, err);
+    OSTaskCreate(
+        (OS_TCB*)&SendCarCAN_TCB,
+        (CPU_CHAR*)"SendCarCAN",
+        (OS_TASK_PTR)Task_SendCarCAN,
+        (void*) car_state,
+        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
+        (CPU_STK*)SendCarCAN_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (OS_MSG_QTY)NULL,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
+        (OS_ERR*)&err
+    );
     // TODO: check for task creation error
 
     // Spawn ReadTritium
-    INIT_TASK(ReadTritium, TASK_READ_TRITIUM_PRIO, p_arg, err);
+    OSTaskCreate(
+        (OS_TCB*)&ReadTritium_TCB,
+        (CPU_CHAR*)"ReadTritium",
+        (OS_TASK_PTR)Task_ReadTritium,
+        (void*) car_state,
+        (OS_PRIO)TASK_READ_TRITIUM_PRIO,
+        (CPU_STK*)ReadTritium_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_READ_TRITIUM_STACK_SIZE,
+        (OS_MSG_QTY)NULL,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
+        (OS_ERR*)&err
+    );
     // TODO: check for task creation error
 
     // Spawn SendTritium
-    INIT_TASK(SendTritium, TASK_SEND_TRITIUM_PRIO, p_arg, err);
+    OSTaskCreate(
+        (OS_TCB*)&SendTritium_TCB,
+        (CPU_CHAR*)"SendTritium",
+        (OS_TASK_PTR)Task_SendTritium,
+        (void*) car_state,
+        (OS_PRIO)TASK_SEND_TRITIUM_PRIO,
+        (CPU_STK*)SendTritium_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_SEND_TRITIUM_STACK_SIZE,
+        (OS_MSG_QTY)NULL,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
+        (OS_ERR*)&err
+    );
     // TODO: check for task creation error
 
     while (1) {
