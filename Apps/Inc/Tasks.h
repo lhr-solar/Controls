@@ -16,23 +16,6 @@
  * @param err the local OS_ERR variable
  */
 
-#define _CONCAT(A, B) A ## B
-#define CONCAT(A, B) _CONCAT(A, B)
-#define INIT_TASK(task, prio, arg, err) \
-        OSTaskCreate(&CONCAT(task, _TCB),\
-                     #task,\
-                     CONCAT(Task_, task),\
-                     (void*) arg,\
-                     prio,\
-                     CONCAT(task, _Stk),\
-                     WATERMARK_STACK_LIMIT,\
-                     DEFAULT_STACK_SIZE,\
-                     0,\
-                     0,\
-                     (void *)0,\
-                     OS_OPT_TASK_STK_CLR,\
-                     &err);
-
 /**
  * Priority Definitions
  */
