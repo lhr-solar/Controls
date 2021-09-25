@@ -45,6 +45,17 @@ typedef struct {
  * state of the car
  * This is used by all the tasks to communicate
  */
+
+typedef struct{
+    State ArrayErr;
+    State ReadCANErr;
+    State ReadTritiumErr;
+    State SendCANErr;
+    State SendTritiumErr;
+    State UpdateVelocityErr;
+    State ReadPedalErr;
+} error_code_t;
+
 typedef struct {
     float DesiredVelocity;
     float CruiseControlVelocity;
@@ -65,6 +76,9 @@ typedef struct {
     State ShouldMotorBeActivated;
 
     State IsRegenBrakingAllowed;
+
+    error_code_t ErrorCode;
+
 } car_state_t;
 
 #endif
