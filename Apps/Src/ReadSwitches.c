@@ -10,8 +10,13 @@
  * Semaphores when Switches state changes. Also updates a switches global defined in StateTypes.h, declared in Tasks.c and externed in Tasks.h
 */
 void Task_ReadSwitches (void* p_arg) {
-    switch_states_t *storedSwitchStates = &(((car_state_t*)p_arg)->SwitchStates); //pointer to global switchstates
+    fprintf(stderr, "In ReadSwitches\n");
+    car_state_t *car_state = (car_state_t *) p_arg;
+    switch_states_t *storedSwitchStates = &(car_state->SwitchStates); //pointer to global switchstates
     switch_states_t readSwitchStates; //holds states read from driver reads
+
+    Switches_Init(); // Initialize the switches module
+    fprintf(stderr, "Initialized switches\n");
 
     // load readSwitchStates
     readSwitchStates = (switch_states_t){
@@ -28,10 +33,10 @@ void Task_ReadSwitches (void* p_arg) {
         Switches_Read(REV_SW),
     };
 
-    Switches_Init();
     OS_ERR err;
     bool arrayConThreadSpawned = false;
     bool motorConThreadSpawned = false;
+
     while(1){
         //Spawns arrayConnection thread and MotorConnection thread when it is appropriate
         uint8_t ignStates = 0x00; //holds states read from Switches Driver
@@ -40,6 +45,7 @@ void Task_ReadSwitches (void* p_arg) {
         ignStates = ignStates|(readSwitchStates.IGN_1&1);
         ignStored = ignStored|((storedSwitchStates->IGN_2&1)<<1);
         ignStored = ignStates|(storedSwitchStates->IGN_1&1);
+        fprintf(stderr, "ignStates: %d\tignStored: %d\n", ignStates, ignStored);
         if (ignStored!=ignStates){
             switch(ignStates){
                 case 0x00:
@@ -47,8 +53,8 @@ void Task_ReadSwitches (void* p_arg) {
                     storedSwitchStates->IGN_1 = 0;
                     storedSwitchStates->IGN_2 = 0;
                     //TODO: add car turn off code?
-                    ((car_state_t*)p_arg)->ShouldArrayBeActivated = 0;
-                    ((car_state_t*)p_arg)->ShouldMotorBeActivated = 0;
+                    car_state->ShouldArrayBeActivated = 0;
+                    car_state->ShouldMotorBeActivated = 0;
                     OSSemPost(
                         &ArrayConnectionChange_Sem4,
                         (OS_OPT) OS_OPT_POST_ALL,
@@ -63,7 +69,6 @@ void Task_ReadSwitches (void* p_arg) {
                 //IGN1 is on
                     storedSwitchStates->IGN_1=1;
                     storedSwitchStates->IGN_2=0;
-                    #pragma region
                     if (arrayConThreadSpawned=false){ 
                         OSTaskCreate(
                             (OS_TCB*)&ArrayConnection_TCB,
@@ -81,13 +86,11 @@ void Task_ReadSwitches (void* p_arg) {
                             (OS_ERR*)&err
                         );
                     }
-                    #pragma endregion
                 case 0x03:
                 //Both are on
                     storedSwitchStates->IGN_2=1;
                     storedSwitchStates->IGN_1=1;
                     //OSTASKCREATE activate array, OSTASKCREATE activate motor
-                    #pragma region
                     if(arrayConThreadSpawned=false){ 
                         OSTaskCreate(
                             (OS_TCB*)&ArrayConnection_TCB,
@@ -122,32 +125,25 @@ void Task_ReadSwitches (void* p_arg) {
                             (OS_ERR*)&err
                         );
                     }
-                    #pragma endregion
                 case 0x02:
-                    return -1; //Shouldn't happen - error case; only IGN2 is on
+                    break; //Shouldn't happen - error case; only IGN2 is on
             }
        
         }
+
+        uint8_t lightSwitchStates = 
+            (readSwitchStates.HZD_SW << 3)       |
+            (readSwitchStates.HEADLIGHT_SW << 2) |
+            (readSwitchStates.RIGHT_SW << 1)     |
+            (readSwitchStates.LEFT_SW)           ; //holds states read from Switches_Driver
+
         
-        //Signal LightsChange_Sem4 for UpdateLights Thread
-        State readlightSwitches[]={
-            readSwitchStates.LEFT_SW,
-            readSwitchStates.RIGHT_SW,
-            readSwitchStates.HEADLIGHT_SW,
-            readSwitchStates.HZD_SW
-        }; 
-        State storeLightSwitches[]={
-            storedSwitchStates->LEFT_SW,
-            storedSwitchStates->RIGHT_SW,
-            storedSwitchStates->HEADLIGHT_SW,
-            storedSwitchStates->HZD_SW
-        };       
-        uint8_t lightSwitchStates = 0x00; //holds states read from Switches_Driver
-        uint8_t lightSwitchStored = 0x00; //holds states stored in global
-        for(uint8_t i = 0; i<3; i++){
-            lightSwitchStates = lightSwitchStates | (readlightSwitches[i]<<i);
-            lightSwitchStored = lightSwitchStored | (storeLightSwitches[i]<<i);
-        }
+        uint8_t lightSwitchStored =
+            (storedSwitchStates->HZD_SW << 3)       |
+            (storedSwitchStates->HEADLIGHT_SW << 2) |
+            (storedSwitchStates->RIGHT_SW << 1)     |
+            (storedSwitchStates->LEFT_SW)           ; //holds states stored in global
+
         if(lightSwitchStored!=lightSwitchStates){
             //if any of the bits dont match, LightsChange must get signaled       
             OSSemPost(
