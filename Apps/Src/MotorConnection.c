@@ -23,6 +23,9 @@ void Task_MotorConnection(void *p_arg) {
 
     Contactors_Init(MOTOR);
     motor_startup(&err);
+    if(err != OS_ERR_NONE){
+        car_state->ErrorCode.MotorConnectionErr = ON;
+    }
 
     // Spawn SendCarCAN
     OSTaskCreate(
@@ -41,6 +44,9 @@ void Task_MotorConnection(void *p_arg) {
         (OS_ERR*)&err
     );
     // TODO: check for task creation error
+    if(err != OS_ERR_NONE){
+        car_state->ErrorCode.SendCANErr = ON;
+    }
 
     // Spawn ReadTritium
     OSTaskCreate(
@@ -59,6 +65,9 @@ void Task_MotorConnection(void *p_arg) {
         (OS_ERR*)&err
     );
     // TODO: check for task creation error
+    if(err != OS_ERR_NONE){
+        car_state->ErrorCode.ReadTritiumErr = ON;
+    }
 
     // Spawn SendTritium
     OSTaskCreate(
@@ -77,6 +86,9 @@ void Task_MotorConnection(void *p_arg) {
         (OS_ERR*)&err
     );
     // TODO: check for task creation error
+    if(err != OS_ERR_NONE){
+        car_state->ErrorCode.SendTritiumErr = ON;
+    }
 
     while (1) {
         // Wait until some change needs to be made to the motor state
@@ -88,13 +100,31 @@ void Task_MotorConnection(void *p_arg) {
         if (desiredState == ON && currentState != ON) {
             motor_startup(&err); // Reactivate the array
             OSTaskSemPost(&SendCarCAN_TCB, OS_OPT_POST_NONE, &err);
+            if(err != OS_ERR_NONE){
+                car_state->ErrorCode.SendCANErr = ON;
+            }
             OSTaskSemPost(&ReadTritium_TCB, OS_OPT_POST_NONE, &err);
+            if(err != OS_ERR_NONE){
+                car_state->ErrorCode.ReadTritiumErr = ON;
+            }
             OSTaskSemPost(&SendTritium_TCB, OS_OPT_POST_NONE, &err);
+            if(err != OS_ERR_NONE){
+                car_state->ErrorCode.SendTritiumErr = ON;
+            }
         } else if (desiredState != ON && currentState == ON) {
             Contactors_Set(MOTOR, OFF); // Deactivate the array
             OSTaskSemPost(&SendCarCAN_TCB, OS_OPT_POST_NONE, &err);
+            if(err != OS_ERR_NONE){
+                car_state->ErrorCode.SendCANErr = ON;
+            }
             OSTaskSemPost(&ReadTritium_TCB, OS_OPT_POST_NONE, &err);
+            if(err != OS_ERR_NONE){
+                car_state->ErrorCode.ReadTritiumErr = ON;
+            }
             OSTaskSemPost(&SendTritium_TCB, OS_OPT_POST_NONE, &err);
+            if(err != OS_ERR_NONE){
+                car_state->ErrorCode.SendTritiumErr = ON;
+            }
         }
 
     }

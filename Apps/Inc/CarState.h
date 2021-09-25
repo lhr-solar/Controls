@@ -55,6 +55,7 @@ typedef struct{
     State UpdateVelocityErr;
     State ReadPedalErr;
     State BlinkLightsErr;
+    State MotorConnectionErr;
 } error_code_t;
 
 typedef struct {
