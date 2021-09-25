@@ -1,0 +1,8 @@
+run `st-util`
+
+run `gdb-multiarch Objects/control-leader.elf`
+
+> target extended-remote localhost:4242
+> type 'start'
+> type ctrl + x + a to have a better view of the code
+> asdfghasdfg

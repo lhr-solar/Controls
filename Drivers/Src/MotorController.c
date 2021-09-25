@@ -46,7 +46,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
         i++;
     }
     
-    BSP_CAN_Write(CAN_2, MOTOR_DRIVE, data, MAX_CAN_LEN);
+    BSP_CAN_Write(CAN_3, MOTOR_DRIVE, data, MAX_CAN_LEN);
 }
 
 /**
@@ -57,7 +57,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
 ErrorStatus MotorController_Read(CANbuff *message){
     uint32_t id;
     uint8_t data[8] = {0};
-    uint32_t length = BSP_CAN_Read(CAN_2, &id, data);
+    uint32_t length = BSP_CAN_Read(CAN_3, &id, data);
     uint32_t firstSum = 0;
     uint32_t secondSum = 0;
     if(length>0){

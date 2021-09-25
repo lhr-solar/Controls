@@ -26,21 +26,33 @@ static CanRxMsg gRxMessage;
 static void (*gRxEvent)(void);
 static void (*gTxEnd)(void);
 
+
+void BSP_CAN1_Init();
+void BSP_CAN2_Init();
+void BSP_CAN3_Init();
+
 /**
  * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
  * @param   rxEvent : the function to execute when recieving a message. NULL for no action.
  * @param   txEnd   : the function to execute after transmitting a message. NULL for no action.
  * @return  None
  */
+
 void BSP_CAN_Init(CAN_t bus, void (*rxEvent)(void), void (*txEnd)(void)) {
+    //BSP_CAN1_Init();
+    //RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
+    BSP_CAN3_Init();
+}
+
+void BSP_CAN1_Init(){
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
     CAN_FilterInitTypeDef CAN_FilterInitStruct;
 
     // Configure event handles
-    gRxEvent  = rxEvent;
-    gTxEnd    = txEnd;
+    //gRxEvent  = rxEvent;
+    //gTxEnd    = txEnd;
 
     // Initialize the queue
     gRxQueue = msg_queue_new();
@@ -100,6 +112,8 @@ void BSP_CAN_Init(CAN_t bus, void (*rxEvent)(void), void (*txEnd)(void)) {
     CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
     CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
 
+    //CAN_SlaveStartBank(CAN1, 0);
+
     /* Transmit Structure preparation */
     gTxMessage.ExtId = 0x5;
     gTxMessage.RTR = CAN_RTR_DATA;
@@ -123,14 +137,212 @@ void BSP_CAN_Init(CAN_t bus, void (*rxEvent)(void), void (*txEnd)(void)) {
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);	
 
-    if(NULL != txEnd) {
+    /*if(NULL != txEnd) {
         // Enable Tx Interrupts
         NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
         NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
         NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
         NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn;
         NVIC_Init(&NVIC_InitStruct);
-    }
+    }*/
+}
+
+void BSP_CAN2_Init(){
+    GPIO_InitTypeDef GPIO_InitStruct;
+    CAN_InitTypeDef CAN_InitStruct;
+    NVIC_InitTypeDef NVIC_InitStruct;
+    CAN_FilterInitTypeDef CAN_FilterInitStruct;
+
+    // Configure event handles
+    //gRxEvent  = rxEvent;
+    //gTxEnd    = txEnd;
+
+    // Initialize the queue
+    gRxQueue = msg_queue_new();
+
+    /* CAN GPIOs configuration **************************************************/
+
+    /* Enable GPIO clock */
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+
+    // Alternate Function 9
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource12, GPIO_AF_CAN2);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_CAN2);
+
+    /* Configure CAN RX and TX pins */
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* CAN configuration ********************************************************/  
+    /* Enable CAN clock */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN2, ENABLE);
+
+    /* CAN register init */
+    //CAN_DeInit(CAN1);
+
+    /* CAN cell init */
+    CAN_InitStruct.CAN_TTCM = DISABLE;
+    CAN_InitStruct.CAN_ABOM = DISABLE;
+    CAN_InitStruct.CAN_AWUM = DISABLE;
+    CAN_InitStruct.CAN_NART = DISABLE;
+    CAN_InitStruct.CAN_RFLM = DISABLE;
+    CAN_InitStruct.CAN_TXFP = DISABLE;
+    CAN_InitStruct.CAN_Mode = CAN_Mode_LoopBack; // TODO: change back to Normal after testing
+    CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
+
+    /* CAN Baudrate = 125 KBps
+        * 1/(prescalar + (prescalar*BS1) + (prescalar*BS2)) * Clk = CAN Baudrate
+        * The CAN clk is currently set to 20MHz (APB1 clock set to 20MHz in BSP_PLL_Init())
+    */
+    CAN_InitStruct.CAN_BS1 = CAN_BS1_3tq;
+    CAN_InitStruct.CAN_BS2 = CAN_BS2_4tq;
+    CAN_InitStruct.CAN_Prescaler = 16;
+    uint8_t return_value = CAN_Init(CAN2, &CAN_InitStruct);
+
+    CAN_SlaveStartBank(CAN2, 14);
+
+    /* CAN filter init */
+    CAN_FilterInitStruct.CAN_FilterNumber = 1;
+    CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
+    CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
+    CAN_FilterInitStruct.CAN_FilterIdHigh = 0x0000;
+    CAN_FilterInitStruct.CAN_FilterIdLow = 0x0000;
+    CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 0x0000;
+    CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
+    CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
+    CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+    CAN_FilterInit(CAN2, &CAN_FilterInitStruct);
+
+    /* Transmit Structure preparation */
+    gTxMessage.ExtId = 0x5;
+    gTxMessage.RTR = CAN_RTR_DATA;
+    gTxMessage.IDE = CAN_ID_STD;
+    gTxMessage.DLC = 1;
+
+    /* Receive Structure preparation */
+    gRxMessage.StdId = 0x00;
+    gRxMessage.ExtId = 0x00;
+    gRxMessage.IDE = CAN_ID_STD;
+    gRxMessage.DLC = 0;
+    gRxMessage.FMI = 0;
+
+    /* Enable FIFO 1 message pending Interrupt */
+    CAN_ITConfig(CAN2, CAN_IT_FMP1, ENABLE);
+
+    // Enable Rx interrupts
+    NVIC_InitStruct.NVIC_IRQChannel = CAN2_RX0_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStruct);	
+
+    /*if(NULL != txEnd) {
+        // Enable Tx Interrupts
+        NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
+        NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
+        NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+        NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn;
+        NVIC_Init(&NVIC_InitStruct);
+    }*/
+}
+
+void BSP_CAN3_Init(){
+    GPIO_InitTypeDef GPIO_InitStruct;
+    CAN_InitTypeDef CAN_InitStruct;
+    NVIC_InitTypeDef NVIC_InitStruct;
+    CAN_FilterInitTypeDef CAN_FilterInitStruct;
+
+    // Configure event handles
+    //gRxEvent  = rxEvent;
+    //gTxEnd    = txEnd;
+
+    // Initialize the queue
+    gRxQueue = msg_queue_new();
+
+    /* CAN GPIOs configuration **************************************************/
+
+    /* Enable GPIO clock */
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+    // Alternate Function 9
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource15, GPIO_AF11_CAN3);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF11_CAN3);
+
+    /* Configure CAN RX and TX pins */
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_8;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /* CAN configuration ********************************************************/  
+    /* Enable CAN clock */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN3, ENABLE);
+
+    /* CAN register init */
+    //CAN_DeInit(CAN1);
+
+    /* CAN cell init */
+    CAN_InitStruct.CAN_TTCM = DISABLE;
+    CAN_InitStruct.CAN_ABOM = DISABLE;
+    CAN_InitStruct.CAN_AWUM = DISABLE;
+    CAN_InitStruct.CAN_NART = DISABLE;
+    CAN_InitStruct.CAN_RFLM = DISABLE;
+    CAN_InitStruct.CAN_TXFP = DISABLE;
+    CAN_InitStruct.CAN_Mode = CAN_Mode_LoopBack; // TODO: change back to Normal after testing
+    CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
+
+    /* CAN Baudrate = 125 KBps
+        * 1/(prescalar + (prescalar*BS1) + (prescalar*BS2)) * Clk = CAN Baudrate
+        * The CAN clk is currently set to 20MHz (APB1 clock set to 20MHz in BSP_PLL_Init())
+    */
+    CAN_InitStruct.CAN_BS1 = CAN_BS1_3tq;
+    CAN_InitStruct.CAN_BS2 = CAN_BS2_4tq;
+    CAN_InitStruct.CAN_Prescaler = 16;
+    CAN_Init(CAN3, &CAN_InitStruct);
+
+    /* CAN filter init */
+    CAN_FilterInitStruct.CAN_FilterNumber = 0;
+    CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
+    CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
+    CAN_FilterInitStruct.CAN_FilterIdHigh = 0x0000;
+    CAN_FilterInitStruct.CAN_FilterIdLow = 0x0000;
+    CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 0x0000;
+    CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
+    CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
+    CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+    CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
+
+    //CAN_SlaveStartBank(CAN1, 0);
+
+    /* Transmit Structure preparation */
+    gTxMessage.ExtId = 0x5;
+    gTxMessage.RTR = CAN_RTR_DATA;
+    gTxMessage.IDE = CAN_ID_STD;
+    gTxMessage.DLC = 1;
+
+    /* Receive Structure preparation */
+    gRxMessage.StdId = 0x00;
+    gRxMessage.ExtId = 0x00;
+    gRxMessage.IDE = CAN_ID_STD;
+    gRxMessage.DLC = 0;
+    gRxMessage.FMI = 0;
+
+    /* Enable FIFO 0 message pending Interrupt */
+    CAN_ITConfig(CAN3, CAN_IT_FMP0, ENABLE);
+
+    // Enable Rx interrupts
+    NVIC_InitStruct.NVIC_IRQChannel = CAN3_RX0_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStruct);	
+
 }
 
 /**
@@ -148,7 +360,7 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
         gTxMessage.Data[i] = data[i];
     }
 	
-    ErrorStatus retVal = (ErrorStatus) (CAN_Transmit(CAN1, &gTxMessage) != 0);
+    ErrorStatus retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
 
     return retVal;
 }
@@ -179,7 +391,35 @@ ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t *id, uint8_t *data) {
 
     return SUCCESS;
 }
+void CAN3_RX0_IRQHandler(){
+    #ifdef RTOS
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
+    #endif
 
+    // Take any pending messages into a queue
+    while(CAN_MessagePending(CAN3, CAN_FIFO0)) {
+        CAN_Receive(CAN3, CAN_FIFO0, &gRxMessage);
+
+        msg_t rxMsg;
+        rxMsg.id = gRxMessage.StdId;
+        memcpy(&rxMsg.data[0], gRxMessage.Data, 8);
+
+        // Place the message in the queue
+        if(msg_queue_put(&gRxQueue, rxMsg)) {
+            // If the queue was not already full...
+            // Call the driver-provided function, if it is not null
+            if(gRxEvent != NULL) {
+                gRxEvent();
+            }
+        } else {
+            // If the queue is already full, then we can't really do anything else
+            break;
+        }
+    }
+}
 void CAN1_RX0_IRQHandler(void) {
     #ifdef RTOS
     CPU_SR_ALLOC();
@@ -213,6 +453,41 @@ void CAN1_RX0_IRQHandler(void) {
     OSIntExit();      // Signal to uC/OS
     #endif
 }
+
+void CAN2_RX0_IRQHandler(void) {
+    #ifdef RTOS
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
+    #endif
+
+    // Take any pending messages into a queue
+    while(CAN_MessagePending(CAN2, CAN_FIFO1)) {
+        CAN_Receive(CAN2, CAN_FIFO1, &gRxMessage);
+
+        msg_t rxMsg;
+        rxMsg.id = gRxMessage.StdId;
+        memcpy(&rxMsg.data[0], gRxMessage.Data, 8);
+
+        // Place the message in the queue
+        if(msg_queue_put(&gRxQueue, rxMsg)) {
+            // If the queue was not already full...
+            // Call the driver-provided function, if it is not null
+            if(gRxEvent != NULL) {
+                gRxEvent();
+            }
+        } else {
+            // If the queue is already full, then we can't really do anything else
+            break;
+        }
+    }
+
+    #ifdef RTOS
+    OSIntExit();      // Signal to uC/OS
+    #endif
+}
+
 
 void CAN1_TX_IRQHandler(void) {
     #ifdef RTOS

@@ -15,7 +15,6 @@ int main(void){
 
     CANData_t data;
     data.d = 0xFFFF8765;
-    
 
     CANPayload_t payload;
     payload.data = data;
@@ -27,21 +26,7 @@ int main(void){
     char str[128];
     uint8_t output;
 
-
-    output = CANbus_Send(ids[0], payload,CAN_BLOCKING);
-
-    //for (volatile int i = 0; i < 1000000; i++);
-
-    //data.d = 0xFFFFFFFF;
-    //output = CANbus_Send(0xFFF, payload);
-    /*for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
-        output = CANbus_Send(ids[i], payload);
-        if(output == 0) {
-            i--;
-            continue;
-        }
-        size += sprintf(str, "OUTPUT: %d ", output);
-    }*/
+    output = CANbus_Send(ids[0], payload);
 
     while(1);
 }
