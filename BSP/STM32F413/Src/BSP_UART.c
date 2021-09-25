@@ -34,7 +34,7 @@ static callback_t displayTxCallback = NULL;
 static rxfifo_t *rx_fifos[NUM_UART]     = {&usbRxFifo, &displayRxFifo};
 static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &displayTxFifo};
 static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceived};
-static USART_TypeDef *handles[NUM_UART] = {USART3, USART2};
+static USART_TypeDef *handles[NUM_UART] = {USART2, USART3};
 
 static void USART_DISPLAY_Init() {
     displayTxFifo = txfifo_new();
@@ -44,8 +44,57 @@ static void USART_DISPLAY_Init() {
     USART_InitTypeDef UART_InitStruct = {0};
 
     // Initialize clocks
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,  ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,  ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+
+    // Initialize pins
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;
+    GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
+    GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_USART3);
+
+    //Initialize UART3
+    UART_InitStruct.USART_BaudRate = 115200;
+    UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    UART_InitStruct.USART_Parity = USART_Parity_No;
+    UART_InitStruct.USART_StopBits = USART_StopBits_1;
+    UART_InitStruct.USART_WordLength = USART_WordLength_8b;
+    USART_Init(USART3, &UART_InitStruct);
+
+    // Enable interrupts
+    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+    USART_ITConfig(USART3, USART_IT_TC, ENABLE);
+
+    USART_Cmd(USART3, ENABLE);
+
+    // Enable NVIC
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+static void USART_USB_Init() {
+    usbTxFifo = txfifo_new();
+    usbRxFifo = rxfifo_new();
+
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    USART_InitTypeDef UART_InitStruct = {0};
+
+    // Initialize clocks
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,  ENABLE);
 
     // Initialize pins
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
@@ -58,7 +107,7 @@ static void USART_DISPLAY_Init() {
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
 
-    //Initialize UART2 and 3
+    //Initialize UART2
     UART_InitStruct.USART_BaudRate = 115200;
     UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
@@ -76,55 +125,6 @@ static void USART_DISPLAY_Init() {
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-}
-
-static void USART_USB_Init() {
-    usbTxFifo = txfifo_new();
-    usbRxFifo = rxfifo_new();
-
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    USART_InitTypeDef UART_InitStruct = {0};
-
-    // Initialize clocks
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-
-    // Initialize pins
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-    GPIO_Init(GPIOB, &GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;
-    GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-    GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
-    GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_USART3);
-
-    //Initialize UART2 and 3
-    UART_InitStruct.USART_BaudRate = 115200;
-    UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-    UART_InitStruct.USART_Parity = USART_Parity_No;
-    UART_InitStruct.USART_StopBits = USART_StopBits_1;
-    UART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_Init(USART3, &UART_InitStruct);
-
-    // Enable interrupts
-    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-    USART_ITConfig(USART3, USART_IT_TC, ENABLE);
-
-    USART_Cmd(USART3, ENABLE);
-
-    // Enable NVIC
-    NVIC_InitTypeDef NVIC_InitStructure;
-  	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
 
     setvbuf(stdout, NULL, _IONBF, 0);
 }
@@ -134,12 +134,12 @@ static void USART_USB_Init() {
  */
 static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback, UART_t uart) {
     switch(uart){
-    case UART_3: // their UART_USB
+    case UART_2: // their UART_USB
         USART_USB_Init();
         usbRxCallback = rxCallback;
         usbTxCallback = txCallback;
         break;
-    case UART_2: // their UART_DISPLAY
+    case UART_3: // their UART_DISPLAY
         USART_DISPLAY_Init();
         displayRxCallback = rxCallback;
         displayTxCallback = txCallback;

@@ -73,6 +73,7 @@ typedef struct FIFO_STRUCT_NAME {
 #define NEW      CONCAT(FIFO_NAME, _new)
 #define PEEK     CONCAT(FIFO_NAME, _peek)
 #define POPBACK  CONCAT(FIFO_NAME, _popback)
+#define RENEW    CONCAT(FIFO_NAME, _renew)
 
 /**
  * @brief Initialize a new fifo
@@ -87,6 +88,20 @@ NEW () {
     FIFO_TYPE_NAME fifo;
     memset(&fifo, 0, sizeof(fifo));
     return fifo;
+}
+
+/**
+ * @brief Initialize a fifo by reference.
+ * 
+ * This is going to be faster than _new().
+ * This does not erase all of the contents of the fifo, but
+ * rather marks it as "empty".
+ */
+static inline void __attribute__((unused))
+RENEW (FIFO_TYPE_NAME * fifo) {
+    if(fifo != NULL) {
+        fifo->get = fifo->put;
+    }
 }
 
 /**
