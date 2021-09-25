@@ -46,7 +46,7 @@ void Task_ArrayConnection(void *p_arg) {
     );
     
     if(err != OS_ERR_NONE){
-        car_state->ErrorCode.ArrayErr = ON;
+        car_state->ErrorCode.ReadCANErr = ON;
     }
 
     while (1) {

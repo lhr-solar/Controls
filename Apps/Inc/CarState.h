@@ -54,6 +54,7 @@ typedef struct{
     State SendTritiumErr;
     State UpdateVelocityErr;
     State ReadPedalErr;
+    State BlinkLightsErr;
 } error_code_t;
 
 typedef struct {

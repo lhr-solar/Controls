@@ -27,13 +27,13 @@ void Task_ReadPedals(void *p_arg){
         if(carStates->AccelPedalPercent != PreviousAccel){
             OSSemPost (&VelocityChange_Sem4, OS_OPT_POST_ALL, &err);
             if (err != OS_ERR_NONE) {
-                carStates->ErrorCode.ReadPedalErr = ON;
+                carStates->ErrorCode.UpdateVelocityErr = ON;
             }
         }
         if( carStates->BrakePedalPercent != PreviousBrake){
             OSSemPost (&LightsChange_Sem4, OS_OPT_POST_ALL, &err);
             if (err != OS_ERR_NONE) {
-                carStates->ErrorCode.ReadPedalErr = ON;
+                carStates->ErrorCode.BlinkLightsErr = ON;
             }
         }
 
