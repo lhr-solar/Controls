@@ -5,6 +5,11 @@
 
 #define NEXTION_INSTRUCTION_SUCCESSFUL 0xffffff01
 
+static inline NextionIsFailure(uint32_t val) {
+    return ((val & 0xFFFFFF00) == 0xFFFFFF00 && (val & 0xFF) != 1);
+}
+
+
 // List of names of possible strings to build a command out of
 static enum CommandString_t {
     VELOCITY,
