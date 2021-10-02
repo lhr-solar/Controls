@@ -34,7 +34,7 @@ static char *CommandStrings[] = {
 /**
  * Convert signed 32-bit integer to string
  */
-static char *to_charp(int32_t num, char *dest) {
+static void *to_charp(int32_t num, char *dest) {
     static char buf[12];
     bool neg = false;
     if (num < 0) {
@@ -69,7 +69,7 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
     buf[len1+1+len2] = '=';
     to_charp(val, buf+len1+len2+2);
 
-    // printf("Command is \"%s\"\n", (len1 == 0) ? buf+1 : buf);
+    printf("Command is \"%s\"\n", (len1 == 0) ? buf+1 : buf);
 
     // Get rid of extraneous period in global attribute
     BSP_UART_Write(UART_2, (len1 == 0) ? buf+1 : buf, strlen(buf));
@@ -83,7 +83,7 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
  * Initialize the Nextion display
  */
 void Display_Init() {
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(UART_3);
     // The display sends 0x88 when ready, but that might be
     // before we initialize our UART
 }
