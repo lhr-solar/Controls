@@ -27,5 +27,8 @@ void Task_SendTritium(void *p_arg) {
 
         // Delay for 100 ms
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+        if (err != OS_ERR_NONE) {
+            car_state->ErrorCode.SendTritiumErr = ON;
+        }
     }
 }
