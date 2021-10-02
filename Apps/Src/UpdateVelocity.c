@@ -31,6 +31,10 @@ void Task_UpdateVelocity(void* p_arg){
         }        
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
+        
+        if(err != OS_ERR_NONE){
+            car_state->ErrorCode.UpdateVelocityErr = ON;
+        }
     }
 }
 
