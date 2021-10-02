@@ -1,6 +1,5 @@
 #include "MotorController.h"
-
-
+#include "CarState.h"
 #define MOTOR_DRIVE 0x221
 #define MAX_CAN_LEN 8
 
@@ -46,7 +45,8 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
-ErrorStatus MotorController_Read(CANbuff *message){
+ErrorStatus MotorController_Read(CANbuff *message, void *p_arg){
+    car_state_t *car_state = (car_state_t *) p_arg;
     uint32_t id;
     uint8_t data[8] = {0};
     uint32_t length = BSP_CAN_Read(CAN_2, &id, data);
@@ -70,6 +70,36 @@ ErrorStatus MotorController_Read(CANbuff *message){
         }
         message->firstNum = firstSum;
         message->secondNum = secondSum;
+
+        //read first number (bits 0-31) to get motor error issues
+        uint32_t maskMotorTemp=64; //check if motor temperature is an issue
+        uint32_t motorTempError=maskMotorTemp & firstSum;
+        if(motorTempError==64)
+        {
+             car_state->MotorErrorCode.motorTempErr = ON;
+        }
+
+        uint32_t maskSSErr=8; //check for slip or hall sequence position error
+        uint32_t SSErr=maskSSErr & firstSum;
+        if(SSErr==8)
+        {
+             car_state->MotorErrorCode.slipSpeedErr = ON;
+        }
+
+        uint32_t maskCCErr=4; //checks velocity
+        uint32_t CCErr=maskCCErr & firstSum;
+        if(CCErr==4)
+        {
+             car_state->MotorErrorCode.CCVelocityErr = ON;
+        }
+
+        uint32_t maskOverSpeed=256; //check if motor overshot max RPM
+        uint32_t motorOverSpeedErr=maskOverSpeed & firstSum;
+        if(motorOverSpeedErr==256)
+        {
+             car_state->MotorErrorCode.overSpeedErr = ON;
+        }
+
         return SUCCESS;
     }
     return ERROR;
