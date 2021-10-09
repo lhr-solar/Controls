@@ -79,23 +79,23 @@ ErrorStatus MotorController_Read(CANbuff *message, void *p_arg){
              car_state->MotorErrorCode.motorTempErr = ON;
         }
 
-        uint32_t maskSSErr=8; //check for slip or hall sequence position error
+        uint32_t maskSSErr=524288; //check for slip or hall sequence position error on 19 bit
         uint32_t SSErr=maskSSErr & firstSum;
-        if(SSErr==8)
+        if(SSErr==524288)
         {
              car_state->MotorErrorCode.slipSpeedErr = ON;
         }
 
-        uint32_t maskCCErr=4; //checks velocity
+        uint32_t maskCCErr=4; //checks velocity on 2 bit
         uint32_t CCErr=maskCCErr & firstSum;
         if(CCErr==4)
         {
              car_state->MotorErrorCode.CCVelocityErr = ON;
         }
 
-        uint32_t maskOverSpeed=256; //check if motor overshot max RPM
+        uint32_t maskOverSpeed=16777216; //check if motor overshot max RPM on 24 bit
         uint32_t motorOverSpeedErr=maskOverSpeed & firstSum;
-        if(motorOverSpeedErr==256)
+        if(motorOverSpeedErr==16777216)
         {
              car_state->MotorErrorCode.overSpeedErr = ON;
         }
