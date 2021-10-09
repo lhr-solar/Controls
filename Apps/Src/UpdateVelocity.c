@@ -22,13 +22,44 @@ void Task_UpdateVelocity(void* p_arg){
         //Read global pedal percentage
         uint8_t pedalPercentage = car_state->AccelPedalPercent;
 
-        if(car_state->CruiseControlEnable && car_state -> CruiseControlSet){
+        if(car_state->CREnable == CRUISE && car_state -> CruiseControlSet){
             car_state->DesiredVelocity = car_state->CruiseControlVelocity;
             car_state->DesiredMotorCurrent = 1.0f;
-        }else{
+
+            car_state->RegenButtonMode = OFF;
+        }
+        else if(car_state->CREnable == REGEN){
+            switch(car_state->RegenButtonMode){
+                case OFF:
+                    car_state->CREnable = OFF;
+                    break;
+                case RATE1:
+                    car_state->CREnable = REGEN;
+                    car_state->RegenBrakeRate = 0.75;
+                    break;
+                case RATE2:
+                    car_state->CREnable = REGEN;
+                    car_state->RegenBrakeRate = 0.50;
+                    break;
+                case RATE3:
+                    car_state->CREnable = REGEN;
+                    car_state->RegenBrakeRate = 0.25;
+                    break;
+            }
+
+            if(car_state->IsRegenBrakingAllowed){
+                car_state->DesiredVelocity = car_state->CurrentVelocity*car_state->RegenBrakeRate;
+                car_state->DesiredMotorCurrent = 1.0f;
+            }
+            else{
+                car_state->CREnable = OFF;
+                car_state->RegenButtonMode = OFF;
+            }
+        }
+        else{
             car_state->DesiredVelocity = MAX_VELOCITY;
             car_state->DesiredMotorCurrent = convertPedaltoMotorPercent(pedalPercentage);
-        }        
+        }
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
         

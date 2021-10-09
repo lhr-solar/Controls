@@ -39,11 +39,10 @@ typedef struct {
 } blinker_states_t;
 
 /**
- * Car State
+ * Error States
  * 
- * Stores all relevant data about the current
- * state of the car
- * This is used by all the tasks to communicate
+ * Stores error data to indicate which part of the code
+ * an error is coming from.
  */
 
 typedef struct{
@@ -58,6 +57,29 @@ typedef struct{
     State MotorConnectionErr;
 } error_code_t;
 
+/**
+ * Regen Brake Mode Enum
+ * 
+ * Different modes of the regenerative braking
+ * button
+ */
+typedef enum{OFF, RATE1, RATE2, RATE3} RegenMode;
+
+/**
+ * Regen/Cruise Enable Enum
+ */
+
+typedef enum{OFF, REGEN, CRUISE} CruiseRegenEnable;
+
+
+/**
+ * Car State
+ * 
+ * Stores all relevant data about the current
+ * state of the car
+ * This is used by all the tasks to communicate
+ */
+
 typedef struct {
     float DesiredVelocity;
     float CruiseControlVelocity;
@@ -71,15 +93,19 @@ typedef struct {
     switch_states_t SwitchStates;
     blinker_states_t BlinkerStates;
 
-    State CruiseControlEnable;
+    CruiseRegenEnable CREnable;    
     State CruiseControlSet;
+    
+    double RegenBrakeRate;
+    State IsRegenBrakingAllowed;
+    RegenMode RegenButtonMode;
 
     State ShouldArrayBeActivated;
     State ShouldMotorBeActivated;
 
-    State IsRegenBrakingAllowed;
-
     error_code_t ErrorCode;
+
+    
 
 } car_state_t;
 
