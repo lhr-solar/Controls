@@ -188,13 +188,13 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
  */
 ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t *id, uint8_t *data) {
     // If the queue is empty, return err
-    if(msg_queue_is_empty(gRxQueue[bus])) {
+    if(msg_queue_is_empty(&gRxQueue[bus])) {
         return ERROR;
     }
     
     // Get the message
     msg_t msg;
-    msg_queue_get(gRxQueue[bus], &msg);
+    msg_queue_get(&gRxQueue[bus], &msg);
 
     // Transfer the message to the provided pointers
     for(int i = 0; i < 8; i++){

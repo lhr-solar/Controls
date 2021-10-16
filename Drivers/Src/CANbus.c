@@ -8,7 +8,7 @@
  * @return  None
  */
 void CANbus_Init(void) {
-    BSP_CAN_Init(CAN_1);
+    BSP_CAN_Init(CAN_1, NULL, NULL); // TODO: write RX and TX functions
 }
 
 /**
