@@ -2,6 +2,10 @@
 #include "CarState.h"
 #define MOTOR_DRIVE 0x221
 #define MAX_CAN_LEN 8
+#define maskMotorTempErr=1<<6; //check if motor temperature is an issue on bit 6
+#define maskSSErr=1<<19; //check for slip or hall sequence position error on 19 bit
+#define maskCCErr=1<<2; //checks velocity on 2 bit
+#define maskOverSpeedErr=1<<24; //check if motor overshot max RPM on 24 bit
 
 /**
  * @brief   Initializes the motor controller
@@ -53,11 +57,6 @@ ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
     uint32_t firstSum = 0;
     uint32_t secondSum = 0;
 
-    const uint32_t maskMotorTemp=1<<6; //check if motor temperature is an issue on bit 6
-    const uint32_t maskSSErr=1<<19; //check for slip or hall sequence position error on 19 bit
-    const uint32_t maskCCErr=1<<2; //checks velocity on 2 bit
-    const uint32_t maskOverSpeed=1<<24; //check if motor overshot max RPM on 24 bit
-
     if(length>0){
         message->id = id;
         //get first number (bits 0-31)
@@ -78,26 +77,23 @@ ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
         message->secondNum = secondSum;
 
         //read first number (bits 0-31) from CAN message to check motor error issue flags
-        uint32_t motorTempError=maskMotorTemp & firstSum;
-        if(motorTempError==1<<6)
+        
+        if(maskMotorTempErr & firstSum)
         {
              car.MotorErrorCode.motorTempErr = ON;
         }
 
-        uint32_t SSErr=maskSSErr & firstSum;
-        if(SSErr==1<<19)
+        if(maskSSErr & firstSum)
         {
              car.MotorErrorCode.slipSpeedErr = ON;
         }
 
-        uint32_t CCErr=maskCCErr & firstSum;
-        if(CCErr==1<<2)
+        if(maskCCErr & firstSum)
         {
              car.MotorErrorCode.CCVelocityErr = ON;
         }
 
-        uint32_t motorOverSpeedErr=maskOverSpeed & firstSum;
-        if(motorOverSpeedErr==1<<24)
+        if(maskOverSpeedErr & firstSum)
         {
              car.MotorErrorCode.overSpeedErr = ON;
         }

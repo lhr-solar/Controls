@@ -31,23 +31,23 @@ int main(){
     //printf("The ID on the bus was: %x\n\rMessage: %x, %x\n\rSuccess: %d",tester.id, tester.firstNum, tester.secondNum, check);
 
     printf("Error flags for motor temp, slipspeed, CC velocity, overspeed are on: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
-    car->MotorErrorCode.motorTempErr,car->MotorErrorCode.slipSpeedErr, car->MotorErrorCode.CCVelocityErr, 
-    car->MotorErrorCode.overSpeedErr); 
+    car.MotorErrorCode.motorTempErr,car.MotorErrorCode.slipSpeedErr, car.MotorErrorCode.CCVelocityErr, 
+    car.MotorErrorCode.overSpeedErr); 
 
     test_data=0x00080044
     printf("Error flags for motor temp, slipspeed, CC velocity are on. Overspeed off: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
-    car->MotorErrorCode.motorTempErr,car->MotorErrorCode.slipSpeedErr, car->MotorErrorCode.CCVelocityErr,
-    car->MotorErrorCode.overSpeedErr); 
+    car.MotorErrorCode.motorTempErr,car.MotorErrorCode.slipSpeedErr, car.MotorErrorCode.CCVelocityErr, 
+    car.MotorErrorCode.overSpeedErr); 
 
     test_data=0x00080040
     printf("Error flags for motor temp, slipspeed are on. CC velocity, Overspeed off: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
-    car->MotorErrorCode.motorTempErr,car->MotorErrorCode.slipSpeedErr, car->MotorErrorCode.CCVelocityErr,
-    car->MotorErrorCode.overSpeedErr); 
+    car.MotorErrorCode.motorTempErr,car.MotorErrorCode.slipSpeedErr, car.MotorErrorCode.CCVelocityErr, 
+    car.MotorErrorCode.overSpeedErr); 
 
     test_data=0x00000040
     printf("Error flags for motor temp on. Slipspeed, CC velocity, Overspeed off: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
-    car->MotorErrorCode.motorTempErr,car->MotorErrorCode.slipSpeedErr, car->MotorErrorCode.CCVelocityErr,
-    car->MotorErrorCode.overSpeedErr); 
+    car.MotorErrorCode.motorTempErr,car.MotorErrorCode.slipSpeedErr, car.MotorErrorCode.CCVelocityErr, 
+    car.MotorErrorCode.overSpeedErr); 
 
     test_data=0x00000000
     printf("Error flags for motor temp, slipspeed, CC velocity, Overspeed off: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
