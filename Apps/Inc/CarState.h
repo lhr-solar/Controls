@@ -63,13 +63,13 @@ typedef struct{
  * Different modes of the regenerative braking
  * button
  */
-typedef enum{OFF, RATE1, RATE2, RATE3} RegenMode;
+typedef enum{REGEN_OFF, RATE1, RATE2, RATE3} RegenMode;
 
 /**
  * Regen/Cruise Enable Enum
  */
 
-typedef enum{OFF, REGEN, CRUISE} CruiseRegenEnable;
+typedef enum{CR_OFF, REGEN, CRUISE} CruiseRegenEnable;
 
 
 /**
@@ -96,7 +96,7 @@ typedef struct {
     CruiseRegenEnable CREnable;    
     State CruiseControlSet;
     
-    double RegenBrakeRate;
+    int RegenBrakeRate;
     State IsRegenBrakingAllowed;
     RegenMode RegenButtonMode;
 

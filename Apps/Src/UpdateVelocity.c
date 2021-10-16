@@ -26,34 +26,31 @@ void Task_UpdateVelocity(void* p_arg){
             car_state->DesiredVelocity = car_state->CruiseControlVelocity;
             car_state->DesiredMotorCurrent = 1.0f;
 
-            car_state->RegenButtonMode = OFF;
+            car_state->RegenButtonMode = REGEN_OFF;
         }
         else if(car_state->CREnable == REGEN){
             switch(car_state->RegenButtonMode){
-                case OFF:
-                    car_state->CREnable = OFF;
+                case REGEN_OFF:
+                    car_state->CREnable = CR_OFF;
                     break;
                 case RATE1:
-                    car_state->CREnable = REGEN;
-                    car_state->RegenBrakeRate = 0.75;
+                    car_state->RegenBrakeRate = 3;
                     break;
                 case RATE2:
-                    car_state->CREnable = REGEN;
-                    car_state->RegenBrakeRate = 0.50;
+                    car_state->RegenBrakeRate = 2;
                     break;
                 case RATE3:
-                    car_state->CREnable = REGEN;
-                    car_state->RegenBrakeRate = 0.25;
+                    car_state->RegenBrakeRate = 1;
                     break;
             }
 
             if(car_state->IsRegenBrakingAllowed){
-                car_state->DesiredVelocity = car_state->CurrentVelocity*car_state->RegenBrakeRate;
+                car_state->DesiredVelocity = car_state->CurrentVelocity*(car_state->RegenBrakeRate>>2);
                 car_state->DesiredMotorCurrent = 1.0f;
             }
             else{
-                car_state->CREnable = OFF;
-                car_state->RegenButtonMode = OFF;
+                car_state->CREnable = CR_OFF;
+                car_state->RegenButtonMode = REGEN_OFF;
             }
         }
         else{
