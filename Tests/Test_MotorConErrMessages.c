@@ -34,22 +34,22 @@ int main(){
     car.MotorErrorCode.motorTempErr,car.MotorErrorCode.slipSpeedErr, car.MotorErrorCode.CCVelocityErr, 
     car.MotorErrorCode.overSpeedErr); 
 
-    test_data=0x00080044
+    test_data=0x00080044;
     printf("Error flags for motor temp, slipspeed, CC velocity are on. Overspeed off: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
     car.MotorErrorCode.motorTempErr,car.MotorErrorCode.slipSpeedErr, car.MotorErrorCode.CCVelocityErr, 
     car.MotorErrorCode.overSpeedErr); 
 
-    test_data=0x00080040
+    test_data=0x00080040;
     printf("Error flags for motor temp, slipspeed are on. CC velocity, Overspeed off: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
     car.MotorErrorCode.motorTempErr,car.MotorErrorCode.slipSpeedErr, car.MotorErrorCode.CCVelocityErr, 
     car.MotorErrorCode.overSpeedErr); 
 
-    test_data=0x00000040
+    test_data=0x00000040;
     printf("Error flags for motor temp on. Slipspeed, CC velocity, Overspeed off: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
     car.MotorErrorCode.motorTempErr,car.MotorErrorCode.slipSpeedErr, car.MotorErrorCode.CCVelocityErr, 
     car.MotorErrorCode.overSpeedErr); 
 
-    test_data=0x00000000
+    test_data=0x00000000;
     printf("Error flags for motor temp, slipspeed, CC velocity, Overspeed off: %d\n\r, %d\n\r, %d\n\r, %d\n\r",
     car->MotorErrorCode.motorTempErr,car->MotorErrorCode.slipSpeedErr, car->MotorErrorCode.CCVelocityErr,
     car->MotorErrorCode.overSpeedErr); 
