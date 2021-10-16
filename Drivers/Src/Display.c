@@ -16,11 +16,14 @@ static enum CommandString_t {
     CRUISE_ENABLE,
     CRUISE_SET,
     REGEN_ENABLE,
-    CAN_ERROR,
     VALUE,
     TEXT,
     SYSTEM,
-    PAGE
+    PAGE,
+    ERROR_NONE,
+    ERROR1,
+    ERROR2,
+    ERROR3,
 };
 
 // The command strings themselves
@@ -29,17 +32,22 @@ static char *CommandStrings[] = {
     "t1",
     "t2",
     "t3",
-    "t4",
     "val",
     "txt",
     "",
-    "page"
+    "page",
+    "t5",
+    "t6",
+    "t7",
+    "t8"
+
 };
 
 /**
  * Convert signed 32-bit integer to string
+ * Returns the length of the string
  */
-static void *to_charp(int32_t num, char *dest) {
+static int *to_charp(int32_t num, char *dest) {
     static char buf[12];
     bool neg = false;
     if (num < 0) {
@@ -55,6 +63,7 @@ static void *to_charp(int32_t num, char *dest) {
     if (num != 0) buf[--index] = num + '0';
     if (neg) buf[--index] = '-';
     strcpy(dest, buf+index);
+    return 12 - index; // return string length
 }
 
 /**
@@ -72,7 +81,11 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
     buf[len1] = '.';
     strcpy(buf+len1+1, attr);
     buf[len1+1+len2] = '=';
-    to_charp(val, buf+len1+len2+2);
+    int len3 = to_charp(val, buf+len1+len2+2);
+    buf[len1+len2+len3+1] = 0xFF; // Terminate command with 0xFFFFFF
+    buf[len1+len2+len3+2] = 0xFF;
+    buf[len1+len2+len3+3] = 0xFF;
+    buf[len1+len2+len3+4] = '\0';
 
     printf("Command is \"%s\"\n", (len1 == 0) ? buf+1 : buf);
 

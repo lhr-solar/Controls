@@ -16,6 +16,6 @@
 
 int main() {
     Display_Init();
-    //Display_SetMainView();
-    //Display_SetVelocity(13.46f);
+    Display_SetMainView();
+    Display_SetVelocity(13.46f);
 }
