@@ -45,13 +45,19 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
-ErrorStatus MotorController_Read(CANbuff *message, void *p_arg){
-    car_state_t *car_state = (car_state_t *) p_arg;
+ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
+    car_state_t *car_state = (car_state_t *) car;
     uint32_t id;
     uint8_t data[8] = {0};
     uint32_t length = BSP_CAN_Read(CAN_2, &id, data);
     uint32_t firstSum = 0;
     uint32_t secondSum = 0;
+
+    const uint32_t maskMotorTemp=1<<6; //check if motor temperature is an issue on bit 6
+    const uint32_t maskSSErr=1<<19; //check for slip or hall sequence position error on 19 bit
+    const uint32_t maskCCErr=1<<2; //checks velocity on 2 bit
+    const uint32_t maskOverSpeed=1<<24; //check if motor overshot max RPM on 24 bit
+
     if(length>0){
         message->id = id;
         //get first number (bits 0-31)
@@ -71,33 +77,29 @@ ErrorStatus MotorController_Read(CANbuff *message, void *p_arg){
         message->firstNum = firstSum;
         message->secondNum = secondSum;
 
-        //read first number (bits 0-31) to get motor error issues
-        uint32_t maskMotorTemp=64; //check if motor temperature is an issue
+        //read first number (bits 0-31) from CAN message to check motor error issue flags
         uint32_t motorTempError=maskMotorTemp & firstSum;
-        if(motorTempError==64)
+        if(motorTempError==1<<6)
         {
-             car_state->MotorErrorCode.motorTempErr = ON;
+             car.MotorErrorCode.motorTempErr = ON;
         }
 
-        uint32_t maskSSErr=524288; //check for slip or hall sequence position error on 19 bit
         uint32_t SSErr=maskSSErr & firstSum;
-        if(SSErr==524288)
+        if(SSErr==1<<19)
         {
-             car_state->MotorErrorCode.slipSpeedErr = ON;
+             car.MotorErrorCode.slipSpeedErr = ON;
         }
 
-        uint32_t maskCCErr=4; //checks velocity on 2 bit
         uint32_t CCErr=maskCCErr & firstSum;
-        if(CCErr==4)
+        if(CCErr==1<<2)
         {
-             car_state->MotorErrorCode.CCVelocityErr = ON;
+             car.MotorErrorCode.CCVelocityErr = ON;
         }
 
-        uint32_t maskOverSpeed=16777216; //check if motor overshot max RPM on 24 bit
         uint32_t motorOverSpeedErr=maskOverSpeed & firstSum;
-        if(motorOverSpeedErr==16777216)
+        if(motorOverSpeedErr==1<<24)
         {
-             car_state->MotorErrorCode.overSpeedErr = ON;
+             car.MotorErrorCode.overSpeedErr = ON;
         }
 
         return SUCCESS;
