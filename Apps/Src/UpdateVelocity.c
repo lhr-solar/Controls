@@ -45,7 +45,7 @@ void Task_UpdateVelocity(void* p_arg){
             }
 
             if(car_state->IsRegenBrakingAllowed){
-                car_state->DesiredVelocity = car_state->CurrentVelocity*(car_state->RegenBrakeRate>>2);
+                car_state->DesiredVelocity = (car_state->CurrentVelocity*car_state->RegenBrakeRate)/4;
                 car_state->DesiredMotorCurrent = 1.0f;
             }
             else{
