@@ -11,7 +11,7 @@
 #define MOTOR_CNCTR_PIN 2
 #define ARRAY_CNCTR_PIN 1 
 
-typedef enum {MOTOR=0, ARRAY, NUM_CONTACTORS} contactor_t;
+typedef enum {ARRAY=0, MOTOR, NUM_CONTACTORS} contactor_t;
 
 /**
  * @brief   Initializes contactors to be used

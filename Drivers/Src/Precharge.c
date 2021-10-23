@@ -4,6 +4,14 @@
 
 #define FILE_NAME DATA_PATH(PRECHARGE_CSV)
 
+void Precharges_Init(board_t board) {
+    if(board == ARRAY_PRECHARGE){
+        BSP_GPIO_Init(PRECHARGE_PORT, 1, 1); //Pins 0 and 3 in Port C are output (0b110)
+    }else if(board == MOTOR_PRECHARGE){
+        BSP_GPIO_Init(PRECHARGE_PORT, 8, 1); //Pins 0 and 3 in Port C are output (0b110)
+    }
+}
+
 /**
  * @brief writes the status (ON/OFF) of a board to a CSV file
  * 

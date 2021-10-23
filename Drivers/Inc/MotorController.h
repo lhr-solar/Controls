@@ -4,6 +4,7 @@
 #define __MOTORCONTROLLER_H
 
 #include <bsp.h>
+#include "BSP_CAN.h"
 
 typedef struct 
 {
