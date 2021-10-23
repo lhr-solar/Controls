@@ -14,7 +14,7 @@ void MotorController_Init(){
 }
 
 /**
- * @brief   Sends MOTOR DRIVE command on CAN2
+ * @brief   Sends MOTOR DRIVE command on CAN3
  * @param   newVelocity desired motor velocity setpoint in m/s
  * @param   motorCurrent desired motor current setpoint as a percentage of max current setting
  * @return  None
@@ -42,7 +42,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
 }
 
 /**
- * @brief   Reads most recent command from CAN2 bus
+ * @brief   Reads most recent command from CAN3 bus
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
