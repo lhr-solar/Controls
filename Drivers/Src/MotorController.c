@@ -5,12 +5,20 @@
 #define MAX_CAN_LEN 8
 
 /**
+ * BSP_CAN_INIT requires a tx and rx event handler, and this driver doesn't acutall require any tx/rx event handling.
+ * As such, this is a dummy function just to satisfy the BSP layer's constraints.
+*/
+static void CanFunc(){
+    return;
+}
+
+/**
  * @brief   Initializes the motor controller
  * @param   None
  * @return  None
  */ 
 void MotorController_Init(){
-    BSP_CAN_Init(CAN_2);
+    BSP_CAN_Init(CAN_3, &CanFunc, &CanFunc);
 }
 
 /**
@@ -38,7 +46,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
         i++;
     }
     
-    BSP_CAN_Write(CAN_2, MOTOR_DRIVE, data, MAX_CAN_LEN);
+    BSP_CAN_Write(CAN_3, MOTOR_DRIVE, data, MAX_CAN_LEN);
 }
 
 /**
@@ -49,7 +57,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
 ErrorStatus MotorController_Read(CANbuff *message){
     uint32_t id;
     uint8_t data[8] = {0};
-    uint32_t length = BSP_CAN_Read(CAN_2, &id, data);
+    uint32_t length = BSP_CAN_Read(CAN_3, &id, data);
     uint32_t firstSum = 0;
     uint32_t secondSum = 0;
     if(length>0){

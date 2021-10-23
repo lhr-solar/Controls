@@ -1,6 +1,13 @@
 #include "CANbus.h"
 #include "config.h"
 
+/**
+  * BSP_CAN_INIT requires a tx and rx event handler, and this driver doesn't acutall require any tx/rx event handling.
+  * As such, this is a dummy function just to satisfy the BSP layer's constraints.
+  */
+static void CanFunc(){
+    return;
+}
 
 /**
  * @brief   Initializes the CAN system
@@ -8,7 +15,7 @@
  * @return  None
  */
 void CANbus_Init(void) {
-    BSP_CAN_Init(CAN_1);
+    BSP_CAN_Init(CAN_1, &CanFunc, &CanFunc);
 }
 
 /**
