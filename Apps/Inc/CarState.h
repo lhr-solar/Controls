@@ -63,7 +63,7 @@ typedef struct{
  * Different modes of the regenerative braking
  * button
  */
-typedef enum{REGEN_OFF, RATE1, RATE2, RATE3} RegenMode;
+typedef enum{REGEN_OFF, RATE3, RATE2, RATE1} RegenMode;
 
 /**
  * Regen/Cruise Enable Enum
@@ -104,9 +104,6 @@ typedef struct {
     State ShouldMotorBeActivated;
 
     error_code_t ErrorCode;
-
-    
-
 } car_state_t;
 
 #endif

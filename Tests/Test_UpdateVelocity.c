@@ -19,10 +19,13 @@ void Task_UpdateRandomPedal(void* p_arg){
     while(1){    
         car_state->AccelPedalPercent = rand() % 100;
         
-        car_state->CruiseControlEnable = rand() % 2;
+        car_state->CREnable = rand() % 3;
+        if(car_state->CREnable == 1){
+            car_state->RegenButtonMode = rand() % 4;
+        }
         car_state->CruiseControlSet = rand() % 2;
 
-        printf("Accel: %d | CC Enable: %d | CC Set: %d\n", car_state->AccelPedalPercent, car_state->CruiseControlEnable, car_state->CruiseControlSet);
+        printf("Accel: %d | CR Enable: %d | CC Set: %d | Regen Rate: %f\n", car_state->AccelPedalPercent, car_state->CREnable, car_state->CruiseControlSet, car_state->RegenBrakeRate/4.0f);
         printf("desired velocity: %f, desired motor current: %f\n", car_state->DesiredVelocity, car_state->DesiredMotorCurrent);
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);

@@ -22,28 +22,31 @@ void Task_UpdateVelocity(void* p_arg){
         //Read global pedal percentage
         uint8_t pedalPercentage = car_state->AccelPedalPercent;
 
-        if(car_state->CREnable == CRUISE && car_state -> CruiseControlSet){
-            car_state->DesiredVelocity = car_state->CruiseControlVelocity;
-            car_state->DesiredMotorCurrent = 1.0f;
+        switch(car_state->RegenButtonMode){
+            case REGEN_OFF:
+                car_state->CREnable = CR_OFF;
+                car_state->RegenBrakeRate = 4;
+                break;
+            case RATE3:
+                car_state->RegenBrakeRate = 3;
+                break;
+            case RATE2:
+                car_state->RegenBrakeRate = 2;
+                break;
+            case RATE1:
+                car_state->RegenBrakeRate = 1;
+                break;
+        }
 
+        if(car_state->CREnable == CRUISE){
+            if(car_state -> CruiseControlSet){
+                car_state->DesiredVelocity = car_state->CruiseControlVelocity;
+                car_state->DesiredMotorCurrent = 1.0f;
+            }
             car_state->RegenButtonMode = REGEN_OFF;
         }
         else if(car_state->CREnable == REGEN){
-            switch(car_state->RegenButtonMode){
-                case REGEN_OFF:
-                    car_state->CREnable = CR_OFF;
-                    break;
-                case RATE1:
-                    car_state->RegenBrakeRate = 3;
-                    break;
-                case RATE2:
-                    car_state->RegenBrakeRate = 2;
-                    break;
-                case RATE3:
-                    car_state->RegenBrakeRate = 1;
-                    break;
-            }
-
+            
             if(car_state->IsRegenBrakingAllowed){
                 car_state->DesiredVelocity = (car_state->CurrentVelocity*car_state->RegenBrakeRate)/4;
                 car_state->DesiredMotorCurrent = 1.0f;
