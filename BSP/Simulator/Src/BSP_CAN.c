@@ -15,9 +15,11 @@
  *          an error if not
  * @param   bus the CAN line to initialize
  *          (not used for simulator)
+ * @param   txEvent function to be executed when transmitting
+ * @param   txEnd function to be executed when transmission over
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus) {
+void BSP_CAN_Init(CAN_t bus, void (*txEvent)(void), void(*txEnd)(void)) {
     if (access(FILE_NAME, F_OK) != 0) {
         // File doesn't exist if true
         perror(CAN_CSV);
