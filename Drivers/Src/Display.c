@@ -9,6 +9,9 @@ static const char *SEPERATOR = ".";
 static const char *ASSIGNMENT = "=";
 static const char *TERMINATOR = "\xff\xff\xff";
 
+// Color defintions for display
+static const uint16_t NEXTION_GREEN = 23275;
+
 static inline IsNextionFailure(uint32_t val) {
     return ((val & ~0x00FFFFFF) != (1 << 24));
 }

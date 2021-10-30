@@ -9,6 +9,7 @@
 #include "config.h"
 #include "Display.h"
 #include "Tasks.h"
+#include "stm32f4xx.h"
 #include <bsp.h>
 
 static OS_TCB Task1_TCB;
@@ -20,7 +21,7 @@ void Task1(void *p_arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
     CPU_TS ts;
-
+    /*
     OSTaskCreate(
         (OS_TCB*)&SendDisplay_TCB,
         (CPU_CHAR*)"SendDisplay",
@@ -36,10 +37,11 @@ void Task1(void *p_arg) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
+    */
 
     Display_Init();
     OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    Display_SetMainView(void);
+    Display_SetMainView();
     float vel = 13.7f;
     Display_SetVelocity(vel);
     while (1) {
