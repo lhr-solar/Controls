@@ -1,6 +1,6 @@
 #include "Switches.h"
 
-
+//TODO: make threadsafe? use mutex locks on SPI Writes/reads?
 
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
@@ -13,6 +13,8 @@
  * @return  None
  */ 
 void Switches_Init(void){
+    #define IODIRA_INIT 0xFF
+    #define IODIRB_INIT 0x80
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0x00};
@@ -20,9 +22,10 @@ void Switches_Init(void){
     BSP_SPI_Write(initTxBuf,3);
     do{
         BSP_SPI_Read(initRxBuf, 2);
-    }while(initRxBuf[1] == SPI_IODIRA);
+    }while(initRxBuf[1] == SPI_IODIRA); //keep reading until we get a result that's not what was written by line 20
+
     //OR Result of IODIRA read to set all to 1, then write it back to IODIRA
-    initTxBuf[2] = initRxBuf[1]|0xFF;
+    initTxBuf[2] = initRxBuf[1]|IODIRA_INIT;
     initTxBuf[0]=SPI_OPCODE_W;
     BSP_SPI_Write(initTxBuf,3);
 
@@ -35,7 +38,7 @@ void Switches_Init(void){
         BSP_SPI_Read(initRxBuf, 2);
     }while(initRxBuf[1] == SPI_IODIRB);
     //OR IODIRB to set pin 7 to input and write it back
-    initTxBuf[2] = initRxBuf[1]|0x80;
+    initTxBuf[2] = initRxBuf[1]|IODIRB_INIT;
     initTxBuf[0]=SPI_OPCODE_W;
     BSP_SPI_Write(initTxBuf,3);
 
