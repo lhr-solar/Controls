@@ -3,8 +3,18 @@
 #ifndef __TASKS_H
 #define __TASKS_H
 
+#include "common.h"
 #include "os.h"
+#include "common.h"
 #include "CarState.h"
+
+/**
+ * Task initialization macro
+ * @param task name of the task
+ * @param prio the task's priority
+ * @param arg the argument to pass to the task
+ * @param err the local OS_ERR variable
+ */
 
 /**
  * Priority Definitions
@@ -135,6 +145,8 @@ extern OS_SEM MotorConnectionChange_Sem4;
 /**
  * Global Variables
  */
+
+
 // TODO: Put all global state variables here
 
 
