@@ -90,24 +90,6 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
     BSP_UART_Write(UART_2, number, strlen(number)); // Send the value
     BSP_UART_Write(UART_2, TERMINATOR, strlen(TERMINATOR));
 
-/*
-    // construct the string "obj.attr=val"
-    strcpy(buf, obj);
-    buf[len1] = '.';
-    strcpy(buf+len1+1, attr);
-    buf[len1+1+len2] = '=';
-    int len3 = to_charp(val, buf+len1+len2+2);
-    buf[len1+len2+len3+1] = 0xFF; // Terminate command with 0xFFFFFF
-    buf[len1+len2+len3+2] = 0xFF;
-    buf[len1+len2+len3+3] = 0xFF;
-    buf[len1+len2+len3+4] = '\0';
-
-    //printf("Command is \"%s\"\n", (len1 == 0) ? buf+1 : buf);
-
-    // Get rid of extraneous period in global attribute
-    BSP_UART_Write(UART_2, (len1 == 0) ? buf+1 : buf, strlen(buf));
-    */
-
     BSP_UART_Read(UART_2, buf);
     int ret = *((uint32_t *) buf);
     return (IsNextionFailure(ret)) ? ERROR : SUCCESS;
