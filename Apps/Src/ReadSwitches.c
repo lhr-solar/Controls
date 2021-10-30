@@ -10,42 +10,49 @@
  * Semaphores when Switches state changes. Also updates a switches global defined in StateTypes.h, declared in Tasks.c and externed in Tasks.h
 */
 void Task_ReadSwitches (void* p_arg) {
-    car_state_t *prevCarState= (car_state_t*)p_arg;
-    switch_states_t *prevSwitchStates = &(prevCarState->SwitchStates); //pointer to global switchstates
+    //Get Global States
+    car_state_t *CarState= (car_state_t*)p_arg;
+    switch_states_t *globalSwitchStates = &(CarState->SwitchStates);
     switch_states_t currSwitchStates; //holds states read from driver reads
+    Switches_Init();
 
     // load newSwitchStates
     currSwitchStates = (switch_states_t){
-        Switches_Read(CRUZ_SW),
-        Switches_Read(CRUZ_EN),
-        Switches_Read(HZD_SW),
-        Switches_Read(FWD_SW),
-        Switches_Read(HEADLIGHT_SW),
-        Switches_Read(LEFT_SW),
-        Switches_Read(RIGHT_SW),
-        Switches_Read(REGEN_SW),
         Switches_Read(IGN_1),
         Switches_Read(IGN_2),
-        Switches_Read(REV_SW),
+        (velocity_switches_t){
+            Switches_Read(CRUZ_SW),
+            Switches_Read(CRUZ_EN),
+            Switches_Read(FWD_SW),
+            Switches_Read(REV_SW),
+            Switches_Read(REGEN_SW)
+        },
+        (light_switches_t){
+            Switches_Read(LEFT_SW),
+            Switches_Read(RIGHT_SW),
+            Switches_Read(HEADLIGHT_SW),
+            Switches_Read(HZD_SW)
+        }
     };
-
-    Switches_Init();
     OS_ERR err;
     static bool arrayConThreadSpawned = false; //these booleans need to be persistent
     static bool motorConThreadSpawned = false;
+
     while(1){
         //Spawns arrayConnection thread and MotorConnection thread when it is appropriate
         uint8_t ignStates = 0x00; //holds states read from Switches Driver
         uint8_t ignStored = 0x00; //holds states stored in globals
+
         ignStates|=((currSwitchStates.IGN_2&1)<<1); //shift IGN_2 over 1 and set it in ignStates
         ignStates|=(currSwitchStates.IGN_1&1);
-        ignStored|=((prevSwitchStates->IGN_2&1)<<1);
-        ignStored|=(prevSwitchStates->IGN_1&1);
-        if (ignStored!=ignStates){
+        ignStored|=((globalSwitchStates->IGN_2&1)<<1);
+        ignStored|=(globalSwitchStates->IGN_1&1);
+
+        if (ignStored!=ignStates){ //new ignition state detected
             switch(ignStates){
                 case 0x00:
-                    prevCarState->ShouldArrayBeActivated = 0;
-                    prevCarState->ShouldMotorBeActivated = 0;
+                    CarState->ShouldArrayBeActivated = 0;
+                    CarState->ShouldMotorBeActivated = 0;
                     OSSemPost(
                         &ArrayConnectionChange_Sem4,
                         (OS_OPT) OS_OPT_POST_ALL,
@@ -58,22 +65,22 @@ void Task_ReadSwitches (void* p_arg) {
                     );
                 case 0x01:
                 //IGN1 is on
-                    prevCarState->ShouldArrayBeActivated = 1;
-                    prevCarState->ShouldMotorBeActivated = 0;
+                    CarState->ShouldArrayBeActivated = 1;
+                    CarState->ShouldMotorBeActivated = 0;
                     if (arrayConThreadSpawned==false){ 
                         OSTaskCreate(
                             (OS_TCB*)&ArrayConnection_TCB,
                             (CPU_CHAR*)"Array Connection",
                             (OS_TASK_PTR)Task_ArrayConnection,
                             (void*)NULL,
-                            (OS_PRIO)10,
+                            (OS_PRIO)TASK_ARRAY_CONNECTION_PRIO,
                             (CPU_STK*)ArrayConnection_Stk,
-                            (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-                            (CPU_STK_SIZE)TASK_ARRAY_CONNECTION_STACK_SIZE,
+                            (CPU_STK_SIZE)sizeof(ArrayConnection_Stk)/10,
+                            (CPU_STK_SIZE)sizeof(ArrayConnection_Stk),
                             (OS_MSG_QTY)NULL,
                             (OS_TICK)NULL,
                             (void*)NULL,
-                            (OS_OPT)(OS_OPT_TASK_STK_CLR),
+                            (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
                             (OS_ERR*)&err
                         );
                         arrayConThreadSpawned=true;
@@ -81,8 +88,8 @@ void Task_ReadSwitches (void* p_arg) {
                 
                 case 0x03:
                 //Both are on
-                    prevCarState->ShouldArrayBeActivated = 1;
-                    prevCarState->ShouldMotorBeActivated = 1;
+                    CarState->ShouldArrayBeActivated = 1;
+                    CarState->ShouldMotorBeActivated = 1;
                     if(arrayConThreadSpawned==false){ 
                         OSTaskCreate(
                             (OS_TCB*)&ArrayConnection_TCB,
@@ -91,12 +98,12 @@ void Task_ReadSwitches (void* p_arg) {
                             (void*)NULL,
                             (OS_PRIO)TASK_ARRAY_CONNECTION_PRIO,
                             (CPU_STK*)ArrayConnection_Stk,
-                            (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-                            (CPU_STK_SIZE)TASK_ARRAY_CONNECTION_STACK_SIZE,
+                            (CPU_STK_SIZE)sizeof(ArrayConnection_Stk)/10,
+                            (CPU_STK_SIZE)sizeof(ArrayConnection_Stk),
                             (OS_MSG_QTY)NULL,
                             (OS_TICK)NULL,
                             (void*)NULL,
-                            (OS_OPT)(OS_OPT_TASK_STK_CLR),
+                            (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
                             (OS_ERR*)&err
                         );
                         arrayConThreadSpawned=true;
@@ -109,8 +116,8 @@ void Task_ReadSwitches (void* p_arg) {
                             (void*)NULL,
                             (OS_PRIO)TASK_MOTOR_CONNECTION_PRIO,
                             (CPU_STK*)ArrayConnection_Stk,
-                            (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-                            (CPU_STK_SIZE)TASK_MOTOR_CONNECTION_STACK_SIZE,
+                            (CPU_STK_SIZE)sizeof(MotorConnection_Stk)/10,
+                            (CPU_STK_SIZE)sizeof(MotorConnection_Stk),
                             (OS_MSG_QTY)NULL,
                             (OS_TICK)NULL,
                             (void*)NULL,
@@ -127,25 +134,29 @@ void Task_ReadSwitches (void* p_arg) {
         
         //Signal LightsChange_Sem4 for UpdateLights Thread
         State curLightSwitches[]={
-            currSwitchStates.LEFT_SW,
-            currSwitchStates.RIGHT_SW,
-            currSwitchStates.HEADLIGHT_SW,
-            currSwitchStates.HZD_SW
+            currSwitchStates.lightSwitches.LEFT_SW,
+            currSwitchStates.lightSwitches.RIGHT_SW,
+            currSwitchStates.lightSwitches.HEADLIGHT_SW,
+            currSwitchStates.lightSwitches.HZD_SW
         }; 
+
         State prevLightSwitches[]={
-            prevSwitchStates->LEFT_SW,
-            prevSwitchStates->RIGHT_SW,
-            prevSwitchStates->HEADLIGHT_SW,
-            prevSwitchStates->HZD_SW
+            globalSwitchStates->lightSwitches.LEFT_SW,
+            globalSwitchStates->lightSwitches.RIGHT_SW,
+            globalSwitchStates->lightSwitches.HEADLIGHT_SW,
+            globalSwitchStates->lightSwitches.HZD_SW
         };       
         uint8_t lightSwitchStates = 0x00; //holds states read from Switches_Driver
         uint8_t lightSwitchStored = 0x00; //holds states stored in global
-        for(uint8_t i = 0; i<3; i++){
+        for(uint8_t i = 0; i<4; i++){
             lightSwitchStates |= (curLightSwitches[i]<<i);
             lightSwitchStored |= (prevLightSwitches[i]<<i);
         }
+        
         if(lightSwitchStored!=lightSwitchStates){
-            //if any of the bits dont match, LightsChange must get signaled       
+            //if any of the bits dont match, CarState needs to get updated and LightsChange must get signaled
+            //TODO: use memcpy to move currSwitchStates.lightSwitches into globalSwitchStates->lightSwitches
+            memcpy(&(globalSwitchStates->lightSwitches),&(currSwitchStates.lightSwitches),sizeof(currSwitchStates.lightSwitches));
             OSSemPost(
                 &LightsChange_Sem4,
                 (OS_OPT) OS_OPT_POST_ALL,
@@ -153,64 +164,40 @@ void Task_ReadSwitches (void* p_arg) {
             );
         }
 
-        //VelocityChange_Sem4
-        State readVelSwitches[] = {
-            currSwitchStates.CRUZ_SW,
-            currSwitchStates.CRUZ_EN,
-            currSwitchStates.FWD_SW,
-            currSwitchStates.REV_SW,
-            currSwitchStates.REGEN_SW
+        //DisplayChange_Sem4 + VelocityChangeSem4
+        State readVelDispSwitches[] = {
+            currSwitchStates.velDispSwitches.CRUZ_SW,
+            currSwitchStates.velDispSwitches.CRUZ_EN,
+            currSwitchStates.velDispSwitches.FWD_SW,
+            currSwitchStates.velDispSwitches.REV_SW,
+            currSwitchStates.velDispSwitches.REGEN_SW
         };
-        State storeVelSwitches[] = {
-            prevSwitchStates->CRUZ_SW,
-            prevSwitchStates->CRUZ_EN,
-            prevSwitchStates->FWD_SW,
-            prevSwitchStates->REV_SW,
-            prevSwitchStates->REGEN_SW
+        State storeVelDispSwitches[] = {
+            globalSwitchStates->velDispSwitches.CRUZ_SW,
+            globalSwitchStates->velDispSwitches.CRUZ_EN,
+            globalSwitchStates->velDispSwitches.FWD_SW,
+            globalSwitchStates->velDispSwitches.REV_SW,
+            globalSwitchStates->velDispSwitches.REGEN_SW
         };
-        uint8_t velStates = 0x00; //holds read states of switches in least sig 5 bits
-        uint8_t velStored = 0x00; //hold stored global states of velocity switches in least sig bits
-        for(uint8_t i = 0; i<5;i++){
-            velStates |=((readVelSwitches[i]&1)<<i);
-            velStored |=((storeVelSwitches[i]&1)<<i);
+        uint8_t velDispStates = 0x00;
+        uint8_t velDispStored = 0x00;
+        for(uint8_t i=0;i<3;i++){
+            velDispStates |= ((readVelDispSwitches[i])<<i);
+            velDispStored |= ((storeVelDispSwitches[i])<<i);
         }
-        if(velStates!=velStored){
-            //stored states and read states dont match up
+        if(velDispStates != velDispStored){ //if any of the states don't match up both sem4 needs a signal
+            //TODO: use memcpy to copy velDispSwitches of current to global
+            memcpy(&(globalSwitchStates->velDispSwitches),&(currSwitchStates.velDispSwitches),sizeof(currSwitchStates.velDispSwitches));
+            OSSemPost(
+                &DisplayChange_Sem4,
+                (OS_OPT) OS_OPT_POST_ALL,
+                (OS_ERR*)&err
+            );
             OSSemPost(
                 &VelocityChange_Sem4,
                 (OS_OPT) OS_OPT_POST_ALL,
                 (OS_ERR*)&err
             );
         }
-
-        //DisplayChange_Sem4
-        State readDispSwitches[] = {
-            currSwitchStates.CRUZ_EN,
-            currSwitchStates.CRUZ_SW,
-            currSwitchStates.REGEN_SW
-        };
-        State storeDispSwitches[] = {
-            prevSwitchStates->CRUZ_EN,
-            prevSwitchStates->CRUZ_SW,
-            prevSwitchStates->REGEN_SW
-        };
-        uint8_t dispStates = 0x00;
-        uint8_t dispStored = 0x00;
-        for(uint8_t i=0;i<3;i++){
-            dispStates |= ((readDispSwitches[i])<<i);
-            dispStored |= ((storeDispSwitches[i])<<i);
-        }
-        if(dispStates != dispStored){ //if any of the states don't match up sem4 needs a signal
-            OSSemPost(
-                &DisplayChange_Sem4,
-                (OS_OPT) OS_OPT_POST_ALL,
-                (OS_ERR*)&err
-            );
-        }
-
-
-        //set global state to match what was read
-        *prevSwitchStates = currSwitchStates; 
-
     }
 }
