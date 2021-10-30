@@ -3,6 +3,7 @@
 #ifndef __CAR_STATE_H
 #define __CAR_STATE_H
 
+#include "Switches.h"
 #include "common.h"
 #include "config.h"
 
