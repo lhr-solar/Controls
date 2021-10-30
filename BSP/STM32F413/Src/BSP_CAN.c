@@ -16,15 +16,15 @@ typedef struct _msg {
 #define FIFO_NAME msg_queue
 #include "fifo.h"
 
-static msg_queue_t gRxQueue;
+static msg_queue_t gRxQueue[2];
 
 // Required for receiving CAN messages
-static CanTxMsg gTxMessage;
-static CanRxMsg gRxMessage;
+static CanTxMsg gTxMessage[2];
+static CanRxMsg gRxMessage[2];
 
 // User parameters for CAN events
-static void (*gRxEvent)(void);
-static void (*gTxEnd)(void);
+static void (*gRxEvent[2])(void);
+static void (*gTxEnd[2])(void);
 
 
 void BSP_CAN1_Init();
@@ -40,8 +40,8 @@ void BSP_CAN3_Init();
 void BSP_CAN_Init(CAN_t bus, void (*rxEvent)(void), void (*txEnd)(void)) {
     
     // Configure event handles
-    gRxEvent  = rxEvent;
-    gTxEnd    = txEnd;
+    gRxEvent[bus]  = rxEvent;
+    gTxEnd[bus]    = txEnd;
     
     if (bus == CAN_1){
         BSP_CAN1_Init();
@@ -59,7 +59,7 @@ void BSP_CAN1_Init(){
     
 
     // Initialize the queue
-    gRxQueue = msg_queue_new();
+    gRxQueue[0] = msg_queue_new();
 
     /* CAN GPIOs configuration **************************************************/
 
@@ -119,17 +119,17 @@ void BSP_CAN1_Init(){
     //CAN_SlaveStartBank(CAN1, 0);
 
     /* Transmit Structure preparation */
-    gTxMessage.ExtId = 0x5;
-    gTxMessage.RTR = CAN_RTR_DATA;
-    gTxMessage.IDE = CAN_ID_STD;
-    gTxMessage.DLC = 1;
+    gTxMessage[0].ExtId = 0x5;
+    gTxMessage[0].RTR = CAN_RTR_DATA;
+    gTxMessage[0].IDE = CAN_ID_STD;
+    gTxMessage[0].DLC = 1;
 
     /* Receive Structure preparation */
-    gRxMessage.StdId = 0x00;
-    gRxMessage.ExtId = 0x00;
-    gRxMessage.IDE = CAN_ID_STD;
-    gRxMessage.DLC = 0;
-    gRxMessage.FMI = 0;
+    gRxMessage[0].StdId = 0x00;
+    gRxMessage[0].ExtId = 0x00;
+    gRxMessage[0].IDE = CAN_ID_STD;
+    gRxMessage[0].DLC = 0;
+    gRxMessage[0].FMI = 0;
 
     /* Enable FIFO 0 message pending Interrupt */
     CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
@@ -162,7 +162,7 @@ void BSP_CAN3_Init(){
 
 
     // Initialize the queue
-    gRxQueue = msg_queue_new();
+    gRxQueue[1] = msg_queue_new();
 
     /* CAN GPIOs configuration **************************************************/
 
@@ -222,17 +222,17 @@ void BSP_CAN3_Init(){
     //CAN_SlaveStartBank(CAN1, 0);
 
     /* Transmit Structure preparation */
-    gTxMessage.ExtId = 0x5;
-    gTxMessage.RTR = CAN_RTR_DATA;
-    gTxMessage.IDE = CAN_ID_STD;
-    gTxMessage.DLC = 1;
+    gTxMessage[1].ExtId = 0x5;
+    gTxMessage[1].RTR = CAN_RTR_DATA;
+    gTxMessage[1].IDE = CAN_ID_STD;
+    gTxMessage[1].DLC = 1;
 
     /* Receive Structure preparation */
-    gRxMessage.StdId = 0x00;
-    gRxMessage.ExtId = 0x00;
-    gRxMessage.IDE = CAN_ID_STD;
-    gRxMessage.DLC = 0;
-    gRxMessage.FMI = 0;
+    gRxMessage[1].StdId = 0x00;
+    gRxMessage[1].ExtId = 0x00;
+    gRxMessage[1].IDE = CAN_ID_STD;
+    gRxMessage[1].DLC = 0;
+    gRxMessage[1].FMI = 0;
 
     /* Enable FIFO 0 message pending Interrupt */
     CAN_ITConfig(CAN3, CAN_IT_FMP0, ENABLE);
@@ -255,10 +255,10 @@ void BSP_CAN3_Init(){
  */
 ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t length) {
     
-    gTxMessage.StdId = id;
-    gTxMessage.DLC = length;
+    gTxMessage[bus].StdId = id;
+    gTxMessage[bus].DLC = length;
 	for(int i = 0; i < length; i++){
-        gTxMessage.Data[i] = data[i];
+        gTxMessage[bus].Data[i] = data[i];
     }
 	
     ErrorStatus retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
@@ -276,13 +276,13 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
  */
 ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t *id, uint8_t *data) {
     // If the queue is empty, return err
-    if(msg_queue_is_empty(&gRxQueue)) {
+    if(msg_queue_is_empty(&gRxQueue[bus])) {
         return ERROR;
     }
     
     // Get the message
     msg_t msg;
-    msg_queue_get(&gRxQueue, &msg);
+    msg_queue_get(&gRxQueue[bus], &msg);
 
     // Transfer the message to the provided pointers
     for(int i = 0; i < 8; i++){
@@ -305,15 +305,15 @@ void CAN3_RX0_IRQHandler(){
         CAN_Receive(CAN3, CAN_FIFO0, &gRxMessage);
 
         msg_t rxMsg;
-        rxMsg.id = gRxMessage.StdId;
-        memcpy(&rxMsg.data[0], gRxMessage.Data, 8);
+        rxMsg.id = gRxMessage[1].StdId;
+        memcpy(&rxMsg.data[0], gRxMessage[1].Data, 8);
 
         // Place the message in the queue
-        if(msg_queue_put(&gRxQueue, rxMsg)) {
+        if(msg_queue_put(&gRxQueue[1], rxMsg)) {
             // If the queue was not already full...
             // Call the driver-provided function, if it is not null
-            if(gRxEvent != NULL) {
-                gRxEvent();
+            if(gRxEvent[1] != NULL) {
+                gRxEvent[1]();
             }
         } else {
             // If the queue is already full, then we can't really do anything else
@@ -334,15 +334,15 @@ void CAN1_RX0_IRQHandler(void) {
         CAN_Receive(CAN1, CAN_FIFO0, &gRxMessage);
 
         msg_t rxMsg;
-        rxMsg.id = gRxMessage.StdId;
-        memcpy(&rxMsg.data[0], gRxMessage.Data, 8);
+        rxMsg.id = gRxMessage[0].StdId;
+        memcpy(&rxMsg.data[0], gRxMessage[0].Data, 8);
 
         // Place the message in the queue
-        if(msg_queue_put(&gRxQueue, rxMsg)) {
+        if(msg_queue_put(&gRxQueue[0], rxMsg)) {
             // If the queue was not already full...
             // Call the driver-provided function, if it is not null
-            if(gRxEvent != NULL) {
-                gRxEvent();
+            if(gRxEvent[0] != NULL) {
+                gRxEvent[0]();
             }
         } else {
             // If the queue is already full, then we can't really do anything else
@@ -355,6 +355,7 @@ void CAN1_RX0_IRQHandler(void) {
     #endif
 }
 
+/*
 void CAN2_RX0_IRQHandler(void) {
     #ifdef RTOS
     CPU_SR_ALLOC();
@@ -388,6 +389,7 @@ void CAN2_RX0_IRQHandler(void) {
     OSIntExit();      // Signal to uC/OS
     #endif
 }
+*/
 
 void CAN1_TX_IRQHandler(void) {
     #ifdef RTOS
@@ -401,7 +403,7 @@ void CAN1_TX_IRQHandler(void) {
     CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
 
     // Call the function provided
-    gTxEnd();
+    gTxEnd[0]();
 
     #ifdef RTOS
     OSIntExit();      // Signal to uC/OS
