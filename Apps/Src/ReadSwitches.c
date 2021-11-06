@@ -84,8 +84,13 @@ void Task_ReadSwitches (void* p_arg) {
                             (OS_ERR*)&err
                         );
                         arrayConThreadSpawned=true;
+                    } else {
+                        OSSemPost(
+                            &ArrayConnectionChange_Sem4,
+                            (OS_OPT) OS_OPT_POST_ALL,
+                            (OS_ERR*) &err
+                        );
                     }
-                
                 case 0x03:
                 //Both are on
                     CarState->ShouldArrayBeActivated = 1;
@@ -107,7 +112,13 @@ void Task_ReadSwitches (void* p_arg) {
                             (OS_ERR*)&err
                         );
                         arrayConThreadSpawned=true;
-                    }
+                    } else {
+                        OSSemPost(
+                            &ArrayConnectionChange_Sem4,
+                            (OS_OPT) OS_OPT_POST_ALL,
+                            (OS_ERR*) &err
+                        );
+		            }
                     if(motorConThreadSpawned==false){
                         OSTaskCreate(
                             (OS_TCB*)&MotorConnection_TCB,
@@ -125,7 +136,13 @@ void Task_ReadSwitches (void* p_arg) {
                             (OS_ERR*)&err
                         );
                         motorConThreadSpawned=true;
-                    };
+                    }else {
+                        OSSemPost(
+                            &MotorConnectionChange_Sem4,
+                            (OS_OPT) OS_OPT_POST_ALL,
+                            (OS_ERR*) &err
+                        );
+                    }
                 case 0x02:
                     return -1; //Shouldn't happen - error case; only IGN2 is on
             }
