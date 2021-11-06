@@ -16,16 +16,20 @@ void Task_UpdateRandomPedal(void* p_arg){
     OS_ERR err;
 
     car_state->CruiseControlVelocity = 20;
+    car_state->IsRegenBrakingAllowed = ON;
     while(1){    
         car_state->AccelPedalPercent = rand() % 100;
         
         car_state->CRSet = rand() % 3;
-        if(car_state->CRSet == 1){
-            car_state->RegenButtonMode = rand() % 4;
-        }
+        car_state->RegenButtonMode = rand() % 4;
         car_state->CruiseControlEnable = rand() % 2;
 
-        printf("Accel: %d | CR Set: %d | CC Enable: %d | Regen Rate: %f\n", car_state->AccelPedalPercent, car_state->CRSet, car_state->CruiseControlEnable, car_state->RegenBrakeRate/4.0f);
+        if (car_state->CRSet == REGEN && rand() % 2) {
+            car_state->AccelPedalPercent = 0;
+            car_state->BrakePedalPercent = 3;
+        }
+
+        printf("Accel: %d | CR Set: %d | CC Enable: %d | Regen Button Mode: %d |Regen Rate: %f\n", car_state->AccelPedalPercent, car_state->CRSet, car_state->CruiseControlEnable, car_state->RegenButtonMode, car_state->RegenBrakeRate/4.0f);
         printf("desired velocity: %f, desired motor current: %f\n", car_state->DesiredVelocity, car_state->DesiredMotorCurrent);
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
