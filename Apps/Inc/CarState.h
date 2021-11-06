@@ -66,10 +66,10 @@ typedef struct{
 typedef enum{REGEN_OFF, RATE3, RATE2, RATE1} RegenMode;
 
 /**
- * Regen/Cruise Enable Enum
+ * Regen/Cruise Set Enum
  */
 
-typedef enum{CR_OFF, REGEN, CRUISE} CruiseRegenEnable;
+typedef enum{ACCEL, REGEN, CRUISE} CruiseRegenSet;
 
 
 /**
@@ -93,8 +93,8 @@ typedef struct {
     switch_states_t SwitchStates;
     blinker_states_t BlinkerStates;
 
-    CruiseRegenEnable CREnable;    
-    State CruiseControlSet;
+    CruiseRegenSet CRSet;
+    State CruiseControlEnable;
     
     int RegenBrakeRate;
     State IsRegenBrakingAllowed;

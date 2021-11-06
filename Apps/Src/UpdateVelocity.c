@@ -22,28 +22,18 @@ void Task_UpdateVelocity(void* p_arg){
         //Read global pedal percentage
         uint8_t pedalPercentage = car_state->AccelPedalPercent;
 
-        if(car_state->CREnable == CRUISE){
-            if(car_state->IsRegenBrakingAllowed){
-                if(car_state -> CruiseControlSet){
-                    car_state->DesiredVelocity = car_state->CurrentVelocity;
-                    car_state->DesiredMotorCurrent = 1.0f;
-                }
-                else{
+        if(car_state -> IsRegenBrakingAllowed && car_state -> BrakePedalPercent < 5 && car_state -> AccelPedalPercent < 5){
+            if(car_state -> CruiseControlEnable){
+                if(car_state -> CRSet == CRUISE){
                     car_state->DesiredVelocity = car_state->CruiseControlVelocity;
                     car_state->DesiredMotorCurrent = 1.0f;
                 }
             }
-            else{
-                car_state->CREnable = CR_OFF;
-                car_state->RegenButtonMode = REGEN_OFF;
-            }
-        }
-        else if(car_state->CREnable == REGEN){
-            
-            if(car_state->IsRegenBrakingAllowed){
+
+            if(car_state -> CRSet == REGEN){
                 switch(car_state->RegenButtonMode){
                     case REGEN_OFF:
-                        car_state->CREnable = CR_OFF;
+                        car_state->CRSet = ACCEL;
                         car_state->RegenBrakeRate = 4;
                         break;
                     case RATE3:
@@ -59,15 +49,19 @@ void Task_UpdateVelocity(void* p_arg){
                 car_state->DesiredVelocity = (car_state->CurrentVelocity*car_state->RegenBrakeRate)/4;
                 car_state->DesiredMotorCurrent = 1.0f;
             }
-            else{
-                car_state->CREnable = CR_OFF;
-                car_state->RegenButtonMode = REGEN_OFF;
-            }
         }
         else{
-            car_state->DesiredVelocity = MAX_VELOCITY;
-            car_state->DesiredMotorCurrent = convertPedaltoMotorPercent(pedalPercentage);
+            car_state -> CRSet = ACCEL;
+            car_state -> CruiseControlEnable = OFF;
         }
+
+        if(car_state -> CRSet == ACCEL){
+            car_state -> DesiredVelocity = MAX_VELOCITY;
+            car_state -> DesiredMotorCurrent = convertPedaltoMotorPercent(pedalPercentage);
+        }
+
+
+
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
         
