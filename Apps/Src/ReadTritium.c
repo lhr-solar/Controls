@@ -5,6 +5,8 @@
 void Task_ReadTritium(void* p_arg) {
 
 	OS_ERR err;
+	
+	car_state_t *car_state = (car_state_t *) p_arg;
 
 	MotorController_Init();
 
@@ -18,9 +20,12 @@ void Task_ReadTritium(void* p_arg) {
 			OSQPost(&CANBus_MsgQ, (void *) &buf, sizeof(buf), OS_OPT_POST_FIFO, &err);
 			
 			if (err != OS_ERR_NONE) {
-				// TODO: error handling
+        	    car_state->ErrorCode.ReadTritiumErr = ON;
 			}
 		}
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+		if (err != OS_ERR_NONE) {
+			car_state->ErrorCode.ReadTritiumErr = ON;
+		}
 	}
 }
