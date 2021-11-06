@@ -23,14 +23,11 @@ void Task_UpdateVelocity(void* p_arg){
         uint8_t pedalPercentage = car_state->AccelPedalPercent;
 
         if(car_state -> IsRegenBrakingAllowed && car_state -> BrakePedalPercent < 5 && car_state -> AccelPedalPercent < 5){
-            if(car_state -> CruiseControlEnable){
-                if(car_state -> CRSet == CRUISE){
-                    car_state->DesiredVelocity = car_state->CruiseControlVelocity;
-                    car_state->DesiredMotorCurrent = 1.0f;
-                }
+            if(car_state -> CruiseControlEnable && car_state -> CRSet == CRUISE){
+                car_state->DesiredVelocity = car_state->CruiseControlVelocity;
+                car_state->DesiredMotorCurrent = 1.0f;
             }
-
-            if(car_state -> CRSet == REGEN){
+            else if(car_state -> CRSet == REGEN){
                 switch(car_state->RegenButtonMode){
                     case REGEN_OFF:
                         car_state->CRSet = ACCEL;
