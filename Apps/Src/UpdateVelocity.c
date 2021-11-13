@@ -20,9 +20,6 @@ void Task_UpdateVelocity(void* p_arg) {
 
     //Set desired velocity to 0
     car_state->DesiredVelocity = 0;
-    int time =0;
-    float velInit=0;
-    float initcurrent=0;
     while(1) {
         // Regen or cruise control mode require regen to be enabled and no pedals being touched
         if(car_state->IsRegenBrakingAllowed && car_state->BrakePedalPercent < 5 && car_state->AccelPedalPercent < 5) {
