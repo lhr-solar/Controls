@@ -5,7 +5,7 @@
 
 #define NEXTION_INSTRUCTION_SUCCESSFUL 0x01ffffff
 
-static const char *SEPERATOR = ".";
+static const char *DELIMITER = ".";
 static const char *ASSIGNMENT = "=";
 static const char *TERMINATOR = "\xff\xff\xff";
 
@@ -85,7 +85,7 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
     // If not modifying a global, send obj
     if (len1 != 0) {
         BSP_UART_Write(UART_2, obj, len1);
-        BSP_UART_Write(UART_2, SEPERATOR, 1);
+        BSP_UART_Write(UART_2, DELIMITER, 1);
     }
 
     BSP_UART_Write(UART_2, attr, len2); // Send the attribute
