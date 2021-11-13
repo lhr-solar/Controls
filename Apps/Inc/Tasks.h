@@ -57,7 +57,7 @@
 /**
  * Task Prototypes
  */
-void Task_SendTritium(void* p_arg);
+void Task_SendTritium(void* p_arg); 
 
 void Task_UpdateVelocity(void* p_arg);
 
@@ -140,6 +140,7 @@ extern OS_SEM ActivateMotor_Sem4;
 extern OS_SEM BlinkLight_Sem4;
 extern OS_SEM SendCarCAN_Sem4;
 extern OS_SEM ArrayConnectionChange_Sem4;
+extern OS_SEM MotorConnectionChange_Sem4;
 
 /**
  * Global Variables
