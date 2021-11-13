@@ -56,7 +56,7 @@ void Task_UpdateVelocity(void* p_arg) {
 
         if(car_state->CRSet == ACCEL) {
             car_state->DesiredVelocity = MAX_VELOCITY;
-            car_state->DesiredMotorCurrent = convertPedaltoMotorPercent(pedalPercentage);
+            car_state->DesiredMotorCurrent = convertPedaltoMotorPercent(car_state->AccelPedalPercent);
         }
 
         // Delay of few milliseconds (10)
