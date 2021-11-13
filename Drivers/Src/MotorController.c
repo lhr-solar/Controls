@@ -108,11 +108,14 @@ ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
                 {
                     car->MotorErrorCode.overSpeedErr = ON;
                 }
+                break;
             }
             case MOTOR_DRIVE: {
                 convert.n = secondSum;
                 car->CurrentVelocity = convert.f;
+                break;
             }
+            default: break;
         }
 
         return SUCCESS;
