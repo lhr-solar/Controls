@@ -29,12 +29,12 @@ void Task_UpdateLights(void* p_arg){
             Lights_Set(Headlight_ON,OFF);
         }
 
-        if(GlobalLightSwitches->HZD_SW == ON){
-            //TODO: Signal BlinkLights Sem4
-        } else if (GlobalLightSwitches->LEFT_SW==ON){
-            //TODO: Signal BlinkLights Sem4
-        } else if (GlobalLightSwitches->RIGHT_SW==ON){
-            //TODO: Signal BlinkLights Sem4
+        if(GlobalLightSwitches->HZD_SW == ON || GlobalLightSwitches->LEFT_SW == ON || GlobalLightSwitches->RIGHT_SW ==ON){
+            OSSemPost(
+                &BlinkLight_Sem4,
+                OS_OPT_POST_ALL,
+                &err
+            );
         } else {
             Lights_Set(LEFT_BLINK,OFF);
             Lights_Set(RIGHT_BLINK,OFF);
