@@ -3,6 +3,7 @@
 
 /* Converts accelerator pedal percentage to a decimal */
 const float pedalToPercent[] = {
+    0.00f,
     0.01f,
     0.02f,
     0.03f,

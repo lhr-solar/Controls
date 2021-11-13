@@ -1,5 +1,8 @@
 #include "Switches.h"
 
+#define IODIRA_INIT 0xFF
+#define IODIRB_INIT 0x80
+
 //TODO: make threadsafe? use mutex locks on SPI Writes/reads?
 
 
@@ -13,8 +16,6 @@
  * @return  None
  */ 
 void Switches_Init(void){
-    #define IODIRA_INIT 0xFF
-    #define IODIRB_INIT 0x80
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0x00};
