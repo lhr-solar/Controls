@@ -27,13 +27,11 @@ void Task_SendDisplay(void *p_arg) {
     car_state_t *car = (car_state_t *) p_arg;
     OS_ERR err;
 
-    Display_SetMainView();
+    Display_Init();
+
+    Display_SetPrechargeView();
 
     while (1) {
-        // Get velocity in deci-meters per second
-        int currentVelocity = floorf(car->CurrentVelocity * 10.0f);
-        State cruiseEnable = car->CruiseControlEnable;
-        CruiseRegenSet cruiseRegen = car->CRSet;
 
         char *errors[6]; // Up to 6 errors possible
         size_t errorCount = 0;
@@ -60,12 +58,22 @@ void Task_SendDisplay(void *p_arg) {
         }
 
         // If the contactors are not yet enabled, we're probably still in precharge
-        // Otherwise, changed to the drive view
+        // Otherwise, changed to the main view
         if (Contactors_Get(MOTOR) == ON) {
-            // Set drive view
-            // update velocity
-            // update cruise status
+            Display_SetMainView(); // Make sure we're in the main view first
+            Display_SetVelocity(car->CurrentVelocity);
+            Display_CruiseEnable(car->CruiseControlEnable);
+            Display_CruiseSet(car->CRSet == CRUISE ? ON : OFF);
+
             // update error display
+            // TODO: if there are no errors, change color to green and display "No Errors"
+            int i = 0;
+            for (; i < errorCount; i++) {
+                Display_SetError(i, errors[i]);
+            }
+            for (; i<6; i++) {
+                Display_SetError(i, ""); // Clear unsused error slots
+            }
         }
 
         OSTimeDlyHMSM(0, 0, 0, 33, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 30 fps
