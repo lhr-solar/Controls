@@ -6,5 +6,6 @@
 #include "Tasks.h"
 
 #include "Display.h"
+#include "Contactors.h"
 
 #endif
