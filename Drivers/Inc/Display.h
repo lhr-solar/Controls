@@ -8,6 +8,8 @@
 #ifndef __DISPLAY_H
 #define __DISPLAY_H
 
+#include "common.h"
+
 /*
  * Initialize the Nextion display
  */
@@ -16,8 +18,12 @@ void Display_Init();
 /**
  * Value setting subroutines
  */
-ErrorStatus Display_SetVelocity(float vel);
 ErrorStatus Display_SetMainView(void);
+ErrorStatus Display_SetPrechargeView(void);
 
+ErrorStatus Display_CruiseEnable(State on);
+ErrorStatus Display_CruiseSet(State on);
+ErrorStatus Display_SetVelocity(float vel);
+ErrorStatus Display_SetError(int idx, char *err);
 
 #endif
