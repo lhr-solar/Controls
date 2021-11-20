@@ -7,7 +7,7 @@
 static GPIO_TypeDef* GPIO_GetPort(port_t port){
  	const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
 
-	return gpio_mapping[port];
+	return (GPIO_TypeDef *) gpio_mapping[port];
 
 }
 
