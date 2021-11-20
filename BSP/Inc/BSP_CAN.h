@@ -11,7 +11,7 @@
 #include "common.h"
 #include <bsp.h>
 
-typedef enum {CAN_1=0, CAN_2, NUM_CAN} CAN_t;
+typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
 
 /**
  * @brief   Initializes both CAN lines to
