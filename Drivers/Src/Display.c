@@ -10,7 +10,10 @@ static const char *ASSIGNMENT = "=";
 static const char *TERMINATOR = "\xff\xff\xff";
 
 // Color defintions for display
-static const uint16_t NEXTION_GREEN = 23275;
+static const uint16_t NEXTION_GREEN = 2016;
+static const uint16_t NEXTION_RED = 63488;
+static const uint16_t NEXTION_DARK_GREY = 23275;
+static const uint16_t NEXTION_BURNT_ORANGE = 51872;
 
 static inline IsNextionFailure(uint32_t val) {
     return ((val & ~0x00FFFFFF) != (1 << 24));
@@ -27,10 +30,12 @@ static enum CommandString_t {
     TEXT,
     SYSTEM,
     PAGE,
-    ERROR_NONE,
+    ERROR0,
     ERROR1,
     ERROR2,
     ERROR3,
+    ERROR4,
+    ERROR5
 };
 
 // The command strings themselves
@@ -43,11 +48,12 @@ static char *CommandStrings[] = {
     "txt",
     "",
     "page",
+    "t4",
     "t5",
     "t6",
     "t7",
-    "t8"
-
+    "t8",
+    "t9"
 };
 
 /**
