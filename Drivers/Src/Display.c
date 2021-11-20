@@ -12,6 +12,7 @@ static const char *TERMINATOR = "\xff\xff\xff";
 // Color defintions for display
 static const uint16_t NEXTION_GREEN = 2016;
 static const uint16_t NEXTION_RED = 63488;
+static const uint16_t NEXTION_LIGHT_GREY = 42260;
 static const uint16_t NEXTION_DARK_GREY = 23275;
 static const uint16_t NEXTION_BURNT_ORANGE = 51872;
 
@@ -28,6 +29,7 @@ static enum CommandString_t {
     REGEN_ENABLE,
     VALUE,
     TEXT,
+    PCO,
     SYSTEM,
     PAGE,
     ERROR0,
@@ -46,6 +48,7 @@ static char *CommandStrings[] = {
     "t3",
     "val",
     "txt",
+    "pco",
     "",
     "page",
     "t4",
@@ -117,8 +120,39 @@ void Display_Init() {
  * Set the displayed velocity to vel 
  */
 ErrorStatus Display_SetVelocity(float vel) {
-    int32_t vel_fix = (uint32_t) floor(vel * 10.0f);
+    int32_t vel_fix = (uint32_t) floorf(vel * 10.0f);
     return updateValue(VELOCITY, VALUE, vel_fix);
+}
+
+/**
+ * Update the cruise enable light on the display based on the given state
+ */
+ErrorStatus Display_CruiseEnable(State on) {
+    if (on == ON) {
+        return updateValue(CRUISE_ENABLE, PCO, NEXTION_GREEN);
+    } else {
+        return updateValue(CRUISE_ENABLE, PCO, NEXTION_LIGHT_GREY);
+    }
+}
+
+/**
+ * Update the cruise set light on the display based on the given state
+ */
+ErrorStatus Display_CruiseSet(State on) {
+    if (on == ON) {
+        return updateValue(CRUISE_SET, PCO, NEXTION_GREEN);
+    } else {
+        return updateValue(CRUISE_SET, PCO, NEXTION_LIGHT_GREY);
+    }
+}
+
+/**
+ * Set ERROR<idx> to err
+ * If err is an empty string, then the error will be cleared
+ */
+ErrorStatus Display_SetError(int idx, char *err) {
+    if (idx < 0 || idx > 5) return ERROR; // Index out of bounds
+    return updateValue(ERROR0 + idx, TEXT, 0);
 }
 
 
@@ -127,4 +161,11 @@ ErrorStatus Display_SetVelocity(float vel) {
  */
 ErrorStatus Display_SetMainView(void) {
     return updateValue(SYSTEM, PAGE, 1);
+}
+
+/**
+ * Set the display back to the precharge view
+ */
+ErrorStatus Display_SetPrechargeView(void) {
+    return updateValue(SYSTEM, PAGE, 0);
 }
