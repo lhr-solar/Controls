@@ -83,7 +83,7 @@ static int *to_charp(int32_t num, char *dest) {
 /**
  * Sets an object's attribute to a value
  */
-static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandString_t attr_index, int32_t val) {
+static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandString_t attr_index, char *msg, int32_t val) {
     char buf[12]; // To store converted int
     char *number = to_charp(val, buf); // Convert integer to string
     char *obj = CommandStrings[obj_index];
@@ -93,16 +93,22 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
 
     // If not modifying a global, send obj
     if (len1 != 0) {
-        BSP_UART_Write(UART_2, obj, len1);
-        BSP_UART_Write(UART_2, DELIMITER, 1);
+        BSP_UART_Write(UART_3, obj, len1);
+        BSP_UART_Write(UART_3, DELIMITER, 1);
     }
 
-    BSP_UART_Write(UART_2, attr, len2); // Send the attribute
-    BSP_UART_Write(UART_2, ASSIGNMENT, 1);
-    BSP_UART_Write(UART_2, number, strlen(number)); // Send the value
-    BSP_UART_Write(UART_2, TERMINATOR, strlen(TERMINATOR));
+    BSP_UART_Write(UART_3, attr, len2); // Send the attribute
+    BSP_UART_Write(UART_3, ASSIGNMENT, 1);
+    // If msg is valid, send it; otherwise send a converted number
+    if (msg != NULL) {
+        BSP_UART_Write(UART_3, msg, strlen(msg));
+    } else {
+        BSP_UART_Write(UART_3, number, strlen(number)); // Send the value
+    }
 
-    BSP_UART_Read(UART_2, buf);
+    BSP_UART_Write(UART_3, TERMINATOR, strlen(TERMINATOR));
+
+    BSP_UART_Read(UART_3, buf);
     int ret = *((uint32_t *) buf);
     return (IsNextionFailure(ret)) ? ERROR : SUCCESS;
 }
@@ -121,7 +127,7 @@ void Display_Init() {
  */
 ErrorStatus Display_SetVelocity(float vel) {
     int32_t vel_fix = (uint32_t) floorf(vel * 10.0f);
-    return updateValue(VELOCITY, VALUE, vel_fix);
+    return updateValue(VELOCITY, VALUE, NULL, vel_fix);
 }
 
 /**
@@ -129,9 +135,9 @@ ErrorStatus Display_SetVelocity(float vel) {
  */
 ErrorStatus Display_CruiseEnable(State on) {
     if (on == ON) {
-        return updateValue(CRUISE_ENABLE, PCO, NEXTION_GREEN);
+        return updateValue(CRUISE_ENABLE, PCO, NULL, NEXTION_GREEN);
     } else {
-        return updateValue(CRUISE_ENABLE, PCO, NEXTION_LIGHT_GREY);
+        return updateValue(CRUISE_ENABLE, PCO, NULL, NEXTION_LIGHT_GREY);
     }
 }
 
@@ -140,9 +146,9 @@ ErrorStatus Display_CruiseEnable(State on) {
  */
 ErrorStatus Display_CruiseSet(State on) {
     if (on == ON) {
-        return updateValue(CRUISE_SET, PCO, NEXTION_GREEN);
+        return updateValue(CRUISE_SET, PCO, NULL, NEXTION_GREEN);
     } else {
-        return updateValue(CRUISE_SET, PCO, NEXTION_LIGHT_GREY);
+        return updateValue(CRUISE_SET, PCO, NULL, NEXTION_LIGHT_GREY);
     }
 }
 
@@ -152,7 +158,7 @@ ErrorStatus Display_CruiseSet(State on) {
  */
 ErrorStatus Display_SetError(int idx, char *err) {
     if (idx < 0 || idx > 5) return ERROR; // Index out of bounds
-    return updateValue(ERROR0 + idx, TEXT, 0);
+    return updateValue(ERROR0 + idx, TEXT, err, 0);
 }
 
 
@@ -160,12 +166,12 @@ ErrorStatus Display_SetError(int idx, char *err) {
  * Set the display to the main view
  */
 ErrorStatus Display_SetMainView(void) {
-    return updateValue(SYSTEM, PAGE, 1);
+    return updateValue(SYSTEM, PAGE, NULL, 1);
 }
 
 /**
  * Set the display back to the precharge view
  */
 ErrorStatus Display_SetPrechargeView(void) {
-    return updateValue(SYSTEM, PAGE, 0);
+    return updateValue(SYSTEM, PAGE, NULL, 0);
 }
