@@ -17,7 +17,7 @@
  *          (not used for simulator)
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus) {
+void BSP_CAN_Init(CAN_t bus, void (*tx)(void), void (*rx)(void)) {
     if (access(FILE_NAME, F_OK) != 0) {
         // File doesn't exist if true
         perror(CAN_CSV);
@@ -36,7 +36,7 @@ void BSP_CAN_Init(CAN_t bus) {
  * @param   len length of the message in bytes
  * @return  number of bytes transmitted (0 if unsuccessful)
  */
-uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
+ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
     // Get current values in CSV
     FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {
@@ -102,7 +102,7 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
  *          the message in bytes
  * @return  number of bytes read (0 if unsuccessful)
  */
-uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
+ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {
         printf("CAN not available\n\r");
