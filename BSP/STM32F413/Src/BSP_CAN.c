@@ -38,6 +38,11 @@ void BSP_CAN3_Init();
  */
 
 void BSP_CAN_Init(CAN_t bus, void (*rxEvent)(void), void (*txEnd)(void)) {
+
+    // Configure event handles
+    gRxEvent  = rxEvent;
+    gTxEnd    = txEnd;
+
     if (bus == CAN_1){
         BSP_CAN1_Init();
     }else{
@@ -50,10 +55,6 @@ void BSP_CAN1_Init(){
     CAN_InitTypeDef CAN_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
     CAN_FilterInitTypeDef CAN_FilterInitStruct;
-
-    // Configure event handles
-    gRxEvent  = rxEvent;
-    gTxEnd    = txEnd;
 
     // Initialize the queue
     gRxQueue = msg_queue_new();
@@ -156,10 +157,6 @@ void BSP_CAN3_Init(){
     NVIC_InitTypeDef NVIC_InitStruct;
     CAN_FilterInitTypeDef CAN_FilterInitStruct;
 
-    // Configure event handles
-    gRxEvent  = rxEvent;
-    gTxEnd    = txEnd;
-
     // Initialize the queue
     gRxQueue = msg_queue_new();
 
@@ -260,7 +257,13 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
         gTxMessage.Data[i] = data[i];
     }
 	
-    ErrorStatus retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
+    ErrorStatus retVal;
+    
+    if(bus == CAN_1){
+        retVal = (ErrorStatus) (CAN_Transmit(CAN1, &gTxMessage) != 0);
+    }else{
+        retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
+    }
 
     return retVal;
 }

@@ -5,6 +5,8 @@
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[128];
 
+#define STACK_SIZE 128
+
 void Task1(void *p_arg){
     CPU_Init();
     // OS_CPU_SysTickInit();
@@ -21,8 +23,8 @@ void Task1(void *p_arg){
         (void*)NULL,
         (OS_PRIO)3,
         (CPU_STK*)SendCarCAN_Stk,
-        (CPU_STK_SIZE)sizeof(SendCarCAN_Stk)/10,
-        (CPU_STK_SIZE)sizeof(SendCarCAN_Stk),
+        (CPU_STK_SIZE)STACK_SIZE/10,
+        (CPU_STK_SIZE)STACK_SIZE,
         (OS_MSG_QTY)NULL,
         (OS_TICK)NULL,
         (void*)NULL,
@@ -72,8 +74,8 @@ int main(void){ //startup OS stuff, spawn test task
         (void*)NULL,
         (OS_PRIO)4,
         (CPU_STK*)Task1_Stk,
-        (CPU_STK_SIZE)sizeof(Task1_Stk)/10,
-        (CPU_STK_SIZE)sizeof(Task1_Stk),
+        (CPU_STK_SIZE)STACK_SIZE/10,
+        (CPU_STK_SIZE)STACK_SIZE,
         (OS_MSG_QTY)NULL,
         (OS_TICK)NULL,
         (void*)NULL,

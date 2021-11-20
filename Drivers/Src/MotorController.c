@@ -18,7 +18,7 @@ static void CanFunc(){
  * @return  None
  */ 
 void MotorController_Init(){
-    BSP_CAN_Init(CAN_2,&CanFunc,&CanFunc);
+    BSP_CAN_Init(CAN_3,&CanFunc,&CanFunc);
 }
 
 /**
