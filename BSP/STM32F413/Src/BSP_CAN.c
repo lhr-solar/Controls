@@ -261,7 +261,13 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
         gTxMessage.Data[i] = data[i];
     }
 	
-    ErrorStatus retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
+    ErrorStatus retVal;
+
+    if (bus == CAN1){
+        retVal = (ErrorStatus) (CAN_Transmit(CAN1, &gTxMessage) != 0);
+    } else{
+        retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
+    }
 
     return retVal;
 }
