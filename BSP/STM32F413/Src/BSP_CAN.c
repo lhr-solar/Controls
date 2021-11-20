@@ -263,7 +263,7 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
 	
     ErrorStatus retVal;
 
-    if (bus == CAN1){
+    if (bus == CAN_1){
         retVal = (ErrorStatus) (CAN_Transmit(CAN1, &gTxMessage) != 0);
     } else{
         retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
