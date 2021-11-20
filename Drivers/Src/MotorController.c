@@ -1,7 +1,11 @@
 #include "MotorController.h"
 #include "CarState.h"
+
 #define MOTOR_DRIVE 0x221
+#define MOTOR_STATUS 0x241
+#define MOTOR_VELOCITY 0x243
 #define MAX_CAN_LEN 8
+
 #define MASK_MOTOR_TEMP_ERR 1<<6 //check if motor temperature is an issue on bit 6
 #define MASK_SS_ERR 1<<19 //check for slip or hall sequence position error on 19 bit
 #define MASK_CC_ERR 1<<2 //checks velocity on 2 bit
@@ -76,26 +80,42 @@ ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
         message->firstNum = firstSum;
         message->secondNum = secondSum;
 
-        //read first number (bits 0-31) from CAN message to check motor error issue flags
+        union {
+            uint32_t n;
+            float f;
+        } convert;
         
-        if(MASK_MOTOR_TEMP_ERR & firstSum)
-        {
-             car->MotorErrorCode.motorTempErr = ON;
-        }
+        switch (id) {
+            // If we're reading the output from the Motor Status command (0x241) then 
+            // Check the status bits we care about and set flags accordingly
+            case MOTOR_STATUS: {
+                if(MASK_MOTOR_TEMP_ERR & firstSum)
+                {
+                    car->MotorErrorCode.motorTempErr = ON;
+                }
 
-        if(MASK_SS_ERR & firstSum)
-        {
-             car->MotorErrorCode.slipSpeedErr = ON;
-        }
+                if(MASK_SS_ERR & firstSum)
+                {
+                    car->MotorErrorCode.slipSpeedErr = ON;
+                }
 
-        if(MASK_CC_ERR & firstSum)
-        {
-             car->MotorErrorCode.CCVelocityErr = ON;
-        }
+                if(MASK_CC_ERR & firstSum)
+                {
+                    car->MotorErrorCode.CCVelocityErr = ON;
+                }
 
-        if(MASK_OVER_SPEED_ERR & firstSum)
-        {
-             car->MotorErrorCode.overSpeedErr = ON;
+                if(MASK_OVER_SPEED_ERR & firstSum)
+                {
+                    car->MotorErrorCode.overSpeedErr = ON;
+                }
+                break;
+            }
+            case MOTOR_DRIVE: {
+                convert.n = secondSum;
+                car->CurrentVelocity = convert.f;
+                break;
+            }
+            default: break;
         }
 
         return SUCCESS;
