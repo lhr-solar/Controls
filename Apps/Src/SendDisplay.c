@@ -2,6 +2,15 @@
 
 #include "SendDisplay.h"
 
+// Strings for motor errors
+static const char *MOTOR_ERROR_STRINGS[] = {
+    "MOTOR TEMP ERR",
+    "VELOCITY LIMITED", // Not really an error?
+    "SLIP SPEED ERR",
+    "OVERSPEED ERR"     // Not implemented, unecessary
+};
+
+// Strings for software module errors
 static const char *ERROR_STRINGS[] = {
     "ARRAY ERR",
     "READ CAN ERR",
@@ -25,11 +34,21 @@ void Task_SendDisplay(void *p_arg) {
     char *errors[6]; // Up to 6 errors possible
     size_t errorCount = 0;
 
+    // check for the motor errors we care about
+    if (car->MotorErrorCode.motorTempErr) {
+        errors[errorCount++] = MOTOR_ERROR_STRINGS[0];
+    }
+
+    if (car->MotorErrorCode.slipSpeedErr) {
+        errors[errorCount++] = MOTOR_ERROR_STRINGS[2];
+    }
+
     // Access the error codes as an array so we can loop through them
     State *errorStates = ((State *) &(car->ErrorCode));
     size_t numErrors = sizeof(error_code_t) / sizeof(State);
 
     // Note that we only ever display the first six errors
+    // These errors will always be displayed after motor errors
     for (int i=0; i < numErrors && errorCount < 6; i++) {
         if (errorStates[i] == ON) {
             errors[errorCount++] = ERROR_STRINGS[i];
