@@ -25,5 +25,6 @@ ErrorStatus Display_CruiseEnable(State on);
 ErrorStatus Display_CruiseSet(State on);
 ErrorStatus Display_SetVelocity(float vel);
 ErrorStatus Display_SetError(int idx, char *err);
+ErrorStatus Display_NoErrors(void);
 
 #endif

@@ -8,6 +8,7 @@
 static const char *DELIMITER = ".";
 static const char *ASSIGNMENT = "=";
 static const char *TERMINATOR = "\xff\xff\xff";
+static const char *NO_ERROR = "No Error";
 
 // Color defintions for display
 static const uint16_t NEXTION_GREEN = 2016;
@@ -158,7 +159,19 @@ ErrorStatus Display_CruiseSet(State on) {
  */
 ErrorStatus Display_SetError(int idx, char *err) {
     if (idx < 0 || idx > 5) return ERROR; // Index out of bounds
-    return updateValue(ERROR0 + idx, TEXT, err, 0);
+    ErrorStatus err1 = updateValue(ERROR0 + idx, TEXT, err, 0);
+    ErrorStatus err2 = updateValue(ERROR0 + idx, PCO, NULL, NEXTION_GREEN);
+    return err1 && err2; // If either is error, then had an error
+}
+
+/**
+ * Set the first error slot to say "No Error" and set its color to green
+ * User must clear the remaining slots manually using Display_SetError
+ */
+ErrorStatus Display_NoErrors(void) {
+    ErrorStatus err1 = updateValue(ERROR0, PCO, NULL, NEXTION_GREEN);
+    ErrorStatus err2 = updateValue(ERROR0, PCO, (char *) NO_ERROR, 0);
+    return err1 && err2; // If either one is error, then we had an error
 }
 
 
