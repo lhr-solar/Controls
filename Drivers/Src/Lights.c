@@ -34,9 +34,8 @@ State Lights_Read(light_t light) {
 
     // Busy wait until SPI data changes
     // (Should be changed with RTOS later on)
-    do {
-        BSP_SPI_Read(rxBuf, 2);
-    } while (rxBuf[0] == SPI_GPIOB);
+    
+    BSP_SPI_Read(rxBuf, 2);
     
     uint8_t currData = rxBuf[1];
     // Different depending on the light
@@ -62,10 +61,8 @@ void Lights_Set(light_t light, State state) {
 
     // Busy wait until SPI data changes
     // (Should be changed with RTOS later on)
-    do {
-        BSP_SPI_Read(rxBuf, 2);
-    } while (rxBuf[0] == SPI_GPIOB);
-
+    BSP_SPI_Read(rxBuf, 2);
+    
     uint8_t portc = BSP_GPIO_Read(LIGHTS_PORT);
     if (light == BrakeLight) {
         portc &= ~(0x01 << BRAKELIGHT_PIN); // Clear bit corresponding to pin
