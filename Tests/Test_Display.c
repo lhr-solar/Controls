@@ -46,7 +46,8 @@ void Task1(void *p_arg) {
     Display_SetVelocity(vel);
     while (1) {
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-        vel += ((random() % 5) - 2) * (-0.2f); // update velocity
+        vel += ((random() % 5) - 2) * (0.2f); // update velocity
+        if (vel < 0) vel = 0;
     }
 }
 
