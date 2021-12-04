@@ -31,9 +31,6 @@ State Lights_Read(light_t light) {
     uint8_t txBuf[3] = {SPI_OPCODE_R, SPI_GPIOB, 0x00};
     uint8_t rxBuf[2] = {0};
     BSP_SPI_Write(txBuf, 3);
-
-    // Busy wait until SPI data changes
-    // (Should be changed with RTOS later on)
     
     BSP_SPI_Read(rxBuf, 2);
     
@@ -59,8 +56,6 @@ void Lights_Set(light_t light, State state) {
     uint8_t rxBuf[2] = {0};
     BSP_SPI_Write(txBuf, 3);
 
-    // Busy wait until SPI data changes
-    // (Should be changed with RTOS later on)
     BSP_SPI_Read(rxBuf, 2);
     
     uint8_t portc = BSP_GPIO_Read(LIGHTS_PORT);
