@@ -16,13 +16,13 @@ static const uint16_t NEXTION_LIGHT_GREY = 42260;
 static const uint16_t NEXTION_DARK_GREY = 23275;
 static const uint16_t NEXTION_BURNT_ORANGE = 51872;
 
-static inline IsNextionFailure(uint32_t val) {
+static inline int IsNextionFailure(uint32_t val) {
     return ((val & ~0x00FFFFFF) != (1 << 24));
 }
 
 
 // List of names of possible strings to build a command out of
-static enum CommandString_t {
+enum CommandString_t {
     VELOCITY,
     CRUISE_ENABLE,
     CRUISE_SET,
@@ -61,9 +61,9 @@ static char *CommandStrings[] = {
 
 /**
  * Convert signed 32-bit integer to string
- * Returns pointer to the string
+ * Returns pointer to string
  */
-static int *to_charp(int32_t num, char *dest) {
+static char *to_charp(int32_t num, char *dest) {
     bool neg = false;
     if (num < 0) {
         neg = true;
@@ -77,7 +77,7 @@ static int *to_charp(int32_t num, char *dest) {
     } while (num > 9);
     if (num != 0) dest[--index] = num + '0';
     if (neg) dest[--index] = '-';
-    return 12 - index; // return string length
+    return dest + index; // return pointer to beginning of string
 }
 
 /**
@@ -94,11 +94,11 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
     // If not modifying a global, send obj
     if (len1 != 0) {
         BSP_UART_Write(UART_3, obj, len1);
-        BSP_UART_Write(UART_3, DELIMITER, 1);
+        BSP_UART_Write(UART_3, (char *) DELIMITER, 1);
     }
 
     BSP_UART_Write(UART_3, attr, len2); // Send the attribute
-    BSP_UART_Write(UART_3, ASSIGNMENT, 1);
+    BSP_UART_Write(UART_3, (char *) ASSIGNMENT, 1);
     // If msg is valid, send it; otherwise send a converted number
     if (msg != NULL) {
         BSP_UART_Write(UART_3, msg, strlen(msg));
@@ -106,7 +106,7 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
         BSP_UART_Write(UART_3, number, strlen(number)); // Send the value
     }
 
-    BSP_UART_Write(UART_3, TERMINATOR, strlen(TERMINATOR));
+    BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
 
     BSP_UART_Read(UART_3, buf);
     int ret = *((uint32_t *) buf);
