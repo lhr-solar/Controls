@@ -33,7 +33,7 @@ void Task_SendDisplay(void *p_arg) {
 
     while (1) {
 
-        char *errors[6]; // Up to 6 errors possible
+        const char *errors[6]; // Up to 6 errors possible
         size_t errorCount = 0;
 
         // check for the motor errors we care about

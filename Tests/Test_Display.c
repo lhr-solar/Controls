@@ -79,5 +79,6 @@ int main(void) {
     if (err != OS_ERR_NONE) {
         printf("OS error code %d\n", err);
     }
+
     return 0;
 }
