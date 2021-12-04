@@ -1,6 +1,6 @@
 #include "Lights.h"
 #include "Tasks.h"
-#define BRAKETHRESHOLD 2
+#define BRAKETHRESHOLD 3
 
 /**
  * @brief This task waits on the Update Lights Semaphore, then reads the switches that pertain to the lights from the global carstate
@@ -11,7 +11,7 @@
 void Task_UpdateLights(void* p_arg){
     car_state_t* GlobalCarState = (car_state_t*) p_arg;
     switch_states_t* GlobalSwitchStates = &(GlobalCarState->SwitchStates);
-    //Note: the below code is based off the switch_states_t struct defined in the RTOS_ReadSwitches branch rather than the current one
+    //Note: the below code is based off the switch_states_t struct defined in the RTOS_ReadSwitches branch rather than main
     light_switches_t* GlobalLightSwitches = &(GlobalSwitchStates->lightSwitches);
     OS_ERR err;
     CPU_TS ts;
