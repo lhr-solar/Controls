@@ -171,6 +171,8 @@ void BSP_SPI_Write(uint8_t *txBuf, uint8_t txLen) {
 			// Wait for the transmission to complete
 			SPI_WaitTx();
 		}
+
+		SPI_Wait();
 	}
 }
 
