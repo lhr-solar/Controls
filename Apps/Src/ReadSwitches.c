@@ -16,29 +16,31 @@ void Task_ReadSwitches (void* p_arg) {
     switch_states_t currSwitchStates; //holds states read from driver reads
     Switches_Init();
 
-    // load newSwitchStates
-    currSwitchStates = (switch_states_t){
-        Switches_Read(IGN_1),
-        Switches_Read(IGN_2),
-        (velocity_switches_t){
-            Switches_Read(CRUZ_SW),
-            Switches_Read(CRUZ_EN),
-            Switches_Read(FWD_SW),
-            Switches_Read(REV_SW),
-            Switches_Read(REGEN_SW)
-        },
-        (light_switches_t){
-            Switches_Read(LEFT_SW),
-            Switches_Read(RIGHT_SW),
-            Switches_Read(HEADLIGHT_SW),
-            Switches_Read(HZD_SW)
-        }
-    };
+    
     OS_ERR err;
     static bool arrayConThreadSpawned = false; //these booleans need to be persistent
     static bool motorConThreadSpawned = false;
 
     while(1){
+        // load newSwitchStates
+        currSwitchStates = (switch_states_t){
+            Switches_Read(IGN_1),
+            Switches_Read(IGN_2),
+            (velocity_switches_t){
+                Switches_Read(CRUZ_SW),
+                Switches_Read(CRUZ_EN),
+                Switches_Read(FWD_SW),
+                Switches_Read(REV_SW),
+                Switches_Read(REGEN_SW)
+            },
+            (light_switches_t){
+                Switches_Read(LEFT_SW),
+                Switches_Read(RIGHT_SW),
+                Switches_Read(HEADLIGHT_SW),
+                Switches_Read(HZD_SW)
+            }
+        };
+        
         //Spawns arrayConnection thread and MotorConnection thread when it is appropriate
         uint8_t ignStates = 0x00; //holds states read from Switches Driver
         uint8_t ignStored = 0x00; //holds states stored in globals
