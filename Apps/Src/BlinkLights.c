@@ -85,7 +85,7 @@ void Task_BlinkLight(void* p_arg){
             0,
             0,
             0,
-            11, //11 milliseconds corresponds to a 90HZ 
+            650, //650 milliseconds corresponds to 92ish times per minute 
             OS_OPT_TIME_HMSM_STRICT,
              &err
         );
