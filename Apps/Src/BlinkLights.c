@@ -1,6 +1,10 @@
 #include "Tasks.h"
 #include "Lights.h"
 
+/**
+* @brief This thread controls the blinking of the hazard and indicator lights at the regulation specified frequency. 
+**/
+
 void Task_BlinkLight(void* p_arg){
     //get necessary state pointers
     car_state_t *car_state = (car_state_t*) p_arg;
@@ -10,7 +14,7 @@ void Task_BlinkLight(void* p_arg){
     OS_ERR err;
 
     while(1){
-        //wait for blinkLight to get signaled
+        //wait for blinkLight to get signaled. TODO: Does this thread even need a semaphore to signal it? Or can it just be spawned and allowed to run
         OSSemPend( 
             &BlinkLight_Sem4,
             0,
@@ -18,7 +22,6 @@ void Task_BlinkLight(void* p_arg){
             &ts,
             &err
         );    
-        //TODO: Main light toggle logic
 
         //Read the storedLightSwitches and toggle the blinkerSwitches that are on. If else, set to 0. At least one is on.
 
@@ -80,7 +83,7 @@ void Task_BlinkLight(void* p_arg){
         } 
 
 
-        //lock thread to run at 90Hz if blinkLights needed.
+        //lock thread to run at 90ish times per minute if blinkLights needed.
         OSTimeDlyHMSM(
             0,
             0,
