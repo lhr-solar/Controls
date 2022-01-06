@@ -4,6 +4,7 @@
 #define __MOTORCONTROLLER_H
 
 #include <bsp.h>
+#include "CarState.h"
 
 typedef struct 
 {
@@ -32,6 +33,6 @@ void MotorController_Drive(float newVelocity, float motorCurrent);
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
-ErrorStatus MotorController_Read(CANbuff *message);
+ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car);
 
 #endif

@@ -77,9 +77,6 @@ SF = st-flash
 # cpu
 CPU = -mcpu=cortex-m4
 
-# fpu
-FPU = 
-
 # float-abi
 FLOAT-ABI = -mfloat-abi=soft
 

@@ -93,6 +93,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
             datalen = 8;
             memcpy(&txdata,&payload.data.d,sizeof(payload.data.d));
 
+
     //Handle 8bit precision case (0b0000xxxx) (no idx)
        case CAR_STATE:
             datalen = 1;

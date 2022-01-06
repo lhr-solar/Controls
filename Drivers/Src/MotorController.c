@@ -1,8 +1,15 @@
 #include "MotorController.h"
-
+#include "CarState.h"
 
 #define MOTOR_DRIVE 0x221
+#define MOTOR_STATUS 0x241
+#define MOTOR_VELOCITY 0x243
 #define MAX_CAN_LEN 8
+
+#define MASK_MOTOR_TEMP_ERR 1<<6 //check if motor temperature is an issue on bit 6
+#define MASK_SS_ERR 1<<19 //check for slip or hall sequence position error on 19 bit
+#define MASK_CC_ERR 1<<2 //checks velocity on 2 bit
+#define MASK_OVER_SPEED_ERR 1<<24 //check if motor overshot max RPM on 24 bit
 
 /**
  * BSP_CAN_INIT requires a tx and rx event handler, and this driver doesn't actually require any tx/rx event handling. As such, this 
@@ -54,12 +61,14 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
-ErrorStatus MotorController_Read(CANbuff *message){
+ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
+
     uint32_t id;
     uint8_t data[8] = {0};
     uint32_t length = BSP_CAN_Read(CAN_3, &id, data);
     uint32_t firstSum = 0;
     uint32_t secondSum = 0;
+
     if(length>0){
         message->id = id;
         //get first number (bits 0-31)
@@ -78,6 +87,45 @@ ErrorStatus MotorController_Read(CANbuff *message){
         }
         message->firstNum = firstSum;
         message->secondNum = secondSum;
+
+        union {
+            uint32_t n;
+            float f;
+        } convert;
+        
+        switch (id) {
+            // If we're reading the output from the Motor Status command (0x241) then 
+            // Check the status bits we care about and set flags accordingly
+            case MOTOR_STATUS: {
+                if(MASK_MOTOR_TEMP_ERR & firstSum)
+                {
+                    car->MotorErrorCode.motorTempErr = ON;
+                }
+
+                if(MASK_SS_ERR & firstSum)
+                {
+                    car->MotorErrorCode.slipSpeedErr = ON;
+                }
+
+                if(MASK_CC_ERR & firstSum)
+                {
+                    car->MotorErrorCode.CCVelocityErr = ON;
+                }
+
+                if(MASK_OVER_SPEED_ERR & firstSum)
+                {
+                    car->MotorErrorCode.overSpeedErr = ON;
+                }
+                break;
+            }
+            case MOTOR_DRIVE: {
+                convert.n = secondSum;
+                car->CurrentVelocity = convert.f;
+                break;
+            }
+            default: break;
+        }
+
         return SUCCESS;
     }
     return ERROR;
