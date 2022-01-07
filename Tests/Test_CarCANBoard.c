@@ -1,12 +1,23 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/**
+ * Test file for the CarCAN module of the controls board
+ * 
+ * Used by sending a CAN message on the CarCAN module
+ * which is then verified via a logic analyzer hooked up 
+ * to the output and input headers to verify the driver code
+ * and the hardware of the module is correct
+ * 
+ */
+
 #include "common.h"
 #include "config.h"
 #include <bsp.h>
 #include <unistd.h>
 #include "CANbus.h"
 
-int main(void){
+int main(void)
+{
     BSP_UART_Init(UART_2);
     CANbus_Init();
 
@@ -26,21 +37,23 @@ int main(void){
     char str[128];
     uint8_t output;
 
-
     output = CANbus_Send(ids[0], payload);
 
-    for (volatile int i = 0; i < 1000000; i++);
+    for (volatile int i = 0; i < 1000000; i++)
+        ;
 
     //data.d = 0xFFFFFFFF;
     //output = CANbus_Send(0xFFF, payload);
-    for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
+    for (int i = 0; i < sizeof(ids) / sizeof(ids[0]); i++)
+    {
         output = CANbus_Send(ids[i], payload);
         size += sprintf(str, "OUTPUT: %d ", output);
     }
-    
+
     BSP_UART_Write(UART_2, str, size);
-    for (volatile int i = 0; i < 2*1000000; i++);
+    for (volatile int i = 0; i < 2 * 1000000; i++)
+        ;
 
-
-    while(1);
+    while (1)
+        ;
 }
