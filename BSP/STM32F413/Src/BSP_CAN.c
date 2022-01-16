@@ -264,9 +264,9 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
     ErrorStatus retVal;
 
     if (bus == CAN_1){
-        retVal = (ErrorStatus) (CAN_Transmit(CAN1, &gTxMessage) != 0);
+        retVal = (ErrorStatus) (CAN_Transmit(CAN1, &gTxMessage[bus]) != 0);
     } else{
-        retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
+        retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage[bus]) != 0);
     }
 
     return retVal;
@@ -308,14 +308,14 @@ void CAN3_RX0_IRQHandler(){
 
     // Take any pending messages into a queue
     while(CAN_MessagePending(CAN3, CAN_FIFO0)) {
-        CAN_Receive(CAN3, CAN_FIFO0, &gRxMessage);
+        CAN_Receive(CAN3, CAN_FIFO0, &gRxMessage[CAN_3]);
 
         msg_t rxMsg;
         rxMsg.id = gRxMessage[1].StdId;
-        memcpy(&rxMsg.data[0], gRxMessage[1].Data, 8);
+        memcpy(&rxMsg.data[0], gRxMessage[CAN_3].Data, 8);
 
         // Place the message in the queue
-        if(msg_queue_put(&gRxQueue[1], rxMsg)) {
+        if(msg_queue_put(&gRxQueue[CAN_3], rxMsg)) {
             // If the queue was not already full...
             // Call the driver-provided function, if it is not null
             if(gRxEvent[1] != NULL) {
@@ -326,6 +326,10 @@ void CAN3_RX0_IRQHandler(){
             break;
         }
     }
+
+    #ifdef RTOS
+    OSIntExit();
+    #endif
 }
 void CAN1_RX0_IRQHandler(void) {
     #ifdef RTOS
@@ -337,11 +341,11 @@ void CAN1_RX0_IRQHandler(void) {
 
     // Take any pending messages into a queue
     while(CAN_MessagePending(CAN1, CAN_FIFO0)) {
-        CAN_Receive(CAN1, CAN_FIFO0, &gRxMessage);
+        CAN_Receive(CAN1, CAN_FIFO0, &gRxMessage[CAN_1]);
 
         msg_t rxMsg;
-        rxMsg.id = gRxMessage[0].StdId;
-        memcpy(&rxMsg.data[0], gRxMessage[0].Data, 8);
+        rxMsg.id = gRxMessage[CAN_1].StdId;
+        memcpy(&rxMsg.data[0], gRxMessage[CAN_1].Data, 8);
 
         // Place the message in the queue
         if(msg_queue_put(&gRxQueue[0], rxMsg)) {
@@ -413,5 +417,25 @@ void CAN1_TX_IRQHandler(void) {
 
     #ifdef RTOS
     OSIntExit();      // Signal to uC/OS
+    #endif
+}
+
+
+void CAN3_TX_IRQHandler(void) {
+    #ifdef RTOS
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
+    #endif
+
+    // Acknowledge
+    CAN_ClearFlag(CAN3, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
+
+    // Call the function provided
+    gTxEnd[1]();
+
+    #ifdef RTOS
+    OSIntExit();
     #endif
 }

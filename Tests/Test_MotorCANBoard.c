@@ -33,5 +33,5 @@ int main()
     car_state_t car_state;
     car_state.DesiredVelocity = MAX_VELOCITY;
     car_state.DesiredMotorCurrent = 50;
-    MotorController_Drive(velocity_to_rpm(car_state.CruiseControlVelocity), car_state.DesiredMotorCurrent);
+    MotorController_Drive(velocity_to_rpm(car_state.DesiredVelocity), car_state.DesiredMotorCurrent);
 }
