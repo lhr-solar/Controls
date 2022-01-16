@@ -218,5 +218,8 @@ void Task_ReadSwitches (void* p_arg) {
                 (OS_ERR*)&err
             );
         }
+    
+    //OS Time delay to allow for context switching. This locks us to reading the switches every 1 ms which should be fine.
+    OSTimeDlyHMSM(0, 0, 0, 1, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 }
