@@ -74,8 +74,8 @@ void BSP_ADC_Init(void) {
 	// Configure the channels
 	// Apparently channel 2 has priority, or is at least read first.
 	// If you change the priorities, be prepared to have the order in the array change.
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_9, 2, ADC_SampleTime_480Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 1, ADC_SampleTime_480Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_480Cycles);	// Accelerator
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_480Cycles);	// Brake
 
 	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
 
