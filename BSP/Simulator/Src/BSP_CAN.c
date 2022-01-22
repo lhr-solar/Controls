@@ -10,8 +10,8 @@
 
 #define FILE_NAME DATA_PATH(CAN_CSV)
 
-static void (*txEvent)(void);
-static void (*rxEvent)(void);
+static callback_t txEvent;
+static callback_t rxEvent;
 
 /**
  * @brief   Confirms that the CSV file
@@ -21,7 +21,7 @@ static void (*rxEvent)(void);
  *          (not used for simulator)
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus,void (*txHandler)(void),void (*rxHandler)(void)) {
+void BSP_CAN_Init(CAN_t bus, callback_t txHandler, callback_t rxHandler) {
     txEvent=txHandler; //bind the handler functions
     rxEvent=rxHandler;
     if (access(FILE_NAME, F_OK) != 0) {
@@ -42,7 +42,7 @@ void BSP_CAN_Init(CAN_t bus,void (*txHandler)(void),void (*rxHandler)(void)) {
  * @param   len length of the message in bytes
  * @return  number of bytes transmitted (0 if unsuccessful)
  */
-uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
+ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
     // Get current values in CSV
     FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {
@@ -111,7 +111,7 @@ uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len) {
  *          the message in bytes
  * @return  number of bytes read (0 if unsuccessful)
  */
-uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
+ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data) {
     FILE* fp = fopen(FILE_NAME, "r");
     if (!fp) {
         printf("CAN not available\n\r");
