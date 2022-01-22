@@ -9,6 +9,7 @@
 #define __BSP_CAN_H
 
 #include "common.h"
+#include "config.h"
 #include <bsp.h>
 
 typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
@@ -18,11 +19,11 @@ typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
  *          communicate with the motor controllers
  *          and other car systems
  * @param   bus the CAN line to initialize
- * @param txHandler the Function that will be called every time TX completes
- * @param rxHanlder the function that will be called on every RX event
+ * @param   txHandler the function that will be called every time TX completes
+ * @param   rxHandler the function that iwll be called on every RX event 
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus, callback_t txHandler, callback_t rxHander);
+void BSP_CAN_Init(CAN_t bus, callback_t txHandler, callback_t rxHandler);
 
 /**
  * @brief   Writes a message to the specified CAN line
@@ -33,17 +34,16 @@ void BSP_CAN_Init(CAN_t bus, callback_t txHandler, callback_t rxHander);
  * @param   len length of the message in bytes
  * @return  number of bytes transmitted (0 if unsuccessful)
  */
-uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len);
+ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len);
 
 /**
  * @brief   Reads the message on the specified CAN line
- * @param   bus the bus line 
  * @param   id pointer to integer to store the 
  *          message ID that was read
  * @param   data pointer to integer array to store
  *          the message in bytes
  * @return  number of bytes read (0 if unsuccessful)
  */
-uint8_t BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data);
+ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data);
 
 #endif
