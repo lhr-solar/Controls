@@ -62,16 +62,14 @@ void Task_ArrayConnection(void *p_arg) {
 
         if (desiredState == ON && currentState != ON) {
             arrayStartup(&err); // Reactivate the array
-            OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
+            car_state->ActiveTasks.readCarCAN = ON; // set readCarCAN to active again
+            OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err); // Tell the task it can start up again
             if(err != OS_ERR_NONE){
                 car_state->ErrorCode.ArrayErr = ON;
             }
         } else if (desiredState != ON && currentState == ON) {
             Contactors_Set(ARRAY, OFF); // Deactivate the array
-            OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.ArrayErr = ON;
-            }
+            car_state->ActiveTasks.readCarCAN = OFF; // Pause readCarCAN
         }
         
         if(err != OS_ERR_NONE){
