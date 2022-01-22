@@ -41,14 +41,14 @@ static void ADC_InitDMA(void) {
  */
 void BSP_ADC_Init(void) {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	// Enable the ADC clock
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	// Enable the PC clock
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	// Enable the PC clock for port C
 
 	ADC_InitDMA();
 
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;	// Using pins PC0 and PC1 for the ADC
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;						// Analog Input
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;				// High impedence
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;	// Using pin PC0 and PC1
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;	// Analog Input
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // High impedence
 	GPIO_Init(GPIOC,&GPIO_InitStruct);
 
 	// ADC Common Init
@@ -74,8 +74,8 @@ void BSP_ADC_Init(void) {
 	// Configure the channels
 	// Apparently channel 2 has priority, or is at least read first.
 	// If you change the priorities, be prepared to have the order in the array change.
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 2, ADC_SampleTime_480Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 1, ADC_SampleTime_480Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_480Cycles);	// Accelerator
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_480Cycles);	// Brake
 
 	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
 

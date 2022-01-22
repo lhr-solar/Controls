@@ -20,7 +20,7 @@ void CANbus_Init(void) {
  */
 int CANbus_Send(CANId_t id, CANPayload_t payload) {
 
-    int8_t data[payload.bytes];
+    uint8_t data[payload.bytes];
 
     uint64_t tempData = payload.data.d;
     uint8_t mask = 0xFF;
