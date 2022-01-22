@@ -26,8 +26,8 @@ static void moveCursorUp(int n) {
 
 int main() {
 
-    BSP_ADC_Init(ADC_0);
-    BSP_ADC_Init(ADC_1);
+    BSP_ADC_Init(Accelerator_ADC);
+    BSP_ADC_Init(Brake_ADC);
 
     BSP_CAN_Init(CAN_1);
     //BSP_CAN_Init(CAN_2);
@@ -61,7 +61,7 @@ int main() {
         printf("--------------------------------------------------------------\n");
         printf("As you move the pedals in the GUI their voltage values should change\n");
         printf("Accelerator: %5.1d mV\tBrake: %5.1d mV\n", 
-                BSP_ADC_Get_Millivoltage(ADC_0), BSP_ADC_Get_Millivoltage(ADC_1));
+                BSP_ADC_Get_Millivoltage(Accelerator_ADC), BSP_ADC_Get_Millivoltage(Brake_ADC));
 
         //BSP_CAN TEST -----------------------------------------------------------
         //NOTE: The can test file can test both CAN1 ot CAN2 and
