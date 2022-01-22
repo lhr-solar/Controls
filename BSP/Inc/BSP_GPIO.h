@@ -13,13 +13,16 @@
 #include <bsp.h>
 
 typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t; 
+typedef enum {INPUT = 0, OUTPUT} direction_t;
 
 /**
  * @brief   Initializes a GPIO port
- * @param   port to initialize
+ * @param   port - port to initialize
+ * @param	mask - pins
+ * @param	direction - input or output 
  * @return  None
  */ 
-void BSP_GPIO_Init(port_t port);
+void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction);
 
 /**
  * @brief   Reads value of the specified port
@@ -30,10 +33,35 @@ uint16_t BSP_GPIO_Read(port_t port);
 
 /**
  * @brief   Writes data to a specified port 
- * @param   port to write to
- * @param   data to write 
+ * @param   port port to write to
+ * @param   data data to write 
  * @return  None
  */ 
 void BSP_GPIO_Write(port_t port, uint16_t data);
+
+/**
+ * @brief   Reads data to a specified pin (not applicalbe to output pins)
+ * @param   port The port to read from
+ * @param   pin The pin to read from 
+ * @return  State of the pin
+ */ 
+uint8_t BSP_GPIO_Read_Pin(port_t port, uint8_t pin);
+
+/**
+ * @brief   Writes data to a specified pin
+ * @param   port The port to write to
+ * @param   pin The pin to write to 
+ * @param   state ON or OFF
+ * @return  None
+ */ 
+void BSP_GPIO_Write_Pin(port_t port, uint16_t pin, State state);
+
+/**
+ * @brief   Returns state of output pin (not applicable to input pins)
+ * @param   port The port to get state from
+ * @param   pin The pin to get state from
+ * @return  1 if pin is high, 0 if low
+ */ 
+uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin);
 
 #endif

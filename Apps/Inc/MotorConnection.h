@@ -9,5 +9,6 @@
 
 #include "Contactors.h"
 #include "Precharge.h"
+#include "CarState.h"
 
 #endif
