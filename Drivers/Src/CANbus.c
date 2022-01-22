@@ -1,6 +1,8 @@
 #include "CANbus.h"
 #include "config.h"
 #include "os.h"
+
+
 static OS_SEM CANMail_Sem4; //sem4 to count how many sending hardware mailboxes we have left (start at 3)
 static OS_SEM CANBus_RecieveSem4; //sem4 to count how many msgs in our recieving queue
 static OS_MUTEX CANbus_TxMutex; //mutex to lock tx line 

@@ -3,8 +3,8 @@
 #define BSP_OS_H
 
 typedef struct {
-    void (*pend)(void);
-    void (*post)(void);
+    callback_t pend;
+    callback_t post;
 } bsp_os_t;
 
 #endif

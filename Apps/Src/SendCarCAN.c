@@ -10,28 +10,6 @@ void Task_SendCarCAN(void *p_arg){
     CANMSG_t *msg;
     CANbus_Init();
 
-
-    // uint32_t ids[10] = {MC_BUS, VELOCITY, MC_PHASE_CURRENT, VOLTAGE_VEC, CURRENT_VEC, BACKEMF, TEMPERATURE,
-    //                     CAR_STATE, MOTOR_DISABLE, CHARGE_ENABLE};
-
-    // CANData_t data;
-    // data.d = 0xFFFF8765;
-    
-
-    // CANPayload_t payload;
-    // payload.data = data;
-    // payload.bytes = 4;
-
-    // int size;
-
-    // size = 0;
-    // char str[128];
-    // uint8_t output;
-
-    // while (1){
-    //     output = CANbus_Send(ids[0], payload, CAN_BLOCKING);
-    // }
-
     while (1){
         (msg) = (CANMSG_t*)OSQPend(
             &CANBus_MsgQ,

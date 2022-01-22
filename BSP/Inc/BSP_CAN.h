@@ -22,7 +22,7 @@ typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
  * @param rxHanlder the function that will be called on every RX event
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus,void (*txHandler)(void), void (*rxHander)(void));
+void BSP_CAN_Init(CAN_t bus, callback_t txHandler, callback_t rxHander);
 
 /**
  * @brief   Writes a message to the specified CAN line

@@ -23,8 +23,8 @@ static CanTxMsg gTxMessage;
 static CanRxMsg gRxMessage;
 
 // User parameters for CAN events
-static void (*gRxEvent)(void);
-static void (*gTxEnd)(void);
+static callback_t gRxEvent;
+static callback_t gTxEnd;
 
 
 void BSP_CAN1_Init();
@@ -37,7 +37,7 @@ void BSP_CAN3_Init();
  * @return  None
  */
 
-void BSP_CAN_Init(CAN_t bus, void (*rxEvent)(void), void (*txEnd)(void)) {
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd) {
 
     // Configure event handles
     gRxEvent  = rxEvent;
