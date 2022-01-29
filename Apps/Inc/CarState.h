@@ -7,25 +7,6 @@
 #include "config.h"
 
 /**
- * ON if a task is currently running as usual
- * OFF if a task is paused
- */
-typedef struct {
-    State sendTritium;
-    State updateVelocity;
-    State readCarCAN;
-    State sendDisplay;
-    State readPedals;
-    State readTritium;
-    State readSwitches;
-    State updateLights;
-    State sendCarCAN;
-    State blinkLight;
-    State arrayConnection;
-    State motorConnection;
-} task_active_t;
-
-/**
  * Motor Error States
  * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits
  * 
@@ -138,8 +119,6 @@ typedef struct {
     error_code_t ErrorCode;
 
     motor_error_code_t MotorErrorCode;
-
-    task_active_t ActiveTasks;
     
 } car_state_t;
 

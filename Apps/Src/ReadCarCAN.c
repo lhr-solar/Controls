@@ -15,34 +15,28 @@ void Task_ReadCarCAN(void *p_arg) {
     CPU_TS ts;
 
     while (1) {
-
-        if (car->ActiveTasks.readCarCAN != ON) {
-            OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
-        } else {
-
-            // Check if BPS sent us a message
-            if (CANbus_Read(buffer) == SUCCESS) {
-                long msg = *((long *)(&buffer[0]));
-                if (msg == 0) {
-                    car->IsRegenBrakingAllowed = OFF;
-                } else {
-                    car->IsRegenBrakingAllowed = ON;
-                }
-
-                faultCounter = 0;
-            } else {
-                faultCounter++;
-            }
-
-            if (faultCounter >= THRESHOLD) {
+        // Check if BPS sent us a message
+        if (CANbus_Read(buffer) == SUCCESS) {
+            long msg = *((long *)(&buffer[0]));
+            if (msg == 0) {
                 car->IsRegenBrakingAllowed = OFF;
+            } else {
+                car->IsRegenBrakingAllowed = ON;
             }
 
-            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-            
-            if(err != OS_ERR_NONE){
-                car->ErrorCode.ReadCANErr = ON;
-            }
+            faultCounter = 0;
+        } else {
+            faultCounter++;
+        }
+
+        if (faultCounter >= THRESHOLD) {
+            car->IsRegenBrakingAllowed = OFF;
+        }
+
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        
+        if(err != OS_ERR_NONE){
+            car->ErrorCode.ReadCANErr = ON;
         }
     }
 }
