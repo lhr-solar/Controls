@@ -64,7 +64,7 @@ static char *CommandStrings[] = {
  * Sends a string of the form "obj_index.attr_index=" or "attr_index=" over UART
  * Do not call on its own, should only be called by the updateValue subroutines
  */
-static ErrorStatus sendStartOfAssignment(enum CommandString_t obj_index, enum CommandString_t attr_index) {
+static void sendStartOfAssignment(enum CommandString_t obj_index, enum CommandString_t attr_index) {
     char *obj = CommandStrings[obj_index];
     char *attr = CommandStrings[attr_index];
     int len = strlen(obj);
@@ -173,7 +173,7 @@ ErrorStatus Display_SetError(int idx, char *err) {
  */
 ErrorStatus Display_NoErrors(void) {
     ErrorStatus err1 = updateIntValue(ERROR0, PCO, NEXTION_GREEN);
-    ErrorStatus err2 = updateValue(ERROR0, PCO, (char *) NO_ERROR, 0);
+    ErrorStatus err2 = updateStringValue(ERROR0, TEXT, (char *) NO_ERROR);
     return err1 && err2; // If either one is error, then we had an error
 }
 
