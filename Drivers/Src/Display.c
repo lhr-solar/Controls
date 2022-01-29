@@ -61,32 +61,11 @@ static char *CommandStrings[] = {
 };
 
 /**
- * Convert signed 32-bit integer to string
- * Returns pointer to string
- */
-static char *to_charp(int32_t num, char *dest) {
-    bool neg = false;
-    if (num < 0) {
-        neg = true;
-        num = -num;
-    }
-    int index = 12;
-    dest[--index] = '\0';
-    do {
-        dest[--index] = (num % 10) + '0';
-        num /= 10;
-    } while (num > 9);
-    if (num != 0) dest[--index] = num + '0';
-    if (neg) dest[--index] = '-';
-    return dest + index; // return pointer to beginning of string
-}
-
-/**
  * Sets an object's attribute to a value
  */
 static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandString_t attr_index, char *msg, int32_t val) {
-    char buf[12]; // To store converted int
-    char *number = to_charp(val, buf); // Convert integer to string
+    char number[12]; // To store converted int
+    sprintf(number, "%ld", val);
     char *obj = CommandStrings[obj_index];
     char *attr = CommandStrings[attr_index];
     int len1 = strlen(obj);
@@ -109,6 +88,7 @@ static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandStrin
 
     BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
 
+    uint8_t buf[8];
     BSP_UART_Read(UART_3, buf);
     int ret = *((uint32_t *) buf);
     return (IsNextionFailure(ret)) ? ERROR : SUCCESS;
