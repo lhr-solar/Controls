@@ -12,7 +12,6 @@ void Task_ReadCarCAN(void *p_arg) {
     static int faultCounter = 0;
 
     OS_ERR err;
-    CPU_TS ts;
 
     while (1) {
         // Check if BPS sent us a message
