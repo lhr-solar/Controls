@@ -260,16 +260,9 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
 	for(int i = 0; i < length; i++){
         gTxMessage[bus].Data[i] = data[i];
     }
-	
-    ErrorStatus retVal;
 
-    if (bus == CAN_1){
-        retVal = (ErrorStatus) (CAN_Transmit(CAN1, &gTxMessage) != 0);
-    } else{
-        retVal = (ErrorStatus) (CAN_Transmit(CAN3, &gTxMessage) != 0);
-    }
-
-    return retVal;
+    
+    return (ErrorStatus) (CAN_Transmit(bus == CAN_1 ? CAN1 : CAN3, &gTxMessage[bus]) != 0);
 }
 
 /**
@@ -309,7 +302,7 @@ void CAN3_RX0_IRQHandler() {
 
     // Take any pending messages into a queue
     while(CAN_MessagePending(CAN3, CAN_FIFO0)) {
-        CAN_Receive(CAN3, CAN_FIFO0, &gRxMessage);
+        CAN_Receive(CAN3, CAN_FIFO0, &gRxMessage[1]);
 
         msg_t rxMsg;
         rxMsg.id = gRxMessage[1].StdId;
@@ -343,7 +336,7 @@ void CAN1_RX0_IRQHandler(void) {
 
     // Take any pending messages into a queue
     while(CAN_MessagePending(CAN1, CAN_FIFO0)) {
-        CAN_Receive(CAN1, CAN_FIFO0, &gRxMessage);
+        CAN_Receive(CAN1, CAN_FIFO0, &gRxMessage[0]);
 
         msg_t rxMsg;
         rxMsg.id = gRxMessage[0].StdId;
