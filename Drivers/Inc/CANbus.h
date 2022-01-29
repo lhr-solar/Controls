@@ -63,12 +63,12 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,CAN_blocking_t blocking
 /**
  * @brief   Checks if the CAN ID matches with Motor disable ID
  * @param   canline (not implemented, default is CAN1) can line to read from
- * @param 	ID CAN msg ID
+ * @param 	id CAN msg ID
  * @param 	buffer pointer to buffer in which to store the can msg
  * @param   blocking whether or not this Read should be a blocking read or a nonblocking read
  * @return  1 if ID matches and 0 if it doesn't
  */
-ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking);
+ErrorStatus CANbus_Read(uint32_t *id, uint8_t* buffer, CAN_blocking_t blocking);
 
 
 #endif

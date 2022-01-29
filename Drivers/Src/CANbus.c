@@ -141,7 +141,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
  * @return  1 if ID matches and 0 if it doesn't
  */
 
-ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking){
+ErrorStatus CANbus_Read(uint32_t *id, uint8_t* buffer, CAN_blocking_t blocking){
     CPU_TS timestamp;
     OS_ERR err;
 
@@ -178,9 +178,8 @@ ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking){
         return ERROR;
     }
 
-    //GETMSG
-    CANId_t ret;
-    uint8_t status = BSP_CAN_Read(CAN_1,&ret,buffer);
+    // Actually get the message
+    uint8_t status = BSP_CAN_Read(CAN_1, id, buffer);
     
 
     OSMutexPost( //unlock RX line
@@ -188,12 +187,8 @@ ErrorStatus CANbus_Read(uint8_t* buffer,CAN_blocking_t blocking){
         OS_OPT_POST_1,
         &err
     );
-    if(status&&(ret == CHARGE_ENABLE)){
-        return SUCCESS;
-    } else {
-        return ERROR;
-    }
 
+    return status ? SUCCESS : ERROR;
 }
 
 

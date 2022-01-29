@@ -30,18 +30,18 @@ void Task_ReadCarCAN(void *p_arg) {
 
         // Normal task countinues here
 
-        // Check if BPS sent us a message
-        if (CANbus_Read(buffer,CAN_NON_BLOCKING) == SUCCESS) {
-            long msg = *((long *)(&buffer[0]));
-            if (msg == 0) {
-                car->IsRegenBrakingAllowed = OFF;
-            } else {
-                car->IsRegenBrakingAllowed = ON;
-            }
+        uint32_t canId;
 
-            faultCounter = 0;
-        } else {
-            faultCounter++;
+        // Check if BPS sent us a message
+        if (CANbus_Read(&canId, buffer, CAN_NON_BLOCKING) == SUCCESS) {
+            // If charge_enable, set regen flag
+            if (canId == CHARGE_ENABLE) {
+                car->IsRegenBrakingAllowed = (buffer[0] == 0) ? OFF : ON;
+                faultCounter = 0;
+            } else {
+                // If we didn't get a message, something might have gone wrong
+                faultCounter++;
+            }
         }
 
         if (faultCounter >= THRESHOLD) {
