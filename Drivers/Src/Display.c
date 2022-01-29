@@ -61,33 +61,55 @@ static char *CommandStrings[] = {
 };
 
 /**
- * Sets an object's attribute to a value
+ * Sends a string of the form "obj_index.attr_index=" or "attr_index=" over UART
+ * Do not call on its own, should only be called by the updateValue subroutines
  */
-static ErrorStatus updateValue(enum CommandString_t obj_index, enum CommandString_t attr_index, char *msg, int32_t val) {
-    char number[12]; // To store converted int
-    sprintf(number, "%ld", val);
+static ErrorStatus sendStartOfAssignment(enum CommandString_t obj_index, enum CommandString_t attr_index) {
     char *obj = CommandStrings[obj_index];
     char *attr = CommandStrings[attr_index];
-    int len1 = strlen(obj);
-    int len2 = strlen(attr);
+    int len = strlen(obj);
 
-    // If not modifying a global, send obj
-    if (len1 != 0) {
-        BSP_UART_Write(UART_3, obj, len1);
-        BSP_UART_Write(UART_3, (char *) DELIMITER, 1);
+    if (len != 0) { // If not global
+        BSP_UART_Write(UART_3, obj, len);
+        BSP_UART_Write(UART_3, (char *) DELIMITER, strlen(DELIMITER));
     }
 
-    BSP_UART_Write(UART_3, attr, len2); // Send the attribute
+    BSP_UART_Write(UART_3, attr, strlen(attr)); // Send the attribute
     BSP_UART_Write(UART_3, (char *) ASSIGNMENT, 1);
-    // If msg is valid, send it; otherwise send a converted number
-    if (msg != NULL) {
-        BSP_UART_Write(UART_3, msg, strlen(msg));
-    } else {
-        BSP_UART_Write(UART_3, number, strlen(number)); // Send the value
-    }
 
+}
+
+/**
+ * Sends out a string of the form "obj.attr=msg" or "attr=msg"
+ * Use to update string fields of display objects
+ */
+static ErrorStatus updateStringValue(enum CommandString_t obj_index, enum CommandString_t attr_index, char *msg) {
+    sendStartOfAssignment(obj_index, attr_index);
+
+    BSP_UART_Write(UART_3, msg, strlen(msg));
     BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
 
+    // Get a response from the display
+    uint8_t buf[8];
+    BSP_UART_Read(UART_3, buf);
+    int ret = *((uint32_t *) buf);
+    return (IsNextionFailure(ret)) ? ERROR : SUCCESS;
+}
+
+/**
+ * Sends out a string of the form "obj.attr=val" or "attr=val"
+ * Use to update integer fields of display objects
+ */
+static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandString_t attr_index, int32_t val) {
+    sendStartOfAssignment(obj_index, attr_index);
+
+    char number[12]; // To store converted int
+    sprintf(number, "%ld", val);
+
+    BSP_UART_Write(UART_3, number, strlen(number));
+    BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
+
+    // Get a response from the display
     uint8_t buf[8];
     BSP_UART_Read(UART_3, buf);
     int ret = *((uint32_t *) buf);
@@ -108,7 +130,7 @@ void Display_Init() {
  */
 ErrorStatus Display_SetVelocity(float vel) {
     int32_t vel_fix = (uint32_t) floorf(vel * 10.0f);
-    return updateValue(VELOCITY, VALUE, NULL, vel_fix);
+    return updateIntValue(VELOCITY, VALUE, vel_fix);
 }
 
 /**
@@ -116,9 +138,9 @@ ErrorStatus Display_SetVelocity(float vel) {
  */
 ErrorStatus Display_CruiseEnable(State on) {
     if (on == ON) {
-        return updateValue(CRUISE_ENABLE, PCO, NULL, NEXTION_GREEN);
+        return updateIntValue(CRUISE_ENABLE, PCO, NEXTION_GREEN);
     } else {
-        return updateValue(CRUISE_ENABLE, PCO, NULL, NEXTION_LIGHT_GREY);
+        return updateIntValue(CRUISE_ENABLE, PCO, NEXTION_LIGHT_GREY);
     }
 }
 
@@ -127,9 +149,9 @@ ErrorStatus Display_CruiseEnable(State on) {
  */
 ErrorStatus Display_CruiseSet(State on) {
     if (on == ON) {
-        return updateValue(CRUISE_SET, PCO, NULL, NEXTION_GREEN);
+        return updateIntValue(CRUISE_SET, PCO, NEXTION_GREEN);
     } else {
-        return updateValue(CRUISE_SET, PCO, NULL, NEXTION_LIGHT_GREY);
+        return updateIntValue(CRUISE_SET, PCO, NEXTION_LIGHT_GREY);
     }
 }
 
@@ -139,9 +161,10 @@ ErrorStatus Display_CruiseSet(State on) {
  */
 ErrorStatus Display_SetError(int idx, char *err) {
     if (idx < 0 || idx > 5) return ERROR; // Index out of bounds
-    ErrorStatus err1 = updateValue(ERROR0 + idx, TEXT, err, 0);
-    ErrorStatus err2 = updateValue(ERROR0 + idx, PCO, NULL, NEXTION_GREEN);
-    return err1 && err2; // If either is error, then had an error
+    ErrorStatus err1 = updateStringValue(ERROR0 + idx, TEXT, err);
+    ErrorStatus err2 = updateIntValue(ERROR0 + idx, PCO, NEXTION_GREEN);
+    // If either is error, then had an error
+    return (err1 == ERROR)  || (err2 == ERROR) ? ERROR : SUCCESS;
 }
 
 /**
@@ -149,7 +172,7 @@ ErrorStatus Display_SetError(int idx, char *err) {
  * User must clear the remaining slots manually using Display_SetError
  */
 ErrorStatus Display_NoErrors(void) {
-    ErrorStatus err1 = updateValue(ERROR0, PCO, NULL, NEXTION_GREEN);
+    ErrorStatus err1 = updateIntValue(ERROR0, PCO, NEXTION_GREEN);
     ErrorStatus err2 = updateValue(ERROR0, PCO, (char *) NO_ERROR, 0);
     return err1 && err2; // If either one is error, then we had an error
 }
@@ -159,12 +182,12 @@ ErrorStatus Display_NoErrors(void) {
  * Set the display to the main view
  */
 ErrorStatus Display_SetMainView(void) {
-    return updateValue(SYSTEM, PAGE, NULL, 1);
+    return updateIntValue(SYSTEM, PAGE, 1);
 }
 
 /**
  * Set the display back to the precharge view
  */
 ErrorStatus Display_SetPrechargeView(void) {
-    return updateValue(SYSTEM, PAGE, NULL, 0);
+    return updateIntValue(SYSTEM, PAGE, 0);
 }
