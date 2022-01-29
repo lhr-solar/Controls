@@ -71,6 +71,14 @@ typedef struct{
     State MotorConnectionErr;
 } error_code_t;
 
+#define SYSTEM_ERR_COUNT (sizeof(error_code_t) / sizeof(State))
+
+union error_array_t {
+    error_code_t err;
+    State arr[SYSTEM_ERR_COUNT];
+};
+
+
 /**
  * Regen Brake Mode Enum
  * 
