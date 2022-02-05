@@ -5,7 +5,7 @@
 #define THRESHOLD 3
 
 void Task_ReadCarCAN(void *p_arg) {
-    car_state_t *car = (car_state_t *) p_arg;
+    car_state_t *car_state = (car_state_t *) p_arg;
 
     uint8_t buffer[8]; // buffer for CAN message
 
@@ -20,12 +20,10 @@ void Task_ReadCarCAN(void *p_arg) {
         if (err == OS_ERR_NONE) {
             // A signal was received, so the task should wait until signaled again
             OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
+            assertOSErr(car_state, READ_CAN_ERR, M_NONE, &err);
 
-            if(err != OS_ERR_NONE){
-                car->ErrorCode.ReadCANErr = ON;
-            }
         } else if (err != OS_ERR_PEND_WOULD_BLOCK) {
-            car->ErrorCode.ReadCANErr = ON;
+            assertOSErr(car_state, READ_CAN_ERR, M_NONE, &err);
         }
 
         // Normal task countinues here
@@ -34,9 +32,9 @@ void Task_ReadCarCAN(void *p_arg) {
         if (CANbus_Read(buffer) == SUCCESS) {
             long msg = *((long *)(&buffer[0]));
             if (msg == 0) {
-                car->IsRegenBrakingAllowed = OFF;
+                car_state->IsRegenBrakingAllowed = OFF;
             } else {
-                car->IsRegenBrakingAllowed = ON;
+                car_state->IsRegenBrakingAllowed = ON;
             }
 
             faultCounter = 0;
@@ -45,13 +43,10 @@ void Task_ReadCarCAN(void *p_arg) {
         }
 
         if (faultCounter >= THRESHOLD) {
-            car->IsRegenBrakingAllowed = OFF;
+            car_state->IsRegenBrakingAllowed = OFF;
         }
 
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-        
-        if(err != OS_ERR_NONE){
-            car->ErrorCode.ReadCANErr = ON;
-        }
+        assertOSErr(car_state, READ_CAN_ERR, M_NONE, &err);
     }
 }

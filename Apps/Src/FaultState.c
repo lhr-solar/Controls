@@ -4,24 +4,53 @@
 #include "CANbus.h"
 #include "BSP_UART.h"
 #include "config.h"
+#include "MotorConnection.h"
+#include "ArrayConnection.h"
 
 /*
  * Note: do not call this directly if it can be helped.
  * Instead, call an RTOS function to unblock the mutex
  * that the Fault Task is pending on.
  */
-void EnterFaultState() {
-    //switch()
+void EnterFaultState(void *p_arg) {
+    car_state_t *car_state = (car_state_t *) p_arg;
+
+    fault_bitmap_t FaultBitmap = car_state->FaultBitmap;
+
+    if(FaultBitmap.Fault_OS){
+        EEPROM_LogError(FaultBitmap);
+        arrayKill();
+        motor_kill();
+    }
+    else if(FaultBitmap.Fault_TRITIUM){
+        EEPROM_LogError(FaultBitmap);
+        arrayKill();
+        motor_kill();
+    }
+    else if(FaultBitmap.Fault_READBPS){
+        EEPROM_LogError(FaultBitmap);
+        arrayKill();
+        motor_kill();
+    }
+    else if(FaultBitmap.Fault_UNREACH){
+        EEPROM_LogError(FaultBitmap);
+        arrayKill();
+        motor_kill();
+    }
+    else if(FaultBitmap.Fault_DISPLAY){
+        EEPROM_LogError(FaultBitmap);
+    }
 }
 
+
 void Task_FaultState(void *p_arg) {
-    (void)p_arg;
+    car_state_t *car_state = (car_state_t *) p_arg;
     OS_ERR err;
     CPU_TS ts;
-
+    
     // BLOCKING =====================
     // Wait until a FAULT is signaled by another task.
-    OSSemPend(&Fault_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+    OSSemPend(&Fault_State_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
     
-    EnterFaultState();
+    EnterFaultState(car_state);
 }

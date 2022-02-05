@@ -4,15 +4,31 @@
 
 void Task_SendCarCAN(void *p_arg) {} // TODO: remove this
 
-static void motor_startup(OS_ERR *err) {
+static void motor_startup(car_state_t *car_state, OS_ERR *err) {
     Precharge_Write(MOTOR_PRECHARGE, ON); // Activate the motor recharge
 
-    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, err);
-    // TODO: check for errors
+    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    assertOSErr(car_state, MOTOR_CONNECTION_ERR, M_NONE, &err);
 
     Contactors_Set(MOTOR, ON); // Actually activate motor contactors
     Precharge_Write(MOTOR_PRECHARGE, OFF);
 }
+
+static void motor_kill(){
+    OS_ERR err;
+    OS_TaskDel(SendTritium_TCB, &err);  //Stop sending CAN
+    if(err != OS_ERR_NONE){
+        Contactors_Set(MOTOR, OFF);
+    }
+
+    OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, err);
+    if(err != OS_ERR_NONE){
+        Contactors_Set(MOTOR, OFF);
+    }
+
+    Contactors_Set(MOTOR, OFF);
+}
+
 
 
 void Task_MotorConnection(void *p_arg) {
@@ -22,10 +38,8 @@ void Task_MotorConnection(void *p_arg) {
     CPU_TS ts;
 
     Contactors_Init(MOTOR);
-    motor_startup(&err);
-    if(err != OS_ERR_NONE){
-        car_state->ErrorCode.MotorConnectionErr = ON;
-    }
+    motor_startup(car_state, &err);
+    assertOSErr(car_state, MOTOR_CONNECTION_ERR, M_NONE, &err);
 
     // Spawn SendCarCAN
     OSTaskCreate(
@@ -43,10 +57,7 @@ void Task_MotorConnection(void *p_arg) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    // TODO: check for task creation error
-    if(err != OS_ERR_NONE){
-        car_state->ErrorCode.SendCANErr = ON;
-    }
+    assertOSErr(car_state, SEND_CAN_ERR, M_NONE, &err);
 
     // Spawn ReadTritium
     OSTaskCreate(
@@ -64,10 +75,7 @@ void Task_MotorConnection(void *p_arg) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    // TODO: check for task creation error
-    if(err != OS_ERR_NONE){
-        car_state->ErrorCode.ReadTritiumErr = ON;
-    }
+    assertOSErr(car_state, READ_TRITIUM_ERR, M_NONE, &err);
 
     // Spawn SendTritium
     OSTaskCreate(
@@ -85,10 +93,7 @@ void Task_MotorConnection(void *p_arg) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    // TODO: check for task creation error
-    if(err != OS_ERR_NONE){
-        car_state->ErrorCode.SendTritiumErr = ON;
-    }
+    assertOSErr(car_state, SEND_TRITIUM_ERR, M_NONE, &err);
 
     while (1) {
         // Wait until some change needs to be made to the motor state
@@ -98,33 +103,26 @@ void Task_MotorConnection(void *p_arg) {
         State currentState = Contactors_Get(MOTOR);
 
         if (desiredState == ON && currentState != ON) {
-            motor_startup(&err); // Reactivate the array
+            motor_startup(car_state, &err); // Reactivate the array
+            
             OSTaskSemPost(&SendCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.SendCANErr = ON;
-            }
+            assertOSErr(car_state, SEND_CAN_ERR, M_NONE, &err);
+            
             OSTaskSemPost(&ReadTritium_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.ReadTritiumErr = ON;
-            }
+            assertOSErr(car_state, READ_TRITIUM_ERR, M_NONE, &err);
+            
             OSTaskSemPost(&SendTritium_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.SendTritiumErr = ON;
-            }
+            assertOSErr(car_state, SEND_TRITIUM_ERR, M_NONE, &err);
         } else if (desiredState != ON && currentState == ON) {
             Contactors_Set(MOTOR, OFF); // Deactivate the array
             OSTaskSemPost(&SendCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.SendCANErr = ON;
-            }
+            assertOSErr(car_state, SEND_CAN_ERR, M_NONE, &err);
+
             OSTaskSemPost(&ReadTritium_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.ReadTritiumErr = ON;
-            }
+            assertOSErr(car_state, READ_TRITIUM_ERR, M_NONE, &err);
+
             OSTaskSemPost(&SendTritium_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.SendTritiumErr = ON;
-            }
+            assertOSErr(car_state, SEND_TRITIUM_ERR, M_NONE, &err);
         }
 
     }

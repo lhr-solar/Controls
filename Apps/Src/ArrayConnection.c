@@ -3,30 +3,30 @@
 #include "ArrayConnection.h"
 #include "Contactors.h"
 
-static void arrayStartup(OS_ERR *err) {
 
+static void arrayStartup(car_state_t *car_state, OS_ERR *err) {
     Precharge_Write(ARRAY_PRECHARGE, ON); // Turn on the array precharge
 
-    OSTimeDlyHMSM(0, 0, PRECHARGE_ARRAY_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, err);
-    // TODO: error handling
-    
+    OSTimeDlyHMSM(0, 0, PRECHARGE_ARRAY_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+    assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
 
     Contactors_Set(ARRAY, ON); // Actually activate the contactor
     Precharge_Write(ARRAY_PRECHARGE, OFF); // Deactivate the array precharge
 }
 
-void Task_ArrayConnection(void *p_arg) {
+static void arrayKill(){
+    Contactors_Set(ARRAY, OFF);
+}
 
+void Task_ArrayConnection(void *p_arg) {
     car_state_t *car_state = (car_state_t *) p_arg;
 
     OS_ERR err;
     CPU_TS ts;
 
     Contactors_Init(ARRAY); //  Initialize the contactors
-    arrayStartup(&err);
-    if(err != OS_ERR_NONE){
-        car_state->ErrorCode.ArrayErr = ON;
-    }
+    arrayStartup(car_state, &err);
+    assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
 
     // Create ReadCarCAN
     OSTaskCreate(
@@ -45,37 +45,27 @@ void Task_ArrayConnection(void *p_arg) {
         (OS_ERR*)&err
     );
     
-    if(err != OS_ERR_NONE){
-        car_state->ErrorCode.ReadCANErr = ON;
-    }
+    assertOSErr(car_state, READ_CAN_ERR, M_NONE, &err);
 
     while (1) {
         // Wait until some change needs to be made to the array state
         OSSemPend(&ArrayConnectionChange_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-        if(err != OS_ERR_NONE) {
-            car_state->ErrorCode.ArrayErr = ON;
-        }
+        assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
 
         State desiredState = car_state->ShouldArrayBeActivated;
         State currentState = Contactors_Get(ARRAY);
 
 
         if (desiredState == ON && currentState != ON) {
-            arrayStartup(&err); // Reactivate the array
+            arrayStartup(car_state, &err); // Reactivate the array
             OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.ArrayErr = ON;
-            }
+            assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
         } else if (desiredState != ON && currentState == ON) {
             Contactors_Set(ARRAY, OFF); // Deactivate the array
             OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.ArrayErr = ON;
-            }
+            assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
         }
         
-        if(err != OS_ERR_NONE){
-            car_state->ErrorCode.ArrayErr = ON;
-        }
+        assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
     }
 }

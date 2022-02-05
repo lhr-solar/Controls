@@ -13,11 +13,12 @@
  * 
  */
 
-typedef struct{
-    State motorTempErr;
-    State CCVelocityErr; 
-    State slipSpeedErr;
-    State overSpeedErr;
+typedef enum{
+    M_NONE = 0x00,
+    M_TEMP_ERR = 0x01,
+    M_CC_VEL_ERR = 0x02,
+    M_SLIP_SPEED_ERR = 0x04,
+    M_OVER_SPEED_ERR = 0x08
 } motor_error_code_t;
 
 /**
@@ -53,32 +54,40 @@ typedef struct {
 } blinker_states_t;
 
 /**
- * Error States
+ * OS Error States
  * 
  * Stores error data to indicate which part of the code
  * an error is coming from.
  */
 
-typedef struct{
-    State ArrayErr;
-    State ReadCANErr;
-    State ReadTritiumErr;
-    State SendCANErr;
-    State SendTritiumErr;
-    State UpdateVelocityErr;
-    State ReadPedalErr;
-    State BlinkLightsErr;
-    State MotorConnectionErr;
-} error_code_t;
+typedef enum{
+    ARRAY_ERR = 0x001,
+    READ_CAN_ERR = 0x002,
+    READ_TRITIUM_ERR = 0x004,
+    SEND_CAN_ERR = 0x008,
+    SEND_TRITIUM_ERR = 0x010,
+    UPDATE_VEL_ERR = 0x020,
+    READ_PEDAL_ERR = 0x040,
+    BLINK_LIGHTS_ERR = 0x080,
+    MOTOR_CONNECTION_ERR = 0x100;
+} os_error_code_t;
 
+/**
+ * Fault Union
+ * 
+ * Different fault states that need to be handled by the FaultState task
+ */
+typedef union{
+    uint8_t bitmap;
+    struct{
+        State Fault_OS : 1;         // for OS faults
+        State Fault_UNREACH : 1;    // for unreachable conditions
+        State Fault_TRITIUM : 1;      // for errors sent from the tritium
+        State Fault_READBPS : 1;    // for unsuccessfully reading from BPS CAN
+        State Fault_DISPLAY : 1;    // for display faults
+    };
+} fault_bitmap_t;
 
-typedef struct{
-    State Fault_OS : 1;         // for OS faults
-    State Fault_UNREACH : 1;    // for unreachable conditions
-    State Fault_TRITIUM : 1;      // for errors sent from the tritium
-    State Fault_READBPS : 1;    // for unsuccessfully reading from BPS CAN
-    State Fault_DISPLAY : 1;    // for display faults
-} fault_conditions_t;
 /**
  * Regen Brake Mode Enum
  * 
@@ -125,9 +134,9 @@ typedef struct {
     State ShouldArrayBeActivated;
     State ShouldMotorBeActivated;
 
-    error_code_t ErrorCode;
-    motor_error_code_t MotorErrorCode;
-    fault_conditions_t FaultConditions;
+    uint8_t OSErrorBitmap;
+    uint8_t MotorErrorBitmap;
+    fault_bitmap_t FaultBitmap;
 
 } car_state_t;
 

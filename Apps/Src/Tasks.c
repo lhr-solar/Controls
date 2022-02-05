@@ -6,6 +6,7 @@
 /**
  * TCBs
  */
+OS_TCB FaultState_TCB;
 OS_TCB SendTritium_TCB;
 OS_TCB UpdateVelocity_TCB;
 OS_TCB ReadCarCAN_TCB;
@@ -24,6 +25,7 @@ OS_TCB Init_TCB;
 /**
  * Stacks
  */
+CPU_STK Fault_Stk[TASK_FAULT_STATE_STACK_SIZE];
 CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
 CPU_STK UpdateVelocity_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
 CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
@@ -47,6 +49,7 @@ OS_Q CANBus_MsgQ;
 /**
  * Semaphores
  */
+OS_SEM Fault_State_Sem4;
 OS_SEM VelocityChange_Sem4;
 OS_SEM DisplayChange_Sem4;
 OS_SEM LightsChange_Sem4;
@@ -59,7 +62,6 @@ OS_SEM BlinkLight_Sem4;
 OS_SEM SendCarCAN_Sem4;
 OS_SEM MotorConnectionChange_Sem4;
 OS_SEM ArrayConnectionChange_Sem4;
-OS_SEM Fault_Sem4;
 
 /**
  * Global Variables
@@ -67,12 +69,17 @@ OS_SEM Fault_Sem4;
 
 // TODO: Put all global state variables here
 
-void assertOSError(OS_ERR err, error_code_t errType, void *p_arg){
+void assertOSError(car_state_t *car_state, uint8_t OS_error_code, uint8_t motor_error_code, OS_ERR *err){
     if(err != OS_ERR_NONE){
-        car_state_t *car_state = (car_state_t *) p_arg;
-        car_state->FaultConditions.Fault_OS = 1;
-        OSSemPost(&Fault_Sem4, OS_OPT_POST_1, &err);
+        car_state->FaultBitmap.Fault_OS = 1;
+        car_state->OSErrorBitmap |= OS_error_code;
+        car_state->MotorErrorBitmap |= motor_error_code;
+        //TODO: Update display by reading from error codes in car state
 
+        OSSemPost(&Fault_State_Sem4, OS_OPT_POST_1, &err);
         
+        if(err != OS_ERR_NONE){
+            EnterFaultState();
+        }
     }
 }
