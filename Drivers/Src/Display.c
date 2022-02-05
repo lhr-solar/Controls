@@ -4,6 +4,8 @@
 #include <string.h>
 
 #define NEXTION_INSTRUCTION_SUCCESSFUL 0x01ffffff
+// The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
+#define MPS_TO_dMPH 22.374f
 
 static const char *DELIMITER = ".";
 static const char *ASSIGNMENT = "=";
@@ -129,7 +131,7 @@ void Display_Init() {
  * Set the displayed velocity to vel 
  */
 ErrorStatus Display_SetVelocity(float vel) {
-    int32_t vel_fix = (uint32_t) floorf(vel * 10.0f);
+    int32_t vel_fix = (uint32_t) floorf(vel * MPS_TO_dMPH);
     return updateIntValue(VELOCITY, VALUE, vel_fix);
 }
 

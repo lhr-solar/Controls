@@ -82,6 +82,6 @@ void Task_SendDisplay(void *p_arg) {
             }
         }
 
-        OSTimeDlyHMSM(0, 0, 0, 33, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 30 fps
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
     }
 }
