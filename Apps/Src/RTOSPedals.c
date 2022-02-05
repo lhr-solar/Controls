@@ -28,7 +28,7 @@ void Task_ReadPedals(void *p_arg){
             OSSemPost (&VelocityChange_Sem4, OS_OPT_POST_ALL, &err);
             assertOSError(car_state, OS_UPDATE_VEL_LOC, &err);
         }
-        if( car_state->BrakePedalPercent != PreviousBrake){
+        if(car_state->BrakePedalPercent != PreviousBrake){
             OSSemPost (&LightsChange_Sem4, OS_OPT_POST_ALL, &err);
             assertOSError(car_state, OS_BLINK_LIGHTS_LOC, &err);
         }
