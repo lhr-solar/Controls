@@ -34,14 +34,15 @@ void Task1(void *p_arg){
 
     uint8_t buffer[8];
     buffer[0]=99; //this should change after read
+    
     CANMSG_t msg;
     CANPayload_t payload;
     CANData_t dat;
-    dat.b = 1;
-    payload.bytes = 1;
+    dat.d = 0xABCDEFABABCDEFAB;
+    payload.bytes = 8;
     payload.data = dat;
     payload.idx = 0;
-    msg.id = CAR_STATE; //ON-OFF 
+    msg.id = VELOCITY; //ON-OFF 
     msg.payload = payload;
     uint8_t i = 0;
     while(i<4){
@@ -58,6 +59,9 @@ void Task1(void *p_arg){
         // printf("Read Result: %i\n",buffer[0]);
         // msg.payload.data.b ^= 0x01; //toggle bit 0  to swap data
         i++;
+    }
+    while(true){
+        volatile int x = 0;
     }
 }
 int main(void){ //startup OS stuff, spawn test task
