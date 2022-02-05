@@ -58,7 +58,7 @@ void Task_UpdateVelocity(void* p_arg) {
 
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(car_state, UPDATE_VEL_ERR, &err);
+        assertOSError(car_state, OS_UPDATE_VEL_LOC, &err);
     }
 }
 

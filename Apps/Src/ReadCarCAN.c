@@ -20,10 +20,10 @@ void Task_ReadCarCAN(void *p_arg) {
         if (err == OS_ERR_NONE) {
             // A signal was received, so the task should wait until signaled again
             OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
-            assertOSError(car_state, READ_CAN_ERR, &err);
+            assertOSError(car_state, OS_READ_CAN_LOC, &err);
 
         } else if (err != OS_ERR_PEND_WOULD_BLOCK) {
-            assertOSError(car_state, READ_CAN_ERR, &err);
+            assertOSError(car_state, OS_READ_CAN_LOC, &err);
         }
 
         // Normal task countinues here
@@ -47,6 +47,6 @@ void Task_ReadCarCAN(void *p_arg) {
         }
 
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-        assertOSError(car_state, READ_CAN_ERR, &err);
+        assertOSError(car_state, OS_READ_CAN_LOC, &err);
     }
 }

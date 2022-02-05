@@ -83,12 +83,12 @@ void assertOSError(car_state_t *car_state, uint16_t OS_error_loc, OS_ERR *err){
     }
 }
 
-void assertMotorControlError(car_state_t *car_state, uint8_t motor_error_code){
-    if(motor_error_code != M_NONE){
+void assertTritiumError(car_state_t *car_state, uint8_t motor_error_code){
+    if(motor_error_code != T_NONE){
         OS_ERR err;
 
         car_state->FaultBitmap.Fault_TRITIUM = 1;
-        car_state->MotorErrorBitmap |= motor_error_code;
+        car_state->TritiumErrorBitmap |= motor_error_code;
 
         OSSemPost(&Fault_State_Sem4, OS_OPT_POST_1, &err);
         if(err != OS_ERR_NONE){
