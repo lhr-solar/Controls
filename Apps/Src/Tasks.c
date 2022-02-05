@@ -70,12 +70,12 @@ OS_SEM ArrayConnectionChange_Sem4;
 
 // TODO: Put all global state variables here
 
-void assertOSError(car_state_t *car_state, uint16_t OS_error_loc, OS_ERR *err){
+void assertOSError(car_state_t *car_state, uint16_t OS_error_loc, OS_ERR err){
     if(err != OS_ERR_NONE){
         car_state->FaultBitmap.Fault_OS = 1;
         car_state->OSErrorLocBitmap |= OS_error_loc;
         
-        OSSemPost(&Fault_State_Sem4, OS_OPT_POST_1, err);
+        OSSemPost(&Fault_State_Sem4, OS_OPT_POST_1, &err);
         
         if(err != OS_ERR_NONE){
             EnterFaultState(&car_state);

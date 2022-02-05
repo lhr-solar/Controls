@@ -26,9 +26,9 @@ void Task_SendTritium(void *p_arg) {
         if (err == OS_ERR_NONE) {
             // A signal was received, so the task should wait until signaled again
             OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
-            assertOSError(car_state, OS_SEND_TRITIUM_LOC, &err);
+            assertOSError(car_state, OS_SEND_TRITIUM_LOC, err);
         } else if (err != OS_ERR_PEND_WOULD_BLOCK) {
-            assertOSError(car_state, OS_SEND_TRITIUM_LOC, &err);
+            assertOSError(car_state, OS_SEND_TRITIUM_LOC, err);
         }
 
         // Send the drive command to the motor controller
@@ -37,7 +37,7 @@ void Task_SendTritium(void *p_arg) {
         // Delay for 100 ms
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE) {
-            assertOSError(car_state, OS_SEND_TRITIUM_LOC, &err);
+            assertOSError(car_state, OS_SEND_TRITIUM_LOC, err);
         }
     }
 }

@@ -26,11 +26,11 @@ void Task_ReadPedals(void *p_arg){
         // Post to semaphores if there is a change in newly read accel or brake compared to prev values
         if(car_state->AccelPedalPercent != PreviousAccel){
             OSSemPost (&VelocityChange_Sem4, OS_OPT_POST_ALL, &err);
-            assertOSError(car_state, OS_UPDATE_VEL_LOC, &err);
+            assertOSError(car_state, OS_UPDATE_VEL_LOC, err);
         }
         if(car_state->BrakePedalPercent != PreviousBrake){
             OSSemPost (&LightsChange_Sem4, OS_OPT_POST_ALL, &err);
-            assertOSError(car_state, OS_BLINK_LIGHTS_LOC, &err);
+            assertOSError(car_state, OS_BLINK_LIGHTS_LOC, err);
         }
 
         PreviousAccel = car_state->AccelPedalPercent;
@@ -38,7 +38,7 @@ void Task_ReadPedals(void *p_arg){
     
         // Delay for 0.01 sec
         OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(car_state, OS_READ_PEDAL_LOC, &err);
+        assertOSError(car_state, OS_READ_PEDAL_LOC, err);
     }
 }
 

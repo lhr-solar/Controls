@@ -157,6 +157,6 @@ extern OS_SEM Fault_State_Sem4;
 
 
 // TODO: Put all global state variables here
-void assertOSError(car_state_t *car_state, uint16_t OS_error_loc, OS_ERR *err);
+void assertOSError(car_state_t *car_state, uint16_t OS_error_loc, OS_ERR err);
 void assertTritiumError(car_state_t *car_state, uint8_t motor_error_code);
 #endif
