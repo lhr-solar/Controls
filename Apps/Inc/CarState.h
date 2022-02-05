@@ -71,6 +71,14 @@ typedef struct{
     State MotorConnectionErr;
 } error_code_t;
 
+
+typedef struct{
+    State Fault_OS : 1;         // for OS faults
+    State Fault_UNREACH : 1;    // for unreachable conditions
+    State Fault_TRITIUM : 1;      // for errors sent from the tritium
+    State Fault_READBPS : 1;    // for unsuccessfully reading from BPS CAN
+    State Fault_DISPLAY : 1;    // for display faults
+} fault_conditions_t;
 /**
  * Regen Brake Mode Enum
  * 
@@ -118,8 +126,9 @@ typedef struct {
     State ShouldMotorBeActivated;
 
     error_code_t ErrorCode;
-
     motor_error_code_t MotorErrorCode;
+    fault_conditions_t FaultConditions;
+
 } car_state_t;
 
 

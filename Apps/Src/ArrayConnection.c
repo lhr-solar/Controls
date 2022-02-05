@@ -52,11 +52,7 @@ void Task_ArrayConnection(void *p_arg) {
     while (1) {
         // Wait until some change needs to be made to the array state
         OSSemPend(&ArrayConnectionChange_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-<<<<<<< HEAD
-        if(err != OS_ERR_NONE){
-=======
         if(err != OS_ERR_NONE) {
->>>>>>> master
             car_state->ErrorCode.ArrayErr = ON;
         }
 

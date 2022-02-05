@@ -59,6 +59,7 @@ OS_SEM BlinkLight_Sem4;
 OS_SEM SendCarCAN_Sem4;
 OS_SEM MotorConnectionChange_Sem4;
 OS_SEM ArrayConnectionChange_Sem4;
+OS_SEM Fault_Sem4;
 
 /**
  * Global Variables
@@ -66,3 +67,12 @@ OS_SEM ArrayConnectionChange_Sem4;
 
 // TODO: Put all global state variables here
 
+void assertOSError(OS_ERR err, error_code_t errType, void *p_arg){
+    if(err != OS_ERR_NONE){
+        car_state_t *car_state = (car_state_t *) p_arg;
+        car_state->FaultConditions.Fault_OS = 1;
+        OSSemPost(&Fault_Sem4, OS_OPT_POST_1, &err);
+
+        
+    }
+}
