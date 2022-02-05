@@ -1,11 +1,5 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
-#include "os.h"
-#include "Tasks.h"
-#include "CANbus.h"
-#include "BSP_UART.h"
-#include "config.h"
-#include "MotorConnection.h"
-#include "ArrayConnection.h"
+#include "FaultState.h"
 
 /*
  * Note: do not call this directly if it can be helped.
@@ -18,28 +12,30 @@ void EnterFaultState(void *p_arg) {
     fault_bitmap_t FaultBitmap = car_state->FaultBitmap;
 
     if(FaultBitmap.Fault_OS){
-        EEPROM_LogError(FaultBitmap);
+        //EEPROM_LogError(FaultBitmap);
         arrayKill();
         motor_kill();
     }
     else if(FaultBitmap.Fault_TRITIUM){
-        EEPROM_LogError(FaultBitmap);
+        //EEPROM_LogError(FaultBitmap);
         arrayKill();
         motor_kill();
     }
     else if(FaultBitmap.Fault_READBPS){
-        EEPROM_LogError(FaultBitmap);
+        //EEPROM_LogError(FaultBitmap);
         arrayKill();
         motor_kill();
     }
     else if(FaultBitmap.Fault_UNREACH){
-        EEPROM_LogError(FaultBitmap);
+        //EEPROM_LogError(FaultBitmap);
         arrayKill();
         motor_kill();
     }
     else if(FaultBitmap.Fault_DISPLAY){
-        EEPROM_LogError(FaultBitmap);
+        //EEPROM_LogError(FaultBitmap);
     }
+
+    while(1){}
 }
 
 

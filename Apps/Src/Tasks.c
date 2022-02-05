@@ -1,6 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "Tasks.h"
+#include "FaultState.h"
 #include "os.h"
 
 /**
@@ -69,17 +70,29 @@ OS_SEM ArrayConnectionChange_Sem4;
 
 // TODO: Put all global state variables here
 
-void assertOSError(car_state_t *car_state, uint8_t OS_error_code, uint8_t motor_error_code, OS_ERR *err){
+void assertOSError(car_state_t *car_state, uint16_t OS_error_loc, OS_ERR *err){
     if(err != OS_ERR_NONE){
         car_state->FaultBitmap.Fault_OS = 1;
-        car_state->OSErrorBitmap |= OS_error_code;
-        car_state->MotorErrorBitmap |= motor_error_code;
-        //TODO: Update display by reading from error codes in car state
-
-        OSSemPost(&Fault_State_Sem4, OS_OPT_POST_1, &err);
+        car_state->OSErrorLocBitmap |= OS_error_loc;
+        
+        OSSemPost(&Fault_State_Sem4, OS_OPT_POST_1, err);
         
         if(err != OS_ERR_NONE){
-            EnterFaultState();
+            EnterFaultState(&car_state);
+        }
+    }
+}
+
+void assertMotorControlError(car_state_t *car_state, uint8_t motor_error_code){
+    if(motor_error_code != M_NONE){
+        OS_ERR err;
+
+        car_state->FaultBitmap.Fault_TRITIUM = 1;
+        car_state->MotorErrorBitmap |= motor_error_code;
+
+        OSSemPost(&Fault_State_Sem4, OS_OPT_POST_1, &err);
+        if(err != OS_ERR_NONE){
+            EnterFaultState(&car_state);
         }
     }
 }

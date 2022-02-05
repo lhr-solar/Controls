@@ -11,4 +11,6 @@
 #include "Precharge.h"
 #include "CarState.h"
 
+void motor_kill();
+
 #endif

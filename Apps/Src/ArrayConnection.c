@@ -7,14 +7,14 @@
 static void arrayStartup(car_state_t *car_state, OS_ERR *err) {
     Precharge_Write(ARRAY_PRECHARGE, ON); // Turn on the array precharge
 
-    OSTimeDlyHMSM(0, 0, PRECHARGE_ARRAY_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
+    OSTimeDlyHMSM(0, 0, PRECHARGE_ARRAY_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, err);
+    assertOSError(car_state, ARRAY_ERR, err);
 
     Contactors_Set(ARRAY, ON); // Actually activate the contactor
     Precharge_Write(ARRAY_PRECHARGE, OFF); // Deactivate the array precharge
 }
 
-static void arrayKill(){
+void arrayKill(){
     Contactors_Set(ARRAY, OFF);
 }
 
@@ -26,7 +26,7 @@ void Task_ArrayConnection(void *p_arg) {
 
     Contactors_Init(ARRAY); //  Initialize the contactors
     arrayStartup(car_state, &err);
-    assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
+    assertOSError(car_state, ARRAY_ERR, &err);
 
     // Create ReadCarCAN
     OSTaskCreate(
@@ -45,27 +45,26 @@ void Task_ArrayConnection(void *p_arg) {
         (OS_ERR*)&err
     );
     
-    assertOSErr(car_state, READ_CAN_ERR, M_NONE, &err);
+    assertOSError(car_state, READ_CAN_ERR, &err);
 
     while (1) {
         // Wait until some change needs to be made to the array state
         OSSemPend(&ArrayConnectionChange_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-        assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
+        assertOSError(car_state, ARRAY_ERR, &err);
 
         State desiredState = car_state->ShouldArrayBeActivated;
         State currentState = Contactors_Get(ARRAY);
 
-
         if (desiredState == ON && currentState != ON) {
             arrayStartup(car_state, &err); // Reactivate the array
             OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
+            assertOSError(car_state, ARRAY_ERR, &err);
         } else if (desiredState != ON && currentState == ON) {
             Contactors_Set(ARRAY, OFF); // Deactivate the array
             OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
+            assertOSError(car_state, ARRAY_ERR, &err);
         }
         
-        assertOSErr(car_state, ARRAY_ERR, M_NONE, &err);
+        assertOSError(car_state, ARRAY_ERR, &err);
     }
 }

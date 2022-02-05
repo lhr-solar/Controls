@@ -10,4 +10,6 @@
 #include "Contactors.h"
 #include "Precharge.h"
 
+void arrayKill();
+
 #endif

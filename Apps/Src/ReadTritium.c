@@ -16,9 +16,9 @@ void Task_ReadTritium(void* p_arg) {
         if (err == OS_ERR_NONE) {
             // A signal was received, so the task should wait until signaled again
             OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
-            assertOSErr(car_state, READ_TRITIUM_ERR, M_NONE, &err);
+            assertOSError(car_state, READ_TRITIUM_ERR, &err);
         } else if (err != OS_ERR_PEND_WOULD_BLOCK) {
-            assertOSErr(car_state, READ_TRITIUM_ERR, M_NONE, &err);
+            assertOSError(car_state, READ_TRITIUM_ERR, &err);
         }
 
 		CANbuff buf;
@@ -27,9 +27,9 @@ void Task_ReadTritium(void* p_arg) {
 		if(status == SUCCESS) {
 
 			OSQPost(&CANBus_MsgQ, (void *) &buf, sizeof(buf), OS_OPT_POST_FIFO, &err);
-			assertOSErr(car_state, READ_TRITIUM_ERR, M_NONE, &err);
+			assertOSError(car_state, READ_TRITIUM_ERR, &err);
 		}
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-		assertOSErr(car_state, READ_TRITIUM_ERR, M_NONE, &err);
+		assertOSError(car_state, READ_TRITIUM_ERR, &err);
 	}
 }

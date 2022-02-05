@@ -69,8 +69,8 @@ typedef enum{
     UPDATE_VEL_ERR = 0x020,
     READ_PEDAL_ERR = 0x040,
     BLINK_LIGHTS_ERR = 0x080,
-    MOTOR_CONNECTION_ERR = 0x100;
-} os_error_code_t;
+    MOTOR_CONNECTION_ERR = 0x100
+} os_error_loc_t;
 
 /**
  * Fault Union
@@ -134,8 +134,8 @@ typedef struct {
     State ShouldArrayBeActivated;
     State ShouldMotorBeActivated;
 
-    uint8_t OSErrorBitmap;
-    uint8_t MotorErrorBitmap;
+    uint8_t OSErrorLocBitmap;
+    uint16_t MotorErrorBitmap;
     fault_bitmap_t FaultBitmap;
 
 } car_state_t;

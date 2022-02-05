@@ -53,7 +53,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
-ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
+ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car_state){
 
     uint32_t id;
     uint8_t data[8] = {0};
@@ -91,28 +91,28 @@ ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
             case MOTOR_STATUS: {
                 if(MASK_MOTOR_TEMP_ERR & firstSum)
                 {
-                    car->MotorErrorCode.motorTempErr = ON;
+                    assertMotorControlError(car_state, M_TEMP_ERR);
                 }
 
                 if(MASK_SS_ERR & firstSum)
                 {
-                    car->MotorErrorCode.slipSpeedErr = ON;
+                    assertMotorControlError(car_state, M_SLIP_SPEED_ERR);
                 }
 
                 if(MASK_CC_ERR & firstSum)
                 {
-                    car->MotorErrorCode.CCVelocityErr = ON;
+                    assertMotorControlError(car_state, M_CC_VEL_ERR);
                 }
 
                 if(MASK_OVER_SPEED_ERR & firstSum)
                 {
-                    car->MotorErrorCode.overSpeedErr = ON;
+                    assertMotorControlError(car_state, M_OVER_SPEED_ERR);
                 }
                 break;
             }
             case MOTOR_DRIVE: {
                 convert.n = secondSum;
-                car->CurrentVelocity = convert.f;
+                car_state->CurrentVelocity = convert.f;
                 break;
             }
             default: break;
