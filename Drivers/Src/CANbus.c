@@ -133,7 +133,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         &err
     );
 
-    if (retval){
+    if (retval == SUCCESS){
         return SUCCESS;
     } else {
         return ERROR;
