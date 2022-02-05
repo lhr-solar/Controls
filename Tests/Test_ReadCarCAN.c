@@ -93,9 +93,9 @@ void Task1(void *p_arg) {
     printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no");
 
     // Make sure the task can't fault when suspended
-    OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
+    OSTaskSuspend(&ReadCarCAN_TCB, &err);
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err); // If task was active, this would trigger a fault
-    OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
+    OSTaskResume(&ReadCarCAN_TCB, &err);
     printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no"); // should be yes
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err); // should trigger a fault now
     printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no"); // should be no
