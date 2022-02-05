@@ -1,5 +1,6 @@
 #include "common.h"
 #include "config.h"
+#include "stm32f4xx.h"
 #include <os.h>
 
 // Globals
@@ -53,7 +54,7 @@ void Task1(void* p_arg) {
     OS_ERR err;
 
     CPU_Init();
-    OS_CPU_SysTickInit();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
     OSTaskCreate(
         (OS_TCB*)&Task2TCB,
