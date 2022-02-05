@@ -14,12 +14,12 @@
  */
 
 typedef enum{
-    M_NONE = 0x00,
-    M_TEMP_ERR = 0x01,
-    M_CC_VEL_ERR = 0x02,
-    M_SLIP_SPEED_ERR = 0x04,
-    M_OVER_SPEED_ERR = 0x08
-} motor_error_code_t;
+    T_NONE = 0x00,
+    T_TEMP_ERR = 0x01,
+    T_CC_VEL_ERR = 0x02,
+    T_SLIP_SPEED_ERR = 0x04,
+    T_OVER_SPEED_ERR = 0x08
+} tritium_error_code_t;
 
 /**
  * Switch States
@@ -61,15 +61,16 @@ typedef struct {
  */
 
 typedef enum{
-    ARRAY_ERR = 0x001,
-    READ_CAN_ERR = 0x002,
-    READ_TRITIUM_ERR = 0x004,
-    SEND_CAN_ERR = 0x008,
-    SEND_TRITIUM_ERR = 0x010,
-    UPDATE_VEL_ERR = 0x020,
-    READ_PEDAL_ERR = 0x040,
-    BLINK_LIGHTS_ERR = 0x080,
-    MOTOR_CONNECTION_ERR = 0x100
+    OS_NONE_LOC = 0x000,
+    OS_ARRAY_LOC = 0x001,
+    OS_READ_CAN_LOC = 0x002,
+    OS_READ_TRITIUM_LOC = 0x004,
+    OS_SEND_CAN_LOC = 0x008,
+    OS_SEND_TRITIUM_LOC = 0x010,
+    OS_UPDATE_VEL_LOC = 0x020,
+    OS_READ_PEDAL_LOC = 0x040,
+    OS_BLINK_LIGHTS_LOC = 0x080,
+    OS_MOTOR_CONNECTION_LOC = 0x100
 } os_error_loc_t;
 
 /**
@@ -134,8 +135,8 @@ typedef struct {
     State ShouldArrayBeActivated;
     State ShouldMotorBeActivated;
 
-    uint8_t OSErrorLocBitmap;
-    uint16_t MotorErrorBitmap;
+    os_error_loc_t OSErrorLocBitmap;
+    tritium_error_code_t TritiumErrorBitmap;
     fault_bitmap_t FaultBitmap;
 
 } car_state_t;

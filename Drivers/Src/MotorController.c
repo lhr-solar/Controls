@@ -91,22 +91,22 @@ ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car_state){
             case MOTOR_STATUS: {
                 if(MASK_MOTOR_TEMP_ERR & firstSum)
                 {
-                    assertMotorControlError(car_state, M_TEMP_ERR);
+                    assertMotorControlError(car_state, T_TEMP_ERR);
                 }
 
                 if(MASK_SS_ERR & firstSum)
                 {
-                    assertMotorControlError(car_state, M_SLIP_SPEED_ERR);
+                    assertMotorControlError(car_state, T_SLIP_SPEED_ERR);
                 }
 
                 if(MASK_CC_ERR & firstSum)
                 {
-                    assertMotorControlError(car_state, M_CC_VEL_ERR);
+                    assertMotorControlError(car_state, T_CC_VEL_ERR);
                 }
 
                 if(MASK_OVER_SPEED_ERR & firstSum)
                 {
-                    assertMotorControlError(car_state, M_OVER_SPEED_ERR);
+                    assertMotorControlError(car_state, T_OVER_SPEED_ERR);
                 }
                 break;
             }
