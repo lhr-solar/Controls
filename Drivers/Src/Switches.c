@@ -1,6 +1,12 @@
 #include "Switches.h"
 
-
+/**
+ * TODO
+ * Change the macros for the registers
+ * put the select stuff around the init stuff
+ * change the buffers
+ * 
+ */
 
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
