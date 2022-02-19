@@ -142,6 +142,7 @@ extern OS_SEM SendCarCAN_Sem4;
 extern OS_SEM ArrayConnectionChange_Sem4;
 extern OS_SEM MotorConnectionChange_Sem4;
 
+
 /**
  * Global Variables
  */

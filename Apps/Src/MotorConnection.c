@@ -2,8 +2,6 @@
 
 #include "MotorConnection.h"
 
-void Task_SendCarCAN(void *p_arg) {} // TODO: remove this
-
 static void motor_startup(OS_ERR *err) {
     Precharge_Write(MOTOR_PRECHARGE, ON); // Activate the motor recharge
 

@@ -34,6 +34,16 @@ typedef struct {
 } CANPayload_t;
 
 /**
+ * Data type for message queue
+*/
+typedef struct {
+	CANPayload_t payload;
+	CANId_t id;
+}CANMSG_t;
+
+typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
+
+/**
  * @brief   Initializes the CAN system
  * @param   None
  * @return  None
@@ -41,22 +51,24 @@ typedef struct {
 void CANbus_Init(void);
 
 /**
- * @brief   Transmits data onto the CANbus
- * @param   CAN bus line
+ * @brief   Transmits data onto the CANbus.
  * @param   id : CAN id of the message
  * @param 	payload : the data that will be sent.
- * @return  0 if data wasn't sent, otherwise it was sent.
+ * @param   blocking: Whether or not the Send should be blocking or not
+ * @return  ERROR if data wasn't sent, otherwise it was sent.
  */
-int CANbus_Send(CANId_t id, CANPayload_t payload);
+ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,CAN_blocking_t blocking);
+
 
 /**
  * @brief   Checks if the CAN ID matches with Motor disable ID
- * @param   CAN line bus
- * @param   pointer to buffer array to store message
+ * @param   canline (not implemented, default is CAN1) can line to read from
+ * @param 	id CAN msg ID
+ * @param 	buffer pointer to buffer in which to store the can msg
+ * @param   blocking whether or not this Read should be a blocking read or a nonblocking read
  * @return  1 if ID matches and 0 if it doesn't
  */
-ErrorStatus CANbus_Read(uint8_t* buffer);
-
+ErrorStatus CANbus_Read(uint32_t *id, uint8_t* buffer, CAN_blocking_t blocking);
 
 
 #endif
