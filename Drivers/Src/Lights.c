@@ -90,8 +90,8 @@ void Lights_Set(light_t light, State state) {
         portc &= ~(0x01 << BRAKELIGHT_PIN); // Clear bit corresponding to pin
         portc |= (state << BRAKELIGHT_PIN); // Set value to inputted state
     } else {
-        uint8_t currData = rxBuf[0];
-        uint8_t newData = currData & ~(0x01 << light);
+        uint16_t currData = rxBuf[0];
+        uint16_t newData = currData & ~(0x01 << light);
         newData |= state << light;
         
         txWriteBuf[2] = newData;
