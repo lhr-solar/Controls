@@ -51,11 +51,11 @@ void Lights_Init(void) {
 State Lights_Read(light_t light) {
     // Get internal lights from SPI
     uint8_t txBuf[2] = {SPI_OPCODE_R, SPI_GPIOB};
-    uint8_t rxBuf[2] = {0};
+    uint8_t rxBuf[1] = {0};
     
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(txBuf, 2);
-    BSP_SPI_Read(rxBuf, 2);
+    BSP_SPI_Read(rxBuf, 1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     
     uint8_t currData = rxBuf[1];
@@ -78,11 +78,11 @@ void Lights_Set(light_t light, State state) {
     // Get internal lights from SPI
     uint8_t txReadBuf[2] = {SPI_OPCODE_R, SPI_GPIOB};
     uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
-    uint8_t rxBuf[2] = {0};
+    uint8_t rxBuf[1] = {0};
     
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(txReadBuf, 2);
-    BSP_SPI_Read(rxBuf, 2);
+    BSP_SPI_Read(rxBuf, 1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     
     uint8_t portc = BSP_GPIO_Read(LIGHTS_PORT);
