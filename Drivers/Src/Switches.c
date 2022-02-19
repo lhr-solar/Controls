@@ -46,7 +46,7 @@ void Switches_Init(void){
     BSP_SPI_Read(initRxBuf, 1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     //OR IODIRB to set pin 7 to input and write it back
-    initTxBuf[2] = initRxBuf[1]|0x40;
+    initTxBuf[2] = initRxBuf[0]|0x40;
     initTxBuf[0]=SPI_OPCODE_W;
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf,3);
@@ -61,35 +61,33 @@ void Switches_Init(void){
  * @return  ON/OFF State
  */ 
 State Switches_Read(switches_t sw){
-    uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA,0x00}; //query GPIOA
-    uint8_t SwitchReadData[2] = {0};
+    uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA, 0}; //query GPIOA
+    uint8_t SwitchReadData[1] = {0};
     // If we are not trying to get the state of the ignition switches, or the Reverse switch
     switch(sw) {
-    case CRUZ_SW:
+    case CRUZ_ST:
     case CRUZ_EN:
-    case HZD_SQ: 
-    case FR_SW: 
+    case REV_SW: 
+    case FOR_SW: 
     case HEADLIGHT_SW: 
     case LEFT_SW: 
     case RIGHT_SW: 
     case REGEN_SW:
+        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(query,3);
-        do{
-            BSP_SPI_Read(SwitchReadData,2);
-        }while(SwitchReadData[0] == SPI_GPIOA);
+        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
         if (SwitchReadData[1] & (1 << sw)) {
             return ON;
         } else {
             return OFF;
         }
 
-    case REV_SW:
+    case HZD_SW:
         query[1] = SPI_GPIOB;
+        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(query,3);
-        do{
-            BSP_SPI_Read(SwitchReadData,2);
-        }while(SwitchReadData[0] == SPI_GPIOB);
-        if (SwitchReadData[1] & (1 << 7)) {
+        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+        if (SwitchReadData[1] & (1 << 6)) { //6 because HZD_SW is on PB6
             return ON;
         } else {
             return OFF;
