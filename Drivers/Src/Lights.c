@@ -9,8 +9,12 @@
 */
 
 
-
 #include "Lights.h"
+#include "common.h"
+#include <unistd.h>
+#include "BSP_SPI.h"
+#include "stm32f4xx.h"
+
 
 /**
 * @brief   Initialize Lights Module
@@ -19,6 +23,24 @@
 void Lights_Init(void) {
     BSP_GPIO_Init(LIGHTS_PORT, 0x3C0, 1); // Pins 6,7,8,9 from Port C are out (0b1111000000)
     BSP_SPI_Init();
+
+    uint8_t txReadBuf[2] = {SPI_OPCODE_R, 0x01}; //0x01 is IODIRB in Bank 0 Mode
+    uint8_t rxBuf[1] = {0};
+    
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    BSP_SPI_Write(txReadBuf, 2);
+    BSP_SPI_Read(rxBuf,1);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+
+    uint8_t txWriteBuf[3] = {
+        SPI_OPCODE_W, //write to IODIRB
+        0x01, 
+        rxBuf[0]&0x40 //clear IODIRB to set as outputs except for hazard lights switch pin (bit 6, 0x40)
+    };
+    
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    BSP_SPI_Write(txWriteBuf, 3);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
 }
 
 /**
@@ -28,11 +50,13 @@ void Lights_Init(void) {
 */ 
 State Lights_Read(light_t light) {
     // Get internal lights from SPI
-    uint8_t txBuf[3] = {SPI_OPCODE_R, SPI_GPIOB, 0x00};
+    uint8_t txBuf[2] = {SPI_OPCODE_R, SPI_GPIOB};
     uint8_t rxBuf[2] = {0};
-    BSP_SPI_Write(txBuf, 3);
     
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    BSP_SPI_Write(txBuf, 2);
     BSP_SPI_Read(rxBuf, 2);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     
     uint8_t currData = rxBuf[1];
     // Different depending on the light
@@ -52,11 +76,14 @@ State Lights_Read(light_t light) {
  */
 void Lights_Set(light_t light, State state) {
     // Get internal lights from SPI
-    uint8_t txBuf[3] = {SPI_OPCODE_R, SPI_GPIOB, 0x00};
+    uint8_t txReadBuf[2] = {SPI_OPCODE_R, SPI_GPIOB};
+    uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
     uint8_t rxBuf[2] = {0};
-    BSP_SPI_Write(txBuf, 3);
-
+    
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    BSP_SPI_Write(txReadBuf, 2);
     BSP_SPI_Read(rxBuf, 2);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     
     uint8_t portc = BSP_GPIO_Read(LIGHTS_PORT);
     if (light == BrakeLight) {
@@ -66,8 +93,8 @@ void Lights_Set(light_t light, State state) {
         uint8_t currData = rxBuf[1];
         uint8_t newData = currData & ~(0x01 << light);
         newData |= state << light;
-        txBuf[0] = SPI_OPCODE_W;
-        txBuf[2] = newData;
+        
+        txWriteBuf[2] = newData;
 
         // Lights that are external and internal
         switch (light) {
@@ -87,6 +114,10 @@ void Lights_Set(light_t light, State state) {
                 break;
         }
     }
-    BSP_SPI_Write(txBuf, 3);
+
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    BSP_SPI_Write(txWriteBuf, 3);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+    
     BSP_GPIO_Write(LIGHTS_PORT, portc);
 }
