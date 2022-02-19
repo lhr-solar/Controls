@@ -58,7 +58,7 @@ State Lights_Read(light_t light) {
     BSP_SPI_Read(rxBuf, 1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     
-    uint8_t currData = rxBuf[1];
+    uint8_t currData = rxBuf[0];
     // Different depending on the light
     if (light == BrakeLight) {
         // Only one that is not internal
@@ -90,7 +90,7 @@ void Lights_Set(light_t light, State state) {
         portc &= ~(0x01 << BRAKELIGHT_PIN); // Clear bit corresponding to pin
         portc |= (state << BRAKELIGHT_PIN); // Set value to inputted state
     } else {
-        uint8_t currData = rxBuf[1];
+        uint8_t currData = rxBuf[0];
         uint8_t newData = currData & ~(0x01 << light);
         newData |= state << light;
         
