@@ -1,4 +1,5 @@
 #include "Switches.h"
+#include "stm32f4xx.h"
 
 /**
  * TODO
@@ -21,29 +22,35 @@
 void Switches_Init(void){
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
-    uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0x00};
-    uint8_t initRxBuf[2] = {0}; 
-    BSP_SPI_Write(initTxBuf,3);
-    do{
-        BSP_SPI_Read(initRxBuf, 2);
-    }while(initRxBuf[1] == SPI_IODIRA);
+    uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
+    uint8_t initRxBuf[1] = {0};
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET); 
+    BSP_SPI_Write(initTxBuf,2);
+    BSP_SPI_Read(initRxBuf, 1);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     //OR Result of IODIRA read to set all to 1, then write it back to IODIRA
-    initTxBuf[2] = initRxBuf[1]|0xFF;
+    initTxBuf[2] = initRxBuf[0]|0xFF;
     initTxBuf[0]=SPI_OPCODE_W;
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf,3);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
 
     //Sets up pin 7 on GPIOB as input (for ReverseSwitch)
+    initTxBuf[0]=SPI_OPCODE_R;
     initTxBuf[1] = SPI_IODIRB;
+    initTxBuf[2] = 0;
     initRxBuf[0]=0;
     initRxBuf[1]=0;
-    BSP_SPI_Write(initTxBuf,3);
-    do{
-        BSP_SPI_Read(initRxBuf, 2);
-    }while(initRxBuf[1] == SPI_IODIRB);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    BSP_SPI_Write(initTxBuf, 2);
+    BSP_SPI_Read(initRxBuf, 1);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     //OR IODIRB to set pin 7 to input and write it back
-    initTxBuf[2] = initRxBuf[1]|0x80;
+    initTxBuf[2] = initRxBuf[1]|0x40;
     initTxBuf[0]=SPI_OPCODE_W;
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf,3);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
 
 };
 
