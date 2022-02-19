@@ -1,13 +1,6 @@
 #include "Switches.h"
 #include "stm32f4xx.h"
 
-/**
- * TODO
- * Change the macros for the registers
- * put the select stuff around the init stuff
- * change the buffers
- * 
- */
 
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
@@ -76,7 +69,7 @@ State Switches_Read(switches_t sw){
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(query,3);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
-        if (SwitchReadData[1] & (1 << sw)) {
+        if (SwitchReadData[0] & (1 << sw)) {
             return ON;
         } else {
             return OFF;
@@ -87,7 +80,7 @@ State Switches_Read(switches_t sw){
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(query,3);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
-        if (SwitchReadData[1] & (1 << 6)) { //6 because HZD_SW is on PB6
+        if (SwitchReadData[0] & (1 << 6)) { //6 because HZD_SW is on PB6
             return ON;
         } else {
             return OFF;
