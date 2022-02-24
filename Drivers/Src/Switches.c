@@ -1,7 +1,11 @@
 #include "Switches.h"
 #include "stm32f4xx.h"
+#include "os.h"
 
-
+static OS_MUTEX SwitchMutex; //Mutex to lock SPI lines
+//TODO: Do we want to have two mutexes, one to lock GPIO and one to lock SPI? I dont think it's worth it because sync that granular doesn't seem necessary
+static OS_ERR err;
+static CPU_TS timestamp;
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
 //Readwrite bit = Read: 1, Write: 0
@@ -13,6 +17,14 @@
  * @return  None
  */ 
 void Switches_Init(void){
+    //TODO: Sync isn't expressly needed here because Init will only ever be called once from the main task, however I added it just in case. Removal should be fine.
+    OSMutexPend(
+        &SwitchMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err
+    );
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
@@ -44,7 +56,11 @@ void Switches_Init(void){
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf,3);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
-
+    OSMutexPost(
+        &SwitchMutex,
+        OS_OPT_POST_NONE,
+        &err
+    );
 };
 
 /**
@@ -66,9 +82,27 @@ State Switches_Read(switches_t sw){
     case LEFT_SW: 
     case RIGHT_SW: 
     case REGEN_SW:
+        OSMutexPend(
+            &SwitchMutex,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            &timestamp,
+            &err
+        );
+        if(err != OS_ERR_NONE){
+            return ERROR; //Os error, could not properly lock the Minion SPI Line
+        }
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(query,3);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+        OSMutexPost(
+            &SwitchMutex,
+            OS_OPT_POST_NONE,
+            &err
+        );
+        if(err != OS_ERR_NONE){
+            return ERROR; //Os error, couldn't properly unlock the Minion SPI Line
+        }
         if (SwitchReadData[0] & (1 << sw)) {
             return ON;
         } else {
@@ -77,9 +111,27 @@ State Switches_Read(switches_t sw){
 
     case HZD_SW:
         query[1] = SPI_GPIOB;
+        OSMutexPend(
+            &SwitchMutex,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            &timestamp,
+            &err
+        );
+        if(err != OS_ERR_NONE){
+            return ERROR; //Os error, could not properly lock the Minion SPI Line
+        }
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(query,3);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+        OSMutexPost(
+            &SwitchMutex,
+            OS_OPT_POST_NONE,
+            &err
+        );
+        if(err != OS_ERR_NONE){
+            return ERROR; //Os error, couldn't properly unlock the Minion SPI Line
+        }
         if (SwitchReadData[0] & (1 << 6)) { //6 because HZD_SW is on PB6
             return ON;
         } else {
@@ -87,11 +139,48 @@ State Switches_Read(switches_t sw){
         }
 
     case IGN_1: {
+        OSMutexPend(
+            &SwitchMutex,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            &timestamp,
+            &err
+        );
+        if(err != OS_ERR_NONE){
+            return ERROR; //Os error, could not properly lock the Minion GPIO Line
+        }
         int ignStates = BSP_GPIO_Read(PORTA);
+        OSMutexPost(
+            &SwitchMutex,
+            OS_OPT_POST_NONE,
+            &err
+        );
+        if(err != OS_ERR_NONE){
+            return ERROR; //Os error, couldn't properly unlock the Minion GPIO Line
+        }
+
         return (ignStates & 0x2) >> 1;
     }
     case IGN_2: {
+        OSMutexPend(
+            &SwitchMutex,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            &timestamp,
+            &err
+        );
+        if(err != OS_ERR_NONE){
+            return ERROR; //Os error, could not properly lock the Minion GPIO Line
+        }
         int ignStates = BSP_GPIO_Read(PORTA);
+        OSMutexPost(
+            &SwitchMutex,
+            OS_OPT_POST_NONE,
+            &err
+        );
+        if(err != OS_ERR_NONE){
+            return ERROR; //Os error, couldn't properly unlock the Minion GPIO Line
+        }
         return (ignStates & 0x1);
     }
 
