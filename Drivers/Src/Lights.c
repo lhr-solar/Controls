@@ -14,8 +14,10 @@
 #include <unistd.h>
 #include "BSP_SPI.h"
 #include "stm32f4xx.h"
+#include "Tasks.h"
 
-static State lightStates[10] = {OFF};
+//static State lightStates[10] = {OFF};
+static uint16_t lightStates = 0x0000;
 static OS_MUTEX lightMutex;
 static CPU_TS timestamp;
 static OS_ERR err;
@@ -26,7 +28,15 @@ static OS_ERR err;
 */ 
 void Lights_Init(void) {
     OSMutexCreate(&lightMutex, "Light lock", &err); //init mutex
+    if(err != OS_ERR_NONE){
+        assertOSError(OS_BLINK_LIGHTS_LOC, err);
+    }
+
     OSMutexPend(&lightMutex,0,OS_OPT_PEND_BLOCKING,&timestamp,&err); //lock light hardware for initialization (TODO: may not be needed, just here for additional safety)
+    if(err != OS_ERR_NONE){
+        assertOSError(OS_BLINK_LIGHTS_LOC, err);
+    }
+
     BSP_GPIO_Init(LIGHTS_PORT, 0x3C0, 1); // Pins 6,7,8,9 from Port C are out (0b1111000000)
     BSP_SPI_Init();
 
@@ -47,7 +57,11 @@ void Lights_Init(void) {
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(txWriteBuf, 3);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+    
     OSMutexPost(&lightMutex,OS_OPT_POST_NONE,&err);
+    if(err != OS_ERR_NONE){
+        assertOSError(OS_BLINK_LIGHTS_LOC, err);
+    }
 }
 
 /**
@@ -57,7 +71,7 @@ void Lights_Init(void) {
 */ 
 State Lights_Read(light_t light) {
     //Return from a stored state array instead of actually querying hardware.
-    return lightStates[light];
+    return (lightStates>>light)&0x01;
 }
 
 /**
@@ -67,52 +81,66 @@ State Lights_Read(light_t light) {
  * @return  void
  */
 void Lights_Set(light_t light, State state) {
-    //DEPRECATED: Read SPI logic removed
-    // Get internal lights from SPI
-    uint8_t txReadBuf[2] = {SPI_OPCODE_R, SPI_GPIOB};
-    uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
-    uint8_t rxBuf[1] = {0};
+    State lightCurrentState = (lightStates>>light)&0x01;
     
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
-    BSP_SPI_Write(txReadBuf, 2);
-    BSP_SPI_Read(rxBuf, 1);
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
-
-    State lightCurrentState = lightStates[light];    
-    uint16_t portc = BSP_GPIO_Read(LIGHTS_PORT);
-
-    if (light == BrakeLight) {
-        portc &= ~(0x01 << BRAKELIGHT_PIN); // Clear bit corresponding to pin
-        portc |= (state << BRAKELIGHT_PIN); // Set value to inputted state
-    } else {
-        uint16_t currData = rxBuf[0];
-        uint16_t newData = currData & ~(0x01 << light);
-        newData |= state << light;
+    if(lightCurrentState != state){     // Check if state has changed
+        uint16_t lightNewStates = lightStates;
         
-        txWriteBuf[2] = newData;
+        lightNewStates &= ~(0x01 << light);
+        lightNewStates |= (state << light);
+        
+        uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
+        uint16_t portc = BSP_GPIO_Read(LIGHTS_PORT);
 
-        // Lights that are external and internal
-        switch (light) {
-            case LEFT_BLINK:
-                portc &= ~(0x01 << LEFT_BLINK_PIN); // Clear bit corresponding to pin
-                portc |= (state << LEFT_BLINK_PIN); // Set value to inputted state
-                break;
-            case RIGHT_BLINK:
-                portc &= ~(0x01 << RIGHT_BLINK_PIN);    // Clear bit corresponding to pin
-                portc |= (state << RIGHT_BLINK_PIN);    // Set value to inputted state
-                break;
-            case Headlight_ON:
-                portc &= ~(0x01 << HEADLIGHT_PIN);  // Clear bit corresponding to pin
-                portc |= (state << HEADLIGHT_PIN);  // Set value to inputted state
-                break;
-            default:
-                break;
+        if (light == BrakeLight) {
+            portc &= ~(0x01 << BRAKELIGHT_PIN); // Clear bit corresponding to pin
+            portc |= (state << BRAKELIGHT_PIN); // Set value to inputted state
+        } else {
+            txWriteBuf[2] = lightNewStates;
+            
+            // Lights that are external and internal
+            switch (light) {
+                case LEFT_BLINK:
+                    portc &= ~(0x01 << LEFT_BLINK_PIN); // Clear bit corresponding to pin
+                    portc |= (state << LEFT_BLINK_PIN); // Set value to inputted state
+                    break;
+                case RIGHT_BLINK:
+                    portc &= ~(0x01 << RIGHT_BLINK_PIN);    // Clear bit corresponding to pin
+                    portc |= (state << RIGHT_BLINK_PIN);    // Set value to inputted state
+                    break;
+                case Headlight_ON:
+                    portc &= ~(0x01 << HEADLIGHT_PIN);  // Clear bit corresponding to pin
+                    portc |= (state << HEADLIGHT_PIN);  // Set value to inputted state
+                    break;
+                default:
+                    break;
+            }
+        }
+        OSMutexPend(&lightMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);    // Lock mutex in order to update our lightStates and write to SPI
+        if(err != OS_ERR_NONE){
+            assertOSError(OS_BLINK_LIGHTS_LOC, err);
+        }
+        
+        lightStates = lightNewStates;   // Update lightStates bitmap
+
+        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+        BSP_SPI_Write(txWriteBuf, 3);
+        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+        
+        BSP_GPIO_Write(LIGHTS_PORT, portc);
+
+        OSMutexPost(&lightMutex,OS_OPT_POST_NONE,&err); // Unlock mutex
+        if(err != OS_ERR_NONE){
+            assertOSError(OS_BLINK_LIGHTS_LOC, err);
         }
     }
+}
 
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
-    BSP_SPI_Write(txWriteBuf, 3);
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
-    
-    BSP_GPIO_Write(LIGHTS_PORT, portc);
+/**
+ * @brief   Toggle light
+ * @param   light which light to set
+ * @return  void
+ */
+void Lights_Toggle(light_t light) {
+    Lights_Set(light, (lightStates>>light)&0x01);
 }
