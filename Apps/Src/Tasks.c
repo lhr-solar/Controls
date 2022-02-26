@@ -66,3 +66,33 @@ OS_SEM ArrayConnectionChange_Sem4;
 
 // TODO: Put all global state variables here
 
+// Needs to get initialized somewhere, not currently initialized
+fault_bitmap_t FaultBitmap;
+os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
+tritium_error_code_t TritiumErrorBitmap = T_NONE;
+
+void assertOSError(uint16_t OS_err_loc, OS_ERR err){
+    if(err != OS_ERR_NONE){
+        FaultBitmap.Fault_OS = 1;
+        OSErrLocBitmap |= OS_err_loc;
+        
+        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+        if(err != OS_ERR_NONE){
+            EnterFaultState();
+        }
+    }
+}
+
+void assertTritiumError(uint8_t motor_error_code){
+    if(motor_error_code != T_NONE){
+        OS_ERR err;
+
+        FaultBitmap.Fault_TRITIUM = 1;
+        TritiumErrorBitmap |= motor_error_code;
+
+        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+        if(err != OS_ERR_NONE){
+            EnterFaultState();
+        }
+    }
+}
