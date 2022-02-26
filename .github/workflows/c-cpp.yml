@@ -20,6 +20,7 @@ jobs:
     - name: Initialize Submodules
       run: git submodule update --init --recursive
     - name: clean
+      run: git clean -fdx
       run: make clean
     - name: make stm32f413
       run: make stm32f413
