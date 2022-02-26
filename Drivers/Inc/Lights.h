@@ -24,8 +24,6 @@ typedef enum {
     LEFT_BLINK,
     RIGHT_BLINK,
     Headlight_ON,
-    BPS_FAULT,
-    BPS_PWR,
     BrakeLight,
     RSVD_LED
 } light_t;

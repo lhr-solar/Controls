@@ -15,8 +15,8 @@
 #include "Tasks.h"
 
 //static State lightStates[10] = {OFF};
-static uint16_t lightStatesBitmap;
-static uint16_t lightToggleBitmap;
+static uint8_t lightStatesBitmap;
+static uint8_t lightToggleBitmap;
 static OS_MUTEX lightMutex;
 static CPU_TS timestamp;
 static OS_ERR err;
@@ -111,7 +111,7 @@ void Lights_Set(light_t light, State state) {
     State lightCurrentState = Lights_Read(light);
     
     if(lightCurrentState != state){     // Check if state has changed
-        uint16_t lightNewStates = lightStatesBitmap;
+        uint8_t lightNewStates = lightStatesBitmap;
         
         lightNewStates &= ~(0x01 << light); // Clear bit corresponding to pin
         lightNewStates |= (state << light); // Set value to inputted state
