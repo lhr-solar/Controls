@@ -7,7 +7,7 @@ void Task_SendCarCAN(void *p_arg) {} // TODO: remove this
 static void motor_startup(OS_ERR *err) {
     Precharge_Write(MOTOR_PRECHARGE, ON); // Activate the motor recharge
 
-    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, err);
     // TODO: check for errors
 
     Contactors_Set(MOTOR, ON); // Actually activate motor contactors
@@ -37,7 +37,7 @@ void Task_MotorConnection(void *p_arg) {
         (CPU_STK*)SendCarCAN_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY) 0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
@@ -58,7 +58,7 @@ void Task_MotorConnection(void *p_arg) {
         (CPU_STK*)ReadTritium_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_READ_TRITIUM_STACK_SIZE,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY) 0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
@@ -79,7 +79,7 @@ void Task_MotorConnection(void *p_arg) {
         (CPU_STK*)SendTritium_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_SEND_TRITIUM_STACK_SIZE,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY) 0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
@@ -99,29 +99,29 @@ void Task_MotorConnection(void *p_arg) {
 
         if (desiredState == ON && currentState != ON) {
             motor_startup(&err); // Reactivate the array
-            OSTaskSemPost(&SendCarCAN_TCB, OS_OPT_POST_NONE, &err);
+            OSTaskResume(&SendCarCAN_TCB, &err);
             if(err != OS_ERR_NONE){
                 car_state->ErrorCode.SendCANErr = ON;
             }
-            OSTaskSemPost(&ReadTritium_TCB, OS_OPT_POST_NONE, &err);
+            OSTaskResume(&ReadTritium_TCB, &err);
             if(err != OS_ERR_NONE){
                 car_state->ErrorCode.ReadTritiumErr = ON;
             }
-            OSTaskSemPost(&SendTritium_TCB, OS_OPT_POST_NONE, &err);
+            OSTaskResume(&SendTritium_TCB, &err);
             if(err != OS_ERR_NONE){
                 car_state->ErrorCode.SendTritiumErr = ON;
             }
         } else if (desiredState != ON && currentState == ON) {
             Contactors_Set(MOTOR, OFF); // Deactivate the array
-            OSTaskSemPost(&SendCarCAN_TCB, OS_OPT_POST_NONE, &err);
+            OSTaskSuspend(&SendCarCAN_TCB, &err);
             if(err != OS_ERR_NONE){
                 car_state->ErrorCode.SendCANErr = ON;
             }
-            OSTaskSemPost(&ReadTritium_TCB, OS_OPT_POST_NONE, &err);
+            OSTaskSuspend(&ReadTritium_TCB, &err);
             if(err != OS_ERR_NONE){
                 car_state->ErrorCode.ReadTritiumErr = ON;
             }
-            OSTaskSemPost(&SendTritium_TCB, OS_OPT_POST_NONE, &err);
+            OSTaskSuspend(&SendTritium_TCB, &err);
             if(err != OS_ERR_NONE){
                 car_state->ErrorCode.SendTritiumErr = ON;
             }

@@ -13,11 +13,7 @@
  * @return  None
  */ 
 void Contactors_Init(contactor_t contactor) {
-    if(contactor == ARRAY){
-        BSP_GPIO_Init(CONTACTORS_PORT, 2, 1); //Pins 1 and 2 in Port C are output (0b110)
-    }else if(contactor == MOTOR){
-        BSP_GPIO_Init(CONTACTORS_PORT, 4, 1); //Pins 1 and 2 in Port C are output (0b110)
-    }
+    BSP_GPIO_Init(CONTACTORS_PORT, 0x6, 1); //Pins 1 and 2 in Port C are output (0b110)
 }
 
 /**

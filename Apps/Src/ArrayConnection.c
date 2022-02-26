@@ -7,7 +7,7 @@ static void arrayStartup(OS_ERR *err) {
 
     Precharge_Write(ARRAY_PRECHARGE, ON); // Turn on the array precharge
 
-    OSTimeDlyHMSM(0, 0, PRECHARGE_ARRAY_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+    OSTimeDlyHMSM(0, 0, PRECHARGE_ARRAY_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, err);
     // TODO: error handling
     
 
@@ -38,7 +38,7 @@ void Task_ArrayConnection(void *p_arg) {
         (CPU_STK*)ReadCarCAN_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_READ_CAR_CAN_STACK_SIZE,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY) 0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
@@ -52,7 +52,7 @@ void Task_ArrayConnection(void *p_arg) {
     while (1) {
         // Wait until some change needs to be made to the array state
         OSSemPend(&ArrayConnectionChange_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-        if(err != OS_ERR_NONE){
+        if(err != OS_ERR_NONE) {
             car_state->ErrorCode.ArrayErr = ON;
         }
 
@@ -62,16 +62,10 @@ void Task_ArrayConnection(void *p_arg) {
 
         if (desiredState == ON && currentState != ON) {
             arrayStartup(&err); // Reactivate the array
-            OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.ArrayErr = ON;
-            }
+            OSTaskResume(&ReadCarCAN_TCB, &err); // Resume task
         } else if (desiredState != ON && currentState == ON) {
             Contactors_Set(ARRAY, OFF); // Deactivate the array
-            OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-            if(err != OS_ERR_NONE){
-                car_state->ErrorCode.ArrayErr = ON;
-            }
+            OSTaskSuspend(&ReadCarCAN_TCB, &err);
         }
         
         if(err != OS_ERR_NONE){

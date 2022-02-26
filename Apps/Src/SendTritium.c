@@ -21,7 +21,6 @@ void Task_SendTritium(void *p_arg) {
     MotorController_Init();
 
     while (1) {
-
         // Send the drive command to the motor controller
         MotorController_Drive(velocity_to_rpm(car_state->CruiseControlVelocity), car_state->DesiredMotorCurrent);
 
