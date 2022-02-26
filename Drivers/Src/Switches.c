@@ -17,14 +17,7 @@ static CPU_TS timestamp;
  * @return  None
  */ 
 void Switches_Init(void){
-    //TODO: Sync isn't expressly needed here because Init will only ever be called once from the main task, however I added it just in case. Removal should be fine.
-    OSMutexPend(
-        &SwitchMutex,
-        0,
-        OS_OPT_PEND_BLOCKING,
-        &timestamp,
-        &err
-    );
+    OSMutexCreate(&SwitchMutex, "Switch Mutex", &err);
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
