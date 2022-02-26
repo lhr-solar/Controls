@@ -91,11 +91,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
     CPU_TS ts;
 	OS_ERR err;
 
-    uint32_t nv = *((uint32_t *)((void *) &newVelocity));
-    uint32_t mc = *((uint32_t *)((void *) &motorCurrent));
-
     uint8_t data[8];
-    int index = 0;
     memcpy(data, &motorCurrent, sizeof(motorCurrent));
     memcpy(data + sizeof(motorCurrent), &newVelocity, sizeof(newVelocity));
     
