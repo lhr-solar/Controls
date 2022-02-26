@@ -19,20 +19,20 @@
 /**
  * Priority Definitions
  */
-#define TASK_FAULT_STATE_PRIO               0
-#define TASK_SEND_TRITIUM_PRIO              1
-#define TASK_UPDATE_VELOCITY_PRIO           2
-#define TASK_READ_CAR_CAN_PRIO              3
-#define TASK_SEND_DISPLAY_PRIO              4
-#define TASK_READ_PEDALS_PRIO               5
-#define TASK_READ_TRITIUM_PRIO              6
-#define TASK_READ_SWITCHES_PRIO             7
-#define TASK_UPDATE_LIGHTS_PRIO             8
-#define TASK_SEND_CAR_CAN_PRIO              9
-#define TASK_BLINK_LIGHT_PRIO               10
-#define TASK_ARRAY_CONNECTION_PRIO          11
-#define TASK_MOTOR_CONNECTION_PRIO          12
-#define TASK_IDLE_PRIO                      13
+#define TASK_FAULT_STATE_PRIO               1
+#define TASK_SEND_TRITIUM_PRIO              2
+#define TASK_UPDATE_VELOCITY_PRIO           3
+#define TASK_READ_CAR_CAN_PRIO              4
+#define TASK_SEND_DISPLAY_PRIO              5
+#define TASK_READ_PEDALS_PRIO               6
+#define TASK_READ_TRITIUM_PRIO              7
+#define TASK_READ_SWITCHES_PRIO             8
+#define TASK_UPDATE_LIGHTS_PRIO             9
+#define TASK_SEND_CAR_CAN_PRIO              10
+#define TASK_BLINK_LIGHT_PRIO               11
+#define TASK_ARRAY_CONNECTION_PRIO          12
+#define TASK_MOTOR_CONNECTION_PRIO          13
+#define TASK_IDLE_PRIO                      14
 
 /**
  * Stack Sizes
