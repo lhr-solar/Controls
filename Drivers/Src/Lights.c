@@ -15,8 +15,8 @@
 #include "Tasks.h"
 
 //static State lightStates[10] = {OFF};
-static uint8_t lightStatesBitmap;
-static uint8_t lightToggleBitmap;
+static uint8_t lightStatesBitmap;   // Stores light states (on/off)
+static uint8_t lightToggleBitmap;   // Stores light toggle states (flashing/not flashing)
 static OS_MUTEX lightMutex;
 static CPU_TS timestamp;
 static OS_ERR err;
@@ -66,9 +66,9 @@ void Lights_Init(void) {
 }
 
 /**
-* @brief   Read the state of the lights
+* @brief   Read the state of a specific light from the light bitmap
 * @param   light Which Light to read
-* @return  returns state enum which indicates ON/OFF
+* @return  returns State enum which indicates ON/OFF
 */ 
 State Lights_Read(light_t light) {
     //Return from a stored state bitmap instead of actually querying hardware.
@@ -85,9 +85,9 @@ uint16_t Lights_Bitmap_Read(light_t light) {
 }
 
 /**
-* @brief   Read the state of the lights
+* @brief   Read the state of a specific toggleable light from the toggle bitmap
 * @param   light Which Light to read
-* @return  returns state enum which indicates ON/OFF
+* @return  returns State enum which indicates ON/OFF
 */
 State Toggle_Read(light_t light) {
     return (lightToggleBitmap>>light)&0x01;
@@ -103,8 +103,8 @@ uint16_t Toggle_Bitmap_Read() {
 
 /**
  * @brief   Set light to given state
- * @param   light which light to set
- * @param   state what state to set the light to
+ * @param   light Which light to set
+ * @param   state What state to set the light to
  * @return  void
  */
 void Lights_Set(light_t light, State state) {
@@ -164,7 +164,7 @@ void Lights_Set(light_t light, State state) {
 
 /**
  * @brief   Turn on light toggling
- * @param   light which light to enable toggling for
+ * @param   light Which light to enable toggling for
  * @return  void
  */
 void Toggle_Enable(light_t light) {
@@ -174,7 +174,7 @@ void Toggle_Enable(light_t light) {
 
 /**
  * @brief   Turn off light toggling
- * @param   light which light to disable toggling for
+ * @param   light Which light to disable toggling for
  * @return  void
  */
 void Toggle_Disable(light_t light) {
