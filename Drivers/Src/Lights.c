@@ -42,7 +42,7 @@ void Lights_Init(void) {
     // Reads direction register and stores in rxBuf
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(txReadBuf, 2);
-    BSP_SPI_Read(rxBuf,1);
+    BSP_SPI_Read(&rxBuf,1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
 
     uint8_t txWriteBuf[3] = {
