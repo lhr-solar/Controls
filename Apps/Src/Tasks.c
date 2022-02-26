@@ -66,6 +66,7 @@ OS_SEM ArrayConnectionChange_Sem4;
 
 // TODO: Put all global state variables here
 
+// Needs to get initialized somewhere, not currently initialized
 fault_bitmap_t FaultBitmap;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 tritium_error_code_t TritiumErrorBitmap = T_NONE;
