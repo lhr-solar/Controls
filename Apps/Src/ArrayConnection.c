@@ -5,14 +5,14 @@
 
 static void arrayStartup(OS_ERR *err) {
 
-    Precharge_Write(ARRAY_PRECHARGE, ON); // Turn on the array precharge
+    // Precharge_Write(ARRAY_PRECHARGE, ON); // Turn on the array precharge
 
     OSTimeDlyHMSM(0, 0, PRECHARGE_ARRAY_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, err);
     // TODO: error handling
     
 
-    Contactors_Set(ARRAY, ON); // Actually activate the contactor
-    Precharge_Write(ARRAY_PRECHARGE, OFF); // Deactivate the array precharge
+    Contactors_Set(ARRAY_CONTACTOR, ON); // Actually activate the contactor
+    // Precharge_Write(ARRAY_PRECHARGE, OFF); // Deactivate the array precharge
 }
 
 void Task_ArrayConnection(void *p_arg) {
@@ -22,7 +22,7 @@ void Task_ArrayConnection(void *p_arg) {
     OS_ERR err;
     CPU_TS ts;
 
-    Contactors_Init(ARRAY); //  Initialize the contactors
+    Contactors_Init(ARRAY_CONTACTOR); //  Initialize the contactors
     arrayStartup(&err);
     if(err != OS_ERR_NONE){
         car_state->ErrorCode.ArrayErr = ON;
@@ -57,14 +57,14 @@ void Task_ArrayConnection(void *p_arg) {
         }
 
         State desiredState = car_state->ShouldArrayBeActivated;
-        State currentState = Contactors_Get(ARRAY);
+        State currentState = Contactors_Get(ARRAY_CONTACTOR);
 
 
         if (desiredState == ON && currentState != ON) {
             arrayStartup(&err); // Reactivate the array
             OSTaskResume(&ReadCarCAN_TCB, &err); // Resume task
         } else if (desiredState != ON && currentState == ON) {
-            Contactors_Set(ARRAY, OFF); // Deactivate the array
+            Contactors_Set(ARRAY_CONTACTOR, OFF); // Deactivate the array
             OSTaskSuspend(&ReadCarCAN_TCB, &err);
         }
         
