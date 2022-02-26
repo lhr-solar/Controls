@@ -12,7 +12,7 @@
  */ 
 void Contactors_Init(contactor_t contactor) {
     BSP_GPIO_Init(CONTACTORS_PORT, 
-                 (1 << MOTOR_CNCTR_PIN) | (1 << ARRAY_CNCTR_PIN), 
+                 MOTOR_CNCTR_PIN | ARRAY_CNCTR_PIN, 
                   1);
 }
 

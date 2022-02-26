@@ -6,10 +6,11 @@
 #include "common.h"
 #include "config.h"
 #include "BSP_GPIO.h"
+#include "stm32f4xx_gpio.h"
 
 #define CONTACTORS_PORT PORTC
-#define MOTOR_CNCTR_PIN 12
-#define ARRAY_CNCTR_PIN 11 
+#define MOTOR_CNCTR_PIN GPIO_Pin_12
+#define ARRAY_CNCTR_PIN GPIO_Pin_11 
 
 typedef enum {ARRAY=0, MOTOR, NUM_CONTACTORS} contactor_t;
 
