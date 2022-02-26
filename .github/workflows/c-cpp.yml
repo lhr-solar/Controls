@@ -19,9 +19,5 @@ jobs:
         sudo apt -y install gcc-arm-none-eabi
     - name: Initialize Submodules
       run: git submodule update --init --recursive
-    - name: make simulator
-      run: make simulator
-    - name: clean
-      run: make clean
     - name: make stm32f413
       run: make stm32f413
