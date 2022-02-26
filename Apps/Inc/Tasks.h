@@ -7,6 +7,11 @@
 #include "os.h"
 #include "common.h"
 #include "CarState.h"
+#include "Pedals.h"
+#include "MotorController.h"
+#include "CANbus.h"
+#include "Contactors.h"
+#include "Precharge.h"
 
 /**
  * Task initialization macro

@@ -1,6 +1,6 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-#include "RTOSPedals.h"
+#include "Tasks.h"
 
 /**
 * @brief   Read both pedal percentage values and set the global variables

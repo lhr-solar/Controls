@@ -1,7 +1,6 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-#include "ArrayConnection.h"
-#include "Contactors.h"
+#include "Tasks.h"
 
 static void arrayStartup(OS_ERR *err) {
 

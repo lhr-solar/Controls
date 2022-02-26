@@ -13,6 +13,9 @@ typedef enum {OFF = 0, ON} State;
 // Wheel diameter in meters
 #define WHEEL_DIAMETER 0.4f
 
+// MAX_VELOCITY IN M/S
+#define MAX_VELOCITY 50.0f
+
 #define PRECHARGE_ARRAY_DELAY 5
 
 #ifndef __STM32F4xx_H

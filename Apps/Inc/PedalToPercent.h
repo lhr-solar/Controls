@@ -1,6 +1,6 @@
 /* Copyright (c) 2021 UT Longhorn Racing Solar */
-
-
+#ifndef PEDALS_TO_PERCENT
+#define PEDALS_TO_PERCENT
 /* Converts accelerator pedal percentage to a decimal */
 const float pedalToPercent[] = {
     0.00f,
@@ -105,3 +105,5 @@ const float pedalToPercent[] = {
     0.99f,
     1.0f,
 };
+
+#endif
