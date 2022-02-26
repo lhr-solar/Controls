@@ -12,7 +12,7 @@ void Task_ReadTritium(void* p_arg) {
 
 	while (1) {
 		CANbuff buf;
-		ErrorStatus status = MotorController_Read(&buf, p_arg);
+		ErrorStatus status = MotorController_Read(&buf);
 
 		if(status == SUCCESS) {
 

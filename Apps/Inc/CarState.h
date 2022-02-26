@@ -7,19 +7,6 @@
 #include "config.h"
 
 /**
- * Motor Error States
- * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits
- * 
- */
-
-typedef struct{
-    State motorTempErr;
-    State CCVelocityErr; 
-    State slipSpeedErr;
-    State overSpeedErr;
-} motor_error_code_t;
-
-/**
  * Switch States
  * 
  * Stores the current state of each of
@@ -117,8 +104,6 @@ typedef struct {
     State ShouldMotorBeActivated;
 
     error_code_t ErrorCode;
-
-    motor_error_code_t MotorErrorCode;
     
 } car_state_t;
 

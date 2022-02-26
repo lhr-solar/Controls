@@ -14,6 +14,21 @@ typedef struct
 } CANbuff;
 
 /**
+ * Motor Error States
+ * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits
+ * 
+ */
+typedef enum{
+    T_NONE = 0x00,
+    T_TEMP_ERR = 0x01,
+    T_CC_VEL_ERR = 0x02,
+    T_SLIP_SPEED_ERR = 0x04,
+    T_OVER_SPEED_ERR = 0x08
+} tritium_error_code_t;
+
+extern uint16_t Motor_FaultBitmap;
+
+/**
  * @brief   Initializes the motor controller
  * @param   None
  * @return  None
@@ -21,7 +36,7 @@ typedef struct
 void MotorController_Init(void);
 
 /**
- * @brief   Sends MOTOR DRIVE command on CAN2
+ * @brief   Sends MOTOR DRIVE command on CAN3
  * @param   newVelocity desired motor velocity setpoint in rpm
  * @param   motorCurrent desired motor current setpoint as a fraction of max current setting
  * @return  None
@@ -29,10 +44,16 @@ void MotorController_Init(void);
 void MotorController_Drive(float newVelocity, float motorCurrent);
 
 /**
- * @brief   Reads most recent command from CAN2 bus
+ * @brief   Reads most recent command from CAN3 bus
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
-ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car);
+ErrorStatus MotorController_Read(CANbuff *message);
+
+/**
+ * @brief   Reads velocity
+ * @return  Velocity
+ */ 
+float MotorController_ReadVelocity(void);
 
 #endif
