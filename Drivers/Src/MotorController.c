@@ -15,7 +15,6 @@
 
 static OS_SEM	MotorController_MailSem4;
 static OS_SEM	MotorController_ReceiveSem4;
-static OS_MUTEX MotorController_VelocityMutex;
 static float CurrentVelocity;
 
 uint16_t Motor_FaultBitmap = 0;
