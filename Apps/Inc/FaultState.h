@@ -4,4 +4,6 @@
 #include "os.h"
 #include "Tasks.h"
 
+void EnterFaultState(void);
+
 #endif
