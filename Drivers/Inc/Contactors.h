@@ -7,19 +7,20 @@
 #include "config.h"
 #include "BSP_GPIO.h"
 
-#define CONTACTORS_PORT PORTC
-#define MOTOR_CNCTR_PIN 12
-#define ARRAY_CNCTR_PIN 11 
 
-typedef enum {ARRAY=0, MOTOR, NUM_CONTACTORS} contactor_t;
+typedef enum {
+    ARRAY_CONTACTOR = 0,
+    ARRAY_PRECHARGE,
+    MOTOR_CONTACTOR,
+    NUM_CONTACTORS
+} contactor_t;
 
 /**
  * @brief   Initializes contactors to be used
  *          in connection with the Motor and Array
- * @param   contactor the contactor to initialize (unused)
  * @return  None
  */  
-void Contactors_Init(contactor_t contactor);
+void Contactors_Init();
 
 /**
  * @brief   Returns the current state of 

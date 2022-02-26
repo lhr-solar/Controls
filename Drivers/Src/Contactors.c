@@ -4,32 +4,43 @@
 #include "Contactors.h"
 
 
+#define CONTACTORS_PORT     PORTC
+#define ARRAY_PRECHARGE_PIN 10
+#define ARRAY_CONTACTOR_PIN 11
+#define MOTOR_CONTACTOR_PIN 12
+
+
 /**
  * @brief   Initializes contactors to be used
  *          in connection with the Motor and Array
- * @param   contactor the contactor to initialize (unused)
  * @return  None
  */ 
-void Contactors_Init(contactor_t contactor) {
+void Contactors_Init() {
     BSP_GPIO_Init(CONTACTORS_PORT, 
-                 (1 << MOTOR_CNCTR_PIN) | (1 << ARRAY_CNCTR_PIN), 
+                 (1 << ARRAY_CONTACTOR_PIN) | 
+                 (1 << ARRAY_PRECHARGE_PIN) |
+                 (1 << MOTOR_CONTACTOR_PIN), 
                   1);
 }
 
 /**
  * @brief   Returns the current state of 
  *          a specified contactor
- * @param   contactor the contactor (MOTOR/ARRAY)
+ * @param   contactor the contactor
+ *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @return  The contactor's state (ON/OFF)
  */ 
 State Contactors_Get(contactor_t contactor) {
     State state = OFF;
     switch (contactor) {
-        case MOTOR:
-            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, MOTOR_CNCTR_PIN);
+        case ARRAY_CONTACTOR :
+            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN);
             break;
-        case ARRAY:
-            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_CNCTR_PIN);
+        case ARRAY_PRECHARGE :
+            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN);
+            break;
+        case MOTOR_CONTACTOR :
+            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN);
             break;
         default:
             break;
@@ -39,17 +50,21 @@ State Contactors_Get(contactor_t contactor) {
 
 /**
  * @brief   Sets the state of a specified contactor
- * @param   contactor the contactor (MOTOR/ARRAY)
+ * @param   contactor the contactor
+ *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @param   state the state to set (ON/OFF)
  * @return  None
  */
 void Contactors_Set(contactor_t contactor, State state) {
     switch (contactor) {
-        case MOTOR:
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CNCTR_PIN, state);
+        case ARRAY_CONTACTOR :
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, state);
             break;
-        case ARRAY:
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CNCTR_PIN, state);
+        case ARRAY_PRECHARGE :
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, state);
+            break;
+        case MOTOR_CONTACTOR :
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, state);
             break;
         default:
             break;
