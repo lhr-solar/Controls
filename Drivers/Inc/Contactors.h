@@ -8,8 +8,8 @@
 #include "BSP_GPIO.h"
 
 #define CONTACTORS_PORT PORTC
-#define MOTOR_CNCTR_PIN 2
-#define ARRAY_CNCTR_PIN 1 
+#define MOTOR_CNCTR_PIN 12
+#define ARRAY_CNCTR_PIN 11 
 
 typedef enum {ARRAY=0, MOTOR, NUM_CONTACTORS} contactor_t;
 

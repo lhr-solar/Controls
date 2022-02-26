@@ -2,58 +2,65 @@
 
 #include "Precharge.h"
 
-#define FILE_NAME DATA_PATH(PRECHARGE_CSV)
-
+/**
+ * @brief   initializes the GPIO pins used for precharging
+ * 
+ * @param   board the precharge to initialize (unused)
+ * @return  None
+ */
 void Precharges_Init(board_t board) {
-    if(board == ARRAY_PRECHARGE){
-        BSP_GPIO_Init(PRECHARGE_PORT, 1, 1); //Pins 0 and 3 in Port C are output (0b110)
-    }else if(board == MOTOR_PRECHARGE){
-        BSP_GPIO_Init(PRECHARGE_PORT, 8, 1); //Pins 0 and 3 in Port C are output (0b110)
-    }
+    BSP_GPIO_Init(ARRAY_PRECHARGE_PORT,
+                  1 << ARRAY_PRECHARGE_PIN,
+                  1);
+    BSP_GPIO_Init(MOTOR_PRECHARGE_PORT,
+                  1 << MOTOR_PRECHARGE_PIN,
+                  1);
 }
 
 /**
- * @brief writes the status (ON/OFF) of a board to a CSV file
+ * @brief writes the status to the board (ON/OFF)
  * 
- * @param board to get status (Array | Motor)
- * status of board (ON | OFF)
- * 
+ * @param board     board to set status (Array/Motor)
+ * @param status    status of board (ON/OFF)
  * @return none
 */
 void Precharge_Write(board_t board, State status){
-    // first get previous board states from csv file
-    int data = BSP_GPIO_Read(PRECHARGE_PORT);
-    
-    // update bit of data accordingly
-    if(board == MOTOR_PRECHARGE){
-        board = MOTOR_BIT;
+    switch (board) {
+        case ARRAY_PRECHARGE :
+            BSP_GPIO_Write_Pin(ARRAY_PRECHARGE_PORT, 
+                               ARRAY_PRECHARGE_PIN, 
+                               status);
+            break;
+        case MOTOR_PRECHARGE :
+            BSP_GPIO_Write_Pin(MOTOR_PRECHARGE_PORT, 
+                               MOTOR_PRECHARGE_PIN, 
+                               status);
+            break;
+        default :
+            break;
     }
-
-    int mask = (1 << board);
-    data = data & (~mask);
-    data = data | (status << board);
-
-    BSP_GPIO_Write(PRECHARGE_PORT, data);
 }
 
 /**
- * @brief reads the data from the Precharge port
+ * @brief reads the Precharge port status
  * 
- * @param board to get status (Array | Motor)
- * 
- * @return status of board
+ * @param board board to get status (Array/Motor)
+ * @return status of board (ON/OFF)
 */
 State Precharge_Read(board_t board){
-    if(board == ARRAY_PRECHARGE){
-        return(BSP_GPIO_Read(PRECHARGE_PORT) & 0x1);
+    State status = OFF;
+    switch (board) {
+        case ARRAY_PRECHARGE :
+            status = BSP_GPIO_Read_Pin(ARRAY_PRECHARGE_PORT, 
+                                       ARRAY_PRECHARGE_PIN);
+            break;
+        case MOTOR_PRECHARGE :
+            status = BSP_GPIO_Read_Pin(MOTOR_PRECHARGE_PORT, 
+                                       MOTOR_PRECHARGE_PIN);
+            break;
+        default :
+            break;
     }
-    else{
-        return((BSP_GPIO_Read(PRECHARGE_PORT) & 0x8) >> 3);
-    }
+    return status;
 }
-
-
-
-
-
 
