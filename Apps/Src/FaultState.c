@@ -1,5 +1,7 @@
 #include "FaultState.h"
 #include "Contactors.h"
+#include "os.h"
+#include "Tasks.h"
 
 static void ArrayKill(void) {
     Contactors_Set(ARRAY, OFF);
@@ -9,25 +11,27 @@ static void MotorKill(void) {
     Contactors_Set(MOTOR, OFF);
 }
 
+static void ArrayMotorKill(void) {
+    ArrayKill();
+    MotorKill();
+}
+
 void EnterFaultState(void) {
     if(FaultBitmap.Fault_OS){
-        ArrayKill();
-        MotorKill();
+        ArrayMotorKill();
     }
     else if(FaultBitmap.Fault_TRITIUM){
-        ArrayKill();
-        MotorKill();
+        ArrayMotorKill();
     }
     else if(FaultBitmap.Fault_READBPS){
-        ArrayKill();
-        MotorKill();
+        ArrayMotorKill();
     }
     else if(FaultBitmap.Fault_UNREACH){
-        ArrayKill();
-        MotorKill();
+        ArrayMotorKill();
     }
     else if(FaultBitmap.Fault_DISPLAY){
-        // TODO: What should be done during a display fault?
+        // TODO: Send reset command to display ("rest")
+        // To be implemented when display driver is complete
     }
 
     while(1){}
