@@ -25,7 +25,7 @@ uint16_t Motor_FaultBitmap = 0;
  *          and semaphore is posted, Fault state will run.
  * @param   motor_err Bitmap which has motor error codes
  */
-void assertTritiumError(uint16_t motor_err){
+static void assertTritiumError(uint16_t motor_err){
     OS_ERR err;
     if(motor_err != T_NONE){
         FaultBitmap.Fault_TRITIUM = 1;
@@ -67,12 +67,6 @@ static void MotorController_CountIncoming(void) {
  */ 
 void MotorController_Init(){
     OS_ERR err;
-
-    OSMutexCreate(&MotorController_VelocityMutex,
-                "Motor Controller Velocity Mutex",
-                &err
-    );
-    assertOSError(0, err);
     OSSemCreate(&MotorController_MailSem4,
                 "Motor Controller Mailbox Semaphore",
                 3,	// Number of mailboxes
@@ -100,19 +94,10 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
     uint32_t nv = *((uint32_t *)((void *) &newVelocity));
     uint32_t mc = *((uint32_t *)((void *) &motorCurrent));
 
-    uint8_t data[8] = {0};
+    uint8_t data[8];
     int index = 0;
-    while(index < MAX_CAN_LEN/2){
-        data[index] = (mc >> (8 * (MAX_CAN_LEN/2-index-1))) & 0xFF; //split inputs into bytes
-        index++;
-        
-    }
-    int i = 0;
-    while(index < MAX_CAN_LEN){
-        data[index] = (nv >> (8 * (MAX_CAN_LEN/2-i-1))) & 0xFF;
-        index++;
-        i++;
-    }
+    memcpy(data, &motorCurrent, sizeof(motorCurrent));
+    memcpy(data + sizeof(motorCurrent), &newVelocity, sizeof(newVelocity));
     
     OSSemPend(&MotorController_MailSem4,
 			  0,
@@ -178,35 +163,29 @@ ErrorStatus MotorController_Read(CANbuff *message){
             // If we're reading the output from the Motor Status command (0x241) then 
             // Check the status bits we care about and set flags accordingly
             case MOTOR_STATUS: {
-                if(MASK_MOTOR_TEMP_ERR & firstSum) Motor_FaultBitmap |= T_TEMP_ERR;
+                if(MASK_MOTOR_TEMP_ERR & firstSum){
+                    Motor_FaultBitmap |= T_TEMP_ERR;
+                }
 
-                if(MASK_SS_ERR & firstSum) Motor_FaultBitmap |= T_CC_VEL_ERR;
+                if(MASK_SS_ERR & firstSum){
+                    Motor_FaultBitmap |= T_CC_VEL_ERR;
+                }
 
-                if(MASK_CC_ERR & firstSum) Motor_FaultBitmap |= T_SLIP_SPEED_ERR;
+                if(MASK_CC_ERR & firstSum){
+                    Motor_FaultBitmap |= T_SLIP_SPEED_ERR;
+                }
 
-                if(MASK_OVER_SPEED_ERR & firstSum) Motor_FaultBitmap |= T_OVER_SPEED_ERR;
-                
+                if(MASK_OVER_SPEED_ERR & firstSum){
+                    Motor_FaultBitmap |= T_OVER_SPEED_ERR;
+                }
+
                 assertTritiumError(Motor_FaultBitmap);
                 
                 break;
             }
             case MOTOR_DRIVE: {
                 convert.n = secondSum;
-
-                OSMutexPend(&MotorController_VelocityMutex,
-				0,
-				OS_OPT_PEND_BLOCKING,
-				&ts,
-				&err);
-	            assertOSError(0, err);
-
                 CurrentVelocity = convert.f;
-
-                OSMutexPost(&MotorController_VelocityMutex,
-				OS_OPT_POST_1,
-				&err);
-	            assertOSError(0, err);
-
                 break;
             }
             default: break;
@@ -223,21 +202,5 @@ ErrorStatus MotorController_Read(CANbuff *message){
  * @return  velocity value obtained from MotorController_Read
  */ 
 float MotorController_ReadVelocity(void){
-    CPU_TS ts;
-	OS_ERR err;
-    
-    OSMutexPend(&MotorController_VelocityMutex,
-	            0,
-				OS_OPT_PEND_BLOCKING,
-				&ts,
-				&err);
-	assertOSError(0, err);
-
-    float val = CurrentVelocity;
-
-    OSMutexPost(&MotorController_VelocityMutex,
-				OS_OPT_POST_1,
-				&err);
-	assertOSError(0, err);
-    return val;
+    return CurrentVelocity;
 }

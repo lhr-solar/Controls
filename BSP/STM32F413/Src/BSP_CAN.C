@@ -84,9 +84,6 @@ void BSP_CAN1_Init(){
     /* Enable CAN clock */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
 
-    /* CAN register init */
-    // CAN_DeInit(CAN1);
-
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
     CAN_InitStruct.CAN_ABOM = DISABLE;
@@ -94,7 +91,7 @@ void BSP_CAN1_Init(){
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
     CAN_InitStruct.CAN_TXFP = DISABLE;
-    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal; // TODO: change back to Normal after testing
+    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
     /* CAN Baudrate = 125 KBps
@@ -118,8 +115,6 @@ void BSP_CAN1_Init(){
     CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
     CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
 
-    // CAN_SlaveStartBank(CAN1, 0);
-
     /* Transmit Structure preparation */
     gTxMessage[0].ExtId = 0x5;
     gTxMessage[0].RTR = CAN_RTR_DATA;
@@ -142,15 +137,6 @@ void BSP_CAN1_Init(){
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
-
-    /*if(NULL != txEnd) {
-        // Enable Tx Interrupts
-        NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
-        NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
-        NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-        NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn;
-        NVIC_Init(&NVIC_InitStruct);
-    }*/
 
 }
 
@@ -184,9 +170,6 @@ void BSP_CAN3_Init(){
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN3, ENABLE);
-
-    /* CAN register init */
-    // CAN_DeInit(CAN1);
 
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
