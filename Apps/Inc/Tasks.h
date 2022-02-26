@@ -19,19 +19,20 @@
 /**
  * Priority Definitions
  */
-#define TASK_SEND_TRITIUM_PRIO              0
-#define TASK_UPDATE_VELOCITY_PRIO           1
-#define TASK_READ_CAR_CAN_PRIO              2
-#define TASK_SEND_DISPLAY_PRIO              3
-#define TASK_READ_PEDALS_PRIO               4
-#define TASK_READ_TRITIUM_PRIO              5
-#define TASK_READ_SWITCHES_PRIO             6
-#define TASK_UPDATE_LIGHTS_PRIO             7
-#define TASK_SEND_CAR_CAN_PRIO              8
-#define TASK_BLINK_LIGHT_PRIO               9
-#define TASK_ARRAY_CONNECTION_PRIO          10
-#define TASK_MOTOR_CONNECTION_PRIO          11
-#define TASK_IDLE_PRIO                      12
+#define TASK_FAULT_STATE_PRIO               1
+#define TASK_SEND_TRITIUM_PRIO              2
+#define TASK_UPDATE_VELOCITY_PRIO           3
+#define TASK_READ_CAR_CAN_PRIO              4
+#define TASK_SEND_DISPLAY_PRIO              5
+#define TASK_READ_PEDALS_PRIO               6
+#define TASK_READ_TRITIUM_PRIO              7
+#define TASK_READ_SWITCHES_PRIO             8
+#define TASK_UPDATE_LIGHTS_PRIO             9
+#define TASK_SEND_CAR_CAN_PRIO              10
+#define TASK_BLINK_LIGHT_PRIO               11
+#define TASK_ARRAY_CONNECTION_PRIO          12
+#define TASK_MOTOR_CONNECTION_PRIO          13
+#define TASK_IDLE_PRIO                      14
 
 /**
  * Stack Sizes
@@ -39,6 +40,7 @@
 #define DEFAULT_STACK_SIZE                  256
 #define WATERMARK_STACK_LIMIT               DEFAULT_STACK_SIZE/2
 
+#define TASK_FAULT_STATE_STACK_SIZE         DEFAULT_STACK_SIZE
 #define TASK_SEND_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_UPDATE_VELOCITY_STACK_SIZE     DEFAULT_STACK_SIZE
 #define TASK_READ_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
@@ -57,6 +59,8 @@
 /**
  * Task Prototypes
  */
+void Task_FaultState(void* p_arg);
+
 void Task_SendTritium(void* p_arg); 
 
 void Task_UpdateVelocity(void* p_arg);
@@ -88,6 +92,7 @@ void Task_Init(void* p_arg);
 /**
  * TCBs
  */
+extern OS_TCB FaultState_TCB;
 extern OS_TCB SendTritium_TCB;
 extern OS_TCB UpdateVelocity_TCB;
 extern OS_TCB ReadCarCAN_TCB;
@@ -106,6 +111,7 @@ extern OS_TCB Init_TCB;
 /**
  * Stacks
  */
+extern CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
 extern CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
 extern CPU_STK UpdateVelocity_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
 extern CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
@@ -129,6 +135,7 @@ extern OS_Q CANBus_MsgQ;
 /**
  * Semaphores
  */
+extern OS_SEM FaultState_Sem4;
 extern OS_SEM VelocityChange_Sem4;
 extern OS_SEM DisplayChange_Sem4;
 extern OS_SEM LightsChange_Sem4;
@@ -148,6 +155,51 @@ extern OS_SEM MotorConnectionChange_Sem4;
 
 
 // TODO: Put all global state variables here
+/**
+ * Motor Error States
+ * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits
+ * 
+ */
+typedef enum{
+    T_NONE = 0x00,
+    T_TEMP_ERR = 0x01,
+    T_CC_VEL_ERR = 0x02,
+    T_SLIP_SPEED_ERR = 0x04,
+    T_OVER_SPEED_ERR = 0x08
+} tritium_error_code_t;
+
+/**
+ * OS Error States
+ * 
+ * Stores error data to indicate which part of the code
+ * an error is coming from.
+ */
+typedef enum{
+    OS_NONE_LOC = 0x000,
+    OS_ARRAY_LOC = 0x001,
+    OS_READ_CAN_LOC = 0x002,
+    OS_READ_TRITIUM_LOC = 0x004,
+    OS_SEND_CAN_LOC = 0x008,
+    OS_SEND_TRITIUM_LOC = 0x010,
+    OS_UPDATE_VEL_LOC = 0x020,
+    OS_BLINK_LIGHTS_LOC = 0x040,
+} os_error_loc_t;
+
+/**
+ * Fault Union
+ * 
+ * Different fault states that need to be handled by the FaultState task
+ */
+typedef union{
+    uint8_t bitmap;
+    struct{
+        State Fault_OS : 1;         // for OS faults
+        State Fault_UNREACH : 1;    // for unreachable conditions
+        State Fault_TRITIUM : 1;      // for errors sent from the tritium
+        State Fault_READBPS : 1;    // for unsuccessfully reading from BPS CAN
+        State Fault_DISPLAY : 1;    // for display faults
+    };
+} fault_bitmap_t;
 
 
 #endif

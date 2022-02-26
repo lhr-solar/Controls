@@ -12,24 +12,8 @@ void Task_ReadCarCAN(void *p_arg) {
     static int faultCounter = 0;
 
     OS_ERR err;
-    CPU_TS ts;
 
     while (1) {
-        OSTaskSemPend(0, OS_OPT_PEND_NON_BLOCKING, &ts, &err);
-        
-        if (err == OS_ERR_NONE) {
-            // A signal was received, so the task should wait until signaled again
-            OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
-
-            if(err != OS_ERR_NONE){
-                car->ErrorCode.ReadCANErr = ON;
-            }
-        } else if (err != OS_ERR_PEND_WOULD_BLOCK) {
-            car->ErrorCode.ReadCANErr = ON;
-        }
-
-        // Normal task countinues here
-
         // Check if BPS sent us a message
         if (CANbus_Read(buffer) == SUCCESS) {
             long msg = *((long *)(&buffer[0]));

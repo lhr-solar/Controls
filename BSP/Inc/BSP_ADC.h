@@ -18,8 +18,8 @@
 
 typedef enum 
 {
-    ADC_0, 
-    ADC_1,
+    Accelerator_ADC, 
+    Brake_ADC,
     NUMBER_OF_CHANNELS
 } ADC_t;
 
