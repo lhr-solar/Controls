@@ -23,5 +23,7 @@ jobs:
       run: git clean -fdx
     - name: clean
       run: make clean
+    - name: grep
+      run: grep -rnI assertTritiumError
     - name: make stm32f413
       run: make stm32f413
