@@ -19,11 +19,7 @@ jobs:
         sudo apt -y install gcc-arm-none-eabi
     - name: Initialize Submodules
       run: git submodule update --init --recursive
-    - name: git clean
-      run: git clean -fdx
     - name: clean
       run: make clean
-    - name: grep
-      run: grep -rnI assertTritiumError
     - name: make stm32f413
       run: make stm32f413
