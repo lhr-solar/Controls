@@ -1,5 +1,4 @@
 #include "MotorController.h"
-#include "CarState.h"
 #include "os.h"
 #include "Tasks.h"
 
@@ -15,7 +14,7 @@
 
 static OS_SEM	MotorController_MailSem4;
 static OS_SEM	MotorController_ReceiveSem4;
-static float CurrentVelocity;
+static float CurrentVelocity = 0;
 
 uint16_t Motor_FaultBitmap = 0;
 
