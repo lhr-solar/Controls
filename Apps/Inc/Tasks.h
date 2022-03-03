@@ -189,7 +189,9 @@ typedef union{
     };
 } fault_bitmap_t;
 
-
+/**
+ * Error variables
+ */
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
 
