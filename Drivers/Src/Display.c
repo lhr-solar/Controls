@@ -18,8 +18,8 @@ static const char *NO_ERROR = "No Error";
 static const uint16_t NEXTION_GREEN = 2016;
 static const uint16_t NEXTION_RED = 63488;
 static const uint16_t NEXTION_LIGHT_GREY = 42260;
-static const uint16_t NEXTION_DARK_GREY = 23275;
-static const uint16_t NEXTION_BURNT_ORANGE = 51872;
+//static const uint16_t NEXTION_DARK_GREY = 23275;
+//static const uint16_t NEXTION_BURNT_ORANGE = 51872;
 
 static inline int IsNextionFailure(uint32_t val) {
     return ((val & ~0x00FFFFFF) != (1 << 24));
@@ -96,7 +96,7 @@ static ErrorStatus updateStringValue(enum CommandString_t obj_index, enum Comman
     BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
 
     // Get a response from the display
-    uint8_t buf[8];
+    char buf[8];
     BSP_UART_Read(UART_3, buf);
     int ret = *((uint32_t *) buf);
     return (IsNextionFailure(ret)) ? ERROR : SUCCESS;
@@ -116,7 +116,7 @@ static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandSt
     BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
 
     // Get a response from the display
-    uint8_t buf[8];
+    char buf[8];
     BSP_UART_Read(UART_3, buf);
     int ret = *((uint32_t *) buf);
     return (IsNextionFailure(ret)) ? ERROR : SUCCESS;
@@ -130,7 +130,7 @@ static ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis) {
     sprintf(out, "%s %s,%d%s", CommandStrings[VIS], CommandStrings[comp], vis ? 1 : 0, TERMINATOR);
     printf("String out: %s\n", out);
 
-    uint8_t buf[4];
+    char buf[4];
     BSP_UART_Write(UART_3, out, strlen(out));
     BSP_UART_Read(UART_3, buf);
     int ret = *((uint32_t *) buf);
@@ -200,7 +200,7 @@ ErrorStatus Display_NoErrors(void) {
     CHECK (updateStringValue(ERROR0, TEXT, (char *) NO_ERROR));
     CHECK (updateIntValue(ERROR0, PCO, NEXTION_GREEN));
     CHECK (setComponentVisibility(ERROR0, true));
-    return SUCCESS
+    return SUCCESS;
 }
 
 

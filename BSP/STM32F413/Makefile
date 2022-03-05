@@ -29,7 +29,8 @@ $(wildcard ../../CMSIS/DSP_Lib/Source/*.c)	\
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/*.c)	\
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/*.c) \
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/*.c) \
-$(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/*.c)
+$(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/*.c) \
+$(wildcard ../../RTOS/uCOS-III-STM32F4/uC-LIB/*.c)
 
 ifneq ($(TEST), none)
 TEST_FILE := Test_$(TEST).c
@@ -116,7 +117,7 @@ C_INCLUDES =  \
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Werror -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2
@@ -180,7 +181,7 @@ clean:
 #######################################
 # flash
 #######################################
-flash: $(BUILD_DIR)/$(TARGET).bin
+flash:
 	$(SF) write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 
 #######################################
