@@ -56,6 +56,18 @@ void Lights_Set(light_t light, State state);
 */ 
 uint16_t Lights_Bitmap_Read(light_t light);
 
+/**
+ * @brief Toggles a light. Should be used only after Toggle_Enable has been called for this light so that we are accurately tracking the enabled and disabled lights
+ * @param light Which light to toggle
+*/
+void Lights_Toggle(light_t light);
+
+
+/**
+ * @brief Toggles multiple lights according to the toggle bitmap
+*/
+void Lights_MultiToggle();
+
 
 /**
 
@@ -65,12 +77,6 @@ uint16_t Lights_Bitmap_Read(light_t light);
  * @return  void
  */
 void Toggle_Set(light_t light, State state);
-
-/**
- * @brief Toggles a light. Should be used only after Toggle_Enable has been called for this light so that we are accurately tracking the enabled and disabled lights
- * @param light Which light to toggle
-*/
-void Toggle_Light(light_t light);
 
 /**
 * @brief   Read the state of a specific toggleable light from the toggle bitmap
@@ -94,6 +100,13 @@ uint16_t Toggle_Bitmap_Read();
  * @return  void
  */
 void Lights_Set(light_t light, State state);
+
+
+/**
+ * @brief   Set multiple lights given light bitmap
+ * @return  void
+ */
+void Lights_MultiSet(uint16_t bitmap);
 
 
 #endif
