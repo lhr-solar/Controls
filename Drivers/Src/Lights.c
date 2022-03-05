@@ -110,29 +110,12 @@ void Toggle_Disable(light_t light) {
 */
 void Toggle_Light(light_t light){
     State lightState = Lights_Read(light);
-    if(lightState = OFF){
+    if(lightState == OFF){
         Lights_Set(light, ON);
     } else {
         Lights_Set(light, OFF);
     }
-
-* @brief   Read the state of a specific toggleable light from the toggle bitmap
-* @param   light Which Light to read
-* @return  returns State enum which indicates ON/OFF
-*/
-State Toggle_Read(light_t light) {
-    return (lightToggleBitmap>>light)&0x01;
 }
-
-/**
- * @brief   Read toggle bitmap
- * @return  returns uint16_t bitmap for toggle
- */
-uint16_t Toggle_Bitmap_Read() {
-    return lightToggleBitmap;
-
-}
-
 
 /**
 * @brief   Read the state of a specific toggleable light from the toggle bitmap
@@ -149,6 +132,7 @@ State Toggle_Read(light_t light) {
  */
 uint16_t Toggle_Bitmap_Read() {
     return lightToggleBitmap;
+
 }
 
 
