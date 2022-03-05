@@ -1,7 +1,8 @@
 #include "Switches.h"
-#include "stm32f4xx.h"
 #include "os.h"
 #include "Tasks.h"
+#include "BSP_GPIO.h"
+#include "stm32f4xx.h"      // TODO: remove this and replace with BSP_GPIO.h, replace all calls to stm32 specific functions with calls to corresponding BSP function
 
 static OS_MUTEX SwitchMutex; //Mutex to lock SPI lines
 //TODO: Do we want to have two mutexes, one to lock GPIO and one to lock SPI? I dont think it's worth it because sync that granular doesn't seem necessary
@@ -25,14 +26,14 @@ void Switches_Init(void){
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
-    uint8_t initRxBuf[1] = {0};
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET); 
+    uint8_t initRxBuf = 0;
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf,2);
     BSP_SPI_Read(initRxBuf, 1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     //OR Result of IODIRA read to set all to 1, then write it back to IODIRA
-    initTxBuf[2] = initRxBuf[0]|0xFF;
-    initTxBuf[0]=SPI_OPCODE_W;
+    initTxBuf[2] = initRxBuf|0xFF;
+    initTxBuf[0] = SPI_OPCODE_W;
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf,3);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
@@ -41,14 +42,13 @@ void Switches_Init(void){
     initTxBuf[0]=SPI_OPCODE_R;
     initTxBuf[1] = SPI_IODIRB;
     initTxBuf[2] = 0;
-    initRxBuf[0]=0;
-    initRxBuf[1]=0;
+    initRxBuf = 0;
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf, 2);
     BSP_SPI_Read(initRxBuf, 1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     //OR IODIRB to set pin 7 to input and write it back
-    initTxBuf[2] = initRxBuf[0]|0x40;
+    initTxBuf[2] = initRxBuf|0x40;
     initTxBuf[0]=SPI_OPCODE_W;
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf,3);
@@ -69,7 +69,7 @@ void Switches_Init(void){
  */ 
 State Switches_Read(switches_t sw){
     uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA, 0}; //query GPIOA
-    uint8_t SwitchReadData[1] = {0};
+    uint8_t SwitchReadData = 0;
     // If we are not trying to get the state of the ignition switches, or the Reverse switch
     switch(sw) {
     case CRUZ_ST:
@@ -97,7 +97,7 @@ State Switches_Read(switches_t sw){
             &err
         );
         assertOSError(0,err);
-        if (SwitchReadData[0] & (1 << sw)) {
+        if (SwitchReadData & (1 << sw)) {
             return ON;
         } else {
             return OFF;
@@ -122,56 +122,17 @@ State Switches_Read(switches_t sw){
             &err
         );
         assertOSError(0,err);
-        if (SwitchReadData[0] & (1 << 6)) { //6 because HZD_SW is on PB6
+        if (SwitchReadData & (1 << 6)) { //6 because HZD_SW is on PB6
             return ON;
         } else {
             return OFF;
         }
 
     case IGN_1: {
-        OSMutexPend(
-            &SwitchMutex,
-            0,
-            OS_OPT_PEND_BLOCKING,
-            &timestamp,
-            &err
-        );
-        if(err != OS_ERR_NONE){
-            return ERROR; //Os error, could not properly lock the Minion GPIO Line
-        }
-        int ignStates = BSP_GPIO_Read(PORTA);
-        OSMutexPost(
-            &SwitchMutex,
-            OS_OPT_POST_NONE,
-            &err
-        );
-        if(err != OS_ERR_NONE){
-            return ERROR; //Os error, couldn't properly unlock the Minion GPIO Line
-        }
-
-        return (ignStates & 0x2) >> 1;
+        return BSP_GPIO_Read_Pin(PORTA,1);
     }
     case IGN_2: {
-        OSMutexPend(
-            &SwitchMutex,
-            0,
-            OS_OPT_PEND_BLOCKING,
-            &timestamp,
-            &err
-        );
-        if(err != OS_ERR_NONE){
-            return ERROR; //Os error, could not properly lock the Minion GPIO Line
-        }
-        int ignStates = BSP_GPIO_Read(PORTA);
-        OSMutexPost(
-            &SwitchMutex,
-            OS_OPT_POST_NONE,
-            &err
-        );
-        if(err != OS_ERR_NONE){
-            return ERROR; //Os error, couldn't properly unlock the Minion GPIO Line
-        }
-        return (ignStates & 0x1);
+        return BSP_GPIO_Read_Pin(PORTA,0);
     }
 
     default:
@@ -180,4 +141,3 @@ State Switches_Read(switches_t sw){
     }
     
 }
-

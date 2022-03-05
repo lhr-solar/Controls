@@ -91,8 +91,10 @@ uint8_t BSP_GPIO_Read_Pin(port_t port, uint8_t pin){
 
 void BSP_GPIO_Write_Pin(port_t port, uint16_t pin, State state){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
-
-	state ? GPIO_WriteBit(gpio_port, pin, Bit_RESET) : GPIO_WriteBit(gpio_port, pin, Bit_SET);
+	if(state==ON)
+		GPIO_WriteBit(gpio_port, pin, Bit_SET);
+	else if(state==OFF)
+		GPIO_WriteBit(gpio_port, pin, Bit_RESET);
 }
 
 
