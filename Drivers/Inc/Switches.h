@@ -46,4 +46,10 @@ void Switches_Init(void);
  */ 
 State Switches_Read(switches_t sw);
 
+/**
+ * @brief   Sends SPI messages to read switches values. Also reads from GPIO's for 
+ *          ignition switch values
+ */ 
+void Switches_UpdateStates(void);
+
 #endif

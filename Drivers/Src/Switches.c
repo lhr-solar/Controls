@@ -4,7 +4,7 @@
 #include "BSP_GPIO.h"
 
 static OS_MUTEX CommMutex; //Mutex to lock SPI lines
-static uint16_t SwitchStates_Bitmap;
+static uint16_t SwitchStates_Bitmap = 0;
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
 //Readwrite bit = Read: 1, Write: 0
@@ -80,7 +80,7 @@ State Switches_Read(switches_t sw){
  * @brief   Sends SPI messages to read switches values. Also reads from GPIO's for 
  *          ignition switch values
  */ 
-void Switches_Update(void){
+void Switches_UpdateStates(void){
     OS_ERR err;
     CPU_TS timestamp;
     uint8_t query[2]={SPI_OPCODE_R,SPI_GPIOA}; //query GPIOA
