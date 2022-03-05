@@ -45,7 +45,7 @@ void BSP_GPIO_Write(port_t port, uint16_t data);
  * @param   pin The pin to read from 
  * @return  State of the pin
  */ 
-uint8_t BSP_GPIO_Read_Pin(port_t port, uint8_t pin);
+uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pin);
 
 /**
  * @brief   Writes data to a specified pin

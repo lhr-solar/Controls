@@ -4,11 +4,11 @@
 #include "Tasks.h"
 
 static void ArrayKill(void) {
-    Contactors_Set(ARRAY, OFF);
+    Contactors_Set(ARRAY_CONTACTOR, OFF);
 }
 
 static void MotorKill(void) {
-    Contactors_Set(MOTOR, OFF);
+    Contactors_Set(MOTOR_CONTACTOR, OFF);
 }
 
 static void ArrayMotorKill(void) {
