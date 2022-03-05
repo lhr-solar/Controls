@@ -152,9 +152,10 @@ extern OS_SEM MotorConnectionChange_Sem4;
 /**
  * Global Variables
  */
-
-
 // TODO: Put all global state variables here
+State RegenEnable;
+State CruiseControlEnable;
+
 /**
  * Motor Error States
  * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits

@@ -1,4 +1,6 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
+/*DEPRECATED FILE, THE LOGIC AND FUNCTION HAVE BEEN MOVED TO UpdateVelocity.c 
+and UpdateVelocity.h*/
 
 #include "RTOSPedals.h"
 
