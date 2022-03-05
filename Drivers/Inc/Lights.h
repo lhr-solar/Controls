@@ -49,6 +49,12 @@ State Lights_Read(light_t light);
  */
 void Lights_Set(light_t light, State state);
 
+/**
+ * @brief   Set multiple lights given light bitmap
+ * @return  void
+ */
+void Lights_MultiSet(uint16_t bitmap);
+
 
 /**
 * @brief   Read the lights bitmap
@@ -91,15 +97,6 @@ State Toggle_Read(light_t light);
  * @return  returns uint16_t bitmap for toggle
  */
 uint16_t Toggle_Bitmap_Read(void);
-
-
-
-
-/**
- * @brief   Set multiple lights given light bitmap
- * @return  void
- */
-void Lights_MultiSet(uint16_t bitmap);
 
 
 #endif
