@@ -85,6 +85,7 @@ uint16_t Lights_Bitmap_Read(light_t light) {
 }
 
 /**
+
  * @brief   Turn on light toggling
  * @param   light Which light to enable toggling for
  * @return  void
@@ -114,6 +115,22 @@ void Toggle_Light(light_t light){
     } else {
         Lights_Set(light, OFF);
     }
+
+* @brief   Read the state of a specific toggleable light from the toggle bitmap
+* @param   light Which Light to read
+* @return  returns State enum which indicates ON/OFF
+*/
+State Toggle_Read(light_t light) {
+    return (lightToggleBitmap>>light)&0x01;
+}
+
+/**
+ * @brief   Read toggle bitmap
+ * @return  returns uint16_t bitmap for toggle
+ */
+uint16_t Toggle_Bitmap_Read() {
+    return lightToggleBitmap;
+
 }
 
 
@@ -196,4 +213,5 @@ void Lights_Set(light_t light, State state) {
         assertOSError(OS_BLINK_LIGHTS_LOC, err);
     }
 }
+
 
