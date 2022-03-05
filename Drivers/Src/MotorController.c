@@ -14,7 +14,6 @@
 
 static OS_SEM	MotorController_MailSem4;
 static OS_SEM	MotorController_ReceiveSem4;
-static OS_Q     MotorController_RxQueue;
 static float CurrentVelocity = 0;
 
 uint16_t Motor_FaultBitmap = T_NONE;
@@ -50,7 +49,7 @@ static void MotorController_Release(void) {
  * @brief	Increments the receive semaphore.
  * @note	Do not call directly.
  */
-static void MotorController_ReceiveIncoming(void) {
+static void MotorController_CountIncoming(void) {
 	OS_ERR err;
 
 	OSSemPost(&MotorController_ReceiveSem4,
@@ -72,12 +71,13 @@ void MotorController_Init(){
                 &err);
 	assertOSError(0, err);
 
-	OSQCreate(&MotorController_RxQueue,
-              "Motor Controller Receive Queue",
-              (OS_MSG_QTY)64,
-              &err);
+    OSSemCreate(&MotorController_ReceiveSem4,
+                "Motor Controller Receive Semaphore",
+                0,	// Number of mailboxes
+                &err);
 	assertOSError(0, err);
-    BSP_CAN_Init(CAN_3, MotorController_ReceiveIncoming, MotorController_Release);
+
+    BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
 }
 
 /**
