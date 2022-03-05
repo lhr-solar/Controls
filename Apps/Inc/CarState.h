@@ -3,7 +3,6 @@
 #ifndef __CAR_STATE_H
 #define __CAR_STATE_H
 
-#include "Switches.h"
 #include "common.h"
 #include "config.h"
 
@@ -19,6 +18,18 @@ typedef struct{
     State slipSpeedErr;
     State overSpeedErr;
 } motor_error_code_t;
+
+/**
+ * Blinker States
+ * 
+ * Stores the desired blinker state
+ * to indicate which lights to toggle
+ */
+typedef struct {
+    State HZD;
+    State LT;
+    State RT;
+} blinker_states_t;
 
 /**
  * Error States
@@ -72,7 +83,7 @@ typedef struct {
     uint8_t BrakePedalPercent;
     uint8_t MotorCurrentSetpoint;
 
-    switch_states_t SwitchStates;
+    blinker_states_t BlinkerStates;
 
     CruiseRegenSet CRSet;
     State CruiseControlEnable;

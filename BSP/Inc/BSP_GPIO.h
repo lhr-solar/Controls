@@ -10,6 +10,7 @@
 
 #include "common.h"
 #include "config.h"
+#include "stm32f4xx_gpio.h"
 #include <bsp.h>
 
 typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t; 
@@ -40,21 +41,21 @@ uint16_t BSP_GPIO_Read(port_t port);
 void BSP_GPIO_Write(port_t port, uint16_t data);
 
 /**
- * @brief   Reads data to a specified pin (not applicalbe to output pins)
+ * @brief   Reads data from a specified pin (not applicalbe to output pins)
  * @param   port The port to read from
- * @param   pin The pin to read from 
+ * @param   pinmask Mask from stm header file that says which pin to read from
  * @return  State of the pin
  */ 
-uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pin);
+uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask);
 
 /**
  * @brief   Writes data to a specified pin
  * @param   port The port to write to
- * @param   pin The pin to write to 
+ * @param   pinmask Mask from stm header file that says which pin to write too
  * @param   state ON or OFF
  * @return  None
  */ 
-void BSP_GPIO_Write_Pin(port_t port, uint16_t pin, State state);
+void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, State state);
 
 /**
  * @brief   Returns state of output pin (not applicable to input pins)
