@@ -29,7 +29,7 @@ void Switches_Init(void){
     uint8_t initRxBuf = 0;
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf,2);
-    BSP_SPI_Read(initRxBuf, 1);
+    BSP_SPI_Read(&initRxBuf, 1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     //OR Result of IODIRA read to set all to 1, then write it back to IODIRA
     initTxBuf[2] = initRxBuf|0xFF;
@@ -45,7 +45,7 @@ void Switches_Init(void){
     initRxBuf = 0;
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
     BSP_SPI_Write(initTxBuf, 2);
-    BSP_SPI_Read(initRxBuf, 1);
+    BSP_SPI_Read(&initRxBuf, 1);
     GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
     //OR IODIRB to set pin 7 to input and write it back
     initTxBuf[2] = initRxBuf|0x40;
