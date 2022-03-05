@@ -17,12 +17,22 @@ static uint16_t SwitchStates_Bitmap;
  */ 
 void Switches_Init(void){
     OS_ERR err;
-    OSMutexCreate(&CommMutex, "communications Mutex", &err);
+    CPU_TS timestamp;
+    OSMutexCreate(&CommMutex, "Communications Mutex", &err);
     assertOSError(0,err);
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
     uint8_t initRxBuf = 0;
+
+    OSMutexPend(
+        &CommMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err);
+    assertOSError(0,err);
+    
     BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,2);
     BSP_SPI_Read(&initRxBuf, 1);
@@ -33,7 +43,6 @@ void Switches_Init(void){
     BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,3);
     BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
-
     //Sets up pin 7 on GPIOB as input (for ReverseSwitch)
     initTxBuf[0]=SPI_OPCODE_R;
     initTxBuf[1] = SPI_IODIRB;
@@ -49,6 +58,13 @@ void Switches_Init(void){
     BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,3);
     BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err
+    );
+    assertOSError(0,err);
 };
 
 /**
@@ -71,52 +87,56 @@ void Switches_Update(void){
     uint8_t SwitchDataReg1 = 0, SwitchDataReg2 = 0;
 
     //Read all switches except for ignition and hazard
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
-        OSMutexPend(
-            &CommMutex,
-            0,
-            OS_OPT_PEND_BLOCKING,
-            &timestamp,
-            &err
-        );
-        assertOSError(0,err);        
-        BSP_SPI_Write(query,2);
-        BSP_SPI_Read(&SwitchDataReg1,1);
-        OSMutexPost(
-            &CommMutex,
-            OS_OPT_POST_NONE,
-            &err
-        );
-        assertOSError(0,err);
-        BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    OSMutexPend(
+        &CommMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err
+    );
+    assertOSError(0,err);
 
-        //Read Hazard Switch
-        query[1] = SPI_GPIOB;
-        GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
-        OSMutexPend(
-            &CommMutex,
-            0,
-            OS_OPT_PEND_BLOCKING,
-            &timestamp,
-            &err
-        );
-        assertOSError(0,err);
-        BSP_SPI_Write(query,2);
-        BSP_SPI_Read(&SwitchDataReg2,1);
-        OSMutexPost(
-            &CommMutex,
-            OS_OPT_POST_NONE,
-            &err
-        );
-        assertOSError(0,err);
-        GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);       
+    BSP_SPI_Write(query,2);
+    BSP_SPI_Read(&SwitchDataReg1,1);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
 
-        //Read Ignition Switch 1
-        uint8_t ign1 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err
+    );
+    assertOSError(0,err);
 
-        //Read Ignition Switch 2
-        uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
-        
-        //Store data in bitmap
-        SwitchStates_Bitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
+    //Read Hazard Switch
+    query[1] = SPI_GPIOB;
+    OSMutexPend(
+        &CommMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err
+    );
+    assertOSError(0,err);
+
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
+    BSP_SPI_Write(query,2);
+    BSP_SPI_Read(&SwitchDataReg2,1);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err
+    );
+    assertOSError(0,err);
+
+    //Read Ignition Switch 1
+    uint8_t ign1 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
+
+    //Read Ignition Switch 2
+    uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
+    
+    //Store data in bitmap
+    SwitchStates_Bitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
 }
