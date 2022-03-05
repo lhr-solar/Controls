@@ -49,6 +49,19 @@ State Lights_Read(light_t light);
  */
 void Lights_Set(light_t light, State state);
 
+/**
+ * @brief   Turn on light toggling
+ * @param   light Which light to enable toggling for
+ * @return  void
+ */
+void Toggle_Enable(light_t light);
+
+/**
+ * @brief   Turn off light toggling
+ * @param   light Which light to disable toggling for
+ * @return  void
+ */
+void Toggle_Disable(light_t light);
 
 
 #endif
