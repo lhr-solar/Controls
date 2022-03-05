@@ -65,10 +65,12 @@ void Task1(void *p_arg)
     // Receiving buffer that will be populated
     uint8_t buffer[8];
 
+    uint32_t canId;
+
     while (1)
     {
         // Attempt to read from CANbus_Read
-        if (CANbus_Read(1, buffer, CAN_BLOCKING) == SUCCESS)
+        if (CANbus_Read(&canId, buffer, CAN_BLOCKING) == SUCCESS)
         {
             // Delay to be able to read buffer in GDB
             for (int i = 0; i < 100000; i++)
