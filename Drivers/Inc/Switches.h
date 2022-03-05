@@ -6,6 +6,7 @@
 #include "config.h"
 #include "GPIOExpander.h"
 
+#define SPI_CS GPIO_Pin_4
 
 typedef enum {CRUZ_ST=0, CRUZ_EN, REV_SW, FOR_SW, HEADLIGHT_SW, LEFT_SW, RIGHT_SW, REGEN_SW, HZD_SW, IGN_1, IGN_2} switches_t;
 

@@ -23,32 +23,32 @@ void Switches_Init(void){
     //Sets up pins 0-7 on GPIOA as input 
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
     uint8_t initRxBuf = 0;
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, OFF);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,2);
     BSP_SPI_Read(&initRxBuf, 1);
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, ON);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
     //OR Result of IODIRA read to set all to 1, then write it back to IODIRA
     initTxBuf[2] = initRxBuf|0xFF;
     initTxBuf[0] = SPI_OPCODE_W;
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, OFF);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,3);
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, ON);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
 
     //Sets up pin 7 on GPIOB as input (for ReverseSwitch)
     initTxBuf[0]=SPI_OPCODE_R;
     initTxBuf[1] = SPI_IODIRB;
     initTxBuf[2] = 0;
     initRxBuf = 0;
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, OFF);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf, 2);
     BSP_SPI_Read(&initRxBuf, 1);
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, ON);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
     //OR IODIRB to set pin 7 to input and write it back
     initTxBuf[2] = initRxBuf|0x40;
     initTxBuf[0]=SPI_OPCODE_W;
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, OFF);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,3);
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, ON);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
 };
 
 /**
@@ -71,7 +71,7 @@ void Switches_Update(void){
     uint8_t SwitchDataReg1 = 0, SwitchDataReg2 = 0;
 
     //Read all switches except for ignition and hazard
-    BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, OFF);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
         OSMutexPend(
             &CommMutex,
             0,
@@ -88,11 +88,11 @@ void Switches_Update(void){
             &err
         );
         assertOSError(0,err);
-        BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_4, ON);
+        BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
 
         //Read Hazard Switch
         query[1] = SPI_GPIOB;
-        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+        GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
         OSMutexPend(
             &CommMutex,
             0,
@@ -109,7 +109,7 @@ void Switches_Update(void){
             &err
         );
         assertOSError(0,err);
-        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+        GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
 
         //Read Ignition Switch 1
         uint8_t ign1 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
