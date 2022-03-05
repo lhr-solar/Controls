@@ -74,7 +74,7 @@ void Task_ReadSwitches(void* p_arg) {
     while (1) {
         curr_fsm_state->statefunction();
         OS_DELAY_MS(curr_fsm_state->delay_ms);
-        curr_fsm_state = &(IgnitionFSM[UpdateSwitches()]);  // set next state
+        curr_fsm_state = &(IgnitionFSM[curr_fsm_state->next_state[UpdateSwitches()]]);  // set next state
     }
 }
 
