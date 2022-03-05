@@ -73,7 +73,7 @@ void BSP_GPIO_Write(port_t port, uint16_t data){
  * @return  State of the pin
  */ 
 
-uint8_t BSP_GPIO_Read_Pin(port_t port, uint8_t pin){
+uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pin){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
 
 	return !GPIO_ReadInputDataBit(gpio_port, pin);
