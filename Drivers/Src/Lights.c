@@ -85,6 +85,26 @@ uint16_t Lights_Bitmap_Read(light_t light) {
 }
 
 /**
+ * @brief Toggles a light. Should be used only after Toggle_Set has been called for this light so that we are accurately tracking the enabled and disabled lights
+ * @param light Which light to toggle
+*/
+void Lights_Toggle(light_t light){
+    State lightState = Lights_Read(light);
+    if(lightState == OFF){
+        Lights_Set(light, ON);
+    } else {
+        Lights_Set(light, OFF);
+    }
+}
+
+/**
+ * @brief Toggles multiple lights according to the toggle bitmap
+*/
+void Lights_MultiToggle(void){
+    Lights_MultiSet(lightToggleBitmap ^ lightStatesBitmap); //toggle XOR states will flip wherever toggle bitmap has a 1 and keep wherever toggle bitmap has 0
+}
+
+/**
 
  * @brief   Set light toggling
  * @param   light Which light to enable toggling for
@@ -93,22 +113,11 @@ uint16_t Lights_Bitmap_Read(light_t light) {
  */
 void Toggle_Set(light_t light, State state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
-    if(state==ON)
+    if(state==ON){
         lightToggleBitmap |= (0x01<<light);
-    else if(state==OFF)
+    }
+    else if(state==OFF){
         lightToggleBitmap &= ~(0x01<<light);
-}
-
-/**
- * @brief Toggles a light. Should be used only after Toggle_Enable has been called for this light so that we are accurately tracking the enabled and disabled lights
- * @param light Which light to toggle
-*/
-void Toggle_Light(light_t light){
-    State lightState = Lights_Read(light);
-    if(lightState == OFF){
-        Lights_Set(light, ON);
-    } else {
-        Lights_Set(light, OFF);
     }
 }
 
@@ -125,7 +134,7 @@ State Toggle_Read(light_t light) {
  * @brief   Read toggle bitmap
  * @return  returns uint16_t bitmap for toggle
  */
-uint16_t Toggle_Bitmap_Read() {
+uint16_t Toggle_Bitmap_Read(void) {
     return lightToggleBitmap;
 
 }
@@ -147,7 +156,7 @@ void Lights_Set(light_t light, State state) {
         
         // Initialize tx buffer and port c
         uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
-
+        
         if (light == BrakeLight) {  // Brakelight is only external
             BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, ON);
         } else {
@@ -183,4 +192,48 @@ void Lights_Set(light_t light, State state) {
     }
 }
 
+/**
+ * @brief   Set multiple lights given light bitmap
+ * @return  void
+ */
+void Lights_MultiSet(uint16_t bitmap){
+    // Initialize tx buffer and port c
+    uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
+    uint16_t portc = BSP_GPIO_Read(LIGHTS_PORT);
+    
+    // Set corresponding bits on port c because they're not in the right order
+    if(bitmap & (0x01<<BrakeLight)){
+        portc |= (0x01<<BRAKELIGHT_PIN);
+    }
+
+    if(bitmap & (0x01<<Headlight_ON)){
+        portc |= (0x01<<HEADLIGHT_PIN);
+    }
+
+    if(bitmap & (0x01<<LEFT_BLINK)){
+        portc |= (0x01<<LEFT_BLINK_PIN);
+    }
+
+    if(bitmap & (0x01<<RIGHT_BLINK)){
+        portc |= (0x01<<RIGHT_BLINK_PIN);
+    }
+
+    // We don't want to accidentally set the brakelight bit over SPI because it only exists on the controls board
+    txWriteBuf[3] = lightStatesBitmap & (0x01<<BRAKELIGHT_PIN); // Isolate current brakelight bit
+    txWriteBuf[3] |= bitmap & (~(0x01<<BRAKELIGHT_PIN));    // Or with new input excluding brakelight bit
+
+    // Update array
+    lightStatesBitmap = bitmap;
+
+    OSMutexPend(&lightMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);    // Lock mutex in order to update our lights bitmap and write to SPI
+    assertOSError(OS_BLINK_LIGHTS_LOC, err);
+
+    // Write to GPIOB on the minion board (SPI) for internal lights
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    BSP_SPI_Write(txWriteBuf, 3);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+
+    OSMutexPost(&lightMutex,OS_OPT_POST_NONE,&err); // Unlock mutex
+    assertOSError(OS_BLINK_LIGHTS_LOC, err);
+}
 
