@@ -34,7 +34,7 @@ typedef enum {
 
 typedef struct {
     /**
-     * indexed by ignition switch read value (0, 1, or 3) TODO: double check those numbers
+     * indexed by ignition switch read value (0, 1, or 3)
      *      0: electronics on only
      *      1: delay for array precharge -> array on
      *      3: motor on
@@ -46,10 +46,10 @@ typedef struct {
 } fsm_state_t;
 
 fsm_state_t IgnitionFSM[] = {
-    {{ELEC_ON, ARRAY_PRE,   UNUSED_SWITCH_NUM, ARRAY_PRE},  ElectronicsOn,  1}, // electronics on, array/motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, ARRAY_ON},   ArrayPrecharge, 1}, // array precharge, array/motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   ArrayOn,        1}, // array on, motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   MotorOn,        1}, // motor on, array on
+    {{ELEC_ON, ARRAY_PRE,   UNUSED_SWITCH_NUM, ARRAY_PRE},  ElectronicsOn,  10}, // electronics on, array/motor off
+    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, ARRAY_ON},   ArrayPrecharge, 10}, // array precharge, array/motor off
+    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   ArrayOn,        10}, // array on, motor off
+    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   MotorOn,        10}, // motor on, array on
 };
 
 /**
@@ -108,15 +108,15 @@ static void MotorOn() {
 
 
 static uint8_t UpdateSwitches() {
-    // Switches_Update();
+    Switches_UpdateStates();
 
     CurrSwitches.IGN_1 = Switches_Read(IGN_1);
     CurrSwitches.IGN_2 = Switches_Read(IGN_2);
     
-    CurrSwitches.lightSwitches.LEFT_SW =    Switches_Read(LEFT_SW);
-    CurrSwitches.lightSwitches.RIGHT_SW =   Switches_Read(RIGHT_SW);
-    CurrSwitches.lightSwitches.HEADLIGHT_SW = Switches_Read(HEADLIGHT_SW);
-    CurrSwitches.lightSwitches.HZD_SW =     Switches_Read(HZD_SW);
+    CurrSwitches.LT = Switches_Read(LEFT_SW);
+    CurrSwitches.RT = Switches_Read(RIGHT_SW);
+    CurrSwitches.HDLT = Switches_Read(HEADLIGHT_SW);
+    CurrSwitches.HZD = Switches_Read(HZD_SW);
 
     UpdateLights();
 
@@ -124,13 +124,13 @@ static uint8_t UpdateSwitches() {
 }
 
 static void UpdateLights() {
-    Lights_Set(Headlight_ON, CurrSwitches.lightSwitches.HEADLIGHT_SW);
+    Lights_Set(Headlight_ON, CurrSwitches.HDLT);
     
-    int leftblink = CurrSwitches.lightSwitches.LEFT_SW | 
-                    CurrSwitches.lightSwitches.HZD_SW;
-    int rightblink = CurrSwitches.lightSwitches.RIGHT_SW | 
-                     CurrSwitches.lightSwitches.HZD_SW;
+    int leftblink = CurrSwitches.LT | 
+                    CurrSwitches.HZD;
+    int rightblink = CurrSwitches.RT | 
+                     CurrSwitches.HZD;
 
-    leftblink ? Toggle_Enable(LEFT_BLINK) : Toggle_Disable(LEFT_BLINK);
-    rightblink ? Toggle_Enable(RIGHT_BLINK) : Toggle_Disable(RIGHT_BLINK);
+    Toggle_Set(RIGHT_BLINK, rightblink);
+    Toggle_Set(LEFT_BLINK, leftblink);
 }
