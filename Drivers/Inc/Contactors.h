@@ -25,14 +25,16 @@ void Contactors_Init();
 /**
  * @brief   Returns the current state of 
  *          a specified contactor
- * @param   contactor the contactor (MOTOR/ARRAY)
+ * @param   contactor the contactor
+ *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @return  The contactor's state (ON/OFF)
  */ 
 State Contactors_Get(contactor_t contactor);
 
 /**
  * @brief   Sets the state of a specified contactor
- * @param   contactor the contactor (MOTOR/ARRAY)
+ * @param   contactor the contactor
+ *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @param   state the state to set (ON/OFF)
  * @return  None
  */

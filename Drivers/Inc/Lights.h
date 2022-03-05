@@ -16,6 +16,7 @@
 #define LEFT_BLINK_PIN  9
 
 // Ordered by pin of minion board
+//TODO: Double check that this ordering remains valid
 typedef enum {  
     A_CNCTR = 0,
     M_CNCTR,
@@ -23,8 +24,6 @@ typedef enum {
     LEFT_BLINK,
     RIGHT_BLINK,
     Headlight_ON,
-    BPS_FAULT,
-    BPS_PWR,
     BrakeLight,
     RSVD_LED
 } light_t;

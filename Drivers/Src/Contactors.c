@@ -2,12 +2,12 @@
 
 
 #include "Contactors.h"
+#include "stm32f4xx_gpio.h"
 
-
-#define CONTACTORS_PORT     PORTC
-#define ARRAY_PRECHARGE_PIN 10
-#define ARRAY_CONTACTOR_PIN 11
-#define MOTOR_CONTACTOR_PIN 12
+#define CONTACTORS_PORT         PORTC
+#define ARRAY_PRECHARGE_PIN GPIO_Pin_10
+#define ARRAY_CONTACTOR_PIN GPIO_Pin_11
+#define MOTOR_CONTACTOR_PIN GPIO_Pin_12
 
 
 /**
@@ -17,9 +17,9 @@
  */ 
 void Contactors_Init() {
     BSP_GPIO_Init(CONTACTORS_PORT, 
-                 (1 << ARRAY_CONTACTOR_PIN) | 
-                 (1 << ARRAY_PRECHARGE_PIN) |
-                 (1 << MOTOR_CONTACTOR_PIN), 
+                 (ARRAY_CONTACTOR_PIN) | 
+                 (ARRAY_PRECHARGE_PIN) |
+                 (MOTOR_CONTACTOR_PIN), 
                   1);
 }
 
