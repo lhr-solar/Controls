@@ -79,7 +79,7 @@ void Lights_MultiToggle(void);
 void Toggle_Set(light_t light, State state);
 
 /**
-* @brief   Read the state of a specific toggleable light from the toggle bitmap
+* @brief   Read the toggle enable state of a specific light from the toggle bitmap
 * @param   light Which Light to read
 * @return  returns State enum which indicates ON/OFF
 */
