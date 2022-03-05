@@ -7,16 +7,17 @@
 #define MOTOR_VELOCITY 0x243
 #define MAX_CAN_LEN 8
 
-#define MASK_MOTOR_TEMP_ERR 1<<6 //check if motor temperature is an issue on bit 6
-#define MASK_SS_ERR 1<<19 //check for slip or hall sequence position error on 19 bit
-#define MASK_CC_ERR 1<<2 //checks velocity on 2 bit
-#define MASK_OVER_SPEED_ERR 1<<24 //check if motor overshot max RPM on 24 bit
+#define MASK_MOTOR_TEMP_ERR (1<<6) //check if motor temperature is an issue on bit 6
+#define MASK_SS_ERR (1<<19) //check for slip or hall sequence position error on 19 bit
+#define MASK_CC_ERR (1<<2) //checks velocity on 2 bit
+#define MASK_OVER_SPEED_ERR (1<<24) //check if motor overshot max RPM on 24 bit
 
 static OS_SEM	MotorController_MailSem4;
 static OS_SEM	MotorController_ReceiveSem4;
+static OS_Q     MotorController_RxQueue;
 static float CurrentVelocity = 0;
 
-uint16_t Motor_FaultBitmap = 0;
+uint16_t Motor_FaultBitmap = T_NONE;
 
 /**
  * @brief   Assert Error if Tritium sends error. When Fault Bitmap is set,
@@ -49,7 +50,7 @@ static void MotorController_Release(void) {
  * @brief	Increments the receive semaphore.
  * @note	Do not call directly.
  */
-static void MotorController_CountIncoming(void) {
+static void MotorController_ReceiveIncoming(void) {
 	OS_ERR err;
 
 	OSSemPost(&MotorController_ReceiveSem4,
@@ -71,12 +72,12 @@ void MotorController_Init(){
                 &err);
 	assertOSError(0, err);
 
-	OSSemCreate(&MotorController_ReceiveSem4,
-                "Motor Controller RX Mailbox Semaphore",
-                0,
-                &err);
+	OSQCreate(&MotorController_RxQueue,
+              "Motor Controller Receive Queue",
+              (OS_MSG_QTY)64,
+              &err);
 	assertOSError(0, err);
-    BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
+    BSP_CAN_Init(CAN_3, MotorController_ReceiveIncoming, MotorController_Release);
 }
 
 /**
@@ -133,25 +134,16 @@ ErrorStatus MotorController_Read(CANbuff *message){
         message->id = id;
         //get first number (bits 0-31)
         for(int j = 0; j < MAX_CAN_LEN/2; j++){
+            firstSum <<= 8;
             firstSum += data[j];
-            if(j != MAX_CAN_LEN/2 - 1){
-                firstSum = firstSum << 8;
-            }
         }
         //get second number (bits 32-63)
         for(int k = MAX_CAN_LEN/2; k < MAX_CAN_LEN; k++){
+            secondSum <<= 8;
             secondSum += data[k];
-            if(k != MAX_CAN_LEN-1){
-                secondSum = secondSum << 8;
-            }
         }
         message->firstNum = firstSum;
         message->secondNum = secondSum;
-
-        union {
-            uint32_t n;
-            float f;
-        } convert;
         
         switch (id) {
             // If we're reading the output from the Motor Status command (0x241) then 
