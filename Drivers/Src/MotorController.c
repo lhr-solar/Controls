@@ -144,11 +144,6 @@ ErrorStatus MotorController_Read(CANbuff *message){
         }
         message->firstNum = firstSum;
         message->secondNum = secondSum;
-
-        union {
-            uint32_t n;
-            float f;
-        } convert;
         
         switch (id) {
             // If we're reading the output from the Motor Status command (0x241) then 
@@ -175,8 +170,7 @@ ErrorStatus MotorController_Read(CANbuff *message){
                 break;
             }
             case MOTOR_DRIVE: {
-                convert.n = secondSum;
-                CurrentVelocity = convert.f;
+                CurrentVelocity = *(float *) &secondSum;
                 break;
             }
             default: break;
