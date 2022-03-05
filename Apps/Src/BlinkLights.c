@@ -6,5 +6,7 @@
 **/
 
 void Task_BlinkLight(void* p_arg){
-    
+    while(1){
+        
+    }
 }
