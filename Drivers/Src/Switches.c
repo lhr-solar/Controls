@@ -1,6 +1,7 @@
 #include "Switches.h"
 #include "stm32f4xx.h"
 #include "os.h"
+#include "Tasks.h"
 
 static OS_MUTEX SwitchMutex; //Mutex to lock SPI lines
 //TODO: Do we want to have two mutexes, one to lock GPIO and one to lock SPI? I dont think it's worth it because sync that granular doesn't seem necessary
@@ -18,6 +19,9 @@ static CPU_TS timestamp;
  */ 
 void Switches_Init(void){
     OSMutexCreate(&SwitchMutex, "Switch Mutex", &err);
+    assertOSError(0,err);
+    OSMutexPend(&SwitchMutex,0,OS_OPT_PEND_BLOCKING,&timestamp,&err);
+    assertOSError(0,err);
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
     uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
@@ -54,6 +58,7 @@ void Switches_Init(void){
         OS_OPT_POST_NONE,
         &err
     );
+    assertOSError(0,err);
 };
 
 /**
@@ -82,9 +87,7 @@ State Switches_Read(switches_t sw){
             &timestamp,
             &err
         );
-        if(err != OS_ERR_NONE){
-            return ERROR; //Os error, could not properly lock the Minion SPI Line
-        }
+        assertOSError(0,err);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(query,3);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
@@ -93,9 +96,7 @@ State Switches_Read(switches_t sw){
             OS_OPT_POST_NONE,
             &err
         );
-        if(err != OS_ERR_NONE){
-            return ERROR; //Os error, couldn't properly unlock the Minion SPI Line
-        }
+        assertOSError(0,err);
         if (SwitchReadData[0] & (1 << sw)) {
             return ON;
         } else {
@@ -111,9 +112,7 @@ State Switches_Read(switches_t sw){
             &timestamp,
             &err
         );
-        if(err != OS_ERR_NONE){
-            return ERROR; //Os error, could not properly lock the Minion SPI Line
-        }
+        assertOSError(0,err);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(query,3);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
@@ -122,9 +121,7 @@ State Switches_Read(switches_t sw){
             OS_OPT_POST_NONE,
             &err
         );
-        if(err != OS_ERR_NONE){
-            return ERROR; //Os error, couldn't properly unlock the Minion SPI Line
-        }
+        assertOSError(0,err);
         if (SwitchReadData[0] & (1 << 6)) { //6 because HZD_SW is on PB6
             return ON;
         } else {
