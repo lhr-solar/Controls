@@ -66,7 +66,7 @@ void Lights_Toggle(light_t light);
 /**
  * @brief Toggles multiple lights according to the toggle bitmap
 */
-void Lights_MultiToggle();
+void Lights_MultiToggle(void);
 
 
 /**
@@ -90,7 +90,7 @@ State Toggle_Read(light_t light);
  * @brief   Read toggle bitmap
  * @return  returns uint16_t bitmap for toggle
  */
-uint16_t Toggle_Bitmap_Read();
+uint16_t Toggle_Bitmap_Read(void);
 
 
 /**

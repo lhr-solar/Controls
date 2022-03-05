@@ -85,7 +85,7 @@ uint16_t Lights_Bitmap_Read(light_t light) {
 }
 
 /**
- * @brief Toggles a light. Should be used only after Toggle_Enable has been called for this light so that we are accurately tracking the enabled and disabled lights
+ * @brief Toggles a light. Should be used only after Toggle_Set has been called for this light so that we are accurately tracking the enabled and disabled lights
  * @param light Which light to toggle
 */
 void Lights_Toggle(light_t light){
@@ -100,7 +100,7 @@ void Lights_Toggle(light_t light){
 /**
  * @brief Toggles multiple lights according to the toggle bitmap
 */
-void Lights_MultiToggle(){
+void Lights_MultiToggle(void){
     Lights_MultiSet(lightToggleBitmap ^ lightStatesBitmap); //toggle XOR states will flip wherever toggle bitmap has a 1 and keep wherever toggle bitmap has 0
 }
 
@@ -113,10 +113,12 @@ void Lights_MultiToggle(){
  */
 void Toggle_Set(light_t light, State state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
-    if(state==ON)
+    if(state==ON){
         lightToggleBitmap |= (0x01<<light);
-    else if(state==OFF)
+    }
+    else if(state==OFF){
         lightToggleBitmap &= ~(0x01<<light);
+    }
 }
 
 /**
@@ -132,7 +134,7 @@ State Toggle_Read(light_t light) {
  * @brief   Read toggle bitmap
  * @return  returns uint16_t bitmap for toggle
  */
-uint16_t Toggle_Bitmap_Read() {
+uint16_t Toggle_Bitmap_Read(void) {
     return lightToggleBitmap;
 
 }
@@ -200,19 +202,19 @@ void Lights_MultiSet(uint16_t bitmap){
     uint16_t portc = BSP_GPIO_Read(LIGHTS_PORT);
     
     // Set corresponding bits on port c because they're not in the right order
-    if(bitmap & (0x01<<BRAKELIGHT_PIN)){
+    if(bitmap & (0x01<<BrakeLight)){
         portc |= (0x01<<BRAKELIGHT_PIN);
     }
 
-    if(bitmap & (0x01<<HEADLIGHT_PIN)){
+    if(bitmap & (0x01<<Headlight_ON)){
         portc |= (0x01<<HEADLIGHT_PIN);
     }
 
-    if(bitmap & (0x01<<LEFT_BLINK_PIN)){
+    if(bitmap & (0x01<<LEFT_BLINK)){
         portc |= (0x01<<LEFT_BLINK_PIN);
     }
 
-    if(bitmap & (0x01<<RIGHT_BLINK_PIN)){
+    if(bitmap & (0x01<<RIGHT_BLINK)){
         portc |= (0x01<<RIGHT_BLINK_PIN);
     }
 
