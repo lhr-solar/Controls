@@ -17,7 +17,6 @@ static uint16_t SwitchStates_Bitmap;
  */ 
 void Switches_Init(void){
     OS_ERR err;
-    CPU_TS timestamp;
     OSMutexCreate(&CommMutex, "communications Mutex", &err);
     assertOSError(0,err);
     BSP_SPI_Init();
@@ -82,7 +81,7 @@ void Switches_Update(void){
         );
         assertOSError(0,err);        
         BSP_SPI_Write(query,2);
-        BSP_SPI_Read(SwitchDataReg1,1);
+        BSP_SPI_Read(&SwitchDataReg1,1);
         OSMutexPost(
             &CommMutex,
             OS_OPT_POST_NONE,
@@ -103,7 +102,7 @@ void Switches_Update(void){
         );
         assertOSError(0,err);
         BSP_SPI_Write(query,2);
-        BSP_SPI_Read(SwitchDataReg2,1);
+        BSP_SPI_Read(&SwitchDataReg2,1);
         OSMutexPost(
             &CommMutex,
             OS_OPT_POST_NONE,
