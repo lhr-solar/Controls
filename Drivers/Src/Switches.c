@@ -32,7 +32,7 @@ void Switches_Init(void){
         &timestamp,
         &err);
     assertOSError(0,err);
-    
+
     BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,2);
     BSP_SPI_Read(&initRxBuf, 1);
@@ -100,24 +100,9 @@ void Switches_Update(void){
     BSP_SPI_Write(query,2);
     BSP_SPI_Read(&SwitchDataReg1,1);
     BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
-
-    OSMutexPost(
-        &CommMutex,
-        OS_OPT_POST_NONE,
-        &err
-    );
-    assertOSError(0,err);
-
+    
     //Read Hazard Switch
     query[1] = SPI_GPIOB;
-    OSMutexPend(
-        &CommMutex,
-        0,
-        OS_OPT_PEND_BLOCKING,
-        &timestamp,
-        &err
-    );
-    assertOSError(0,err);
 
     GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
     BSP_SPI_Write(query,2);
