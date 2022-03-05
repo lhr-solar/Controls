@@ -1,49 +1,99 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
-/*  
-    Allows for reading from and writing to light states. Reading and writing 
-    brake lights has been separated from implementation of other lights because
-    brake lights have no need for SPI, as they work solely externally and through GPIO.
-    
-    Headlights and blinkers need to use SPI and GPIO, given that they have an indicator
-    internally as well as an external component.
-*/
+#include "Minions.h"
 
+static OS_MUTEX CommMutex; //Mutex to lock SPI lines
+//Variables for Switches
+static uint16_t SwitchStates_Bitmap = 0;
 
-#include "Lights.h"
-#include "BSP_SPI.h"
-#include "stm32f4xx.h"
-#include "Tasks.h"
+//Variables for Lights
+static uint8_t lightStatesBitmap = 0;   // Stores light states (on/off)
+static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (flashing/not flashing)
 
-//static State lightStates[10] = {OFF};
-static uint8_t lightStatesBitmap;   // Stores light states (on/off)
-static uint8_t lightToggleBitmap;   // Stores light toggle states (flashing/not flashing)
-static OS_MUTEX lightMutex;
-static CPU_TS timestamp;
-static OS_ERR err;
+//Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
+//Readwrite bit = Read: 1, Write: 0
+
+/**
+ * @brief   Initializes all switches
+ *          from the steering wheel
+ * @param   None
+ * @return  None
+ */ 
+static void Switches_Init(void){
+    OS_ERR err;
+    CPU_TS timestamp;
+    //Sets up pins 0-7 on GPIOA as input 
+    uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
+    uint8_t initRxBuf = 0;
+
+    OSMutexPend(
+        &CommMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err);
+    assertOSError(0,err);
+
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    BSP_SPI_Write(initTxBuf,2);
+    BSP_SPI_Read(&initRxBuf, 1);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    //OR Result of IODIRA read to set all to 1, then write it back to IODIRA
+    initTxBuf[2] = initRxBuf|0xFF;
+    initTxBuf[0] = SPI_OPCODE_W;
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    BSP_SPI_Write(initTxBuf,3);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    //Sets up pin 7 on GPIOB as input (for ReverseSwitch)
+    initTxBuf[0]=SPI_OPCODE_R;
+    initTxBuf[1] = SPI_IODIRB;
+    initTxBuf[2] = 0;
+    initRxBuf = 0;
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    BSP_SPI_Write(initTxBuf, 2);
+    BSP_SPI_Read(&initRxBuf, 1);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    //OR IODIRB to set pin 7 to input and write it back
+    initTxBuf[2] = initRxBuf|0x40;
+    initTxBuf[0]=SPI_OPCODE_W;
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    BSP_SPI_Write(initTxBuf,3);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err
+    );
+    assertOSError(0,err);
+};
+
 
 /**
 * @brief   Initialize Lights Module
 * @return  void
 */ 
-void Lights_Init(void) {
-    OSMutexCreate(&lightMutex, "Light lock", &err); //init mutex
-    assertOSError(OS_BLINK_LIGHTS_LOC, err);
-
-    OSMutexPend(&lightMutex,0,OS_OPT_PEND_BLOCKING,&timestamp,&err); //lock light hardware for initialization (TODO: may not be needed, just here for additional safety)
-    assertOSError(OS_BLINK_LIGHTS_LOC, err);
-
+static void Lights_Init(void) {
+    OS_ERR err;
+    CPU_TS timestamp;
     BSP_GPIO_Init(LIGHTS_PORT, 0x3C0, 1); // Pins 6,7,8,9 from Port C are out (0b1111000000)
-    BSP_SPI_Init();
-
+    
     // Initialize txBuf and rxBuf
     uint8_t txReadBuf[2] = {SPI_OPCODE_R, SPI_IODIRB}; //0x01 is IODIRB in Bank 0 Mode
     uint8_t rxBuf = 0;
+
+    OSMutexPend(
+        &CommMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err);
+    assertOSError(OS_BLINK_LIGHTS_LOC,err);
     
     // Reads direction register and stores in rxBuf
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
     BSP_SPI_Write(txReadBuf, 2);
     BSP_SPI_Read(&rxBuf,1);
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
 
     uint8_t txWriteBuf[3] = {
         SPI_OPCODE_W, //write to IODIRB
@@ -52,17 +102,34 @@ void Lights_Init(void) {
     };
     
     // Set direction register
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
     BSP_SPI_Write(txWriteBuf, 3);
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
 
     // Initialize toggle bitmap and states bitmap
     lightToggleBitmap = 0x0000;
     lightStatesBitmap = 0x0000;
     
     // Unlock mutex
-    OSMutexPost(&lightMutex,OS_OPT_POST_NONE,&err);
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err);
     assertOSError(OS_BLINK_LIGHTS_LOC, err);
+}
+
+/**
+ * @brief   Initializes all Lights and Switches
+ * @param   None
+ * @return  None
+ */ 
+void Minions_Init(void){
+    OS_ERR err;
+    OSMutexCreate(&CommMutex, "Communications Mutex", &err);
+    assertOSError(0,err);
+    BSP_SPI_Init();
+    Lights_Init();
+    Switches_Init();
 }
 
 /**
@@ -82,6 +149,65 @@ State Lights_Read(light_t light) {
 uint16_t Lights_Bitmap_Read(light_t light) {
     //Return from a stored state array instead of actually querying hardware.
     return lightStatesBitmap;
+}
+
+/**
+ * @brief   Reads from static variable bitmap holding values of switches
+ * @param   sw
+ * @return  ON/OFF State
+ */ 
+State Switches_Read(switches_t sw){
+    return (State) ((SwitchStates_Bitmap >> sw) & 0x0001);
+}
+
+/**
+ * @brief   Sends SPI messages to read switches values. Also reads from GPIO's for 
+ *          ignition switch values
+ */ 
+void Switches_UpdateStates(void){
+    OS_ERR err;
+    CPU_TS timestamp;
+    uint8_t query[2]={SPI_OPCODE_R,SPI_GPIOA}; //query GPIOA
+    uint8_t SwitchDataReg1 = 0, SwitchDataReg2 = 0;
+
+    //Read all switches except for ignition and hazard
+    OSMutexPend(
+        &CommMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err
+    );
+    assertOSError(0,err);
+
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);       
+    BSP_SPI_Write(query,2);
+    BSP_SPI_Read(&SwitchDataReg1,1);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    
+    //Read Hazard Switch
+    query[1] = SPI_GPIOB;
+
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
+    BSP_SPI_Write(query,2);
+    BSP_SPI_Read(&SwitchDataReg2,1);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err
+    );
+    assertOSError(0,err);
+
+    //Read Ignition Switch 1
+    uint8_t ign1 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
+
+    //Read Ignition Switch 2
+    uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
+    
+    //Store data in bitmap
+    SwitchStates_Bitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
 }
 
 /**
@@ -146,6 +272,8 @@ uint16_t Toggle_Bitmap_Read(void) {
  * @return  void
  */
 void Lights_Set(light_t light, State state) {
+    CPU_TS timestamp;
+    OS_ERR err;
     State lightCurrentState = Lights_Read(light);
     
     if(lightCurrentState != state){     // Check if state has changed
@@ -177,17 +305,25 @@ void Lights_Set(light_t light, State state) {
                     break;
             }
         }
-        OSMutexPend(&lightMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);    // Lock mutex in order to update our lights bitmap and write to SPI
+        OSMutexPend(
+            &CommMutex,
+            0, 
+            OS_OPT_PEND_BLOCKING, 
+            &timestamp, 
+            &err);    // Lock mutex in order to update our lights bitmap and write to SPI
         assertOSError(OS_BLINK_LIGHTS_LOC, err);
         
         lightStatesBitmap = lightNewStates;   // Update lights bitmap
 
         // Write to GPIOB on the minion board (SPI) for internal lights
-        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+        GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
         BSP_SPI_Write(txWriteBuf, 3);
-        GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+        GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
 
-        OSMutexPost(&lightMutex,OS_OPT_POST_NONE,&err); // Unlock mutex
+        OSMutexPost(
+            &CommMutex,
+            OS_OPT_POST_NONE,
+            &err); // Unlock mutex
         assertOSError(OS_BLINK_LIGHTS_LOC, err);
     }
 }
@@ -197,6 +333,8 @@ void Lights_Set(light_t light, State state) {
  * @return  void
  */
 void Lights_MultiSet(uint16_t bitmap){
+    CPU_TS timestamp;
+    OS_ERR err;
     // Initialize tx buffer and port c
     uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
     uint16_t portc = BSP_GPIO_Read(LIGHTS_PORT);
@@ -225,15 +363,22 @@ void Lights_MultiSet(uint16_t bitmap){
     // Update array
     lightStatesBitmap = bitmap;
 
-    OSMutexPend(&lightMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);    // Lock mutex in order to update our lights bitmap and write to SPI
+    OSMutexPend(
+        &CommMutex, 
+        0, 
+        OS_OPT_PEND_BLOCKING, 
+        &timestamp, 
+        &err);    // Lock mutex in order to update our lights bitmap and write to SPI
     assertOSError(OS_BLINK_LIGHTS_LOC, err);
 
     // Write to GPIOB on the minion board (SPI) for internal lights
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
     BSP_SPI_Write(txWriteBuf, 3);
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
 
-    OSMutexPost(&lightMutex,OS_OPT_POST_NONE,&err); // Unlock mutex
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err); // Unlock mutex
     assertOSError(OS_BLINK_LIGHTS_LOC, err);
 }
-
