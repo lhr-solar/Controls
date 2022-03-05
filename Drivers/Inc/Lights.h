@@ -98,5 +98,4 @@ State Toggle_Read(light_t light);
  */
 uint16_t Toggle_Bitmap_Read(void);
 
-
 #endif
