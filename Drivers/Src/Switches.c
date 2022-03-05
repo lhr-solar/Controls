@@ -73,7 +73,7 @@ void Switches_Init(void){
  * @return  ON/OFF State
  */ 
 State Switches_Read(switches_t sw){
-    return (State) ((SwitchStates_Bitmap >> sw) && 0x0001);
+    return (State) ((SwitchStates_Bitmap >> sw) & 0x0001);
 }
 
 /**
