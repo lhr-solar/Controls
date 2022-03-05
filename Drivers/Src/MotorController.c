@@ -122,11 +122,12 @@ ErrorStatus MotorController_Read(CANbuff *message){
 	OS_ERR err;
 	
 	// Check to see if a mailbox is available: BLOCKING
-	OSSemPend(&MotorController_ReceiveSem4,
-			  0,    
-			  OS_OPT_PEND_BLOCKING,
-			  &ts,
-			  &err);
+	OSSemPend(
+        &MotorController_ReceiveSem4,
+	    0,    
+		OS_OPT_PEND_BLOCKING,
+		&ts,
+		&err);
 	assertOSError(0, err);
     uint32_t length = BSP_CAN_Read(CAN_3, &id, data);
 
