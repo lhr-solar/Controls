@@ -2,15 +2,12 @@
 
 
 #include "Contactors.h"
-#include "stm32f4xx.h"
+#include "stm32f4xx_gpio.h"
 
 #define CONTACTORS_PORT         PORTC
-#define ARRAY_PRECHARGE_PIN_MSK GPIO_Pin_10
-#define ARRAY_PRECHARGE_PIN_NUM 10
-#define ARRAY_CONTACTOR_PIN_MSK GPIO_Pin_11
-#define ARRAY_CONTACTOR_PIN_NUM 11
-#define MOTOR_CONTACTOR_PIN_MSK GPIO_Pin_12
-#define MOTOR_CONTACTOR_PIN_NUM 12
+#define ARRAY_PRECHARGE_PIN GPIO_Pin_10
+#define ARRAY_CONTACTOR_PIN GPIO_Pin_11
+#define MOTOR_CONTACTOR_PIN GPIO_Pin_12
 
 
 /**
@@ -20,9 +17,9 @@
  */ 
 void Contactors_Init() {
     BSP_GPIO_Init(CONTACTORS_PORT, 
-                 (ARRAY_CONTACTOR_PIN_MSK) | 
-                 (ARRAY_PRECHARGE_PIN_MSK) |
-                 (MOTOR_CONTACTOR_PIN_MSK), 
+                 (ARRAY_CONTACTOR_PIN) | 
+                 (ARRAY_PRECHARGE_PIN) |
+                 (MOTOR_CONTACTOR_PIN), 
                   1);
 }
 
@@ -37,13 +34,13 @@ State Contactors_Get(contactor_t contactor) {
     State state = OFF;
     switch (contactor) {
         case ARRAY_CONTACTOR :
-            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN_NUM);
+            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN);
             break;
         case ARRAY_PRECHARGE :
-            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN_NUM);
+            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN);
             break;
         case MOTOR_CONTACTOR :
-            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN_NUM);
+            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN);
             break;
         default:
             break;
@@ -61,13 +58,13 @@ State Contactors_Get(contactor_t contactor) {
 void Contactors_Set(contactor_t contactor, State state) {
     switch (contactor) {
         case ARRAY_CONTACTOR :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN_NUM, state);
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, state);
             break;
         case ARRAY_PRECHARGE :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN_NUM, state);
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, state);
             break;
         case MOTOR_CONTACTOR :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN_NUM, state);
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, state);
             break;
         default:
             break;
