@@ -38,7 +38,7 @@ void Task1(void *p_arg) {
         (OS_ERR*)&err
     );
     */
-
+   
     Display_Init();
     OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     Display_SetMainView();

@@ -7,6 +7,8 @@
 // The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
 #define MPS_TO_dMPH 22.374f
 
+#define CHECK(expr) do {if ((expr) == ERROR) {return ERROR;}} while(0)
+
 static const char *DELIMITER = ".";
 static const char *ASSIGNMENT = "=";
 static const char *TERMINATOR = "\xff\xff\xff";
@@ -33,6 +35,7 @@ enum CommandString_t {
     VALUE,
     TEXT,
     PCO,
+    VIS,
     SYSTEM,
     PAGE,
     ERROR0,
@@ -52,6 +55,7 @@ static char *CommandStrings[] = {
     "val",
     "txt",
     "pco",
+    "vis",
     "",
     "page",
     "t4",
@@ -119,6 +123,21 @@ static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandSt
 }
 
 /*
+ * Sets a component's visiblity
+ */
+static ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis) {
+    char out[24];
+    sprintf(out, "%s %s,%d%s", CommandStrings[VIS], CommandStrings[comp], vis ? 1 : 0, TERMINATOR);
+    printf("String out: %s\n", out);
+
+    uint8_t buf[4];
+    BSP_UART_Write(UART_3, out, strlen(out));
+    BSP_UART_Read(UART_3, buf);
+    int ret = *((uint32_t *) buf);
+    return (IsNextionFailure(ret) ? ERROR : SUCCESS);
+}
+
+/*
  * Initialize the Nextion display
  */
 void Display_Init() {
@@ -163,10 +182,14 @@ ErrorStatus Display_CruiseSet(State on) {
  */
 ErrorStatus Display_SetError(int idx, char *err) {
     if (idx < 0 || idx > 5) return ERROR; // Index out of bounds
-    ErrorStatus err1 = updateStringValue(ERROR0 + idx, TEXT, err);
-    ErrorStatus err2 = updateIntValue(ERROR0 + idx, PCO, NEXTION_GREEN);
-    // If either is error, then had an error
-    return (err1 == ERROR)  || (err2 == ERROR) ? ERROR : SUCCESS;
+    if (strlen(err) == 0) {
+        CHECK (setComponentVisibility(ERROR0 + idx, false)); // Hide text if no error
+    } else {
+        CHECK (updateStringValue(ERROR0 + idx, TEXT, err)); // Set error string
+        CHECK (updateIntValue(ERROR0 + idx, PCO, NEXTION_RED));
+        CHECK (setComponentVisibility(ERROR0 + idx, true));
+    }
+    return SUCCESS;
 }
 
 /**
@@ -174,9 +197,10 @@ ErrorStatus Display_SetError(int idx, char *err) {
  * User must clear the remaining slots manually using Display_SetError
  */
 ErrorStatus Display_NoErrors(void) {
-    ErrorStatus err1 = updateIntValue(ERROR0, PCO, NEXTION_GREEN);
-    ErrorStatus err2 = updateStringValue(ERROR0, TEXT, (char *) NO_ERROR);
-    return err1 && err2; // If either one is error, then we had an error
+    CHECK (updateStringValue(ERROR0, TEXT, (char *) NO_ERROR));
+    CHECK (updateIntValue(ERROR0, PCO, NEXTION_GREEN));
+    CHECK (setComponentVisibility(ERROR0, true));
+    return SUCCESS
 }
 
 

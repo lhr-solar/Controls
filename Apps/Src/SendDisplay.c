@@ -61,7 +61,7 @@ void Task_SendDisplay(void *p_arg) {
 
         // If the contactors are not yet enabled, we're probably still in precharge
         // Otherwise, changed to the main view
-        if (Contactors_Get(MOTOR) == ON) {
+        if (Contactors_Get(ARRAY) == ON) {
             Display_SetMainView(); // Make sure we're in the main view first
             Display_SetVelocity(car->CurrentVelocity);
             Display_CruiseEnable(car->CruiseControlEnable);
