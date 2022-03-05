@@ -85,6 +85,39 @@ uint16_t Lights_Bitmap_Read(light_t light) {
 }
 
 /**
+ * @brief   Turn on light toggling
+ * @param   light Which light to enable toggling for
+ * @return  void
+ */
+void Toggle_Enable(light_t light) {
+    // Mutex not needed here because only BlinkLights uses this bitmap
+    lightToggleBitmap |= (0x01<<light);
+}
+
+/**
+ * @brief   Turn off light toggling
+ * @param   light Which light to disable toggling for
+ * @return  void
+ */
+void Toggle_Disable(light_t light) {
+    // Mutex not needed here because only BlinkLights uses this bitmap
+    lightToggleBitmap &= ~(0x01<<light);
+}
+
+/**
+ * @brief Toggles a light. Should be used only after Toggle_Enable has been called for this light so that we are accurately tracking the enabled and disabled lights
+*/
+void Toggle_Light(light_t light){
+    State lightState = Lights_Read(light);
+    if(lightState = OFF){
+        Lights_Set(light, ON);
+    } else {
+        Lights_Set(light, OFF);
+    }
+}
+
+
+/**
 * @brief   Read the state of a specific toggleable light from the toggle bitmap
 * @param   light Which Light to read
 * @return  returns State enum which indicates ON/OFF
@@ -100,6 +133,8 @@ State Toggle_Read(light_t light) {
 uint16_t Toggle_Bitmap_Read() {
     return lightToggleBitmap;
 }
+
+
 
 /**
  * @brief   Set light to given state
@@ -162,22 +197,3 @@ void Lights_Set(light_t light, State state) {
     }
 }
 
-/**
- * @brief   Turn on light toggling
- * @param   light Which light to enable toggling for
- * @return  void
- */
-void Toggle_Enable(light_t light) {
-    // Mutex not needed here because only BlinkLights uses this bitmap
-    lightToggleBitmap |= (0x01<<light);
-}
-
-/**
- * @brief   Turn off light toggling
- * @param   light Which light to disable toggling for
- * @return  void
- */
-void Toggle_Disable(light_t light) {
-    // Mutex not needed here because only BlinkLights uses this bitmap
-    lightToggleBitmap &= ~(0x01<<light);
-}
