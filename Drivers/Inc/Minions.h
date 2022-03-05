@@ -1,19 +1,22 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-#ifndef __Lights_H
-#define __Lights_H
-
-#include "BSP_GPIO.h"
+#ifndef MINIONS_H
+#define MINIONS_H
 #include "BSP_SPI.h"
+#include "BSP_GPIO.h"
 #include "common.h"
 #include "config.h"
 #include "GPIOExpander.h"
+#include "Tasks.h"
 
+#define SPI_CS          GPIO_Pin_4
 #define LIGHTS_PORT     PORTC
 #define HEADLIGHT_PIN   6
 #define BRAKELIGHT_PIN  7
 #define RIGHT_BLINK_PIN 8
 #define LEFT_BLINK_PIN  9
+
+typedef enum {CRUZ_ST=0, CRUZ_EN, REV_SW, FOR_SW, HEADLIGHT_SW, LEFT_SW, RIGHT_SW, REGEN_SW, HZD_SW, IGN_1, IGN_2} switches_t;
 
 // Ordered by pin of minion board
 //TODO: Double check that this ordering remains valid
@@ -29,10 +32,39 @@ typedef enum {
 } light_t;
 
 /**
-* @brief   Initialize Lights Module
-* @return  void
-*/ 
-void Lights_Init(void);
+ * Switch States
+ * 
+ * Stores the current state of each of
+ * the switches that control this system
+ */
+typedef struct {
+    State LT;
+    State RT;
+    State FWD;
+    State REV;
+    State CRS_EN;
+    State CRS_SET;
+    State REGEN;
+    State HZD;
+    State HDLT;
+    State IGN_1;
+    State IGN_2;
+} switch_states_t;
+
+/**
+ * @brief   Initializes all Lights and Switches
+ * @param   None
+ * @return  None
+ */ 
+void Minions_Init(void);
+
+/**
+ * @brief   Reads the current state of 
+ *          the specified switch
+ * @param   sw the switch to read
+ * @return  State of the switch (ON/OFF)
+ */ 
+State Switches_Read(switches_t sw);
 
 /**
 * @brief   Read the state of the lights
@@ -40,6 +72,12 @@ void Lights_Init(void);
 * @return  returns state enum which indicates ON/OFF
 */ 
 State Lights_Read(light_t light);
+
+/**
+ * @brief   Sends SPI messages to read switches values. Also reads from GPIO's for 
+ *          ignition switch values
+ */ 
+void Switches_UpdateStates(void);
 
 /**
  * @brief   Set light to given state
@@ -55,7 +93,6 @@ void Lights_Set(light_t light, State state);
  */
 void Lights_MultiSet(uint16_t bitmap);
 
-
 /**
 * @brief   Read the lights bitmap
 * @return  returns uint16_t with lights bitmap
@@ -68,12 +105,10 @@ uint16_t Lights_Bitmap_Read(light_t light);
 */
 void Lights_Toggle(light_t light);
 
-
 /**
  * @brief Toggles multiple lights according to the toggle bitmap
 */
 void Lights_MultiToggle(void);
-
 
 /**
 
@@ -90,7 +125,6 @@ void Toggle_Set(light_t light, State state);
 * @return  returns State enum which indicates ON/OFF
 */
 State Toggle_Read(light_t light);
-
 
 /**
  * @brief   Read toggle bitmap
