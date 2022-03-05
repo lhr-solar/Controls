@@ -93,13 +93,6 @@ State Toggle_Read(light_t light);
 uint16_t Toggle_Bitmap_Read(void);
 
 
-/**
- * @brief   Set light to given state
- * @param   light Which light to set
- * @param   state What state to set the light to
- * @return  void
- */
-void Lights_Set(light_t light, State state);
 
 
 /**
