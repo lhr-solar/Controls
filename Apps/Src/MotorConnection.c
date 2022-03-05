@@ -3,13 +3,13 @@
 #include "MotorConnection.h"
 
 static void motor_startup(OS_ERR *err) {
-    Precharge_Write(MOTOR_PRECHARGE, ON); // Activate the motor recharge
+    // Precharge_Write(MOTOR_PRECHARGE, ON); // Activate the motor recharge
 
     OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, err);
     // TODO: check for errors
 
-    Contactors_Set(MOTOR, ON); // Actually activate motor contactors
-    Precharge_Write(MOTOR_PRECHARGE, OFF);
+    Contactors_Set(MOTOR_CONTACTOR, ON); // Actually activate motor contactors
+    // Precharge_Write(MOTOR_PRECHARGE, OFF);
 }
 
 
@@ -19,7 +19,7 @@ void Task_MotorConnection(void *p_arg) {
     OS_ERR err;
     CPU_TS ts;
 
-    Contactors_Init(MOTOR);
+    Contactors_Init(MOTOR_CONTACTOR);
     motor_startup(&err);
     if(err != OS_ERR_NONE){
         car_state->ErrorCode.MotorConnectionErr = ON;
@@ -93,7 +93,7 @@ void Task_MotorConnection(void *p_arg) {
         OSSemPend(&MotorConnectionChange_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
 
         State desiredState = car_state->ShouldMotorBeActivated;
-        State currentState = Contactors_Get(MOTOR);
+        State currentState = Contactors_Get(MOTOR_CONTACTOR);
 
         if (desiredState == ON && currentState != ON) {
             motor_startup(&err); // Reactivate the array
@@ -110,7 +110,7 @@ void Task_MotorConnection(void *p_arg) {
                 car_state->ErrorCode.SendTritiumErr = ON;
             }
         } else if (desiredState != ON && currentState == ON) {
-            Contactors_Set(MOTOR, OFF); // Deactivate the array
+            Contactors_Set(MOTOR_CONTACTOR, OFF); // Deactivate the array
             OSTaskSuspend(&SendCarCAN_TCB, &err);
             if(err != OS_ERR_NONE){
                 car_state->ErrorCode.SendCANErr = ON;
