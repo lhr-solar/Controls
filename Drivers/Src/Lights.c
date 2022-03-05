@@ -86,27 +86,22 @@ uint16_t Lights_Bitmap_Read(light_t light) {
 
 /**
 
- * @brief   Turn on light toggling
+ * @brief   Set light toggling
  * @param   light Which light to enable toggling for
+ * @param   state State to set toggling
  * @return  void
  */
-void Toggle_Enable(light_t light) {
+void Toggle_Set(light_t light, State state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
-    lightToggleBitmap |= (0x01<<light);
-}
-
-/**
- * @brief   Turn off light toggling
- * @param   light Which light to disable toggling for
- * @return  void
- */
-void Toggle_Disable(light_t light) {
-    // Mutex not needed here because only BlinkLights uses this bitmap
-    lightToggleBitmap &= ~(0x01<<light);
+    if(state==ON)
+        lightToggleBitmap |= (0x01<<light);
+    else if(state==OFF)
+        lightToggleBitmap &= ~(0x01<<light);
 }
 
 /**
  * @brief Toggles a light. Should be used only after Toggle_Enable has been called for this light so that we are accurately tracking the enabled and disabled lights
+ * @param light Which light to toggle
 */
 void Toggle_Light(light_t light){
     State lightState = Lights_Read(light);
@@ -135,8 +130,6 @@ uint16_t Toggle_Bitmap_Read() {
 
 }
 
-
-
 /**
  * @brief   Set light to given state
  * @param   light Which light to set
@@ -154,27 +147,22 @@ void Lights_Set(light_t light, State state) {
         
         // Initialize tx buffer and port c
         uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
-        uint16_t portc = BSP_GPIO_Read(LIGHTS_PORT);
 
         if (light == BrakeLight) {  // Brakelight is only external
-            portc &= ~(0x01 << BRAKELIGHT_PIN); // Clear bit corresponding to pin
-            portc |= (state << BRAKELIGHT_PIN); // Set value to inputted state
+            BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, ON);
         } else {
             txWriteBuf[2] = lightNewStates; // Write to tx buffer for lights present internally (on minion board)
             
             // Write to port c for lights present externally
             switch (light) {
                 case LEFT_BLINK:
-                    portc &= ~(0x01 << LEFT_BLINK_PIN); // Clear bit corresponding to pin
-                    portc |= (state << LEFT_BLINK_PIN); // Set value to inputted state
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, ON);
                     break;
                 case RIGHT_BLINK:
-                    portc &= ~(0x01 << RIGHT_BLINK_PIN);    // Clear bit corresponding to pin
-                    portc |= (state << RIGHT_BLINK_PIN);    // Set value to inputted state
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, ON);
                     break;
                 case Headlight_ON:
-                    portc &= ~(0x01 << HEADLIGHT_PIN);  // Clear bit corresponding to pin
-                    portc |= (state << HEADLIGHT_PIN);  // Set value to inputted state
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, HEADLIGHT_PIN, ON);
                     break;
                 default:
                     break;
@@ -189,9 +177,6 @@ void Lights_Set(light_t light, State state) {
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_RESET);
         BSP_SPI_Write(txWriteBuf, 3);
         GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);
-        
-        // Write to port c for external lights
-        BSP_GPIO_Write(LIGHTS_PORT, portc);
 
         OSMutexPost(&lightMutex,OS_OPT_POST_NONE,&err); // Unlock mutex
         assertOSError(OS_BLINK_LIGHTS_LOC, err);
