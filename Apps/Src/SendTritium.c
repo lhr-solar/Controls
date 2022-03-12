@@ -1,6 +1,8 @@
 #include "SendTritium.h"
 #include "CarState.h"
 #include <math.h>
+/*DEPRECATED FILE, THE LOGIC AND FUNCTION HAVE BEEN MOVED TO UpdateVelocity.c
+and UpdateVelocity.h*/
 
 // Convert a float velocity to a desired RPM
 static float velocity_to_rpm(float velocity)
