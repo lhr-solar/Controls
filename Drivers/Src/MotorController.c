@@ -81,7 +81,7 @@ void MotorController_Init(){
 
     BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
 
-    uint8_t data = {0};
+    uint8_t data[8] = {0};
     float busCurrentPercentSetPoint = 1.0f;
     memcpy(
         data,
@@ -94,7 +94,7 @@ void MotorController_Init(){
             &ts,
             &err);
 	assertOSError(0, err);
-    ErrorStatus initCommand = BSP_CAN_Write(CAN_3,MOTOR_POWER,data,MAX_CAN_LEN);
+    ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_POWER, data, MAX_CAN_LEN);
     if (initCommand == ERROR) {
 		MotorController_Release();
         Motor_FaultBitmap = T_INIT_FAIL;
@@ -192,7 +192,7 @@ ErrorStatus MotorController_Read(CANbuff *message){
                 
                 break;
             }
-            case MOTOR_DRIVE: {
+            case MOTOR_VELOCITY: {
                 CurrentVelocity = *(float *) &secondSum;
                 break;
             }

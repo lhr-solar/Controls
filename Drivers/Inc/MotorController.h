@@ -27,10 +27,6 @@ typedef enum{
     T_INIT_FAIL = 0x16
 } tritium_error_code_t;
 
-//Since this is a global, MotorController_Drive should not be called from multiple functions
-//This variable should only be read from the Fault State Handler
-extern uint16_t Motor_FaultBitmap;
-
 /**
  * @brief   Initializes the motor controller
  * @param   None
