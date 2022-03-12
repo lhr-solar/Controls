@@ -13,6 +13,24 @@ static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (flashing/
 //Readwrite bit = Read: 1, Write: 0
 
 /**
+ *  @brief Set chip select low, starting an SPI transmission
+ *  @param None
+ *  @param None
+ */
+static void ChipSelect(void) {
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+}
+
+/**
+ *  @brief Set chip select high, ending an SPI transmission
+ *  @param None
+ *  @param None
+ */
+static void ChipDeselect(void) {
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+}
+
+/**
  * @brief   Initializes all switches
  *          from the steering wheel
  * @param   None
@@ -33,31 +51,31 @@ static void Switches_Init(void){
         &err);
     assertOSError(0,err);
 
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    ChipSelect();
     BSP_SPI_Write(initTxBuf,2);
     BSP_SPI_Read(&initRxBuf, 1);
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    ChipDeselect();
     //OR Result of IODIRA read to set all to 1, then write it back to IODIRA
     initTxBuf[2] = initRxBuf|0xFF;
     initTxBuf[0] = SPI_OPCODE_W;
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    ChipSelect();
     BSP_SPI_Write(initTxBuf,3);
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    ChipDeselect();
     //Sets up pin 7 on GPIOB as input (for ReverseSwitch)
     initTxBuf[0]=SPI_OPCODE_R;
     initTxBuf[1] = SPI_IODIRB;
     initTxBuf[2] = 0;
     initRxBuf = 0;
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    ChipSelect();
     BSP_SPI_Write(initTxBuf, 2);
     BSP_SPI_Read(&initRxBuf, 1);
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    ChipDeselect();
     //OR IODIRB to set pin 7 to input and write it back
     initTxBuf[2] = initRxBuf|0x40;
     initTxBuf[0]=SPI_OPCODE_W;
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    ChipSelect();
     BSP_SPI_Write(initTxBuf,3);
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    ChipDeselect();
 
     OSMutexPost(
         &CommMutex,
@@ -90,10 +108,10 @@ static void Lights_Init(void) {
     assertOSError(OS_BLINK_LIGHTS_LOC,err);
     
     // Reads direction register and stores in rxBuf
-    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
+    ChipSelect();
     BSP_SPI_Write(txReadBuf, 2);
     BSP_SPI_Read(&rxBuf,1);
-    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+    ChipDeselect();
 
     uint8_t txWriteBuf[3] = {
         SPI_OPCODE_W, //write to IODIRB
@@ -102,9 +120,9 @@ static void Lights_Init(void) {
     };
     
     // Set direction register
-    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
+    ChipSelect();
     BSP_SPI_Write(txWriteBuf, 3);
-    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+    ChipDeselect();
 
     // Initialize toggle bitmap and states bitmap
     lightToggleBitmap = 0x0000;
@@ -180,18 +198,18 @@ void Switches_UpdateStates(void){
     );
     assertOSError(0,err);
 
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);       
+    ChipSelect();      
     BSP_SPI_Write(query,2);
     BSP_SPI_Read(&SwitchDataReg1,1);
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    ChipDeselect();
     
     //Read Hazard Switch
     query[1] = SPI_GPIOB;
 
-    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
+    ChipSelect();
     BSP_SPI_Write(query,2);
     BSP_SPI_Read(&SwitchDataReg2,1);
-    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+    ChipDeselect();
 
     OSMutexPost(
         &CommMutex,
@@ -316,9 +334,9 @@ void Lights_Set(light_t light, State state) {
         lightStatesBitmap = lightNewStates;   // Update lights bitmap
 
         // Write to GPIOB on the minion board (SPI) for internal lights
-        GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
+        ChipSelect();
         BSP_SPI_Write(txWriteBuf, 3);
-        GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+        ChipDeselect();
 
         OSMutexPost(
             &CommMutex,
@@ -372,9 +390,9 @@ void Lights_MultiSet(uint16_t bitmap){
     assertOSError(OS_BLINK_LIGHTS_LOC, err);
 
     // Write to GPIOB on the minion board (SPI) for internal lights
-    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
+    ChipSelect();
     BSP_SPI_Write(txWriteBuf, 3);
-    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+    ChipDeselect();
 
     OSMutexPost(
         &CommMutex,
