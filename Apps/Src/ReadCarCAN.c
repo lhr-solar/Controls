@@ -35,7 +35,7 @@ void Task_ReadCarCAN(void *p_arg) {
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
         
         if(err != OS_ERR_NONE){
-            car->ErrorCode.ReadCANErr = ON;
+            //car->ErrorCode.ReadCANErr = ON;
         }
     }
 }

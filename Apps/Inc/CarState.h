@@ -94,10 +94,6 @@ typedef struct {
 
     State ShouldArrayBeActivated;
     State ShouldMotorBeActivated;
-
-    error_code_t ErrorCode;
-
-    motor_error_code_t MotorErrorCode;
     
 } car_state_t;
 

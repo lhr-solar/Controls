@@ -7,38 +7,28 @@
 /**
  * TCBs
  */
-OS_TCB SendTritium_TCB;
+OS_TCB FaultState_TCB;
+OS_TCB Init_TCB;
 OS_TCB UpdateVelocity_TCB;
 OS_TCB ReadCarCAN_TCB;
 OS_TCB SendDisplay_TCB;
-OS_TCB ReadPedals_TCB;
 OS_TCB ReadTritium_TCB;
-OS_TCB ReadSwitches_TCB;
-OS_TCB UpdateLights_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB BlinkLight_TCB;
-OS_TCB ArrayConnection_TCB;
-OS_TCB MotorConnection_TCB;
 OS_TCB Idle_TCB;
-OS_TCB Init_TCB;
 
 /**
  * Stacks
  */
-CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
+CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
+CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 CPU_STK UpdateVelocity_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
 CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
 CPU_STK SendDisplay_Stk[TASK_SEND_DISPLAY_STACK_SIZE];
-CPU_STK ReadPedals_Stk[TASK_READ_PEDALS_STACK_SIZE];
 CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
-CPU_STK ReadSwitches_Stk[TASK_READ_SWITCHES_STACK_SIZE];
-CPU_STK UpdateLights_Stk[TASK_UPDATE_LIGHTS_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
-CPU_STK ArrayConnection_Stk[TASK_ARRAY_CONNECTION_STACK_SIZE];
-CPU_STK MotorConnection_Stk[TASK_MOTOR_CONNECTION_STACK_SIZE];
 CPU_STK Idle_Stk[TASK_IDLE_STACK_SIZE];
-CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 
 /**
  * Queues
@@ -48,18 +38,12 @@ OS_Q CANBus_MsgQ;
 /**
  * Semaphores
  */
-OS_SEM VelocityChange_Sem4;
+OS_SEM FaultState_Sem4;
 OS_SEM DisplayChange_Sem4;
-OS_SEM LightsChange_Sem4;
 OS_SEM CarCAN_Sem4;
-OS_SEM SendTritium_Sem4;
 OS_SEM ReadTritium_Sem4;
-OS_SEM ActivateArray_Sem4;
-OS_SEM ActivateMotor_Sem4;
 OS_SEM BlinkLight_Sem4;
 OS_SEM SendCarCAN_Sem4;
-OS_SEM MotorConnectionChange_Sem4;
-OS_SEM ArrayConnectionChange_Sem4;
 
 /**
  * Global Variables
@@ -69,12 +53,12 @@ OS_SEM ArrayConnectionChange_Sem4;
 
 // Needs to get initialized somewhere, not currently initialized
 fault_bitmap_t FaultBitmap;
-os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
-tritium_error_code_t TritiumErrorBitmap = T_NONE;
+os_error_loc_t OSErrLocBitmap;
+tritium_error_code_t TritiumErrorBitmap;
 
 void assertOSError(uint16_t OS_err_loc, OS_ERR err){
     if(err != OS_ERR_NONE){
-        FaultBitmap.Fault_OS = 1;
+        FaultBitmap |= FAULT_OS;
         OSErrLocBitmap |= OS_err_loc;
         
         OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
@@ -88,7 +72,7 @@ void assertTritiumError(uint8_t motor_error_code){
     if(motor_error_code != T_NONE){
         OS_ERR err;
 
-        FaultBitmap.Fault_TRITIUM = 1;
+        FaultBitmap |= FAULT_TRITIUM;
         TritiumErrorBitmap |= motor_error_code;
 
         OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
@@ -96,4 +80,10 @@ void assertTritiumError(uint8_t motor_error_code){
             EnterFaultState();
         }
     }
+}
+
+void sysInit(){
+    FaultBitmap = FAULT_NONE;
+    OSErrLocBitmap = OS_NONE_LOC;
+    TritiumErrorBitmap = T_NONE;    // Remove once tritium stuff is merged in; this variable moves to tritium file
 }

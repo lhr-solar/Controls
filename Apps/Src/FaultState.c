@@ -17,19 +17,19 @@ static void ArrayMotorKill(void) {
 }
 
 void EnterFaultState(void) {
-    if(FaultBitmap.Fault_OS){
+    if(FaultBitmap & FAULT_OS){
         ArrayMotorKill();
     }
-    else if(FaultBitmap.Fault_TRITIUM){
+    else if(FaultBitmap & FAULT_TRITIUM){
         ArrayMotorKill();
     }
-    else if(FaultBitmap.Fault_READBPS){
+    else if(FaultBitmap & FAULT_READBPS){
         ArrayMotorKill();
     }
-    else if(FaultBitmap.Fault_UNREACH){
+    else if(FaultBitmap & FAULT_UNREACH){
         ArrayMotorKill();
     }
-    else if(FaultBitmap.Fault_DISPLAY){
+    else if(FaultBitmap & FAULT_DISPLAY){
         // TODO: Send reset command to display ("rest")
         // To be implemented when display driver is complete
     }
@@ -43,7 +43,7 @@ void Task_FaultState(void *p_arg) {
     OS_ERR err;
     CPU_TS ts;
 
-    FaultBitmap.bitmap = 0; // Initialize to no faults
+    FaultBitmap = FAULT_NONE; // Initialize to no faults
 
     // Block until fault is signaled by an assert
     OSSemPend(&FaultState_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);

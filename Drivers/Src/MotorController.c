@@ -91,22 +91,22 @@ ErrorStatus MotorController_Read(CANbuff *message, car_state_t *car){
             case MOTOR_STATUS: {
                 if(MASK_MOTOR_TEMP_ERR & firstSum)
                 {
-                    car->MotorErrorCode.motorTempErr = ON;
+                    //car->MotorErrorCode.motorTempErr = ON;
                 }
 
                 if(MASK_SS_ERR & firstSum)
                 {
-                    car->MotorErrorCode.slipSpeedErr = ON;
+                    //car->MotorErrorCode.slipSpeedErr = ON;
                 }
 
                 if(MASK_CC_ERR & firstSum)
                 {
-                    car->MotorErrorCode.CCVelocityErr = ON;
+                    //car->MotorErrorCode.CCVelocityErr = ON;
                 }
 
                 if(MASK_OVER_SPEED_ERR & firstSum)
                 {
-                    car->MotorErrorCode.overSpeedErr = ON;
+                    //car->MotorErrorCode.overSpeedErr = ON;
                 }
                 break;
             }
