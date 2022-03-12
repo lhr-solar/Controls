@@ -23,7 +23,8 @@ typedef enum{
     T_TEMP_ERR = 0x01,
     T_CC_VEL_ERR = 0x02,
     T_SLIP_SPEED_ERR = 0x04,
-    T_OVER_SPEED_ERR = 0x08
+    T_OVER_SPEED_ERR = 0x08,
+    T_INIT_FAIL = 0x16
 } tritium_error_code_t;
 
 //Since this is a global, MotorController_Drive should not be called from multiple functions

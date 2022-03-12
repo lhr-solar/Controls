@@ -3,6 +3,7 @@
 #include "Tasks.h"
 
 #define MOTOR_DRIVE 0x221
+#define MOTOR_POWER 0x222
 #define MOTOR_STATUS 0x241
 #define MOTOR_VELOCITY 0x243
 #define MAX_CAN_LEN 8
@@ -16,14 +17,14 @@ static OS_SEM	MotorController_MailSem4;
 static OS_SEM	MotorController_ReceiveSem4;
 static float CurrentVelocity = 0;
 
-uint16_t Motor_FaultBitmap = T_NONE;
+static tritium_error_code_t Motor_FaultBitmap = T_NONE;
 
 /**
  * @brief   Assert Error if Tritium sends error. When Fault Bitmap is set,
  *          and semaphore is posted, Fault state will run.
  * @param   motor_err Bitmap which has motor error codes
  */
-static void assertTritiumError(uint16_t motor_err){
+static void assertTritiumError(tritium_error_code_t motor_err){
     OS_ERR err;
     if(motor_err != T_NONE){
         FaultBitmap.Fault_TRITIUM = 1;
@@ -64,7 +65,8 @@ static void MotorController_CountIncoming(void) {
  * @return  None
  */ 
 void MotorController_Init(){
-    OS_ERR err;
+    CPU_TS ts;
+	OS_ERR err;
     OSSemCreate(&MotorController_MailSem4,
                 "Motor Controller Mailbox Semaphore",
                 3,	// Number of mailboxes
@@ -78,12 +80,32 @@ void MotorController_Init(){
 	assertOSError(0, err);
 
     BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
+
+    uint8_t data = {0};
+    float busCurrentPercentSetPoint = 1.0f;
+    memcpy(
+        data,
+        &busCurrentPercentSetPoint,
+        sizeof(busCurrentPercentSetPoint)
+    );
+    OSSemPend(&MotorController_MailSem4,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            &ts,
+            &err);
+	assertOSError(0, err);
+    ErrorStatus initCommand = BSP_CAN_Write(CAN_3,MOTOR_POWER,data,MAX_CAN_LEN);
+    if (initCommand == ERROR) {
+		MotorController_Release();
+        Motor_FaultBitmap = T_INIT_FAIL;
+        assertTritiumError(Motor_FaultBitmap);
+	}
 }
 
 /**
- * @brief   Sends MOTOR DRIVE command on CAN2
+ * @brief   Sends MOTOR DRIVE command on CAN3
  * @param   newVelocity desired motor velocity setpoint in m/s
- * @param   motorCurrent desired motor current setpoint as a percentage of max current setting
+ * @param   motorCurrent desired motor current setpoint as a percentage of max current setting (0.0-1.0)
  * @return  None
  */ 
 void MotorController_Drive(float newVelocity, float motorCurrent){
