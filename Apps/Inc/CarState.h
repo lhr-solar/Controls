@@ -90,7 +90,6 @@ typedef struct {
     uint8_t BrakePedalPercent;
     uint8_t MotorCurrentSetpoint;
 
-    switch_states_t SwitchStates;
     blinker_states_t BlinkerStates;
 
     CruiseRegenSet CRSet;
