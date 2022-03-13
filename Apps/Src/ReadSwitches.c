@@ -110,26 +110,18 @@ static void MotorOn() {
 static uint8_t UpdateSwitches() {
     Switches_UpdateStates();
 
-    CurrSwitches.IGN_1 = Switches_Read(IGN_1);
-    CurrSwitches.IGN_2 = Switches_Read(IGN_2);
-    
-    CurrSwitches.LT = Switches_Read(LEFT_SW);
-    CurrSwitches.RT = Switches_Read(RIGHT_SW);
-    CurrSwitches.HDLT = Switches_Read(HEADLIGHT_SW);
-    CurrSwitches.HZD = Switches_Read(HZD_SW);
-
     UpdateLights();
 
-    return (CurrSwitches.IGN_2 << 1) + CurrSwitches.IGN_1;
+    return (Switches_Read(IGN_2) << 1) + Switches_Read(IGN_1);
 }
 
 static void UpdateLights() {
-    Lights_Set(Headlight_ON, CurrSwitches.HDLT);
+    Lights_Set(Headlight_ON, Switches_Read(HEADLIGHT_SW));
     
-    int leftblink = CurrSwitches.LT | 
-                    CurrSwitches.HZD;
-    int rightblink = CurrSwitches.RT | 
-                     CurrSwitches.HZD;
+    int leftblink = Switches_Read(LEFT_SW) | 
+                    Switches_Read(HZD_SW);
+    int rightblink = Switches_Read(RIGHT_SW) | 
+                     Switches_Read(HZD_SW);
 
     Toggle_Set(RIGHT_BLINK, rightblink);
     Toggle_Set(LEFT_BLINK, leftblink);
