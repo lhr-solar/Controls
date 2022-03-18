@@ -5,6 +5,7 @@
 
 // Macros
 #define MAX_SWITCH_LAG          100  // period (ms) for checking switches while precharging
+#define READ_SWITCH_PERIOD      20   // period (ms) that switches will be read.
 #define PRECHARGE_DELAY_CYCLES  ((PRECHARGE_ARRAY_DELAY*1000) / MAX_SWITCH_LAG)
 
 // Globals
@@ -17,10 +18,10 @@ static void UpdateLights();
 
 // State functions
 
-static void ElectronicsOn();
-static void ArrayPrecharge();
-static void ArrayOn();
-static void MotorOn();
+static int ElectronicsOn();
+static int ArrayPrecharge();
+static int ArrayOn();
+static int MotorOn();
 
 // States
 typedef enum {
@@ -40,15 +41,15 @@ typedef struct {
      */
     ignition_state_num_t next_state[4];
 
-    void (* statefunction)();   // function executed at state
+    int (* statefunction)();   // function executed at state
     uint32_t delay_ms;          // ms delay after executing function, should be >= 1
 } fsm_state_t;
 
 fsm_state_t IgnitionFSM[] = {
-    {{ELEC_ON, ARRAY_PRE,   UNUSED_SWITCH_NUM, ARRAY_PRE},  ElectronicsOn,  10}, // electronics on, array/motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, ARRAY_ON},   ArrayPrecharge, 10}, // array precharge, array/motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   ArrayOn,        10}, // array on, motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   MotorOn,        10}, // motor on, array on
+    {{ELEC_ON, ARRAY_PRE,   UNUSED_SWITCH_NUM, ARRAY_PRE},  ElectronicsOn,  READ_SWITCH_PERIOD}, // electronics on, array/motor off
+    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, ARRAY_ON},   ArrayPrecharge, READ_SWITCH_PERIOD}, // array precharge, array/motor off
+    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   ArrayOn,        READ_SWITCH_PERIOD}, // array on, motor off
+    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   MotorOn,        READ_SWITCH_PERIOD}, // motor on, array on
 };
 
 /**
@@ -69,20 +70,31 @@ void Task_ReadSwitches(void* p_arg) {
 
     // Main loop
     while (1) {
-        curr_fsm_state->statefunction();
-        curr_fsm_state = &(IgnitionFSM[curr_fsm_state->next_state[UpdateSwitches()]]);  // set next state
+        int status = curr_fsm_state->statefunction();
+        
+        /*
+         * if the precharge wait exits early then status == 1; 
+         * we don't update switches again in case the driver 
+         * toggles the switch to position 1 or 3 between returning from
+         * ArrayPrecharge() and setting the next state
+         */
+
+        uint8_t ignition_pos = status ? 0 : UpdateSwitches();
+        curr_fsm_state = &(IgnitionFSM[curr_fsm_state->next_state[ignition_pos]]);  // set next state
         OSTimeDlyHMSM(0, 0, 0, curr_fsm_state->delay_ms, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }
 }
 
 /**
  * @brief State where only electronics are on; contactors are all off
+ * 
+ * @return Always returns 0.
  */
-static void ElectronicsOn() {
+static int ElectronicsOn() {
     Contactors_Set(ARRAY_CONTACTOR, OFF);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
     Contactors_Set(MOTOR_CONTACTOR, OFF);
-    return;
+    return 0;
 }
 
 /**
@@ -90,32 +102,40 @@ static void ElectronicsOn() {
  *        Array will precharge for a time defined in "config.h"
  * @note  During the precharge delay, switches will be continually updated 
  *        with a period defined by MAX_SWITCH_LAG
+ * 
+ * @return 0 if precharge fully completed, 1 if exited early
  */
-static void ArrayPrecharge() {
+static int ArrayPrecharge() {
     Contactors_Set(ARRAY_PRECHARGE, ON);
 
-    uint16_t i = 0;
-    while ((i < PRECHARGE_DELAY_CYCLES) && (UpdateSwitches() != 0)) {
+    for (uint16_t i = 0; i < PRECHARGE_DELAY_CYCLES; i++) {
+        if (UpdateSwitches() == 0) return 1;
         OSTimeDlyHMSM(0, 0, 0, MAX_SWITCH_LAG, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-        i++;
     }
+    return 0;
 }
 
 /**
  * @brief Array On state. Motor contactor should be off here.
+ * 
+ * @return Always returns 0.
  */
-static void ArrayOn() {
+static int ArrayOn() {
     Contactors_Set(MOTOR_CONTACTOR, OFF);
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
+    return 0;
 }
 
 /**
  * @brief Motor On state. All non-prechage contactors - 
  *        (Array contactor, Motor contactor) are on.
+ * 
+ * @return Always returns 0.
  */
-static void MotorOn() {
+static int MotorOn() {
     Contactors_Set(MOTOR_CONTACTOR, ON);
+    return 0;
 }
 
 /**
