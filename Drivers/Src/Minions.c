@@ -137,7 +137,7 @@ static void Lights_Init(void) {
 }
 
 /**
- * @brief   Initializes all Lights and Switches
+ * @brief   Initializes all Lights and Switches. **Can be called only after Fault Semaphore is initialized.**
  * @param   None
  * @return  None
  */ 
