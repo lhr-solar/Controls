@@ -58,6 +58,7 @@ int main(void) {
     if (err != OS_ERR_NONE) {
         printf("OS error code %d\n", err);
     }
+    assertOSError(OS_NONE_LOC, err);
 
     OSTaskCreate(
         (OS_TCB*)&TestReadSwitchesTCB,
@@ -79,11 +80,21 @@ int main(void) {
     if (err != OS_ERR_NONE) {
         printf("Task error code %d\n", err);
     }
+    assertOSError(OS_NONE_LOC, err);
 
+    // FaultState semaphore
+    OSSemCreate(&FaultState_Sem4, "FaultState", 0, &err);
+    if (err != OS_ERR_NONE) {
+        printf("Task error code %d\n", err);
+    }
+    assertOSError(OS_NONE_LOC, err);
+
+    // Start OS
     OSStart(&err);
     if (err != OS_ERR_NONE) {
         printf("OS error code %d\n", err);
     }
+    assertOSError(OS_NONE_LOC, err);
 }
 
 void TestReadSwitches(void *p_arg) {
@@ -93,7 +104,7 @@ void TestReadSwitches(void *p_arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
     OSTaskCreate(
-        (OS_TCB*)&ReadTritium_TCB,
+        (OS_TCB*)&ReadSwitches_TCB,
         (CPU_CHAR*)"ReadSwitches",
         (OS_TASK_PTR)Task_ReadSwitches,
         (void*)NULL,
@@ -112,10 +123,11 @@ void TestReadSwitches(void *p_arg) {
     if (err != OS_ERR_NONE) {
         printf("ReadSwitches task creation error code %d\n", err);
     }
+    assertOSError(OS_NONE_LOC, err);
 
     printf("Created ReadSwitches\n");
-    // Wait for Task_ReadSwitches to finish initialization
-    OSTimeDlyHMSM(0, 0, PRECHARGE_MOTOR_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+    // Wait for Task_ReadSwitches to finish initialization (with an extra second to be sure)
+    OSTimeDlyHMSM(0, 0, PRECHARGE_MOTOR_DELAY + 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
 
     uint8_t counter = 0;
     while (1) {
