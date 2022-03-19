@@ -285,12 +285,10 @@ ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t *id, uint8_t *data)
 
 void CAN3_RX0_IRQHandler()
 {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-#endif
 
     // Take any pending messages into a queue
     while (CAN_MessagePending(CAN3, CAN_FIFO0))
@@ -318,19 +316,15 @@ void CAN3_RX0_IRQHandler()
         }
     }
 
-#ifdef RTOS
     OSIntExit(); // Signal to uC/OS
-#endif
 }
 
 void CAN1_RX0_IRQHandler(void)
 {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-#endif
 
     // Take any pending messages into a queue
     while (CAN_MessagePending(CAN1, CAN_FIFO0))
@@ -358,19 +352,15 @@ void CAN1_RX0_IRQHandler(void)
         }
     }
 
-#ifdef RTOS
     OSIntExit(); // Signal to uC/OS
-#endif
 }
 
 void CAN3_TX_IRQHandler(void)
 {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-#endif
 
     // Acknowledge
     CAN_ClearFlag(CAN3, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
@@ -378,19 +368,15 @@ void CAN3_TX_IRQHandler(void)
     // Call the function provided
     gTxEnd[1]();
 
-#ifdef RTOS
     OSIntExit(); // Signal to uC/OS
-#endif
 }
 
 void CAN1_TX_IRQHandler(void)
 {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-#endif
 
     // Acknowledge
     CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
@@ -398,7 +384,5 @@ void CAN1_TX_IRQHandler(void)
     // Call the function provided
     gTxEnd[0]();
 
-#ifdef RTOS
     OSIntExit(); // Signal to uC/OS
-#endif
 }
