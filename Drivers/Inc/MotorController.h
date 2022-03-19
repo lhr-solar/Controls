@@ -33,10 +33,10 @@ extern uint16_t Motor_FaultBitmap;
 
 /**
  * @brief   Initializes the motor controller
- * @param   None
+ * @param   busCurrentPercentSetPoint percentage of the bus current to allow the motor to draw
  * @return  None
  */ 
-void MotorController_Init(void);
+void MotorController_Init(float busCurrentPercentSetPoint);
 
 /**
  * @brief   Sends MOTOR DRIVE command on CAN3

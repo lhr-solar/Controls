@@ -61,10 +61,10 @@ static void MotorController_CountIncoming(void) {
 
 /**
  * @brief   Initializes the motor controller
- * @param   None
+ * @param   busCurrentPercentSetPoint percentage of the bus current to allow the motor to draw
  * @return  None
  */ 
-void MotorController_Init(){
+void MotorController_Init(float busCurrentPercentSetPoint){
     CPU_TS ts;
 	OS_ERR err;
     OSSemCreate(&MotorController_MailSem4,
@@ -81,8 +81,7 @@ void MotorController_Init(){
 
     BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
 
-    uint8_t data = {0};
-    float busCurrentPercentSetPoint = 1.0f;
+    uint8_t data[8] = {0};
     memcpy(
         data,
         &busCurrentPercentSetPoint,
