@@ -1,5 +1,5 @@
 /*
-    Test file that sends out the status of FOR_SW to UART_2 with RTOS
+    Test file that sends out the status of FWD_SW to UART_2 with RTOS
 */
 
 #include "common.h"
@@ -7,7 +7,7 @@
 #include <unistd.h>
 //#include "BSP_PLL.h"
 #include "stm32f4xx.h"
-#include "Switches.h"
+#include "Minions.h"
 #include "BSP_UART.h"
 
 // static void delay_u(uint16_t micro)
@@ -28,7 +28,7 @@ void Task1(void *p_arg){
     BSP_UART_Init(UART_2);
     Switches_Init();
     while(1){
-        switches_t sw = FOR_SW;
+        switches_t sw = FWD_SW;
         printf("FORWARD Switch Status: %d", Switches_Read(sw));
         //delay_u(250);
     }

@@ -156,15 +156,15 @@ void Minions_Init(void){
 * @return  returns State enum which indicates ON/OFF
 */ 
 State Lights_Read(light_t light) {
-    //Return from a stored state bitmap instead of actually querying hardware.
-    return (lightStatesBitmap>>light)&0x01;
+    //Return from a stored state bitmap instead of actually querying hardware. 
+    return (State) ((lightStatesBitmap>>light)&0x0001);
 }
 
 /**
 * @brief   Read the lights bitmap
 * @return  returns uint16_t with lights bitmap
 */ 
-uint16_t Lights_Bitmap_Read(light_t light) {
+uint16_t Lights_Bitmap_Read() {
     //Return from a stored state array instead of actually querying hardware.
     return lightStatesBitmap;
 }
@@ -229,7 +229,7 @@ void Switches_UpdateStates(void){
 }
 
 /**
- * @brief Toggles a light. Should be used only after Toggle_Set has been called for this light so that we are accurately tracking the enabled and disabled lights
+ * @brief Toggles a light. Should be used only after Lights_Toggle_Set has been called for this light so that we are accurately tracking the enabled and disabled lights
  * @param light Which light to toggle
 */
 void Lights_Toggle(light_t light){
@@ -245,7 +245,7 @@ void Lights_Toggle(light_t light){
  * @brief Toggles multiple lights according to the toggle bitmap
 */
 void Lights_MultiToggle(void){
-    Lights_MultiSet(lightToggleBitmap ^ lightStatesBitmap); //toggle XOR states will flip wherever toggle bitmap has a 1 and keep wherever toggle bitmap has 0
+    Lights_MultiSet(Lights_Toggle_Bitmap_Read() ^ Lights_Bitmap_Read()); //toggle XOR states will flip wherever toggle bitmap has a 1 and keep wherever toggle bitmap has 0
 }
 
 /**
@@ -255,7 +255,7 @@ void Lights_MultiToggle(void){
  * @param   state State to set toggling
  * @return  void
  */
-void Toggle_Set(light_t light, State state) {
+void Lights_Toggle_Set(light_t light, State state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
     if(state==ON){
         lightToggleBitmap |= (0x01<<light);
@@ -270,7 +270,7 @@ void Toggle_Set(light_t light, State state) {
 * @param   light Which Light to read
 * @return  returns State enum which indicates ON/OFF
 */
-State Toggle_Read(light_t light) {
+State Lights_Toggle_Read(light_t light) {
     return (lightToggleBitmap>>light)&0x01;
 }
 
@@ -278,7 +278,7 @@ State Toggle_Read(light_t light) {
  * @brief   Read toggle bitmap
  * @return  returns uint16_t bitmap for toggle
  */
-uint16_t Toggle_Bitmap_Read(void) {
+uint16_t Lights_Toggle_Bitmap_Read(void) {
     return lightToggleBitmap;
 
 }
@@ -380,6 +380,9 @@ void Lights_MultiSet(uint16_t bitmap){
 
     // Update array
     lightStatesBitmap = bitmap;
+
+    //Update GPIO pins
+    BSP_GPIO_Write(LIGHTS_PORT, portc);
 
     OSMutexPend(
         &CommMutex, 
