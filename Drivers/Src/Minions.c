@@ -179,8 +179,9 @@ State Switches_Read(switches_t sw){
 }
 
 /**
- * @brief   Sends SPI messages to read switches values. Also reads from GPIO's for 
- *          ignition switch values
+ * @brief   Queries all switch-related hardware and updates our internal state with the most recent switch values 
+ * that Switches_Read depends on.
+ * 
  */ 
 void Switches_UpdateStates(void){
     OS_ERR err;
