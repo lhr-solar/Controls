@@ -19,6 +19,8 @@ static float CurrentVelocity = 0;
 
 static tritium_error_code_t Motor_FaultBitmap = T_NONE;
 
+static bool is_initialized = false;
+
 /**
  * @brief   Assert Error if Tritium sends error. When Fault Bitmap is set,
  *          and semaphore is posted, Fault state will run.
@@ -61,10 +63,12 @@ static void MotorController_CountIncoming(void) {
 
 /**
  * @brief   Initializes the motor controller
- * @param   busCurrentPercentSetPoint percentage of the bus current to allow the motor to draw
+ * @param   busCurrentFractionalSetPoint fraction of the bus current to allow the motor to draw
  * @return  None
  */ 
-void MotorController_Init(float busCurrentPercentSetPoint){
+void MotorController_Init(float busCurrentFractionalSetPoint){
+    if (is_initialized) return;
+    is_initialized = true; // Ensure that we only execute the function once
     CPU_TS ts;
 	OS_ERR err;
     OSSemCreate(&MotorController_MailSem4,
@@ -84,8 +88,8 @@ void MotorController_Init(float busCurrentPercentSetPoint){
     uint8_t data[8] = {0};
     memcpy(
         data,
-        &busCurrentPercentSetPoint,
-        sizeof(busCurrentPercentSetPoint)
+        &busCurrentFractionalSetPoint,
+        sizeof(busCurrentFractionalSetPoint)
     );
     OSSemPend(&MotorController_MailSem4,
             0,

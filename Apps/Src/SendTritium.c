@@ -18,7 +18,7 @@ void Task_SendTritium(void *p_arg) {
 
     OS_ERR err;
 
-    MotorController_Init();
+    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
 
     while (1) {
         // Send the drive command to the motor controller

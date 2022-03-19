@@ -29,10 +29,10 @@ typedef enum{
 
 /**
  * @brief   Initializes the motor controller
- * @param   busCurrentPercentSetPoint percentage of the bus current to allow the motor to draw
+ * @param   busCurrentPercentSetPoint fraction of the bus current to allow the motor to draw
  * @return  None
  */ 
-void MotorController_Init(float busCurrentPercentSetPoint);
+void MotorController_Init(float busCurrentFractionalSetPoint);
 
 /**
  * @brief   Sends MOTOR DRIVE command on CAN3
