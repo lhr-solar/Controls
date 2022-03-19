@@ -3,7 +3,7 @@
 
 static OS_MUTEX CommMutex; //Mutex to lock SPI lines
 //Variables for Switches
-static uint16_t SwitchStates_Bitmap = 0;
+static uint16_t switchStatesBitmap = 0;
 
 //Variables for Lights
 static uint8_t lightStatesBitmap = 0;   // Stores light states (on/off)
@@ -76,6 +76,8 @@ static void Switches_Init(void){
     ChipSelect();
     BSP_SPI_Write(initTxBuf,3);
     ChipDeselect();
+
+    switchStatesBitmap = 0x0000;
 
     OSMutexPost(
         &CommMutex,
@@ -175,7 +177,7 @@ uint16_t Lights_Bitmap_Read() {
  * @return  ON/OFF State
  */ 
 State Switches_Read(switches_t sw){
-    return (State) ((SwitchStates_Bitmap >> sw) & 0x0001);
+    return (State) ((switchStatesBitmap >> sw) & 0x0001);
 }
 
 /**
@@ -226,7 +228,7 @@ void Switches_UpdateStates(void){
     uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
     
     //Store data in bitmap
-    SwitchStates_Bitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
+    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
 }
 
 /**
