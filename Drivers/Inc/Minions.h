@@ -127,4 +127,10 @@ void Lights_Toggle_Set(light_t light, State state);
 */
 State Lights_Toggle_Read(light_t light);
 
+/**
+ * @brief   Read toggle bitmap
+ * @return  returns uint16_t bitmap for toggle
+ */
+uint16_t Lights_Toggle_Bitmap_Read(void) 
+
 #endif
