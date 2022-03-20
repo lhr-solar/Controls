@@ -253,12 +253,13 @@ void Lights_Toggle(light_t light){
  */
 void Lights_Toggle_Set(light_t light, State state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
-    if(state==ON){
-        lightToggleBitmap |= (0x01<<light);
+    if(light == LEFT_BLINK){
+        lightToggleBitmap |= 0x02;
     }
-    else if(state==OFF){
-        lightToggleBitmap &= ~(0x01<<light);
+    else if(light == RIGHT_BLINK){
+        lightToggleBitmap |= 0x01;
     }
+
 }
 
 /**
@@ -267,14 +268,19 @@ void Lights_Toggle_Set(light_t light, State state) {
 * @return  returns State enum which indicates ON/OFF
 */
 State Lights_Toggle_Read(light_t light) {
-    return (lightToggleBitmap>>light)&0x01;
+    if(light == LEFT_BLINK){
+        return lightToggleBitmap&0x02;
+    }
+    else if(light == RIGHT_BLINK){
+        return lightToggleBitmap&0x01;
+    }
 }
 
 /**
  * @brief   Read toggle bitmap
- * @return  returns uint16_t bitmap for toggle
+ * @return  returns uint8_t bitmap for toggle (LEFT/RIGHT)
  */
-uint16_t Lights_Toggle_Bitmap_Read(void) {
+uint8_t Lights_Toggle_Bitmap_Read(void) {
     return lightToggleBitmap;
 
 }
