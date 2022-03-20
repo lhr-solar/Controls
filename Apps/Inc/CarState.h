@@ -20,26 +20,6 @@ typedef struct{
 } motor_error_code_t;
 
 /**
- * Switch States
- * 
- * Stores the current state of each of
- * the switches that control this system
- */
-typedef struct {
-    State LT;
-    State RT;
-    State FWD;
-    State REV;
-    State CRS_EN;
-    State CRS_SET;
-    State REGEN;
-    State HZD;
-    State HDLT;
-    State IGN_1;
-    State IGN_2;
-} switch_states_t;
-
-/**
  * Blinker States
  * 
  * Stores the desired blinker state
@@ -103,7 +83,6 @@ typedef struct {
     uint8_t BrakePedalPercent;
     uint8_t MotorCurrentSetpoint;
 
-    switch_states_t SwitchStates;
     blinker_states_t BlinkerStates;
 
     CruiseRegenSet CRSet;
