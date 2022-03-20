@@ -8,7 +8,7 @@
 void Task_BlinkLight(void* p_arg){
     OS_ERR err;
     while(1){
-        Lights_MultiToggle();
+        
         
         //lock thread to run at 90ish times per minute if blinkLights needed.
         OSTimeDlyHMSM(

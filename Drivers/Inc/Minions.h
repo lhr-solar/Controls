@@ -129,8 +129,8 @@ State Lights_Toggle_Read(light_t light);
 
 /**
  * @brief   Read toggle bitmap
- * @return  returns uint16_t bitmap for toggle
+ * @return  returns uint8_t bitmap for toggle (LEFT/RIGHT)
  */
-uint16_t Lights_Toggle_Bitmap_Read(void) 
+uint8_t Lights_Toggle_Bitmap_Read(void) 
 
 #endif
