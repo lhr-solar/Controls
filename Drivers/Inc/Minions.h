@@ -100,12 +100,6 @@ void Switches_UpdateStates(void);
 void Lights_Set(light_t light, State state);
 
 /**
- * @brief   Set multiple lights given light bitmap
- * @return  void
- */
-void Lights_MultiSet(uint16_t bitmap);
-
-/**
 * @brief   Read the lights bitmap
 * @return  returns uint16_t with lights bitmap
 */ 
@@ -116,11 +110,6 @@ uint16_t Lights_Bitmap_Read();
  * @param light Which light to toggle
 */
 void Lights_Toggle(light_t light);
-
-/**
- * @brief Toggles multiple lights according to the toggle bitmap
-*/
-void Lights_MultiToggle(void);
 
 /**
 
@@ -137,11 +126,5 @@ void Lights_Toggle_Set(light_t light, State state);
 * @return  returns State enum which indicates ON/OFF
 */
 State Lights_Toggle_Read(light_t light);
-
-/**
- * @brief   Read toggle bitmap
- * @return  returns uint16_t bitmap for toggle
- */
-uint16_t Lights_Toggle_Bitmap_Read(void);
 
 #endif

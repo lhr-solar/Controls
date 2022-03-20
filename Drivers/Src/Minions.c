@@ -7,7 +7,7 @@ static uint16_t switchStatesBitmap = 0;
 
 //Variables for Lights
 static uint8_t lightStatesBitmap = 0;   // Stores light states (on/off)
-static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (flashing/not flashing)
+static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (left, right)
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
 //Readwrite bit = Read: 1, Write: 0
@@ -245,13 +245,6 @@ void Lights_Toggle(light_t light){
 }
 
 /**
- * @brief Toggles multiple lights according to the toggle bitmap
-*/
-void Lights_MultiToggle(void){
-    Lights_MultiSet(Lights_Toggle_Bitmap_Read() ^ Lights_Bitmap_Read()); //toggle XOR states will flip wherever toggle bitmap has a 1 and keep wherever toggle bitmap has 0
-}
-
-/**
 
  * @brief   Set light toggling
  * @param   light Which light to enable toggling for
@@ -347,62 +340,4 @@ void Lights_Set(light_t light, State state) {
             &err); // Unlock mutex
         assertOSError(OS_BLINK_LIGHTS_LOC, err);
     }
-}
-
-/**
- * @brief   Set multiple lights given light bitmap
- * @return  void
- */
-void Lights_MultiSet(uint16_t bitmap){
-    CPU_TS timestamp;
-    OS_ERR err;
-    // Initialize tx buffer and port c
-    uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
-    uint16_t portc = BSP_GPIO_Read(LIGHTS_PORT);
-    
-    // Set corresponding bits on port c because they're not in the right order
-    if(bitmap & (0x01<<BrakeLight)){
-        portc |= (0x01<<BRAKELIGHT_PIN);
-    }
-
-    if(bitmap & (0x01<<Headlight_ON)){
-        portc |= (0x01<<HEADLIGHT_PIN);
-    }
-
-    if(bitmap & (0x01<<LEFT_BLINK)){
-        portc |= (0x01<<LEFT_BLINK_PIN);
-    }
-
-    if(bitmap & (0x01<<RIGHT_BLINK)){
-        portc |= (0x01<<RIGHT_BLINK_PIN);
-    }
-
-    // We don't want to accidentally set the brakelight bit over SPI because it only exists on the controls board
-    txWriteBuf[3] = lightStatesBitmap & (0x01<<BRAKELIGHT_PIN); // Isolate current brakelight bit
-    txWriteBuf[3] |= bitmap & (~(0x01<<BRAKELIGHT_PIN));    // Or with new input excluding brakelight bit
-
-    // Update array
-    lightStatesBitmap = bitmap;
-
-    //Update GPIO pins
-    BSP_GPIO_Write(LIGHTS_PORT, portc);
-
-    OSMutexPend(
-        &CommMutex, 
-        0, 
-        OS_OPT_PEND_BLOCKING, 
-        &timestamp, 
-        &err);    // Lock mutex in order to update our lights bitmap and write to SPI
-    assertOSError(OS_BLINK_LIGHTS_LOC, err);
-
-    // Write to GPIOB on the minion board (SPI) for internal lights
-    ChipSelect();
-    BSP_SPI_Write(txWriteBuf, 3);
-    ChipDeselect();
-
-    OSMutexPost(
-        &CommMutex,
-        OS_OPT_POST_NONE,
-        &err); // Unlock mutex
-    assertOSError(OS_BLINK_LIGHTS_LOC, err);
 }
