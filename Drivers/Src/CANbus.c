@@ -82,7 +82,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
     }
 
     uint8_t txdata[8];
-    uint8_t datalen;
+    uint8_t datalen = 0;
 
     switch (id)
     {
@@ -96,6 +96,9 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
     case TEMPERATURE:
     case ODOMETER_AMPHOURS:
         datalen = 8;
+        //TODO: I don't think we need this reversal thing, this was done looking at a logic analyzer trace showing the data frame was reversed
+        //We should test reception of data using BPS supplemental ASAP, and if that shows that it's wrong we need to revert this block to the memcpy 
+        //that got removed
         txdata[0] = (payload.data.d >> 56) & 0xFF;
         txdata[1] = (payload.data.d >> 48) & 0xFF;
         txdata[2] = (payload.data.d >> 40) & 0xFF;
@@ -111,6 +114,9 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         datalen = 1;
         txdata[0] = (payload.data.b);
         break;
+    case CHARGE_ENABLE:
+        //TODO: Error handling, this should never occur, we should never be sending the Charge_enable message out
+        return ERROR;
     }
 
     OSMutexPend( // ensure that tx line is available
@@ -126,21 +132,14 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
     }
     // tx line locked
 
-    int retval = BSP_CAN_Write(CAN_1, id, txdata, datalen);
+    ErrorStatus retval = BSP_CAN_Write(CAN_1, id, txdata, datalen);
 
     OSMutexPost( // unlock the TX line
         &CANbus_TxMutex,
         OS_OPT_POST_NONE,
         &err);
 
-    if (retval == SUCCESS)
-    {
-        return SUCCESS;
-    }
-    else
-    {
-        return ERROR;
-    }
+    return retval;
 }
 
 /**
@@ -193,12 +192,12 @@ ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking)
     }
 
     // Actually get the message
-    uint8_t status = BSP_CAN_Read(CAN_1, id, buffer);
+    ErrorStatus status = BSP_CAN_Read(CAN_1, id, buffer);
 
     OSMutexPost( // unlock RX line
         &CANbus_RxMutex,
         OS_OPT_POST_1,
         &err);
 
-    return status ? SUCCESS : ERROR;
+    return status;
 }

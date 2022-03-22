@@ -7,6 +7,7 @@
 #include "os.h"
 #include "common.h"
 #include "CarState.h"
+#include "config.h"
 
 /**
  * Task initialization macro
@@ -154,8 +155,9 @@ extern OS_SEM MotorConnectionChange_Sem4;
  * Global Variables
  */
 
+extern State RegenAllowed; //TODO: We may need to add a mutex to protect this. ReadCarCAN writes to it, UpdateVelocity reads from it.
 
-// TODO: Put all global state variables here
+
 /**
  * Motor Error States
  * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits

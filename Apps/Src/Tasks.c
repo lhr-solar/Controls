@@ -66,6 +66,7 @@ OS_SEM ArrayConnectionChange_Sem4;
  */
 
 // TODO: Put all global state variables here
+State RegenAllowed = OFF; //TODO: We may need to add a mutex to protect this. ReadCarCAN writes to it, UpdateVelocity reads from it.
 
 // Needs to get initialized somewhere, not currently initialized
 fault_bitmap_t FaultBitmap;

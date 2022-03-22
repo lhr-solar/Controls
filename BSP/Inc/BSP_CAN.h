@@ -15,15 +15,13 @@
 typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
 
 /**
- * @brief   Initializes both CAN lines to
- *          communicate with the motor controllers
- *          and other car systems
- * @param   bus the CAN line to initialize
- * @param   txHandler the function that will be called every time TX completes
- * @param   rxHandler the function that iwll be called on every RX event 
+ * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
+ * @param   bus : The bus to initialize. Should only be either CAN_1 or CAN_3.
+ * @param   rxEvent : the function to execute when recieving a message. NULL for no action.
+ * @param   txEnd   : the function to execute after transmitting a message. NULL for no action.
  * @return  None
- */ 
-void BSP_CAN_Init(CAN_t bus, callback_t txHandler, callback_t rxHandler);
+ */
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd);
 
 /**
  * @brief   Writes a message to the specified CAN line

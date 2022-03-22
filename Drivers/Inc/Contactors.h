@@ -34,11 +34,10 @@ State Contactors_Get(contactor_t contactor);
 
 /**
  * @brief   Sets the state of a specified contactor
-<<<<<<< HEAD
  * @param   contactor the contactor (MOTOR/ARRAY)
-=======
  * @param   contactor the contactor
  * @return  None
  */
+void Contactors_Set(contactor_t contactor, State state);
 
 #endif
