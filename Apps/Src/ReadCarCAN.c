@@ -51,7 +51,7 @@ void Task_ReadCarCAN(void *p_arg)
     while (1)
     {
         //Get any message that BPS Sent us
-        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING);
+        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); //NOTE: This function acts as an OS Scheduling point because it contains a sempend
         if(status == SUCCESS && canId == CHARGE_ENABLE){ //we got a charge_enable message
             OSTmrStart( //Pet the watchdog since we got a charge_Enable message
                 (OS_TMR*) &CANWatchdog,
@@ -69,7 +69,7 @@ void Task_ReadCarCAN(void *p_arg)
                     (void*) NULL,
                     (OS_ERR*) &err
                 );
-                assertOSError(0,err);
+                assertOSError(OS_READ_CAN_LOC,err);
                 continue;
             }
 
@@ -83,10 +83,11 @@ void Task_ReadCarCAN(void *p_arg)
                     (OS_TMR*) &ArrayRestartTimer,
                     (OS_ERR*) &err
                 );
-                assertOSError(0,err); //TODO: add actual error location
+                assertOSError(OS_READ_CAN_LOC,err); //TODO: add actual error location
             }
             
         }
+        assertOSError(OS_READ_CAN_LOC,err);
     }
 }
 
@@ -104,7 +105,7 @@ static void CANWatchdog_Handler(){
         (void*) NULL,
         (OS_ERR*) &err
     );
-    assertOSError(0,err);
+    assertOSError(OS_READ_CAN_LOC,err);
     watchDogTripCounter += 1;
 };
 
