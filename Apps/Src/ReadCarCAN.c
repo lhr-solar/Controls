@@ -57,7 +57,7 @@ void Task_ReadCarCAN(void *p_arg)
                 (OS_ERR*) &err
             );
             assertOSError(OS_READ_CAN_LOC,err);
-            if(!(buffer[0]==1)){ //If the buffer doesn't contain anything in the LSByte, turn off RegenEnable and array off
+            if(!(buffer[0]==1)){ //If the buffer doesn't contain anything in the MSByte, turn off RegenEnable and array off
                 RegenAllowed = OFF;
                 Contactors_Set(ARRAY_CONTACTOR, OFF); //kill contactors and the array restart timer
                 Contactors_Set(ARRAY_PRECHARGE, OFF);
