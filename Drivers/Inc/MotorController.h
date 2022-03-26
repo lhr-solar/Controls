@@ -29,7 +29,7 @@ typedef enum{
 
 /**
  * @brief   Initializes the motor controller
- * @param   busCurrentPercentSetPoint fraction of the bus current to allow the motor to draw
+ * @param   busCurrentFractionalSetPoint fraction of the bus current to allow the motor to draw
  * @return  None
  */ 
 void MotorController_Init(float busCurrentFractionalSetPoint);
