@@ -19,6 +19,7 @@ OS_TCB SendCarCAN_TCB;
 OS_TCB BlinkLight_TCB;
 OS_TCB ArrayConnection_TCB;
 OS_TCB MotorConnection_TCB;
+OS_TCB FaultState_TCB;
 OS_TCB Idle_TCB;
 OS_TCB Init_TCB;
 
@@ -37,6 +38,7 @@ CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
 CPU_STK ArrayConnection_Stk[TASK_ARRAY_CONNECTION_STACK_SIZE];
 CPU_STK MotorConnection_Stk[TASK_MOTOR_CONNECTION_STACK_SIZE];
+CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
 CPU_STK Idle_Stk[TASK_IDLE_STACK_SIZE];
 CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 
@@ -60,6 +62,7 @@ OS_SEM BlinkLight_Sem4;
 OS_SEM SendCarCAN_Sem4;
 OS_SEM MotorConnectionChange_Sem4;
 OS_SEM ArrayConnectionChange_Sem4;
+OS_SEM FaultState_Sem4;
 
 /**
  * Global Variables

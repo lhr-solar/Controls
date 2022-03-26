@@ -3,7 +3,7 @@
  * 
  * 
  * This file spins the motor up to .5amps for 200ms, then 1 amp for 200ms, 
- * and then non-regen brakes for 200ms and repeats. 
+ * and then coasting for 200ms and repeats. 
  */ 
 #include "common.h"
 #include "config.h"
@@ -20,10 +20,9 @@ static car_state_t car_state;
 
 void Task1(void* arg){
     CPU_Init();
-    OS_CPU_SysTickInit();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
     OS_ERR err;
-    CPU_TS ts;
 
 
     MotorController_Init(1.0f);
@@ -35,32 +34,42 @@ void Task1(void* arg){
 
     while(1){
         unatttainable_Velocity = 2500.0f;
+
         desiredCurrent = 0.5f; //spin up to .5 amps worth
         currentSetPoint = desiredCurrent/BUSCURRENT;
-        MotorController_Drive(unatttainable_Velocity,currentSetPoint);
-        OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT, &err);
-        if(err != OS_ERR_NONE){
-            while(1){
+        for (int i=0; i<30; i++) { // Run for ~6 seconds
+            MotorController_Drive(unatttainable_Velocity,currentSetPoint);
+            OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT, &err);
+            if(err != OS_ERR_NONE){
                 volatile int x = 0;
+                while(1){
+                    x++;
+                }
             }
         }
+
         desiredCurrent = 1.0f; //1 amps worth
         currentSetPoint = desiredCurrent/BUSCURRENT;
-        MotorController_Drive(unatttainable_Velocity,currentSetPoint);
-        OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT, &err);
-        if(err != OS_ERR_NONE){
-            while(1){
+        for (int i=0; i<30; i++) { // ~6 seconds
+            MotorController_Drive(unatttainable_Velocity,currentSetPoint);
+            OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT, &err);
+            if(err != OS_ERR_NONE){
                 volatile int x = 0;
+                while(1){
+                    x++;
+                }
             }
         }
         
-        
-        MotorController_Drive(unatttainable_Velocity,0); //non-regen brake
-        MotorController_Drive(0,0);
-        OSTimeDlyHMWSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT, &err);
-        if(err != OS_ERR_NONE){
-            while(1){
+        MotorController_Drive(unatttainable_Velocity,0); // prepare to coast
+        for (int i=0; i<30; i++) { // ~6 seconds
+            MotorController_Drive(0,0); // coasting
+            OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT, &err);
+            if(err != OS_ERR_NONE){
                 volatile int x = 0;
+                while(1){
+                    x++;
+                }
             }
         }
     }
@@ -71,8 +80,9 @@ int main(){
     OS_ERR err;
     OSInit(&err);
     if(err != OS_ERR_NONE){
+        volatile int x = 0;
         while(1){
-            volatile int x = 0;
+            x++;
         }
     }
     OSSemCreate( //driver depends on fault state semaphore/thread
@@ -82,8 +92,9 @@ int main(){
         &err
     );
     if(err != OS_ERR_NONE){
+        volatile int x = 0;
         while(1){
-            volatile int x = 0;
+            x++;
         }
     }
 
@@ -96,15 +107,16 @@ int main(){
         (CPU_STK*)FaultState_Stk,
         (CPU_STK_SIZE)128/10,
         (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY)0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
     if(err != OS_ERR_NONE){
+        volatile int x = 0;
         while(1){
-            volatile int x = 0;
+            x++;
         }
     }
 
@@ -119,26 +131,30 @@ int main(){
         (CPU_STK*)Task1Stk,
         (CPU_STK_SIZE)128/10,
         (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY)0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
     if(err != OS_ERR_NONE){
+        volatile int x = 0;
         while(1){
-            volatile int x = 0;
+            x++;
         }
     }
     OSStart(&err);
     
     if(err != OS_ERR_NONE){
+        volatile int x = 0;
         while(1){
-            volatile int x = 0;
+            x++;
         }
     }
-
-    while(1){volatile int x = 0;}
+    {
+        volatile int x = 0;
+        while(1){x++;}
+    }
     
     
 }
