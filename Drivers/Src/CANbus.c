@@ -1,6 +1,7 @@
 #include "CANbus.h"
 #include "config.h"
 #include "os.h"
+#include "Tasks.h"
 
 static OS_SEM CANMail_Sem4;       // sem4 to count how many sending hardware mailboxes we have left (start at 3)
 static OS_SEM CANBus_RecieveSem4; // sem4 to count how many msgs in our recieving queue
@@ -14,6 +15,7 @@ void CANbus_RxHandler()
 {
     OS_ERR err;
     OSSemPost(&CANBus_RecieveSem4, OS_OPT_POST_1, &err); // increment our queue counter
+    assertOSError(0,err);
 }
 
 /**
@@ -23,6 +25,7 @@ void CANbus_TxHandler()
 {
     OS_ERR err;
     OSSemPost(&CANMail_Sem4, OS_OPT_POST_1, &err);
+    assertOSError(0,err);
 }
 
 /**
@@ -37,12 +40,17 @@ void CANbus_Init(void)
     OS_ERR err;
 
     OSMutexCreate(&CANbus_TxMutex, "CAN TX Lock", &err);
+    assertOSError(0,err);
 
     OSMutexCreate(&CANbus_RxMutex, "CAN RX Lock", &err);
+    assertOSError(0,err);
 
     OSSemCreate(&CANMail_Sem4, "CAN Mailbox Semaphore", 3, &err); // there's 3 hardware mailboxes on the board, so 3 software mailboxes
+    assertOSError(0,err);
 
     OSSemCreate(&CANBus_RecieveSem4, "CAN Recieved Msg queue", 0, &err); // create a mailbox counter to hold the messages in as they come in
+    assertOSError(0,err);
+
     BSP_CAN_Init(CAN_1, &CANbus_RxHandler, &CANbus_TxHandler);
 }
 
@@ -76,6 +84,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
             &timestamp,
             &err);
     }
+    assertOSError(0,err);
     if (err != OS_ERR_NONE)
     {
         return ERROR;
@@ -115,7 +124,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         txdata[0] = (payload.data.b);
         break;
     case CHARGE_ENABLE:
-        //TODO: Error handling, this should never occur, we should never be sending the Charge_enable message out
+        //This should never occur, we should never be sending the Charge_enable message out
         return ERROR;
     }
 
@@ -125,6 +134,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         OS_OPT_PEND_BLOCKING,
         &timestamp,
         &err);
+    assertOSError(0,err);
     if (err != OS_ERR_NONE)
     {
         // couldn't lock tx line
@@ -138,7 +148,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         &CANbus_TxMutex,
         OS_OPT_POST_NONE,
         &err);
-
+    assertOSError(0,err);
     return retval;
 }
 
@@ -174,6 +184,8 @@ ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking)
             &timestamp,
             &err);
     }
+
+    assertOSError(0,err);
     if (err != OS_ERR_NONE)
     {
         return ERROR;
@@ -185,6 +197,7 @@ ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking)
         OS_OPT_PEND_BLOCKING,
         &timestamp,
         &err);
+    assertOSError(0,err);
     if (err != OS_ERR_NONE)
     {
         // couldn't lock RX line
@@ -198,6 +211,6 @@ ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking)
         &CANbus_RxMutex,
         OS_OPT_POST_1,
         &err);
-
+    assertOSError(0,err);
     return status;
 }
