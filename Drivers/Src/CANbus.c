@@ -108,14 +108,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         //TODO: I don't think we need this reversal thing, this was done looking at a logic analyzer trace showing the data frame was reversed
         //We should test reception of data using BPS supplemental ASAP, and if that shows that it's wrong we need to revert this block to the memcpy 
         //that got removed
-        txdata[0] = (payload.data.d >> 56) & 0xFF;
-        txdata[1] = (payload.data.d >> 48) & 0xFF;
-        txdata[2] = (payload.data.d >> 40) & 0xFF;
-        txdata[3] = (payload.data.d >> 32) & 0xFF;
-        txdata[4] = (payload.data.d >> 24) & 0xFF;
-        txdata[5] = (payload.data.d >> 16) & 0xFF;
-        txdata[6] = (payload.data.d >> 8) & 0xFF;
-        txdata[7] = (payload.data.d >> 0) & 0xFF;
+        memcpy(txdata, &payload.data.d, sizeof(txdata));
         break;
 
         // Handle 8bit precision case (0b0000xxxx) (no idx)

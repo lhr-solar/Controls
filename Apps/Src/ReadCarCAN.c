@@ -7,7 +7,6 @@
 static OS_TMR CANWatchdog; //watchdog timer to trigger fault if we stop getting messages
 static OS_TMR ArrayRestartTimer; //Timer to restart the array properly after precharge.
 static OS_ERR err;
-static bool RESTART_TRIGGER = false; //Flag to indicate whether we are in precharge or not
 static int watchDogTripCounter = 0; //count how many times the CAN watchdog trips
 
 static void CANWatchdog_Handler(); //Handler if we stop getting messages
@@ -58,11 +57,10 @@ void Task_ReadCarCAN(void *p_arg)
                 (OS_ERR*) &err
             );
             assertOSError(OS_READ_CAN_LOC,err);
-            if(!(buffer[0]==1)){ //If the buffer doesn't contain anything in the LSByte, turn off RegenEnable and array contactor off
+            if(!(buffer[0]==1)){ //If the buffer doesn't contain anything in the LSByte, turn off RegenEnable and array off
                 RegenAllowed = OFF;
-                Contactors_Set(ARRAY_CONTACTOR, OFF);
-                //kill restart if it is going on
-                RESTART_TRIGGER = false;
+                Contactors_Set(ARRAY_CONTACTOR, OFF); //kill contactors and the array restart timer
+                Contactors_Set(ARRAY_PRECHARGE, OFF);
                 OSTmrStop(
                     (OS_TMR*) &ArrayRestartTimer,
                     (OS_OPT) OS_OPT_TMR_NONE,
@@ -76,16 +74,14 @@ void Task_ReadCarCAN(void *p_arg)
             //We got a message of enable, turn on Regen, If we are already in precharge / array is on, do nothing. 
             //If not initiate precharge and restart sequence. 
             RegenAllowed = ON;
-            if(!RESTART_TRIGGER){ //If restart hasn't been triggered, trigger it
-                Contactors_Set(ARRAY_PRECHARGE, ON);
-                RESTART_TRIGGER = true;
+            if((Contactors_Get(ARRAY_CONTACTOR)==OFF) && (Contactors_Get(ARRAY_PRECHARGE)==OFF)){ // IF the array is off and we are not already in precharge sequence.
+                Contactors_Set(ARRAY_PRECHARGE, ON); //turn on precharge sequence
                 OSTmrStart(
                     (OS_TMR*) &ArrayRestartTimer,
                     (OS_ERR*) &err
                 );
-                assertOSError(OS_READ_CAN_LOC,err); //TODO: add actual error location
-            }
-            
+                assertOSError(OS_READ_CAN_LOC,err); 
+            }            
         }
         assertOSError(OS_READ_CAN_LOC,err);
     }
@@ -96,9 +92,8 @@ void Task_ReadCarCAN(void *p_arg)
  * a CAN message with the ID Charge_Enable within the desired interval.
 */
 static void CANWatchdog_Handler(){
-    //TODO: Do we want this to signal the Global Fault Handler and kill the system? Or do we want to be able to recover from this
-    Contactors_Set(ARRAY_CONTACTOR,OFF);
-    RESTART_TRIGGER = false; //kill restart process if it is on
+    Contactors_Set(ARRAY_CONTACTOR,OFF); //Kill array and precharge sequence
+    Contactors_Set(ARRAY_PRECHARGE, OFF);
     OSTmrStop(
         (OS_TMR*) &ArrayRestartTimer,
         (OS_OPT) OS_OPT_TMR_NONE,
@@ -113,7 +108,6 @@ static void CANWatchdog_Handler(){
  * @brief This function is a callback that gets triggered to reconnect the array after the precharge timer hits zero.
 */
 static void ArrayRestart(){
-    Contactors_Set(ARRAY_CONTACTOR, ON);
+    Contactors_Set(ARRAY_CONTACTOR, ON); //turn on contactor and precharge
     Contactors_Set(ARRAY_PRECHARGE, OFF);
-    RESTART_TRIGGER = false; //restart process complete, reset trigger
 };
