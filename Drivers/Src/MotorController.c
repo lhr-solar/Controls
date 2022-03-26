@@ -116,8 +116,8 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
 	OS_ERR err;
 
     uint8_t data[8];
-    memcpy(data, &motorCurrent, sizeof(motorCurrent));
-    memcpy(data + sizeof(motorCurrent), &newVelocity, sizeof(newVelocity));
+    memcpy(data, &newVelocity, sizeof(newVelocity));
+    memcpy(data + sizeof(newVelocity), &motorCurrent, sizeof(motorCurrent));
     
     OSSemPend(&MotorController_MailSem4,
 			  0,
