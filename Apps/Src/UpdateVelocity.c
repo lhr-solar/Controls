@@ -2,9 +2,11 @@
 #include "Pedals.h"
 #include "Tasks.h"
 #include "Switches.h"
+#include "MotorController.h"
 #include <math.h>
 #define UNTOUCH_PEDALS_PERCENT 5
 #define REGEN_CURRENT 0.5f
+//#define UNATTAINABLE_VELOCITY 1000.0f
 
 extern const float pedalToPercent[];
 
@@ -60,21 +62,17 @@ void Task_UpdateVelocity(void *p_arg)
         State cruzSetActive = Switches_Read(CRUZ_SW);
 
         //The cruzEnableState is toggled on the rising edge of the button press
-        if(cruzEnableActive){
-            if(!cruzEnablePressed){
-                cruzEnablePressed = ON;
-                cruzEnableState ^= cruzEnableState;
-            }
+        if(cruzEnableActive && !cruzEnablePressed){
+            cruzEnablePressed = ON;
+            cruzEnableState ^= cruzEnableState;
         }else if(!cruzEnableActive){
             cruzEnablePressed = OFF;
         }
 
         //The cruzSetState is toggled on the rising edge of the button press
-        if(cruzSetActive){
-            if(!cruzSetPressed){
-                cruzSetPressed = ON;
-                cruzSetState ^= cruzSetState;
-            }
+        if(cruzSetActive && !cruzSetPressed){
+            cruzSetPressed = ON;
+            cruzSetState ^= cruzSetState;
         }else if(!cruzSetActive){
             cruzSetPressed = OFF;
         }
@@ -83,9 +81,7 @@ void Task_UpdateVelocity(void *p_arg)
             && accelPedalPercent < UNTOUCH_PEDALS_PERCENT){
             desiredVelocity = 0;
             desiredMotorCurrent = REGEN_CURRENT;
-        }
-        
-        else if(cruzEnableState && cruzSetState && brakePedalPercent < UNTOUCH_PEDALS_PERCENT 
+        } else if(cruzEnableState && cruzSetState && brakePedalPercent < UNTOUCH_PEDALS_PERCENT 
             && accelPedalPercent < UNTOUCH_PEDALS_PERCENT){
             desiredVelocity = MotorController_ReadVelocity();
             desiredMotorCurrent = 1.0f;
