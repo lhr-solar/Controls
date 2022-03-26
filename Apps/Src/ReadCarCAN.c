@@ -17,17 +17,22 @@ void Task_ReadCarCAN(void *p_arg)
     uint8_t buffer[8]; // buffer for CAN message
     uint32_t canId;
 
+    // OS_STATE debugwatchdogState;
+
+
     OSTmrCreate( //Create Can watchdog 
         (OS_TMR*) &CANWatchdog,
         (CPU_CHAR*) "CAN Watchdog Timer",
         (OS_TICK)50, //Our tick rate is set to 100Hz in OS_CFG_APP.h. 100 HZ = 10ms period -> 50 ticks = 500ms
         (OS_TICK)0,
         (OS_OPT) OS_OPT_TMR_ONE_SHOT,
-        (OS_TMR_CALLBACK_PTR) &CANWatchdog_Handler,
+        (OS_TMR_CALLBACK_PTR) CANWatchdog_Handler,
         (void*) NULL,
         (OS_ERR*) &err
     );
     assertOSError(0,err);
+    // debugwatchdogState = OSTmrStateGet(&CANWatchdog,&err);
+    // printf("%d",debugwatchdogState);
 
     OSTmrCreate( //create array precharge timer for re-enabling charge 
         (OS_TMR*) &ArrayRestartTimer,
@@ -46,11 +51,15 @@ void Task_ReadCarCAN(void *p_arg)
         (OS_ERR*) &err
     );
     assertOSError(0,err);
-
+    // debugwatchdogState = OSTmrStateGet(&CANWatchdog,&err);
+    // printf("%d",debugwatchdogState);
+    
     while (1)
     {
+        // debugwatchdogState = OSTmrStateGet(&CANWatchdog,&err);
+        // printf("%d",debugwatchdogState);
         //Get any message that BPS Sent us
-        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); //NOTE: This function acts as an OS Scheduling point because it contains a sempend
+        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_NON_BLOCKING); //NOTE: This function acts as an OS Scheduling point because it contains a sempend
         if(status == SUCCESS && canId == CHARGE_ENABLE){ //we got a charge_enable message
             OSTmrStart( //Pet the watchdog since we got a charge_Enable message
                 (OS_TMR*) &CANWatchdog,
