@@ -154,9 +154,9 @@ ErrorStatus MotorController_Read(CANbuff *message){
 		&ts,
 		&err);
 	assertOSError(0, err);
-    uint32_t length = BSP_CAN_Read(CAN_3, &id, data);
+    ErrorStatus status = BSP_CAN_Read(CAN_3, &id, data);
 
-    if(length>0){
+    if(status == SUCCESS){
         message->id = id;
         //get first number (bits 0-31)
         for(int j = 0; j < MAX_CAN_LEN/2; j++){
