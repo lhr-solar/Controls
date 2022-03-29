@@ -6,10 +6,7 @@
 #include "MotorController.h"
 
 
-void main(void) {
-    static OS_TCB Task1TCB;
-    static CPU_STK Task1Stk[128];
-
+int main(void) {
     OS_ERR err;
     OSInit(&err);
 
@@ -27,7 +24,7 @@ void main(void) {
 
     if(err != OS_ERR_NONE){
         printf("Fault semaphore create failed:\n");
-        printf(err);
+        printf("%d",err);
     }
 
     OSTaskCreate( //create readCarCAN task
@@ -35,11 +32,11 @@ void main(void) {
         (CPU_CHAR*)"Read Car CAN",
         (OS_TASK_PTR)Task_ReadCarCAN,
         (void*)NULL,
-        (OS_PRIO)1,
+        (OS_PRIO)12,
         (CPU_STK*)ReadCarCAN_Stk,
         (CPU_STK_SIZE)128/10,
         (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY)0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
@@ -55,4 +52,6 @@ void main(void) {
     if (err != OS_ERR_NONE) {
         printf("OS error code %d\n", err);
     }
+
+    while(1){}
 }
