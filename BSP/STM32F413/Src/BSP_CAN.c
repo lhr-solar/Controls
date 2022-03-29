@@ -220,12 +220,21 @@ void BSP_CAN3_Init(){
     /* Enable FIFO 0 message pending Interrupt */
     CAN_ITConfig(CAN3, CAN_IT_FMP0, ENABLE);
 
+    //TODO: Double check preemption priority and subpriority
     // Enable Rx interrupts
-    NVIC_InitStruct.NVIC_IRQChannel = CAN3_RX0_IRQn; // TODO: DOUBLE CHECK IRQ CHANNELS
+    NVIC_InitStruct.NVIC_IRQChannel = CAN3_RX0_IRQn;
     NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
+
+    // Enable Tx interrupts
+    NVIC_InitStruct.NVIC_IRQChannel = CAN3_TX_IRQn; 
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00; 
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStruct);
+
 }
 
 /**
