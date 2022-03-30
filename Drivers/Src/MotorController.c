@@ -87,7 +87,7 @@ void MotorController_Init(float busCurrentFractionalSetPoint){
 
     uint8_t data[8] = {0};
     memcpy(
-        data,
+        data+4,
         &busCurrentFractionalSetPoint,
         sizeof(busCurrentFractionalSetPoint)
     );
@@ -126,7 +126,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent){
 			  &err);
 	assertOSError(0, err);
     ErrorStatus result = BSP_CAN_Write(CAN_3, MOTOR_DRIVE, data, MAX_CAN_LEN);
-    if (result == ERROR) {
+    if (result == ERROR) { 
 		MotorController_Release();
 	}
 

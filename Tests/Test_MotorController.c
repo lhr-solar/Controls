@@ -35,7 +35,7 @@ void Task1(void* arg){
     while(1){
         unatttainable_Velocity = 2500.0f;
 
-        desiredCurrent = 1.0f; //spin up to .5 amps worth
+        desiredCurrent = 1.0f; 
         currentSetPoint = desiredCurrent/BUSCURRENT;
         for (int i=0; i<30; i++) { // Run for ~6 seconds
             MotorController_Drive(unatttainable_Velocity,currentSetPoint);
