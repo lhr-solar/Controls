@@ -229,13 +229,14 @@ void BSP_CAN3_Init(){
     NVIC_Init(&NVIC_InitStruct);
 
     // Enable Tx interrupts
-    CAN_ITConfig(CAN3,CAN_IT_TME,ENABLE);
-    NVIC_InitStruct.NVIC_IRQChannel = CAN3_TX_IRQn; 
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00; 
-    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
-
+    if(NULL != gTxEnd[1]){ 
+        CAN_ITConfig(CAN3,CAN_IT_TME,ENABLE);
+        NVIC_InitStruct.NVIC_IRQChannel = CAN3_TX_IRQn; 
+        NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00; 
+        NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
+        NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+        NVIC_Init(&NVIC_InitStruct);
+    }
 }
 
 /**
