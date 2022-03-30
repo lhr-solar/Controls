@@ -144,14 +144,15 @@ void BSP_CAN1_Init()
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
 
-    /*if(NULL != txEnd) {
+    if(NULL != gTxEnd[0]) {
         // Enable Tx Interrupts
+        CAN_ITConfig(CAN1, CAN_IT_TME, ENABLE);
         NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
         NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
         NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
         NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn;
         NVIC_Init(&NVIC_InitStruct);
-    }*/
+    }
 }
 
 void BSP_CAN3_Init()
