@@ -150,7 +150,6 @@ void BSP_CAN1_Init()
         NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
         NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
         NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-        NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn;
         NVIC_Init(&NVIC_InitStruct);
     }
 }
