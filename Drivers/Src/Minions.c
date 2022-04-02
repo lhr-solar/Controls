@@ -61,7 +61,7 @@ static void Switches_Init(void){
     ChipSelect();
     BSP_SPI_Write(initTxBuf,3);
     ChipDeselect();
-    //Sets up pin 7 on GPIOB as input (for ReverseSwitch)
+    //Sets up pin 6 on GPIOB as input (for Hazard Switch)
     initTxBuf[0]=SPI_OPCODE_R;
     initTxBuf[1] = SPI_IODIRB;
     initTxBuf[2] = 0;
@@ -70,7 +70,7 @@ static void Switches_Init(void){
     BSP_SPI_Write(initTxBuf, 2);
     BSP_SPI_Read(&initRxBuf, 1);
     ChipDeselect();
-    //OR IODIRB to set pin 7 to input and write it back
+    //OR IODIRB to set pin 6 to input and write it back (For GPIOExpander, In=1 and Out=0)
     initTxBuf[2] = initRxBuf|0x40;
     initTxBuf[0]=SPI_OPCODE_W;
     ChipSelect();
@@ -118,7 +118,7 @@ static void Lights_Init(void) {
     uint8_t txWriteBuf[3] = {
         SPI_OPCODE_W, //write to IODIRB
         SPI_IODIRB, 
-        rxBuf&0x40 //clear IODIRB to set as outputs except for hazard lights switch pin (bit 6, 0x40)
+        rxBuf&0x80 //clear IODIRB to set as outputs except for hazard lights switch pin (bit 6, 0x80)
     };
     
     // Set direction register
