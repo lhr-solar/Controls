@@ -59,7 +59,7 @@ void Task_UpdateVelocity(void *p_arg)
 
         //Active refers to it currently being pressed
         State cruzEnableActive = Switches_Read(CRUZ_EN);
-        State cruzSetActive = Switches_Read(CRUZ_SW);
+        State cruzSetActive = Switches_Read(CRUZ_ST);
 
         //The cruzEnableState is toggled on the rising edge of the button press
         if(cruzEnableActive && !cruzEnablePressed){
@@ -77,7 +77,7 @@ void Task_UpdateVelocity(void *p_arg)
             cruzSetPressed = OFF;
         }
 
-        if(regenPressed && RegenAllowed && brakePedalPercent < UNTOUCH_PEDALS_PERCENT 
+        if(regenPressed && RegenEnable && brakePedalPercent < UNTOUCH_PEDALS_PERCENT 
             && accelPedalPercent < UNTOUCH_PEDALS_PERCENT){
             desiredVelocity = 0;
             desiredMotorCurrent = REGEN_CURRENT;
@@ -102,10 +102,8 @@ void Task_UpdateVelocity(void *p_arg)
         // Delay of few milliseconds (10)
         OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
 
-        if (err != OS_ERR_NONE)
-        {
-            // TODO: Determine how we'll keep track of errors
-            car_state->ErrorCode.UpdateVelocityErr = ON;
+        if (err != OS_ERR_NONE){
+            assertOSError(OS_UPDATE_VEL_LOC, err);
         }
     }
 }
