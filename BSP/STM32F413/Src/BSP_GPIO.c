@@ -2,7 +2,6 @@
 
 #include "BSP_GPIO.h"
 #include "Tasks.h"
-#include "stm32f4xx.h"
 
 static GPIO_TypeDef* GPIO_GetPort(port_t port){
  	const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
@@ -67,16 +66,16 @@ void BSP_GPIO_Write(port_t port, uint16_t data){
 
 
 /**
- * @brief   Reads data to a specified input pin (not applicable to output pins)
+ * @brief   Reads data from a specified input pin (not applicable to output pins)
  * @param   port The port to read from
  * @param   pin The pin to read from 
  * @return  State of the pin
  */ 
 
-uint8_t BSP_GPIO_Read_Pin(port_t port, uint8_t pin){
+uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
 
-	return !GPIO_ReadInputDataBit(gpio_port, pin);
+	return !GPIO_ReadInputDataBit(gpio_port, pinmask);
 }
 
 
@@ -89,10 +88,9 @@ uint8_t BSP_GPIO_Read_Pin(port_t port, uint8_t pin){
  * @return  None
  */ 
 
-void BSP_GPIO_Write_Pin(port_t port, uint16_t pin, State state){
+void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, State state){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
-
-	state ? GPIO_WriteBit(gpio_port, pin, Bit_RESET) : GPIO_WriteBit(gpio_port, pin, Bit_SET);
+	GPIO_WriteBit(gpio_port, pinmask, (state==ON)?Bit_SET:Bit_RESET);
 }
 
 

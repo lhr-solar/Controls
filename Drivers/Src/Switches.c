@@ -1,7 +1,10 @@
 #include "Switches.h"
+#include "os.h"
+#include "Tasks.h"
+#include "BSP_GPIO.h"
 
-
-
+static OS_MUTEX CommMutex; //Mutex to lock SPI lines
+static uint16_t SwitchStates_Bitmap = 0;
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
 //Readwrite bit = Read: 1, Write: 0
@@ -13,88 +16,112 @@
  * @return  None
  */ 
 void Switches_Init(void){
+    OS_ERR err;
+    CPU_TS timestamp;
+    OSMutexCreate(&CommMutex, "Communications Mutex", &err);
+    assertOSError(0,err);
     BSP_SPI_Init();
     //Sets up pins 0-7 on GPIOA as input 
-    uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0x00};
-    uint8_t initRxBuf[2] = {0}; 
-    BSP_SPI_Write(initTxBuf,3);
-    do{
-        BSP_SPI_Read(initRxBuf, 2);
-    }while(initRxBuf[1] == SPI_IODIRA);
+    uint8_t initTxBuf[3]={SPI_OPCODE_R, SPI_IODIRA, 0};
+    uint8_t initRxBuf = 0;
+
+    OSMutexPend(
+        &CommMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err);
+    assertOSError(0,err);
+
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    BSP_SPI_Write(initTxBuf,2);
+    BSP_SPI_Read(&initRxBuf, 1);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
     //OR Result of IODIRA read to set all to 1, then write it back to IODIRA
-    initTxBuf[2] = initRxBuf[1]|0xFF;
-    initTxBuf[0]=SPI_OPCODE_W;
+    initTxBuf[2] = initRxBuf|0xFF;
+    initTxBuf[0] = SPI_OPCODE_W;
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,3);
-
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
     //Sets up pin 7 on GPIOB as input (for ReverseSwitch)
+    initTxBuf[0]=SPI_OPCODE_R;
     initTxBuf[1] = SPI_IODIRB;
-    initRxBuf[0]=0;
-    initRxBuf[1]=0;
-    BSP_SPI_Write(initTxBuf,3);
-    do{
-        BSP_SPI_Read(initRxBuf, 2);
-    }while(initRxBuf[1] == SPI_IODIRB);
+    initTxBuf[2] = 0;
+    initRxBuf = 0;
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    BSP_SPI_Write(initTxBuf, 2);
+    BSP_SPI_Read(&initRxBuf, 1);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
     //OR IODIRB to set pin 7 to input and write it back
-    initTxBuf[2] = initRxBuf[1]|0x80;
+    initTxBuf[2] = initRxBuf|0x40;
     initTxBuf[0]=SPI_OPCODE_W;
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
     BSP_SPI_Write(initTxBuf,3);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
 
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err
+    );
+    assertOSError(0,err);
 };
 
 /**
- * @brief   Writes to SPI with Write Bit set (no change allowed) to query GPIOA Register (x09), 
- * reads it back using SPI, isolates for input switch using AND mask and returns state 
+ * @brief   Reads from static variable bitmap holding values of switches
  * @param   sw
  * @return  ON/OFF State
  */ 
 State Switches_Read(switches_t sw){
-    uint8_t query[3]={SPI_OPCODE_R,SPI_GPIOA,0x00}; //query GPIOA
-    uint8_t SwitchReadData[2] = {0};
-    // If we are not trying to get the state of the ignition switches, or the Reverse switch
-    switch(sw) {
-    case CRUZ_SW:
-    case CRUZ_EN:
-    case HZD_SQ: 
-    case FR_SW: 
-    case HEADLIGHT_SW: 
-    case LEFT_SW: 
-    case RIGHT_SW: 
-    case REGEN_SW:
-        BSP_SPI_Write(query,3);
-        do{
-            BSP_SPI_Read(SwitchReadData,2);
-        }while(SwitchReadData[0] == SPI_GPIOA);
-        if (SwitchReadData[1] & (1 << sw)) {
-            return ON;
-        } else {
-            return OFF;
-        }
-
-    case REV_SW:
-        query[1] = SPI_GPIOB;
-        BSP_SPI_Write(query,3);
-        do{
-            BSP_SPI_Read(SwitchReadData,2);
-        }while(SwitchReadData[0] == SPI_GPIOB);
-        if (SwitchReadData[1] & (1 << 7)) {
-            return ON;
-        } else {
-            return OFF;
-        }
-
-    case IGN_1: {
-        int ignStates = BSP_GPIO_Read(PORTA);
-        return (ignStates & 0x2) >> 1;
-    }
-    case IGN_2: {
-        int ignStates = BSP_GPIO_Read(PORTA);
-        return (ignStates & 0x1);
-    }
-
-    default:
-        // Shouldn't happen
-        return -1;
-    }
-    
+    return (State) ((SwitchStates_Bitmap >> sw) & 0x0001);
 }
 
+/**
+ * @brief   Sends SPI messages to read switches values. Also reads from GPIO's for 
+ *          ignition switch values
+ */ 
+void Switches_UpdateStates(void){
+    OS_ERR err;
+    CPU_TS timestamp;
+    uint8_t query[2]={SPI_OPCODE_R,SPI_GPIOA}; //query GPIOA
+    uint8_t SwitchDataReg1 = 0, SwitchDataReg2 = 0;
+
+    //Read all switches except for ignition and hazard
+    OSMutexPend(
+        &CommMutex,
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &timestamp,
+        &err
+    );
+    assertOSError(0,err);
+
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);       
+    BSP_SPI_Write(query,2);
+    BSP_SPI_Read(&SwitchDataReg1,1);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    
+    //Read Hazard Switch
+    query[1] = SPI_GPIOB;
+
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_RESET);
+    BSP_SPI_Write(query,2);
+    BSP_SPI_Read(&SwitchDataReg2,1);
+    GPIO_WriteBit(GPIOA, SPI_CS, Bit_SET);
+
+    OSMutexPost(
+        &CommMutex,
+        OS_OPT_POST_NONE,
+        &err
+    );
+    assertOSError(0,err);
+
+    //Read Ignition Switch 1
+    uint8_t ign1 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
+
+    //Read Ignition Switch 2
+    uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
+    
+    //Store data in bitmap
+    SwitchStates_Bitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
+}
