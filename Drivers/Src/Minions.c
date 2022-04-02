@@ -118,7 +118,7 @@ static void Lights_Init(void) {
     uint8_t txWriteBuf[3] = {
         SPI_OPCODE_W, //write to IODIRB
         SPI_IODIRB, 
-        rxBuf&0x80 //clear IODIRB to set as outputs except for hazard lights switch pin (bit 6, 0x80)
+        rxBuf&0x40 //clear IODIRB to set as outputs except for hazard lights switch pin (bit 6, 0x40)
     };
     
     // Set direction register
