@@ -20,7 +20,7 @@ void Task1(void *p_arg) {
     // OS_CPU_SysTickInit();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
-    CPU_TS ts;
+    // CPU_TS ts;
     /*
     OSTaskCreate(
         (OS_TCB*)&SendDisplay_TCB,
@@ -66,7 +66,7 @@ int main(void) {
         (CPU_STK*)Task1_Stk,
         (CPU_STK_SIZE)sizeof(Task1_Stk)/10,
         (CPU_STK_SIZE)sizeof(Task1_Stk),
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY)0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
