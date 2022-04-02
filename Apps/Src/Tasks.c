@@ -88,4 +88,6 @@ void sysInit(){
     FaultBitmap = FAULT_NONE;
     OSErrLocBitmap = OS_NONE_LOC;
     TritiumErrorBitmap = T_NONE;    // Remove once tritium stuff is merged in; this variable moves to tritium file
+
+    
 }
