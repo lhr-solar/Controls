@@ -9,6 +9,7 @@
 #define __DISPLAY_H
 
 #include "common.h"
+#include "config.h"
 
 /*
  * Initialize the Nextion display
