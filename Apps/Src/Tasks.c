@@ -3,6 +3,12 @@
 #include "Tasks.h"
 #include "FaultState.h"
 #include "os.h"
+#include "CANbus.h"
+#include "Contactors.h"
+#include "Display.h"
+#include "Minions.h"
+#include "MotorController.h"
+#include "Pedals.h"
 
 /**
  * TCBs
@@ -89,5 +95,11 @@ void sysInit(){
     OSErrLocBitmap = OS_NONE_LOC;
     TritiumErrorBitmap = T_NONE;    // Remove once tritium stuff is merged in; this variable moves to tritium file
 
-    
+    // Initialize hardware
+    CANbus_Init();
+    Contactors_Init();
+    Display_Init();
+    Minions_Init();
+    MotorController_Init();
+    Pedals_Init();
 }
