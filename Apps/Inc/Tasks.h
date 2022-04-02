@@ -202,10 +202,6 @@ typedef union{
     };
 } fault_bitmap_t;
 
-extern fault_bitmap_t FaultBitmap;
-extern os_error_loc_t OSErrLocBitmap;
-extern tritium_error_code_t TritiumErrorBitmap;
-
 void assertOSError(uint16_t OS_err_loc, OS_ERR err);
 void assertTritiumError(uint8_t motor_error_code);
 

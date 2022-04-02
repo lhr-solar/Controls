@@ -11,7 +11,6 @@ static float velocity_to_rpm(float velocity)
     const float circumfrence = WHEEL_DIAMETER * M_PI;
     float wheel_rpm = velocity_mpm / circumfrence;
     return wheel_rpm;
-    3
 }
 
 void Task_SendTritium(void *p_arg)
