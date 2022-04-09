@@ -62,7 +62,7 @@ static void USART_DISPLAY_Init() {
     GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_USART3);
 
     //Initialize UART3
-    UART_InitStruct.USART_BaudRate = 115200;
+    UART_InitStruct.USART_BaudRate = 9600;
     UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     UART_InitStruct.USART_Parity = USART_Parity_No;
