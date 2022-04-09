@@ -155,18 +155,6 @@ extern OS_SEM MotorConnectionChange_Sem4;
 
 
 // TODO: Put all global state variables here
-/**
- * Motor Error States
- * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits
- * 
- */
-typedef enum{
-    T_NONE = 0x00,
-    T_TEMP_ERR = 0x01,
-    T_CC_VEL_ERR = 0x02,
-    T_SLIP_SPEED_ERR = 0x04,
-    T_OVER_SPEED_ERR = 0x08
-} tritium_error_code_t;
 
 /**
  * OS Error States
@@ -201,18 +189,17 @@ typedef union{
     };
 } fault_bitmap_t;
 
-extern fault_bitmap_t FaultBitmap;
-extern os_error_loc_t OSErrLocBitmap;
-extern tritium_error_code_t TritiumErrorBitmap;
-
-void assertOSError(uint16_t OS_err_loc, OS_ERR err);
-void assertTritiumError(uint8_t motor_error_code);
-
 /**
  * Error variables
  */
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
-extern tritium_error_code_t TritiumErrorBitmap;
+
+/**
+ * @brief   Assert Error if OS function call fails
+ * @param   OS_err_loc Where OS error occured (driver level)
+ * @param   err OS Error that occurred
+ */
+void assertOSError(uint16_t OS_err_loc, OS_ERR err);
 
 #endif
