@@ -87,7 +87,7 @@ void MotorController_Init(float busCurrentFractionalSetPoint){
 
     uint8_t data[8] = {0};
     memcpy(
-        data+4,
+        data+4, //Tritium expects the setpoint in the Most significant 32 bits, so we offset
         &busCurrentFractionalSetPoint,
         sizeof(busCurrentFractionalSetPoint)
     );
