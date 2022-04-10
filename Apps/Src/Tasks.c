@@ -67,7 +67,6 @@ OS_SEM ArrayConnectionChange_Sem4;
 // TODO: Put all global state variables here
 State RegenEnable = OFF;
 State CruiseControlEnable = OFF;
-// WE'RE HERE: Create enum for CRSet
 
 // Needs to get initialized somewhere, not currently initialized
 fault_bitmap_t FaultBitmap;
