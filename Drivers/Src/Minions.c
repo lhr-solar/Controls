@@ -228,7 +228,7 @@ void Switches_UpdateStates(void){
     uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
     
     //Store data in bitmap
-    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
+    switchStatesBitmap = (ign2 << 10) | (ign1 << 8) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
 }
 
 /**
