@@ -103,7 +103,7 @@ void Contactors_Set(contactor_t contactor, State state) {
     OS_ERR err;
 
     // acquire lock
-    OS_MutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+    OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 
     // update contactor state
@@ -115,7 +115,7 @@ void Contactors_Set(contactor_t contactor, State state) {
     }
 
     // release lock
-    OS_MutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
+    OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 }
 
@@ -129,7 +129,7 @@ void Contators_Enable(contactor_t contactor) {
     OS_ERR err;
 
     // acquire lock
-    OS_MutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+    OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 
     // mark contactor as enabled
@@ -141,7 +141,7 @@ void Contators_Enable(contactor_t contactor) {
     }
 
     // release lock
-    OS_MutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
+    OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 }
 
@@ -155,7 +155,7 @@ void Contactors_Disable(contactor_t contactor) {
     OS_ERR err;
 
     // acquire lock
-    OS_MutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+    OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 
     // mark contactor as disabled
@@ -165,7 +165,7 @@ void Contactors_Disable(contactor_t contactor) {
     Contactors_Set(contactor, OFF);
 
     // release lock
-    OS_MutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+    OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 
 }
