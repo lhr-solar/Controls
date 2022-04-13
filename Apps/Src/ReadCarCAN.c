@@ -62,7 +62,7 @@ void Task_ReadCarCAN(void *p_arg)
             msg_recieved = true; //signal success recieved
             OSMutexPost(&CANWatchdogMutex,OS_OPT_POST_NONE,&err); //release the mutex
             assertOSError(OS_READ_CAN_LOC,err);
-            
+
             if(!(buffer[0]==1)){ //If the buffer doesn't contain anything turn off RegenEnable and turn array off
                 RegenAllowed = OFF;
                 //kill array restart thread 
@@ -117,10 +117,11 @@ static void CANWatchdog_Handler(){
             msg_recieved = false;
             continue;
         } else {
+            //kill the precharge thread
+            OSTaskDel(&arrayTCB,&err);
+            //turn off contactors
             Contactors_Set(ARRAY_CONTACTOR,OFF); //Turn off the contactors
             Contactors_Set(ARRAY_PRECHARGE, OFF);
-            //TODO: kill the precharge thread
-
             //increment trip counter
             watchDogTripCounter += 1;
         }
