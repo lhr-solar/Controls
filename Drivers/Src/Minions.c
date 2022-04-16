@@ -183,18 +183,18 @@ uint16_t Lights_Bitmap_Read() {
  * @return  ON/OFF State
  */ 
 State Switches_Read(switches_t sw){
-    if(sw != (LEFT_SW||RIGHT_SW||FOR_SW||REV_SW)){
+    if(sw != LEFT_SW && sw != RIGHT_SW && sw != FOR_SW && sw != REV_SW){
         return (State) ((switchStatesBitmap >> sw) & 0x0001);
     }else{
-        if(sw == LEFT_SW||RIGHT_SW){
+        if(sw == LEFT_SW || sw == RIGHT_SW){
             // If Left and Right are one, then in reality, none are selected
-            if(((switchStatesBitmap&0x20) == 0x20)&&((switchStatesBitmap&0x10) == 0x10)){
+            if(((switchStatesBitmap&0x20) == 0x20)&&((switchStatesBitmap&0x40) == 0x40)){
                 return OFF;
             }
             return (State) ((switchStatesBitmap >> sw) & 0x0001);
         }else{
             // If Forward and Reverse are one, then in reality, none are selected
-            if(((switchStatesBitmap&0x01) == 0x01)&&((switchStatesBitmap&0x04) == 0x04)){
+            if(((switchStatesBitmap&0x04) == 0x04)&&((switchStatesBitmap&0x08) == 0x08)){
                 return OFF;
             }
             return (State) ((switchStatesBitmap >> sw) & 0x0001);
@@ -329,7 +329,7 @@ void Lights_Set(light_t light, State state) {
         lightNewStates &= ~(0x01 << light); // Clear bit corresponding to pin
         lightNewStates |= (state << light); // Set value to inputted state   
 
-        if(light == (LEFT_BLINK || RIGHT_BLINK)){   // Reverse the state in the alt bitmap if left or right light
+        if(light != LEFT_BLINK && light != RIGHT_BLINK){   // Reverse the state in the alt bitmap if left or right light
             blinkerNegStateCorrection &= ~(0x01 << light); // Clear bit corresponding to pin
             blinkerNegStateCorrection |= (~state << light); // Set value to inputted state
         }
@@ -340,7 +340,7 @@ void Lights_Set(light_t light, State state) {
         if (light == BrakeLight) {  // Brakelight is only external
             BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, ON);
         } else {
-            if(light != (LEFT_BLINK || RIGHT_BLINK)){
+            if(light != LEFT_BLINK && light != RIGHT_BLINK){
                 txWriteBuf[2] = lightNewStates & 0x3F; // Write to tx buffer for lights present internally (on minion board)
             }else{
                 txWriteBuf[2] = blinkerNegStateCorrection & 0x3F;  //Give alternative state if left or right light

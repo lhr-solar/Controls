@@ -32,14 +32,14 @@ void Task1(void *p_arg){
             Lights_Toggle(i);
         }
 
-        printf("CRUZ_ST Status: %d\n", Lights_Read(A_CNCTR));
-        printf("CRUZ_EN Status: %d\n", Lights_Read(M_CNCTR));
-        printf("REV_SW Status: %d\n", Lights_Read(CTRL_FAULT));
-        printf("FWD_SW Status: %d\n", Lights_Read(LEFT_BLINK));
-        printf("HEADLIGHT_SW Status: %d\n", Lights_Read(RIGHT_BLINK));
-        printf("LEFT_SW Status: %d\n", Lights_Read(Headlight_ON));
-        printf("RIGHT_SW Status: %d\n", Lights_Read(BrakeLight));
-        printf("\n\n\n");
+        printf("CRUZ_ST Status: %d\n\r", Lights_Read(A_CNCTR));
+        printf("CRUZ_EN Status: %d\n\r", Lights_Read(M_CNCTR));
+        printf("REV_SW Status: %d\n\r", Lights_Read(CTRL_FAULT));
+        printf("FWD_SW Status: %d\n\r", Lights_Read(LEFT_BLINK));
+        printf("HEADLIGHT_SW Status: %d\n\r", Lights_Read(RIGHT_BLINK));
+        printf("LEFT_SW Status: %d\n\r", Lights_Read(Headlight_ON));
+        printf("RIGHT_SW Status: %d\n\r", Lights_Read(BrakeLight));
+        printf("\n\r");
     }
     
 }

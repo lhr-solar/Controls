@@ -30,17 +30,17 @@ void Task1(void *p_arg){
     while(1){
         Switches_UpdateStates();
 
-        printf("CRUZ_ST Switch Status: %d\n", Switches_Read(CRUZ_ST));
-        printf("CRUZ_EN Switch Status: %d\n", Switches_Read(CRUZ_EN));
-        printf("REV_SW Switch Status: %d\n", Switches_Read(REV_SW));
-        printf("FOR_SW Switch Status: %d\n", Switches_Read(FOR_SW));
-        printf("HEADLIGHT Switch Status: %d\n", Switches_Read(HEADLIGHT_SW));
-        printf("LEFT Switch Status: %d\n", Switches_Read(LEFT_SW));
-        printf("RIGHT Switch Status: %d\n", Switches_Read(RIGHT_SW));
-        printf("REGEN Switch Status: %d\n", Switches_Read(REGEN_SW));
-        printf("HZD Switch Status: %d\n", Switches_Read(HZD_SW));
-        printf("IGN1 Switch Status: %d\n", Switches_Read(IGN_1));
-        printf("IGN2 Switch Status: %d\n", Switches_Read(IGN_2));
+        printf("CRUZ_ST Switch Status: %d\n\r", Switches_Read(CRUZ_ST));
+        printf("CRUZ_EN Switch Status: %d\n\r", Switches_Read(CRUZ_EN));
+        printf("REV_SW Switch Status: %d\n\r", Switches_Read(REV_SW));
+        printf("FOR_SW Switch Status: %d\n\r", Switches_Read(FOR_SW));
+        printf("HEADLIGHT Switch Status: %d\n\r", Switches_Read(HEADLIGHT_SW));
+        printf("LEFT Switch Status: %d\n\r", Switches_Read(LEFT_SW));
+        printf("RIGHT Switch Status: %d\n\r", Switches_Read(RIGHT_SW));
+        printf("REGEN Switch Status: %d\n\r", Switches_Read(REGEN_SW));
+        printf("HZD Switch Status: %d\n\r", Switches_Read(HZD_SW));
+        printf("IGN1 Switch Status: %d\n\r", Switches_Read(IGN_1));
+        printf("IGN2 Switch Status: %d\n\r", Switches_Read(IGN_2));
         printf("\n\n\n");
         //delay_u(250);
     }
