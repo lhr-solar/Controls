@@ -64,7 +64,7 @@ void Task_UpdateVelocity(void *p_arg)
         //The cruzEnableState is toggled on the rising edge of the button press
         if(cruzEnableActive && !cruzEnablePressed){
             cruzEnablePressed = ON;
-            cruzEnableState ^= cruzEnableState;
+            cruzEnableState = (State) ((int)cruzEnableState ^ 1);
         }else if(!cruzEnableActive){
             cruzEnablePressed = OFF;
         }
