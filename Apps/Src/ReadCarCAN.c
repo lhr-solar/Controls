@@ -4,14 +4,13 @@
 #include "Contactors.h"
 
 
-static OS_ERR err;
 static OS_MUTEX CANWatchdogMutex;
 static bool msg_recieved = false;
 static int watchDogTripCounter = 0; //count how many times the CAN watchdog trips
 
 //CAN watchdog thread variables
-static OS_TCB cwatchTCB;
-static CPU_STK cwatchSTK;
+static OS_TCB canWatchTCB;
+static CPU_STK canWatchSTK;
 
 //Array restart thread variables
 static OS_TCB arrayTCB;
@@ -23,6 +22,7 @@ static void ArrayRestart(); //handler to turn array back on
 
 void Task_ReadCarCAN(void *p_arg)
 {
+    OS_ERR err;
     uint8_t buffer[8]; // buffer for CAN message
     uint32_t canId;
     CPU_TS ts;
@@ -36,12 +36,12 @@ void Task_ReadCarCAN(void *p_arg)
 
     //Create+start the Can watchdog thread
     OSTaskCreate(
-        &cwatchTCB,
+        &canWatchTCB,
         "CAN Watchdog",
         &CANWatchdog_Handler,
         NULL,
         4,
-        &cwatchSTK,
+        &canWatchSTK,
         128/10,
         128,
         NULL,
@@ -107,6 +107,7 @@ void Task_ReadCarCAN(void *p_arg)
  * a CAN message with the ID Charge_Enable within the desired interval.
 */
 static void CANWatchdog_Handler(){
+    OS_ERR err;
     CPU_TS ts;
     while(1){
         OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -115,7 +116,6 @@ static void CANWatchdog_Handler(){
         assertOSError(OS_READ_CAN_LOC,err);
         if(msg_recieved==true){
             msg_recieved = false;
-            continue;
         } else {
             //kill the precharge thread
             OSTaskDel(&arrayTCB,&err);
@@ -135,6 +135,7 @@ static void CANWatchdog_Handler(){
  *  * @brief This function is the array precharge thread that gets instantiated when array restart needs to happen.
 */
 static void ArrayRestart(){
+    OS_ERR err;
     OSTimeDlyHMSM(0,0,0,PRECHARGE_ARRAY_DELAY*100,OS_OPT_TIME_HMSM_STRICT,&err); //delay
     assertOSError(OS_READ_CAN_LOC,err);
     Contactors_Set(ARRAY_CONTACTOR, ON); //turn on contactor and turn off precharge
