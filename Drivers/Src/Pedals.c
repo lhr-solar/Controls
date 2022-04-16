@@ -40,13 +40,13 @@ void Pedals_Init(){
  */
 int8_t Pedals_Read(pedal_t pedal){
     if (pedal >= NUMBER_OF_PEDALS) return 0;
-    int16_t millivoltsPedal = BSP_ADC_Get_Millivoltage(pedal);
+    int16_t millivoltsPedal = (int16_t) BSP_ADC_Get_Millivoltage(pedal);
 
     int8_t percentage = 0;
     
     if (millivoltsPedal >= LowerBound[pedal]) {
-        percentage = (millivoltsPedal - LowerBound[pedal]) * 100 /
-            (UpperBound[pedal] - LowerBound[pedal]);
+        percentage = (int8_t) (millivoltsPedal - LowerBound[pedal]) * 100 /
+         (UpperBound[pedal] - LowerBound[pedal]);
     }
 
     return percentage;
