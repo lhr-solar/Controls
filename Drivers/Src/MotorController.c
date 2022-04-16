@@ -62,14 +62,6 @@ static void MotorController_CountIncoming(void) {
 }
 
 /**
- * BSP_CAN_INIT requires a tx and rx event handler, and this driver doesn't actually require any tx/rx event handling. As such, this 
- * is a dummy function just to satisfy the BSP layer's constraints.
-*/
-static void CanFunc(){
-    return;
-}
-
-/**
  * @brief   Initializes the motor controller
  * @param   busCurrentFractionalSetPoint fraction of the bus current to allow the motor to draw
  * @return  None

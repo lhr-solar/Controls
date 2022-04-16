@@ -308,6 +308,10 @@ void CAN3_RX0_IRQHandler()
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
+
+    // Take any pending messages into a queue
+    while (CAN_MessagePending(CAN3, CAN_FIFO0))
+    {
         CAN_Receive(CAN3, CAN_FIFO0, &gRxMessage[1]);
 
         msg_t rxMsg;
@@ -338,6 +342,8 @@ void CAN1_RX0_IRQHandler(void)
 {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
 
     // Take any pending messages into a queue
     while (CAN_MessagePending(CAN1, CAN_FIFO0))
@@ -372,6 +378,8 @@ void CAN3_TX_IRQHandler(void)
 {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
 
     // Acknowledge
     CAN_ClearFlag(CAN3, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);

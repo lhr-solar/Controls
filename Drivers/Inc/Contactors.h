@@ -35,16 +35,16 @@ State Contactors_Get(contactor_t contactor);
 /**
  * @brief   Sets the state of a specified contactor
  * @param   contactor the contactor (MOTOR/ARRAY)
- * @return  None
+ * @return  Whether or not the contactor was successfully set
  */
-void Contactors_Set(contactor_t contactor, State state);
+ErrorStatus Contactors_Set(contactor_t contactor, State state);
 
 /**
  * @brief   Enable the specified contactor
  *          Contactor will turn on if enabled and state is on
  * @return  None
  */ 
-void Contators_Enable(contactor_t contactor);
+void Contactors_Enable(contactor_t contactor);
 
 /**
  * @brief   Disable the specified contactor
