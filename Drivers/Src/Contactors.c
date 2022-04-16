@@ -10,7 +10,6 @@
 #define MOTOR_CONTACTOR_PIN GPIO_Pin_12
 
 
-
 /**
  * @brief   Initializes contactors to be used
  *          in connection with the Motor and Array
