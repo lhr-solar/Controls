@@ -21,7 +21,9 @@ static void UpdateLights();
 static int ElectronicsOn();
 static int ArrayPrecharge();
 static int ArrayOn();
+static int ArrayEn();
 static int MotorOn();
+static int MotorEn();
 
 // States
 typedef enum {
@@ -29,15 +31,17 @@ typedef enum {
     ELEC_ON = 0,
     ARRAY_PRE,
     ARRAY_ON,
-    MOTOR_ON
+    ARRAY_EN,
+    MOTOR_ON,
+    MOTOR_EN
 } ignition_state_num_t;
 
 typedef struct {
     /**
      * indexed by ignition switch read value (0, 1, or 3)
-     *      0: electronics on only
-     *      1: delay for array precharge -> array on
-     *      3: motor on
+     *      0: electronics on only (all contactors disabled)
+     *      1: delay for array precharge -> array contactor on -> array contactor enable
+     *      3: motor contactor on -> motor contactor enable
      */
     ignition_state_num_t next_state[4];
 
@@ -46,10 +50,12 @@ typedef struct {
 } fsm_state_t;
 
 fsm_state_t IgnitionFSM[] = {
-    {{ELEC_ON, ARRAY_PRE,   UNUSED_SWITCH_NUM, ARRAY_PRE},  ElectronicsOn,  READ_SWITCH_PERIOD}, // electronics on, array/motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, ARRAY_ON},   ArrayPrecharge, READ_SWITCH_PERIOD}, // array precharge, array/motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   ArrayOn,        READ_SWITCH_PERIOD}, // array on, motor off
-    {{ELEC_ON, ARRAY_ON,    UNUSED_SWITCH_NUM, MOTOR_ON},   MotorOn,        READ_SWITCH_PERIOD}, // motor on, array on
+    {{ELEC_ON, ARRAY_PRE, UNUSED_SWITCH_NUM, ARRAY_PRE}, ElectronicsOn,  READ_SWITCH_PERIOD}, /* electronics on, array/motor disable */
+    {{ELEC_ON, ARRAY_ON,  UNUSED_SWITCH_NUM, ARRAY_ON},  ArrayPrecharge, READ_SWITCH_PERIOD}, /* array precharge, array/motor disable */
+    {{ELEC_ON, ARRAY_EN,  UNUSED_SWITCH_NUM, ARRAY_EN},  ArrayOn,        READ_SWITCH_PERIOD}, /* array on, motor off */
+    {{ELEC_ON, ARRAY_EN,  UNUSED_SWITCH_NUM, MOTOR_ON},  ArrayEn,        READ_SWITCH_PERIOD}, /* array on, motor off */
+    {{ELEC_ON, ARRAY_EN,  UNUSED_SWITCH_NUM, MOTOR_EN},  MotorOn,        READ_SWITCH_PERIOD}, /* motor on, array on */
+    {{ELEC_ON, ARRAY_EN,  UNUSED_SWITCH_NUM, MOTOR_EN},  MotorEn,        READ_SWITCH_PERIOD}, /* array on, motor off */
 };
 
 /**
@@ -86,20 +92,21 @@ void Task_ReadSwitches(void* p_arg) {
 }
 
 /**
- * @brief State where only electronics are on; contactors are all off
+ * @brief State where only electronics are on; contactors are all disabled and off
  * 
  * @return Always returns 0.
  */
 static int ElectronicsOn() {
-    Contactors_Set(ARRAY_CONTACTOR, OFF);
-    Contactors_Set(ARRAY_PRECHARGE, OFF);
-    Contactors_Set(MOTOR_CONTACTOR, OFF);
+    Contactors_Disable(ARRAY_CONTACTOR);
+    Contactors_Disable(ARRAY_PRECHARGE);
+    Contactors_Disable(MOTOR_CONTACTOR);
     return 0;
 }
 
 /**
  * @brief State for precharging the array before turning on. 
  *        Array will precharge for a time defined in "config.h"
+ *        The precharge contactor is enabled and set here.
  * @note  During the precharge delay, switches will be continually updated 
  *        with a period defined by MAX_SWITCH_LAG
  * 
@@ -107,6 +114,7 @@ static int ElectronicsOn() {
  */
 static int ArrayPrecharge() {
     Contactors_Set(ARRAY_PRECHARGE, ON);
+    Contactors_Enable(ARRAY_PRECHARGE);
 
     for (uint16_t i = 0; i < PRECHARGE_DELAY_CYCLES; i++) {
         if (UpdateSwitches() == 0) return 1;
@@ -116,25 +124,48 @@ static int ArrayPrecharge() {
 }
 
 /**
- * @brief Array On state. Motor contactor should be off here.
+ * @brief Array On state. Motor contactor should be off and disabled here.
+ * @note Array contactor is disabled here (not yet enabled)
  * 
  * @return Always returns 0.
  */
 static int ArrayOn() {
-    Contactors_Set(MOTOR_CONTACTOR, OFF);
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
     return 0;
 }
 
 /**
- * @brief Motor On state. All non-prechage contactors - 
- *        (Array contactor, Motor contactor) are on.
+ * @brief Array Enable state. Motor contactor should be off and disabled here.
+ * @note Does not change the state of the array contactor, only enables
+ * 
+ * @return Always returns 0.
+ */
+static int ArrayEn() {
+    Contactors_Disable(MOTOR_CONTACTOR);
+    Contactors_Enable(ARRAY_CONTACTOR);
+    return 0;
+}
+
+/**
+ * @brief Motor On state.
+ * @note Motor contactor is disabled here (not yet enabled)
  * 
  * @return Always returns 0.
  */
 static int MotorOn() {
     Contactors_Set(MOTOR_CONTACTOR, ON);
+    return 0;
+}
+
+/**
+ * @brief Motor Enable state. All contactors - 
+ *        (Array contactor, Motor contactor) are enabled.
+ * 
+ * @return Always returns 0.
+ */
+static int MotorEn() {
+    Contactors_Enable(MOTOR_CONTACTOR);
     return 0;
 }
 

@@ -122,9 +122,11 @@ void Contactors_Set(contactor_t contactor, State state) {
 /**
  * @brief   Enable the specified contactor
  *          Contactor will turn on if enabled and state is on
+ * @param   contactor the contactor
+ *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @return  None
- */ 
-void Contators_Enable(contactor_t contactor) {
+ */
+void Contactors_Enable(contactor_t contactor) {
     CPU_TS timestamp;
     OS_ERR err;
 
@@ -147,7 +149,9 @@ void Contators_Enable(contactor_t contactor) {
 
 /**
  * @brief   Disable the specified contactor
- *          Contactor will turn on if enabled and state is on
+ *          Contactor will also have state set to off
+ * @param   contactor the contactor
+ *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @return  None
  */ 
 void Contactors_Disable(contactor_t contactor) {
