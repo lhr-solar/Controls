@@ -86,12 +86,10 @@ void Task_UpdateVelocity(void *p_arg)
             desiredVelocity = MotorController_ReadVelocity();
             desiredMotorCurrent = 1.0f;
         }
-        
         else if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
             desiredVelocity = 0;
             desiredMotorCurrent = 0;
         }
-
         else{
             desiredVelocity = MAX_VELOCITY;
             desiredMotorCurrent = convertPedaltoMotorPercent(accelPedalPercent);
