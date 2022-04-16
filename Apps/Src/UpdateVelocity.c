@@ -78,7 +78,7 @@ void Task_UpdateVelocity(void *p_arg)
         }
 
         //Regen will be level sensitive meaning the user will regen brake by holding down a button
-        if(regenPressed && RegenEnable && brakePedalPercent < UNTOUCH_PEDALS_PERCENT){
+        if(regenPressed && RegenEnable && (brakePedalPercent < UNTOUCH_PEDALS_PERCENT)){
             desiredVelocity = 0;
             desiredMotorCurrent = REGEN_CURRENT;
         } else if(cruzEnableState && cruzSetState && brakePedalPercent < UNTOUCH_PEDALS_PERCENT 
