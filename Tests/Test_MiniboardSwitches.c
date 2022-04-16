@@ -1,5 +1,5 @@
 /*
-    Test file that sends out the status of FWD_SW to UART_2 with RTOS
+    Test file that sends out the status of FOR_SW to UART_2 with RTOS
 */
 
 #include "common.h"
@@ -33,7 +33,7 @@ void Task1(void *p_arg){
         printf("CRUZ_ST Switch Status: %d\n", Switches_Read(CRUZ_ST));
         printf("CRUZ_EN Switch Status: %d\n", Switches_Read(CRUZ_EN));
         printf("REV_SW Switch Status: %d\n", Switches_Read(REV_SW));
-        printf("FWD_SW Switch Status: %d\n", Switches_Read(FWD_SW));
+        printf("FOR_SW Switch Status: %d\n", Switches_Read(FOR_SW));
         printf("HEADLIGHT Switch Status: %d\n", Switches_Read(HEADLIGHT_SW));
         printf("LEFT Switch Status: %d\n", Switches_Read(LEFT_SW));
         printf("RIGHT Switch Status: %d\n", Switches_Read(RIGHT_SW));

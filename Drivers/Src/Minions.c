@@ -3,7 +3,7 @@
 
 static OS_MUTEX CommMutex; //Mutex to lock SPI lines
 // Stores switch states:
-// IGN_1 | IGN_2 | HZD_SW | REGEN_SW | RIGHT_SW | LEFT_SW | Headlight_SW | FWD_SW | REV_SW | CRUZ_EN | CRUZ_ST
+// IGN_1 | IGN_2 | HZD_SW | REGEN_SW | RIGHT_SW | LEFT_SW | Headlight_SW | FOR_SW | REV_SW | CRUZ_EN | CRUZ_ST
 static uint16_t switchStatesBitmap = 0;
 
 // Stores light states (on/off): 
@@ -183,7 +183,7 @@ uint16_t Lights_Bitmap_Read() {
  * @return  ON/OFF State
  */ 
 State Switches_Read(switches_t sw){
-    if(sw != (LEFT_SW||RIGHT_SW||FWD_SW||REV_SW)){
+    if(sw != (LEFT_SW||RIGHT_SW||FOR_SW||REV_SW)){
         return (State) ((switchStatesBitmap >> sw) & 0x0001);
     }else{
         if(sw == LEFT_SW||RIGHT_SW){
@@ -324,7 +324,7 @@ void Lights_Set(light_t light, State state) {
     
     if(lightCurrentState != state){     // Check if state has changed
         uint8_t lightNewStates = lightStatesBitmap;
-        uint8_t blinkerNegStateCorrection;  //alternative light state since Left and Right lights are neg logic
+        uint8_t blinkerNegStateCorrection = lightStatesBitmap;  //alternative light state since Left and Right lights are neg logic
         
         lightNewStates &= ~(0x01 << light); // Clear bit corresponding to pin
         lightNewStates |= (state << light); // Set value to inputted state   
@@ -343,7 +343,7 @@ void Lights_Set(light_t light, State state) {
             if(light != (LEFT_BLINK || RIGHT_BLINK)){
                 txWriteBuf[2] = lightNewStates & 0x3F; // Write to tx buffer for lights present internally (on minion board)
             }else{
-                txWriteBuf[2] = blinkerNegStateCorrection 0x3F;  //Give alternative state if left or right light
+                txWriteBuf[2] = blinkerNegStateCorrection & 0x3F;  //Give alternative state if left or right light
             }
 
             // Write to port c for lights present externally

@@ -20,7 +20,7 @@ typedef enum {
      CRUZ_ST=0, 
      CRUZ_EN, 
      REV_SW,
-     FWD_SW,
+     FOR_SW,
      HEADLIGHT_SW,
      LEFT_SW,
      RIGHT_SW,
@@ -52,7 +52,7 @@ typedef enum {
 typedef struct {
     State LT;
     State RT;
-    State FWD;
+    State FOR;
     State REV;
     State CRS_EN;
     State CRS_SET;
