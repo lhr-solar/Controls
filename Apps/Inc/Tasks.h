@@ -171,7 +171,8 @@ typedef enum{
     OS_SEND_TRITIUM_LOC = 0x010,
     OS_UPDATE_VEL_LOC = 0x020,
     OS_BLINK_LIGHTS_LOC = 0x040,
-    OS_CONTACTOR_LOC = 0x080
+    OS_CONTACTOR_LOC = 0x080,
+    OS_SWITCHES_LOC = 0x100
 } os_error_loc_t;
 
 /**
