@@ -40,6 +40,7 @@ void Task1(void *p_arg){
         printf("LEFT_SW Status: %d\n\r", Lights_Read(Headlight_ON));
         printf("RIGHT_SW Status: %d\n\r", Lights_Read(BrakeLight));
         printf("\n\r");
+        for(int i = 0;i<999999;i++){}
     }
     
 }
