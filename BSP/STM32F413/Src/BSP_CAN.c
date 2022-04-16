@@ -37,8 +37,7 @@ void BSP_CAN3_Init();
  * @return  None
  */
 
-void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd)
-{
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd) {
 
     // Configure event handles
     gRxEvent[bus] = rxEvent;
@@ -54,8 +53,8 @@ void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd)
     }
 }
 
-void BSP_CAN1_Init()
-{
+void BSP_CAN1_Init() {
+
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
@@ -85,9 +84,6 @@ void BSP_CAN1_Init()
     /* Enable CAN clock */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
 
-    /* CAN register init */
-    // CAN_DeInit(CAN1);
-
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
     CAN_InitStruct.CAN_ABOM = DISABLE;
@@ -95,7 +91,7 @@ void BSP_CAN1_Init()
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
     CAN_InitStruct.CAN_TXFP = DISABLE;
-    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal; // TODO: change back to Normal after testing
+    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
     /* CAN Baudrate = 125 KBps
@@ -118,8 +114,6 @@ void BSP_CAN1_Init()
     CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
     CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
     CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
-
-    // CAN_SlaveStartBank(CAN1, 0);
 
     /* Transmit Structure preparation */
     gTxMessage[0].ExtId = 0x5;
@@ -185,9 +179,6 @@ void BSP_CAN3_Init()
     /* Enable CAN clock */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN3, ENABLE);
 
-    /* CAN register init */
-    // CAN_DeInit(CAN1);
-
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
     CAN_InitStruct.CAN_ABOM = DISABLE;
@@ -195,7 +186,7 @@ void BSP_CAN3_Init()
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
     CAN_InitStruct.CAN_TXFP = DISABLE;
-    CAN_InitStruct.CAN_Mode = CAN_Mode_LoopBack; // TODO: change back to Normal after testing
+    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal; // TODO: change back to Normal after testing
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
     /* CAN Baudrate = 125 KBps
@@ -237,12 +228,23 @@ void BSP_CAN3_Init()
     /* Enable FIFO 0 message pending Interrupt */
     CAN_ITConfig(CAN3, CAN_IT_FMP0, ENABLE);
 
+    //TODO: Double check preemption priority and subpriority
     // Enable Rx interrupts
-    NVIC_InitStruct.NVIC_IRQChannel = CAN3_RX0_IRQn; // TODO: DOUBLE CHECK IRQ CHANNELS
+    NVIC_InitStruct.NVIC_IRQChannel = CAN3_RX0_IRQn;
     NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
+
+    // Enable Tx interrupts
+    if(NULL != gTxEnd[1]){ 
+        CAN_ITConfig(CAN3,CAN_IT_TME,ENABLE);
+        NVIC_InitStruct.NVIC_IRQChannel = CAN3_TX_IRQn; 
+        NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00; 
+        NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
+        NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+        NVIC_Init(&NVIC_InitStruct);
+    }
 }
 
 /**
@@ -302,16 +304,10 @@ ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t *id, uint8_t *data)
 
 void CAN3_RX0_IRQHandler()
 {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-#endif
-
-    // Take any pending messages into a queue
-    while (CAN_MessagePending(CAN3, CAN_FIFO0))
-    {
         CAN_Receive(CAN3, CAN_FIFO0, &gRxMessage[1]);
 
         msg_t rxMsg;
@@ -335,19 +331,13 @@ void CAN3_RX0_IRQHandler()
         }
     }
 
-#ifdef RTOS
     OSIntExit(); // Signal to uC/OS
-#endif
 }
 
 void CAN1_RX0_IRQHandler(void)
 {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
-    OSIntEnter();
-    CPU_CRITICAL_EXIT();
-#endif
 
     // Take any pending messages into a queue
     while (CAN_MessagePending(CAN1, CAN_FIFO0))
@@ -375,19 +365,13 @@ void CAN1_RX0_IRQHandler(void)
         }
     }
 
-#ifdef RTOS
     OSIntExit(); // Signal to uC/OS
-#endif
 }
 
 void CAN3_TX_IRQHandler(void)
 {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
-    OSIntEnter();
-    CPU_CRITICAL_EXIT();
-#endif
 
     // Acknowledge
     CAN_ClearFlag(CAN3, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
@@ -395,27 +379,17 @@ void CAN3_TX_IRQHandler(void)
     // Call the function provided
     gTxEnd[1]();
 
-#ifdef RTOS
     OSIntExit(); // Signal to uC/OS
-#endif
 }
 
 void CAN1_TX_IRQHandler(void)
 {
-#ifdef RTOS
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-#endif
-
-    // Acknowledge
-    CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
-
     // Call the function provided
     gTxEnd[0]();
 
-#ifdef RTOS
     OSIntExit(); // Signal to uC/OS
-#endif
 }
