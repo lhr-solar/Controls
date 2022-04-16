@@ -48,6 +48,7 @@ OS_Q CANBus_MsgQ;
 /**
  * Semaphores
  */
+OS_SEM FaultState_Sem4;
 OS_SEM VelocityChange_Sem4;
 OS_SEM DisplayChange_Sem4;
 OS_SEM LightsChange_Sem4;
