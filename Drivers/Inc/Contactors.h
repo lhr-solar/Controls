@@ -49,7 +49,6 @@ void Contators_Enable(contactor_t contactor);
 
 /**
  * @brief   Disable the specified contactor
- *          Contactor will turn on if enabled and state is on
  * @return  None
  */ 
 void Contactors_Disable(contactor_t contactor);
