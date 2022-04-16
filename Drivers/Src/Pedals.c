@@ -45,8 +45,8 @@ int8_t Pedals_Read(pedal_t pedal){
     int8_t percentage = 0;
     
     if (millivoltsPedal >= LowerBound[pedal]) {
-        percentage = (int8_t) (millivoltsPedal - LowerBound[pedal]) * 100 /
-         (UpperBound[pedal] - LowerBound[pedal]);
+        percentage = (int8_t) ( (int32_t) (millivoltsPedal - LowerBound[pedal]) * 100 /
+         (UpperBound[pedal] - LowerBound[pedal]));
     }
 
     return percentage;
