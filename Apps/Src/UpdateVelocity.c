@@ -96,7 +96,12 @@ void Task_UpdateVelocity(void *p_arg)
             desiredMotorCurrent = 0;
         }
         else{
-            desiredVelocity = MAX_VELOCITY;
+            if(!Switches_Read(REV_SW)){
+                desiredVelocity = -MAX_VELOCITY;
+            }
+            else{
+                desiredVelocity = MAX_VELOCITY;
+            }
             desiredMotorCurrent = convertPedaltoMotorPercent(accelPedalPercent);
         }
 
