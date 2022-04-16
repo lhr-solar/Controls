@@ -2,11 +2,13 @@
 #include "Minions.h"
 
 static OS_MUTEX CommMutex; //Mutex to lock SPI lines
-//Variables for Switches
+// Stores switch states:
+// IGN_1 | IGN_2 | HZD_SW | REGEN_SW | RIGHT_SW | LEFT_SW | Headlight_SW | FWD_SW | REV_SW | CRUZ_EN | CRUZ_ST
 static uint16_t switchStatesBitmap = 0;
 
-//Variables for Lights
-static uint8_t lightStatesBitmap = 0;   // Stores light states (on/off)
+// Stores light states (on/off): 
+// x | x | HEADLIGHT_SW | RIGHT_BLINK | LEFT_BLINK | CTRL_FAULT | M_CNCTR | A_CNCTR
+static uint8_t lightStatesBitmap = 0;
 static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (left, right)
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
@@ -228,7 +230,7 @@ void Switches_UpdateStates(void){
     uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
     
     //Store data in bitmap
-    switchStatesBitmap = (ign2 << 10) | (ign1 << 8) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
+    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
 }
 
 /**
@@ -311,18 +313,18 @@ void Lights_Set(light_t light, State state) {
         if (light == BrakeLight) {  // Brakelight is only external
             BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, ON);
         } else {
-            txWriteBuf[2] = lightNewStates; // Write to tx buffer for lights present internally (on minion board)
+            txWriteBuf[2] = lightNewStates & 0x3F; // Write to tx buffer for lights present internally (on minion board)
             
             // Write to port c for lights present externally
             switch (light) {
                 case LEFT_BLINK:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, ON);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, state);
                     break;
                 case RIGHT_BLINK:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, ON);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, state);
                     break;
                 case Headlight_ON:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, HEADLIGHT_PIN, ON);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, HEADLIGHT_PIN, state);
                     break;
                 default:
                     break;
