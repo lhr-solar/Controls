@@ -28,7 +28,7 @@ void Task_UpdateVelocity(void *p_arg)
 {
     OS_ERR err;
 
-    MotorController_Init();
+    MotorController_Init(1.0f);
 
     static uint8_t prevBrakePedalPercent;
 
