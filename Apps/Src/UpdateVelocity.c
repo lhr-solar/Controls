@@ -1,7 +1,7 @@
 #include "UpdateVelocity.h"
 #include "Pedals.h"
 #include "Tasks.h"
-#include "Switches.h"
+#include "Minions.h"
 #include "MotorController.h"
 #include <math.h>
 #define UNTOUCH_PEDALS_PERCENT 5
