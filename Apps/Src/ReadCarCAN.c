@@ -63,7 +63,7 @@ void Task_ReadCarCAN(void *p_arg)
             OSMutexPost(&CANWatchdogMutex,OS_OPT_POST_NONE,&err); //release the mutex
             assertOSError(OS_READ_CAN_LOC,err);
 
-            if(!(buffer[0]==1)){ //If the buffer doesn't contain anything turn off RegenEnable and turn array off
+            if(buffer[0] != 1){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                 RegenAllowed = OFF;
                 //kill array restart thread 
                 OSTaskDel(&arrayTCB,&err);
