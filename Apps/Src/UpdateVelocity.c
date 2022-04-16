@@ -50,7 +50,12 @@ void Task_UpdateVelocity(void *p_arg)
         // If the brake is changed, then the brake lights might need to be changed
         if (brakePedalPercent != prevBrakePedalPercent)
         {
-            OSSemPost(&LightsChange_Sem4, OS_OPT_POST_ALL, &err);
+            if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
+                Lights_Set(BrakeLight, ON);
+            }
+            else{
+                Lights_Set(BrakeLight, OFF);
+            }
         }
 
         prevBrakePedalPercent = brakePedalPercent;

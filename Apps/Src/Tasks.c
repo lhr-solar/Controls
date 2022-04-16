@@ -89,24 +89,4 @@ void assertOSError(uint16_t OS_err_loc, OS_ERR err)
             EnterFaultState();
         }
     }
-<<<<<<< HEAD
-}
-
-void assertTritiumError(uint8_t motor_error_code)
-{
-    if (motor_error_code != T_NONE)
-    {
-        OS_ERR err;
-
-        FaultBitmap.Fault_TRITIUM = 1;
-        TritiumErrorBitmap |= motor_error_code;
-
-        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-        if (err != OS_ERR_NONE)
-        {
-            EnterFaultState();
-        }
-    }
-=======
->>>>>>> master
 }
