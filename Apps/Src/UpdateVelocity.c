@@ -33,8 +33,8 @@ void Task_UpdateVelocity(void *p_arg)
     static uint8_t prevBrakePedalPercent;
 
     //Pressed refers to it being pressed before
-    static State cruzEnablePressed = OFF;
-    static State cruzSetPressed = OFF;    
+    static State cruzEnablePrev = OFF;
+    static State cruzSetPrev = OFF;    
 
     //State refers to whether we consider the enable and set to be on or off
     static State cruzEnableState = OFF;
@@ -58,23 +58,23 @@ void Task_UpdateVelocity(void *p_arg)
         State regenPressed = Switches_Read(REGEN_SW);
 
         //Active refers to it currently being pressed
-        State cruzEnableActive = Switches_Read(CRUZ_EN);
-        State cruzSetActive = Switches_Read(CRUZ_ST);
+        State cruzEnableCurr = Switches_Read(CRUZ_EN);
+        State cruzSetCurr = Switches_Read(CRUZ_ST);
 
         //The cruzEnableState is toggled on the rising edge of the button press
-        if(cruzEnableActive && !cruzEnablePressed){
-            cruzEnablePressed = ON;
+        if(cruzEnableCurr && !cruzEnablePrev){
+            cruzEnablePrev = ON;
             cruzEnableState ^= cruzEnableState;
-        }else if(!cruzEnableActive){
-            cruzEnablePressed = OFF;
+        }else if(!cruzEnableCurr){
+            cruzEnablePrev = OFF;
         }
 
         //The cruzSetState is toggled on the rising edge of the button press
-        if(cruzSetActive && !cruzSetPressed){
-            cruzSetPressed = ON;
+        if(cruzSetCurr && !cruzSetPrev){
+            cruzSetPrev = ON;
             cruzSetState ^= cruzSetState;
-        }else if(!cruzSetActive){
-            cruzSetPressed = OFF;
+        }else if(!cruzSetCurr){
+            cruzSetPrev = OFF;
         }
 
         //Regen will be level sensitive meaning the user will regen brake by holding down a button
