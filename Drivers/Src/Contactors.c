@@ -162,7 +162,7 @@ void Contactors_Disable(contactor_t contactor) {
     contactors[contactor].state = OFF;
 
     // turn off the contactor
-    Contactors_Set(contactor, OFF);
+    setContactor(contactor, OFF);
 
     // release lock
     OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
