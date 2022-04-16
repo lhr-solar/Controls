@@ -69,7 +69,7 @@ void Task_UpdateVelocity(void *p_arg)
         //The cruzEnableState is toggled on the rising edge of the button press
         if(cruzEnableCurr && !cruzEnablePrev){
             cruzEnablePrev = ON;
-            cruzEnableState ^= cruzEnableState;
+            cruzEnableState = (State) ((int)cruzEnableState ^ 1);
         }else if(!cruzEnableCurr){
             cruzEnablePrev = OFF;
         }
@@ -77,7 +77,7 @@ void Task_UpdateVelocity(void *p_arg)
         //The cruzSetState is toggled on the rising edge of the button press
         if(cruzSetCurr && !cruzSetPrev){
             cruzSetPrev = ON;
-            cruzSetState ^= cruzSetState;
+            cruzSetState = (State) ((int)cruzSetState ^ 1);
         }else if(!cruzSetCurr){
             cruzSetPrev = OFF;
         }
