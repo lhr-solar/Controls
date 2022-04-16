@@ -2,7 +2,7 @@
 #include "config.h"
 #include <unistd.h>
 //#include "BSP_PLL.h"
-#include "Switches.h"
+#include "Minions.h"
 #include "BSP_UART.h"
 
 // Test file that sends out the status of FOR_SW to UART_2 without RTOS
