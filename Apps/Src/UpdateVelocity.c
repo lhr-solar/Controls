@@ -32,7 +32,7 @@ void Task_UpdateVelocity(void *p_arg)
 
     static uint8_t prevBrakePedalPercent;
 
-    //Pressed refers to it being pressed before
+    //Prev refers to it being pressed before
     static State cruzEnablePrev = OFF;
     static State cruzSetPrev = OFF;    
 
@@ -62,7 +62,7 @@ void Task_UpdateVelocity(void *p_arg)
 
         State regenPressed = Switches_Read(REGEN_SW);
 
-        //Active refers to it currently being pressed
+        //Current refers to it currently being pressed
         State cruzEnableCurr = Switches_Read(CRUZ_EN);
         State cruzSetCurr = Switches_Read(CRUZ_ST);
 
