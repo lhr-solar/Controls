@@ -120,7 +120,7 @@ static void Lights_Init(void) {
         SPI_IODIRB, 
         rxBuf&0x40 //clear IODIRB to set as outputs except for hazard lights switch pin (bit 6, 0x40)
     };
-    
+
     // Set direction register
     ChipSelect();
     BSP_SPI_Write(txWriteBuf, 3);
@@ -130,6 +130,10 @@ static void Lights_Init(void) {
     lightToggleBitmap = 0x0000;
     lightStatesBitmap = 0x0000;
     
+    // Make the lights initialize to be off since they are neg logic
+    Lights_Set(RIGHT_BLINK, OFF);
+    Lights_Set(LEFT_BLINK, OFF);
+
     // Unlock mutex
     OSMutexPost(
         &CommMutex,
@@ -301,9 +305,15 @@ void Lights_Set(light_t light, State state) {
     
     if(lightCurrentState != state){     // Check if state has changed
         uint8_t lightNewStates = lightStatesBitmap;
+        uint8_t blinkerNegStateCorrection;  //alternative light state since Left and Right lights are neg logic
         
         lightNewStates &= ~(0x01 << light); // Clear bit corresponding to pin
-        lightNewStates |= (state << light); // Set value to inputted state
+        lightNewStates |= (state << light); // Set value to inputted state   
+
+        if(light == (LEFT_BLINK || RIGHT_BLINK)){   // Reverse the state in the alt bitmap if left or right light
+            blinkerNegStateCorrection &= ~(0x01 << light); // Clear bit corresponding to pin
+            blinkerNegStateCorrection |= (~state << light); // Set value to inputted state
+        }
         
         // Initialize tx buffer and port c
         uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
@@ -311,8 +321,12 @@ void Lights_Set(light_t light, State state) {
         if (light == BrakeLight) {  // Brakelight is only external
             BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, ON);
         } else {
-            txWriteBuf[2] = lightNewStates; // Write to tx buffer for lights present internally (on minion board)
-            
+            if(light != (LEFT_BLINK || RIGHT_BLINK)){
+                txWriteBuf[2] = lightNewStates; // Write to tx buffer for lights present internally (on minion board)
+            }else{
+                txWriteBuf[2] = blinkerNegStateCorrection;  //Give alternative state if left or right light
+            }
+
             // Write to port c for lights present externally
             switch (light) {
                 case LEFT_BLINK:
