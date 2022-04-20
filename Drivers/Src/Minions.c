@@ -266,17 +266,17 @@ void Lights_Toggle(light_t light){
 /**
 
  * @brief   Set light toggling
- * @param   light Which light to enable toggling for
- * @param   state State to set toggling
+ * @param   light Which light to enable/disable toggling for
+ * @param   state State to set toggling (ON/OFF)
  * @return  void
  */
 void Lights_Toggle_Set(light_t light, State state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
     if(light == LEFT_BLINK){
-        lightToggleBitmap |= 0x02;
+        (state == ON) ? (lightToggleBitmap |= 0x02) : (lightToggleBitmap &= 0xFD);
     }
     else if(light == RIGHT_BLINK){
-        lightToggleBitmap |= 0x01;
+        (state == ON) ? (lightToggleBitmap |= 0x01) : (lightToggleBitmap &= 0xFE);
     }
 
 }

@@ -9,8 +9,7 @@
 #include "Tasks.h"
 
 #include "Contactors.h"
-#include "Switches.h"
-#include "Lights.h"
+#include "Minions.h"
 #include "CarState.h"
 
 #endif  /* __READ_SWITCHES_H */

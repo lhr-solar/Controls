@@ -20,8 +20,7 @@ void Task_ReadSwitches(void* p_arg) {
     OS_ERR err;
 
     // Initialization
-    Switches_Init();
-    Lights_Init();
+    Minions_Init();
     Contactors_Init();
 
     // Delay for precharge
@@ -76,6 +75,6 @@ static void UpdateLights() {
     int rightblink = Switches_Read(RIGHT_SW) | 
                      Switches_Read(HZD_SW);
 
-    Toggle_Set(RIGHT_BLINK, rightblink);
-    Toggle_Set(LEFT_BLINK, leftblink);
+    Lights_Toggle_Set(RIGHT_BLINK, rightblink);
+    Lights_Toggle_Set(LEFT_BLINK, leftblink);
 }
