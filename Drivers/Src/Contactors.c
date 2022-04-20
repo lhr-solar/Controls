@@ -122,10 +122,8 @@ void Contactors_Set(contactor_t contactor, State state) {
 /**
  * @brief   Enable the specified contactor
  *          Contactor will turn on if enabled and state is on
- * @param   contactor the contactor
- *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @return  None
- */
+ */ 
 void Contactors_Enable(contactor_t contactor) {
     CPU_TS timestamp;
     OS_ERR err;
@@ -149,9 +147,6 @@ void Contactors_Enable(contactor_t contactor) {
 
 /**
  * @brief   Disable the specified contactor
- *          Contactor will also have state set to off
- * @param   contactor the contactor
- *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @return  None
  */ 
 void Contactors_Disable(contactor_t contactor) {
@@ -162,11 +157,12 @@ void Contactors_Disable(contactor_t contactor) {
     OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 
-    // mark contactor as disabled
+    // mark contactor as disabled and off
     contactors[contactor].enabled = false;
+    contactors[contactor].state = OFF;
 
     // turn off the contactor
-    Contactors_Set(contactor, OFF);
+    setContactor(contactor, OFF);
 
     // release lock
     OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
