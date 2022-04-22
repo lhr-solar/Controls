@@ -4,7 +4,7 @@
 #include "stm32f4xx.h"
 #include "os.h"
 
-#define SPI_PORT SPI3
+#define SPI_PORT SPI1
 
 // These are the sizes of the fifos.
 // You can write/read more than this at once,
@@ -42,12 +42,12 @@ static void spi_pend(void) {
 
 // Use this inline function to wait until SPI communication is complete
 static inline void SPI_Wait(void) {
-	while((SPI3->SR & (SPI_SR_TXE | SPI_SR_RXNE)) == 0 || (SPI3->SR & SPI_SR_BSY));
+	while((SPI1->SR & (SPI_SR_TXE | SPI_SR_RXNE)) == 0 || (SPI1->SR & SPI_SR_BSY));
 }
 
 // Use this inline function to wait until SPI communication is complete
 static inline void SPI_WaitTx(void) {
-	SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_TXE, ENABLE);
+	SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_TXE, ENABLE);
 	spi_pend();
 }
 
@@ -89,7 +89,7 @@ void BSP_SPI_Init(void) {
 	//          CPOL : 1 (polarity of clock during idle is high)
 	//          CPHA : 1 (tx recorded during 2nd edge)
 	// Pins:
-	//      SPI3:
+	//      SPI1:
 	//          PA5 : SCK
 	//          PA6 : MISO
 	//          PA7 : MOSI 
@@ -97,7 +97,7 @@ void BSP_SPI_Init(void) {
 	
 	// Initialize clocks
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 	
 	// Initialize pins
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
@@ -107,9 +107,9 @@ void BSP_SPI_Init(void) {
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_SPI3);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_SPI3);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_SPI3);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_SPI1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_SPI1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_SPI1);
 	
 	// Initialize SPI port
 	SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
@@ -121,8 +121,8 @@ void BSP_SPI_Init(void) {
 	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
 	SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;
 	SPI_InitStruct.SPI_CRCPolynomial = 0;	
-	SPI_Init(SPI3, &SPI_InitStruct);
-	SPI_Cmd(SPI3, ENABLE);
+	SPI_Init(SPI1, &SPI_InitStruct);
+	SPI_Cmd(SPI1, ENABLE);
 
 	// Initialize CS pin
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_4;
@@ -132,16 +132,16 @@ void BSP_SPI_Init(void) {
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-	// Configure SPI3 interrupt priority
+	// Configure SPI1 interrupt priority
 	NVIC_InitTypeDef NVIC_InitStruct;
-	NVIC_InitStruct.NVIC_IRQChannel = SPI3_IRQn;
+	NVIC_InitStruct.NVIC_IRQChannel = SPI1_IRQn;
 	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStruct);
 
 	// Enable the Rx buffer not empty interrupt
-	SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_RXNE, ENABLE);
+	SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_RXNE, ENABLE);
 }
 
 /**
@@ -192,7 +192,7 @@ void BSP_SPI_Read(uint8_t *rxBuf, uint8_t rxLen) {
 			rxBuf[i] = SPI_WriteRead(0x00);
 		}
 	} else {
-		SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_RXNE, ENABLE);
+		SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_RXNE, ENABLE);
 		// Fill the fifo with zeros to read
 		size_t i = 0, r = 0;
 		// Empty the fifo
@@ -215,12 +215,12 @@ void BSP_SPI_Read(uint8_t *rxBuf, uint8_t rxLen) {
 				r++;
 			}
 		}
-		SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_RXNE, DISABLE);
+		SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_RXNE, DISABLE);
 	}
 }
 
 
-void SPI3_Handler(){
+void SPI1_IRQHandler(){
 	// Save the CPU registers
 	CPU_SR_ALLOC();
 
@@ -232,23 +232,20 @@ void SPI3_Handler(){
 	CPU_CRITICAL_EXIT();
 	
 	// Handle the interrupts
-	if (SPI_I2S_GetITStatus(SPI3, SPI_I2S_IT_TXE) == SET){
+	if (SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_TXE) == SET){
 		// Check to see if there is any data awaiting transmission
-		if(!txfifo_get(&spiTxFifo, (uint8_t*)&SPI3->DR)) {
+		if(!txfifo_get(&spiTxFifo, (uint8_t*)&SPI1->DR)) {
 			// We are out of data, so turn off the interrupt and post the semaphore
-			SPI_I2S_ITConfig(SPI3, SPI_I2S_IT_TXE, DISABLE);
+			SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_TXE, DISABLE);
 			spi_post();
 		}
 	}
-	if (SPI_I2S_GetITStatus(SPI3, SPI_I2S_IT_RXNE) == SET){
+	if (SPI_I2S_GetITStatus(SPI1, SPI_I2S_IT_RXNE) == SET){
 		// Get the incoming data, put it in the fifo
 		// If this overflows, it's the user's fault.
-		rxfifo_put(&spiRxFifo, SPI3->DR);
+		rxfifo_put(&spiRxFifo, SPI1->DR);
 	}
 	
 	//make the kernel aware that the interrupt has ended
 	OSIntExit();
 }
-
-
-
