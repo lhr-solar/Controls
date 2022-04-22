@@ -2,7 +2,7 @@
 
 #include "ReadCarCAN.h"
 #include "Contactors.h"
-#include "Lights.h"
+#include "Minions.h"
 
 
 static bool msg_recieved = false;
@@ -168,7 +168,7 @@ static void ArrayRestart(void *p_arg){
 
         Contactors_Set(ARRAY_CONTACTOR, ON);
         Contactors_Set(ARRAY_PRECHARGE, OFF);
-        Lights_set(A_CNCTR, ON);
+        Lights_Set(A_CNCTR, ON);
     }
 
     // done restarting the array
