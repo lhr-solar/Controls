@@ -2,6 +2,7 @@
 
 #include "ReadCarCAN.h"
 #include "Contactors.h"
+#include "Lights.h"
 
 
 static bool msg_recieved = false;
@@ -27,8 +28,9 @@ static inline void chargingDisable(void) {
     // mark regen as disabled
     RegenAllowed = OFF;
     //kill contactors 
-    Contactors_Disable(ARRAY_CONTACTOR); 
-    Contactors_Disable(ARRAY_PRECHARGE);
+    Contactors_Set(ARRAY_CONTACTOR, OFF);
+    Contactors_Set(ARRAY_PRECHARGE, OFF);
+    Lights_Set(A_CNCTR, OFF);
 }
 
 // helper function to call if charging should be enabled
@@ -36,12 +38,8 @@ static inline void chargingEnable(void) {
     OS_ERR err;
     CPU_TS ts;
 
-    // mark regen as disabled
+    // mark regen as enabled
     RegenAllowed = ON;
-
-    // enable contactors
-    Contactors_Enable(ARRAY_CONTACTOR);
-    Contactors_Enable(ARRAY_PRECHARGE);
 
     // check if we need to run the precharge sequence to turn on the array
     bool shouldRestartArray = false;
@@ -170,6 +168,7 @@ static void ArrayRestart(void *p_arg){
 
         Contactors_Set(ARRAY_CONTACTOR, ON);
         Contactors_Set(ARRAY_PRECHARGE, OFF);
+        Lights_set(A_CNCTR, ON);
     }
 
     // done restarting the array
