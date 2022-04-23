@@ -113,6 +113,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
 
         // Handle 8bit precision case (0b0000xxxx) (no idx)
     case CAR_STATE:
+    case ARRAY_CONTACTOR_STATE_CHANGE:
         datalen = 1;
         txdata[0] = (payload.data.b);
         break;

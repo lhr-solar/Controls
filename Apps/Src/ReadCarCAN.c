@@ -3,6 +3,7 @@
 #include "ReadCarCAN.h"
 #include "Contactors.h"
 #include "Minions.h"
+#include "CAN_Queue.h"
 
 
 static bool msg_recieved = false;
@@ -30,6 +31,15 @@ static inline void chargingDisable(void) {
     //kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
+
+    // let array know we killed contactors
+    CANMSG_t msg;
+    msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
+    msg.payload.bytes = 1;
+    msg.payload.data.b = false;
+    CAN_Queue_Post(msg);
+
+    // turn off the array contactor light
     Lights_Set(A_CNCTR, OFF);
 }
 
@@ -169,6 +179,13 @@ static void ArrayRestart(void *p_arg){
         Contactors_Set(ARRAY_CONTACTOR, ON);
         Contactors_Set(ARRAY_PRECHARGE, OFF);
         Lights_Set(A_CNCTR, ON);
+
+        // let array know the contactor is on
+        CANMSG_t msg;
+        msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
+        msg.payload.bytes = 1;
+        msg.payload.data.b = true;
+        CAN_Queue_Post(msg);
     }
 
     // done restarting the array
