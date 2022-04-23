@@ -20,7 +20,7 @@ typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
  * @param   bus the CAN line to initialize
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus);
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd);
 
 /**
  * @brief   Writes a message to the specified CAN line

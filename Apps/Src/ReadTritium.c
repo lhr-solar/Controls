@@ -8,11 +8,11 @@ void Task_ReadTritium(void* p_arg) {
 	
 	car_state_t *car_state = (car_state_t *) p_arg;
 
-	MotorController_Init();
+	MotorController_Init(1.0f); // Let motor controller use 100% of bus current
 
 	while (1) {
 		CANbuff buf;
-		ErrorStatus status = MotorController_Read(&buf, p_arg);
+		ErrorStatus status = MotorController_Read(&buf);
 
 		if(status == SUCCESS) {
 
