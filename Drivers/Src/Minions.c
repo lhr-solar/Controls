@@ -254,10 +254,10 @@ void Lights_Toggle(light_t light){
 void Lights_Toggle_Set(light_t light, State state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
     if(light == LEFT_BLINK){
-        lightToggleBitmap |= 0x02;
+        (state == ON) ? (lightToggleBitmap |= 0x02) : (lightToggleBitmap &= ~0x02);
     }
     else if(light == RIGHT_BLINK){
-        lightToggleBitmap |= 0x01;
+        (state == ON) ? (lightToggleBitmap |= 0x01) : (lightToggleBitmap &= ~0x01);
     }
 
 }
