@@ -40,6 +40,7 @@
 #include "Tasks.h"
 #include "stm32f4xx.h"
 #include "ReadSwitches.h"
+#include "BSP_UART.h"
 
 
 void TestReadSwitches(void *);
@@ -47,6 +48,9 @@ void TestReadSwitches(void *);
 int main(void) {
     static OS_TCB TestReadSwitchesTCB;
     static CPU_STK TestReadSwitchesStk[DEFAULT_STACK_SIZE];
+
+    BSP_UART_Init(UART_2);
+    Contactors_Init();
 
     OS_ERR err;
     OSInit(&err);

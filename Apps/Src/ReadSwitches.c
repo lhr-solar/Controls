@@ -33,15 +33,16 @@ void Task_ReadSwitches(void* p_arg) {
         UpdateSwitches();
 
         // array on/off
-        if (Switches_Read(IGN_1) == ON) {
+        if (Switches_Read(IGN_1) == ON || Switches_Read(IGN_2) == ON) {
             Contactors_Enable(ARRAY_CONTACTOR);
             Contactors_Enable(ARRAY_PRECHARGE);
         } else {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
         }
+        
         // motor on/off
-        if (Switches_Read(IGN_2) == OFF) {
+        if (Switches_Read(IGN_2) == ON) {
             Contactors_Enable(MOTOR_CONTACTOR);
         } else {
             Contactors_Disable(MOTOR_CONTACTOR);

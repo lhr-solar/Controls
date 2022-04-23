@@ -241,10 +241,10 @@ void Switches_UpdateStates(void){
     assertOSError(0,err);
 
     //Read Ignition Switch 1
-    uint8_t ign1 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
+    uint8_t ign1 = !BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
 
     //Read Ignition Switch 2
-    uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
+    uint8_t ign2 = !BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
     
     //Store data in bitmap
     switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
