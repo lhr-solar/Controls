@@ -57,14 +57,6 @@ void Task_Init(void *p_arg){
     // Start systick    
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
-
-    extern OS_SEM FaultState_Sem4;
-extern OS_SEM DisplayChange_Sem4;
-extern OS_SEM CarCAN_Sem4;
-extern OS_SEM ReadTritium_Sem4;
-extern OS_SEM BlinkLight_Sem4;
-extern OS_SEM SendCarCAN_Sem4;
-
     // Create FaultState semaphore
     OSSemCreate(
         (OS_SEM*)&FaultState_Sem4,
