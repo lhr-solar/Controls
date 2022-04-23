@@ -339,13 +339,13 @@ void Lights_Set(light_t light, State state) {
             // Write to port c for lights present externally
             switch (light) {
                 case LEFT_BLINK:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, state);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, !state);
                     break;
                 case RIGHT_BLINK:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, state);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, !state);
                     break;
                 case Headlight_ON:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, HEADLIGHT_PIN, state);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, HEADLIGHT_PIN, !state);
                     break;
                 default:
                     break;
