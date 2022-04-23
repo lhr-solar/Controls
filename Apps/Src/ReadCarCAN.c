@@ -105,6 +105,13 @@ void Task_ReadCarCAN(void *p_arg)
     uint8_t buffer[8]; // buffer for CAN message
     uint32_t canId;
 
+    //DEBUG ONLY
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+    Contactors_Init();
+    Contactors_Enable(ARRAY_CONTACTOR);
+
+
+
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
 
     //Create+start the Can watchdog thread
@@ -118,7 +125,7 @@ void Task_ReadCarCAN(void *p_arg)
         128/10,
         128,
         0,
-        1,
+        0,
         NULL,
         OS_OPT_TASK_STK_CLR,
         &err
@@ -128,12 +135,12 @@ void Task_ReadCarCAN(void *p_arg)
     while (1)
     {
         //Get any message that BPS Sent us
-        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_NON_BLOCKING); 
+        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); 
         if(status == SUCCESS && canId == CHARGE_ENABLE){ //we got a charge_enable message
 
             msg_recieved = true; //signal success recieved
 
-            if(buffer[0] != 1){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
+            if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                 chargingDisable();
             } else {
 

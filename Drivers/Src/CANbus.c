@@ -74,6 +74,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
             OS_OPT_PEND_BLOCKING,
             &timestamp,
             &err);
+        assertOSError(0,err);
     }
     else
     {
@@ -83,8 +84,12 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
             OS_OPT_PEND_NON_BLOCKING,
             &timestamp,
             &err);
+
+        // don't crash if we are just using this in non-blocking mode and don't block
+        if (err != OS_ERR_PEND_WOULD_BLOCK) {
+            assertOSError(0,err);
+        }
     }
-    assertOSError(0,err);
     if (err != OS_ERR_NONE)
     {
         return ERROR;
@@ -168,6 +173,7 @@ ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking)
             OS_OPT_PEND_BLOCKING,
             &timestamp,
             &err);
+            assertOSError(0,err);
     }
     else
     {
@@ -177,9 +183,12 @@ ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking)
             OS_OPT_PEND_NON_BLOCKING,
             &timestamp,
             &err);
-    }
 
-    assertOSError(0,err);
+        // don't crash if we are just using this in non-blocking mode and don't block
+        if (err != OS_ERR_PEND_WOULD_BLOCK) {
+            assertOSError(0,err);
+        }
+    }
     if (err != OS_ERR_NONE)
     {
         return ERROR;

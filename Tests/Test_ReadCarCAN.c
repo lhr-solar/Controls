@@ -2,6 +2,7 @@
 #include "common.h"
 #include "Tasks.h"
 #include "MotorController.h"
+#include "CAN_Queue.h"
 
 
 int main(void) {
@@ -45,6 +46,8 @@ int main(void) {
     if (err != OS_ERR_NONE) {
         printf("Task error code %d\n", err);
     }
+
+    CANbus_Init();
 
     OSStart(&err);
     if (err != OS_ERR_NONE) {

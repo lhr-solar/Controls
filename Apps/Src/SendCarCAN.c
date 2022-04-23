@@ -11,7 +11,6 @@
 
 void Task_SendCarCAN(void *p_arg){
     CANMSG_t msg;
-    CANbus_Init();
 
     while (1){
         CAN_Queue_Pend(&msg);
