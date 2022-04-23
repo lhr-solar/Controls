@@ -29,16 +29,17 @@ void Task_UpdateVelocity(void *p_arg)
     OS_ERR err;
 
     MotorController_Init(1.0f);
+    Pedals_Init();
 
     static uint8_t prevBrakePedalPercent;
 
     //Prev refers to it being pressed before
-    static State cruzEnablePrev = OFF;
-    static State cruzSetPrev = OFF;    
+ //   static State cruzEnablePrev = OFF;
+ //   static State cruzSetPrev = OFF;    
 
     //State refers to whether we consider the enable and set to be on or off
-    static State cruzEnableState = OFF;
-    static State cruzSetState = OFF;
+ //   static State cruzEnableState = OFF;
+ //   static State cruzSetState = OFF;
     
     float desiredVelocity = 0;
     float desiredMotorCurrent = 0;
@@ -59,7 +60,7 @@ void Task_UpdateVelocity(void *p_arg)
         }
 
         prevBrakePedalPercent = brakePedalPercent;
-
+/*
         State regenPressed = Switches_Read(REGEN_SW);
 
         //Current refers to it currently being pressed
@@ -91,7 +92,7 @@ void Task_UpdateVelocity(void *p_arg)
             desiredVelocity = MotorController_ReadVelocity();
             desiredMotorCurrent = 1.0f;
         }
-        else if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
+        else */ if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
             desiredVelocity = 0;
             desiredMotorCurrent = 0;
         }
