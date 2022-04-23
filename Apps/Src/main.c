@@ -71,7 +71,7 @@ extern OS_SEM SendCarCAN_Sem4;
         (CPU_CHAR*)"FaultState Semaphore",
         (OS_SEM_CTR)0,
         (OS_ERR*)&err
-    )
+    );
     assertOSError(OS_MAIN_LOC, err);
 
     // Create DisplayChange semaphore
@@ -80,7 +80,7 @@ extern OS_SEM SendCarCAN_Sem4;
         (CPU_CHAR*)"DisplayChange Semaphore",
         (OS_SEM_CTR)0,
         (OS_ERR*)&err
-    )
+    );
     assertOSError(OS_MAIN_LOC, err);
 
     // Create CarCAN semaphore
@@ -89,7 +89,7 @@ extern OS_SEM SendCarCAN_Sem4;
         (CPU_CHAR*)"CarCAN Semaphore",
         (OS_SEM_CTR)0,
         (OS_ERR*)&err
-    )
+    );
     assertOSError(OS_MAIN_LOC, err);
 
     // Create ReadTritium semaphore
@@ -98,7 +98,7 @@ extern OS_SEM SendCarCAN_Sem4;
         (CPU_CHAR*)"ReadTritium Semaphore",
         (OS_SEM_CTR)0,
         (OS_ERR*)&err
-    )
+    );
     assertOSError(OS_MAIN_LOC, err);
 
     // Create BlinkLights semaphore
@@ -116,7 +116,7 @@ extern OS_SEM SendCarCAN_Sem4;
         (CPU_CHAR*)"SendCarCAN Semaphore",
         (OS_SEM_CTR)0,
         (OS_ERR*)&err
-    )
+    );
     assertOSError(OS_MAIN_LOC, err);
 
     // Initialize drivers
