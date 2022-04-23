@@ -152,9 +152,9 @@ extern OS_SEM MotorConnectionChange_Sem4;
 /**
  * Global Variables
  */
-
-
 // TODO: Put all global state variables here
+extern State RegenEnable;
+extern State CruiseControlEnable;
 
 /**
  * OS Error States

@@ -55,4 +55,11 @@ ErrorStatus MotorController_Read(CANbuff *message);
  */ 
 float MotorController_ReadVelocity(void);
 
+/**
+ * @brief   Sends VELOCITY MEASUREMENT command on CAN2
+ * @param   None
+ * @return  velocity measurement in meters per second as a floating point number
+ */ 
+float MotorController_ReadVelocity(void);
+
 #endif
