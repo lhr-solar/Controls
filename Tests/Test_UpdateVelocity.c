@@ -2,60 +2,26 @@
 #include "config.h"
 #include "UpdateVelocity.h"
 
-#define INITIAL_SWITCH_STATES {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF}
-#define INITIAL_BLINKER_STATES {OFF, OFF, OFF}
-
-car_state_t carState = {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, INITIAL_SWITCH_STATES, INITIAL_BLINKER_STATES, OFF, OFF};
-
-OS_TCB UpdateRandomPedal_TCB;
-CPU_STK UpdateRandomPedal_Stk[DEFAULT_STACK_SIZE];
-
-void Task_UpdateRandomPedal(void* p_arg){
-    car_state_t *car_state = (car_state_t *) p_arg;
-
-    OS_ERR err;
-
-    car_state->CruiseControlVelocity = 20;
-    car_state->IsRegenBrakingAllowed = ON;
-    while(1){    
-        car_state->AccelPedalPercent = rand() % 100;
-        
-        car_state->CRSet = rand() % 3;
-        car_state->RegenButtonMode = rand() % 4;
-        car_state->CruiseControlEnable = rand() % 2;
-
-        if (car_state->CRSet == REGEN && rand() % 2) {
-            car_state->AccelPedalPercent = 0;
-            car_state->BrakePedalPercent = 3;
-        }
-
-        printf("Accel: %d | CR Set: %d | CC Enable: %d | Regen Button Mode: %d |Regen Rate: %f\n", car_state->AccelPedalPercent, car_state->CRSet, car_state->CruiseControlEnable, car_state->RegenButtonMode, car_state->RegenBrakeRate/4.0f);
-        printf("desired velocity: %f, desired motor current: %f\n", car_state->DesiredVelocity, car_state->DesiredMotorCurrent);
-        // Delay of few milliseconds (10)
-        OSTimeDlyHMSM (0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
-    }
-}
+static volatile int x = 0;
 
 int main() {
     OS_ERR err;
     OSInit(&err);
-    
-    printf("inside main");
 
     if(err != OS_ERR_NONE){
-        printf("OS error code %d\n", err);
+        for (;;) x++;
     }
 
     OSTaskCreate(
         (OS_TCB*)&UpdateVelocity_TCB,
         (CPU_CHAR*)"UpdateVelocity",
         (OS_TASK_PTR)Task_UpdateVelocity,
-        (void*) &carState,
+        (void*) NULL,
         (OS_PRIO)TASK_UPDATE_VELOCITY_PRIO,
         (CPU_STK*)UpdateVelocity_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT/10,
         (CPU_STK_SIZE)TASK_UPDATE_VELOCITY_STACK_SIZE,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY) 0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
@@ -63,31 +29,15 @@ int main() {
     );
 
     if (err != OS_ERR_NONE) {
-        printf("Task error code %d\n", err);
+        for(;;) x++;
     }
 
-    OSTaskCreate(
-        (OS_TCB*)&UpdateRandomPedal_TCB,
-        (CPU_CHAR*)"Random Pedal Task",
-        (OS_TASK_PTR)Task_UpdateRandomPedal,
-        (void*)&carState,
-        (OS_PRIO)2,
-        (CPU_STK*)UpdateRandomPedal_Stk,
-        (CPU_STK_SIZE)128/10,
-        (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)NULL,
-        (OS_TICK)NULL,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
 
-
-    OS_CPU_SysTickInit();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
 
     OSStart(&err);
     if (err != OS_ERR_NONE) {
-        printf("OS error code %d\n", err);
+        for(;;) x++;
     }
 }
