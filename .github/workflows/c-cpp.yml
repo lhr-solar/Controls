@@ -2,9 +2,7 @@ name: Verify Build
 
 on:
   push:
-    branches: [ master, simulator ]
   pull_request:
-    branches: [ master, simulator ]
 
 jobs:
   build:
