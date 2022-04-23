@@ -1,5 +1,4 @@
-#include "Tasks.h"
-#include "Minions.h"
+#include "BlinkLights.h"
 
 /**
 * @brief This thread controls the blinking of the hazard and indicator lights at the regulation specified frequency. 
