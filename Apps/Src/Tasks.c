@@ -84,9 +84,6 @@ void assertOSError(uint16_t OS_err_loc, OS_ERR err)
         OSErrLocBitmap |= OS_err_loc;
 
         OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-        if (err != OS_ERR_NONE)
-        {
-            EnterFaultState();
-        }
+        EnterFaultState();
     }
 }
