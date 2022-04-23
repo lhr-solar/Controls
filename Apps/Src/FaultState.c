@@ -38,12 +38,12 @@ void EnterFaultState(void) {
 }
 
 void Task_FaultState(void *p_arg) {
-    (void) p_arg;
-
     OS_ERR err;
     CPU_TS ts;
 
-    FaultBitmap = FAULT_NONE; // Initialize to no faults
+    FaultBitmap = FAULT_NONE;
+    OSErrLocBitmap = OS_NONE_LOC;
+    TritiumErrorBitmap = T_NONE;
 
     // Block until fault is signaled by an assert
     OSSemPend(&FaultState_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);

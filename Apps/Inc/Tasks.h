@@ -28,7 +28,6 @@
 #define TASK_READ_SWITCHES_PRIO             7
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_BLINK_LIGHT_PRIO               9
-#define TASK_IDLE_PRIO                      10
 
 /**
  * Stack Sizes
@@ -45,7 +44,6 @@
 #define TASK_READ_SWITCHES_STACK_SIZE       DEFAULT_STACK_SIZE
 #define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_BLINK_LIGHT_STACK_SIZE         DEFAULT_STACK_SIZE
-#define TASK_IDLE_STACK_SIZE                DEFAULT_STACK_SIZE
 
 
 /**
@@ -69,8 +67,6 @@ void Task_SendCarCAN(void* p_arg);
 
 void Task_BlinkLight(void* p_arg);
 
-void Task_Idle(void* p_arg);
-
 /**
  * TCBs
  */
@@ -83,7 +79,6 @@ extern OS_TCB ReadTritium_TCB;
 extern OS_TCB ReadSwitches_TCB;
 extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB BlinkLight_TCB;
-extern OS_TCB Idle_TCB;
 
 
 /**
@@ -98,7 +93,6 @@ extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 extern CPU_STK ReadSwitches_Stk[TASK_READ_SWITCHES_STACK_SIZE];
 extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 extern CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
-extern CPU_STK Idle_Stk[TASK_IDLE_STACK_SIZE];
 
 /**
  * Queues
@@ -147,6 +141,7 @@ typedef enum{
     OS_SEND_CAN_LOC = 0x004,
     OS_UPDATE_VEL_LOC = 0x008,
     OS_BLINK_LIGHTS_LOC = 0x010,
+    OS_MAIN_LOC = 0x020
 } os_error_loc_t;
 
 /**

@@ -22,7 +22,6 @@ OS_TCB ReadTritium_TCB;
 OS_TCB ReadSwitches_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB BlinkLight_TCB;
-OS_TCB Idle_TCB;
 
 /**
  * Stacks
@@ -36,7 +35,6 @@ CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK ReadSwitches_Stk[TASK_READ_SWITCHES_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
-CPU_STK Idle_Stk[TASK_IDLE_STACK_SIZE];
 
 /**
  * Queues
@@ -88,18 +86,4 @@ void assertTritiumError(uint8_t motor_error_code){
             EnterFaultState();
         }
     }
-}
-
-void sysInit(){
-    FaultBitmap = FAULT_NONE;
-    OSErrLocBitmap = OS_NONE_LOC;
-    TritiumErrorBitmap = T_NONE;    // Remove once tritium stuff is merged in; this variable moves to tritium file
-
-    // Initialize hardware
-    CANbus_Init();
-    Contactors_Init();
-    Display_Init();
-    Minions_Init();
-    MotorController_Init();
-    Pedals_Init();
 }
