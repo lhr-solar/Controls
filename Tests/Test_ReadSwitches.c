@@ -1,36 +1,3 @@
-<<<<<<< HEAD
-#include "common.h"
-#include "config.h"
-#include "os.h"
-#include "Tasks.h"
-#include "CarState.h"
-#include "CANbus.h"
-
-void Task1(void *);
-
-void main(void){
-    static OS_TCB Task1_TCB;
-    static CPU_STK Task1_STK[128];
-    OS_ERR err;
-    OSInit(&err);
-
-    //init error
-    if(err != OS_ERR_NONE){
-        printf("OS error code %d\n", err);
-    }
-
-    OSTaskCreate(
-        (OS_TCB*)&Task1_TCB,
-        (CPU_CHAR*)"Task 1",
-        (OS_TASK_PTR)Task1,
-        (void*)NULL,
-        (OS_PRIO)3,
-        (CPU_STK*)Task1_STK,
-        (CPU_STK_SIZE)128/10,
-        (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)NULL,
-        (OS_TICK)NULL,
-=======
 /**
  * Copyright (c) 2022 UT Longhorn Racing Solar
  * 
@@ -106,17 +73,10 @@ int main(void) {
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
->>>>>>> master
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-<<<<<<< HEAD
-    if (err != OS_ERR_NONE) {
-        printf("Task error code %d\n", err);
-    }
-
-=======
 
     // Task not created
     if (err != OS_ERR_NONE) {
@@ -125,72 +85,10 @@ int main(void) {
     assertOSError(OS_NONE_LOC, err);
 
     // Start OS
->>>>>>> master
     OSStart(&err);
     if (err != OS_ERR_NONE) {
         printf("OS error code %d\n", err);
     }
-<<<<<<< HEAD
-
-}
-
-void Task1 (void *p_arg){
-    OS_ERR err;
-    CPU_TS ts;
-
-    car_state_t car = (car_state_t){
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        0,
-        0,
-        0,
-        (switch_states_t) {
-            (State)OFF,
-            (State)OFF,
-            (velocity_switches_t){
-                (State)OFF,
-                (State)OFF,
-                (State)OFF,
-                (State)OFF,
-                (State)OFF
-            },
-            (light_switches_t){
-                (State)OFF,
-                (State)OFF,
-                (State)OFF,
-                (State)OFF
-            }
-        },
-        (CruiseRegenSet)ACCEL,
-        (State)OFF,
-        0,
-        (State)OFF,
-        (RegenMode)REGEN_OFF,
-        (State)OFF,
-        (State)OFF,
-        (error_code_t){
-            (State) OFF,
-            (State) OFF,
-            (State) OFF,
-            (State) OFF,
-            (State) OFF,
-            (State) OFF,
-            (State) OFF,
-            (State) OFF,
-            (State) OFF
-        },
-        (motor_error_code_t) {
-            OFF,
-            OFF,
-            OFF,
-            OFF,
-        }
-    };
-    CPU_Init();
-    OS_CPU_SysTickInit();
-=======
     assertOSError(OS_NONE_LOC, err);
 }
 
@@ -199,29 +97,11 @@ void TestReadSwitches(void *p_arg) {
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
->>>>>>> master
 
     OSTaskCreate(
         (OS_TCB*)&ReadSwitches_TCB,
         (CPU_CHAR*)"ReadSwitches",
         (OS_TASK_PTR)Task_ReadSwitches,
-<<<<<<< HEAD
-        (void*)&car,
-        (OS_PRIO)4,
-        (CPU_STK*)ReadSwitches_Stk,
-        (CPU_STK_SIZE)128/10,
-        (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)NULL,
-        (OS_TICK)NULL,
-        (void*)&car,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
-        (OS_ERR*)&err
-    );
-
-    
-
-}
-=======
         (void*)NULL,
         (OS_PRIO)2,
         (CPU_STK*)ReadSwitches_Stk,
@@ -263,4 +143,3 @@ void TestReadSwitches(void *p_arg) {
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }
 }
->>>>>>> master

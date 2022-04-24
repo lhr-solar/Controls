@@ -30,7 +30,7 @@ static void ArrayRestart(); //handler to turn array back on
 // helper function to call if charging should be disabled
 static inline void chargingDisable(void) {
     // mark regen as disabled
-    RegenAllowed = OFF;
+    RegenEnable = OFF;
     //kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
@@ -52,7 +52,7 @@ static inline void chargingEnable(void) {
     CPU_TS ts;
 
     // mark regen as enabled
-    RegenAllowed = ON;
+    RegenEnable = ON;
 
     // check if we need to run the precharge sequence to turn on the array
     bool shouldRestartArray = false;
