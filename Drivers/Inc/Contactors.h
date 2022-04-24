@@ -45,7 +45,7 @@ void Contactors_Set(contactor_t contactor, State state);
  *          Contactor will turn on if enabled and state is on
  * @return  None
  */ 
-void Contators_Enable(contactor_t contactor);
+void Contactors_Enable(contactor_t contactor);
 
 /**
  * @brief   Disable the specified contactor
