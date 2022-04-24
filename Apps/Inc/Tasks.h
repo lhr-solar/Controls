@@ -5,8 +5,7 @@
 
 #include "common.h"
 #include "os.h"
-#include "common.h"
-#include "CarState.h"
+#include "config.h"
 
 /**
  * Task initialization macro

@@ -8,7 +8,6 @@
 
 #include "Contactors.h"
 #include "Minions.h"
-#include "CarState.h"
 
 // Macros
 #define READ_SWITCH_PERIOD      20   // period (ms) that switches will be read.
