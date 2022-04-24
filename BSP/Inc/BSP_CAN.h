@@ -20,7 +20,7 @@ typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
  * @param   bus the CAN line to initialize
  * @return  None
  */ 
-void BSP_CAN_Init(CAN_t bus);
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd);
 
 /**
  * @brief   Writes a message to the specified CAN line
@@ -31,7 +31,7 @@ void BSP_CAN_Init(CAN_t bus);
  * @param   len length of the message in bytes
  * @return  number of bytes transmitted (0 if unsuccessful)
  */
-uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t* data, uint8_t len);
+uint8_t BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t len);
 
 /**
  * @brief   Reads the message on the specified CAN line

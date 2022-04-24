@@ -11,16 +11,17 @@
 
 #define SPI_CS          GPIO_Pin_4
 #define LIGHTS_PORT     PORTC
-#define HEADLIGHT_PIN   6
-#define BRAKELIGHT_PIN  7
-#define RIGHT_BLINK_PIN 8
-#define LEFT_BLINK_PIN  9
+#define HEADLIGHT_PIN   GPIO_Pin_6
+#define BRAKELIGHT_PIN  GPIO_Pin_7
+#define RIGHT_BLINK_PIN GPIO_Pin_8
+#define LEFT_BLINK_PIN  GPIO_Pin_9
+
 
 typedef enum {
      CRUZ_ST=0, 
      CRUZ_EN, 
      REV_SW,
-     FWD_SW,
+     FOR_SW,
      HEADLIGHT_SW,
      LEFT_SW,
      RIGHT_SW,
@@ -52,7 +53,7 @@ typedef enum {
 typedef struct {
     State LT;
     State RT;
-    State FWD;
+    State FOR;
     State REV;
     State CRS_EN;
     State CRS_SET;

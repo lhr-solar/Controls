@@ -2,11 +2,13 @@
 #include "Minions.h"
 
 static OS_MUTEX CommMutex; //Mutex to lock SPI lines
-//Variables for Switches
+// Stores switch states:
+// IGN_1 | IGN_2 | HZD_SW | REGEN_SW | RIGHT_SW | LEFT_SW | Headlight_SW | FOR_SW | REV_SW | CRUZ_EN | CRUZ_ST
 static uint16_t switchStatesBitmap = 0;
 
-//Variables for Lights
-static uint8_t lightStatesBitmap = 0;   // Stores light states (on/off)
+// Stores light states (on/off): 
+// x | x | HEADLIGHT_SW | RIGHT_BLINK | LEFT_BLINK | CTRL_FAULT | M_CNCTR | A_CNCTR
+static uint8_t lightStatesBitmap = 0;
 static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (left, right)
 
 //Data Structure of SPI module is Opcode+RW,Register Address, then Data as 3 element byte array
@@ -61,7 +63,7 @@ static void Switches_Init(void){
     ChipSelect();
     BSP_SPI_Write(initTxBuf,3);
     ChipDeselect();
-    //Sets up pin 7 on GPIOB as input (for ReverseSwitch)
+    //Sets up pin 6 on GPIOB as input (for Hazard Switch)
     initTxBuf[0]=SPI_OPCODE_R;
     initTxBuf[1] = SPI_IODIRB;
     initTxBuf[2] = 0;
@@ -70,7 +72,7 @@ static void Switches_Init(void){
     BSP_SPI_Write(initTxBuf, 2);
     BSP_SPI_Read(&initRxBuf, 1);
     ChipDeselect();
-    //OR IODIRB to set pin 7 to input and write it back
+    //OR IODIRB to set pin 6 to input and write it back (For GPIOExpander, In=1 and Out=0)
     initTxBuf[2] = initRxBuf|0x40;
     initTxBuf[0]=SPI_OPCODE_W;
     ChipSelect();
@@ -120,7 +122,6 @@ static void Lights_Init(void) {
         SPI_IODIRB, 
         rxBuf&0x40 //clear IODIRB to set as outputs except for hazard lights switch pin (bit 6, 0x40)
     };
-    
     // Set direction register
     ChipSelect();
     BSP_SPI_Write(txWriteBuf, 3);
@@ -177,7 +178,24 @@ uint16_t Lights_Bitmap_Read() {
  * @return  ON/OFF State
  */ 
 State Switches_Read(switches_t sw){
-    return (State) ((switchStatesBitmap >> sw) & 0x0001);
+    if(sw != LEFT_SW && sw != RIGHT_SW && sw != FOR_SW && sw != REV_SW){
+        return (State) ((switchStatesBitmap >> sw) & 0x0001);
+    }else{
+        if(sw == LEFT_SW || sw == RIGHT_SW){
+            // If Left and Right are one, then in reality, none are selected
+            if(((switchStatesBitmap&0x20) == 0x20)&&((switchStatesBitmap&0x40) == 0x40)){
+                return OFF;
+            }
+            return (State) ((switchStatesBitmap >> sw) & 0x0001);
+        }else{
+            // If Forward and Reverse are one, then in reality, none are selected
+            if(((switchStatesBitmap&0x04) == 0x04)&&((switchStatesBitmap&0x08) == 0x08)){
+                return OFF;
+            }
+            return (State) ((switchStatesBitmap >> sw) & 0x0001);
+        }
+    }
+    
 }
 
 /**
@@ -222,13 +240,13 @@ void Switches_UpdateStates(void){
     assertOSError(0,err);
 
     //Read Ignition Switch 1
-    uint8_t ign1 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
+    uint8_t ign1 = !BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_1);
 
     //Read Ignition Switch 2
-    uint8_t ign2 = BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
+    uint8_t ign2 = !BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
     
     //Store data in bitmap
-    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
+    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
 }
 
 /**
@@ -247,17 +265,17 @@ void Lights_Toggle(light_t light){
 /**
 
  * @brief   Set light toggling
- * @param   light Which light to enable toggling for
- * @param   state State to set toggling
+ * @param   light Which light to enable/disable toggling for
+ * @param   state State to set toggling (ON/OFF)
  * @return  void
  */
 void Lights_Toggle_Set(light_t light, State state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
     if(light == LEFT_BLINK){
-        lightToggleBitmap |= 0x02;
+        (state == ON) ? (lightToggleBitmap |= 0x02) : (lightToggleBitmap &= 0xFD);
     }
     else if(light == RIGHT_BLINK){
-        lightToggleBitmap |= 0x01;
+        (state == ON) ? (lightToggleBitmap |= 0x01) : (lightToggleBitmap &= 0xFE);
     }
 
 }
@@ -269,10 +287,10 @@ void Lights_Toggle_Set(light_t light, State state) {
 */
 State Lights_Toggle_Read(light_t light) {
     if(light == LEFT_BLINK){
-        return (State) (lightToggleBitmap&0x02 >> 1);
+        return (State) ((lightToggleBitmap & 0x02) >> 1);
     }
     else if(light == RIGHT_BLINK){
-        return (State) (lightToggleBitmap&0x01);
+        return (State) (lightToggleBitmap & 0x01);
     }
     else{
         return OFF;
@@ -301,28 +319,32 @@ void Lights_Set(light_t light, State state) {
     
     if(lightCurrentState != state){     // Check if state has changed
         uint8_t lightNewStates = lightStatesBitmap;
-        
+    
         lightNewStates &= ~(0x01 << light); // Clear bit corresponding to pin
-        lightNewStates |= (state << light); // Set value to inputted state
+        lightNewStates |= (state << light); // Set value to inputted state   
         
+        uint8_t tempLightNewStates = lightNewStates;
+
         // Initialize tx buffer and port c
         uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
         
         if (light == BrakeLight) {  // Brakelight is only external
             BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, ON);
+            return;
         } else {
-            txWriteBuf[2] = lightNewStates; // Write to tx buffer for lights present internally (on minion board)
-            
+            tempLightNewStates &= ~(lightNewStates & 0x18); 
+            txWriteBuf[2] = (((tempLightNewStates) | (~(lightNewStates)&0x18)) & 0x3F); // Write to tx buffer for lights present internally (on minion board)
+
             // Write to port c for lights present externally
             switch (light) {
                 case LEFT_BLINK:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, ON);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, !state);
                     break;
                 case RIGHT_BLINK:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, ON);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, !state);
                     break;
                 case Headlight_ON:
-                    BSP_GPIO_Write_Pin(LIGHTS_PORT, HEADLIGHT_PIN, ON);
+                    BSP_GPIO_Write_Pin(LIGHTS_PORT, HEADLIGHT_PIN, !state);
                     break;
                 default:
                     break;
@@ -335,13 +357,13 @@ void Lights_Set(light_t light, State state) {
             &timestamp, 
             &err);    // Lock mutex in order to update our lights bitmap and write to SPI
         assertOSError(OS_BLINK_LIGHTS_LOC, err);
-        
-        lightStatesBitmap = lightNewStates;   // Update lights bitmap
 
         // Write to GPIOB on the minion board (SPI) for internal lights
         ChipSelect();
         BSP_SPI_Write(txWriteBuf, 3);
         ChipDeselect();
+        
+        lightStatesBitmap = lightNewStates;   // Update lights bitmap
 
         OSMutexPost(
             &CommMutex,
