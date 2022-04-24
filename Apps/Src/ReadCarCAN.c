@@ -211,7 +211,7 @@ static void ArrayRestart(void *p_arg){
 
     if (Contactors_Set(ARRAY_PRECHARGE, ON) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
 
-        OSTimeDlyHMSM(0,0,0,PRECHARGE_ARRAY_DELAY*100,OS_OPT_TIME_HMSM_STRICT,&err); //delay
+        OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
         assertOSError(OS_READ_CAN_LOC,err);
 
         Contactors_Set(ARRAY_CONTACTOR, ON);

@@ -4,6 +4,7 @@
 #include "MotorController.h"
 #include "CAN_Queue.h"
 #include "Contactors.h"
+#include "Minions.h"
 
 OS_TCB Task_EnableContactorsTCB;
 CPU_STK EnableContactorsStk[DEFAULT_STACK_SIZE];
@@ -20,6 +21,8 @@ void Task_EnableContactors(void *p_arg) {
     Contactors_Init();
     Contactors_Enable(ARRAY_CONTACTOR);
     Contactors_Enable(ARRAY_PRECHARGE);
+
+    Minions_Init();
 
     // delete this task
     OSTaskDel(&Task_EnableContactorsTCB, &err);
