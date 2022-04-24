@@ -2,7 +2,6 @@
 
 #include "ReadCarCAN.h"
 
-#define THRESHOLD 3
 
 void Task_ReadCarCAN(void *p_arg) {
     
