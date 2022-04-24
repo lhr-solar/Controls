@@ -48,6 +48,8 @@ int main(void) {
     OSStart(&err);
     assertOSError(OS_MAIN_LOC, err);
 
+    while(1);
+
     return 0;
 }
 
