@@ -155,10 +155,9 @@ extern OS_SEM MotorConnectionChange_Sem4;
  * Global Variables
  */
 
-extern State RegenAllowed; //TODO: We may need to add a mutex to protect this. ReadCarCAN writes to it, UpdateVelocity reads from it.
-
-
 // TODO: Put all global state variables here
+extern State RegenEnable;
+extern State CruiseControlEnable;
 
 /**
  * OS Error States
@@ -175,7 +174,8 @@ typedef enum{
     OS_SEND_TRITIUM_LOC = 0x010,
     OS_UPDATE_VEL_LOC = 0x020,
     OS_BLINK_LIGHTS_LOC = 0x040,
-    OS_CONTACTOR_LOC = 0x080
+    OS_CONTACTOR_LOC = 0x080,
+    OS_SWITCHES_LOC = 0x100
 } os_error_loc_t;
 
 /**

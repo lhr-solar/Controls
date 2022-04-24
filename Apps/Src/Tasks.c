@@ -63,22 +63,22 @@ OS_SEM FaultState_Sem4;
 /**
  * Global Variables
  */
-
 // TODO: Put all global state variables here
-State RegenAllowed = OFF; //TODO: We may need to add a mutex to protect this. ReadCarCAN writes to it, UpdateVelocity reads from it.
+State RegenEnable = OFF;
+State CruiseControlEnable = OFF;
 
 // Needs to get initialized somewhere, not currently initialized
 fault_bitmap_t FaultBitmap;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 
-void assertOSError(uint16_t OS_err_loc, OS_ERR err){
-    if(err != OS_ERR_NONE){
+void assertOSError(uint16_t OS_err_loc, OS_ERR err)
+{
+    if (err != OS_ERR_NONE)
+    {
         FaultBitmap.Fault_OS = 1;
         OSErrLocBitmap |= OS_err_loc;
-        
+
         OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-        if(err != OS_ERR_NONE){
-            EnterFaultState();
-        }
+        EnterFaultState();
     }
 }

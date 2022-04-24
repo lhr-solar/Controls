@@ -1,5 +1,5 @@
 /*
-    Test file that sends out the status of FWD_SW to UART_2 with RTOS
+    Test file that sends out the status of FOR_SW to UART_2 with RTOS
 */
 
 #include "common.h"
@@ -30,6 +30,19 @@ void Task1(void *p_arg){
     while(1){
         Switches_UpdateStates();
 
+        //Change stuff
+        Lights_Set(LEFT_BLINK, Switches_Read(LEFT_SW));
+        Lights_Set(RIGHT_BLINK, Switches_Read(RIGHT_SW));
+
+        printf("A_CNTR Status: %d\n\r", Lights_Read(A_CNCTR));
+        printf("M_CNTR Status: %d\n\r", Lights_Read(M_CNCTR));
+        printf("CTRL_FAULT Status: %d\n\r", Lights_Read(CTRL_FAULT));
+        printf("LIGHT_BLINK Status: %d\n\r", Lights_Read(LEFT_BLINK));
+        printf("RIGHT_BLINK Status: %d\n\r", Lights_Read(RIGHT_BLINK));
+        printf("HEADLIGHT_ON Status: %d\n\r", Lights_Read(Headlight_ON));
+        printf("BREAKLIGHT Status: %d\n\r", Lights_Read(BrakeLight));
+        printf("\n\r");
+
         printf("CRUZ_ST Switch Status: %d\n\r", Switches_Read(CRUZ_ST));
         printf("CRUZ_EN Switch Status: %d\n\r", Switches_Read(CRUZ_EN));
         printf("REV_SW Switch Status: %d\n\r", Switches_Read(REV_SW));
@@ -41,7 +54,9 @@ void Task1(void *p_arg){
         printf("HZD Switch Status: %d\n\r", Switches_Read(HZD_SW));
         printf("IGN1 Switch Status: %d\n\r", Switches_Read(IGN_1));
         printf("IGN2 Switch Status: %d\n\r", Switches_Read(IGN_2));
-        printf("\n\n\n");
+        printf("\n\r");
+
+        for(int i = 0;i<999999;i++){}
         //delay_u(250);
     }
     

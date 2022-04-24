@@ -159,7 +159,7 @@ void Contactors_Disable(contactor_t contactor) {
     setContactor(contactor, OFF);
 
     // release lock
-    OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+    OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 
 }
