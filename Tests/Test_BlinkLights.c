@@ -7,12 +7,15 @@
 #include "config.h"
 #include "BlinkLights.h"
 #include "Tasks.h"
+#include "BSP_UART.h"
 
 OS_TCB TaskInit_TCB;
 CPU_STK TaskInit_Stk[256];
 
 void Task_Init(void* p_arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+
+    BSP_UART_Init(UART_2);
 
     OS_ERR err;
 
@@ -31,6 +34,8 @@ void Task_Init(void* p_arg) {
                 &err);
     while(err != OS_ERR_NONE);
 
+    printf("Created ReadSwitches\n");
+
     OSTaskCreate(&BlinkLight_TCB,
                 "Blink Lights",
                 Task_BlinkLight,
@@ -45,6 +50,8 @@ void Task_Init(void* p_arg) {
                 OS_OPT_TASK_SAVE_FP | OS_OPT_TASK_STK_CHK,
                 &err);
     while(err != OS_ERR_NONE);
+
+    printf("Created BlinkLight\n");
 
     OSTaskDel(&TaskInit_TCB, &err);
 }

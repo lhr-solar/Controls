@@ -78,4 +78,10 @@ static void UpdateLights() {
 
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
+    if(leftblink==0){
+        Lights_Set(LEFT_BLINK,OFF);
+    }
+    if(rightblink==0){
+        Lights_Set(RIGHT_BLINK,OFF);
+    }
 }

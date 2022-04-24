@@ -31,20 +31,6 @@ typedef enum {
      IGN_2
 } switches_t;
 
-typedef enum {
-     CRUZ_ST=0, 
-     CRUZ_EN, 
-     REV_SW,
-     FWD_SW,
-     HEADLIGHT_SW,
-     LEFT_SW,
-     RIGHT_SW,
-     REGEN_SW,
-     HZD_SW,
-     IGN_1,
-     IGN_2
-} switches_t;
-
 // Ordered by pin of minion board
 //TODO: Double check that this ordering remains valid
 typedef enum {  

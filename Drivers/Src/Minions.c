@@ -287,10 +287,10 @@ void Lights_Toggle_Set(light_t light, State state) {
 */
 State Lights_Toggle_Read(light_t light) {
     if(light == LEFT_BLINK){
-        return (State) (lightToggleBitmap&0x02 >> 1);
+        return (State) ((lightToggleBitmap & 0x02) >> 1);
     }
     else if(light == RIGHT_BLINK){
-        return (State) (lightToggleBitmap&0x01);
+        return (State) (lightToggleBitmap & 0x01);
     }
     else{
         return OFF;
