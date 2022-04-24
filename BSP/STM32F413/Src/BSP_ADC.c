@@ -92,7 +92,7 @@ void BSP_ADC_Init(void) {
  * @param   None
  * @return  millivoltage value ADC measurement
  */
-int16_t BSP_ADC_High_GBSP_ADC_Get_Value(ADC_t hardwareDevice) {
+int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice) {
 
     // Get ADC raw data
     uint16_t data = ADCresults[hardwareDevice];
