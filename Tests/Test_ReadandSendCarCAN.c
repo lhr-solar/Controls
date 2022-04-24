@@ -5,6 +5,7 @@
 #include "CAN_Queue.h"
 #include "Contactors.h"
 #include "Minions.h"
+#include "BSP_UART.h"
 
 OS_TCB Task_EnableContactorsTCB;
 CPU_STK EnableContactorsStk[DEFAULT_STACK_SIZE];
@@ -32,6 +33,11 @@ void Task_EnableContactors(void *p_arg) {
 
 int main(void) {
     OS_ERR err;
+
+    // I don't know which UART y'all are using for the printf's I copy-pasted, but here you go
+    BSP_UART_Init(UART_2);
+    BSP_UART_Init(UART_3);
+
     OSInit(&err);
 
     // Initialized with error
