@@ -397,6 +397,7 @@ void CAN1_TX_IRQHandler(void)
     OSIntEnter();
     CPU_CRITICAL_EXIT();
     // Call the function provided
+    CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
     gTxEnd[0]();
 
     OSIntExit(); // Signal to uC/OS
