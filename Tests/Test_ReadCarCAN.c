@@ -1,16 +1,34 @@
-#include "common.h"
-#include "config.h"
 #include "os.h"
+#include "common.h"
 #include "Tasks.h"
-#include "CarState.h"
-#include "CANbus.h"
+#include "MotorController.h"
+#include "CAN_Queue.h"
+#include "Contactors.h"
+#include "Minions.h"
 
-void Task1(void *);
+OS_TCB Task_EnableContactorsTCB;
+CPU_STK EnableContactorsStk[DEFAULT_STACK_SIZE];
 
-void main(void) {
-    static OS_TCB Task1_TCB;
-    static CPU_STK Task1_STK[128];
 
+// set up for the read car can task
+void Task_EnableContactors(void *p_arg) {
+    OS_ERR err;
+
+    // enable systick and the other tasks
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+
+    CANbus_Init();
+    Contactors_Init();
+    Contactors_Enable(ARRAY_CONTACTOR);
+    Contactors_Enable(ARRAY_PRECHARGE);
+
+    Minions_Init();
+
+    // delete this task
+    OSTaskDel(&Task_EnableContactorsTCB, &err);
+}
+
+int main(void) {
     OS_ERR err;
     OSInit(&err);
 
@@ -19,16 +37,44 @@ void main(void) {
         printf("OS error code %d\n", err);
     }
 
-    OSTaskCreate(
-        (OS_TCB*)&Task1_TCB,
-        (CPU_CHAR*)"Task 1",
-        (OS_TASK_PTR)Task1,
+    OSSemCreate(
+        (OS_SEM*) &FaultState_Sem4,
+        (CPU_CHAR*) "Fault State Semaphore",
+        (OS_SEM_CTR) 0,
+        (OS_ERR*) &err
+    );
+
+    if(err != OS_ERR_NONE){
+        printf("Fault semaphore create failed:\n");
+        printf("%d",err);
+    }
+
+    OSTaskCreate( //create contactors enable task
+        (OS_TCB*)&Task_EnableContactorsTCB,
+        (CPU_CHAR*)"Enable Contactors",
+        (OS_TASK_PTR)Task_EnableContactors,
         (void*)NULL,
-        (OS_PRIO)3,
-        (CPU_STK*)Task1_STK,
+        (OS_PRIO)1,
+        (CPU_STK*)EnableContactorsStk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE/10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+
+    OSTaskCreate( //create readCarCAN task
+        (OS_TCB*)&ReadCarCAN_TCB,
+        (CPU_CHAR*)"Read Car CAN",
+        (OS_TASK_PTR)Task_ReadCarCAN,
+        (void*)NULL,
+        (OS_PRIO)12,
+        (CPU_STK*)ReadCarCAN_Stk,
         (CPU_STK_SIZE)128/10,
         (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)NULL,
+        (OS_MSG_QTY)0,
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
@@ -44,61 +90,6 @@ void main(void) {
     if (err != OS_ERR_NONE) {
         printf("OS error code %d\n", err);
     }
-}
 
-void Task1(void *p_arg) {
-
-    OS_ERR err;
-    CPU_TS ts;
-
-    car_state_t car;
-
-    CANPayload_t payload1;
-    payload1.bytes = 8;
-    payload1.data.w = 1;
-
-    CANPayload_t payload2;
-    payload2.bytes = 8;
-    payload2.data.w = 0;
-
-    CPU_Init();
-    OS_CPU_SysTickInit();
-
-    OSTaskCreate(
-        (OS_TCB*)&ReadCarCAN_TCB,
-        (CPU_CHAR*)"ReadCarCAN",
-        (OS_TASK_PTR)Task_ReadCarCAN,
-        (void*)&car,
-        (OS_PRIO)4,
-        (CPU_STK*)ReadCarCAN_Stk,
-        (CPU_STK_SIZE)128/10,
-        (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)NULL,
-        (OS_TICK)NULL,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-
-    printf("Spawned ReadCarCAN\n");
-
-    // Simulate BPS enabling and disabling charge
-    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no");
-    CANbus_Send(CHARGE_ENABLE, payload2); // disable charging
-    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no");
-    CANbus_Send(CHARGE_ENABLE, payload1); // enable charging
-    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no");
-
-    // Make sure the task can't fault when suspended
-    OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err); // If task was active, this would trigger a fault
-    OSTaskSemPost(&ReadCarCAN_TCB, OS_OPT_POST_NONE, &err);
-    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no"); // should be yes
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err); // should trigger a fault now
-    printf("Is regen braking allowed? %s\n", car.IsRegenBrakingAllowed ? "yes" : "no"); // should be no
-    
-    OSTaskDel(NULL, &err);
+    while(1){}
 }

@@ -7,6 +7,7 @@
 #include "os.h"
 #include "common.h"
 #include "CarState.h"
+#include "config.h"
 
 /**
  * Task initialization macro
@@ -149,9 +150,11 @@ extern OS_SEM SendCarCAN_Sem4;
 extern OS_SEM ArrayConnectionChange_Sem4;
 extern OS_SEM MotorConnectionChange_Sem4;
 
+
 /**
  * Global Variables
  */
+
 // TODO: Put all global state variables here
 extern State RegenEnable;
 extern State CruiseControlEnable;
@@ -172,7 +175,8 @@ typedef enum{
     OS_UPDATE_VEL_LOC = 0x020,
     OS_BLINK_LIGHTS_LOC = 0x040,
     OS_CONTACTOR_LOC = 0x080,
-    OS_SWITCHES_LOC = 0x100
+    OS_SWITCHES_LOC = 0x100,
+    OS_CANDRIVER_LOC = 0x200
 } os_error_loc_t;
 
 /**

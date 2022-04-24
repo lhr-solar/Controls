@@ -37,7 +37,7 @@ void BSP_CAN3_Init();
  * @return  None
  */
 
-void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd){
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd) {
 
     // Configure event handles
     gRxEvent[bus] = rxEvent;
@@ -53,7 +53,7 @@ void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd){
     }
 }
 
-void BSP_CAN1_Init(){
+void BSP_CAN1_Init() {
 
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
@@ -138,10 +138,18 @@ void BSP_CAN1_Init(){
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
 
+    if(NULL != gTxEnd[0]) {
+        // Enable Tx Interrupts
+        CAN_ITConfig(CAN1, CAN_IT_TME, ENABLE);
+        NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
+        NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
+        NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+        NVIC_Init(&NVIC_InitStruct);
+    }
 }
 
-void BSP_CAN3_Init(){
-
+void BSP_CAN3_Init()
+{
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
@@ -388,11 +396,8 @@ void CAN1_TX_IRQHandler(void)
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
-
-    // Acknowledge
-    CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
-
     // Call the function provided
+    CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
     gTxEnd[0]();
 
     OSIntExit(); // Signal to uC/OS

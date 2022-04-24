@@ -43,11 +43,6 @@ CPU_STK Idle_Stk[TASK_IDLE_STACK_SIZE];
 CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 
 /**
- * Queues
- */
-OS_Q CANBus_MsgQ;
-
-/**
  * Semaphores
  */
 OS_SEM FaultState_Sem4;

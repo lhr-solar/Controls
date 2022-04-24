@@ -6,6 +6,7 @@
 #include "common.h"
 #include "config.h"
 #include "BSP_GPIO.h"
+#include "stm32f4xx_gpio.h"
 
 
 typedef enum {
@@ -33,12 +34,10 @@ State Contactors_Get(contactor_t contactor);
 
 /**
  * @brief   Sets the state of a specified contactor
- * @param   contactor the contactor
- *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
- * @param   state the state to set (ON/OFF)
- * @return  None
+ * @param   contactor the contactor (MOTOR/ARRAY)
+ * @return  Whether or not the contactor was successfully set
  */
-void Contactors_Set(contactor_t contactor, State state);
+ErrorStatus Contactors_Set(contactor_t contactor, State state);
 
 /**
  * @brief   Enable the specified contactor
