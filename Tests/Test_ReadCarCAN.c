@@ -22,6 +22,8 @@ void Task_EnableContactors(void *p_arg) {
     Contactors_Enable(ARRAY_CONTACTOR);
     Contactors_Enable(ARRAY_PRECHARGE);
 
+    CAN_Queue_Init();
+
     Minions_Init();
 
     // delete this task

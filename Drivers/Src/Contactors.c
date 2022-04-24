@@ -76,10 +76,10 @@ State Contactors_Get(contactor_t contactor) {
     State state = OFF;
     switch (contactor) {
         case ARRAY_CONTACTOR :
-            state = (BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN) == 1 ? OFF : ON);
+            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN);
             break;
         case ARRAY_PRECHARGE :
-            state = (BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN) == 1? OFF : ON);
+            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN);
             break;
         case MOTOR_CONTACTOR :
             state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN);
