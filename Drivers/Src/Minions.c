@@ -122,7 +122,6 @@ static void Lights_Init(void) {
         SPI_IODIRB, 
         rxBuf&0x40 //clear IODIRB to set as outputs except for hazard lights switch pin (bit 6, 0x40)
     };
-
     // Set direction register
     ChipSelect();
     BSP_SPI_Write(txWriteBuf, 3);
@@ -288,10 +287,10 @@ void Lights_Toggle_Set(light_t light, State state) {
 */
 State Lights_Toggle_Read(light_t light) {
     if(light == LEFT_BLINK){
-        return (State) (lightToggleBitmap&0x02 >> 1);
+        return (State) ((lightToggleBitmap & 0x02) >> 1);
     }
     else if(light == RIGHT_BLINK){
-        return (State) (lightToggleBitmap&0x01);
+        return (State) (lightToggleBitmap & 0x01);
     }
     else{
         return OFF;

@@ -5,7 +5,7 @@
 #include "Minions.h"
 #include "BSP_UART.h"
 
-// Test file that sends out the status of FOR_SW to UART_2 without RTOS
+// Test file that sends out the status of FWD_SW to UART_2 without RTOS
 
 
 // static void delay_u(uint16_t micro)
@@ -20,7 +20,7 @@
 int main(){
     BSP_UART_Init(UART_2);
     Switches_Init();
-    switches_t sw = FOR_SW;
+    switches_t sw = FWD_SW;
     while(1){
         printf("FOWARD Switch Status: %d\n", Switches_Read(sw));
         //delay_u(250);

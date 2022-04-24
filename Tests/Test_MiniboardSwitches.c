@@ -1,5 +1,5 @@
 /*
-    Test file that sends out the status of FOR_SW to UART_2 with RTOS
+    Test file that sends out the status of FWD_SW to UART_2 with RTOS
 */
 
 #include "common.h"
