@@ -10,6 +10,7 @@
 #include "Minions.h"
 #include "MotorController.h"
 #include "Pedals.h"
+#include "CAN_Queue.h"
 
 int main(void) {
     // Disable interrupts
@@ -120,6 +121,7 @@ void Task_Init(void *p_arg){
     Minions_Init();
     MotorController_Init(1.0f); // Let motor controller use 100% of bus current
     Pedals_Init();
+    CAN_Queue_Init();
 
     // Initialize FaultState
     OSTaskCreate(

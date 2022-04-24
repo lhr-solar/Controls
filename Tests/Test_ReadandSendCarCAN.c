@@ -5,6 +5,7 @@
 #include "CAN_Queue.h"
 #include "Contactors.h"
 #include "Minions.h"
+#include "BSP_UART.h"
 
 OS_TCB Task_EnableContactorsTCB;
 CPU_STK EnableContactorsStk[DEFAULT_STACK_SIZE];
@@ -32,6 +33,11 @@ void Task_EnableContactors(void *p_arg) {
 
 int main(void) {
     OS_ERR err;
+
+    // I don't know which UART y'all are using for the printf's I copy-pasted, but here you go
+    BSP_UART_Init(UART_2);
+    BSP_UART_Init(UART_3);
+
     OSInit(&err);
 
     // Initialized with error
@@ -80,6 +86,23 @@ int main(void) {
         (OS_TICK)NULL,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+
+    //spawn can send task
+    OSTaskCreate(
+        (OS_TCB*)&SendCarCAN_TCB,
+        (CPU_CHAR*)"SendCarCan",
+        (OS_TASK_PTR)Task_SendCarCAN,
+        (void*)NULL,
+        (OS_PRIO)3,
+        (CPU_STK*)SendCarCAN_Stk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE/10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
 

@@ -29,6 +29,8 @@ void Task_ReadSwitches(void* p_arg) {
     OSTimeDlyHMSM(0, 0, PRECHARGE_MOTOR_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     assertOSError(OS_SWITCHES_LOC, err);
 
+    Contactors_Enable(MOTOR_CONTACTOR);
+
     // Main loop
     while (1) {
 
@@ -44,11 +46,7 @@ void Task_ReadSwitches(void* p_arg) {
         }
         
         // motor on/off
-        if (Switches_Read(IGN_2) == ON) {
-            Contactors_Enable(MOTOR_CONTACTOR);
-        } else {
-            Contactors_Disable(MOTOR_CONTACTOR);
-        }
+        Contactors_Set(MOTOR_CONTACTOR, Switches_Read(IGN_2));
 
         OSTimeDlyHMSM(0, 0, 0, READ_SWITCH_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
         assertOSError(OS_SWITCHES_LOC, err);

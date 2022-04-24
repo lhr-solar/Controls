@@ -107,10 +107,13 @@ extern OS_SEM CarCAN_Sem4;
 extern OS_SEM ReadTritium_Sem4;
 extern OS_SEM BlinkLight_Sem4;
 extern OS_SEM SendCarCAN_Sem4;
+extern OS_SEM MotorConnectionChange_Sem4;
+
 
 /**
  * Global Variables
  */
+
 // TODO: Put all global state variables here
 extern State RegenEnable;
 extern State CruiseControlEnable;
@@ -132,7 +135,9 @@ typedef enum{
     OS_BLINK_LIGHTS_LOC = 0x040,
     OS_CONTACTOR_LOC = 0x080,
     OS_SWITCHES_LOC = 0x100,
-    OS_MAIN_LOC = 0x200
+    OS_MAIN_LOC = 0x200,
+    OS_CANDRIVER_LOC = 0x400,
+    OS_MOTOR_CONNECTION_LOC = 0x800
 } os_error_loc_t;
 
 /**

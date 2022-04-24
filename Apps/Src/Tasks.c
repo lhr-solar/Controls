@@ -37,11 +37,6 @@ CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
 
 /**
- * Queues
- */
-OS_Q CANBus_MsgQ;
-
-/**
  * Semaphores
  */
 OS_SEM FaultState_Sem4;
@@ -51,7 +46,6 @@ OS_SEM CarCAN_Sem4;
 OS_SEM ReadTritium_Sem4;
 OS_SEM BlinkLight_Sem4;
 OS_SEM SendCarCAN_Sem4;
-OS_SEM MotorConnectionChange_Sem4;
 OS_SEM ArrayConnectionChange_Sem4;
 OS_SEM FaultState_Sem4;
 
