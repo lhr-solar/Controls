@@ -7,15 +7,18 @@
 
 
 static bool msg_recieved = false;
+static OS_MUTEX msg_rcv_mutex;
+
+
 static int watchDogTripCounter = 0; //count how many times the CAN watchdog trips
 
 //CAN watchdog thread variables
 static OS_TCB canWatchTCB;
-static CPU_STK canWatchSTK;
+static CPU_STK canWatchSTK[DEFAULT_STACK_SIZE];
 
 //Array restart thread variables
 static OS_TCB arrayTCB;
-static CPU_STK arraySTK;
+static CPU_STK arraySTK[DEFAULT_STACK_SIZE];
 
 // Array restart thread lock
 static OS_MUTEX arrayRestartMutex;
@@ -84,9 +87,9 @@ static inline void chargingEnable(void) {
             &ArrayRestart,
             NULL,
             4,
-            &arraySTK,
-            128/10,
-            128,
+            arraySTK,
+            DEFAULT_STACK_SIZE/10,
+            DEFAULT_STACK_SIZE,
             0,
             1,
             NULL,
@@ -104,15 +107,12 @@ void Task_ReadCarCAN(void *p_arg)
     OS_ERR err;
     uint8_t buffer[8]; // buffer for CAN message
     uint32_t canId;
-
-    //DEBUG ONLY
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    Contactors_Init();
-    Contactors_Enable(ARRAY_CONTACTOR);
-
-
+    CPU_TS ts;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
+    assertOSError(OS_READ_CAN_LOC,err);
+    OSMutexCreate(&msg_rcv_mutex, "message received mutex", &err);
+    assertOSError(OS_READ_CAN_LOC,err);
 
     //Create+start the Can watchdog thread
     OSTaskCreate(
@@ -121,9 +121,9 @@ void Task_ReadCarCAN(void *p_arg)
         &CANWatchdog_Handler,
         NULL,
         4,
-        &canWatchSTK,
-        128/10,
-        128,
+        canWatchSTK,
+        DEFAULT_STACK_SIZE/10,
+        DEFAULT_STACK_SIZE,
         0,
         0,
         NULL,
@@ -135,10 +135,22 @@ void Task_ReadCarCAN(void *p_arg)
     while (1)
     {
         //Get any message that BPS Sent us
-        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); 
+        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_NON_BLOCKING); 
         if(status == SUCCESS && canId == CHARGE_ENABLE){ //we got a charge_enable message
 
+            OSMutexPend(&msg_rcv_mutex,
+                0,
+                OS_OPT_PEND_BLOCKING,
+                &ts,
+                &err);
+            assertOSError(OS_READ_CAN_LOC,err);
+
             msg_recieved = true; //signal success recieved
+
+            OSMutexPost(&msg_rcv_mutex,
+                        OS_OPT_NONE,
+                        &err);
+            assertOSError(OS_READ_CAN_LOC,err);
 
             if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                 chargingDisable();
@@ -158,12 +170,31 @@ void Task_ReadCarCAN(void *p_arg)
 */
 static void CANWatchdog_Handler(void *p_arg){
     OS_ERR err;
+    CPU_TS ts;
+
     while(1){
-        OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+        assertOSError(OS_READ_CAN_LOC,err);
+
+        OSMutexPend(&msg_rcv_mutex,
+                0,
+                OS_OPT_PEND_BLOCKING,
+                &ts,
+                &err);
         assertOSError(OS_READ_CAN_LOC,err);
         if(msg_recieved==true){
             msg_recieved = false;
+            OSMutexPost(&msg_rcv_mutex,
+                        OS_OPT_NONE,
+                        &err);
+            assertOSError(OS_READ_CAN_LOC,err);
+            
         } else {
+            OSMutexPost(&msg_rcv_mutex,
+                        OS_OPT_NONE,
+                        &err);
+            assertOSError(OS_READ_CAN_LOC,err);
+
             chargingDisable();
             //increment trip counter
             watchDogTripCounter += 1;

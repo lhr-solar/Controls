@@ -73,16 +73,16 @@ void Contactors_Init() {
  * @return  The contactor's state (ON/OFF)
  */ 
 State Contactors_Get(contactor_t contactor) {
-    uint8_t state = 0;
+    State state = OFF;
     switch (contactor) {
         case ARRAY_CONTACTOR :
-            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN);
+            state = (BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN) == 1 ? OFF : ON);
             break;
         case ARRAY_PRECHARGE :
-            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN);
+            state = (BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN) == 1? OFF : ON);
             break;
         case MOTOR_CONTACTOR :
-            state = BSP_GPIO_Read_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN);
+            state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN);
             break;
         default:
             break;
