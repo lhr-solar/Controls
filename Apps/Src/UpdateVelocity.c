@@ -28,9 +28,6 @@ void Task_UpdateVelocity(void *p_arg)
 {
     OS_ERR err;
 
-    MotorController_Init(1.0f);
-    Pedals_Init();
-
     static uint8_t prevBrakePedalPercent;
 
     //Prev refers to it being pressed before

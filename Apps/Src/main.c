@@ -116,7 +116,7 @@ void Task_Init(void *p_arg){
     Contactors_Init();
     Display_Init();
     Minions_Init();
-    MotorController_Init(1.0f); // 100% of bus current is allowed
+    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
     Pedals_Init();
 
     // Initialize FaultState

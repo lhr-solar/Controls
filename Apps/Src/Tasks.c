@@ -62,8 +62,7 @@ OS_SEM FaultState_Sem4;
 State RegenEnable = OFF;
 State CruiseControlEnable = OFF;
 
-// Needs to get initialized somewhere, not currently initialized
-fault_bitmap_t FaultBitmap;
+fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 
 void assertOSError(uint16_t OS_err_loc, OS_ERR err)

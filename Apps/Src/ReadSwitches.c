@@ -25,10 +25,6 @@ static void UpdateLights();
 void Task_ReadSwitches(void* p_arg) {
     OS_ERR err;
 
-    // Initialization
-    Minions_Init();
-    Contactors_Init();
-
     // Delay for precharge
     OSTimeDlyHMSM(0, 0, PRECHARGE_MOTOR_DELAY, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     assertOSError(OS_SWITCHES_LOC, err);
