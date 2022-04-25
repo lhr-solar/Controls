@@ -13,6 +13,9 @@ NC=\033[0m # No Color
 TEST = none
 export TEST
 
+DEBUG = 1
+export DEBUG
+
 all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
 

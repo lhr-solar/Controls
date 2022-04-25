@@ -115,6 +115,7 @@ void Task_Init(void *p_arg){
     assertOSError(OS_MAIN_LOC, err);
 
     // Initialize drivers
+    BSP_UART_Init(UART_2);
     CANbus_Init();
     Contactors_Init();
     Display_Init();

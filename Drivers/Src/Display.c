@@ -44,10 +44,6 @@ void Display_SetData(display_data_t *status) {
         (status->regenEnabled << 1) |
         status->canError;
 
-    #ifdef DEBUG
-    assert(sizeof(float) == 4); // Just a sanity check
-    #endif
-
     static union fi {float f; int i;} data; // So we can interpret the float as a bitvector
     data.f = status->speed;
     for (int j=0; j<4; j++) {

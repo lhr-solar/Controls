@@ -67,39 +67,36 @@ static inline void chargingEnable(void) {
     // if nothing is precharging and we need to turn the array on, turn it on
     shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==OFF) && (Contactors_Get(ARRAY_PRECHARGE)==OFF);
 
-    // don't let anyone restart the array while we are restarting it
-    if (shouldRestartArray) {
-        restartingArray = true;
+    // start precharge for array 
+    if(shouldRestartArray){
+
+         if (Contactors_Set(ARRAY_PRECHARGE, ON) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
+            restartingArray = true;
+            
+            //Turn on the array restart thread
+            OSTaskCreate(
+                &arrayTCB,
+                "Array Restarter",
+                &ArrayRestart,
+                NULL,
+                TASK_READ_CAR_CAN_PRIO,
+                arraySTK,
+                DEFAULT_STACK_SIZE/10,
+                DEFAULT_STACK_SIZE,
+                0,
+                1,
+                NULL,
+                OS_OPT_TASK_STK_CLR,
+                &err
+            );
+            assertOSError(OS_READ_CAN_LOC,err);   
+        }
     }
 
     OSMutexPost(&arrayRestartMutex,
                 OS_OPT_NONE,
                 &err);
     assertOSError(OS_READ_CAN_LOC,err);
-
-
-    // start precharge for array 
-    if(shouldRestartArray){
-        //Turn on the array restart thread
-        OSTaskCreate(
-            &arrayTCB,
-            "Array Restarter",
-            &ArrayRestart,
-            NULL,
-            4,
-            arraySTK,
-            DEFAULT_STACK_SIZE/10,
-            DEFAULT_STACK_SIZE,
-            0,
-            1,
-            NULL,
-            OS_OPT_TASK_STK_CLR,
-            &err
-        );
-        assertOSError(OS_READ_CAN_LOC,err);
-    }
-
-    
 }
 
 void Task_ReadCarCAN(void *p_arg)
@@ -120,7 +117,7 @@ void Task_ReadCarCAN(void *p_arg)
         "CAN Watchdog",
         &CANWatchdog_Handler,
         NULL,
-        4,
+        TASK_READ_CAR_CAN_PRIO,
         canWatchSTK,
         DEFAULT_STACK_SIZE/10,
         DEFAULT_STACK_SIZE,
@@ -155,7 +152,6 @@ void Task_ReadCarCAN(void *p_arg)
             if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                 chargingDisable();
             } else {
-
                 //We got a message of enable with a nonzero value, turn on Regen, If we are already in precharge / array is on, do nothing. 
                 //If not initiate precharge and restart sequence. 
                 chargingEnable();
@@ -208,26 +204,36 @@ static void CANWatchdog_Handler(void *p_arg){
 */
 static void ArrayRestart(void *p_arg){
     OS_ERR err;
+    CPU_TS ts;
 
-    if (Contactors_Set(ARRAY_PRECHARGE, ON) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
+    OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
+    assertOSError(OS_READ_CAN_LOC,err);
 
-        OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
-        assertOSError(OS_READ_CAN_LOC,err);
+    Contactors_Set(ARRAY_CONTACTOR, ON);
+    Contactors_Set(ARRAY_PRECHARGE, OFF);
+    Lights_Set(A_CNCTR, ON);
 
-        Contactors_Set(ARRAY_CONTACTOR, ON);
-        Contactors_Set(ARRAY_PRECHARGE, OFF);
-        Lights_Set(A_CNCTR, ON);
+    // let array know the contactor is on
+    CANMSG_t msg;
+    msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
+    msg.payload.bytes = 1;
+    msg.payload.data.b = true;
+    CAN_Queue_Post(msg);
 
-        // let array know the contactor is on
-        CANMSG_t msg;
-        msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
-        msg.payload.bytes = 1;
-        msg.payload.data.b = true;
-        CAN_Queue_Post(msg);
-    }
+    OSMutexPend(&arrayRestartMutex,
+                0,
+                OS_OPT_PEND_BLOCKING,
+                &ts,
+                &err);
+    assertOSError(OS_READ_CAN_LOC,err);
 
     // done restarting the array
     restartingArray = false;
+
+    OSMutexPost(&arrayRestartMutex,
+                OS_OPT_NONE,
+                &err);
+    assertOSError(OS_READ_CAN_LOC,err);
 
     // delete this task
     OSTaskDel(&arrayTCB, &err);

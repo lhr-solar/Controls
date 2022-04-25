@@ -1,6 +1,14 @@
 #include "common.h"
 #include "config.h"
 #include "UpdateVelocity.h"
+#include "BSP_UART.h"
+#include "CANbus.h"
+#include "Display.h"
+#include "Contactors.h"
+#include "Minions.h"
+#include "MotorController.h"
+#include "Pedals.h"
+#include "CAN_Queue.h"
 
 static volatile int x = 0;
 
@@ -9,6 +17,15 @@ CPU_STK Task1_Stk[256];
 
 void Task1(void *p_arg) {
     OS_ERR err;
+
+    BSP_UART_Init(UART_2);
+    CANbus_Init();
+    Contactors_Init();
+    Display_Init();
+    Minions_Init();
+    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
+    Pedals_Init();
+    CAN_Queue_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OSTaskCreate(
@@ -48,18 +65,18 @@ int main() {
     }
 
     OSTaskCreate(&Task1_TCB,
-    "Task 1",
-    Task1,
-    (void *) NULL,
-    5,
-    Task1_Stk,
-    16,
-    256,
-    0,
-    0,
-    (void *) NULL,
-    OS_OPT_TASK_STK_CHK,
-    &err
+                "Task 1",
+                Task1,
+                (void *) NULL,
+                5,
+                Task1_Stk,
+                16,
+                256,
+                0,
+                0,
+                (void *) NULL,
+                OS_OPT_TASK_STK_CHK,
+                &err
     );
 
     if (err != OS_ERR_NONE) {

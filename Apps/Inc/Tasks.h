@@ -165,6 +165,16 @@ extern os_error_loc_t OSErrLocBitmap;
  * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void assertOSError(uint16_t OS_err_loc, OS_ERR err);
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err);
+
+#ifdef DEBUG
+#define assertOSError(OS_err_loc,err) \
+        if (err != OS_ERR_NONE) { \
+            printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \
+        } \
+        _assertOSError(OS_err_loc,err);
+#else
+#define assertOSError(OS_err_loc,err) _assertOSError(OS_err_loc,err);
+#endif
 
 #endif
