@@ -10,10 +10,11 @@
 #include "MotorController.h"
 #include "os.h"
 #include "Tasks.h"
+#include "CANbus.h"
+#include "CAN_Queue.h"
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[128];
-static car_state_t car_state;
 
 
 #define BUSCURRENT 10
@@ -26,6 +27,8 @@ void Task1(void* arg){
 
 
     MotorController_Init(1.0f);
+    CANbus_Init();
+    CAN_Queue_Init();
     float unatttainable_Velocity;
     float desiredCurrent; 
     float currentSetPoint;
@@ -77,6 +80,7 @@ void Task1(void* arg){
 }
 
 int main(){    
+
     OS_ERR err;
     OSInit(&err);
     if(err != OS_ERR_NONE){
@@ -126,7 +130,7 @@ int main(){
         (OS_TCB*)&Task1TCB,
         (CPU_CHAR*)"Task 1",
         (OS_TASK_PTR)Task1,
-        (void*)&car_state,
+        (void*)NULL,
         (OS_PRIO)13,
         (CPU_STK*)Task1Stk,
         (CPU_STK_SIZE)128/10,

@@ -53,6 +53,7 @@ int main(void) {
 
     BSP_UART_Init(UART_2);
     Contactors_Init();
+    BSP_GPIO_Init(PORTA, 0x03, 0);
 
     OS_ERR err;
     OSInit(&err);
@@ -131,9 +132,9 @@ void TestReadSwitches(void *p_arg) {
     printf("array precharge | array contactor | motor contactor | IGN1 | IGN2 \n\r");
     while (1) {
         //attempt to turn on all contactors
-        Contactors_Set(ARRAY_PRECHARGE, ON);
-        Contactors_Set(ARRAY_CONTACTOR, ON);
-        Contactors_Set(MOTOR_CONTACTOR, ON);
+        // Contactors_Set(ARRAY_PRECHARGE, ON);
+        // Contactors_Set(ARRAY_CONTACTOR, ON);
+        // Contactors_Set(MOTOR_CONTACTOR, ON);
 
         printf(
             "      %s       |       %s       |       %s      |       %s       |       %s       |\r",

@@ -26,7 +26,7 @@ static bool is_initialized = false;
  *          and semaphore is posted, Fault state will run.
  * @param   motor_err Bitmap which has motor error codes
  */
-static void assertTritiumError(tritium_error_code_t motor_err){
+static void _assertTritiumError(tritium_error_code_t motor_err){
     OS_ERR err;
     if(motor_err != T_NONE){
         FaultBitmap |= FAULT_TRITIUM;
@@ -34,6 +34,16 @@ static void assertTritiumError(tritium_error_code_t motor_err){
         assertOSError(0, err);
     }
 }
+
+#ifdef DEBUG
+#define assertTritiumError(motor_err) \
+        if (motor_err != T_NONE) { \
+            printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, motor_err); \
+        } \
+        _assertTritiumError(motor_err);
+#else
+#define assertTritiumError(motor_err) _assertTritiumError(motor_err);
+#endif
 
 /**
  * @brief   Releases hold of the mailbox semaphore.
@@ -187,9 +197,9 @@ ErrorStatus MotorController_Read(CANbuff *message){
                     Motor_FaultBitmap |= T_SLIP_SPEED_ERR;
                 }
 
-                if(MASK_OVER_SPEED_ERR & firstSum){
-                    Motor_FaultBitmap |= T_OVER_SPEED_ERR;
-                }
+                // if(MASK_OVER_SPEED_ERR & firstSum){
+                //     Motor_FaultBitmap |= T_OVER_SPEED_ERR;
+                // }
 
                 assertTritiumError(Motor_FaultBitmap);
                 
