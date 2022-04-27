@@ -39,8 +39,10 @@
 #include "common.h"
 #include "Tasks.h"
 #include "stm32f4xx.h"
-#include "ReadSwitches.h"
+// #include "ReadSwitches.h"
 #include "BSP_UART.h"
+#include "Contactors.h"
+#include "Minions.h"
 
 
 void TestReadSwitches(void *);
@@ -98,6 +100,8 @@ void TestReadSwitches(void *p_arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
+    Minions_Init();
+
     OSTaskCreate(
         (OS_TCB*)&ReadSwitches_TCB,
         (CPU_CHAR*)"ReadSwitches",
@@ -116,15 +120,15 @@ void TestReadSwitches(void *p_arg) {
 
     // Task not created
     if (err != OS_ERR_NONE) {
-        printf("ReadSwitches task creation error code %d\n", err);
+        printf("ReadSwitches task creation error code %d\n\r", err);
     }
     assertOSError(OS_NONE_LOC, err);
 
-    printf("Created ReadSwitches\n");
+    printf("Created ReadSwitches\n\r");
     // Wait for Task_ReadSwitches to finish initialization (with an extra second to be sure)
     OSTimeDlyHMSM(0, 0, PRECHARGE_MOTOR_DELAY + 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
 
-    printf("array precharge | array contactor | motor contactor | IGN1 | IGN2 \n");
+    printf("array precharge | array contactor | motor contactor | IGN1 | IGN2 \n\r");
     while (1) {
         //attempt to turn on all contactors
         Contactors_Set(ARRAY_PRECHARGE, ON);
