@@ -43,10 +43,12 @@ void Task_ReadSwitches(void* p_arg) {
         } else {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
+            Lights_Set(A_CNCTR,OFF);
         }
         
         // motor on/off
         Contactors_Set(MOTOR_CONTACTOR, Switches_Read(IGN_2));
+        Lights_Set(M_CNCTR,Switches_Read(IGN_2));
 
         OSTimeDlyHMSM(0, 0, 0, READ_SWITCH_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
         assertOSError(OS_SWITCHES_LOC, err);

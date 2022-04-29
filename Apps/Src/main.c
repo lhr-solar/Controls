@@ -60,6 +60,8 @@ void Task_Init(void *p_arg){
     // Start systick    
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
+    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+
     // Create FaultState semaphore
     OSSemCreate(
         (OS_SEM*)&FaultState_Sem4,

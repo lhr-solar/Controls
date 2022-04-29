@@ -3,6 +3,7 @@
 #include "Tasks.h"
 #include "Minions.h"
 #include "MotorController.h"
+#include "Contactors.h"
 #include <math.h>
 #define UNTOUCH_PEDALS_PERCENT 5
 #define REGEN_CURRENT 0.5f
@@ -57,10 +58,12 @@ void Task_UpdateVelocity(void *p_arg)
             desiredMotorCurrent = convertPedaltoMotorPercent(accelPedalPercent);
         }
 
-        MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
+        if (Contactors_Get(MOTOR_CONTACTOR) == ON) {
+            MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
+        }
 
-        // Delay of few milliseconds (10)
-        OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
+        // Delay of few milliseconds (100)
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
 
         if (err != OS_ERR_NONE){
             assertOSError(OS_UPDATE_VEL_LOC, err);
