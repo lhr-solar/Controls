@@ -141,9 +141,17 @@ static ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis) {
  * Initialize the Nextion display
  */
 void Display_Init() {
+    char ret[8];
+    for (int i=0; i<8; i++) ret[i] = 0;
+    volatile char *x = ret;
     BSP_UART_Init(UART_3);
     // The display sends 0x88 when ready, but that might be
     // before we initialize our UART
+    BSP_UART_Read(UART_3, (char *) x);
+    if (ret[0] == 0x88) {
+        volatile int a = 0;
+        while (1) a++;
+    }
 }
 
 /**
@@ -209,9 +217,8 @@ ErrorStatus Display_NoErrors(void) {
  */
 ErrorStatus Display_SetMainView(void) {
     //return updateIntValue(SYSTEM, PAGE, 1);
-    char *page = "page 1";
+    char *page = "page 1\xff\xff\xff";
     BSP_UART_Write(UART_3, page, strlen(page));
-    BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
     return SUCCESS;
 }
 
