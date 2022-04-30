@@ -4,6 +4,7 @@
 #include <string.h>
 
 #define NEXTION_INSTRUCTION_SUCCESSFUL 0x01
+#define DISP_OUT UART_2
 // The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
 #define MPS_TO_dMPH 22.374f
 
@@ -76,12 +77,12 @@ static void sendStartOfAssignment(enum CommandString_t obj_index, enum CommandSt
     int len = strlen(obj);
 
     if (len != 0) { // If not global
-        BSP_UART_Write(UART_3, obj, len);
-        BSP_UART_Write(UART_3, (char *) DELIMITER, strlen(DELIMITER));
+        BSP_UART_Write(DISP_OUT, obj, len);
+        BSP_UART_Write(DISP_OUT, (char *) DELIMITER, strlen(DELIMITER));
     }
 
-    BSP_UART_Write(UART_3, attr, strlen(attr)); // Send the attribute
-    BSP_UART_Write(UART_3, (char *) ASSIGNMENT, 1);
+    BSP_UART_Write(DISP_OUT, attr, strlen(attr)); // Send the attribute
+    BSP_UART_Write(DISP_OUT, (char *) ASSIGNMENT, 1);
 
 }
 
@@ -92,12 +93,12 @@ static void sendStartOfAssignment(enum CommandString_t obj_index, enum CommandSt
 static ErrorStatus updateStringValue(enum CommandString_t obj_index, enum CommandString_t attr_index, char *msg) {
     sendStartOfAssignment(obj_index, attr_index);
 
-    BSP_UART_Write(UART_3, msg, strlen(msg));
-    BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
+    BSP_UART_Write(DISP_OUT, msg, strlen(msg));
+    BSP_UART_Write(DISP_OUT, (char *) TERMINATOR, strlen(TERMINATOR));
 
     // Get a response from the display
     char buf[8];
-    BSP_UART_Read(UART_3, buf);
+    BSP_UART_Read(DISP_OUT, buf);
     return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
 }
 
@@ -111,12 +112,12 @@ static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandSt
     char number[12]; // To store converted int
     sprintf(number, "%ld", val);
 
-    BSP_UART_Write(UART_3, number, strlen(number));
-    BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
+    BSP_UART_Write(DISP_OUT, number, strlen(number));
+    BSP_UART_Write(DISP_OUT, (char *) TERMINATOR, strlen(TERMINATOR));
 
     // Get a response from the display
     char buf[8];
-    BSP_UART_Read(UART_3, buf);
+    BSP_UART_Read(DISP_OUT, buf);
     return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
 }
 
@@ -129,8 +130,8 @@ static ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis) {
     printf("String out: %s\n", out);
 
     char buf[8];
-    BSP_UART_Write(UART_3, out, strlen(out));
-    BSP_UART_Read(UART_3, buf);
+    BSP_UART_Write(DISP_OUT, out, strlen(out));
+    BSP_UART_Read(DISP_OUT, buf);
     return (IsNextionFailure(buf[0]) ? ERROR : SUCCESS);
 }
 
@@ -141,10 +142,10 @@ void Display_Init() {
     char ret[8];
     for (int i=0; i<8; i++) ret[i] = 0;
     volatile char *x = ret;
-    BSP_UART_Init(UART_3);
+    BSP_UART_Init(DISP_OUT);
     // The display sends 0x88 when ready, but that might be
     // before we initialize our UART
-    BSP_UART_Read(UART_3, (char *) x);
+    BSP_UART_Read(DISP_OUT, (char *) x);
     if (ret[0] == 0x88) {
         volatile int a = 0;
         while (1) a++;
@@ -215,7 +216,7 @@ ErrorStatus Display_NoErrors(void) {
 ErrorStatus Display_SetMainView(void) {
     //return updateIntValue(SYSTEM, PAGE, 1);
     char *page = "page 1\xff\xff\xff";
-    BSP_UART_Write(UART_3, page, strlen(page));
+    BSP_UART_Write(DISP_OUT, page, strlen(page));
     return SUCCESS;
 }
 
