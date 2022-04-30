@@ -336,7 +336,8 @@ void Lights_Set(light_t light, State state) {
         uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
         
         if (light == BrakeLight) {  // Brakelight is only external
-            BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, ON);
+            BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, !state);    // Negative logic
+            lightStatesBitmap = lightNewStates;   // Update lights bitmap
             return;
         } else {
             tempLightNewStates &= ~(lightNewStates & 0x18); 
