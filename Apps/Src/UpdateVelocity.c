@@ -56,7 +56,8 @@ void Task_UpdateVelocity(void *p_arg)
         if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
             desiredVelocity = 0;
             desiredMotorCurrent = Switches_Read(REGEN_SW) ? REGEN_CURRENT : 0;
-        } else if(Switches_Read(REGEN_SW) && MotorController_ReadVelocity() <= THRESHOLD_VEL){ 
+        } 
+        else if(Switches_Read(REGEN_SW) && (MotorController_ReadVelocity() > THRESHOLD_VEL && RegenEnable)){ 
             desiredVelocity = 0;
             desiredMotorCurrent = REGEN_CURRENT;
         } 
