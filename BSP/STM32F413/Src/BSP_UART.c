@@ -71,8 +71,8 @@ static void USART_DISPLAY_Init() {
     USART_Init(USART3, &UART_InitStruct);
 
     // Enable interrupts
-    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-    USART_ITConfig(USART3, USART_IT_TC, ENABLE);
+    //USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+    //USART_ITConfig(USART3, USART_IT_TC, ENABLE);
 
     USART_Cmd(USART3, ENABLE);
 
