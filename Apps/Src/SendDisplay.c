@@ -4,6 +4,7 @@
 
 #define MAX_DISPLAYABLE_ERRORS 6
 
+/*
 // Strings for motor errors
 static const char *MOTOR_ERROR_STRINGS[] = {
     "MOTOR TEMP ERR",
@@ -24,6 +25,7 @@ static const char *ERROR_STRINGS[] = {
     "BLINK LIGHTS ERR",
     "MOTOR CONNECTION ERR"
 };
+*/
 
 void Task_SendDisplay(void *p_arg) {
     car_state_t *car = (car_state_t *) p_arg;
@@ -35,6 +37,8 @@ void Task_SendDisplay(void *p_arg) {
 
     while (1) {
 
+        /*
+        Error display commented out for now
         const char *errors[MAX_DISPLAYABLE_ERRORS]; // Up to 6 errors possible
         size_t errorCount = 0;
 
@@ -59,14 +63,17 @@ void Task_SendDisplay(void *p_arg) {
             }
         }
 
+        */
+
         // If the contactors are not yet enabled, we're probably still in precharge
         // Otherwise, changed to the main view
-        if (Contactors_Get(ARRAY) == ON) {
+        if (Contactors_Get(ARRAY_CONTACTOR) == ON) {
             Display_SetMainView(); // Make sure we're in the main view first
             Display_SetVelocity(car->CurrentVelocity);
             Display_CruiseEnable(car->CruiseControlEnable);
             Display_CruiseSet(car->CRSet == CRUISE ? ON : OFF);
 
+            /*
             // update error display
             int i = 0;
             for (; i < errorCount; i++) {
@@ -80,6 +87,7 @@ void Task_SendDisplay(void *p_arg) {
             if (errorCount == 0) {
                 Display_NoErrors();
             }
+            */
         }
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
