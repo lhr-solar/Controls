@@ -69,7 +69,7 @@ int main(void) {
         (OS_MSG_QTY)0,
         (OS_TICK)NULL,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
+        (OS_OPT)(OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
 

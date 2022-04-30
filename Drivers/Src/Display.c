@@ -208,7 +208,11 @@ ErrorStatus Display_NoErrors(void) {
  * Set the display to the main view
  */
 ErrorStatus Display_SetMainView(void) {
-    return updateIntValue(SYSTEM, PAGE, 1);
+    //return updateIntValue(SYSTEM, PAGE, 1);
+    char *page = "page 1";
+    BSP_UART_Write(UART_3, page, strlen(page));
+    BSP_UART_Write(UART_3, (char *) TERMINATOR, strlen(TERMINATOR));
+    return SUCCESS;
 }
 
 /**
