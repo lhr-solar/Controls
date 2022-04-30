@@ -3,7 +3,7 @@
 #include <math.h>
 #include <string.h>
 
-#define NEXTION_INSTRUCTION_SUCCESSFUL 0x01ffffff
+#define NEXTION_INSTRUCTION_SUCCESSFUL 0x01
 // The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
 #define MPS_TO_dMPH 22.374f
 
@@ -98,8 +98,7 @@ static ErrorStatus updateStringValue(enum CommandString_t obj_index, enum Comman
     // Get a response from the display
     char buf[8];
     BSP_UART_Read(UART_3, buf);
-    int ret = *((uint32_t *) buf);
-    return (IsNextionFailure(ret)) ? ERROR : SUCCESS;
+    return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
 }
 
 /**
@@ -118,8 +117,7 @@ static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandSt
     // Get a response from the display
     char buf[8];
     BSP_UART_Read(UART_3, buf);
-    int ret = *((uint32_t *) buf);
-    return (IsNextionFailure(ret)) ? ERROR : SUCCESS;
+    return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
 }
 
 /*
@@ -130,11 +128,10 @@ static ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis) {
     sprintf(out, "%s %s,%d%s", CommandStrings[VIS], CommandStrings[comp], vis ? 1 : 0, TERMINATOR);
     printf("String out: %s\n", out);
 
-    char buf[4];
+    char buf[8];
     BSP_UART_Write(UART_3, out, strlen(out));
     BSP_UART_Read(UART_3, buf);
-    int ret = *((uint32_t *) buf);
-    return (IsNextionFailure(ret) ? ERROR : SUCCESS);
+    return (IsNextionFailure(buf[0]) ? ERROR : SUCCESS);
 }
 
 /*
