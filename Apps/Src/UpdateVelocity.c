@@ -5,9 +5,13 @@
 #include "MotorController.h"
 #include "Contactors.h"
 #include <math.h>
-#define UNTOUCH_PEDALS_PERCENT 5
+
+// REGEN_CURRENT AS A PERCENTAGE (DECIMAL NUMBER) OF MAX CURRENT
 #define REGEN_CURRENT 0.5f
-//#define UNATTAINABLE_VELOCITY 1000.0f
+// THRESHOLD VELOCITY IN M/S
+#define THRESHOLD_VEL 1.0f
+// UNTOUCH_PEDALS_PERCENT AS A PERCENTAGE OF MAX PEDAL POSITION
+#define UNTOUCH_PEDALS_PERCENT 5
 
 extern const float pedalToPercent[];
 
@@ -34,6 +38,7 @@ void Task_UpdateVelocity(void *p_arg)
     
     float desiredVelocity = 0;
     float desiredMotorCurrent = 0;
+    
     while (1)
     {
         uint8_t accelPedalPercent = Pedals_Read(ACCELERATOR);
@@ -50,9 +55,13 @@ void Task_UpdateVelocity(void *p_arg)
         // Deadband comparison
         if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
             desiredVelocity = 0;
-            desiredMotorCurrent = 0;
-        } else {
-            if (Switches_Read(FOR_SW)) {
+            desiredMotorCurrent = Switches_Read(REGEN_SW) ? REGEN_CURRENT : 0;
+        } else if(Switches_Read(REGEN_SW) && MotorController_ReadVelocity() <= THRESHOLD_VEL){ 
+            desiredVelocity = 0;
+            desiredMotorCurrent = REGEN_CURRENT;
+        } 
+        else {
+            if(!Switches_Read(FOR_SW)){
                 desiredVelocity = MAX_VELOCITY;
             } else if (Switches_Read(REV_SW)) {
                 desiredVelocity = -MAX_VELOCITY;
