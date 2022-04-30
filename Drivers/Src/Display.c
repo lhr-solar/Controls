@@ -4,7 +4,7 @@
 #include <string.h>
 
 #define NEXTION_INSTRUCTION_SUCCESSFUL 0x01
-#define DISP_OUT UART_2
+#define DISP_OUT UART_3
 // The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
 #define MPS_TO_dMPH 22.374f
 

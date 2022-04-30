@@ -40,14 +40,17 @@ void Task1(void *p_arg) {
     */
    
     Display_Init();
-    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    Display_SetMainView();
-    float vel = 13.7f;
+    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+    //Display_SetMainView();
+    BSP_UART_Write(UART_3, "page 1\xff\xff\xff", 9);
+    BSP_UART_Write(UART_3, "page 1\xff\xff\xff", 9);
+    float vel = 0.0f;
     Display_SetVelocity(vel);
     while (1) {
-        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-        vel += ((random() % 5) - 2) * (0.2f); // update velocity
-        if (vel < 0) vel = 0;
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        vel += 0.1; // update velocity
+        if (vel > 30.0f) vel = 0.0f;
+        Display_SetVelocity(vel);
     }
 }
 
