@@ -77,7 +77,12 @@ static void UpdateLights() {
                     Switches_Read(HZD_SW);
     int rightblink = Switches_Read(RIGHT_SW) | 
                      Switches_Read(HZD_SW);
-
+    if(rightblink && leftblink){ //hazard lights should reset the lights to sync them up
+        Lights_Toggle_Set(RIGHT_BLINK, OFF);
+        Lights_Toggle_Set(LEFT_BLINK, OFF);
+        Lights_Set(RIGHT_BLINK,OFF);
+        Lights_Set(LEFT_BLINK,OFF);
+    }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
     if(leftblink==0){
