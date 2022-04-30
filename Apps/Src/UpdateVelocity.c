@@ -13,7 +13,7 @@ extern const float pedalToPercent[];
 // As of 03/13/2021 the function just returns a 1 to 1 conversion
 static float convertPedaltoMotorPercent(uint8_t pedalPercentage)
 {
-    return pedalToPercent[pedalPercentage];
+    return pedalPercentage > 100 ? 1.0f : pedalToPercent[pedalPercentage];
 }
 
 // Convert a float velocity to a desired RPM
