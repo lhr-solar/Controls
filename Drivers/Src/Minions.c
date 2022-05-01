@@ -78,6 +78,9 @@ static void Switches_Init(void){
     ChipSelect();
     BSP_SPI_Write(initTxBuf,3);
     ChipDeselect();
+    BSP_GPIO_Init(PORTA,0x03,0);
+
+    //Sets up GPIO switch
 
     switchStatesBitmap = 0x0000;
 
@@ -98,7 +101,11 @@ static void Lights_Init(void) {
     OS_ERR err;
     CPU_TS timestamp;
     BSP_GPIO_Init(LIGHTS_PORT, 0x3C0, 1); // Pins 6,7,8,9 from Port C are out (0b1111000000)
-    
+    BSP_GPIO_Write_Pin(LIGHTS_PORT,HEADLIGHT_PIN,ON); //These are negative logic, and I used write pin instead of write because write pin is atomic/threadsafe.
+    BSP_GPIO_Write_Pin(LIGHTS_PORT,LEFT_BLINK_PIN,ON);
+    BSP_GPIO_Write_Pin(LIGHTS_PORT,RIGHT_BLINK_PIN,ON);
+    BSP_GPIO_Write_Pin(LIGHTS_PORT,BRAKELIGHT_PIN,ON);
+
     // Initialize txBuf and rxBuf
     uint8_t txReadBuf[2] = {SPI_OPCODE_R, SPI_IODIRB}; //0x01 is IODIRB in Bank 0 Mode
     uint8_t rxBuf = 0;
@@ -329,7 +336,8 @@ void Lights_Set(light_t light, State state) {
         uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
         
         if (light == BrakeLight) {  // Brakelight is only external
-            BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, ON);
+            BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, !state);    // Negative logic
+            lightStatesBitmap = lightNewStates;   // Update lights bitmap
             return;
         } else {
             tempLightNewStates &= ~(lightNewStates & 0x18); 

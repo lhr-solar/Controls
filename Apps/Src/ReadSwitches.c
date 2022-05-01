@@ -43,10 +43,12 @@ void Task_ReadSwitches(void* p_arg) {
         } else {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
+            Lights_Set(A_CNCTR,OFF);
         }
         
         // motor on/off
         Contactors_Set(MOTOR_CONTACTOR, Switches_Read(IGN_2));
+        Lights_Set(M_CNCTR,Switches_Read(IGN_2));
 
         OSTimeDlyHMSM(0, 0, 0, READ_SWITCH_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
         assertOSError(OS_SWITCHES_LOC, err);
@@ -75,7 +77,12 @@ static void UpdateLights() {
                     Switches_Read(HZD_SW);
     int rightblink = Switches_Read(RIGHT_SW) | 
                      Switches_Read(HZD_SW);
-
+    if(rightblink && leftblink){ //hazard lights should reset the lights to sync them up
+        Lights_Toggle_Set(RIGHT_BLINK, OFF);
+        Lights_Toggle_Set(LEFT_BLINK, OFF);
+        Lights_Set(RIGHT_BLINK,OFF);
+        Lights_Set(LEFT_BLINK,OFF);
+    }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
     if(leftblink==0){
