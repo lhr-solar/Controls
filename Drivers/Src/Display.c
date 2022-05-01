@@ -1,65 +1,228 @@
 #include "bsp.h"
 #include "Display.h"
+#include <math.h>
+#include <string.h>
 
-#define GECKO_DATA_LENGTH 5*2
+#define NEXTION_INSTRUCTION_SUCCESSFUL 0x01
+#define DISP_OUT UART_3
+// The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
+#define MPS_TO_dMPH 22.374f
 
-/*
- * Encodes a byte into two hex digits and places them at buf
- * @param byte the given data byte
- * @param buf the output buffer
- * @return void
- */
-static void encodeByte(uint8_t byte, uint8_t *buf) {
-    uint8_t hi = (byte >> 4) & 0x0F;
-    uint8_t lo = byte & 0x0F;
-    buf[0] = hi < 10 ? (hi + '0') : (hi - 10 + 'A');
-    buf[1] = lo < 10 ? (lo + '0') : (lo - 10 + 'A');
-    // e.g encoding the byte `42` will write the characters
-    // '2' and 'A' to the locations pointed at by buf and buf+1
+#define CHECK(expr) do {if ((expr) == ERROR) {return ERROR;}} while(0)
+
+static const char *DELIMITER = ".";
+static const char *ASSIGNMENT = "=";
+static const char *TERMINATOR = "\xff\xff\xff";
+static const char *NO_ERROR = "No Error";
+
+// Color defintions for display
+static const uint16_t NEXTION_GREEN = 2016;
+static const uint16_t NEXTION_RED = 63488;
+static const uint16_t NEXTION_LIGHT_GREY = 42260;
+//static const uint16_t NEXTION_DARK_GREY = 23275;
+//static const uint16_t NEXTION_BURNT_ORANGE = 51872;
+
+static inline int IsNextionFailure(uint32_t val) {
+    return ((val & ~0x00FFFFFF) != (1 << 24));
 }
 
-/*
- * Initialize the Wonder Gecko communications.
+
+// List of names of possible strings to build a command out of
+enum CommandString_t {
+    VELOCITY,
+    CRUISE_ENABLE,
+    CRUISE_SET,
+    REGEN_ENABLE,
+    VALUE,
+    TEXT,
+    PCO,
+    VIS,
+    SYSTEM,
+    PAGE,
+    ERROR0,
+    ERROR1,
+    ERROR2,
+    ERROR3,
+    ERROR4,
+    ERROR5
+};
+
+// The command strings themselves
+static char *CommandStrings[] = {
+    "x0",
+    "t1",
+    "t2",
+    "t3",
+    "val",
+    "txt",
+    "pco",
+    "vis",
+    "",
+    "page",
+    "t4",
+    "t5",
+    "t6",
+    "t7",
+    "t8",
+    "t9"
+};
+
+/**
+ * Sends a string of the form "obj_index.attr_index=" or "attr_index=" over UART
+ * Do not call on its own, should only be called by the updateValue subroutines
  */
-void Display_Init() {
-    BSP_UART_Init(UART_2);
-}
+static void sendStartOfAssignment(enum CommandString_t obj_index, enum CommandString_t attr_index) {
+    char *obj = CommandStrings[obj_index];
+    char *attr = CommandStrings[attr_index];
+    int len = strlen(obj);
 
-/*
- * Updates the Gecko display with the data provided.
- * @param status the new display data
- * @return void
- */
-void Display_SetData(display_data_t *status) {
-
-    // The update gecko will expect ten bytes: a float a some flags
-    // Each byte will be encoded as two hex digits
-    // The float will be sent in little endian format, and the flags
-    // will be encoded in the order they're declared in the struct,
-    // starting at bit 3 and going til bit 0 of the fifth byte
-    uint8_t msg[GECKO_DATA_LENGTH];
-    // Pack the flags into a byte
-    int flags = (status->cruiseEnabled << 3) |
-        (status->cruiseSet << 2) |
-        (status->regenEnabled << 1) |
-        status->canError;
-
-    static union fi {float f; int i;} data; // So we can interpret the float as a bitvector
-    data.f = status->speed;
-    for (int j=0; j<4; j++) {
-        encodeByte(data.i & 0xFF, msg+j*2); // enocde each byte of the float as two hex digits
-        data.i >>= 8; // Get rid of the bit we just encoded and prepare the next one
+    if (len != 0) { // If not global
+        BSP_UART_Write(DISP_OUT, obj, len);
+        BSP_UART_Write(DISP_OUT, (char *) DELIMITER, strlen(DELIMITER));
     }
 
-    // Say, for example, that the speed is 38.0
-    // In IEEE-754 floating point format, it is represented as 0x42180000
-    // At this point in the code, the msg array will have "00001842" as its first eight bytes
-    
-    encodeByte((uint8_t) flags, msg+4*2);
+    BSP_UART_Write(DISP_OUT, attr, strlen(attr)); // Send the attribute
+    BSP_UART_Write(DISP_OUT, (char *) ASSIGNMENT, 1);
 
-    // At this point, the last byte of the msg array represents the flags
+}
+
+/**
+ * Sends out a string of the form "obj.attr=msg" or "attr=msg"
+ * Use to update string fields of display objects
+ */
+static ErrorStatus updateStringValue(enum CommandString_t obj_index, enum CommandString_t attr_index, char *msg) {
+    sendStartOfAssignment(obj_index, attr_index);
+
+    BSP_UART_Write(DISP_OUT, msg, strlen(msg));
+    BSP_UART_Write(DISP_OUT, (char *) TERMINATOR, strlen(TERMINATOR));
+
+    // Get a response from the display
+    char buf[8];
+    BSP_UART_Read(DISP_OUT, buf);
+    return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
+}
+
+/**
+ * Sends out a string of the form "obj.attr=val" or "attr=val"
+ * Use to update integer fields of display objects
+ */
+static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandString_t attr_index, int32_t val) {
+    sendStartOfAssignment(obj_index, attr_index);
+
+    char number[12]; // To store converted int
+    sprintf(number, "%ld", val);
+
+    BSP_UART_Write(DISP_OUT, number, strlen(number));
+    BSP_UART_Write(DISP_OUT, (char *) TERMINATOR, strlen(TERMINATOR));
+
+    // Get a response from the display
+    char buf[8];
+    BSP_UART_Read(DISP_OUT, buf);
+    return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
+}
+
+/*
+ * Sets a component's visiblity
+ */
+static ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis) {
+    char out[24];
+    sprintf(out, "%s %s,%d%s", CommandStrings[VIS], CommandStrings[comp], vis ? 1 : 0, TERMINATOR);
+    printf("String out: %s\n", out);
+
+    char buf[8];
+    BSP_UART_Write(DISP_OUT, out, strlen(out));
+    BSP_UART_Read(DISP_OUT, buf);
+    return (IsNextionFailure(buf[0]) ? ERROR : SUCCESS);
+}
+
+/*
+ * Initialize the Nextion display
+ */
+void Display_Init() {
+    char ret[8];
+    for (int i=0; i<8; i++) ret[i] = 0;
+    volatile char *x = ret;
+    BSP_UART_Init(DISP_OUT);
+    // The display sends 0x88 when ready, but that might be
+    // before we initialize our UART
+    BSP_UART_Read(DISP_OUT, (char *) x);
+    if (ret[0] == 0x88) {
+        volatile int a = 0;
+        while (1) a++;
+    }
+}
+
+/**
+ * Set the displayed velocity to vel 
+ */
+ErrorStatus Display_SetVelocity(float vel) {
+    int32_t vel_fix = (uint32_t) floorf(vel * MPS_TO_dMPH);
+    return updateIntValue(VELOCITY, VALUE, vel_fix);
+}
+
+/**
+ * Update the cruise enable light on the display based on the given state
+ */
+ErrorStatus Display_CruiseEnable(State on) {
+    if (on == ON) {
+        return updateIntValue(CRUISE_ENABLE, PCO, NEXTION_GREEN);
+    } else {
+        return updateIntValue(CRUISE_ENABLE, PCO, NEXTION_LIGHT_GREY);
+    }
+}
+
+/**
+ * Update the cruise set light on the display based on the given state
+ */
+ErrorStatus Display_CruiseSet(State on) {
+    if (on == ON) {
+        return updateIntValue(CRUISE_SET, PCO, NEXTION_GREEN);
+    } else {
+        return updateIntValue(CRUISE_SET, PCO, NEXTION_LIGHT_GREY);
+    }
+}
+
+/**
+ * Set ERROR<idx> to err
+ * If err is an empty string, then the error will be cleared
+ */
+ErrorStatus Display_SetError(int idx, char *err) {
+    if (idx < 0 || idx > 5) return ERROR; // Index out of bounds
+    if (strlen(err) == 0) {
+        CHECK (setComponentVisibility(ERROR0 + idx, false)); // Hide text if no error
+    } else {
+        CHECK (updateStringValue(ERROR0 + idx, TEXT, err)); // Set error string
+        CHECK (updateIntValue(ERROR0 + idx, PCO, NEXTION_RED));
+        CHECK (setComponentVisibility(ERROR0 + idx, true));
+    }
+    return SUCCESS;
+}
+
+/**
+ * Set the first error slot to say "No Error" and set its color to green
+ * User must clear the remaining slots manually using Display_SetError
+ */
+ErrorStatus Display_NoErrors(void) {
+    CHECK (updateStringValue(ERROR0, TEXT, (char *) NO_ERROR));
+    CHECK (updateIntValue(ERROR0, PCO, NEXTION_GREEN));
+    CHECK (setComponentVisibility(ERROR0, true));
+    return SUCCESS;
+}
 
 
-    // Send the bit vector of info to the Gecko controller
-    BSP_UART_Write(UART_2, (char *) msg, GECKO_DATA_LENGTH);
+/**
+ * Set the display to the main view
+ */
+ErrorStatus Display_SetMainView(void) {
+    //return updateIntValue(SYSTEM, PAGE, 1);
+    char *page = "page 1\xff\xff\xff";
+    BSP_UART_Write(DISP_OUT, page, strlen(page));
+    return SUCCESS;
+}
+
+/**
+ * Set the display back to the precharge view
+ */
+ErrorStatus Display_SetPrechargeView(void) {
+    return updateIntValue(SYSTEM, PAGE, 0);
 }

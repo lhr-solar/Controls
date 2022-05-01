@@ -71,8 +71,6 @@ static void USART_DISPLAY_Init() {
     USART_Init(USART3, &UART_InitStruct);
 
     // Enable interrupts
-    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-    USART_ITConfig(USART3, USART_IT_TC, ENABLE);
 
     USART_Cmd(USART3, ENABLE);
 
@@ -239,21 +237,21 @@ void USART2_IRQHandler(void) {
         uint8_t data = USART2->DR;
         bool removeSuccess = 1;
         if(data == '\r'){
-            displayLineReceived = true;
-            if(displayRxCallback != NULL)
-                displayRxCallback();
+            usbLineReceived = true;
+            if(usbRxCallback != NULL)
+                usbRxCallback();
         }
         // Check if it was a backspace.
         // '\b' for minicmom
         // '\177' for putty
-        if(data != '\b' && data != '\177') rxfifo_put(&displayRxFifo, data);
+        if(data != '\b' && data != '\177') rxfifo_put(&usbRxFifo, data);
         // Sweet, just a "regular" key. Put it into the fifo
         // Doesn't matter if it fails. If it fails, then the data gets thrown away
         // and the easiest solution for this is to increase RX_SIZE
         else {
             char junk;
             // Delete the last entry!
-            removeSuccess = rxfifo_popback(&displayRxFifo, &junk);
+            removeSuccess = rxfifo_popback(&usbRxFifo, &junk);
         }
         if(removeSuccess) {
             USART2->DR = data;
@@ -263,8 +261,8 @@ void USART2_IRQHandler(void) {
         // If getting data from fifo fails i.e. the tx fifo is empty, then turn off the TX interrupt
         if(!txfifo_get(&usbTxFifo, (char*)&(USART2->DR))) {
             USART_ITConfig(USART2, USART_IT_TC, RESET); // Turn off the interrupt
-            if(displayTxCallback != NULL)
-                displayTxCallback();    // Callback
+            if(usbTxCallback != NULL)
+                usbTxCallback();    // Callback
         }
     }
     if(USART_GetITStatus(USART2, USART_IT_ORE) != RESET);
@@ -284,21 +282,21 @@ void USART3_IRQHandler(void) {
         uint8_t data = USART3->DR;
         bool removeSuccess = 1;
         if(data == '\r'){
-            usbLineReceived = true;
-            if(usbRxCallback != NULL)
-                usbRxCallback();
+            displayLineReceived = true;
+            if(displayRxCallback != NULL)
+                displayRxCallback();
         }
         // Check if it was a backspace.
         // '\b' for minicmom
         // '\177' for putty
-        if(data != '\b' && data != '\177') rxfifo_put(&usbRxFifo, data);
+        if(data != '\b' && data != '\177') rxfifo_put(&displayRxFifo, data);
         // Sweet, just a "regular" key. Put it into the fifo
         // Doesn't matter if it fails. If it fails, then the data gets thrown away
         // and the easiest solution for this is to increase RX_SIZE
         else {
             char junk;
             // Delete the last entry!
-            removeSuccess = rxfifo_popback(&usbRxFifo, &junk);
+            removeSuccess = rxfifo_popback(&displayRxFifo, &junk);
         }
         if(removeSuccess) {
             USART3->DR = data;
@@ -306,10 +304,10 @@ void USART3_IRQHandler(void) {
     }
     if(USART_GetITStatus(USART3, USART_IT_TC) != RESET) {
         // If getting data from fifo fails i.e. the tx fifo is empty, then turn off the TX interrupt
-        if(!txfifo_get(&usbTxFifo, (char*)&(USART3->DR))) {
+        if(!txfifo_get(&displayTxFifo, (char*)&(USART3->DR))) {
             USART_ITConfig(USART3, USART_IT_TC, RESET);
-            if(usbTxCallback != NULL)
-                usbTxCallback();
+            if(displayTxCallback != NULL)
+                displayTxCallback();
         }
     }
     if(USART_GetITStatus(USART3, USART_IT_ORE) != RESET);
