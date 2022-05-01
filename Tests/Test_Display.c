@@ -41,9 +41,7 @@ void Task1(void *p_arg) {
    
     Display_Init();
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    //Display_SetMainView();
-    BSP_UART_Write(UART_3, "page 1\xff\xff\xff", 9);
-    BSP_UART_Write(UART_3, "page 1\xff\xff\xff", 9);
+    Display_SetMainView();
     float vel = 0.0f;
     Display_SetVelocity(vel);
     while (1) {
