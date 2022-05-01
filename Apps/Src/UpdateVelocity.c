@@ -52,16 +52,15 @@ void Task_UpdateVelocity(void *p_arg)
             desiredVelocity = 0;
             desiredMotorCurrent = 0;
         } else {
-            if(!Switches_Read(REV_SW)){
+            if (Switches_Read(FOR_SW)) {
                 desiredVelocity = MAX_VELOCITY;
-            }
-            else{
+            } else if (Switches_Read(REV_SW)) {
                 desiredVelocity = -MAX_VELOCITY;
             }
             desiredMotorCurrent = convertPedaltoMotorPercent(accelPedalPercent);
         }
 
-        if (Contactors_Get(MOTOR_CONTACTOR) == ON) {
+        if (Contactors_Get(MOTOR_CONTACTOR) == ON && (Switches_Read(FOR_SW) || Switches_Read(REV_SW))) {
             MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
         }
 
