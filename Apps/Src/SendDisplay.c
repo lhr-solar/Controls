@@ -1,6 +1,7 @@
 
 
 #include "SendDisplay.h"
+#include "MotorController.h"
 
 #define MAX_DISPLAYABLE_ERRORS 6
 
@@ -28,7 +29,7 @@ static const char *ERROR_STRINGS[] = {
 */
 
 void Task_SendDisplay(void *p_arg) {
-    car_state_t *car = (car_state_t *) p_arg;
+    // car_state_t *car = (car_state_t *) p_arg;
     OS_ERR err;
 
     Display_Init();
@@ -69,9 +70,9 @@ void Task_SendDisplay(void *p_arg) {
         // Otherwise, changed to the main view
         if (Contactors_Get(ARRAY_CONTACTOR) == ON) {
             Display_SetMainView(); // Make sure we're in the main view first
-            Display_SetVelocity(car->CurrentVelocity);
-            Display_CruiseEnable(car->CruiseControlEnable);
-            Display_CruiseSet(car->CRSet == CRUISE ? ON : OFF);
+            Display_SetVelocity(MotorController_ReadVelocity());
+            //Display_CruiseEnable(car->CruiseControlEnable);
+            //Display_CruiseSet(car->CRSet == CRUISE ? ON : OFF);
 
             /*
             // update error display
@@ -88,6 +89,8 @@ void Task_SendDisplay(void *p_arg) {
                 Display_NoErrors();
             }
             */
+        } else {
+            Display_SetPrechargeView();
         }
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
