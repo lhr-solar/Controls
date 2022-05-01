@@ -38,33 +38,6 @@ void Task_SendDisplay(void *p_arg) {
 
     while (1) {
 
-        /*
-        Error display commented out for now
-        const char *errors[MAX_DISPLAYABLE_ERRORS]; // Up to 6 errors possible
-        size_t errorCount = 0;
-
-        union error_array_t error_arr;
-        error_arr.err = car->ErrorCode;
-        State *errorStates = error_arr.arr;
-
-        // check for the motor errors we care about
-        if (car->MotorErrorCode.motorTempErr) {
-            errors[errorCount++] = MOTOR_ERROR_STRINGS[0];
-        }
-
-        if (car->MotorErrorCode.slipSpeedErr) {
-            errors[errorCount++] = MOTOR_ERROR_STRINGS[2];
-        }
-
-        // Note that we only ever display the first six errors
-        // These errors will always be displayed after motor errors
-        for (int i=0; i < SYSTEM_ERR_COUNT && errorCount < MAX_DISPLAYABLE_ERRORS; i++) {
-            if (errorStates[i] == ON) {
-                errors[errorCount++] = ERROR_STRINGS[i];
-            }
-        }
-
-        */
 
         // If the contactors are not yet enabled, we're probably still in precharge
         // Otherwise, changed to the main view
