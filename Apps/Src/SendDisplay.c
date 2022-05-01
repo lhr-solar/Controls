@@ -71,24 +71,6 @@ void Task_SendDisplay(void *p_arg) {
         if (Contactors_Get(ARRAY_CONTACTOR) == ON) {
             Display_SetMainView(); // Make sure we're in the main view first
             Display_SetVelocity(MotorController_ReadVelocity());
-            //Display_CruiseEnable(car->CruiseControlEnable);
-            //Display_CruiseSet(car->CRSet == CRUISE ? ON : OFF);
-
-            /*
-            // update error display
-            int i = 0;
-            for (; i < errorCount; i++) {
-                Display_SetError(i, (char *) errors[i]);
-            }
-            for (; i<6; i++) {
-                Display_SetError(i, ""); // Clear unsused error slots
-            }
-
-            // If we have no errors, change color to green and set text to "No Errors"
-            if (errorCount == 0) {
-                Display_NoErrors();
-            }
-            */
         } else {
             Display_SetPrechargeView();
         }
