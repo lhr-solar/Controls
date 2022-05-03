@@ -11,8 +11,6 @@ void Task_ReadTritium(void* p_arg) {
 
 	CANMSG_t msg;
 
-	MotorController_Init(1.0f); // Let motor controller use 100% of bus current
-
 	while (1) {
 		CANbuff buf;
 		ErrorStatus status = MotorController_Read(&buf);

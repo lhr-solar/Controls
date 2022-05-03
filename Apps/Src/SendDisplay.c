@@ -32,7 +32,6 @@ void Task_SendDisplay(void *p_arg) {
     // car_state_t *car = (car_state_t *) p_arg;
     OS_ERR err;
 
-    Display_Init();
 
     Display_SetPrechargeView();
 
