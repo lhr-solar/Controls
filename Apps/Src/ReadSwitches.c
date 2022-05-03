@@ -77,7 +77,6 @@ static void UpdateLights() {
                     Switches_Read(HZD_SW);
     int rightblink = Switches_Read(RIGHT_SW) | 
                      Switches_Read(HZD_SW);
-    
     if((rightblink && leftblink) && (Lights_Read(LEFT_BLINK)!=Lights_Read(RIGHT_BLINK))){ //hazards are on and we are desynced
         Lights_Toggle_Set(RIGHT_BLINK, OFF);
         Lights_Toggle_Set(LEFT_BLINK, OFF);
