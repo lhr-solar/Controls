@@ -13,6 +13,10 @@
 // UNTOUCH_PEDALS_PERCENT AS A PERCENTAGE OF MAX PEDAL POSITION
 #define UNTOUCH_PEDALS_PERCENT 5
 
+// percent of pedal to count as neutral (to add support for one-pedal drive)
+#define NEUTRAL_PEDALS_PERCENT 25
+#define REGEN_RANGE (NEUTRAL_PEDALS_PERCENT - UNTOUCH_PEDALS_PERCENT)
+
 extern const float pedalToPercent[];
 
 // As of 03/13/2021 the function just returns a 1 to 1 conversion
@@ -57,9 +61,14 @@ void Task_UpdateVelocity(void *p_arg)
             desiredVelocity = 0;
             desiredMotorCurrent = Switches_Read(REGEN_SW) ? REGEN_CURRENT : 0;
         } 
-        else if(Switches_Read(REGEN_SW) && (MotorController_ReadVelocity() > THRESHOLD_VEL && RegenEnable)){ 
+        else if(Switches_Read(REGEN_SW) 
+                && (MotorController_ReadVelocity() > THRESHOLD_VEL) 
+                && RegenEnable
+                && accelPedalPercent < NEUTRAL_PEDALS_PERCENT){ 
+            
             desiredVelocity = 0;
-            desiredMotorCurrent = REGEN_CURRENT;
+            // set regen current based on how much the accel pedal is pressed down
+            desiredMotorCurrent = REGEN_CURRENT * REGEN_RANGE / (NEUTRAL_PEDALS_PERCENT - accelPedalPercent);
         } 
         else {
             if(!Switches_Read(FOR_SW)){
@@ -67,7 +76,12 @@ void Task_UpdateVelocity(void *p_arg)
             } else if (Switches_Read(REV_SW)) {
                 desiredVelocity = -MAX_VELOCITY;
             }
-            desiredMotorCurrent = convertPedaltoMotorPercent(accelPedalPercent);
+            // handle one-pedal drive
+            uint8_t forwardPercent = 0;
+            if (accelPedalPercent > NEUTRAL_PEDALS_PERCENT) {
+                forwardPercent = (accelPedalPercent - NEUTRAL_PEDALS_PERCENT) * 100 / (100 - NEUTRAL_PEDALS_PERCENT);
+            }
+            desiredMotorCurrent = convertPedaltoMotorPercent(forwardPercent);
         }
 
         if (Contactors_Get(MOTOR_CONTACTOR) == ON && (Switches_Read(FOR_SW) || Switches_Read(REV_SW))) {
