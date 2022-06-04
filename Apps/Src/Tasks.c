@@ -55,6 +55,7 @@ OS_SEM FaultState_Sem4;
 // TODO: Put all global state variables here
 State RegenEnable = OFF;
 State CruiseControlEnable = OFF;
+uint16_t SupplementalVoltage = 0;
 
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;

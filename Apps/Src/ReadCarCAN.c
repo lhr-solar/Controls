@@ -156,6 +156,8 @@ void Task_ReadCarCAN(void *p_arg)
                 //If not initiate precharge and restart sequence. 
                 chargingEnable();
             }
+        } else if (status == SUCCESS && canId == SUPPLEMENTAL_VOLTAGE) {
+            SupplementalVoltage = *(uint16_t *) &buffer;
         }
     }
 }
