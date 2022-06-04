@@ -167,7 +167,7 @@ extern os_error_loc_t OSErrLocBitmap;
  */
 void _assertOSError(uint16_t OS_err_loc, OS_ERR err);
 
-#ifdef DEBUG
+#if DEBUG == 1
 #define assertOSError(OS_err_loc,err) \
         if (err != OS_ERR_NONE) { \
             printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \

@@ -35,7 +35,7 @@ static void _assertTritiumError(tritium_error_code_t motor_err){
     }
 }
 
-#ifdef DEBUG
+#if DEBUG == 1
 #define assertTritiumError(motor_err) \
         if (motor_err != T_NONE) { \
             printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, motor_err); \

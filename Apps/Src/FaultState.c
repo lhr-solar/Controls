@@ -3,17 +3,15 @@
 #include "os.h"
 #include "Tasks.h"
 
-static void ArrayKill(void) {
-    Contactors_Disable(ARRAY_CONTACTOR);
-}
 
-static void MotorKill(void) {
-    Contactors_Disable(MOTOR_CONTACTOR);
-}
+/**
+ * @brief Non-OS dependent way to kill all contactors
+ */
 
 static void ArrayMotorKill(void) {
-    ArrayKill();
-    MotorKill();
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
 }
 
 void EnterFaultState(void) {
@@ -37,8 +35,13 @@ void EnterFaultState(void) {
     while(1){}
 }
 
+/**
+ * @brief Fault task, highest priority thread that shuts down the car
+ * 
+ * @param p_arg 
+ */
 void Task_FaultState(void *p_arg) {
-    OS_ERR err;
+    OS_ERR err = OS_ERR_NONE;
     CPU_TS ts;
 
     FaultBitmap = FAULT_NONE;
