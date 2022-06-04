@@ -36,7 +36,7 @@ void Pedals_Init(){
  *          converts it to a percentage of the total distance pressed using 
  *          data from calibration testing, and returns it
  * @param   pedal_t, ACCELERATOR or BRAKE as defined in enum
- * @return  distance the pedal has been pressed in percentage
+ * @return  percent amount the pedal has been pressed in percentage
  */
 int8_t Pedals_Read(pedal_t pedal){
     if (pedal >= NUMBER_OF_PEDALS) return 0;
