@@ -8,7 +8,7 @@
 // The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
 #define MPS_TO_dMPH 22.374f
 
-#define CHECK(expr) do {if ((expr) == ERROR) {return ERROR;}} while(0)
+#define CHECK(expr) if ((expr) == ERROR) return ERROR
 
 static const char *DELIMITER = ".";
 static const char *ASSIGNMENT = "=";
