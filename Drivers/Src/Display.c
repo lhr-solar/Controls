@@ -23,7 +23,7 @@ static const uint16_t NEXTION_LIGHT_GREY = 42260;
 //static const uint16_t NEXTION_BURNT_ORANGE = 51872;
 
 static inline int IsNextionFailure(uint32_t val) {
-    return ((val & ~0x00FFFFFF) != (1 << 24));
+    return (val >> 24) != 1;
 }
 
 
