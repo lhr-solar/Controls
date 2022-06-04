@@ -68,7 +68,11 @@ void Task_UpdateVelocity(void *p_arg)
             
             desiredVelocity = 0;
             // set regen current based on how much the accel pedal is pressed down
-            desiredMotorCurrent = REGEN_CURRENT * REGEN_RANGE / (NEUTRAL_PEDALS_PERCENT - accelPedalPercent);
+            if (accelPedalPercent > UNTOUCH_PEDALS_PERCENT) {
+                desiredMotorCurrent = REGEN_CURRENT * (REGEN_RANGE - (accelPedalPercent - UNTOUCH_PEDALS_PERCENT)) / REGEN_RANGE;
+            } else {
+                desiredMotorCurrent = REGEN_CURRENT;
+            }
         } 
         else {
             if(Switches_Read(FOR_SW)){
