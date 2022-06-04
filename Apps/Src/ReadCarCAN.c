@@ -133,31 +133,39 @@ void Task_ReadCarCAN(void *p_arg)
     {
         //Get any message that BPS Sent us
         ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); 
-        if(status == SUCCESS && canId == CHARGE_ENABLE){ //we got a charge_enable message
+        if(status != SUCCESS) {
+            continue;
+        }
 
-            OSMutexPend(&msg_rcv_mutex,
-                0,
-                OS_OPT_PEND_BLOCKING,
-                &ts,
-                &err);
-            assertOSError(OS_READ_CAN_LOC,err);
+        switch(canId){ //we got a charge_enable message
+            case CHARGE_ENABLE: {
+                OSMutexPend(&msg_rcv_mutex,
+                    0,
+                    OS_OPT_PEND_BLOCKING,
+                    &ts,
+                    &err);
+                assertOSError(OS_READ_CAN_LOC,err);
 
-            msg_recieved = true; //signal success recieved
+                msg_recieved = true; //signal success recieved
 
-            OSMutexPost(&msg_rcv_mutex,
-                        OS_OPT_NONE,
-                        &err);
-            assertOSError(OS_READ_CAN_LOC,err);
+                OSMutexPost(&msg_rcv_mutex,
+                            OS_OPT_NONE,
+                            &err);
+                assertOSError(OS_READ_CAN_LOC,err);
 
-            if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
-                chargingDisable();
-            } else {
-                //We got a message of enable with a nonzero value, turn on Regen, If we are already in precharge / array is on, do nothing. 
-                //If not initiate precharge and restart sequence. 
-                chargingEnable();
+                if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
+                    chargingDisable();
+                } else {
+                    //We got a message of enable with a nonzero value, turn on Regen, If we are already in precharge / array is on, do nothing. 
+                    //If not initiate precharge and restart sequence. 
+                    chargingEnable();
+                }
             }
-        } else if (status == SUCCESS && canId == SUPPLEMENTAL_VOLTAGE) {
-            SupplementalVoltage = *(uint16_t *) &buffer;
+            case SUPPLEMENTAL_VOLTAGE: {
+                SupplementalVoltage = *(uint16_t *) &buffer;
+            }
+            default: 
+                break;
         }
     }
 }
