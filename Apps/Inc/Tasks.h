@@ -159,6 +159,7 @@ typedef enum{
  */
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
+extern uint16_t SupplementalVoltage;
 
 /**
  * @brief   Assert Error if OS function call fails
