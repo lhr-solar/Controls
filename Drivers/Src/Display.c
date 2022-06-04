@@ -66,7 +66,7 @@ static char *CommandStrings[] = {
     "t7",
     "t8",
     "t9",
-    "t10"
+    "x1"
 };
 
 /**
