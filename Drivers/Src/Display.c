@@ -97,7 +97,11 @@ static ErrorStatus updateStringValue(enum CommandString_t obj_index, enum Comman
 
     BSP_UART_Write(DISP_OUT, msg, strlen(msg));
     BSP_UART_Write(DISP_OUT, (char *) TERMINATOR, strlen(TERMINATOR));
-    return SUCCESS;
+
+    // Get a response from the display
+    char buf[8];
+    BSP_UART_Read(DISP_OUT, buf);
+    return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
 }
 
 /**
@@ -112,7 +116,11 @@ static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandSt
 
     BSP_UART_Write(DISP_OUT, number, strlen(number));
     BSP_UART_Write(DISP_OUT, (char *) TERMINATOR, strlen(TERMINATOR));
-    return SUCCESS;
+
+    // Get a response from the display
+    char buf[8];
+    BSP_UART_Read(DISP_OUT, buf);
+    return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
 }
 
 /*
@@ -123,15 +131,27 @@ static ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis) {
     sprintf(out, "%s %s,%d%s", CommandStrings[VIS], CommandStrings[comp], vis ? 1 : 0, TERMINATOR);
     printf("String out: %s\n", out);
 
+    char buf[8];
     BSP_UART_Write(DISP_OUT, out, strlen(out));
-    return SUCCESS;
+    BSP_UART_Read(DISP_OUT, buf);
+    return (IsNextionFailure(buf[0]) ? ERROR : SUCCESS);
 }
 
 /*
  * Initialize the Nextion display
  */
 void Display_Init() {
+    char ret[8];
+    for (int i=0; i<8; i++) ret[i] = 0;
+    volatile char *x = ret;
     BSP_UART_Init(DISP_OUT);
+    // The display sends 0x88 when ready, but that might be
+    // before we initialize our UART
+    BSP_UART_Read(DISP_OUT, (char *) x);
+    if (ret[0] == 0x88) {
+        volatile int a = 0;
+        while (1) a++;
+    }
 }
 
 /**
