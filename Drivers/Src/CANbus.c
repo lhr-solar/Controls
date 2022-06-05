@@ -124,8 +124,8 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         datalen = 1;
         txdata[0] = (payload.data.b);
         break;
-    case CHARGE_ENABLE:
-        //This should never occur, we should never be sending the Charge_enable message out
+    default:
+        //This should never occur
         return ERROR;
     }
 

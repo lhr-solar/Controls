@@ -3,16 +3,28 @@
 #include "Tasks.h"
 #include "Minions.h"
 #include "MotorController.h"
+#include "Contactors.h"
 #include <math.h>
-#define UNTOUCH_PEDALS_PERCENT 5
+
+// REGEN_CURRENT AS A PERCENTAGE (DECIMAL NUMBER) OF MAX CURRENT
 #define REGEN_CURRENT 0.5f
-//#define UNATTAINABLE_VELOCITY 1000.0f
+// THRESHOLD VELOCITY IN M/S
+#define THRESHOLD_VEL 1.0f
+// UNTOUCH_PEDALS_PERCENT AS A PERCENTAGE OF MAX PEDAL POSITION
+#define UNTOUCH_PEDALS_PERCENT 5
+
+// percent of pedal to count as neutral (to add support for one-pedal drive)
+#define NEUTRAL_PEDALS_PERCENT 25
+#define REGEN_RANGE (NEUTRAL_PEDALS_PERCENT - UNTOUCH_PEDALS_PERCENT)
 
 extern const float pedalToPercent[];
 
 // As of 03/13/2021 the function just returns a 1 to 1 conversion
 static float convertPedaltoMotorPercent(uint8_t pedalPercentage)
 {
+    if(pedalPercentage > 100){
+        return 1.0f;
+    }
     return pedalToPercent[pedalPercentage];
 }
 
@@ -27,89 +39,61 @@ static float velocity_to_rpm(float velocity) {
 void Task_UpdateVelocity(void *p_arg)
 {
     OS_ERR err;
-
-    MotorController_Init(1.0f);
-    Pedals_Init();
-
-    static uint8_t prevBrakePedalPercent;
-
-    //Prev refers to it being pressed before
- //   static State cruzEnablePrev = OFF;
- //   static State cruzSetPrev = OFF;    
-
-    //State refers to whether we consider the enable and set to be on or off
- //   static State cruzEnableState = OFF;
- //   static State cruzSetState = OFF;
     
     float desiredVelocity = 0;
     float desiredMotorCurrent = 0;
+    
     while (1)
     {
         uint8_t accelPedalPercent = Pedals_Read(ACCELERATOR);
         uint8_t brakePedalPercent = Pedals_Read(BRAKE);
 
-        // If the brake is changed, then the brake lights might need to be changed
-        if (brakePedalPercent != prevBrakePedalPercent)
-        {
-            if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
-                Lights_Set(BrakeLight, ON);
-            }
-            else{
-                Lights_Set(BrakeLight, OFF);
-            }
-        }
-
-        prevBrakePedalPercent = brakePedalPercent;
-/*
-        State regenPressed = Switches_Read(REGEN_SW);
-
-        //Current refers to it currently being pressed
-        State cruzEnableCurr = Switches_Read(CRUZ_EN);
-        State cruzSetCurr = Switches_Read(CRUZ_ST);
-
-        //The cruzEnableState is toggled on the rising edge of the button press
-        if(cruzEnableCurr && !cruzEnablePrev){
-            cruzEnablePrev = ON;
-            cruzEnableState = (State) ((int)cruzEnableState ^ 1);
-        }else if(!cruzEnableCurr){
-            cruzEnablePrev = OFF;
-        }
-
-        //The cruzSetState is toggled on the rising edge of the button press
-        if(cruzSetCurr && !cruzSetPrev){
-            cruzSetPrev = ON;
-            cruzSetState = (State) ((int)cruzSetState ^ 1);
-        }else if(!cruzSetCurr){
-            cruzSetPrev = OFF;
-        }
-
-        //Regen will be level sensitive meaning the user will regen brake by holding down a button
-        if(regenPressed && RegenEnable && (brakePedalPercent < UNTOUCH_PEDALS_PERCENT)){
-            desiredVelocity = 0;
-            desiredMotorCurrent = REGEN_CURRENT;
-        } else if(cruzEnableState && cruzSetState && (brakePedalPercent < UNTOUCH_PEDALS_PERCENT) 
-            && (accelPedalPercent < UNTOUCH_PEDALS_PERCENT)){
-            desiredVelocity = MotorController_ReadVelocity();
-            desiredMotorCurrent = 1.0f;
-        }
-        else */ if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
-            desiredVelocity = 0;
-            desiredMotorCurrent = 0;
+        // Set brake lights
+        if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
+            Lights_Set(BrakeLight, ON);
         }
         else{
-            if(!Switches_Read(REV_SW)){
-                desiredVelocity = MAX_VELOCITY;
+            Lights_Set(BrakeLight, OFF);
+        }
+    
+        // Deadband comparison
+        if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
+            desiredVelocity = 0;
+            desiredMotorCurrent = (Switches_Read(REGEN_SW) && RegenEnable) ? REGEN_CURRENT : 0;
+        } 
+        else if(Switches_Read(REGEN_SW) 
+                && (MotorController_ReadVelocity() > THRESHOLD_VEL) 
+                && RegenEnable
+                && accelPedalPercent < NEUTRAL_PEDALS_PERCENT){ 
+            
+            desiredVelocity = 0;
+            // set regen current based on how much the accel pedal is pressed down
+            if (accelPedalPercent > UNTOUCH_PEDALS_PERCENT) {
+                desiredMotorCurrent = REGEN_CURRENT * (REGEN_RANGE - (accelPedalPercent - UNTOUCH_PEDALS_PERCENT)) / REGEN_RANGE;
+            } else {
+                desiredMotorCurrent = REGEN_CURRENT;
             }
-            else{
+        } 
+        else {
+            if(Switches_Read(FOR_SW)){
+                desiredVelocity = MAX_VELOCITY;
+            } else if (Switches_Read(REV_SW)) {
                 desiredVelocity = -MAX_VELOCITY;
             }
-            desiredMotorCurrent = convertPedaltoMotorPercent(accelPedalPercent);
+            // handle one-pedal drive
+            uint8_t forwardPercent = 0;
+            if (accelPedalPercent > NEUTRAL_PEDALS_PERCENT) {
+                forwardPercent = (accelPedalPercent - NEUTRAL_PEDALS_PERCENT) * 100 / (100 - NEUTRAL_PEDALS_PERCENT);
+            }
+            desiredMotorCurrent = convertPedaltoMotorPercent(forwardPercent);
         }
 
-        MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
+        if (Contactors_Get(MOTOR_CONTACTOR) == ON && (Switches_Read(FOR_SW) || Switches_Read(REV_SW))) {
+            MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
+        }
 
-        // Delay of few milliseconds (10)
-        OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
+        // Delay of few milliseconds (100)
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
 
         if (err != OS_ERR_NONE){
             assertOSError(OS_UPDATE_VEL_LOC, err);

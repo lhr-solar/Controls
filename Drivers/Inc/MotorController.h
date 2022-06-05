@@ -4,7 +4,6 @@
 #define __MOTORCONTROLLER_H
 
 #include <bsp.h>
-#include "CarState.h"
 
 typedef struct 
 {

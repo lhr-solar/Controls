@@ -8,12 +8,8 @@
 void Task_ReadTritium(void* p_arg) {
 
 	OS_ERR err;
-	
-	car_state_t *car_state = (car_state_t *) p_arg;
 
 	CANMSG_t msg;
-
-	MotorController_Init(1.0f); // Let motor controller use 100% of bus current
 
 	while (1) {
 		CANbuff buf;
@@ -24,15 +20,12 @@ void Task_ReadTritium(void* p_arg) {
 			msg.id = buf.id;
 			msg.payload.data.d = ((uint64_t) buf.firstNum << 32) | ((uint64_t) buf.secondNum);
 
+			__unused
 			ErrorStatus error = CAN_Queue_Post(msg);
 			
-			if (error != SUCCESS) {
-        	    car_state->ErrorCode.ReadTritiumErr = ON;
-			}
+			// TODO: handle error
 		}
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-		if (err != OS_ERR_NONE) {
-			car_state->ErrorCode.ReadTritiumErr = ON;
-		}
+		assertOSError(OS_READ_TRITIUM_LOC, err);
 	}
 }

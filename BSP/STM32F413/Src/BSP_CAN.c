@@ -1,5 +1,4 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
-
 #include "BSP_CAN.h"
 #include "stm32f4xx.h"
 #include "os.h"

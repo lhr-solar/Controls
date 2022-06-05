@@ -8,7 +8,7 @@
 // The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
 #define MPS_TO_dMPH 22.374f
 
-#define CHECK(expr) do {if ((expr) == ERROR) {return ERROR;}} while(0)
+#define CHECK(expr) if ((expr) == ERROR) return ERROR
 
 static const char *DELIMITER = ".";
 static const char *ASSIGNMENT = "=";
@@ -23,7 +23,7 @@ static const uint16_t NEXTION_LIGHT_GREY = 42260;
 //static const uint16_t NEXTION_BURNT_ORANGE = 51872;
 
 static inline int IsNextionFailure(uint32_t val) {
-    return ((val & ~0x00FFFFFF) != (1 << 24));
+    return (val >> 24) != 1;
 }
 
 
@@ -44,7 +44,8 @@ enum CommandString_t {
     ERROR2,
     ERROR3,
     ERROR4,
-    ERROR5
+    ERROR5,
+    SUPPL_VOLT
 };
 
 // The command strings themselves
@@ -64,7 +65,8 @@ static char *CommandStrings[] = {
     "t6",
     "t7",
     "t8",
-    "t9"
+    "t9",
+    "x1"
 };
 
 /**
@@ -158,6 +160,15 @@ void Display_Init() {
 ErrorStatus Display_SetVelocity(float vel) {
     int32_t vel_fix = (uint32_t) floorf(vel * MPS_TO_dMPH);
     return updateIntValue(VELOCITY, VALUE, vel_fix);
+}
+
+/**
+ * Set the displayed supplemental battery pack voltage.
+ * Units of millivolts
+ */
+ErrorStatus Display_SetSBPV(uint16_t mv) {
+    int32_t sbpv = mv / 100; // One tenth of a volt precision
+    return updateIntValue(SUPPL_VOLT, VALUE, sbpv);
 }
 
 /**
