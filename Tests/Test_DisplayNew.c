@@ -14,13 +14,14 @@ void Task1(void* arg){
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     SupplementalVoltage = 200;
+    Display_Init();
 
     OS_ERR err;
     Display_SetMainView();
     while(1){
         OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
         assertOSError(OS_MAIN_LOC,err);
-        SupplementalVoltage +=1;
+        SupplementalVoltage +=100;
         Display_SetSBPV(SupplementalVoltage);
         Display_SetVelocity(25.0);
     }
