@@ -43,12 +43,13 @@ void Task_SendDisplay(void *p_arg) {
         if (Contactors_Get(ARRAY_CONTACTOR) == ON) {
             Display_SetMainView(); // Make sure we're in the main view first
             Display_SetVelocity(MotorController_ReadVelocity());
+            Display_SetSBPV(SupplementalVoltage);
+            Display_SetChargeState(StateOfCharge);
+            Display_SetRegenEnabled(RegenEnable);
         } else {
             Display_SetPrechargeView();
         }
 
-        Display_SetSBPV(SupplementalVoltage);
-        Display_SetChargeState(StateOfCharge);
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
     }

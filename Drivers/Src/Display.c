@@ -168,10 +168,20 @@ ErrorStatus Display_SetVelocity(float vel) {
  * @param chargeState 
  * @return void 
  */
-void Display_SetChargeState(uint32_t chargeState){
+ErrorStatus Display_SetChargeState(uint32_t chargeState){
     int32_t format = (int32_t) (chargeState / 10000); //charge state comes in 6 digit precision, we only care about the integer and two decimal places
     return updateIntValue(CHARGE_STATE,VALUE,format);
 }
+
+/**
+ * @brief Updates the display with whether regenerative braking / charging is allowed or not
+ * @param ChargeEnabled a state value indicating whether or not charging is enabled
+ */
+ErrorStatus Display_SetRegenEnabled(State ChargeEnabled){
+    char* msg = (ChargeEnabled == ON ? "Enabled":"Disabled");
+    return updateStringValue(REGEN_ENABLE, TEXT, msg);
+}
+
 
 /**
  * Set the displayed supplemental battery pack voltage.

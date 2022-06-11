@@ -34,6 +34,13 @@ ErrorStatus Display_NoErrors(void);
  * @param chargeState 
  * @return void 
  */
-void Display_SetChargeState(uint32_t chargeState)
+ErrorStatus Display_SetChargeState(uint32_t chargeState);
+
+/**
+ * @brief Updates the display with whether regenerative braking / charging is allowed or not
+ * @param ChargeEnabled a state value indicating whether or not charging is enabled
+ * @return void
+ */
+ErrorStatus Display_SetRegenEnabled(State ChargeEnabled);
 
 #endif
