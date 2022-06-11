@@ -17,9 +17,14 @@
 #define NEUTRAL_PEDALS_PERCENT 25
 #define REGEN_RANGE (NEUTRAL_PEDALS_PERCENT - UNTOUCH_PEDALS_PERCENT)
 
+static float cruiseSpeed = 0; //cruising speed
+static State cruiseSet = OFF; //whether cruise is set
+static State cruiseEnable = OFF; //whether cruise is enabled
+static State prevEnable = OFF; //extra state variable for edge detector
+static State prevSet = OFF; //extra state variable for edge detector
 extern const float pedalToPercent[];
 
-// As of 03/13/2021 the function just returns a 1 to 1 conversion
+
 static float convertPedaltoMotorPercent(uint8_t pedalPercentage)
 {
     if(pedalPercentage > 100){
@@ -28,7 +33,7 @@ static float convertPedaltoMotorPercent(uint8_t pedalPercentage)
     return pedalToPercent[pedalPercentage];
 }
 
-// Convert a float velocity to a desired RPM
+// Convert a float velocity in meters per second to a desired RPM
 static float velocity_to_rpm(float velocity) {
     float velocity_mpm = velocity * 60.0f; // velocity in meters per minute
     const float circumfrence = WHEEL_DIAMETER * M_PI;
@@ -48,6 +53,32 @@ void Task_UpdateVelocity(void *p_arg)
         uint8_t accelPedalPercent = Pedals_Read(ACCELERATOR);
         uint8_t brakePedalPercent = Pedals_Read(BRAKE);
 
+        //Edge detector to toggle the cruise enable on only the rising edge
+        State currEnable = Switches_Read(CRUZ_EN);
+        if((prevEnable == OFF) && (currEnable == ON)){ //we went from off to on, so we should toggle it
+            prevEnable = ON;
+            cruiseEnable ^= 1; 
+        } else if ((currEnable == OFF)){ //went from on to OFF, so reset the prev state
+            prevEnable = OFF;
+        }
+
+        //Edge detector to toggle the cruise set on only the rising edge
+        State currSet = Switches_Read(CRUZ_ST);
+        if((prevSet == OFF) && (currSet == OFF)){
+            prevSet = ON;
+            cruiseSet ^= 1;
+        } else if ((currSet == OFF)){
+            prevSet = OFF;
+        }
+
+
+        State cruiseState = cruiseSet & cruiseEnable; //if both are true, then we are in cruise mode, if not, we are in normal drive
+        
+        //record speed when we're not already cruising
+        if(!cruiseState){
+            cruiseSpeed = MotorController_ReadVelocity();
+        }
+
         // Set brake lights
         if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
             Lights_Set(BrakeLight, ON);
@@ -55,16 +86,23 @@ void Task_UpdateVelocity(void *p_arg)
         else{
             Lights_Set(BrakeLight, OFF);
         }
-    
+        
+
         // Deadband comparison
         if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
-            desiredVelocity = 0;
-            desiredMotorCurrent = (Switches_Read(REGEN_SW) && RegenEnable) ? REGEN_CURRENT : 0;
+            desiredVelocity = 0; //velocity setpoint becomes 0
+            cruiseSet = OFF; //unset cruise, but don't disable cruise system
+            cruiseState = OFF; //turn off the cruise state
+            cruiseSpeed = 0; //set the cruise velocity to 0
+            desiredMotorCurrent = (Switches_Read(REGEN_SW) && RegenEnable) ? REGEN_CURRENT : 0; //either regen brake or 0 current brake
         } 
-        else if(Switches_Read(REGEN_SW) 
-                && (MotorController_ReadVelocity() > THRESHOLD_VEL) 
-                && RegenEnable
-                && accelPedalPercent < NEUTRAL_PEDALS_PERCENT){ 
+        else if( //One-pedal regen drive case
+                Switches_Read(REGEN_SW) //regen switch is pressed
+                && (MotorController_ReadVelocity() > THRESHOLD_VEL)  //we're above the threshold value
+                && RegenEnable //regen is allowed
+                && accelPedalPercent < NEUTRAL_PEDALS_PERCENT //we're in the one-pedal drive range
+                && (cruiseState != ON) //we're not in cruise mode
+            ){ 
             
             desiredVelocity = 0;
             // set regen current based on how much the accel pedal is pressed down
@@ -76,16 +114,23 @@ void Task_UpdateVelocity(void *p_arg)
         } 
         else {
             if(Switches_Read(FOR_SW)){
-                desiredVelocity = MAX_VELOCITY;
+                desiredVelocity = ((cruiseState==ON) ? cruiseSpeed : MAX_VELOCITY); //we're in cruise mode so use the recorded cruise velocity
             } else if (Switches_Read(REV_SW)) {
                 desiredVelocity = -MAX_VELOCITY;
             }
-            // handle one-pedal drive
+            
+            //handle neutral range due to one-pedal drive above
             uint8_t forwardPercent = 0;
             if (accelPedalPercent > NEUTRAL_PEDALS_PERCENT) {
                 forwardPercent = (accelPedalPercent - NEUTRAL_PEDALS_PERCENT) * 100 / (100 - NEUTRAL_PEDALS_PERCENT);
             }
-            desiredMotorCurrent = convertPedaltoMotorPercent(forwardPercent);
+            
+            if((cruiseState == ON)&&(Switches_Read(FOR_SW))){ //we're in cruise mode so use total current to hit cruise velocity
+                desiredMotorCurrent = (float) 100;
+            } else {
+                desiredMotorCurrent = convertPedaltoMotorPercent(forwardPercent);
+            }
+
         }
 
         if (Contactors_Get(MOTOR_CONTACTOR) == ON && (Switches_Read(FOR_SW) || Switches_Read(REV_SW))) {
