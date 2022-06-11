@@ -52,10 +52,10 @@ OS_SEM FaultState_Sem4;
 /**
  * Global Variables
  */
-// TODO: Put all global state variables here
 State RegenEnable = OFF;
 State CruiseControlEnable = OFF;
-uint16_t SupplementalVoltage = 0;
+uint16_t SupplementalVoltage = 0; // supplemental voltage read from Supplemental Voltage board over CAN
+uint32_t StateOfCharge = 0; //8 digit fixed point value from bps read over CAN. 88750000 = 88.750000%
 
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;

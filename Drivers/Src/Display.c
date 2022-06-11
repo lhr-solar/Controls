@@ -9,7 +9,6 @@
 #define MPS_TO_dMPH 22.374f
 
 #define CHECK(expr) if ((expr) == ERROR) return ERROR
-
 static const char *DELIMITER = ".";
 static const char *ASSIGNMENT = "=";
 static const char *TERMINATOR = "\xff\xff\xff";
@@ -45,7 +44,8 @@ enum CommandString_t {
     ERROR3,
     ERROR4,
     ERROR5,
-    SUPPL_VOLT
+    SUPPL_VOLT,
+    CHARGE_STATE
 };
 
 // The command strings themselves
@@ -160,6 +160,17 @@ void Display_Init() {
 ErrorStatus Display_SetVelocity(float vel) {
     int32_t vel_fix = (uint32_t) floorf(vel * MPS_TO_dMPH);
     return updateIntValue(VELOCITY, VALUE, vel_fix);
+}
+
+
+/**
+ * @brief Update the charge state on the display.
+ * @param chargeState 
+ * @return void 
+ */
+void Display_SetChargeState(uint32_t chargeState){
+    int32_t format = (int32_t) (chargeState / 10000); //charge state comes in 6 digit precision, we only care about the integer and two decimal places
+    return updateIntValue(CHARGE_STATE,VALUE,format);
 }
 
 /**

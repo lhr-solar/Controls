@@ -114,9 +114,10 @@ extern OS_SEM MotorConnectionChange_Sem4;
  * Global Variables
  */
 
-// TODO: Put all global state variables here
 extern State RegenEnable;
 extern State CruiseControlEnable;
+extern uint16_t SupplementalVoltage;
+extern uint32_t StateOfCharge;
 
 /**
  * OS Error States
@@ -159,7 +160,6 @@ typedef enum{
  */
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
-extern uint16_t SupplementalVoltage;
 
 /**
  * @brief   Assert Error if OS function call fails

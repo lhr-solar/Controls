@@ -48,6 +48,7 @@ void Task_SendDisplay(void *p_arg) {
         }
 
         Display_SetSBPV(SupplementalVoltage);
+        Display_SetChargeState(StateOfCharge);
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
     }
