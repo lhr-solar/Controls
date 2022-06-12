@@ -63,12 +63,17 @@ void Task_UpdateVelocity(void *p_arg)
         }
 
         //Edge detector to toggle the cruise set on only the rising edge
-        State currSet = Switches_Read(CRUZ_ST);
-        if((prevSet == OFF) && (currSet == OFF)){
-            prevSet = ON;
-            cruiseSet ^= 1;
-        } else if ((currSet == OFF)){
-            prevSet = OFF;
+
+        if(cruiseEnable){
+            State currSet = Switches_Read(CRUZ_ST);
+            if((prevSet == OFF) && (currSet == ON)){
+                prevSet = ON;
+                cruiseSet ^= 1;
+            } else if ((currSet == OFF)){
+                prevSet = OFF;
+            }
+        } else {
+            cruiseSet = OFF;
         }
 
 
