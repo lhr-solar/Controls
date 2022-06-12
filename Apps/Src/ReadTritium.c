@@ -5,24 +5,27 @@
 #include "CANbus.h"
 #include <string.h>
 
-void Task_ReadTritium(void* p_arg) {
+void Task_ReadTritium(void *p_arg)
+{
 
 	OS_ERR err;
 
 	CANMSG_t msg;
 
-	while (1) {
+	while (1)
+	{
 		CANbuff buf;
 		ErrorStatus status = MotorController_Read(&buf);
 
-		if(status == SUCCESS) {
+		if (status == SUCCESS)
+		{
 
 			msg.id = buf.id;
-			msg.payload.data.d = ((uint64_t) buf.firstNum << 32) | ((uint64_t) buf.secondNum);
+			msg.payload.data.d = ((uint64_t)buf.firstNum << 32) | ((uint64_t)buf.secondNum);
 
 			__unused
-			ErrorStatus error = CAN_Queue_Post(msg);
-			
+				ErrorStatus error = CAN_Queue_Post(msg);
+
 			// TODO: handle error
 		}
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
