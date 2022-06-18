@@ -10,18 +10,23 @@
 #define REGEN_CURRENT 0.5f
 // THRESHOLD VELOCITY IN M/S
 #define THRESHOLD_VEL 1.0f
-// UNTOUCH_PEDALS_PERCENT AS A PERCENTAGE OF MAX PEDAL POSITION
-#define UNTOUCH_PEDALS_PERCENT 5
+// UNTOUCH PEDAL PERCENTS AS A PERCENTAGE OF MAX PEDAL POSITION
+#define UNTOUCH_PEDALS_PERCENT_ACCEL UNTOUCH_PEDALS_PERCENT //tuning constant for the accelerator pedal
+#define UNTOUCH_PEDALS_PERCENT_BRAKE UNTOUCH_PEDALS_PERCENT //tuning constant for the brake pedal
+#define UNTOUCH_PEDALS_PERCENT 5 //generic tuning constant for both pedals (assuming we want to use the same one for both)
 
 // percent of pedal to count as neutral (to add support for one-pedal drive)
 #define NEUTRAL_PEDALS_PERCENT 25
-#define REGEN_RANGE (NEUTRAL_PEDALS_PERCENT - UNTOUCH_PEDALS_PERCENT)
+#define REGEN_RANGE (NEUTRAL_PEDALS_PERCENT - UNTOUCH_PEDALS_PERCENT_ACCEL)
 
 static float cruiseSpeed = 0; //cruising speed
-static State cruiseSet = OFF; //whether cruise is set
 static State cruiseEnable = OFF; //whether cruise is enabled
-static State prevEnable = OFF; //extra state variable for edge detector
-static State prevSet = OFF; //extra state variable for edge detector
+static State cruiseSet = OFF; //whether cruise is set
+
+static State currEnable = OFF; //state variable for edge detector Cruise Enable Button
+static State currSet = OFF; //state variable for edge detector on Cruise Set Button
+static State prevEnable = OFF; //state variable for edge detector on Cruise Enable button
+static State prevSet = OFF; //state variable for edge detector on Cruise Set button
 extern const float pedalToPercent[];
 
 
@@ -54,28 +59,24 @@ void Task_UpdateVelocity(void *p_arg)
         uint8_t brakePedalPercent = Pedals_Read(BRAKE);
 
         //Edge detector to toggle the cruise enable on only the rising edge
-        State currEnable = Switches_Read(CRUZ_EN);
-        if((prevEnable == OFF) && (currEnable == ON)){ //we went from off to on, so we should toggle it
-            prevEnable = ON;
+        prevEnable = currEnable; //store old state in prev
+        currEnable = Switches_Read(CRUZ_EN); //read in current state
+        if((prevEnable == OFF) && (currEnable == ON)){ //we went from off to on, so we should toggle it between on and off
             cruiseEnable ^= 1; 
-        } else if ((currEnable == OFF)){ //went from on to OFF, so reset the prev state
-            prevEnable = OFF;
         }
+        //no need for an else block, all following logic is only dependent on the cruiseEnable value
 
         //Edge detector to toggle the cruise set on only the rising edge
+        prevSet = currSet; // store old state in prev
+        currSet = Switches_Read(CRUZ_ST); //read in the current state
+        if((prevSet == OFF) && (currSet == ON)){ //we went from off to on, so we should toggle it between on and off
+            cruiseSet ^= 1;
+        }
+        //no need for an else block, all following logic is only dependent on the cruiseSet value
 
-        if(cruiseEnable){
-            State currSet = Switches_Read(CRUZ_ST);
-            if((prevSet == OFF) && (currSet == ON)){
-                prevSet = ON;
-                cruiseSet ^= 1;
-            } else if ((currSet == OFF)){
-                prevSet = OFF;
-            }
-        } else {
+        if(cruiseEnable==OFF){ //cruise Enable being off overrides cruiseSet edge detector
             cruiseSet = OFF;
         }
-
 
         State cruiseState = cruiseSet & cruiseEnable; //if both are true, then we are in cruise mode, if not, we are in normal drive
         
@@ -83,9 +84,8 @@ void Task_UpdateVelocity(void *p_arg)
         if(!cruiseState){
             cruiseSpeed = MotorController_ReadVelocity();
         }
-
         // Set brake lights
-        if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
+        if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT_BRAKE){
             Lights_Set(BrakeLight, ON);
         }
         else{
@@ -94,7 +94,7 @@ void Task_UpdateVelocity(void *p_arg)
         
 
         // Deadband comparison
-        if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT){
+        if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT_BRAKE){ //mech brake is pushed down
             desiredVelocity = 0; //velocity setpoint becomes 0
             cruiseSet = OFF; //unset cruise, but don't disable cruise system
             cruiseState = OFF; //turn off the cruise state
@@ -111,8 +111,8 @@ void Task_UpdateVelocity(void *p_arg)
             
             desiredVelocity = 0;
             // set regen current based on how much the accel pedal is pressed down
-            if (accelPedalPercent > UNTOUCH_PEDALS_PERCENT) {
-                desiredMotorCurrent = REGEN_CURRENT * (REGEN_RANGE - (accelPedalPercent - UNTOUCH_PEDALS_PERCENT)) / REGEN_RANGE;
+            if (accelPedalPercent > UNTOUCH_PEDALS_PERCENT_ACCEL) {
+                desiredMotorCurrent = REGEN_CURRENT * (REGEN_RANGE - (accelPedalPercent - UNTOUCH_PEDALS_PERCENT_ACCEL)) / REGEN_RANGE;
             } else {
                 desiredMotorCurrent = REGEN_CURRENT;
             }
