@@ -74,10 +74,6 @@ void Task_UpdateVelocity(void *p_arg)
         }
         //no need for an else block, all following logic is only dependent on the cruiseSet value
 
-        if(cruiseEnable==OFF){ //cruise Enable being off overrides cruiseSet edge detector
-            cruiseSet = OFF;
-        }
-
         State cruiseState = cruiseSet & cruiseEnable; //if both are true, then we are in cruise mode, if not, we are in normal drive
         
         //record speed when we're not already cruising
