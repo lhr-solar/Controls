@@ -131,7 +131,7 @@ void Task_UpdateVelocity(void *p_arg)
             }
             
             if((cruiseState == ON)&&(Switches_Read(FOR_SW))){ //we're in cruise mode so use total current to hit cruise velocity
-                desiredMotorCurrent = (float) 100;
+                desiredMotorCurrent = (float) 1.0;
             } else {
                 desiredMotorCurrent = convertPedaltoMotorPercent(forwardPercent);
             }
