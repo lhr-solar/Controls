@@ -21,7 +21,6 @@
 
 static float cruiseSpeed = 0; //cruising speed
 static State cruiseEnable = OFF; //whether cruise is enabled
-static State cruiseSet = OFF; //whether cruise is set
 
 static State currEnable = OFF; //state variable for edge detector Cruise Enable Button
 static State prevEnable = OFF; //state variable for edge detector on Cruise Enable button
