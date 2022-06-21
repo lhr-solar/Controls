@@ -85,7 +85,7 @@ void Task_UpdateVelocity(void *p_arg)
         else if( //One-pedal regen drive case
                 Switches_Read(REGEN_SW) //regen switch is pressed
                 && (MotorController_ReadVelocity() > THRESHOLD_VEL)  //we're above the threshold value
-                && RegenEnable //regen is allowed
+                && (RegenEnable == ON) //regen is allowed
                 && accelPedalPercent < NEUTRAL_PEDALS_PERCENT //we're in the one-pedal drive range
                 && (cruiseEnable == OFF) //we're not in cruise mode
             ){ 
@@ -100,7 +100,7 @@ void Task_UpdateVelocity(void *p_arg)
         } 
         else {
             if(Switches_Read(FOR_SW)){
-                desiredVelocity = ((cruiseEnable==ON) ? cruiseSpeed : MAX_VELOCITY); //we're in cruise mode so use the recorded cruise velocity
+                desiredVelocity = (((cruiseEnable==ON)&&(accelPedalPercent < NEUTRAL_PEDALS_PERCENT)) ? cruiseSpeed : MAX_VELOCITY); //we're in cruise mode so use the recorded cruise velocity
             } else if (Switches_Read(REV_SW)) {
                 desiredVelocity = -MAX_VELOCITY;
             }
@@ -111,7 +111,7 @@ void Task_UpdateVelocity(void *p_arg)
                 forwardPercent = (accelPedalPercent - NEUTRAL_PEDALS_PERCENT) * 100 / (100 - NEUTRAL_PEDALS_PERCENT);
             }
             
-            if((cruiseEnable == ON)&&(Switches_Read(FOR_SW))){ //we're in cruise mode so use total current to hit cruise velocity
+            if((cruiseEnable == ON)&&(Switches_Read(FOR_SW))&&(accelPedalPercent<NEUTRAL_PEDALS_PERCENT)){ //we're in cruise mode and not accelerating so use total current to hit cruise velocity
                 desiredMotorCurrent = (float) 1.0;
             } else {
                 desiredMotorCurrent = convertPedaltoMotorPercent(forwardPercent);
