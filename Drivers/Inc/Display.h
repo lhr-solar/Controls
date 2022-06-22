@@ -20,10 +20,8 @@ void Display_Init();
  * Value setting subroutines
  */
 ErrorStatus Display_SetMainView(void);
-ErrorStatus Display_SetPrechargeView(void);
 
 ErrorStatus Display_CruiseEnable(State on);
-ErrorStatus Display_CruiseSet(State on);
 ErrorStatus Display_SetVelocity(float vel);
 ErrorStatus Display_SetSBPV(uint16_t mv);
 ErrorStatus Display_SetError(int idx, char *err);

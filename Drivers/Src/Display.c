@@ -218,28 +218,14 @@ ErrorStatus Display_CruiseEnable(State on)
 {
     if (on == ON)
     {
-        return updateIntValue(CRUISE_ENABLE, PCO, NEXTION_GREEN);
+        return setComponentVisibility(CRUISE_ENABLE, true);
     }
     else
     {
-        return updateIntValue(CRUISE_ENABLE, PCO, NEXTION_LIGHT_GREY);
+        return setComponentVisibility(CRUISE_ENABLE, false);
     }
 }
 
-/**
- * Update the cruise set light on the display based on the given state
- */
-ErrorStatus Display_CruiseSet(State on)
-{
-    if (on == ON)
-    {
-        return updateIntValue(CRUISE_SET, PCO, NEXTION_GREEN);
-    }
-    else
-    {
-        return updateIntValue(CRUISE_SET, PCO, NEXTION_LIGHT_GREY);
-    }
-}
 
 /**
  * Set ERROR<idx> to err
@@ -280,15 +266,7 @@ ErrorStatus Display_NoErrors(void)
 ErrorStatus Display_SetMainView(void)
 {
     // return updateIntValue(SYSTEM, PAGE, 1);
-    char *page = "page 1\xff\xff\xff";
+    char *page = "main\xff\xff\xff";    // hopefully this works, changed name of page from page 1 to main
     BSP_UART_Write(DISP_OUT, page, strlen(page));
     return SUCCESS;
-}
-
-/**
- * Set the display back to the precharge view
- */
-ErrorStatus Display_SetPrechargeView(void)
-{
-    return updateIntValue(SYSTEM, PAGE, 0);
 }
