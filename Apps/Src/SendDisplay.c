@@ -32,21 +32,10 @@ void Task_SendDisplay(void *p_arg) {
     // car_state_t *car = (car_state_t *) p_arg;
     OS_ERR err;
 
-
-    Display_SetPrechargeView();
-
+    Display_SetMainView(); // Make sure we're in the main view first
+    
     while (1) {
-
-
-        // If the contactors are not yet enabled, we're probably still in precharge
-        // Otherwise, changed to the main view
-        if (Contactors_Get(ARRAY_CONTACTOR) == ON) {
-            Display_SetMainView(); // Make sure we're in the main view first
-            Display_SetVelocity(MotorController_ReadVelocity());
-        } else {
-            Display_SetPrechargeView();
-        }
-
+        Display_SetVelocity(MotorController_ReadVelocity());
         Display_SetSBPV(SupplementalVoltage);
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
