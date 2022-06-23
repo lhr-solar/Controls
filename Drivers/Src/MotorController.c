@@ -17,7 +17,7 @@ static OS_SEM	MotorController_MailSem4;
 static OS_SEM	MotorController_ReceiveSem4;
 static float CurrentVelocity = 0;
 
-static tritium_error_code_t Motor_FaultBitmap = T_NONE;
+tritium_error_code_t Motor_FaultBitmap = T_NONE;
 
 static bool is_initialized = false;
 
@@ -224,4 +224,12 @@ ErrorStatus MotorController_Read(CANbuff *message){
  */ 
 float MotorController_ReadVelocity(void){
     return CurrentVelocity;
+}
+
+/**
+ * @brief Return the static error field from this layer
+ * 
+ */
+tritium_error_code_t MotorController_getTritiumError(void){
+    return Motor_FaultBitmap;
 }

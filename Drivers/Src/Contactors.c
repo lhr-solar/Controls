@@ -5,11 +5,6 @@
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
 
-#define CONTACTORS_PORT         PORTC
-#define ARRAY_PRECHARGE_PIN GPIO_Pin_10
-#define ARRAY_CONTACTOR_PIN GPIO_Pin_11
-#define MOTOR_CONTACTOR_PIN GPIO_Pin_12
-
 // keep track of contactor desired state and if enabled here
 struct contactor {
     bool enabled;

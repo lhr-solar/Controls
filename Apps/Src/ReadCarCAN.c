@@ -137,7 +137,7 @@ void Task_ReadCarCAN(void *p_arg)
             continue;
         }
 
-        switch(canId){ //we got a charge_enable message
+        switch(canId){ //we got a message
             case CHARGE_ENABLE: {
                 OSMutexPend(&msg_rcv_mutex,
                     0,
@@ -196,12 +196,12 @@ static void CANWatchdog_Handler(void *p_arg){
             assertOSError(OS_READ_CAN_LOC,err);
             
         } else {
+            chargingDisable();
             OSMutexPost(&msg_rcv_mutex,
                         OS_OPT_NONE,
                         &err);
             assertOSError(OS_READ_CAN_LOC,err);
 
-            chargingDisable();
             //increment trip counter
             watchDogTripCounter += 1;
         }

@@ -27,6 +27,11 @@ typedef enum{
 } tritium_error_code_t;
 
 /**
+ * @brief Returns the current error status of the tritium controller
+ */
+tritium_error_code_t MotorController_getTritiumError(void);
+
+/**
  * @brief   Initializes the motor controller
  * @param   busCurrentFractionalSetPoint fraction of the bus current to allow the motor to draw
  * @return  None

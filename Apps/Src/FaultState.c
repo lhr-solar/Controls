@@ -2,35 +2,44 @@
 #include "Contactors.h"
 #include "os.h"
 #include "Tasks.h"
+#include "MotorController.h"
+#include "Contactors.h"
 
-static void ArrayKill(void) {
-    Contactors_Disable(ARRAY_CONTACTOR);
-}
-
-static void MotorKill(void) {
-    Contactors_Disable(MOTOR_CONTACTOR);
-}
 
 static void ArrayMotorKill(void) {
-    ArrayKill();
-    MotorKill();
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
 }
+
+/**
+ * @brief Enter a shutdown state when a non-recoverable fault has occurred
+ * 
+ */
+void EnterShutdown(){
+    while(1){};
+};
 
 void EnterFaultState(void) {
     if(FaultBitmap & FAULT_OS){
         ArrayMotorKill();
+        EnterShutdown();
     }
-    else if(FaultBitmap & FAULT_TRITIUM){
+    else if(FaultBitmap & FAULT_TRITIUM){ //This gets tripped by the ReadTritium thread
+        tritium_error_code_t TritiumError = MotorController_getTritiumError(); //get error code to segregate based on fault type
         ArrayMotorKill();
+        EnterShutdown();
     }
-    else if(FaultBitmap & FAULT_READBPS){
+    else if(FaultBitmap & FAULT_READBPS){ //This has been put in with future development in mind, it is not currently tripped by anything.
         ArrayMotorKill();
+        EnterShutdown();
     }
-    else if(FaultBitmap & FAULT_UNREACH){
+    else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
         ArrayMotorKill();
+        EnterShutdown();
     }
     else if(FaultBitmap & FAULT_DISPLAY){
-        // TODO: Send reset command to display ("rest")
+        // TODO: Send reset command to display ("reset")
         // To be implemented when display driver is complete
     }
 
@@ -45,7 +54,8 @@ void Task_FaultState(void *p_arg) {
     OSErrLocBitmap = OS_NONE_LOC;
 
     // Block until fault is signaled by an assert
-    OSSemPend(&FaultState_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-
-    EnterFaultState();
+    while(1){
+        OSSemPend(&FaultState_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+        EnterFaultState();
+    }
 }
