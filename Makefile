@@ -13,7 +13,7 @@ NC=\033[0m # No Color
 TEST = none
 export TEST
 
-DEBUG = 1
+DEBUG = 0
 export DEBUG
 
 all:
