@@ -19,7 +19,7 @@ static const char *NO_ERROR = "No Error";
 // Color defintions for display
 static const uint16_t NEXTION_GREEN = 2016;
 static const uint16_t NEXTION_RED = 63488;
-static const uint16_t NEXTION_LIGHT_GREY = 42260;
+//static const uint16_t NEXTION_LIGHT_GREY = 42260;
 // static const uint16_t NEXTION_DARK_GREY = 23275;
 // static const uint16_t NEXTION_BURNT_ORANGE = 51872;
 
