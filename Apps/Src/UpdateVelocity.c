@@ -102,8 +102,8 @@ void Task_UpdateVelocity(void *p_arg)
         else {
             //determine the percentage of pedal range pushed
             uint8_t forwardPercent = 0;
-            if ((RegenSwitchState == OFF)&&(accelPedalPercent > UNTOUCH_PEDALS_PERCENT)){ //the accelerator is being pushed under non-regen pedal mapping. NOTE: RegenSwitchState used because driver should have exclusive control over which pedal mapping is used.
-                forwardPercent = ((accelPedalPercent - UNTOUCH_PEDALS_PERCENT) * 100) / (100 - UNTOUCH_PEDALS_PERCENT);
+            if ((RegenSwitchState == OFF)&&(accelPedalPercent > UNTOUCH_PEDALS_PERCENT_ACCEL)){ //the accelerator is being pushed under non-regen pedal mapping. NOTE: RegenSwitchState used because driver should have exclusive control over which pedal mapping is used.
+                forwardPercent = ((accelPedalPercent - UNTOUCH_PEDALS_PERCENT_ACCEL) * 100) / (100 - UNTOUCH_PEDALS_PERCENT_ACCEL);
             } else if (accelPedalPercent > NEUTRAL_PEDALS_PERCENT) {  // the accelerator is being pushed under regen enabled pedal mapping
                 forwardPercent = ((accelPedalPercent - NEUTRAL_PEDALS_PERCENT) * 100) / (100 - NEUTRAL_PEDALS_PERCENT);
             }
