@@ -54,7 +54,8 @@ void Task_UpdateVelocity(void *p_arg)
     {
         uint8_t accelPedalPercent = Pedals_Read(ACCELERATOR);
         uint8_t brakePedalPercent = Pedals_Read(BRAKE);
-        RegenState = (Switches_Read(REGEN_SW) && (RegenEnable == ON)); //AND driver regen enable and system regen enable together to decide whether we are in regen brake mode
+        State RegenSwitchState = Switches_Read(REGEN_SW);
+        RegenState = ((RegenSwitchState == ON) && (RegenEnable == ON)); //AND driver regen enable and system regen enable together to decide whether we are in regen brake mode
 
         //Edge detector to toggle the cruise enable on only the rising edge
         prevCruise = currCruise; //store old state in prev
@@ -101,7 +102,7 @@ void Task_UpdateVelocity(void *p_arg)
         else {
             //determine the percentage of pedal range pushed
             uint8_t forwardPercent = 0;
-            if ((RegenState == OFF)&&(accelPedalPercent > UNTOUCH_PEDALS_PERCENT)){ //the accelerator is being pushed under non-regen pedal mapping 
+            if ((RegenSwitchState == OFF)&&(accelPedalPercent > UNTOUCH_PEDALS_PERCENT)){ //the accelerator is being pushed under non-regen pedal mapping. NOTE: RegenSwitchState used because driver should have exclusive control over which pedal mapping is used.
                 forwardPercent = ((accelPedalPercent - UNTOUCH_PEDALS_PERCENT) * 100) / (100 - UNTOUCH_PEDALS_PERCENT);
             } else if (accelPedalPercent > NEUTRAL_PEDALS_PERCENT) {  // the accelerator is being pushed under regen enabled pedal mapping
                 forwardPercent = ((accelPedalPercent - NEUTRAL_PEDALS_PERCENT) * 100) / (100 - NEUTRAL_PEDALS_PERCENT);
