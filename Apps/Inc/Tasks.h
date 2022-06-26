@@ -20,10 +20,10 @@
  */
 #define TASK_FAULT_STATE_PRIO               1
 #define TASK_INIT_PRIO                      2
-#define TASK_UPDATE_VELOCITY_PRIO           3
-#define TASK_READ_CAR_CAN_PRIO              4
-#define TASK_SEND_DISPLAY_PRIO              5
-#define TASK_READ_TRITIUM_PRIO              6
+#define TASK_READ_TRITIUM_PRIO              3
+#define TASK_UPDATE_VELOCITY_PRIO           4
+#define TASK_READ_CAR_CAN_PRIO              5
+#define TASK_SEND_DISPLAY_PRIO              6
 #define TASK_READ_SWITCHES_PRIO             7
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_BLINK_LIGHT_PRIO               9
@@ -116,6 +116,8 @@ extern OS_SEM MotorConnectionChange_Sem4;
 
 //Put all global state variables here
 extern State RegenEnable;
+extern uint16_t SupplementalVoltage;
+extern bool UpdateVel_ToggleCruise;
 
 /**
  * OS Error States
@@ -158,7 +160,6 @@ typedef enum{
  */
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
-extern uint16_t SupplementalVoltage;
 
 /**
  * @brief   Assert Error if OS function call fails

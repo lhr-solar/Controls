@@ -12,7 +12,7 @@ typedef struct _msg
 
 // Set up a fifo for receiving
 #define FIFO_TYPE msg_t
-#define FIFO_SIZE 10
+#define FIFO_SIZE 25
 #define FIFO_NAME msg_queue
 #include "fifo.h"
 

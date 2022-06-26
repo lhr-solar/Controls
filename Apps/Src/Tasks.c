@@ -53,8 +53,8 @@ OS_SEM FaultState_Sem4;
  * Global Variables
  */
 // TODO: Put all global state variables here
-State RegenEnable = OFF;
-uint16_t SupplementalVoltage = 0;
+State RegenEnable = OFF; //whether or not regen is allowed
+uint16_t SupplementalVoltage = 0; //supplemental battery pack voltage
 
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;

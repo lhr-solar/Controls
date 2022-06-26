@@ -205,6 +205,8 @@ State Switches_Read(switches_t sw){
     
 }
 
+#define DEBOUNCING_ORDER 3 //How many history entries to track for switch debouncing
+
 /**
  * @brief   Queries all switch-related hardware and updates our internal state with the most recent switch values 
  * that Switches_Read depends on.
@@ -215,6 +217,8 @@ void Switches_UpdateStates(void){
     CPU_TS timestamp;
     uint8_t query[2]={SPI_OPCODE_R,SPI_GPIOA}; //query GPIOA
     uint8_t SwitchDataReg1 = 0, SwitchDataReg2 = 0;
+
+    static uint16_t debouncing_maps[DEBOUNCING_ORDER]; //switch states history buffer to debounce buttons
 
     //Read all switches except for ignition and hazard
     OSMutexPend(
@@ -252,8 +256,20 @@ void Switches_UpdateStates(void){
     //Read Ignition Switch 2
     uint8_t ign2 = !BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
     
+    // Shift the debouncing values
+    uint16_t debouncing_agg = 0xFFFF; //we want to debounce the ones, ie. if we are at one, it drops quickly to zero and comes back
+    for(int i = DEBOUNCING_ORDER-1; i >= 1; i--) {
+        debouncing_maps[i] = debouncing_maps[i-1]; //shift the history buffer on each pass
+        debouncing_agg &= debouncing_maps[i]; //AND the aggregate with the entry in the history buffer. For there to be a one in debouncing_agg, every entry in maps must have a 1 in that bit.
+    }
+
     //Store data in bitmap
-    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
+    uint16_t _switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
+
+    debouncing_agg &= _switchStatesBitmap; //AND the aggregate with the most recent read
+    debouncing_maps[0] = _switchStatesBitmap; //add the most recent read to the history buffer
+
+    switchStatesBitmap = debouncing_agg; //the debounced aggregate value becomes the bitmap
 }
 
 /**
