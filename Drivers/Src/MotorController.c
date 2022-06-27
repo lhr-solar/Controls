@@ -12,6 +12,7 @@
 #define MASK_SS_ERR (1<<19) //check for slip or hall sequence position error on 19 bit
 #define MASK_CC_ERR (1<<2) //checks velocity on 2 bit
 #define MASK_OVER_SPEED_ERR (1<<24) //check if motor overshot max RPM on 24 bit
+#define BYTES_TO_UINT32(bytes) ((bytes[]))
 
 static OS_SEM	MotorController_MailSem4;
 static OS_SEM	MotorController_ReceiveSem4;
@@ -169,15 +170,19 @@ ErrorStatus MotorController_Read(CANbuff *message){
     if(status == SUCCESS){
         message->id = id;
         //get first number (bits 0-31)
+        #if 0
         for(int j = 0; j < MAX_CAN_LEN/2; j++){
             firstSum <<= 8;
             firstSum += data[j];
         }
+        #endif
+        // firstSum = message->data1[]
         //get second number (bits 32-63)
-        for(int k = MAX_CAN_LEN/2; k < MAX_CAN_LEN; k++){
+        for(int k = MAX_CAN_LEN - 1; k >= (MAX_CAN_LEN/2); k--){
             secondSum <<= 8;
             secondSum += data[k];
         }
+
         message->firstNum = firstSum;
         message->secondNum = secondSum;
         

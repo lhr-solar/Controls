@@ -58,7 +58,10 @@ void Task_UpdateVelocity(void *p_arg)
         RegenState = ((RegenSwitchState == ON) && (RegenEnable == ON)); //AND driver regen enable and system regen enable together to decide whether we are in regen brake mode
 
         // Set the cruise state accordingly
-        cruiseState ^= UpdateVel_ToggleCruise;
+        if (UpdateVel_ToggleCruise) {
+            cruiseState = !cruiseState;
+        }
+        //cruiseState ^= UpdateVel_ToggleCruise;
 
         if(cruiseSpeed<THRESHOLD_VEL){ //prevent trying to cruise to low value and reset edge detector
             cruiseState=OFF;

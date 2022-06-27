@@ -8,8 +8,14 @@
 typedef struct 
 {
     uint32_t id;
+    union {
     uint32_t firstNum;
+    uint8_t data1[4];
+    };
+    union {
     uint32_t secondNum;
+    uint8_t data2[4];
+    };
 } CANbuff;
 
 /**
