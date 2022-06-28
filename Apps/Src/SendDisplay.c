@@ -2,7 +2,7 @@
 
 #include "SendDisplay.h"
 #include "MotorController.h"
-
+#include <math.h>
 #define MAX_DISPLAYABLE_ERRORS 6
 
 /*
@@ -33,22 +33,14 @@ void Task_SendDisplay(void *p_arg) {
     OS_ERR err;
 
 
-    Display_SetPrechargeView();
+    Display_SetMainView();
 
     while (1) {
 
 
-        // If the contactors are not yet enabled, we're probably still in precharge
-        // Otherwise, changed to the main view
-        if (Contactors_Get(ARRAY_CONTACTOR) == ON) {
-            Display_SetMainView(); // Make sure we're in the main view first
-            Display_SetVelocity(MotorController_ReadVelocity());
-        } else {
-            Display_SetPrechargeView();
-        }
-
+        Display_SetVelocity(fabs(MotorController_ReadVelocity()));
         Display_SetSBPV(SupplementalVoltage);
 
-        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
+        OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
     }
 }

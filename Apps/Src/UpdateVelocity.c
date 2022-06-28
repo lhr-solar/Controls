@@ -61,7 +61,6 @@ void Task_UpdateVelocity(void *p_arg)
         if (UpdateVel_ToggleCruise) {
             cruiseState = !cruiseState;
         }
-        //cruiseState ^= UpdateVel_ToggleCruise;
 
         if(cruiseSpeed<THRESHOLD_VEL){ //prevent trying to cruise to low value and reset edge detector
             cruiseState=OFF;
@@ -75,16 +74,16 @@ void Task_UpdateVelocity(void *p_arg)
             cruiseSpeed = MotorController_ReadVelocity();
         }
         // Set brake lights
-        if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT_BRAKE){
+        if(brakePedalPercent <= UNTOUCH_PEDALS_PERCENT_BRAKE){ //it is less than since we switched to a button instead of the adc
             Lights_Set(BrakeLight, ON);
         }
         else{
             Lights_Set(BrakeLight, OFF);
         }
-        
+
 
         // Deadband comparison
-        if(brakePedalPercent >= UNTOUCH_PEDALS_PERCENT_BRAKE){ //mech brake is pushed down
+        if(brakePedalPercent <= UNTOUCH_PEDALS_PERCENT_BRAKE){ //mech brake is pushed down NOTE: it is less than since we switched to a button 
             desiredVelocity = 0; //velocity setpoint becomes 0
             cruiseState = OFF; //turn off cruise
             desiredMotorCurrent = (RegenState == ON) ? REGEN_CURRENT : 0; //either regen brake or 0 current brake
@@ -117,6 +116,7 @@ void Task_UpdateVelocity(void *p_arg)
                 desiredVelocity = (((cruiseState==ON)&&(forwardPercent == 0)) ? cruiseSpeed : MAX_VELOCITY); // if in cruise and not pushing accel pedal, use cruise speed, otherwise use max
             } else if (Switches_Read(REV_SW)) {
                 desiredVelocity = -MAX_VELOCITY; //no cruising in reverse
+                cruiseState = OFF;
             }
             
 

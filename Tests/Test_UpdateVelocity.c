@@ -57,11 +57,10 @@ void Task1(void *p_arg) {
     while (1) {
         OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT, &err);
         Switches_UpdateStates(); //UpdateVelocity thread depends on switch Values
-        cruiseEnablePushed = Switches_Read(CRUZ_EN);
-        if (!lastCruiseEnPushed && cruiseEnablePushed) {
+        cruiseEnablePushed = Switches_Read(CRUZ_EN); //read cruise enable switch
+        if (!lastCruiseEnPushed && cruiseEnablePushed) { //Rising Edge detector for updateVelocity thread
             UpdateVel_ToggleCruise = true;
         }
-        //UpdateVel_ToggleCruise |= !lastCruiseEnPushed && cruiseEnablePushed; // Edge det.
         lastCruiseEnPushed = cruiseEnablePushed;
         CANbuff buf;
         __unused

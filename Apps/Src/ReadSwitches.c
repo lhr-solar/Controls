@@ -10,7 +10,7 @@
 #include "Minions.h"
 
 // Macros
-#define READ_SWITCH_PERIOD      20   // period (ms) that switches will be read.
+#define READ_SWITCH_PERIOD      10   // period (ms) that switches will be read.
 
 
 // Helper functions for reading/updating switches
@@ -30,7 +30,8 @@ void Task_ReadSwitches(void* p_arg) {
     assertOSError(OS_SWITCHES_LOC, err);
 
     Contactors_Enable(MOTOR_CONTACTOR);
-
+    static bool lastCruiseEnPushed = true; //cruise control edge detector variables
+    static State cruiseEnablePushed = OFF;
     // Main loop
     while (1) {
 
@@ -49,6 +50,14 @@ void Task_ReadSwitches(void* p_arg) {
         // motor on/off
         Contactors_Set(MOTOR_CONTACTOR, Switches_Read(IGN_2));
         Lights_Set(M_CNCTR,Switches_Read(IGN_2));
+
+        cruiseEnablePushed = Switches_Read(CRUZ_EN); //read cruise enable switch
+        if (!lastCruiseEnPushed && cruiseEnablePushed) { //Rising Edge detector for updateVelocity thread
+            UpdateVel_ToggleCruise = true; //updateVelocity thread depends on this
+        }
+        
+        lastCruiseEnPushed = cruiseEnablePushed;
+
 
         OSTimeDlyHMSM(0, 0, 0, READ_SWITCH_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
         assertOSError(OS_SWITCHES_LOC, err);
