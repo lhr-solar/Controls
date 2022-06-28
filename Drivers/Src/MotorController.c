@@ -8,10 +8,15 @@
 #define MOTOR_VELOCITY 0x243
 #define MAX_CAN_LEN 8
 
-#define MASK_MOTOR_TEMP_ERR (1<<6) //check if motor temperature is an issue on bit 6
-#define MASK_SS_ERR (1<<19) //check for slip or hall sequence position error on 19 bit
-#define MASK_CC_ERR (1<<2) //checks velocity on 2 bit
-#define MASK_OVER_SPEED_ERR (1<<24) //check if motor overshot max RPM on 24 bit
+//status msg masks
+#define MASK_LOW_VOLTAGE_LOCKOUT_ERR (1<<22) //Low voltage rail lockout happened
+#define MASK_HALL_SENSOR_ERR (1<<19) //check for slip or hall sequence position error on 19 bit
+#define MASK_DC_BUS_OVERVOLT_ERR (1<<18) //DC Bus overvoltage error
+#define MASK_SOFTWARE_OVER_CURRENT_ERR (1<<17) //Software Over Current error; Tritium firmware detected an overcurrent
+#define MASK_HARDWARE_OVER_CURRENT_ERR (1<<16) //Hardware Over current error; Tritium hardware detected an overcurrent
+#define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
+
+
 #define BYTES_TO_UINT32(bytes) ((bytes[]))
 
 static OS_SEM	MotorController_MailSem4;
@@ -36,7 +41,7 @@ static void _assertTritiumError(tritium_error_code_t motor_err){
     }
 }
 
-#ifdef DEBUG
+#if DEBUG == 1
 #define assertTritiumError(motor_err) \
         if (motor_err != T_NONE) { \
             printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, motor_err); \
@@ -170,13 +175,11 @@ ErrorStatus MotorController_Read(CANbuff *message){
     if(status == SUCCESS){
         message->id = id;
         //get first number (bits 0-31)
-        #if 0
-        for(int j = 0; j < MAX_CAN_LEN/2; j++){
+        for(int j = (MAX_CAN_LEN/2)-1 ; j >= 0; j--){
             firstSum <<= 8;
             firstSum += data[j];
         }
-        #endif
-        // firstSum = message->data1[]
+
         //get second number (bits 32-63)
         for(int k = MAX_CAN_LEN - 1; k >= (MAX_CAN_LEN/2); k--){
             secondSum <<= 8;
@@ -190,21 +193,29 @@ ErrorStatus MotorController_Read(CANbuff *message){
             // If we're reading the output from the Motor Status command (0x241) then 
             // Check the status bits we care about and set flags accordingly
             case MOTOR_STATUS: {
-                if(MASK_MOTOR_TEMP_ERR & firstSum){
+
+                if(MASK_DC_BUS_OVERVOLT_ERR & firstSum){
+                    Motor_FaultBitmap |= T_DC_BUS_OVERVOLT_ERR;
+                }
+
+                if(MASK_HALL_SENSOR_ERR & firstSum){
+                    Motor_FaultBitmap |= T_HALL_SENSOR_ERR;
+                }
+
+                if(MASK_HARDWARE_OVER_CURRENT_ERR & firstSum){
+                    Motor_FaultBitmap |= T_HARDWARE_OVER_CURRENT_ERR;
+                }
+                if(MASK_LOW_VOLTAGE_LOCKOUT_ERR & firstSum){
+                    Motor_FaultBitmap |= T_LOW_VOLTAGE_LOCKOUT_ERR;
+                }
+
+                if(MASK_MOTOR_TEMP_LIMIT & firstSum){
                     Motor_FaultBitmap |= T_TEMP_ERR;
                 }
 
-                if(MASK_SS_ERR & firstSum){
-                    Motor_FaultBitmap |= T_CC_VEL_ERR;
+                if(MASK_SOFTWARE_OVER_CURRENT_ERR & firstSum){
+                    Motor_FaultBitmap |= T_SOFTWARE_OVER_CURRENT_ERR;
                 }
-
-                if(MASK_CC_ERR & firstSum){
-                    Motor_FaultBitmap |= T_SLIP_SPEED_ERR;
-                }
-
-                // if(MASK_OVER_SPEED_ERR & firstSum){
-                //     Motor_FaultBitmap |= T_OVER_SPEED_ERR;
-                // }
 
                 assertTritiumError(Motor_FaultBitmap);
                 

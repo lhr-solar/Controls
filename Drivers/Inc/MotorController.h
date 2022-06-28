@@ -25,11 +25,15 @@ typedef struct
  */
 typedef enum{
     T_NONE = 0x00,
-    T_TEMP_ERR = 0x01,
-    T_CC_VEL_ERR = 0x02,
-    T_SLIP_SPEED_ERR = 0x04,
-    T_OVER_SPEED_ERR = 0x08,
-    T_INIT_FAIL = 0x16
+    T_DC_BUS_OVERVOLT_ERR = 0x01,
+    T_HALL_SENSOR_ERR = 0x02,
+    T_HARDWARE_OVER_CURRENT_ERR = 0x04,
+    T_CC_VEL_ERR = 0x08,
+    T_OVER_SPEED_ERR = 0x10,
+    T_TEMP_ERR = 0x20,
+    T_INIT_FAIL = 0x40,
+    T_LOW_VOLTAGE_LOCKOUT_ERR = 0x80,
+    T_SOFTWARE_OVER_CURRENT_ERR = 0x100,
 } tritium_error_code_t;
 
 /**
