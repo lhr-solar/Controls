@@ -18,16 +18,18 @@ CPU_STK Task1_Stk[256];
 void Task1(void *p_arg) {
     OS_ERR err;
 
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+    Pedals_Init();
+    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
+    OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     BSP_UART_Init(UART_2);
     CANbus_Init();
     Contactors_Init();
     Display_Init();
     Minions_Init();
-    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
-    Pedals_Init();
     CAN_Queue_Init();
 
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     //init updatevelocity
     OSTaskCreate(
         (OS_TCB*)&UpdateVelocity_TCB,
@@ -111,6 +113,24 @@ void Task1(void *p_arg) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
+
+    OSTaskCreate(
+        (OS_TCB*)&FaultState_TCB,
+        (CPU_CHAR*)"FaultState",
+        (OS_TASK_PTR)Task_FaultState,
+        (void*)NULL,
+        (OS_PRIO)TASK_FAULT_STATE_PRIO,
+        (CPU_STK*)FaultState_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_FAULT_STATE_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
+
 
     if (err != OS_ERR_NONE) {
         for(;;) x++;

@@ -166,7 +166,7 @@ extern os_error_loc_t OSErrLocBitmap;
  * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err);
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
 
 #if DEBUG == 1
 #define assertOSError(OS_err_loc,err) \

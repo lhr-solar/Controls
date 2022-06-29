@@ -22,6 +22,7 @@
 static OS_SEM	MotorController_MailSem4;
 static OS_SEM	MotorController_ReceiveSem4;
 static float CurrentVelocity = 0;
+static float CurrentRPM = 0;
 
 tritium_error_code_t Motor_FaultBitmap = T_NONE;
 
@@ -35,6 +36,7 @@ static bool is_initialized = false;
 static void _assertTritiumError(tritium_error_code_t motor_err){
     OS_ERR err;
     if(motor_err != T_NONE){
+        Lights_Set(CTRL_FAULT,ON); //turn on fault light
         FaultBitmap |= FAULT_TRITIUM;
         OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
         assertOSError(0, err);
@@ -101,6 +103,34 @@ void MotorController_Init(float busCurrentFractionalSetPoint){
 
     BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
 
+    uint8_t data[8] = {0};
+    memcpy(
+        data+4, //Tritium expects the setpoint in the Most significant 32 bits, so we offset
+        &busCurrentFractionalSetPoint,
+        sizeof(busCurrentFractionalSetPoint)
+    );
+    OSSemPend(&MotorController_MailSem4,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            &ts,
+            &err);
+	assertOSError(0, err);
+    ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_POWER, data, MAX_CAN_LEN);
+    if (initCommand == ERROR) {
+		MotorController_Release();
+        Motor_FaultBitmap = T_INIT_FAIL;
+        assertTritiumError(Motor_FaultBitmap);
+	}
+}
+
+/**
+ * @brief Restarts the motor controller. THIS FUNCTION IS FOR FAULT STATE USE ONLY.
+ * 
+ * @param busCurrentFractionalSetPoint 
+ */
+void MotorController_Restart(float busCurrentFractionalSetPoint){
+    CPU_TS ts;
+	OS_ERR err;
     uint8_t data[8] = {0};
     memcpy(
         data+4, //Tritium expects the setpoint in the Most significant 32 bits, so we offset
@@ -205,6 +235,11 @@ ErrorStatus MotorController_Read(CANbuff *message){
                 if(MASK_HARDWARE_OVER_CURRENT_ERR & firstSum){
                     Motor_FaultBitmap |= T_HARDWARE_OVER_CURRENT_ERR;
                 }
+
+                if(MASK_SOFTWARE_OVER_CURRENT_ERR & firstSum){
+                    Motor_FaultBitmap |= T_SOFTWARE_OVER_CURRENT_ERR;
+                }
+
                 if(MASK_LOW_VOLTAGE_LOCKOUT_ERR & firstSum){
                     Motor_FaultBitmap |= T_LOW_VOLTAGE_LOCKOUT_ERR;
                 }
@@ -213,9 +248,6 @@ ErrorStatus MotorController_Read(CANbuff *message){
                     Motor_FaultBitmap |= T_TEMP_ERR;
                 }
 
-                if(MASK_SOFTWARE_OVER_CURRENT_ERR & firstSum){
-                    Motor_FaultBitmap |= T_SOFTWARE_OVER_CURRENT_ERR;
-                }
 
                 assertTritiumError(Motor_FaultBitmap);
                 
@@ -223,6 +255,7 @@ ErrorStatus MotorController_Read(CANbuff *message){
             }
             case MOTOR_VELOCITY: {
                 CurrentVelocity = *(float *) &secondSum;
+                CurrentRPM = *(float*) &firstSum;
                 break;
             }
             default: break;
@@ -240,6 +273,10 @@ ErrorStatus MotorController_Read(CANbuff *message){
  */ 
 float MotorController_ReadVelocity(void){
     return CurrentVelocity;
+}
+
+float MotorController_ReadRPM(void){
+    return CurrentRPM;
 }
 
 /**

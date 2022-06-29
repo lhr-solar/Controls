@@ -20,6 +20,7 @@
 #define REGEN_RANGE (NEUTRAL_PEDALS_PERCENT - UNTOUCH_PEDALS_PERCENT_ACCEL)
 
 static float cruiseSpeed = 0; //cruising speed
+static float cruiseRPM = 0;
 static State cruiseState = OFF; //whether cruise is enabled
 
 extern const float pedalToPercent[];
@@ -72,6 +73,7 @@ void Task_UpdateVelocity(void *p_arg)
         //record speed when we're not already cruising
         if(!cruiseState){
             cruiseSpeed = MotorController_ReadVelocity();
+            cruiseRPM = MotorController_ReadRPM();
         }
         // Set brake lights
         if(brakePedalPercent <= UNTOUCH_PEDALS_PERCENT_BRAKE){ //it is less than since we switched to a button instead of the adc
@@ -81,6 +83,7 @@ void Task_UpdateVelocity(void *p_arg)
             Lights_Set(BrakeLight, OFF);
         }
 
+        cruiseState = OFF; //DISABLING CRUISE CONTROL FOR POWERED RUN, DEBUG FURTHER BEFORE REMOVING
 
         // Deadband comparison
         if(brakePedalPercent <= UNTOUCH_PEDALS_PERCENT_BRAKE){ //mech brake is pushed down NOTE: it is less than since we switched to a button 
@@ -128,7 +131,7 @@ void Task_UpdateVelocity(void *p_arg)
 
         }
 
-        if ((Contactors_Get(MOTOR_CONTACTOR)) && ((Switches_Read(FOR_SW) || Switches_Read(REV_SW)))) {
+        if ((true) && ((Switches_Read(FOR_SW) || Switches_Read(REV_SW)))) {
             MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
         }
 

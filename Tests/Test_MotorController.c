@@ -102,21 +102,6 @@ int main(){
         }
     }
 
-    OSTaskCreate(
-        (OS_TCB*)&FaultState_TCB,
-        (CPU_CHAR*)"Fault State",
-        (OS_TASK_PTR)&Task_FaultState,
-        (void*)NULL,
-        (OS_PRIO)1,
-        (CPU_STK*)FaultState_Stk,
-        (CPU_STK_SIZE)128/10,
-        (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)0,
-        (OS_TICK)NULL,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
     if(err != OS_ERR_NONE){
         volatile int x = 0;
         while(1){

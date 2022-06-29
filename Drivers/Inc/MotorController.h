@@ -28,8 +28,8 @@ typedef enum{
     T_DC_BUS_OVERVOLT_ERR = 0x01,
     T_HALL_SENSOR_ERR = 0x02,
     T_HARDWARE_OVER_CURRENT_ERR = 0x04,
-    T_CC_VEL_ERR = 0x08,
-    T_OVER_SPEED_ERR = 0x10,
+    T_CC_VEL_ERR = 0x08, //unused + deprecated
+    T_OVER_SPEED_ERR = 0x10, //unused + deprecated
     T_TEMP_ERR = 0x20,
     T_INIT_FAIL = 0x40,
     T_LOW_VOLTAGE_LOCKOUT_ERR = 0x80,
@@ -68,6 +68,22 @@ ErrorStatus MotorController_Read(CANbuff *message);
  * @return  Velocity
  */ 
 float MotorController_ReadVelocity(void);
+
+
+/**
+ * @brief Reads RPM of motor
+ * 
+ * @return RPM
+ */
+float MotorController_ReadRPM(void);
+
+
+/**
+ * @brief Restarts the motor controller. THIS FUNCTION IS FOR FAULT STATE USE ONLY.
+ * 
+ * @param busCurrentFractionalSetPoint 
+ */
+void MotorController_Restart(float busCurrentFractionalSetPoint);
 
 
 #endif
