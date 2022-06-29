@@ -131,7 +131,7 @@ void Task_UpdateVelocity(void *p_arg)
 
         }
 
-        if ((true) && ((Switches_Read(FOR_SW) || Switches_Read(REV_SW)))) {
+        if ((Contactors_Get(MOTOR_CONTACTOR)) && ((Switches_Read(FOR_SW) || Switches_Read(REV_SW)))) {
             MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
         }
 

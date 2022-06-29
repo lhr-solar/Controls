@@ -33,10 +33,12 @@ void Task_SendDisplay(void *p_arg) {
     OS_ERR err;
 
     Display_SetMainView(); // Make sure we're in the main view first
-    
-    while (1) {
+    Display_CruiseEnable(OFF);
 
-        Display_SetVelocity(MotorController_ReadVelocity());
+    while (1) {
+        float vel_mps = MotorController_ReadVelocity();
+        float vel_mph = vel_mps * (2.23694);
+        Display_SetVelocity(vel_mph);
         Display_SetSBPV(SupplementalVoltage);
         Display_SetChargeState(StateOfCharge);
         Display_SetRegenEnabled(RegenEnable);

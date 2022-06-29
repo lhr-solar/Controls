@@ -143,7 +143,7 @@ void Task1(void *p_arg) {
 
     //value injection for display
     SupplementalVoltage = 2000;
-    
+    StateOfCharge = 100 * 1000000;
 
 
     while (1) {

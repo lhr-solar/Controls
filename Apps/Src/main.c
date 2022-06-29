@@ -22,6 +22,8 @@ int main(void) {
 
     OS_ERR err;
     OSInit(&err);
+    OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
+
     assertOSError(OS_MAIN_LOC, err);
 
     // Initialize apps
@@ -62,13 +64,6 @@ void Task_Init(void *p_arg){
 
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
 
-    // Create FaultState semaphore
-    OSSemCreate(
-        (OS_SEM*)&FaultState_Sem4,
-        (CPU_CHAR*)"FaultState Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
     assertOSError(OS_MAIN_LOC, err);
 
     // Create DisplayChange semaphore
