@@ -32,14 +32,14 @@ void Task_SendDisplay(void *p_arg) {
     // car_state_t *car = (car_state_t *) p_arg;
     OS_ERR err;
 
-
-    Display_SetMainView();
-
+    Display_SetMainView(); // Make sure we're in the main view first
+    
     while (1) {
 
-
-        Display_SetVelocity(fabs(MotorController_ReadVelocity()));
+        Display_SetVelocity(MotorController_ReadVelocity());
         Display_SetSBPV(SupplementalVoltage);
+        Display_SetChargeState(StateOfCharge);
+        Display_SetRegenEnabled(RegenEnable);
 
         OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
     }

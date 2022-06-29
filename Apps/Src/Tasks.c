@@ -52,9 +52,14 @@ OS_SEM FaultState_Sem4;
 /**
  * Global Variables
  */
-// TODO: Put all global state variables here
-State RegenEnable = OFF; //whether or not regen is allowed
-uint16_t SupplementalVoltage = 0; //supplemental battery pack voltage
+
+// NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
+// Indicates whether or not regenerative braking / charging is enabled.
+State RegenEnable = OFF; 
+// supplemental voltage read from Supplemental Voltage board over CAN
+uint16_t SupplementalVoltage = 0; 
+//8 digit fixed point value from bps read over CAN. 88750000 = 88.750000%
+uint32_t StateOfCharge = 0; 
 
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;

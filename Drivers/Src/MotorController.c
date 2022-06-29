@@ -1,6 +1,7 @@
 #include "MotorController.h"
 #include "os.h"
 #include "Tasks.h"
+#include "Minions.h"
 
 #define MOTOR_DRIVE 0x221
 #define MOTOR_POWER 0x222
@@ -19,8 +20,8 @@
 
 #define BYTES_TO_UINT32(bytes) ((bytes[]))
 
-static OS_SEM	MotorController_MailSem4;
-static OS_SEM	MotorController_ReceiveSem4;
+static OS_SEM MotorController_MailSem4;
+static OS_SEM MotorController_ReceiveSem4;
 static float CurrentVelocity = 0;
 static float CurrentRPM = 0;
 
@@ -33,7 +34,8 @@ static bool is_initialized = false;
  *          and semaphore is posted, Fault state will run.
  * @param   motor_err Bitmap which has motor error codes
  */
-static void _assertTritiumError(tritium_error_code_t motor_err){
+static void _assertTritiumError(tritium_error_code_t motor_err)
+{
     OS_ERR err;
     if(motor_err != T_NONE){
         Lights_Set(CTRL_FAULT,ON); //turn on fault light
@@ -57,70 +59,74 @@ static void _assertTritiumError(tritium_error_code_t motor_err){
  * @brief   Releases hold of the mailbox semaphore.
  * @note	Do not call directly.
  */
-static void MotorController_Release(void) {
-	OS_ERR err;
+static void MotorController_Release(void)
+{
+    OS_ERR err;
 
-	OSSemPost(&MotorController_MailSem4,
-			  OS_OPT_POST_1,
-			  &err);
-	assertOSError(0, err);
+    OSSemPost(&MotorController_MailSem4,
+              OS_OPT_POST_1,
+              &err);
+    assertOSError(0, err);
 }
 
 /**
  * @brief	Increments the receive semaphore.
  * @note	Do not call directly.
  */
-static void MotorController_CountIncoming(void) {
-	OS_ERR err;
+static void MotorController_CountIncoming(void)
+{
+    OS_ERR err;
 
-	OSSemPost(&MotorController_ReceiveSem4,
-			  OS_OPT_POST_1,
-			  &err);
-	assertOSError(0, err);
+    OSSemPost(&MotorController_ReceiveSem4,
+              OS_OPT_POST_1,
+              &err);
+    assertOSError(0, err);
 }
 
 /**
  * @brief   Initializes the motor controller
  * @param   busCurrentFractionalSetPoint fraction of the bus current to allow the motor to draw
  * @return  None
- */ 
-void MotorController_Init(float busCurrentFractionalSetPoint){
-    if (is_initialized) return;
+ */
+void MotorController_Init(float busCurrentFractionalSetPoint)
+{
+    if (is_initialized)
+        return;
     is_initialized = true; // Ensure that we only execute the function once
     CPU_TS ts;
-	OS_ERR err;
+    OS_ERR err;
     OSSemCreate(&MotorController_MailSem4,
                 "Motor Controller Mailbox Semaphore",
-                3,	// Number of mailboxes
+                3, // Number of mailboxes
                 &err);
-	assertOSError(0, err);
+    assertOSError(0, err);
 
     OSSemCreate(&MotorController_ReceiveSem4,
                 "Motor Controller Receive Semaphore",
-                0,	// Number of mailboxes
+                0, // Number of mailboxes
                 &err);
-	assertOSError(0, err);
+    assertOSError(0, err);
 
     BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
 
     uint8_t data[8] = {0};
     memcpy(
-        data+4, //Tritium expects the setpoint in the Most significant 32 bits, so we offset
+        data + 4, // Tritium expects the setpoint in the Most significant 32 bits, so we offset
         &busCurrentFractionalSetPoint,
-        sizeof(busCurrentFractionalSetPoint)
-    );
+        sizeof(busCurrentFractionalSetPoint));
     OSSemPend(&MotorController_MailSem4,
-            0,
-            OS_OPT_PEND_BLOCKING,
-            &ts,
-            &err);
-	assertOSError(0, err);
+              0,
+              OS_OPT_PEND_BLOCKING,
+              &ts,
+              &err);
+    assertOSError(0, err);
     ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_POWER, data, MAX_CAN_LEN);
-    if (initCommand == ERROR) {
-		MotorController_Release();
+    if (initCommand == ERROR)
+    {
+        MotorController_Release();
         Motor_FaultBitmap = T_INIT_FAIL;
         assertTritiumError(Motor_FaultBitmap);
-	}
+    }
 }
 
 /**
@@ -156,53 +162,58 @@ void MotorController_Restart(float busCurrentFractionalSetPoint){
  * @param   newVelocity desired motor velocity setpoint in m/s
  * @param   motorCurrent desired motor current setpoint as a percentage of max current setting (0.0-1.0)
  * @return  None
- */ 
-void MotorController_Drive(float newVelocity, float motorCurrent){
+ */
+void MotorController_Drive(float newVelocity, float motorCurrent)
+{
     CPU_TS ts;
-	OS_ERR err;
+    OS_ERR err;
 
     uint8_t data[8];
     memcpy(data, &newVelocity, sizeof(newVelocity));
     memcpy(data + sizeof(newVelocity), &motorCurrent, sizeof(motorCurrent));
-    
-    OSSemPend(&MotorController_MailSem4,
-			  0,
-			  OS_OPT_PEND_BLOCKING,
-			  &ts,
-			  &err);
-	assertOSError(0, err);
-    ErrorStatus result = BSP_CAN_Write(CAN_3, MOTOR_DRIVE, data, MAX_CAN_LEN);
-    if (result == ERROR) { 
-		MotorController_Release();
-	}
 
+    OSSemPend(&MotorController_MailSem4,
+              0,
+              OS_OPT_PEND_BLOCKING,
+              &ts,
+              &err);
+    assertOSError(0, err);
+    ErrorStatus result = BSP_CAN_Write(CAN_3, MOTOR_DRIVE, data, MAX_CAN_LEN);
+    if (result == ERROR)
+    {
+        MotorController_Release();
+    }
 }
 
 /**
- * @brief   Reads most recent command from CAN3 bus
+ * @brief
+ *
+ *
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
- */ 
-ErrorStatus MotorController_Read(CANbuff *message){
+ */
+ErrorStatus MotorController_Read(CANbuff *message)
+{
 
     uint32_t id;
     uint8_t data[8] = {0};
     uint32_t firstSum = 0;
     uint32_t secondSum = 0;
     CPU_TS ts;
-	OS_ERR err;
-	
-	// Check to see if a mailbox is available: BLOCKING
-	OSSemPend(
+    OS_ERR err;
+
+    // Check to see if a mailbox is available: BLOCKING
+    OSSemPend(
         &MotorController_ReceiveSem4,
-	    0,    
-		OS_OPT_PEND_BLOCKING,
-		&ts,
-		&err);
-	assertOSError(0, err);
+        0,
+        OS_OPT_PEND_BLOCKING,
+        &ts,
+        &err);
+    assertOSError(0, err);
     ErrorStatus status = BSP_CAN_Read(CAN_3, &id, data);
 
-    if(status == SUCCESS){
+    if (status == SUCCESS)
+    {
         message->id = id;
         //get first number (bits 0-31)
         for(int j = (MAX_CAN_LEN/2)-1 ; j >= 0; j--){
@@ -258,9 +269,15 @@ ErrorStatus MotorController_Read(CANbuff *message){
                 CurrentRPM = *(float*) &firstSum;
                 break;
             }
-            default: break;
-        }
 
+            // if(MASK_OVER_SPEED_ERR & firstSum){
+            //     Motor_FaultBitmap |= T_OVER_SPEED_ERR;
+            // }
+
+            assertTritiumError(Motor_FaultBitmap);
+
+            break;
+        }
 
         return SUCCESS;
     }
@@ -270,8 +287,9 @@ ErrorStatus MotorController_Read(CANbuff *message){
 /**
  * @brief   Mutex protected read from Velocity parameter
  * @return  velocity value obtained from MotorController_Read
- */ 
-float MotorController_ReadVelocity(void){
+ */
+float MotorController_ReadVelocity(void)
+{
     return CurrentVelocity;
 }
 

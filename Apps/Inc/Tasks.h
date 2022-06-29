@@ -114,10 +114,12 @@ extern OS_SEM MotorConnectionChange_Sem4;
  * Global Variables
  */
 
+
 //Put all global state variables here
 extern State RegenEnable;
-extern uint16_t SupplementalVoltage;
 extern bool UpdateVel_ToggleCruise;
+extern uint16_t SupplementalVoltage;
+extern uint32_t StateOfCharge;
 
 /**
  * OS Error States

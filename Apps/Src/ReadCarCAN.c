@@ -160,9 +160,15 @@ void Task_ReadCarCAN(void *p_arg)
                     //If not initiate precharge and restart sequence. 
                     chargingEnable();
                 }
+                break;
             }
             case SUPPLEMENTAL_VOLTAGE: {
                 SupplementalVoltage = *(uint16_t *) &buffer;
+                break;
+            }
+            case STATE_OF_CHARGE:{
+                StateOfCharge = *(uint32_t*) &buffer; //get the 32 bit message and store it
+                break;
             }
             default: 
                 break;
