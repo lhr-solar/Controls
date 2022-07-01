@@ -225,6 +225,20 @@ static void ArrayRestart(void *p_arg){
     OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
     assertOSError(OS_READ_CAN_LOC,err);
 
+    if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
+        OSMutexPend(&arrayRestartMutex,
+                0,
+                OS_OPT_PEND_BLOCKING,
+                &ts,
+                &err);
+        restartingArray = false;
+        OSMutexPost(&arrayRestartMutex,
+                OS_OPT_NONE,
+                &err);
+        assertOSError(OS_READ_CAN_LOC,err);
+        return;
+    }
+
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
     Lights_Set(A_CNCTR, ON);

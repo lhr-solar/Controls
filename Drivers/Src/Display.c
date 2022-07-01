@@ -266,7 +266,7 @@ ErrorStatus Display_NoErrors(void)
 ErrorStatus Display_SetMainView(void)
 {
     //return updateIntValue(SYSTEM, PAGE, 1);
-    char *page = "page1\xff\xff\xff";    // hopefully this works, changed name of page from page 1 to main
+    char *page = "page1\xff\xff\xff";
     BSP_UART_Write(DISP_OUT, page, strlen(page));
     return SUCCESS;
 }

@@ -102,12 +102,6 @@ extern OS_Q CANBus_MsgQ;
  * Semaphores
  */
 extern OS_SEM FaultState_Sem4;
-extern OS_SEM DisplayChange_Sem4;
-extern OS_SEM CarCAN_Sem4;
-extern OS_SEM ReadTritium_Sem4;
-extern OS_SEM BlinkLight_Sem4;
-extern OS_SEM SendCarCAN_Sem4;
-extern OS_SEM MotorConnectionChange_Sem4;
 
 
 /**

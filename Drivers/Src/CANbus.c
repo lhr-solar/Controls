@@ -117,9 +117,6 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         //that got removed
         memcpy(txdata, &payload.data.d, sizeof(txdata));
         break;
-
-        // Handle 8bit precision case (0b0000xxxx) (no idx)
-    case CAR_STATE:
     case ARRAY_CONTACTOR_STATE_CHANGE:
         datalen = 1;
         txdata[0] = (payload.data.b);
@@ -135,14 +132,9 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
         OS_OPT_PEND_BLOCKING,
         &timestamp,
         &err);
-    assertOSError(OS_CANDRIVER_LOC,err);
-    if (err != OS_ERR_NONE)
-    {
-        // couldn't lock tx line
-        return ERROR;
-    }
+    assertOSError(OS_CANDRIVER_LOC,err);    // couldn't lock tx line
+    
     // tx line locked
-
     ErrorStatus retval = BSP_CAN_Write(CAN_1, id, txdata, datalen);
 
     OSMutexPost( // unlock the TX line
@@ -203,11 +195,6 @@ ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking)
         &timestamp,
         &err);
     assertOSError(OS_CANDRIVER_LOC,err);
-    if (err != OS_ERR_NONE)
-    {
-        // couldn't lock RX line
-        return ERROR;
-    }
 
     // Actually get the message
     ErrorStatus status = BSP_CAN_Read(CAN_1, id, buffer);

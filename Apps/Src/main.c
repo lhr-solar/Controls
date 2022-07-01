@@ -65,52 +65,7 @@ void Task_Init(void *p_arg){
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
 
     assertOSError(OS_MAIN_LOC, err);
-
-    // Create DisplayChange semaphore
-    OSSemCreate(
-        (OS_SEM*)&DisplayChange_Sem4,
-        (CPU_CHAR*)"DisplayChange Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Create CarCAN semaphore
-    OSSemCreate(
-        (OS_SEM*)&CarCAN_Sem4,
-        (CPU_CHAR*)"CarCAN Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Create ReadTritium semaphore
-    OSSemCreate(
-        (OS_SEM*)&ReadTritium_Sem4,
-        (CPU_CHAR*)"ReadTritium Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Create BlinkLights semaphore
-    OSSemCreate(
-        (OS_SEM*)&BlinkLight_Sem4,
-        (CPU_CHAR*)"BlinkLights Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Create SendCarCAN semaphore
-    OSSemCreate(
-        (OS_SEM*)&SendCarCAN_Sem4,
-        (CPU_CHAR*)"SendCarCAN Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
+    
     // Initialize drivers
     BSP_UART_Init(UART_2);
     CANbus_Init();

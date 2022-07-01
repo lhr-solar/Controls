@@ -40,14 +40,6 @@ CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
  * Semaphores
  */
 OS_SEM FaultState_Sem4;
-OS_SEM VelocityChange_Sem4;
-OS_SEM DisplayChange_Sem4;
-OS_SEM CarCAN_Sem4;
-OS_SEM ReadTritium_Sem4;
-OS_SEM BlinkLight_Sem4;
-OS_SEM SendCarCAN_Sem4;
-OS_SEM ArrayConnectionChange_Sem4;
-OS_SEM FaultState_Sem4;
 
 /**
  * Global Variables

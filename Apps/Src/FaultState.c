@@ -9,52 +9,52 @@ static bool fromThread = false; //whether fault was tripped from thread
 
 static void ArrayMotorKill(void) {
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
     while(1){;} //nonrecoverable
 }
 
-static void nonOSFaultHandler(){
-        Lights_Set(HZD_SW,ON); //turn additional lights on to indicate critical error
-        Lights_Set(BrakeLight, ON);
-        ArrayMotorKill();
+static void nonrecoverableFaultHandler(){
+    Lights_Set(HZD_SW,ON); //turn additional lights on to indicate critical error
+    Lights_Set(BrakeLight, ON);
+    ArrayMotorKill();
 }
-
 
 void EnterFaultState(void) {
     if(FaultBitmap & FAULT_OS){
-        nonOSFaultHandler();
+        nonrecoverableFaultHandler();
     }
     else if(FaultBitmap & FAULT_TRITIUM){ //This gets tripped by the ReadTritium thread
         tritium_error_code_t TritiumError = MotorController_getTritiumError(); //get error code to segregate based on fault type
         if(TritiumError & T_DC_BUS_OVERVOLT_ERR){ //DC bus overvoltage
-            nonOSFaultHandler();
+            nonrecoverableFaultHandler();
         }
 
         if(TritiumError & T_HARDWARE_OVER_CURRENT_ERR){ //Tritium signaled too much current
-            nonOSFaultHandler();
+            nonrecoverableFaultHandler();
         }
 
         if(TritiumError & T_SOFTWARE_OVER_CURRENT_ERR){
-            nonOSFaultHandler();
+            nonrecoverableFaultHandler();
         }
 
         if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
+            // Note: separate tripcnt from T_INIT_FAIL
             static uint8_t tripcnt = 0; //trip counter
             if(tripcnt>3){ //try to restart the motor a few times and then fail out
-                nonOSFaultHandler();
+                nonrecoverableFaultHandler();
             } else {
                 tripcnt++;
                 Lights_Set(CTRL_FAULT,OFF);
-                MotorController_Restart((float)1.0); //re-initialize motor
+                MotorController_Restart((float)1.0f); //re-initialize motor
                 return;
             }
         }
 
         if(TritiumError & T_INIT_FAIL){
+            // Note: separate tripcnt from T_HALL_SENSOR_ERR
             static uint8_t tripcnt = 0;
             if(tripcnt>5){
-                nonOSFaultHandler(); //we've failed to init the motor five times
+                nonrecoverableFaultHandler(); //we've failed to init the motor five times
             } else {
                 tripcnt++;
                 Lights_Set(CTRL_FAULT,OFF);
@@ -72,10 +72,10 @@ void EnterFaultState(void) {
          */
     }
     else if(FaultBitmap & FAULT_READBPS){ //This has been put in with future development in mind, it is not currently tripped by anything.
-        nonOSFaultHandler();
+        nonrecoverableFaultHandler();
     }
     else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
-        nonOSFaultHandler();
+        nonrecoverableFaultHandler();
     }
     else if(FaultBitmap & FAULT_DISPLAY){
         // TODO: Send reset command to display ("reset")
