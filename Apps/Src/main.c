@@ -65,15 +65,16 @@ void Task_Init(void *p_arg){
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
 
     assertOSError(OS_MAIN_LOC, err);
-    
     // Initialize drivers
+    Pedals_Init();
+    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
+    OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     BSP_UART_Init(UART_2);
     CANbus_Init();
     Contactors_Init();
     Display_Init();
     Minions_Init();
-    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
-    Pedals_Init();
     CAN_Queue_Init();
 
     // Initialize FaultState
@@ -220,9 +221,7 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Delete initialization task
-    OSTaskDel(
-        (OS_TCB*)&Init_TCB,
-        (OS_ERR*)&err
-    );
+    while(1){
+        OSTimeDlyHMSM(1,0,0,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    }
 }
