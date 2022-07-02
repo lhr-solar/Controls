@@ -15,7 +15,7 @@ static OS_MUTEX CommMutex; //Mutex to lock SPI lines
 static uint16_t switchStatesBitmap = 0;
 
 // Stores light states (on/off): 
-// x | x | HEADLIGHT_SW | RIGHT_BLINK | LEFT_BLINK | CTRL_FAULT | M_CNCTR | A_CNCTR
+// RSVD_LED | BrakeLight | HEADLIGHT | RIGHT_BLINK | LEFT_BLINK | CTRL_FAULT | M_CNCTR | A_CNCTR
 static uint8_t lightStatesBitmap = 0;
 static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (left, right)
 
@@ -356,10 +356,8 @@ void Lights_Set(light_t light, State state) {
     
         lightNewStates &= ~(0x01 << light); // Clear bit corresponding to pin
         lightNewStates |= (state << light); // Set value to inputted state   
-        
-        uint8_t tempLightNewStates = lightNewStates;
 
-        // Initialize tx buffer and port c
+        // Initialize tx buffer and gpio port b
         uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
         
         if (light == BrakeLight) {  // Brakelight is only external
@@ -367,8 +365,7 @@ void Lights_Set(light_t light, State state) {
             lightStatesBitmap = lightNewStates;   // Update lights bitmap
             return;
         } else {
-            tempLightNewStates &= ~(lightNewStates & 0x18); 
-            txWriteBuf[2] = (((tempLightNewStates) | (~(lightNewStates)&0x18)) & 0x3F); // Write to tx buffer for lights present internally (on minion board)
+            txWriteBuf[2] = lightNewStates ^ 0x18;  // Flip left and right blink for negative logic on minion board
 
             // Write to port c for lights present externally
             switch (light) {

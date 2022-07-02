@@ -16,11 +16,8 @@
 #define RIGHT_BLINK_PIN GPIO_Pin_8
 #define LEFT_BLINK_PIN  GPIO_Pin_9
 
-
-
-
 typedef enum {
-     CRUZ_ST=0, 
+     HZD_SW=0, 
      CRUZ_EN, 
      REV_SW,
      FOR_SW,
@@ -28,7 +25,7 @@ typedef enum {
      LEFT_SW,
      RIGHT_SW,
      REGEN_SW,
-     HZD_SW,
+     CRUZ_ST,
      IGN_1,
      IGN_2
 } switches_t;
@@ -45,26 +42,6 @@ typedef enum {
     BrakeLight,
     RSVD_LED
 } light_t;
-
-/**
- * Switch States
- * 
- * Stores the current state of each of
- * the switches that control this system
- */
-typedef struct {
-    State LT;
-    State RT;
-    State FOR;
-    State REV;
-    State CRS_EN;
-    State CRS_SET;
-    State REGEN;
-    State HZD;
-    State HDLT;
-    State IGN_1;
-    State IGN_2;
-} switch_states_t;
 
 /**
  * @brief   Initializes all Lights and Switches
