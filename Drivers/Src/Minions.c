@@ -214,7 +214,7 @@ State Switches_Read(switches_t sw){
     
 }
 
-#define DEBOUNCING_ORDER 3 //How many history entries to track for switch debouncing
+
 
 /**
  * @brief   Queries all switch-related hardware and updates our internal state with the most recent switch values 
@@ -241,12 +241,12 @@ void Switches_UpdateStates(void){
     ChipSelect();      
     BSP_SPI_Write(query,2);
     BSP_SPI_Read(&SwitchDataReg1,1);
-    ChipDeselect();
+    // ChipDeselect();
     
     //Read Hazard Switch
     query[1] = SPI_GPIOB;
 
-    ChipSelect();
+    // ChipSelect();
     BSP_SPI_Write(query,2);
     BSP_SPI_Read(&SwitchDataReg2,1);
     ChipDeselect();
