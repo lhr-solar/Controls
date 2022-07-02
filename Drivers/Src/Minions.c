@@ -1,6 +1,14 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 #include "Minions.h"
 
+// Median filter stuff
+#define MEDIAN_FILTER_TYPE uint8_t
+#define MEDIAN_FILTER_DEPTH 10
+#define MEDIAN_FILTER_CHANNELS 11
+#define MEDIAN_FILTER_NAME SwitchesFilter
+#include "MedianFilter.h"
+static SwitchesFilter_t SwitchFilter;
+
 static OS_MUTEX CommMutex; //Mutex to lock SPI lines
 // Stores switch states:
 // IGN_1 | IGN_2 | HZD_SW | REGEN_SW | RIGHT_SW | LEFT_SW | Headlight_SW | FOR_SW | REV_SW | CRUZ_EN | CRUZ_ST
@@ -155,6 +163,7 @@ void Minions_Init(void){
     OS_ERR err;
     OSMutexCreate(&CommMutex, "Communications Mutex", &err);
     assertOSError(0,err);
+    SwitchesFilter_init(&SwitchFilter, 0, 1);
     BSP_SPI_Init();
     Lights_Init();
     Switches_Init();
@@ -217,8 +226,7 @@ void Switches_UpdateStates(void){
     CPU_TS timestamp;
     uint8_t query[2]={SPI_OPCODE_R,SPI_GPIOA}; //query GPIOA
     uint8_t SwitchDataReg1 = 0, SwitchDataReg2 = 0;
-
-    static uint16_t debouncing_maps[DEBOUNCING_ORDER]; //switch states history buffer to debounce buttons
+    uint8_t switchData[11]; // All switches get their own byte
 
     //Read all switches except for ignition and hazard
     OSMutexPend(
@@ -256,20 +264,23 @@ void Switches_UpdateStates(void){
     //Read Ignition Switch 2
     uint8_t ign2 = !BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
     
-    // Shift the debouncing values
-    uint16_t debouncing_agg = 0xFFFF; //we want to debounce the ones, ie. if we are at one, it drops quickly to zero and comes back
-    for(int i = DEBOUNCING_ORDER-1; i >= 1; i--) {
-        debouncing_maps[i] = debouncing_maps[i-1]; //shift the history buffer on each pass
-        debouncing_agg &= debouncing_maps[i]; //AND the aggregate with the entry in the history buffer. For there to be a one in debouncing_agg, every entry in maps must have a 1 in that bit.
-    }
+    // Seperate the switch bitmap out, so each switch is a byte
+    switchData[10] = ign2;
+    switchData[ 9] = ign1;
+    switchData[ 8] = (SwitchDataReg2 & 0x40) >> 6;
+    for (int i=0; i<8; i++) switchData[i] = (SwitchDataReg1 >> i) & 0x1;
 
-    //Store data in bitmap
-    uint16_t _switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
+    // Submit the values to the filter, overwrite with stable values
+    SwitchesFilter_put(&SwitchFilter, switchData);
+    SwitchesFilter_get(&SwitchFilter, switchData);
 
-    debouncing_agg &= _switchStatesBitmap; //AND the aggregate with the most recent read
-    debouncing_maps[0] = _switchStatesBitmap; //add the most recent read to the history buffer
-
-    switchStatesBitmap = debouncing_agg; //the debounced aggregate value becomes the bitmap
+    // Overwrite the old packed values
+    SwitchDataReg1 = 0;
+    for (int i=0; i<8; i++) SwitchDataReg1 |= (switchData[i] << i);
+    SwitchDataReg2 = switchData[8];
+    ign1 = switchData[ 9];
+    ign2 = switchData[10];
+    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
 }
 
 /**
