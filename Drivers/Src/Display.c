@@ -48,7 +48,13 @@ enum CommandString_t
     ERROR4,
     ERROR5,
     SUPPL_VOLT,
-    CHARGE_STATE
+    CHARGE_STATE,
+    ARR_BOX,
+    MOT_BOX,
+    FAULT_BOX,
+    LEFT_BOX,
+    RIGHT_BOX,
+    HEADLIGHT_BOX
 };
 
 // The command strings themselves
@@ -70,7 +76,13 @@ static char *CommandStrings[] = {
     "t8",
     "t9",
     "x1",
-    "x2"};
+    "x2",
+    "l0",
+    "l1",
+    "l2",
+    "l3",
+    "l4",
+    "l5"};
 
 /**
  * Sends a string of the form "obj_index.attr_index=" or "attr_index=" over UART
@@ -132,7 +144,7 @@ static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandSt
 /*
  * Sets a component's visiblity
  */
-static ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis)
+ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis)
 {
     char out[24];
     sprintf(out, "%s %s,%d%s", CommandStrings[VIS], CommandStrings[comp], vis ? 1 : 0, TERMINATOR);
@@ -268,5 +280,10 @@ ErrorStatus Display_SetMainView(void)
     //return updateIntValue(SYSTEM, PAGE, 1);
     char *page = "page1\xff\xff\xff";
     BSP_UART_Write(DISP_OUT, page, strlen(page));
+    return SUCCESS;
+}
+
+ErrorStatus Display_SetLight(uint8_t light, State on){
+    setComponentVisibility(light+18, on==ON);
     return SUCCESS;
 }

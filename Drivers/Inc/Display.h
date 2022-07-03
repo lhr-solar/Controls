@@ -41,4 +41,6 @@ ErrorStatus Display_SetChargeState(uint32_t chargeState);
  */
 ErrorStatus Display_SetRegenEnabled(State ChargeEnabled);
 
+ErrorStatus Display_SetLight(uint8_t light, State on);
+
 #endif
