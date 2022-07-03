@@ -2,6 +2,7 @@
 #include "os.h"
 #include "Tasks.h"
 #include "Minions.h"
+#include "Display.h"
 
 #define MOTOR_DRIVE 0x221
 #define MOTOR_POWER 0x222
@@ -39,6 +40,7 @@ static void _assertTritiumError(tritium_error_code_t motor_err)
     OS_ERR err;
     if(motor_err != T_NONE){
         Lights_Set(CTRL_FAULT,ON); //turn on fault light
+        Display_SetLight(CTRL_FAULT,ON); //turn on fault light
         FaultBitmap |= FAULT_TRITIUM;
         OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
         assertOSError(0, err);
