@@ -8,6 +8,8 @@ void Task_SendDisplay(void *p_arg) {
 
     Display_SetMainView(); // Make sure we're in the main view first
     Display_CruiseEnable(OFF);
+    for(int i=0; i<6; i++)
+        Display_SetLight(i, OFF);
 
     while (1) {
         float vel_mps = MotorController_ReadVelocity();

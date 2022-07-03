@@ -43,19 +43,28 @@ void Task1(void *p_arg) {
     SupplementalVoltage = 200;
     StateOfCharge = 100000;
     RegenEnable = ON;
-    State cr = ON;
+    //State cr = ON;
+    
     Display_SetVelocity(vel);
+    Display_SetMainView(); // Make sure we're in the main view first
+    Display_CruiseEnable(OFF);
+    for(int i=0; i<6; i++)
+        Display_SetLight(i, OFF);
+
     while (1) {
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        
         vel += 0.1; // update velocity
         SupplementalVoltage += 100;
         StateOfCharge += 10000;
         if (vel > 30.0f) vel = 0.0f;
-        cr = (cr==ON)?OFF:ON;
+        //cr = (cr==ON)?OFF:ON;
         RegenEnable = (RegenEnable==ON)?OFF:ON;
-        //Display_SetVelocity(vel);
-        //Display_SetSBPV(SupplementalVoltage);
-        //Display_SetChargeState(StateOfCharge);
+        
+        Display_SetVelocity(vel);
+        Display_SetSBPV(SupplementalVoltage);
+        Display_SetChargeState(StateOfCharge);
+        Display_SetRegenEnabled(RegenEnable);
     }
 }
 
