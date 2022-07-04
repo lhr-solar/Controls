@@ -1,6 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "ReadCarCAN.h"
+#include "Display.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "CAN_Queue.h"
@@ -44,6 +45,7 @@ static inline void chargingDisable(void) {
 
     // turn off the array contactor light
     Lights_Set(A_CNCTR, OFF);
+    //Display_SetLight(A_CNCTR, OFF);
 }
 
 // helper function to call if charging should be enabled
@@ -242,6 +244,7 @@ static void ArrayRestart(void *p_arg){
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
     Lights_Set(A_CNCTR, ON);
+    //Display_SetLight(A_CNCTR, ON);
 
     // let array know the contactor is on
     CANMSG_t msg;

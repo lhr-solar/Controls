@@ -1,4 +1,5 @@
 #include "FaultState.h"
+#include "Display.h"
 #include "Contactors.h"
 #include "os.h"
 #include "Tasks.h"
@@ -14,7 +15,10 @@ static void ArrayMotorKill(void) {
 }
 
 static void nonrecoverableFaultHandler(){
-    Lights_Set(HZD_SW,ON); //turn additional lights on to indicate critical error
+    Lights_Set(LEFT_BLINK,ON); //turn additional lights on to indicate critical error
+    Display_SetLight(LEFT_BLINK, ON);
+    Lights_Set(RIGHT_BLINK,ON);
+    Display_SetLight(RIGHT_BLINK, ON);
     Lights_Set(BrakeLight, ON);
     ArrayMotorKill();
 }
@@ -45,6 +49,7 @@ void EnterFaultState(void) {
             } else {
                 tripcnt++;
                 Lights_Set(CTRL_FAULT,OFF);
+                Display_SetLight(CTRL_FAULT,OFF);
                 MotorController_Restart((float)1.0f); //re-initialize motor
                 return;
             }

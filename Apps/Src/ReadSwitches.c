@@ -47,13 +47,12 @@ void Task_ReadSwitches(void* p_arg) {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,OFF);
-            Display_SetLight(A_CNCTR,OFF);
+            //Display_SetLight(A_CNCTR,OFF);
         }
         
         // motor on/off
         Contactors_Set(MOTOR_CONTACTOR, Switches_Read(IGN_2));
         Lights_Set(M_CNCTR,Switches_Read(IGN_2));
-        Display_SetLight(M_CNCTR,Switches_Read(IGN_2));
 
         cruiseEnablePushed = Switches_Read(CRUZ_EN); //read cruise enable switch
         if (!lastCruiseEnPushed && cruiseEnablePushed) { //Rising Edge detector for updateVelocity thread
