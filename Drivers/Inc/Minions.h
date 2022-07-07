@@ -19,8 +19,8 @@
 typedef enum {
      HZD_SW=0, 
      CRUZ_EN, 
-     FOR_SW,
      REV_SW,
+     FOR_SW,
      HEADLIGHT_SW,
      LEFT_SW,
      RIGHT_SW,

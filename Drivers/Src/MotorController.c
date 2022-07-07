@@ -4,6 +4,8 @@
 #include "Minions.h"
 #include "Display.h"
 
+#include "Contactors.h"
+
 #define MOTOR_DRIVE 0x221
 #define MOTOR_POWER 0x222
 #define MOTOR_STATUS 0x241
@@ -23,8 +25,10 @@
 
 static OS_SEM MotorController_MailSem4;
 static OS_SEM MotorController_ReceiveSem4;
+static bool restartFinished = false;
 static float CurrentVelocity = 0;
 static float CurrentRPM = 0;
+static OS_MUTEX restartFinished_Mutex;
 
 tritium_error_code_t Motor_FaultBitmap = T_NONE;
 
@@ -37,11 +41,14 @@ static bool is_initialized = false;
  */
 static void _assertTritiumError(tritium_error_code_t motor_err)
 {
-    OS_ERR err;
-    if(motor_err != T_NONE){
-        FaultBitmap |= FAULT_TRITIUM;
-        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-        assertOSError(0, err);
+    
+    if(restartFinished && Contactors_Get(MOTOR_CONTACTOR)){
+        OS_ERR err;
+        if(motor_err != T_NONE){
+            FaultBitmap |= FAULT_TRITIUM;
+            OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+            assertOSError(0, err);
+        }
     }
 }
 
@@ -107,6 +114,11 @@ void MotorController_Init(float busCurrentFractionalSetPoint)
                 &err);
     assertOSError(0, err);
 
+    OSMutexCreate(&restartFinished_Mutex,
+                "Motor Controller Restart Mutex",
+                &err);
+    assertOSError(0, err);
+
     BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
 
     uint8_t data[8] = {0};
@@ -138,6 +150,12 @@ void MotorController_Restart(float busCurrentFractionalSetPoint){
     CPU_TS ts;
 	OS_ERR err;
     uint8_t data[8] = {0};
+
+    OSMutexPend(&restartFinished_Mutex, 0, OS_OPT_POST_NONE, &ts, &err);
+    assertOSError(0, err);
+
+    restartFinished = false;
+
     memcpy(
         data+4, //Tritium expects the setpoint in the Most significant 32 bits, so we offset
         &busCurrentFractionalSetPoint,
@@ -151,10 +169,19 @@ void MotorController_Restart(float busCurrentFractionalSetPoint){
 	assertOSError(0, err);
     ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_POWER, data, MAX_CAN_LEN);
     if (initCommand == ERROR) {
+        restartFinished = true;
 		MotorController_Release();
+
+        OSMutexPost(&restartFinished_Mutex, OS_OPT_POST_NONE, &err);
+        assertOSError(0, err);
+
         Motor_FaultBitmap = T_INIT_FAIL;
         assertTritiumError(Motor_FaultBitmap);
+        return;
 	}
+
+    OSMutexPost(&restartFinished_Mutex, OS_OPT_POST_NONE, &err);
+    assertOSError(0, err);
 }
 
 /**
@@ -234,6 +261,14 @@ ErrorStatus MotorController_Read(CANbuff *message)
             // If we're reading the output from the Motor Status command (0x241) then 
             // Check the status bits we care about and set flags accordingly
             case MOTOR_STATUS: {
+                
+                OSMutexPend(&restartFinished_Mutex, 0, OS_OPT_POST_NONE, &ts, &err);
+                assertOSError(0, err);
+                if(restartFinished == false){
+                    restartFinished = true;
+                }
+                OSMutexPost(&restartFinished_Mutex, OS_OPT_POST_NONE, &err);
+                assertOSError(0, err);
 
                 if(MASK_DC_BUS_OVERVOLT_ERR & firstSum){
                     Motor_FaultBitmap |= T_DC_BUS_OVERVOLT_ERR;
