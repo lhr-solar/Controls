@@ -26,7 +26,7 @@
 
 static OS_SEM MotorController_MailSem4;
 static OS_SEM MotorController_ReceiveSem4;
-static bool restartFinished = false;
+static bool restartFinished = true;
 static float CurrentVelocity = 0;
 static float CurrentRPM = 0;
 static float busCurrent = 0.0;
@@ -44,7 +44,7 @@ static bool is_initialized = false;
 static void _assertTritiumError(tritium_error_code_t motor_err)
 {
     
-    if(restartFinished && Contactors_Get(MOTOR_CONTACTOR)){
+    if(restartFinished){    // && Contactors_Get(MOTOR_CONTACTOR)
         OS_ERR err;
         if(motor_err != T_NONE){
             FaultBitmap |= FAULT_TRITIUM;

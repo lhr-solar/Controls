@@ -12,7 +12,7 @@
 
 // Macros
 #define READ_SWITCH_PERIOD      10   // period (ms) that switches will be read.
-static bool restartNeeded = true;
+//static bool restartNeeded = true;
 
 // Helper functions for reading/updating switches
 
@@ -47,17 +47,17 @@ void Task_ReadSwitches(void* p_arg) {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,OFF);
-            //Display_SetLight(A_CNCTR,OFF);
+            Display_SetLight(A_CNCTR,OFF);
         }
         
         // motor on/off
         Contactors_Set(MOTOR_CONTACTOR, Switches_Read(IGN_2));
-        if(Contactors_Get(MOTOR_CONTACTOR) && restartNeeded){ //restart contactor whenever it is on and it wasn't on earlier
-            MotorController_Restart();
-            restartNeeded = false;
-        } else if (!Contactors_Get(MOTOR_CONTACTOR)) { //if contactor is off, set restartNeeded
-            restartNeeded = true;
-        }
+        // if(Contactors_Get(MOTOR_CONTACTOR) && restartNeeded){ //restart contactor whenever it is on and it wasn't on earlier
+        //     MotorController_Restart();
+        //     restartNeeded = false;
+        // } else if (!Contactors_Get(MOTOR_CONTACTOR)) { //if contactor is off, set restartNeeded
+        //     restartNeeded = true;
+        // }
         Lights_Set(M_CNCTR,Switches_Read(IGN_2));
 
         cruiseEnablePushed = Switches_Read(CRUZ_EN); //read cruise enable switch
