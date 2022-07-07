@@ -43,4 +43,6 @@ ErrorStatus Display_SetRegenEnabled(State ChargeEnabled);
 
 ErrorStatus Display_SetLight(uint8_t light, State on);
 
+ErrorStatus Display_SetGear(State fwd, State rev);
+
 #endif

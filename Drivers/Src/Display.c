@@ -20,7 +20,7 @@ static const char *NO_ERROR = "No Error";
 static const uint16_t NEXTION_GREEN = 2016;
 static const uint16_t NEXTION_RED = 63488;
 //static const uint16_t NEXTION_LIGHT_GREY = 42260;
-// static const uint16_t NEXTION_DARK_GREY = 23275;
+static const uint16_t NEXTION_DARK_GREY = 23275;
 // static const uint16_t NEXTION_BURNT_ORANGE = 51872;
 
 static inline int IsNextionFailure(uint32_t val)
@@ -38,6 +38,7 @@ enum CommandString_t
     VALUE,
     TEXT,
     PCO,
+    BCO,
     VIS,
     SYSTEM,
     PAGE,
@@ -51,10 +52,11 @@ enum CommandString_t
     CHARGE_STATE,
     ARR_BOX,
     MOT_BOX,
-    FAULT_BOX,
+    FWD_BOX,
     LEFT_BOX,
     RIGHT_BOX,
-    HEADLIGHT_BOX
+    HDLT_BOX,
+    REV_BOX
 };
 
 // The command strings themselves
@@ -66,9 +68,10 @@ static char *CommandStrings[] = {
     "val",
     "txt",
     "pco",
+    "bco",
     "vis",
     "",
-    "page",
+    "page1",
     "t4",
     "t5",
     "t6",
@@ -82,7 +85,8 @@ static char *CommandStrings[] = {
     "l2",
     "l3",
     "l4",
-    "l5"};
+    "l5",
+    "l6"};
 
 /**
  * Sends a string of the form "obj_index.attr_index=" or "attr_index=" over UART
@@ -166,6 +170,7 @@ void Display_Init()
         ret[i] = 0;
     volatile char *x = ret;
     BSP_UART_Init(DISP_OUT);
+
     // The display sends 0x88 when ready, but that might be
     // before we initialize our UART
     BSP_UART_Read(DISP_OUT, (char *)x);
@@ -175,6 +180,8 @@ void Display_Init()
         while (1)
             a++;
     }
+
+    updateIntValue(PAGE, BCO, NEXTION_DARK_GREY);
 }
 
 /**
@@ -238,6 +245,24 @@ ErrorStatus Display_CruiseEnable(State on)
     }
 }
 
+ErrorStatus Display_SetGear(State fwd, State rev){
+    if(!fwd && !rev){
+        setComponentVisibility(FWD_BOX, false);
+        return setComponentVisibility(REV_BOX, false);
+    }
+    else if(fwd && !rev){
+        setComponentVisibility(FWD_BOX, true);
+        return setComponentVisibility(REV_BOX, false);
+    }
+    else if(rev && !fwd){
+        setComponentVisibility(REV_BOX, true);
+        return setComponentVisibility(FWD_BOX, false);
+    }
+    else{
+        return ERROR;
+    }
+}
+
 
 /**
  * Set ERROR<idx> to err
@@ -284,6 +309,12 @@ ErrorStatus Display_SetMainView(void)
 }
 
 ErrorStatus Display_SetLight(uint8_t light, State on){
-    setComponentVisibility(light+18, on==ON);
+    if(light == 2){  // ctrl fault
+        if(on==ON)
+            return updateIntValue(PAGE, BCO, NEXTION_RED);
+        return updateIntValue(PAGE, BCO, NEXTION_DARK_GREY);
+    }
+        
+    setComponentVisibility(light+19, on==ON);
     return SUCCESS;
 }

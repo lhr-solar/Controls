@@ -112,7 +112,6 @@ static void UpdateSwitches() {
  */
 static void UpdateDispLights() {
     Lights_Set(Headlight_ON, Switches_Read(HEADLIGHT_SW));
-    Display_SetLight(Headlight_ON, Switches_Read(HEADLIGHT_SW));
     
     int leftblink = Switches_Read(LEFT_SW) | 
                     Switches_Read(HZD_SW);
