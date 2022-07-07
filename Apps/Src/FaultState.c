@@ -52,7 +52,7 @@ void EnterFaultState(void) {
                 tripcnt++;
                 //Lights_Set(CTRL_FAULT,OFF);
                 Display_SetLight(CTRL_FAULT,OFF);
-                MotorController_Restart((float)1.0f); //re-initialize motor
+                MotorController_Restart(); //re-initialize motor
                 return;
             }
         }
@@ -66,7 +66,7 @@ void EnterFaultState(void) {
                 tripcnt++;
                 //Lights_Set(CTRL_FAULT,OFF);
                 Display_SetLight(CTRL_FAULT,OFF);
-                MotorController_Restart((float)1.0f);
+                MotorController_Restart();
                 return;
             }
         }

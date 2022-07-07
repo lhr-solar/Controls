@@ -83,7 +83,7 @@ float MotorController_ReadRPM(void);
  * 
  * @param busCurrentFractionalSetPoint 
  */
-void MotorController_Restart(float busCurrentFractionalSetPoint);
+void MotorController_Restart(void);
 
 
 #endif

@@ -8,6 +8,7 @@
 
 #define MOTOR_DRIVE 0x221
 #define MOTOR_POWER 0x222
+#define MOTOR_RESET 0x223
 #define MOTOR_STATUS 0x241
 #define MOTOR_VELOCITY 0x243
 #define MAX_CAN_LEN 8
@@ -28,6 +29,7 @@ static OS_SEM MotorController_ReceiveSem4;
 static bool restartFinished = false;
 static float CurrentVelocity = 0;
 static float CurrentRPM = 0;
+static float busCurrent = 0.0;
 static OS_MUTEX restartFinished_Mutex;
 
 tritium_error_code_t Motor_FaultBitmap = T_NONE;
@@ -90,6 +92,29 @@ static void MotorController_CountIncoming(void)
     assertOSError(0, err);
 }
 
+static void MotorController_InitCommand(){ //transmits the init command with id 0x222
+    OS_ERR err;
+    CPU_TS ts;
+    uint8_t data[8] = {0};
+    memcpy(
+        data + 4, // Tritium expects the setpoint in the Most significant 32 bits, so we offset
+        &busCurrent,
+        sizeof(busCurrent));
+    OSSemPend(&MotorController_MailSem4,
+              0,
+              OS_OPT_PEND_BLOCKING,
+              &ts,
+              &err);
+    assertOSError(0, err);
+    ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_POWER, data, MAX_CAN_LEN);
+    if (initCommand == ERROR)
+    {
+        MotorController_Release();
+        Motor_FaultBitmap = T_INIT_FAIL;
+        assertTritiumError(Motor_FaultBitmap);
+    }
+}
+
 /**
  * @brief   Initializes the motor controller
  * @param   busCurrentFractionalSetPoint fraction of the bus current to allow the motor to draw
@@ -100,7 +125,6 @@ void MotorController_Init(float busCurrentFractionalSetPoint)
     if (is_initialized)
         return;
     is_initialized = true; // Ensure that we only execute the function once
-    CPU_TS ts;
     OS_ERR err;
     OSSemCreate(&MotorController_MailSem4,
                 "Motor Controller Mailbox Semaphore",
@@ -120,54 +144,30 @@ void MotorController_Init(float busCurrentFractionalSetPoint)
     assertOSError(0, err);
 
     BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
-
-    uint8_t data[8] = {0};
-    memcpy(
-        data + 4, // Tritium expects the setpoint in the Most significant 32 bits, so we offset
-        &busCurrentFractionalSetPoint,
-        sizeof(busCurrentFractionalSetPoint));
-    OSSemPend(&MotorController_MailSem4,
-              0,
-              OS_OPT_PEND_BLOCKING,
-              &ts,
-              &err);
-    assertOSError(0, err);
-    ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_POWER, data, MAX_CAN_LEN);
-    if (initCommand == ERROR)
-    {
-        MotorController_Release();
-        Motor_FaultBitmap = T_INIT_FAIL;
-        assertTritiumError(Motor_FaultBitmap);
-    }
+    busCurrent = busCurrentFractionalSetPoint;
+    MotorController_InitCommand();
 }
 
 /**
- * @brief Restarts the motor controller. THIS FUNCTION IS FOR FAULT STATE USE ONLY.
+ * @brief Restarts the motor controller. 
  * 
  * @param busCurrentFractionalSetPoint 
  */
-void MotorController_Restart(float busCurrentFractionalSetPoint){
+void MotorController_Restart(void){
     CPU_TS ts;
 	OS_ERR err;
-    uint8_t data[8] = {0};
-
     OSMutexPend(&restartFinished_Mutex, 0, OS_OPT_POST_NONE, &ts, &err);
     assertOSError(0, err);
-
+    uint8_t data[8] = {0};
     restartFinished = false;
 
-    memcpy(
-        data+4, //Tritium expects the setpoint in the Most significant 32 bits, so we offset
-        &busCurrentFractionalSetPoint,
-        sizeof(busCurrentFractionalSetPoint)
-    );
     OSSemPend(&MotorController_MailSem4,
             0,
             OS_OPT_PEND_BLOCKING,
             &ts,
             &err);
 	assertOSError(0, err);
-    ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_POWER, data, MAX_CAN_LEN);
+    ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_RESET, data, MAX_CAN_LEN); //send reset command
     if (initCommand == ERROR) {
         restartFinished = true;
 		MotorController_Release();
@@ -265,6 +265,7 @@ ErrorStatus MotorController_Read(CANbuff *message)
                 OSMutexPend(&restartFinished_Mutex, 0, OS_OPT_POST_NONE, &ts, &err);
                 assertOSError(0, err);
                 if(restartFinished == false){
+                    MotorController_InitCommand();
                     restartFinished = true;
                 }
                 OSMutexPost(&restartFinished_Mutex, OS_OPT_POST_NONE, &err);

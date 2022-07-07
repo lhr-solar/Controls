@@ -53,7 +53,7 @@ void Task_ReadSwitches(void* p_arg) {
         // motor on/off
         Contactors_Set(MOTOR_CONTACTOR, Switches_Read(IGN_2));
         if(Contactors_Get(MOTOR_CONTACTOR) && restartNeeded){ //restart contactor whenever it is on and it wasn't on earlier
-            MotorController_Restart(1.0);
+            MotorController_Restart();
             restartNeeded = false;
         } else if (!Contactors_Get(MOTOR_CONTACTOR)) { //if contactor is off, set restartNeeded
             restartNeeded = true;
