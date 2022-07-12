@@ -47,12 +47,24 @@ void Task1(void *p_arg) {
         for(;;) x++;
     }
 
-    OSSemCreate(&FaultState_Sem4, "Fault State", 0, &err);
+    OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
     if (err != OS_ERR_NONE) {
         for(;;) x++;
     }
+
+    static bool lastCruiseEnPushed = true;
+    State cruiseEnablePushed = OFF;
     while (1) {
-        OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT, &err);
+        Switches_UpdateStates(); //UpdateVelocity thread depends on switch Values
+        cruiseEnablePushed = Switches_Read(CRUZ_EN); //read cruise enable switch
+        if (!lastCruiseEnPushed && cruiseEnablePushed) { //Rising Edge detector for updateVelocity thread
+            UpdateVel_ToggleCruise = true;
+        }
+        lastCruiseEnPushed = cruiseEnablePushed;
+        CANbuff buf;
+        __unused
+		ErrorStatus status = MotorController_Read(&buf);
     }
 }
 

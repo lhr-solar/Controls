@@ -21,34 +21,50 @@ void Task1(void *p_arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
     // CPU_TS ts;
-    /*
     OSTaskCreate(
-        (OS_TCB*)&SendDisplay_TCB,
-        (CPU_CHAR*)"SendDisplay",
+        (OS_TCB *)&SendDisplay_TCB,
+        (CPU_CHAR *)"SendDisplay_TCB",
         (OS_TASK_PTR)Task_SendDisplay,
-        (void*)p_arg,
-        (OS_PRIO)TASK_SEND_DISPLAY_PRIO,
-        (CPU_STK*)SendDisplay_Stk,
-        (CPU_STK_SIZE)sizeof(SendDisplay_Stk)/10,
-        (CPU_STK_SIZE)sizeof(SendDisplay_Stk),
-        (OS_MSG_QTY)NULL,
+        (void *)NULL,
+        (OS_PRIO)13,
+        (CPU_STK *)SendDisplay_Stk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
         (OS_TICK)NULL,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
-        (OS_ERR*)&err
-    );
-    */
+        (void *)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR *)&err);
    
     Display_Init();
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     Display_SetMainView();
     float vel = 0.0f;
+    SupplementalVoltage = 200;
+    StateOfCharge = 100000;
+    RegenEnable = ON;
+    //State cr = ON;
+    
     Display_SetVelocity(vel);
+    Display_SetMainView(); // Make sure we're in the main view first
+    Display_CruiseEnable(OFF);
+    for(int i=0; i<6; i++)
+        Display_SetLight(i, OFF);
+
     while (1) {
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        
         vel += 0.1; // update velocity
+        SupplementalVoltage += 100;
+        StateOfCharge += 10000;
         if (vel > 30.0f) vel = 0.0f;
+        //cr = (cr==ON)?OFF:ON;
+        RegenEnable = (RegenEnable==ON)?OFF:ON;
+        
         Display_SetVelocity(vel);
+        Display_SetSBPV(SupplementalVoltage);
+        Display_SetChargeState(StateOfCharge);
+        Display_SetRegenEnabled(RegenEnable);
     }
 }
 

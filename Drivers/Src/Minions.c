@@ -1,13 +1,21 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 #include "Minions.h"
 
+// Median filter stuff
+#define MEDIAN_FILTER_TYPE uint8_t
+#define MEDIAN_FILTER_DEPTH 10
+#define MEDIAN_FILTER_CHANNELS 11
+#define MEDIAN_FILTER_NAME SwitchesFilter
+#include "MedianFilter.h"
+static SwitchesFilter_t SwitchFilter;
+
 static OS_MUTEX CommMutex; //Mutex to lock SPI lines
 // Stores switch states:
 // IGN_1 | IGN_2 | HZD_SW | REGEN_SW | RIGHT_SW | LEFT_SW | Headlight_SW | FOR_SW | REV_SW | CRUZ_EN | CRUZ_ST
 static uint16_t switchStatesBitmap = 0;
 
 // Stores light states (on/off): 
-// x | x | HEADLIGHT_SW | RIGHT_BLINK | LEFT_BLINK | CTRL_FAULT | M_CNCTR | A_CNCTR
+// RSVD_LED | BrakeLight | HEADLIGHT | RIGHT_BLINK | LEFT_BLINK | CTRL_FAULT | M_CNCTR | A_CNCTR
 static uint8_t lightStatesBitmap = 0;
 static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (left, right)
 
@@ -155,6 +163,7 @@ void Minions_Init(void){
     OS_ERR err;
     OSMutexCreate(&CommMutex, "Communications Mutex", &err);
     assertOSError(0,err);
+    SwitchesFilter_init(&SwitchFilter, 0, 1);
     BSP_SPI_Init();
     Lights_Init();
     Switches_Init();
@@ -205,6 +214,8 @@ State Switches_Read(switches_t sw){
     
 }
 
+
+
 /**
  * @brief   Queries all switch-related hardware and updates our internal state with the most recent switch values 
  * that Switches_Read depends on.
@@ -215,6 +226,7 @@ void Switches_UpdateStates(void){
     CPU_TS timestamp;
     uint8_t query[2]={SPI_OPCODE_R,SPI_GPIOA}; //query GPIOA
     uint8_t SwitchDataReg1 = 0, SwitchDataReg2 = 0;
+    uint8_t switchData[11]; // All switches get their own byte
 
     //Read all switches except for ignition and hazard
     OSMutexPend(
@@ -229,12 +241,12 @@ void Switches_UpdateStates(void){
     ChipSelect();      
     BSP_SPI_Write(query,2);
     BSP_SPI_Read(&SwitchDataReg1,1);
-    ChipDeselect();
+    // ChipDeselect();
     
     //Read Hazard Switch
     query[1] = SPI_GPIOB;
 
-    ChipSelect();
+    // ChipSelect();
     BSP_SPI_Write(query,2);
     BSP_SPI_Read(&SwitchDataReg2,1);
     ChipDeselect();
@@ -252,8 +264,23 @@ void Switches_UpdateStates(void){
     //Read Ignition Switch 2
     uint8_t ign2 = !BSP_GPIO_Read_Pin(PORTA, GPIO_Pin_0);
     
-    //Store data in bitmap
-    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | ((SwitchDataReg2 & 0x40) << 2) | (SwitchDataReg1);
+    // Seperate the switch bitmap out, so each switch is a byte
+    switchData[10] = ign2;
+    switchData[ 9] = ign1;
+    switchData[ 8] = (SwitchDataReg2 & 0x40) >> 6;
+    for (int i=0; i<8; i++) switchData[i] = (SwitchDataReg1 >> i) & 0x1;
+
+    // Submit the values to the filter, overwrite with stable values
+    SwitchesFilter_put(&SwitchFilter, switchData);
+    SwitchesFilter_get(&SwitchFilter, switchData);
+
+    // Overwrite the old packed values
+    SwitchDataReg1 = 0;
+    for (int i=0; i<8; i++) SwitchDataReg1 |= (switchData[i] << i);
+    SwitchDataReg2 = switchData[8];
+    ign1 = switchData[ 9];
+    ign2 = switchData[10];
+    switchStatesBitmap = (ign2 << 10) | (ign1 << 9) | (SwitchDataReg2 << 8) | (SwitchDataReg1);
 }
 
 /**
@@ -329,10 +356,8 @@ void Lights_Set(light_t light, State state) {
     
         lightNewStates &= ~(0x01 << light); // Clear bit corresponding to pin
         lightNewStates |= (state << light); // Set value to inputted state   
-        
-        uint8_t tempLightNewStates = lightNewStates;
 
-        // Initialize tx buffer and port c
+        // Initialize tx buffer and gpio port b
         uint8_t txWriteBuf[3] = {SPI_OPCODE_W, SPI_GPIOB, 0x00};
         
         if (light == BrakeLight) {  // Brakelight is only external
@@ -340,8 +365,7 @@ void Lights_Set(light_t light, State state) {
             lightStatesBitmap = lightNewStates;   // Update lights bitmap
             return;
         } else {
-            tempLightNewStates &= ~(lightNewStates & 0x18); 
-            txWriteBuf[2] = (((tempLightNewStates) | (~(lightNewStates)&0x18)) & 0x3F); // Write to tx buffer for lights present internally (on minion board)
+            txWriteBuf[2] = lightNewStates ^ 0x18;  // Flip left and right blink for negative logic on minion board
 
             // Write to port c for lights present externally
             switch (light) {

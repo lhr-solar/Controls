@@ -1,6 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "ReadCarCAN.h"
+#include "Display.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "CAN_Queue.h"
@@ -44,6 +45,7 @@ static inline void chargingDisable(void) {
 
     // turn off the array contactor light
     Lights_Set(A_CNCTR, OFF);
+    //Display_SetLight(A_CNCTR, OFF);
 }
 
 // helper function to call if charging should be enabled
@@ -137,7 +139,7 @@ void Task_ReadCarCAN(void *p_arg)
             continue;
         }
 
-        switch(canId){ //we got a charge_enable message
+        switch(canId){ //we got a message
             case CHARGE_ENABLE: {
                 OSMutexPend(&msg_rcv_mutex,
                     0,
@@ -160,9 +162,15 @@ void Task_ReadCarCAN(void *p_arg)
                     //If not initiate precharge and restart sequence. 
                     chargingEnable();
                 }
+                break;
             }
             case SUPPLEMENTAL_VOLTAGE: {
                 SupplementalVoltage = *(uint16_t *) &buffer;
+                break;
+            }
+            case STATE_OF_CHARGE:{
+                StateOfCharge = *(uint32_t*) &buffer; //get the 32 bit message and store it
+                break;
             }
             default: 
                 break;
@@ -196,12 +204,12 @@ static void CANWatchdog_Handler(void *p_arg){
             assertOSError(OS_READ_CAN_LOC,err);
             
         } else {
+            chargingDisable();
             OSMutexPost(&msg_rcv_mutex,
                         OS_OPT_NONE,
                         &err);
             assertOSError(OS_READ_CAN_LOC,err);
 
-            chargingDisable();
             //increment trip counter
             watchDogTripCounter += 1;
         }
@@ -219,9 +227,24 @@ static void ArrayRestart(void *p_arg){
     OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
     assertOSError(OS_READ_CAN_LOC,err);
 
+    if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
+        OSMutexPend(&arrayRestartMutex,
+                0,
+                OS_OPT_PEND_BLOCKING,
+                &ts,
+                &err);
+        restartingArray = false;
+        OSMutexPost(&arrayRestartMutex,
+                OS_OPT_NONE,
+                &err);
+        assertOSError(OS_READ_CAN_LOC,err);
+        return;
+    }
+
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
     Lights_Set(A_CNCTR, ON);
+    //Display_SetLight(A_CNCTR, ON);
 
     // let array know the contactor is on
     CANMSG_t msg;

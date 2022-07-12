@@ -1,53 +1,30 @@
-
-
 #include "SendDisplay.h"
+#include "Minions.h"
 #include "MotorController.h"
-
-#define MAX_DISPLAYABLE_ERRORS 6
-
-/*
-// Strings for motor errors
-static const char *MOTOR_ERROR_STRINGS[] = {
-    "MOTOR TEMP ERR",
-    "VELOCITY LIMITED", // Not really an error?
-    "SLIP SPEED ERR",
-    "OVERSPEED ERR"     // Not implemented, unecessary
-};
-
-// Strings for software module errors
-static const char *ERROR_STRINGS[] = {
-    "ARRAY ERR",
-    "READ CAN ERR",
-    "READ TRITIUM ERR",
-    "SEND CAN ERR",
-    "SEND TRITIUM ERR",
-    "UPDATE VELOCITY ERR",
-    "READ PEDAL ERR",
-    "BLINK LIGHTS ERR",
-    "MOTOR CONNECTION ERR"
-};
-*/
+#include <math.h>
 
 void Task_SendDisplay(void *p_arg) {
-    // car_state_t *car = (car_state_t *) p_arg;
     OS_ERR err;
 
+    Display_SetMainView(); // Make sure we're in the main view first
+    Display_CruiseEnable(OFF);
+    Display_SetGear(OFF, OFF);
+    Display_SetLight(CTRL_FAULT,OFF);
 
-    Display_SetPrechargeView();
+    for(int i=0; i<6; i++)
+        Display_SetLight(i, OFF);
 
     while (1) {
-
-
-        // If the contactors are not yet enabled, we're probably still in precharge
-        // Otherwise, changed to the main view
-        if (Contactors_Get(ARRAY_CONTACTOR) == ON) {
-            Display_SetMainView(); // Make sure we're in the main view first
-            Display_SetVelocity(MotorController_ReadVelocity());
-        } else {
-            Display_SetPrechargeView();
-        }
-
+        float vel_mps = MotorController_ReadVelocity();
+        float vel_mph = vel_mps * (2.23694);
+        Display_SetVelocity(vel_mph);
         Display_SetSBPV(SupplementalVoltage);
+        Display_SetChargeState(StateOfCharge);
+        Display_SetRegenEnabled(RegenEnable);
+        Display_SetLight(A_CNCTR, Contactors_Get(ARRAY_CONTACTOR));
+        Display_SetLight(M_CNCTR, Contactors_Get(MOTOR_CONTACTOR));
+        Display_SetGear(Switches_Read(FOR_SW), Switches_Read(REV_SW));
+        Display_SetLight(Headlight_ON, Switches_Read(HEADLIGHT_SW));
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
     }

@@ -40,22 +40,18 @@ CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
  * Semaphores
  */
 OS_SEM FaultState_Sem4;
-OS_SEM VelocityChange_Sem4;
-OS_SEM DisplayChange_Sem4;
-OS_SEM CarCAN_Sem4;
-OS_SEM ReadTritium_Sem4;
-OS_SEM BlinkLight_Sem4;
-OS_SEM SendCarCAN_Sem4;
-OS_SEM ArrayConnectionChange_Sem4;
-OS_SEM FaultState_Sem4;
 
 /**
  * Global Variables
  */
-// TODO: Put all global state variables here
-State RegenEnable = OFF;
-State CruiseControlEnable = OFF;
-uint16_t SupplementalVoltage = 0;
+
+// NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
+// Indicates whether or not regenerative braking / charging is enabled.
+State RegenEnable = OFF; 
+// supplemental voltage read from Supplemental Voltage board over CAN
+uint16_t SupplementalVoltage = 0; 
+//8 digit fixed point value from bps read over CAN. 88750000 = 88.750000%
+uint32_t StateOfCharge = 0; 
 
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;

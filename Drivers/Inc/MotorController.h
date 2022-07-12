@@ -8,8 +8,14 @@
 typedef struct 
 {
     uint32_t id;
+    union {
     uint32_t firstNum;
+    uint8_t data1[4];
+    };
+    union {
     uint32_t secondNum;
+    uint8_t data2[4];
+    };
 } CANbuff;
 
 /**
@@ -19,12 +25,21 @@ typedef struct
  */
 typedef enum{
     T_NONE = 0x00,
-    T_TEMP_ERR = 0x01,
-    T_CC_VEL_ERR = 0x02,
-    T_SLIP_SPEED_ERR = 0x04,
-    T_OVER_SPEED_ERR = 0x08,
-    T_INIT_FAIL = 0x16
+    T_DC_BUS_OVERVOLT_ERR = 0x01,
+    T_HALL_SENSOR_ERR = 0x02,
+    T_HARDWARE_OVER_CURRENT_ERR = 0x04,
+    T_CC_VEL_ERR = 0x08, //unused + deprecated
+    T_OVER_SPEED_ERR = 0x10, //unused + deprecated
+    T_TEMP_ERR = 0x20,
+    T_INIT_FAIL = 0x40,
+    T_LOW_VOLTAGE_LOCKOUT_ERR = 0x80,
+    T_SOFTWARE_OVER_CURRENT_ERR = 0x100,
 } tritium_error_code_t;
+
+/**
+ * @brief Returns the current error status of the tritium controller
+ */
+tritium_error_code_t MotorController_getTritiumError(void);
 
 /**
  * @brief   Initializes the motor controller
@@ -54,11 +69,21 @@ ErrorStatus MotorController_Read(CANbuff *message);
  */ 
 float MotorController_ReadVelocity(void);
 
+
 /**
- * @brief   Sends VELOCITY MEASUREMENT command on CAN2
- * @param   None
- * @return  velocity measurement in meters per second as a floating point number
- */ 
-float MotorController_ReadVelocity(void);
+ * @brief Reads RPM of motor
+ * 
+ * @return RPM
+ */
+float MotorController_ReadRPM(void);
+
+
+/**
+ * @brief Restarts the motor controller. THIS FUNCTION IS FOR FAULT STATE USE ONLY.
+ * 
+ * @param busCurrentFractionalSetPoint 
+ */
+void MotorController_Restart(void);
+
 
 #endif

@@ -20,10 +20,10 @@
  */
 #define TASK_FAULT_STATE_PRIO               1
 #define TASK_INIT_PRIO                      2
-#define TASK_UPDATE_VELOCITY_PRIO           3
-#define TASK_READ_CAR_CAN_PRIO              4
-#define TASK_SEND_DISPLAY_PRIO              5
-#define TASK_READ_TRITIUM_PRIO              6
+#define TASK_READ_TRITIUM_PRIO              3
+#define TASK_UPDATE_VELOCITY_PRIO           4
+#define TASK_READ_CAR_CAN_PRIO              5
+#define TASK_SEND_DISPLAY_PRIO              6
 #define TASK_READ_SWITCHES_PRIO             7
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_BLINK_LIGHT_PRIO               9
@@ -102,21 +102,18 @@ extern OS_Q CANBus_MsgQ;
  * Semaphores
  */
 extern OS_SEM FaultState_Sem4;
-extern OS_SEM DisplayChange_Sem4;
-extern OS_SEM CarCAN_Sem4;
-extern OS_SEM ReadTritium_Sem4;
-extern OS_SEM BlinkLight_Sem4;
-extern OS_SEM SendCarCAN_Sem4;
-extern OS_SEM MotorConnectionChange_Sem4;
 
 
 /**
  * Global Variables
  */
 
-// TODO: Put all global state variables here
+
+//Put all global state variables here
+extern bool UpdateVel_ToggleCruise;
 extern State RegenEnable;
-extern State CruiseControlEnable;
+extern uint16_t SupplementalVoltage;
+extern uint32_t StateOfCharge;
 
 /**
  * OS Error States
@@ -159,14 +156,13 @@ typedef enum{
  */
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
-extern uint16_t SupplementalVoltage;
 
 /**
  * @brief   Assert Error if OS function call fails
  * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err);
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
 
 #if DEBUG == 1
 #define assertOSError(OS_err_loc,err) \

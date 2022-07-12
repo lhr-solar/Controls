@@ -22,6 +22,8 @@ int main(void) {
 
     OS_ERR err;
     OSInit(&err);
+    OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
+
     assertOSError(OS_MAIN_LOC, err);
 
     // Initialize apps
@@ -62,68 +64,17 @@ void Task_Init(void *p_arg){
 
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
 
-    // Create FaultState semaphore
-    OSSemCreate(
-        (OS_SEM*)&FaultState_Sem4,
-        (CPU_CHAR*)"FaultState Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
     assertOSError(OS_MAIN_LOC, err);
-
-    // Create DisplayChange semaphore
-    OSSemCreate(
-        (OS_SEM*)&DisplayChange_Sem4,
-        (CPU_CHAR*)"DisplayChange Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Create CarCAN semaphore
-    OSSemCreate(
-        (OS_SEM*)&CarCAN_Sem4,
-        (CPU_CHAR*)"CarCAN Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Create ReadTritium semaphore
-    OSSemCreate(
-        (OS_SEM*)&ReadTritium_Sem4,
-        (CPU_CHAR*)"ReadTritium Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Create BlinkLights semaphore
-    OSSemCreate(
-        (OS_SEM*)&BlinkLight_Sem4,
-        (CPU_CHAR*)"BlinkLights Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Create SendCarCAN semaphore
-    OSSemCreate(
-        (OS_SEM*)&SendCarCAN_Sem4,
-        (CPU_CHAR*)"SendCarCAN Semaphore",
-        (OS_SEM_CTR)0,
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
     // Initialize drivers
+    Pedals_Init();
+    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
+    OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     BSP_UART_Init(UART_2);
     CANbus_Init();
     Contactors_Init();
     Display_Init();
     Minions_Init();
-    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
-    Pedals_Init();
     CAN_Queue_Init();
 
     // Initialize FaultState
@@ -270,9 +221,7 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Delete initialization task
-    OSTaskDel(
-        (OS_TCB*)&Init_TCB,
-        (OS_ERR*)&err
-    );
+    while(1){
+        OSTimeDlyHMSM(1,0,0,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    }
 }

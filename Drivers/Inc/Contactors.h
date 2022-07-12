@@ -8,6 +8,11 @@
 #include "BSP_GPIO.h"
 #include "stm32f4xx_gpio.h"
 
+#define CONTACTORS_PORT         PORTC
+#define ARRAY_PRECHARGE_PIN GPIO_Pin_10
+#define ARRAY_CONTACTOR_PIN GPIO_Pin_11
+#define MOTOR_CONTACTOR_PIN GPIO_Pin_12
+
 
 typedef enum {
     ARRAY_CONTACTOR = 0,
