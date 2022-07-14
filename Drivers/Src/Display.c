@@ -56,7 +56,8 @@ enum CommandString_t
     LEFT_BOX,
     RIGHT_BOX,
     HDLT_BOX,
-    REV_BOX
+    REV_BOX,
+    NEUTRAL_BOX
 };
 
 // The command strings themselves
@@ -86,7 +87,8 @@ static char *CommandStrings[] = {
     "l3",
     "l4",
     "l5",
-    "l6"};
+    "l6",
+    "l7"};
 
 /**
  * Sends a string of the form "obj_index.attr_index=" or "attr_index=" over UART
@@ -247,14 +249,17 @@ ErrorStatus Display_CruiseEnable(State on)
 
 ErrorStatus Display_SetGear(State fwd, State rev){
     if(!fwd && !rev){
+        setComponentVisibility(NEUTRAL_BOX, true);
         setComponentVisibility(FWD_BOX, false);
         return setComponentVisibility(REV_BOX, false);
     }
     else if(fwd && !rev){
+        setComponentVisibility(NEUTRAL_BOX, false);
         setComponentVisibility(FWD_BOX, true);
         return setComponentVisibility(REV_BOX, false);
     }
     else if(rev && !fwd){
+        setComponentVisibility(NEUTRAL_BOX, false);
         setComponentVisibility(REV_BOX, true);
         return setComponentVisibility(FWD_BOX, false);
     }

@@ -16,8 +16,7 @@ void Task_SendDisplay(void *p_arg) {
 
     while (1) {
         float vel_mps = MotorController_ReadVelocity();
-        float vel_mph = vel_mps * (2.23694);
-        Display_SetVelocity(vel_mph);
+        Display_SetVelocity(vel_mps);
         Display_SetSBPV(SupplementalVoltage);
         Display_SetChargeState(StateOfCharge);
         Display_SetRegenEnabled(RegenEnable);
