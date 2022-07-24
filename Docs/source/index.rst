@@ -7,6 +7,7 @@ Welcome to the Controls System documentation!
 =============================================
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Overview
 
@@ -14,10 +15,18 @@ Welcome to the Controls System documentation!
    Overview/Software
 
 
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Apps
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   Apps/BlinkLights
+   Apps/FaultState
+   Apps/Main
+   Apps/ReadCarCAN
+   Apps/ReadSwitches
+   Apps/ReadTritium
+   Apps/SendCarCAN
+   Apps/SendDisplay
+   Apps/UpdateVelocity
+   Apps/ExtraFiles
