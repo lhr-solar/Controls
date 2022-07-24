@@ -10,6 +10,7 @@ Welcome to the Controls System documentation!
    :maxdepth: 2
    :caption: Overview
 
+   Overview/Hardware
    Overview/Software
 
 
