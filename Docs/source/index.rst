@@ -30,3 +30,16 @@ Welcome to the Controls System documentation!
    Apps/SendDisplay
    Apps/UpdateVelocity
    Apps/ExtraFiles
+
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Drivers
+
+   Drivers/CANBus
+   Drivers/Contactors
+   Drivers/Display
+   Drivers/Minions
+   Drivers/MotorController
+   Drivers/Pedals
