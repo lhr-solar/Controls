@@ -4,7 +4,8 @@
 #define CAN_H__
 
 #include "BSP_CAN.h"
-
+#define CARCAN CAN_1 //convenience aliases for the CANBuses
+#define MOTORCAN CAN_3
 typedef enum {
 	MC_BUS = 0x242,
 	VELOCITY = 0x243,
@@ -32,7 +33,7 @@ typedef union {
 typedef struct {
 	uint8_t idx : 8;
 	uint8_t bytes : 8;
-	CANData_t data;
+	CANData_t data; //TODO: This could probably be replaced with a uint64_t
 } CANPayload_t;
 
 /**
@@ -46,31 +47,31 @@ typedef struct {
 typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
 
 /**
- * @brief   Initializes the CAN system
- * @param   None
+ * @brief   Initializes the CAN system for a given bus
+ * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN
  * @return  None
  */
-void CANbus_Init(void);
+void CANbus_Init(CAN_t bus);
 
 /**
  * @brief   Transmits data onto the CANbus.
  * @param   id : CAN id of the message
  * @param 	payload : the data that will be sent.
  * @param   blocking: Whether or not the Send should be blocking or not
+ * @param   bus: Which bus to transmit on
  * @return  ERROR if data wasn't sent, otherwise it was sent.
  */
-ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,CAN_blocking_t blocking);
+ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload,CAN_blocking_t blocking, CAN_t bus);
 
 
 /**
- * @brief   Checks if the CAN ID matches with Motor disable ID
- * @param   canline (not implemented, default is CAN1) can line to read from
- * @param 	id CAN msg ID
- * @param 	buffer pointer to buffer in which to store the can msg
- * @param   blocking whether or not this Read should be a blocking read or a nonblocking read
- * @return  1 if ID matches and 0 if it doesn't
+ * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers
+ * @param   ID pointer to where to store the CAN id of the recieved msg
+ * @param   pointer to buffer array to store message. MUST BE 8 BYTES OR LARGER
+ * @param   blocking whether or not this read should be blocking
+ * @returns ERROR if read failed, SUCCESS otherwise
  */
-ErrorStatus CANbus_Read(uint32_t *id, uint8_t* buffer, CAN_blocking_t blocking);
+ErrorStatus CANbus_Read(uint32_t *id, uint8_t* buffer, CAN_blocking_t blocking, CAN_t bus);
 
 
 #endif
