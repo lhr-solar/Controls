@@ -80,13 +80,13 @@ void CANbus_Init(CAN_t bus)
 }
 
 /**
- * @brief   Transmits data onto the CANbus
+ * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is necessary, please use IDX 
  * @param   id : CAN id of the message
  * @param 	payload : the data that will be sent.
  * @param blocking: Whether or not this should be a blocking call
  * @return  0 if data wasn't sent, otherwise it was sent.
  */
-ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blocking, CAN_t bus)
+ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 {
     CPU_TS timestamp;
     OS_ERR err;
@@ -124,28 +124,11 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
 
     uint8_t txdata[8];
     uint8_t datalen = 0;
-
-    switch (id) //TODO: Inspect this Switch case, see if we can offload to the caller
-    {
-        // Handle 64bit precision case (no idx)
-    case MC_BUS:
-    case VELOCITY:
-    case MC_PHASE_CURRENT:
-    case VOLTAGE_VEC:
-    case CURRENT_VEC:
-    case BACKEMF:
-    case TEMPERATURE:
-    case ODOMETER_AMPHOURS:
-        datalen = 8;
-        memcpy(txdata, &payload.data.d, sizeof(txdata));
-        break;
-    case ARRAY_CONTACTOR_STATE_CHANGE:
-        datalen = 1;
-        txdata[0] = (payload.data.b);
-        break;
-    default:
-        //This should never occur
-        return ERROR;
+    if(CanData.idxEn){ //first byte of txData should be the idx value
+        memcpy(txdata,CanData.idx,sizeof(CanData.idx));
+        memcpy(&(txdata[1]),CanData.data,CanData.size);
+    } else { //non-idx case
+        memcpy(txdata,CanData.data,CanData.size);
     }
 
     OSMutexPend( // ensure that tx line is available
@@ -157,7 +140,12 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
     assertOSError(OS_CANDRIVER_LOC,err);    // couldn't lock tx line
     
     // tx line locked
-    ErrorStatus retval = BSP_CAN_Write(bus, id, txdata, datalen);
+    ErrorStatus retval = BSP_CAN_Write(
+        bus, //bus to transmit onto 
+        CanData.ID, //ID from Data struct
+        txdata, //data we memcpy'd earlier
+        (CanData.idxEn ? CanData.size+1 : CanData.size) //if IDX then add one to the msg size, else the msg size
+    );
 
     OSMutexPost( // unlock the TX line
         &(CANbus_TxMutex[bus]),
@@ -175,7 +163,7 @@ ErrorStatus CANbus_Send(CANId_t id, CANPayload_t payload, CAN_blocking_t blockin
  * @returns ERROR if read failed, SUCCESS otherwise
  */
 
-ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking, CAN_t bus)
+ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t bus)
 {
     CPU_TS timestamp;
     OS_ERR err;
@@ -218,7 +206,7 @@ ErrorStatus CANbus_Read(uint32_t *id, uint8_t *buffer, CAN_blocking_t blocking, 
     assertOSError(OS_CANDRIVER_LOC,err);
 
     // Actually get the message
-    ErrorStatus status = BSP_CAN_Read(bus, id, buffer);
+    ErrorStatus status = BSP_CAN_Read(bus, &(MsgContainer->ID), &(MsgContainer->data));
 
     OSMutexPost( // unlock RX line
         &(CANbus_RxMutex[bus]),
