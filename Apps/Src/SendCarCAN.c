@@ -10,11 +10,11 @@
 */
 
 void Task_SendCarCAN(void *p_arg){
-    CANMSG_t msg;
+    CANDATA_t msg;
 
     while (1) {
         CAN_Queue_Pend(&msg);
-        CANbus_Send(msg.id,msg.payload,CAN_BLOCKING); //send message
+        CANbus_Send(msg,CAN_BLOCKING,CARCAN); //send message
     }
     
 }

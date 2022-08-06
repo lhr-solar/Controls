@@ -10,8 +10,7 @@ void Task_ReadTritium(void *p_arg)
 
 	OS_ERR err;
 
-	CANMSG_t msg;
-
+	CANDATA_t dataBuf;
 	while (1)
 	{
 		CANbuff buf;
@@ -19,12 +18,12 @@ void Task_ReadTritium(void *p_arg)
 
 		if (status == SUCCESS)
 		{
-
-			msg.id = buf.id;
-			msg.payload.data.d = ((uint64_t)buf.firstNum << 32) | ((uint64_t)buf.secondNum);
+			dataBuf.data = ((uint64_t)buf.firstNum << 32) | ((uint64_t)buf.secondNum);
+			dataBuf.ID = buf.id;
+			dataBuf.idxEn = false;
 
 			__unused
-				ErrorStatus error = CAN_Queue_Post(msg);
+				ErrorStatus error = CAN_Queue_Post(dataBuf);
 
 			// TODO: handle error
 		}

@@ -19,38 +19,22 @@ typedef enum {
 	CAR_STATE = 0x580,
 	CHARGE_ENABLE = 0x10C,
 	SUPPLEMENTAL_VOLTAGE = 0x10B,
-	STATE_OF_CHARGE = 0x106
+	STATE_OF_CHARGE = 0x106,
+	DO_NOT_USE_FORCE_ENUM_SIZE = 0xFFFFFFFF //force the enum values to be 32 bits wide. This value should not be used. This is here because the BSP layer expects a 32 bit ptr for ID's
 } CANId_t;
 
 
-typedef union {
-	uint8_t b; //byte
-	uint16_t h; //halfword
-	uint32_t w; //word
-	uint64_t d; //double
-} CANData_t;
 
-typedef struct {
-	uint8_t idx : 8;
-	uint8_t bytes : 8;
-	CANData_t data; //TODO: This could probably be replaced with a uint64_t
-} CANPayload_t;
 
 /**
- * Data type for message queue
+ * Standard CAN packet
 */
-typedef struct {
-	CANPayload_t payload;
-	CANId_t id;
-}CANMSG_t;
-
-
 typedef struct {
 	CANId_t ID; 		//ID of message
 	uint8_t idx; 		//FOR TRANSMIT ONLY: if message is part of a sequence of messages (for messages longer than 64 bits), this indicates the index of the message. Recieve will not touch this
 	bool idxEn; 		//FOR TRANSMIT ONLY: whether to use idx or not. Recieve will not touch this.
 	uint8_t size; 		//size of this particular message IN BYTES. On writes, this should not Exceed 8 bytes for non-idx messages, and should not exceed 7 for idx messages.
-	uint8_t data[8]; 	//data of the message
+	uint64_t data; 	//data of the message
 } CANDATA_t;
 
 
@@ -74,7 +58,8 @@ void CANbus_Init(CAN_t bus);
 ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus);
 
 /**
- * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers
+ * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers. 
+ * 	DOES NOT POPULATE IDXen or IDX. You have to manually inspect the first byte and the ID
  * @param   ID pointer to where to store the CAN id of the recieved msg
  * @param   pointer to buffer array to store message. MUST BE 8 BYTES OR LARGER
  * @param   blocking whether or not this read should be blocking

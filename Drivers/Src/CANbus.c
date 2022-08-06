@@ -90,6 +90,17 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 {
     CPU_TS timestamp;
     OS_ERR err;
+
+    //message error checks
+    if(CanData.idxEn & (CanData.size>7)){ //idx message can only handle up to 7 bytes
+        return ERROR;
+    } else if (CanData.size>8){ //non-idx message can only handle up to 8 bytes
+        return ERROR;
+    } else if (CanData.size <= 0){ //no 0 size messages allowed
+        return ERROR;
+    }
+
+
     // make sure that Can mailbox is available
     if (blocking == CAN_BLOCKING)
     {
@@ -123,12 +134,11 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
     }
 
     uint8_t txdata[8];
-    uint8_t datalen = 0;
     if(CanData.idxEn){ //first byte of txData should be the idx value
-        memcpy(txdata,CanData.idx,sizeof(CanData.idx));
-        memcpy(&(txdata[1]),CanData.data,CanData.size);
+        memcpy(txdata,&CanData.idx,sizeof(CanData.idx));
+        memcpy(&(txdata[1]),&CanData.data,CanData.size);
     } else { //non-idx case
-        memcpy(txdata,CanData.data,CanData.size);
+        memcpy(txdata,&CanData.data,CanData.size);
     }
 
     OSMutexPend( // ensure that tx line is available
@@ -156,7 +166,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 }
 
 /**
- * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers
+ * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers. **DOES NOT POPULATE IDXen or IDX. You have to manually inspect the first byte and the ID**
  * @param   ID pointer to where to store the CAN id of the recieved msg
  * @param   pointer to buffer array to store message. MUST BE 8 BYTES OR LARGER
  * @param   blocking whether or not this read should be blocking
@@ -206,7 +216,7 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
     assertOSError(OS_CANDRIVER_LOC,err);
 
     // Actually get the message
-    ErrorStatus status = BSP_CAN_Read(bus, &(MsgContainer->ID), &(MsgContainer->data));
+    ErrorStatus status = BSP_CAN_Read(bus, (uint32_t*)(&(MsgContainer->ID)), (uint8_t*)(&(MsgContainer->data)));
 
     OSMutexPost( // unlock RX line
         &(CANbus_RxMutex[bus]),
