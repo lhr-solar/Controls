@@ -6,6 +6,7 @@
 #include "BSP_CAN.h"
 #define CARCAN CAN_1 //convenience aliases for the CANBuses
 #define MOTORCAN CAN_3
+#define MAX_CAN_LEN 8
 typedef enum {
 	MC_BUS = 0x242,
 	VELOCITY = 0x243,
@@ -20,6 +21,11 @@ typedef enum {
 	CHARGE_ENABLE = 0x10C,
 	SUPPLEMENTAL_VOLTAGE = 0x10B,
 	STATE_OF_CHARGE = 0x106,
+	MOTOR_DRIVE = 0x221,
+	MOTOR_POWER = 0x222,
+	MOTOR_RESET = 0x223,
+	MOTOR_STATUS = 0x241,
+	MOTOR_VELOCITY = 0x243,
 	DO_NOT_USE_FORCE_ENUM_SIZE = 0xFFFFFFFF //force the enum values to be 32 bits wide. This value should not be used. This is here because the BSP layer expects a 32 bit ptr for ID's
 } CANId_t;
 

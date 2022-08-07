@@ -122,9 +122,10 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
             &err);
 
         // don't crash if we are just using this in non-blocking mode and don't block
-        if (err != OS_ERR_PEND_WOULD_BLOCK) {
-            assertOSError(OS_CANDRIVER_LOC,err);
+        if(err == OS_ERR_PEND_WOULD_BLOCK){
+            err = OS_ERR_NONE;
         }
+        assertOSError(OS_CANDRIVER_LOC,err);
     }
 
 
@@ -162,6 +163,10 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
         OS_OPT_POST_NONE,
         &err);
     assertOSError(OS_CANDRIVER_LOC,err);
+    if(retval == ERROR){
+        CANbus_TxHandler(bus); //release the mailbox by posting back to the counter semaphore
+    }
+
     return retval;
 }
 
@@ -198,9 +203,10 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
             &err);
 
         // don't crash if we are just using this in non-blocking mode and don't block
-        if (err != OS_ERR_PEND_WOULD_BLOCK) {
-            assertOSError(OS_CANDRIVER_LOC,err);
+        if(err == OS_ERR_PEND_WOULD_BLOCK){
+            err = OS_ERR_NONE;
         }
+        assertOSError(OS_CANDRIVER_LOC,err);
     }
     if (err != OS_ERR_NONE)
     {
