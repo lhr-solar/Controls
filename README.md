@@ -7,9 +7,11 @@ There is currently one option to develop the Controls system. This option is to 
 ### Setup for Terminal Development
 The system can be built and deployed from a terminal.
 1. Ensure that you have some type of linux machine such as Ubuntu, Windows Subsystem for Linux, etc. Windows will not work.
+    - A Linux Virtual Machine is highly recommended. You will not be able to flash code onto the board with WSL.
 2. Clone the repository and its submodules with: 
 ```git clone --recurse-submodules https://github.com/lhr-solar/Controls.git``` 
 3. Run install.sh to install the appropriate dependencies for both microcontroller and simulator development.
+    - The install script will not work on systems that do not use the apt package manager. Please ask a lead to help install if you have a system without apt.
 4. Download [VSCode](https://code.visualstudio.com/)
 5. In VSCode, download the following extensions (Click on the block icon on the left column):
     - C/C++
