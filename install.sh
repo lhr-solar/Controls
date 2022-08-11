@@ -18,3 +18,9 @@ sudo apt-get -y install gdb-multiarch
 # Run make command and compile projects
 echo -e "${RED}\nInstall make...\n==================================\n${NC}"
 sudo apt-get -y install make
+
+# Make sure that necessary OS submodules are initialized
+echo -e "${RED}\nUpdate and initialize submodules...\n==================================\n${NC}"
+git submodule update --init --recursive
+
+echo -e "${RED}\nFinished! Jolly good!\n${NC}"
