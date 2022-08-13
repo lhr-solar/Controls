@@ -6,8 +6,12 @@
 #include "BSP_CAN.h"
 #define CARCAN CAN_1 //convenience aliases for the CANBuses
 #define MOTORCAN CAN_3
-#define MAX_CAN_LEN 8
 
+//macros to define canmsg length in LUT
+#define BYTE 1
+#define HALFWORD 2
+#define WORD 4
+#define DOUBLE 8
 
 /**
  * @brief Struct to use in CAN MSG LUT
@@ -20,33 +24,6 @@ typedef struct {
 	uint8_t size;
 	uint32_t ID;
 } CANLUT_T;
-
-/**
- * @brief Lookup table to simplify user-defined packet structs. Contains fields that are always the same for every message of a given ID.
- * Indexed by CANId_t values.
- * FOR DRIVER USE ONLY.
- */
-static CANLUT_T CANLUT[NUM_CAN_IDS] = {
-	{false, MAX_CAN_LEN, 0x10C},
-	{false, MAX_CAN_LEN, 0x106},
-	{false, MAX_CAN_LEN, 0x10B},
-	{false, MAX_CAN_LEN, 0x580},
-	{false, MAX_CAN_LEN, 0x242},
-	{false, MAX_CAN_LEN, 0x243},
-	{false, MAX_CAN_LEN, 0x244},
-	{false, MAX_CAN_LEN, 0x245},
-	{false, MAX_CAN_LEN, 0x246},
-	{false, MAX_CAN_LEN, 0x247},
-	{false, MAX_CAN_LEN, 0x248},
-	{false, MAX_CAN_LEN, 0x24E},
-	{false, MAX_CAN_LEN, 0x24F},
-	{false, MAX_CAN_LEN, 0x221},
-	{false, MAX_CAN_LEN, 0x222},
-	{false, MAX_CAN_LEN, 0x223},
-	{false, MAX_CAN_LEN, 0x241},
-	{false, MAX_CAN_LEN, 0x243},
-};
-
 /**
  * @brief This enum is used to signify the ID of the message you want to send. 
  * It is used internally to index our lookup table (above) and get message-specific fields.
@@ -74,6 +51,34 @@ typedef enum {
 	MOTOR_VELOCITY,
 	NUM_CAN_IDS
 } CANId_t;
+
+
+/**
+ * @brief Lookup table to simplify user-defined packet structs. Contains fields that are always the same for every message of a given ID.
+ * Indexed by CANId_t values.
+ * FOR DRIVER USE ONLY.
+ */
+CANLUT_T CANLUT[NUM_CAN_IDS] = {
+	{false, DOUBLE, 0x10C},
+	{false, DOUBLE, 0x106},
+	{false, DOUBLE, 0x10B},
+	{false, DOUBLE, 0x580},
+	{false, DOUBLE, 0x242},
+	{false, DOUBLE, 0x243},
+	{false, DOUBLE, 0x244},
+	{false, DOUBLE, 0x245},
+	{false, DOUBLE, 0x246},
+	{false, DOUBLE, 0x247},
+	{false, DOUBLE, 0x248},
+	{false, DOUBLE, 0x24E},
+	{false, BYTE  , 0x24F},
+	{false, DOUBLE, 0x221},
+	{false, DOUBLE, 0x222},
+	{false, DOUBLE, 0x223},
+	{false, DOUBLE, 0x241},
+	{false, DOUBLE, 0x243},
+};
+
 
 
 /**

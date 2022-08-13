@@ -39,10 +39,8 @@ static inline void chargingDisable(void) {
     // let array know we killed contactors
     CANDATA_t message;
     message.ID = ARRAY_CONTACTOR_STATE_CHANGE;
-    message.idxEn = false;
     message.idx = 0;
-    message.size = 1;
-    message.data = false;
+    message.data[0] = false;
     CAN_Queue_Post(message);
 
     // turn off the array contactor light
@@ -252,9 +250,7 @@ static void ArrayRestart(void *p_arg){
     // let array know the contactor is on
     CANDATA_t databuf;
     databuf.ID = ARRAY_CONTACTOR_STATE_CHANGE;
-    databuf.size = 1;
-    databuf.data = true;
-    databuf.idxEn = false;
+    databuf.data[0] = true;
     databuf.idx = 0;
     CAN_Queue_Post(databuf);
 

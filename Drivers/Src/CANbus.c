@@ -224,7 +224,11 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
     assertOSError(OS_CANDRIVER_LOC,err);
 
     // Actually get the message
-    ErrorStatus status = BSP_CAN_Read(bus, (uint32_t*)(&(MsgContainer->ID)), (uint8_t*)(&(MsgContainer->data)));
+    uint32_t id;
+    uint64_t dat;
+    ErrorStatus status = BSP_CAN_Read(bus, &id, (uint8_t*)&dat);
+    MsgContainer->ID = id;
+    MsgContainer->data[0] = dat;
 
     OSMutexPost( // unlock RX line
         &(CANbus_RxMutex[bus]),

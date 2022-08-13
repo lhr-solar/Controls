@@ -18,12 +18,12 @@ void Task_ReadTritium(void *p_arg)
 
 		if (status == SUCCESS)
 		{
-			dataBuf.data = ((uint64_t)buf.firstNum << 32) | ((uint64_t)buf.secondNum);
+			dataBuf.data[0] = buf.secondNum;
+			dataBuf.data[4] = buf.firstNum;
 			dataBuf.ID = buf.id;
-			dataBuf.idxEn = false;
 
-			__unused
-				ErrorStatus error = CAN_Queue_Post(dataBuf);
+			__attribute__((unused))
+			ErrorStatus error = CAN_Queue_Post(dataBuf);
 
 			// TODO: handle error
 		}

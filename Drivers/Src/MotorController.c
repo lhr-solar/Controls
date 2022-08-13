@@ -60,13 +60,11 @@ static void _assertTritiumError(tritium_error_code_t motor_err)
 
 
 
-static void MotorController_InitCommand(){ //transmits the init command with id 0x222    
+static void MotorController_InitCommand(){ //transmits the init command
     CANDATA_t initData;
-    *(((uint32_t*)&initData.data)+1) = busCurrent; //put the buscurrent into the Most significant 32 bits of initData data
+    initData.data[4] = busCurrent; //put 32bit busCurrent value in most significant 32 bits
     initData.ID = MOTOR_POWER;
     initData.idx = 0;
-    initData.idxEn = false;
-    initData.size = MAX_CAN_LEN;
     ErrorStatus initCommand = CANbus_Send(initData,CAN_BLOCKING,MOTORCAN);
     if (initCommand == ERROR)
     {
@@ -101,11 +99,9 @@ void MotorController_Restart(void){
     restartFinished = false;
 
     CANDATA_t restartCommand;
-    restartCommand.data = 0;
+    restartCommand.data[0] = 0;
     restartCommand.ID = MOTOR_RESET;
     restartCommand.idx = 0;
-    restartCommand.idxEn = false;
-    restartCommand.size = MAX_CAN_LEN;
     ErrorStatus initCommand = CANbus_Send(restartCommand,CAN_BLOCKING,MOTORCAN);
     if (initCommand == ERROR) {
         restartFinished = true;
@@ -133,8 +129,6 @@ void MotorController_Drive(float newVelocity, float motorCurrent)
     *(((uint32_t*)&driveCommand.data)+1) = motorCurrent; //copy current into MS 32 bits
     driveCommand.ID = MOTOR_DRIVE;
     driveCommand.idx = 0;
-    driveCommand.idxEn = false;
-    driveCommand.size = MAX_CAN_LEN;
     CANbus_Send(driveCommand,CAN_NON_BLOCKING,MOTORCAN);
 }
 
