@@ -91,12 +91,14 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
     CPU_TS timestamp;
     OS_ERR err;
 
+    CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+
     //message error checks
-    if(CanData.idxEn & (CanData.size>7)){ //idx message can only handle up to 7 bytes
+    if(msginfo.idxEn & (msginfo.size>7)){ //idx message can only handle up to 7 bytes
         return ERROR;
-    } else if (CanData.size>8){ //non-idx message can only handle up to 8 bytes
+    } else if (msginfo.size>8){ //non-idx message can only handle up to 8 bytes
         return ERROR;
-    } else if (CanData.size <= 0){ //no 0 size messages allowed
+    } else if (msginfo.size <= 0){ //no 0 size messages allowed
         return ERROR;
     }
 
@@ -123,7 +125,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 
         // don't crash if we are just using this in non-blocking mode and don't block
         if(err == OS_ERR_PEND_WOULD_BLOCK){
-            err = OS_ERR_NONE;
+            return ERROR;
         }
         assertOSError(OS_CANDRIVER_LOC,err);
     }
@@ -135,11 +137,11 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
     }
 
     uint8_t txdata[8];
-    if(CanData.idxEn){ //first byte of txData should be the idx value
+    if(msginfo.idxEn){ //first byte of txData should be the idx value
         memcpy(txdata,&CanData.idx,sizeof(CanData.idx));
-        memcpy(&(txdata[1]),&CanData.data,CanData.size);
+        memcpy(&(txdata[sizeof(CanData.idx)]),&CanData.data,msginfo.size);
     } else { //non-idx case
-        memcpy(txdata,&CanData.data,CanData.size);
+        memcpy(txdata,&CanData.data,msginfo.size);
     }
 
     OSMutexPend( // ensure that tx line is available
@@ -155,7 +157,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
         bus, //bus to transmit onto 
         CanData.ID, //ID from Data struct
         txdata, //data we memcpy'd earlier
-        (CanData.idxEn ? CanData.size+1 : CanData.size) //if IDX then add one to the msg size, else the msg size
+        (msginfo.idxEn ? msginfo.size+sizeof(CanData.idx) : msginfo.size) //if IDX then add one to the msg size, else the msg size
     );
 
     OSMutexPost( // unlock the TX line
@@ -204,7 +206,7 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
 
         // don't crash if we are just using this in non-blocking mode and don't block
         if(err == OS_ERR_PEND_WOULD_BLOCK){
-            err = OS_ERR_NONE;
+            return ERROR;
         }
         assertOSError(OS_CANDRIVER_LOC,err);
     }
