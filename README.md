@@ -8,6 +8,7 @@ There is currently one option to develop the Controls system. This option is to 
 The system can be built and deployed from a terminal.
 1. Ensure that you have some type of linux machine such as Ubuntu, Windows Subsystem for Linux, etc. Windows will not work.
     - A Linux Virtual Machine is highly recommended. You will not be able to flash code onto the board with WSL.
+    - Use this link to download the Ubuntu Server image: [Ubuntu Server 22.04 Install](https://releases.ubuntu.com/22.04/)
 2. Clone the repository and its submodules with: 
 ```git clone --recurse-submodules https://github.com/lhr-solar/Controls.git``` 
 3. Run install.sh to install the appropriate dependencies for both microcontroller and simulator development.
@@ -51,3 +52,5 @@ Commit frequently into your own branches. Create a Pull Request whenever you are
 Reviewers:
 1. Sidharth Babu
 2. Roie Gal
+3. Ishan Deshpande
+4. Nathaniel Delgado
