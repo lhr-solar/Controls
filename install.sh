@@ -13,7 +13,6 @@ rm arm-none-eabi.tar.xz &&
 sudo mv arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi /usr/share/
 sudo ln -s /usr/share/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc /usr/bin/arm-none-eabi-gcc
 sudo ln -s /usr/share/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-g++ /usr/bin/arm-none-eabi-g++
-sudo ln -s /usr/share/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gdb /usr/bin/arm-none-eabi-gdb
 sudo ln -s /usr/share/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-objcopy /usr/bin/arm-none-eabi-objcopy
 sudo ln -s /usr/share/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-size /usr/bin/arm-none-eabi-size
 
