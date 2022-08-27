@@ -31,7 +31,9 @@ echo -e "${RED}\nInstall make...\n==================================\n${NC}"
 sudo apt-get -y install make
 
 # Make sure that necessary OS submodules are initialized
-echo -e "${RED}\nUpdate and initialize submodules...\n==================================\n${NC}"
-git submodule update --init --recursive
+if [ -d ".git" ]; then
+    echo -e "${RED}\nUpdate and initialize submodules...\n==================================\n${NC}"
+    git submodule update --init --recursive
+fi
 
 echo -e "${RED}\nFinished! Jolly good!\n${NC}"
