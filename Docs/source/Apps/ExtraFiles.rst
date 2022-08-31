@@ -4,6 +4,8 @@ Extra Files
 
 Some files in the Apps folder don't contain any task code, but instead contain higher level interfaces, calibration data, and supporting structures. Some of these files will likely be relocated in the future.
 
+.. _can-queue:
+
 =========
 CAN Queue
 =========

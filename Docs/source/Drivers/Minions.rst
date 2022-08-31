@@ -1,3 +1,5 @@
+.. _minions-driver:
+
 **************
 Minions Driver
 **************
