@@ -45,7 +45,7 @@ static inline void chargingDisable(void) {
 
     // turn off the array contactor light
     Lights_Set(A_CNCTR, OFF);
-    //Display_SetLight(A_CNCTR, OFF);
+    Display_SetArray(false);
 }
 
 // helper function to call if charging should be enabled
@@ -165,11 +165,12 @@ void Task_ReadCarCAN(void *p_arg)
                 break;
             }
             case SUPPLEMENTAL_VOLTAGE: {
-                SupplementalVoltage = *(uint16_t *) &buffer;
+                Display_SetSBPV(*(uint16_t *) &buffer); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
-                StateOfCharge = *(uint32_t*) &buffer; //get the 32 bit message and store it
+                uint8_t SOC = (*(uint32_t*) &buffer)/(100000);  // Convert to integer percent
+                Display_SetSOC(SOC);
                 break;
             }
             default: 
@@ -244,7 +245,7 @@ static void ArrayRestart(void *p_arg){
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
     Lights_Set(A_CNCTR, ON);
-    //Display_SetLight(A_CNCTR, ON);
+    Display_SetArray(true);
 
     // let array know the contactor is on
     CANMSG_t msg;

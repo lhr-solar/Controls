@@ -10,39 +10,55 @@
 
 #include "common.h"
 #include "config.h"
+#include "Minions.h"
 
-/*
- * Initialize the Nextion display
- */
-void Display_Init();
+#define MAX_ARGS 2
 
-/**
- * Value setting subroutines
- */
-ErrorStatus Display_SetMainView(void);
+typedef enum{
+	STARTUP=0,
+	INFO,
+	FAULT
+} Page_t;
 
-ErrorStatus Display_CruiseEnable(State on);
-ErrorStatus Display_SetVelocity(float vel);
+typedef struct{
+	char* compOrCmd;
+	char* attr;
+	char* op;
+	uint8_t numArgs;
+	bool argTypes[MAX_ARGS];	// TRUE for integers, FALSE for strings
+	union{
+		uint8_t num;
+		char* str;
+	} args[MAX_ARGS];
+} Display_Cmd_t;
+
+OS_SEM DisplayQ_Sem4;
+OS_MUTEX DisplayQ_Mutex;
+
+ErrorStatus Display_Init();
+
+ErrorStatus Display_Reset();
+
+ErrorStatus Display_SetSOC(uint8_t percent);
+
 ErrorStatus Display_SetSBPV(uint16_t mv);
-ErrorStatus Display_SetError(int idx, char *err);
-ErrorStatus Display_NoErrors(void);
 
-/**
- * @brief Update the charge state of the battery onto the display.
- * @param chargeState 
- * @return void 
- */
-ErrorStatus Display_SetChargeState(uint32_t chargeState);
+ErrorStatus Display_SetGear(uint8_t gear);
 
-/**
- * @brief Updates the display with whether regenerative braking / charging is allowed or not
- * @param ChargeEnabled a state value indicating whether or not charging is enabled
- * @return void
- */
-ErrorStatus Display_SetRegenEnabled(State ChargeEnabled);
+ErrorStatus Display_SetArray(bool state);
 
-ErrorStatus Display_SetLight(uint8_t light, State on);
+ErrorStatus Display_SetMotor(bool state);
 
-ErrorStatus Display_SetGear(State fwd, State rev);
+ErrorStatus Display_SetRegenEnable(bool state);
+
+ErrorStatus Display_SetCruiseEnable(bool state);
+
+ErrorStatus Display_SetLeftBlink(bool state);
+
+ErrorStatus Display_SetRightBlink(bool state);
+
+ErrorStatus Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+
+ErrorStatus Display_SendNext();
 
 #endif

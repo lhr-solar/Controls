@@ -47,7 +47,7 @@ void Task_ReadSwitches(void* p_arg) {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,OFF);
-            Display_SetLight(A_CNCTR,OFF);
+            Display_SetArray(true);
         }
         
         // motor on/off
@@ -129,18 +129,22 @@ static void UpdateDispLights() {
         Lights_Toggle_Set(LEFT_BLINK, OFF);
         Lights_Set(RIGHT_BLINK,OFF);
         Lights_Set(LEFT_BLINK,OFF);
-        Display_SetLight(RIGHT_BLINK,OFF);
-        Display_SetLight(LEFT_BLINK,OFF);
+        
+        Display_SetLeftBlink(false);
+        Display_SetRightBlink(false);
     }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
+    Display_SetLeftBlink(leftblink);
+    Display_SetRightBlink(rightblink);
+    
     if(leftblink==0){
         Lights_Set(LEFT_BLINK,OFF);
-        Display_SetLight(LEFT_BLINK,OFF);
+        Display_SetLeftBlink(false);
     }
     if(rightblink==0){
         Lights_Set(RIGHT_BLINK,OFF);
-        Display_SetLight(RIGHT_BLINK,OFF);
+        Display_SetRightBlink(false);
     }
     
 }

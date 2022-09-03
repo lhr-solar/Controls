@@ -134,7 +134,8 @@ typedef enum{
     OS_SWITCHES_LOC = 0x100,
     OS_MAIN_LOC = 0x200,
     OS_CANDRIVER_LOC = 0x400,
-    OS_MOTOR_CONNECTION_LOC = 0x800
+    OS_MOTOR_CONNECTION_LOC = 0x800,
+    OS_DISPLAY_LOC = 0x1000
 } os_error_loc_t;
 
 /**

@@ -16,12 +16,10 @@ static void ArrayMotorKill(void) {
 
 static void nonrecoverableFaultHandler(){
     //turn additional lights on to indicate critical error
+    Display_Fault(OSErrLocBitmap, FaultBitmap);
     BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, OFF);
-    Display_SetLight(LEFT_BLINK, ON);
     BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, OFF);
-    Display_SetLight(RIGHT_BLINK, ON);
     BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, OFF);
-    Display_SetLight(CTRL_FAULT,ON); //turn on fault light
     ArrayMotorKill();
 }
 
@@ -50,8 +48,6 @@ void EnterFaultState(void) {
                 nonrecoverableFaultHandler();
             } else {
                 tripcnt++;
-                //Lights_Set(CTRL_FAULT,OFF);
-                Display_SetLight(CTRL_FAULT,OFF);
                 MotorController_Restart(); //re-initialize motor
                 return;
             }
@@ -64,8 +60,6 @@ void EnterFaultState(void) {
                 nonrecoverableFaultHandler(); //we've failed to init the motor five times
             } else {
                 tripcnt++;
-                //Lights_Set(CTRL_FAULT,OFF);
-                Display_SetLight(CTRL_FAULT,OFF);
                 MotorController_Restart();
                 return;
             }
@@ -86,8 +80,14 @@ void EnterFaultState(void) {
         nonrecoverableFaultHandler();
     }
     else if(FaultBitmap & FAULT_DISPLAY){
-        // TODO: Send reset command to display ("reset")
-        // To be implemented when display driver is complete
+        static uint8_t tripcnt = 0;
+        if(tripcnt>3){
+            Display_Fault(OSErrLocBitmap, FaultBitmap);
+        } else {
+            tripcnt++;
+            Display_Reset();
+            return;
+        }
     }
     if(fromThread){//no recovering if fault state was entered outside of the fault thread
         return;
