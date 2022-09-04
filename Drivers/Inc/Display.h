@@ -27,13 +27,10 @@ typedef struct{
 	uint8_t numArgs;
 	bool argTypes[MAX_ARGS];	// TRUE for integers, FALSE for strings
 	union{
-		uint8_t num;
 		char* str;
+		uint8_t num;
 	} args[MAX_ARGS];
 } Display_Cmd_t;
-
-OS_SEM DisplayQ_Sem4;
-OS_MUTEX DisplayQ_Mutex;
 
 ErrorStatus Display_Init();
 
@@ -60,5 +57,7 @@ ErrorStatus Display_SetRightBlink(bool state);
 ErrorStatus Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
 
 ErrorStatus Display_SendNext();
+
+ErrorStatus Display_Refresh();
 
 #endif

@@ -11,7 +11,6 @@ void Task_SendDisplay(void *p_arg) {
             FaultBitmap |= FAULT_DISPLAY;
             
             OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-            EnterFaultState();
         }
         
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
