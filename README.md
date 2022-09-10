@@ -1,6 +1,9 @@
 # Controls
 This repository contains all code related to Longhorn Racing Solar's Controls System
 
+## Documentation
+Controls documentation is hosted on [Read the Docs](https://controls-docs.readthedocs.io/en/latest/). Make sure to update the documentation as new features are implemented. The link always points to the most up-to-date docs i.e. whatever is on the master branch.
+
 ## Setup
 There is currently one option to develop the Controls system. This option is to use a terminal in a linux environment to build and flash the program.
 
