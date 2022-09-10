@@ -14,6 +14,8 @@ static OS_MUTEX DisplayQ_Mutex;
 #define DISP_OUT UART_3
 static const char *TERMINATOR = "\xff\xff\xff";
 
+// Should make an enum for the gears
+
 typedef enum{
 	// Boolean components
 	LEFT=0,
@@ -36,7 +38,7 @@ typedef enum{
 	FAULT_CODE
 } Component_t;
 
-const char* compStrings[15]= {
+const char* compStrings[17]= {
 	// Boolean components
 	"ltime",
 	"head",
@@ -46,6 +48,7 @@ const char* compStrings[15]= {
 	"rbs",
 	"arr",
 	"mot",
+	"BREAKLIGHTS?",
 	// Non-boolean components
 	"vel",
 	"accel",
@@ -63,7 +66,7 @@ ErrorStatus Display_PutNext(Display_Cmd_t cmd){
 	OS_ERR err;
 
 	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_POST_NONE, &ticks, &err);
-  assertOSError(OS_DISPLAY_LOC, err);  
+  	assertOSError(OS_DISPLAY_LOC, err);  
 	
 	bool success = disp_fifo_put(&msg_queue, cmd);
 
@@ -122,7 +125,7 @@ ErrorStatus Display_SendNext(){
 				strcat(msg, arg);
 
 				if(i<cmd.numArgs-1){	// delimiter
-					strcat(msg, ", ");
+					strcat(msg, ",");
 				}
 			}
 		}
@@ -195,6 +198,7 @@ ErrorStatus Display_SetPage(Page_t page){
 ErrorStatus Display_Init(){
 	BSP_UART_Init(DISP_OUT);
 	disp_fifo_new();
+	Display_Reset();
 	Display_SetPage(INFO);
 	return SUCCESS;
 }
