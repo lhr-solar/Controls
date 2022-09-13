@@ -43,11 +43,13 @@ void Task_ReadSwitches(void* p_arg) {
         if (Switches_Read(IGN_1) == ON || Switches_Read(IGN_2) == ON) {
             Contactors_Enable(ARRAY_CONTACTOR);
             Contactors_Enable(ARRAY_PRECHARGE);
+            Lights_Set(A_CNCTR,ON);
+            Display_SetArray(true);
         } else {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,OFF);
-            Display_SetArray(true);
+            Display_SetArray(false);
         }
         
         // motor on/off
@@ -118,6 +120,7 @@ static void UpdateSwitches() {
  */
 static void UpdateDispLights() {
     Lights_Set(Headlight_ON, Switches_Read(HEADLIGHT_SW));
+    Display_SetHeadlight(Switches_Read(HEADLIGHT_SW));
     
     int leftblink = Switches_Read(LEFT_SW) | 
                     Switches_Read(HZD_SW);
@@ -135,6 +138,7 @@ static void UpdateDispLights() {
     }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
+    
     Display_SetLeftBlink(leftblink);
     Display_SetRightBlink(rightblink);
     
