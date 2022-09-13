@@ -8,7 +8,7 @@
 #include "MotorController.h"
 #include "Contactors.h"
 #include "Minions.h"
-#include "Display.h"
+#include "SendDisplay.h"
 
 // Macros
 #define READ_SWITCH_PERIOD      10   // period (ms) that switches will be read.

@@ -18,13 +18,14 @@ static const char *TERMINATOR = "\xff\xff\xff";
 
 ErrorStatus Display_Init(){
 	BSP_UART_Init(DISP_OUT);
+	return SUCCESS;
 }
 
 ErrorStatus Display_Send(Display_Cmd_t cmd){
 	char msgArgs[16];
 	if((cmd.numArgs == 1 && cmd.args != NULL && cmd.argTypes != NULL) && cmd.op != NULL && cmd.attr != NULL){	// Assignment commands have only 1 arg, an operator, and an attribute
 		if(cmd.argTypes[0]){
-			sprintf(msgArgs, "%d", cmd.args[0].num);
+			sprintf(msgArgs, "%d", (int)cmd.args[0].num);
 		}
 		else{
 			sprintf(msgArgs, "%s", cmd.args[0].str);
@@ -41,7 +42,7 @@ ErrorStatus Display_Send(Display_Cmd_t cmd){
 			for(int i=0; i<cmd.numArgs; i++){
 				char arg[16];
 				if(cmd.argTypes[i]){
-					sprintf(arg, "%d", cmd.args[i].num);
+					sprintf(arg, "%d", (int)cmd.args[i].num);
 				}
 				else{
 					sprintf(arg, "%s", cmd.args[i].str);

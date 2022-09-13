@@ -14,6 +14,7 @@
 
 #include "common.h"	// common headers
 #include "config.h"	// for ErrorStatus
+#include "Tasks.h"	// for os and fault error locs
 
 #define MAX_ARGS 2	// maximum # of arguments in a command packet
 

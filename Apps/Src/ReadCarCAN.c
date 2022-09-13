@@ -1,7 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "ReadCarCAN.h"
-#include "Display.h"
+#include "SendDisplay.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "CAN_Queue.h"

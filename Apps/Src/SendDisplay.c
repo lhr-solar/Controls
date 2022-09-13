@@ -98,9 +98,9 @@ static ErrorStatus Display_PopNext(){
     assertOSError(OS_SEND_CAN_LOC, err);
 
     if(result == ERROR)
-		return ERROR;
+			return ERROR;
 
-    Display_Send(cmd);
+    return Display_Send(cmd);
 }
 
 /**
@@ -284,7 +284,7 @@ void Task_SendDisplay(void *p_arg) {
     Display_SetPage(INFO);
 
     while (1) {
-        if(Display_SendNext() == ERROR){
+        if(Display_PopNext() == ERROR){
             FaultBitmap |= FAULT_DISPLAY;
             
             OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
