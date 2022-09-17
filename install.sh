@@ -17,6 +17,7 @@ sudo ln -s /usr/share/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin/arm-n
 sudo ln -s /usr/share/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-size /usr/bin/arm-none-eabi-size
 
 
+
 # Debug code on the microcontroller
 echo -e "${RED}\nInstall openocd...\n==================================\n${NC}"
 sudo apt-get -y install openocd
@@ -26,8 +27,8 @@ echo -e "${RED}\nInstall gdb-multiarch...\n==================================\n$
 sudo apt-get -y install gdb-multiarch
 
 # Run make command and compile projects
-echo -e "${RED}\nInstall make...\n==================================\n${NC}"
-sudo apt-get -y install make
+echo -e "${RED}\nInstall build-essential...\n==================================\n${NC}"
+sudo apt-get -y install build-essential
 
 # Make sure that necessary OS submodules are initialized
 if [ -d ".git" ]; then
