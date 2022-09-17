@@ -1,162 +1,138 @@
-#include "common.h"
-#include "config.h"
+// #include "common.h"
+// #include "config.h"
 #include "os.h"
 #include "Tasks.h"
+// #include "Display.h"
+// #include "bsp.h"
+// #include "MotorController.h"
+// #include "Contactors.h"
 #include "Display.h"
-#include "bsp.h"
-#include "MotorController.h"
-#include "Contactors.h"
 
-static OS_TCB Task1TCB;
-static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
+// Stolen from SendDisplay.c
+/**
+ * Enum and corresponding array for easy component selection.
+ */
+typedef enum{
+	// Boolean components
+	LEFT=0,
+	HEAD,
+	RIGHT,
+	HZD,
+	ARRAY,
+	MOTOR,
+	// Non-boolean components
+	VELOCITY,
+	ACCEL_METER,
+	SOC,
+	SUPP_BATT,
+	CRUISE_ST,
+	REGEN_ST,
+	GEAR,
+	// Fault code components
+	OS_CODE,
+	FAULT_CODE
+} Component_t;
 
-void Task1(void *arg)
-{
-    CPU_Init();
-    Display_Init();
-
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-
-    OS_ERR err;
-
-    while (1)
-    {
-        // Wait for startup screen to finish
-        OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(OS_MAIN_LOC, err);
-
-        // Test info page
-        Display_SetLeftBlink(true);
-        Display_SendNext();
-        // wait a few seconds to see if the blinking occurs
-        OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(OS_MAIN_LOC, err);
-        Display_SetLeftBlink(false);
-        Display_SendNext();
-
-        Display_SetHeadLights(true);    // Does not exist
-        Display_SendNext();
-        Display_SetHeadLights(false);    // Does not exist
-        Display_SendNext();
-
-        // test 
-        Display_SetRightBlink(true);
-        Display_SendNext();
-        // wait a few seconds to see if the blinking occurs
-        OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(OS_MAIN_LOC, err);
-        Display_SetRightBlink(false);
-        Display_SendNext();
-
-        Display_SetCruiseEnable(true);
-        Display_SendNext();
-        Display_SetCruiseEnable(false);
-        Display_SendNext();
-
-        Display_SetRegenEnable(true);
-        Display_SendNext();
-        Display_SetRegenEnable(false);
-        Display_SendNext();
-
-        Display_SetVelocity(100); // DOes not exist
-        Display_SendNext();
-        
-        Display_SetAccel(0); // deos not exist
-        Display_SendNext();
-
-        // does both the percentage integer and bar
-        Display_SetSOC(0);
-        Display_SendNext();
-        Display_SetSOC(25);
-        Display_SendNext();
-        Display_SetSOC(50);
-        Display_SendNext();
-        Display_SetSOC(75);
-        Display_SendNext();
-        Display_SetSOC(100);
-        Display_SendNext();
-
-        Display_SetArray(true);
-        Display_SendNext();
-        Display_SetArray(false);
-        Display_SendNext();
-
-        Display_SetMotor(true);
-        Display_SendNext();
-        Display_SetMotor(false);
-        Display_SendNext();
-
-        // tests both BPV percentage and bar
-        Display_SetBPV(0);
-        Display_SendNext();
-        Display_SetBPV(25);
-        Display_SendNext();
-        Display_SetBPV(50);
-        Display_SendNext();
-        Display_SetBPV(75);
-        Display_SendNext();
-        Display_SetBPV(100);
-        Display_SendNext();
-
-        // tests gears for displaying F,N, and R
-        // The display 
-        Display_SetGear(0);     // F
-        Display_SendNext();
-        Display_SetGear(1);     // N
-        Display_SendNext();
-        Display_SetGear(2);     // R
-        Display_SendNext();
-        
-        // Test stuff on fault page
-        FaultBitmap = 0x0420;
-        OSErrLocBitmap = 0x6969;
-        Display_Fault(OSErrLocBitmap, FaultBitmap);
-    }
+static char* compStrings[15]= {
+	// Boolean components
+	"ltime",
+	"head",
+	"rtime",
+	"hzd",
+	"arr",
+	"mot",
+	// Non-boolean components
+	"vel",
+	"accel",
+	"soc",
+	"supp",
+	"cruiseSt",
+	"rbsSt",
+	"gear",
+	// Fault code components
+	"oserr",
+	"faulterr"
 };
 
-int main()
-{
-    OS_ERR err;
-    OSInit(&err);
-    OSSemCreate( // create fault sem4
-        &FaultState_Sem4,
-        "Fault State Semaphore",
-        0,
-        &err);
-    assertOSError(OS_MAIN_LOC, err);
+// Delay; Don't know how long
+void delay(void){
+    for(int i = 0; i < 999999; i++){
+        continue;
+    }
+}
 
-    OSTaskCreate( // create fault task
-        (OS_TCB *)&FaultState_TCB,
-        (CPU_CHAR *)"Fault State",
-        (OS_TASK_PTR)&Task_FaultState,
-        (void *)NULL,
-        (OS_PRIO)1,
-        (CPU_STK *)FaultState_Stk,
-        (CPU_STK_SIZE)128 / 10,
-        (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)0,
-        (OS_TICK)NULL,
-        (void *)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+int main(){
+    if(Display_Init() != SUCCESS){
+        return 0;
+    }
+    delay();
+    
+    // Test if the reset works (should show the start screen agian)
+    Display_Reset();
+    delay();
 
-    // create tester thread
-    OSTaskCreate(
-        (OS_TCB *)&Task1TCB,
-        (CPU_CHAR *)"Task 1",
-        (OS_TASK_PTR)Task1,
-        (void *)NULL,
-        (OS_PRIO)13,
-        (CPU_STK *)Task1Stk,
-        (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
-        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)NULL,
-        (void *)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    // Display the fault page
+    Display_Cmd_t pgCmd = {
+		.compOrCmd = "page",
+		.attr = NULL,
+		.op = NULL,
+		.numArgs = 1,
+		.argTypes = {true},
+		{
+			{.num=FAULT}
+		}
+	};
+    Display_Send(pgCmd);
+    delay();
 
-    OSStart(&err);
+    // Display the info page
+    pgCmd = (Display_Cmd_t){
+		.compOrCmd = "page",
+		.attr = NULL,
+		.op = NULL,
+		.numArgs = 1,
+		.argTypes = {true},
+		{
+			{.num=INFO}
+		}
+	};
+    Display_Send(pgCmd);
+    delay();
+
+    // Show the array icon
+    Display_Cmd_t toggleCmd = {
+        .compOrCmd = (char*)compStrings[ARRAY],
+        .attr = "en",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {true},
+        {
+            {.num=1}
+        }
+    };
+    Display_Send(toggleCmd);
+    delay();
+
+    // Don't show the array icon
+    toggleCmd = (Display_Cmd_t){
+        .compOrCmd = (char*)compStrings[ARRAY],
+        .attr = "en",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {true},
+        {
+            {.num=0}
+        }
+    };
+    Display_Send(toggleCmd);
+    delay();
+
+    // Test the fault screen
+    os_error_loc_t osErrCode = 0x0420;
+    fault_bitmap_t faultCode = 0x69;
+    Display_Fault(osErrCode, faultCode);
+    
+    while(1){
+        
+    }
 }

@@ -10,13 +10,12 @@
 
 void Task_BlinkLight(void* p_arg){
     OS_ERR err;
+    
     while(1){
         Lights_Set(LEFT_BLINK, (State) (Lights_Toggle_Read(LEFT_BLINK) ^ Lights_Read(LEFT_BLINK)));
         Lights_Set(RIGHT_BLINK, (State) (Lights_Toggle_Read(RIGHT_BLINK) ^ Lights_Read(RIGHT_BLINK)));
         
-        // Maybe add a check for if this has changed so we're not sending this command all the time?
-        Display_SetLeftBlink((bool)(Lights_Toggle_Read(LEFT_BLINK)));
-        Display_SetRightBlink((bool)(Lights_Toggle_Read(LEFT_BLINK)));
+        // Display blink does not need to be set here because the display and readswitches will automatically start and stop blink when necessary
         
         //lock thread to run at 90ish times per minute if blinkLights needed.
         OSTimeDlyHMSM(
