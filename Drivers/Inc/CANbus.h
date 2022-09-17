@@ -7,28 +7,11 @@
 #define CARCAN CAN_1 //convenience aliases for the CANBuses
 #define MOTORCAN CAN_3
 
-//macros to define canmsg length in LUT
-#define BYTE 1
-#define HALFWORD 2
-#define WORD 4
-#define DOUBLE 8
-
-/**
- * @brief Struct to use in CAN MSG LUT
- * @param idxEn Whether or not this message is part of a sequence of messages.
- * @param size Size of message's data
- * @param ID The actual CAN ID of this message
- */
-typedef struct {
-	bool idxEn;
-	uint8_t size;
-	uint32_t ID;
-} CANLUT_T;
 /**
  * @brief This enum is used to signify the ID of the message you want to send. 
- * It is used internally to index our lookup table (above) and get message-specific fields.
+ * It is used internally to index our lookup table (CANbus.C) and get message-specific fields.
  * If changing the order of this enum, make sure to mirror that change in the lookup table, or
- * else the driver will not work properly.
+ * else the driver will not work properly. This also applies if you are adding additional CAN messages.
  */
 typedef enum { 
 	CHARGE_ENABLE = 0,
@@ -52,42 +35,12 @@ typedef enum {
 	NUM_CAN_IDS
 } CANId_t;
 
-
-/**
- * @brief Lookup table to simplify user-defined packet structs. Contains fields that are always the same for every message of a given ID.
- * Indexed by CANId_t values.
- * FOR DRIVER USE ONLY.
- */
-CANLUT_T CANLUT[NUM_CAN_IDS] = {
-	{false, DOUBLE, 0x10C},
-	{false, DOUBLE, 0x106},
-	{false, DOUBLE, 0x10B},
-	{false, DOUBLE, 0x580},
-	{false, DOUBLE, 0x242},
-	{false, DOUBLE, 0x243},
-	{false, DOUBLE, 0x244},
-	{false, DOUBLE, 0x245},
-	{false, DOUBLE, 0x246},
-	{false, DOUBLE, 0x247},
-	{false, DOUBLE, 0x248},
-	{false, DOUBLE, 0x24E},
-	{false, BYTE  , 0x24F},
-	{false, DOUBLE, 0x221},
-	{false, DOUBLE, 0x222},
-	{false, DOUBLE, 0x223},
-	{false, DOUBLE, 0x241},
-	{false, DOUBLE, 0x243},
-};
-
-
-
 /**
  * Standard CAN packet
- * @param ID CANId_t value indicating which message we are trying to send
- * @param idx FOR TRANSMIT ONLY: 
- * if message is part of a sequence of messages (for messages longer than 64 bits), this indicates the index of the message. 
- * This is not designed to exceed the 8bit unsigned max value.
- * @param data data of the message
+ * @param ID 	CANId_t value indicating which message we are trying to send
+ * @param idx 	If message is part of a sequence of messages (for messages longer than 64 bits), this indicates the index of the message. 
+ * 				This is not designed to exceed the 8bit unsigned max value.
+ * @param data 	data of the message
 */
 typedef struct {
 	CANId_t ID; 		
@@ -95,7 +48,9 @@ typedef struct {
 	uint8_t data[8]; 
 } CANDATA_t;
 
-
+/**
+ * Standard identifier for whether or not a CAN transaction is blocking or not
+ */
 typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
 
 /**
@@ -107,20 +62,18 @@ void CANbus_Init(CAN_t bus);
 
 /**
  * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is needed, 
- * @param   id : CAN id of the message
- * @param 	payload : the data that will be sent.
- * @param   blocking: Whether or not the Send should be blocking or not
- * @param   bus: Which bus to transmit on
+ * @param 	CanData 	The data to be transmitted
+ * @param 	blocking 	Whether or not this transmission should be a blocking send.
+ * @param  	bus			The bus to transmit on. This should be either CARCAN or MOTORCAN.
  * @return  ERROR if data wasn't sent, otherwise it was sent.
  */
 ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus);
 
 /**
- * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers. 
- * 	DOES NOT POPULATE IDXen or IDX. You have to manually inspect the first byte and the ID
- * @param   ID pointer to where to store the CAN id of the recieved msg
- * @param   pointer to buffer array to store message. MUST BE 8 BYTES OR LARGER
- * @param   blocking whether or not this read should be blocking
+ * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers.
+ * @param   data 		pointer to where to store the CAN id of the recieved msg
+ * @param   blocking 	Whether or not this read should be a blocking read
+ * @param   bus 		The bus to use. This should either be CARCAN or MOTORCAN.
  * @returns ERROR if read failed, SUCCESS otherwise
  */
 ErrorStatus CANbus_Read(CANDATA_t* data, CAN_blocking_t blocking, CAN_t bus);
