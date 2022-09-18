@@ -7,13 +7,13 @@
  * 
  * @author Ishan Deshpande (IshDeshpa)
  * @author Roie Gal (Cam0Cow)
+ * @author Nathaniel Delgado (NathanielDelgado)
 */
 
 #ifndef __DISPLAY_H
 #define __DISPLAY_H
 
 #include "common.h"	// common headers
-#include "config.h"	// for ErrorStatus
 #include "Tasks.h"	// for os and fault error locs
 
 #define MAX_ARGS 2	// maximum # of arguments in a command packet
@@ -31,10 +31,28 @@ typedef enum{
  * For display elements with three states
  */
 typedef enum{
-	DISABLED=0,
-	ENABLED,
-	ACTIVE
+	STATE_0=0,
+	STATE_1=1,
+	STATE_2=2
 } TriState_t;
+
+// For cruise control and regen
+#define DISABLED STATE_0
+#define ENABLED STATE_1	// Able to be used
+#define ACTIVE STATE_2	// Actively being used right now
+
+// For gear changes
+#define NEUTRAL STATE_0
+#define FORWARD STATE_1
+#define REVERSE STATE_2
+
+/**
+ * Argument types
+ */
+typedef enum{
+	STR_ARG,
+	INT_ARG
+}	Arg_t;
 
 /**
  * Packages relevant display command data for use in a fifo
@@ -44,7 +62,7 @@ typedef struct{
 	char* attr;
 	char* op;
 	uint8_t numArgs;
-	bool argTypes[MAX_ARGS];	// TRUE for integers, FALSE for strings
+	Arg_t argTypes[MAX_ARGS];	// TRUE for integers, FALSE for strings
 	union{
 		char* str;
 		uint32_t num;
@@ -53,28 +71,28 @@ typedef struct{
 
 /**
  * @brief Sends a display message.
- * @returns ErrorStatus: ERROR or SUCCESS
+ * @returns bool: false for ERROR, true for SUCCESS
  */
-ErrorStatus Display_Send(Display_Cmd_t cmd);
+bool Display_Send(Display_Cmd_t cmd);
 
 /**
  * @brief Initializes the display
- * @returns ErrorStatus: ERROR or SUCCESS
+ * @returns bool: false for ERROR, true for SUCCESS
  */
-ErrorStatus Display_Init();
+bool Display_Init();
 
 /**
  * @brief Resets (reboots) the display
- * @returns ErrorStatus: ERROR or SUCCESS
+ * @returns bool: false for ERROR, true for SUCCESS
  */
-ErrorStatus Display_Reset();
+bool Display_Reset();
 
 /**
  * @brief Overwrites any processing commands and triggers the display fault screen
  * @param osErrCode the os error location (will be displayed in hex)
  * @param faultCode the generic fault code (will be displayed in hex)
- * @returns ErrorStatus: ERROR or SUCCESS
+ * @returns bool: false for ERROR, true for SUCCESS
  */
-ErrorStatus Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+bool Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
 
 #endif

@@ -8,6 +8,7 @@
  * 
  * @author Ishan Deshpande (IshDeshpa)
  * @author Roie Gal (Cam0Cow)
+ * @author Nathaniel Delgado (NathanielDelgado)
 */
 #include "SendDisplay.h"
 #include "Minions.h"
@@ -79,9 +80,9 @@ const char* compStrings[15]= {
  * it to the display driver. Pends on semaphore and mutex to ensure that:
  *  1) queue has messages to send (signaled by semaphore)
  *  2) queue is not currently being written to by a separate thread (mutex)
- * @returns ErrorStatus: ERROR or SUCCESS
+ * @returns bool: false for ERROR, true for SUCCESS
  */
-static ErrorStatus Display_PopNext(){
+static bool Display_PopNext(){
     Display_Cmd_t cmd;
 
     OS_ERR err;
@@ -97,19 +98,16 @@ static ErrorStatus Display_PopNext(){
     OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_NONE, &err);
     assertOSError(OS_SEND_CAN_LOC, err);
 
-    if(result == ERROR)
-			return ERROR;
-
-    return Display_Send(cmd);
+    return result && Display_Send(cmd);
 }
 
 /**
  * @brief Pops the next display message from the queue and passes
  * it to the display driver. Pends on mutex to ensure threadsafe memory access
  * and signals semaphore upon successful fifo_put.
- * @returns ErrorStatus: ERROR or SUCCESS
+ * @returns bool: false for ERROR, true for SUCCESS
  */
-static ErrorStatus Display_PutNext(Display_Cmd_t cmd){
+static bool Display_PutNext(Display_Cmd_t cmd){
 	CPU_TS ticks;
 	OS_ERR err;
 
@@ -126,22 +124,22 @@ static ErrorStatus Display_PutNext(Display_Cmd_t cmd){
 		assertOSError(OS_DISPLAY_LOC, err);
 	}
 
-	return success ? SUCCESS : ERROR;
+	return success;
 }
 
 /**
  * @brief Several elements on the display do not update their
  * state until a touch/click event is triggered. This includes the
  * blinkers, gear selector, cruise control and regen braking indicator.
- * @returns ErrorStatus: ERROR or SUCCESS
+ * @returns bool: false for ERROR, true for SUCCESS
  */
-static ErrorStatus Display_Refresh(){
+static bool Display_Refresh(){
 	Display_Cmd_t refreshCmd = {
 		.compOrCmd = "click",
 		.attr = NULL,
 		.op = NULL,
 		.numArgs = 2,
-		.argTypes = {true,true},
+		.argTypes = {INT_ARG,INT_ARG},
 		{
 			{.num=0},
 			{.num=1}
@@ -155,8 +153,9 @@ static ErrorStatus Display_Refresh(){
  * Differentiates between timers, variables, and components to assign values.
  * @param comp component to set value of
  * @param val value
+ * @return bool: false for ERROR, true for SUCCESS
  */
-static ErrorStatus Display_SetComponent(Component_t comp, uint32_t val){
+static bool Display_SetComponent(Component_t comp, uint32_t val){
 	// For components that are on/off
 	if(comp <= MOTOR && val <= 1){
 		// If timer components, set the toggle of the timer instead of the visibility of an item
@@ -166,12 +165,12 @@ static ErrorStatus Display_SetComponent(Component_t comp, uint32_t val){
 				.attr = "en",
 				.op = "=",
 				.numArgs = 1,
-				.argTypes = {true},
+				.argTypes = {INT_ARG},
 				{
 					{.num=val}
 				}
 			};
-			return Display_PutNext(toggleCmd) && Display_Refresh();
+			return Display_PutNext(toggleCmd) || Display_Refresh();
 		}
 		else{
 			Display_Cmd_t visCmd = {
@@ -179,7 +178,7 @@ static ErrorStatus Display_SetComponent(Component_t comp, uint32_t val){
 				.attr = NULL,
 				.op = NULL,
 				.numArgs = 2,
-				.argTypes = {false,true},
+				.argTypes = {STR_ARG,INT_ARG},
 				{
 					{.str=(char*)compStrings[comp]},
 					{.num=val}
@@ -195,7 +194,7 @@ static ErrorStatus Display_SetComponent(Component_t comp, uint32_t val){
 			.attr = "val",
 			.op = "=",
 			.numArgs = 1,
-			.argTypes = {true},
+			.argTypes = {INT_ARG},
 			{
 				{.num=val}
 			}
@@ -203,18 +202,18 @@ static ErrorStatus Display_SetComponent(Component_t comp, uint32_t val){
 		return Display_PutNext(setCmd);
 	}
 	else{
-		return ERROR;
+		return false;
 	}
-	return SUCCESS;
+	return true;
 }
 
-ErrorStatus Display_SetPage(Page_t page){
+bool Display_SetPage(Page_t page){
 	Display_Cmd_t pgCmd = {
 		.compOrCmd = "page",
 		.attr = NULL,
 		.op = NULL,
 		.numArgs = 1,
-		.argTypes = {true},
+		.argTypes = {INT_ARG},
 		{
 			{.num=page}
 		}
@@ -224,53 +223,52 @@ ErrorStatus Display_SetPage(Page_t page){
 
 /* WRAPPERS */
 
-ErrorStatus Display_SetSOC(uint8_t percent){	// Integer percentage from 0-100
-	return Display_SetComponent(SOC, percent) && Display_Refresh();
+bool Display_SetSOC(uint8_t percent){	// Integer percentage from 0-100
+	return Display_SetComponent(SOC, percent) || Display_Refresh();
 }
 
-ErrorStatus Display_SetSBPV(uint32_t mv){
-	return Display_SetComponent(SUPP_BATT, mv/100) && Display_Refresh();
+bool Display_SetSBPV(uint32_t mv){
+	return Display_SetComponent(SUPP_BATT, mv/100) || Display_Refresh();
 }
 
-ErrorStatus Display_SetVelocity(uint32_t mphTenths){
+bool Display_SetVelocity(uint32_t mphTenths){
 	// units of .1 mph
 	return Display_SetComponent(VELOCITY, mphTenths);
 }
 
-ErrorStatus Display_SetAccel(uint8_t percent){
+bool Display_SetAccel(uint8_t percent){
 	return Display_SetComponent(ACCEL_METER, percent);
 }
 
-ErrorStatus Display_SetArray(bool state){
+bool Display_SetArray(bool state){
 	return Display_SetComponent(ARRAY, state);
 }
 
-ErrorStatus Display_SetMotor(bool state){
+bool Display_SetMotor(bool state){
 	return Display_SetComponent(MOTOR, state);
 }
 
-ErrorStatus Display_SetGear(TriState_t gear){
-	// Even though this isn't a three stage component, i'm still using the same enum because i'm lazy
-	return Display_SetComponent(GEAR, (uint32_t)gear) && Display_Refresh();
+bool Display_SetGear(TriState_t gear){
+	return Display_SetComponent(GEAR, (uint32_t)gear) || Display_Refresh();
 }
 
-ErrorStatus Display_SetRegenState(TriState_t state){
-	return Display_SetComponent(REGEN_ST, (uint32_t)state) && Display_Refresh();
+bool Display_SetRegenState(TriState_t state){
+	return Display_SetComponent(REGEN_ST, (uint32_t)state) || Display_Refresh();
 }
 
-ErrorStatus Display_SetCruiseState(TriState_t state){
-	return Display_SetComponent(CRUISE_ST, (uint32_t)state) && Display_Refresh();
+bool Display_SetCruiseState(TriState_t state){
+	return Display_SetComponent(CRUISE_ST, (uint32_t)state) || Display_Refresh();
 }
 
-ErrorStatus Display_SetLeftBlink(bool state){
+bool Display_SetLeftBlink(bool state){
 	return Display_SetComponent(LEFT, state);
 }
 
-ErrorStatus Display_SetRightBlink(bool state){
+bool Display_SetRightBlink(bool state){
 	return Display_SetComponent(RIGHT, state);
 }
 
-ErrorStatus Display_SetHeadlight(bool state){
+bool Display_SetHeadlight(bool state){
 	return Display_SetComponent(HEAD, state);
 }
 
@@ -284,13 +282,11 @@ void Task_SendDisplay(void *p_arg) {
     Display_SetPage(INFO);
 
     while (1) {
-        if(Display_PopNext() == ERROR){
-            FaultBitmap |= FAULT_DISPLAY;
-            
-            OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-        }
-        
-        //OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
-        //assertOSError(OS_DISPLAY_LOC, err);
+			if(!Display_PopNext()){
+					FaultBitmap |= FAULT_DISPLAY;
+					
+					OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+					assertOSError(OS_DISPLAY_LOC, err);
+			}
     }
 }

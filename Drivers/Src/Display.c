@@ -7,6 +7,7 @@
  * 
  * @author Ishan Deshpande (IshDeshpa)
  * @author Roie Gal (Cam0Cow)
+ * @author Nathaniel Delgado (NathanielDelgado)
 */
 
 #include "Display.h"
@@ -16,15 +17,16 @@
 #define DISP_OUT UART_3
 static const char *TERMINATOR = "\xff\xff\xff";
 
-ErrorStatus Display_Init(){
+bool Display_Init(){
 	BSP_UART_Init(DISP_OUT);
-	return SUCCESS;
+	Display_Reset();
+	return true;
 }
 
-ErrorStatus Display_Send(Display_Cmd_t cmd){
+bool Display_Send(Display_Cmd_t cmd){
 	char msgArgs[16];
 	if((cmd.numArgs == 1 && cmd.args != NULL && cmd.argTypes != NULL) && cmd.op != NULL && cmd.attr != NULL){	// Assignment commands have only 1 arg, an operator, and an attribute
-		if(cmd.argTypes[0]){
+		if(cmd.argTypes[0] == INT_ARG){
 			sprintf(msgArgs, "%d", (int)cmd.args[0].num);
 		}
 		else{
@@ -41,7 +43,7 @@ ErrorStatus Display_Send(Display_Cmd_t cmd){
 		if(cmd.numArgs >= 1 && cmd.argTypes != NULL && cmd.args != NULL){	// If there are arguments
 			for(int i=0; i<cmd.numArgs; i++){
 				char arg[16];
-				if(cmd.argTypes[i]){
+				if(cmd.argTypes[i] == INT_ARG){
 					sprintf(arg, "%d", (int)cmd.args[i].num);
 				}
 				else{
@@ -59,7 +61,7 @@ ErrorStatus Display_Send(Display_Cmd_t cmd){
 		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
 	}
 	else{	// Invalid command
-		return ERROR;
+		return false;
 	}
 	
 	BSP_UART_Write(DISP_OUT, msgArgs, strlen(msgArgs));
@@ -68,12 +70,12 @@ ErrorStatus Display_Send(Display_Cmd_t cmd){
 	char buf[8];
 	BSP_UART_Read(DISP_OUT, buf);
 	if(buf[0] == 0x01){	// Successful command
-		return SUCCESS;
+		return true;
 	}
-	return ERROR;
+	return false;
 }
 
-ErrorStatus Display_Reset(){
+bool Display_Reset(){
 	Display_Cmd_t restCmd = {
 		.compOrCmd = "rest",
 		.attr = NULL,
@@ -86,7 +88,7 @@ ErrorStatus Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-ErrorStatus Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+bool Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
 	BSP_UART_Write(DISP_OUT, (char*)TERMINATOR, strlen(TERMINATOR));	// Terminates any in progress command
 
 	char faultPage[7] = "page 2";
@@ -103,5 +105,5 @@ ErrorStatus Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
 	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
 	BSP_UART_Write(DISP_OUT, (char*)TERMINATOR, strlen(TERMINATOR));
 
-	return SUCCESS;
+	return true;
 }
