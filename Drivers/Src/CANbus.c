@@ -10,51 +10,6 @@ static OS_MUTEX CANbus_RxMutex[NUM_CAN];   // mutex to lock Rx line
 
 
 /**
- * @brief Struct to use in CAN MSG LUT
- * @param idxEn Whether or not this message is part of a sequence of messages.
- * @param size Size of message's data
- * @param ID The actual CAN ID of this message
- */
-typedef struct {
-	bool idxEn;
-	uint8_t size;
-	uint32_t ID;
-} CANLUT_T;
-
-
-//macros to define canmsg length in LUT
-#define BYTE 1
-#define HALFWORD 2
-#define WORD 4
-#define DOUBLE 8
-
-/**
- * @brief Lookup table to simplify user-defined packet structs. Contains fields that are always the same for every message of a given ID.
- * Indexed by CANId_t values.
- * FOR DRIVER USE ONLY.
- */
-CANLUT_T CANLUT[NUM_CAN_IDS] = {
-	{false, DOUBLE, 0x10C},
-	{false, DOUBLE, 0x106},
-	{false, DOUBLE, 0x10B},
-	{false, DOUBLE, 0x580},
-	{false, DOUBLE, 0x242},
-	{false, DOUBLE, 0x243},
-	{false, DOUBLE, 0x244},
-	{false, DOUBLE, 0x245},
-	{false, DOUBLE, 0x246},
-	{false, DOUBLE, 0x247},
-	{false, DOUBLE, 0x248},
-	{false, DOUBLE, 0x24E},
-	{false, BYTE  , 0x24F},
-	{false, DOUBLE, 0x221},
-	{false, DOUBLE, 0x222},
-	{false, DOUBLE, 0x223},
-	{false, DOUBLE, 0x241},
-	{false, DOUBLE, 0x243},
-};
-
-/**
  * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly.
  * @param bus The CAN bus to operate on. Should be CARCAN or MOTORCAN.
  */
@@ -139,7 +94,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 
     CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
 
-    //lookup table error checks
+    // lookup table def error checks
     if(msginfo.idxEn & (msginfo.size>7)){ //idx message can only handle up to 7 bytes
         return ERROR;
     } else if (msginfo.size>8){ //non-idx message can only handle up to 8 bytes

@@ -8,10 +8,15 @@
 #define MOTORCAN CAN_3
 
 /**
- * @brief This enum is used to signify the ID of the message you want to send. 
- * It is used internally to index our lookup table (CANbus.C) and get message-specific fields.
+ * This enum is used to signify the ID of the message you want to send. 
+ * It is used internally to index our lookup table (CANLUT.C) and get message-specific fields.
+ * For user purposes, it selects the message to send.
+ * 
  * If changing the order of this enum, make sure to mirror that change in the lookup table, or
- * else the driver will not work properly. This also applies if you are adding additional CAN messages.
+ * else the driver will not work properly. 
+ * 
+ * If adding new types of CAN messages, add the identifier above NUM_CAN_IDs, and then go to CANLUT.c to add an entry for
+ * the new message in the lookup
  */
 typedef enum { 
 	CHARGE_ENABLE = 0,
@@ -34,6 +39,23 @@ typedef enum {
 	MOTOR_VELOCITY,
 	NUM_CAN_IDS
 } CANId_t;
+
+/**
+ * @brief Struct to use in CAN MSG LUT
+ * @param idxEn Whether or not this message is part of a sequence of messages.
+ * @param size Size of message's data
+ * @param ID The actual CAN ID of this message
+ */
+typedef struct {
+	bool idxEn;
+	uint8_t size;
+	uint32_t ID;
+} CANLUT_T;
+
+/**
+ * The lookup table containing the entries for all of our CAN messages. Located in CANLUT.c
+ */
+extern CANLUT_T CANLUT[NUM_CAN_IDS];
 
 /**
  * Standard CAN packet
