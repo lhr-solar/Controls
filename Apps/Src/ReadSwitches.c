@@ -8,7 +8,7 @@
 #include "MotorController.h"
 #include "Contactors.h"
 #include "Minions.h"
-#include "SendDisplay.h"
+#include "UpdateDisplay.h"
 
 // Macros
 #define READ_SWITCH_PERIOD      10   // period (ms) that switches will be read.
@@ -44,12 +44,12 @@ void Task_ReadSwitches(void* p_arg) {
             Contactors_Enable(ARRAY_CONTACTOR);
             Contactors_Enable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,ON);
-            Display_SetArray(true);
+            UpdateDisplay_SetArray(true);
         } else {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,OFF);
-            Display_SetArray(false);
+            UpdateDisplay_SetArray(false);
         }
         
         // motor on/off
@@ -120,7 +120,7 @@ static void UpdateSwitches() {
  */
 static void UpdateDispLights() {
     Lights_Set(Headlight_ON, Switches_Read(HEADLIGHT_SW));
-    Display_SetHeadlight(Switches_Read(HEADLIGHT_SW));
+    UpdateDisplay_SetHeadlight(Switches_Read(HEADLIGHT_SW));
     
     int leftblink = Switches_Read(LEFT_SW) | 
                     Switches_Read(HZD_SW);
@@ -133,22 +133,22 @@ static void UpdateDispLights() {
         Lights_Set(RIGHT_BLINK,OFF);
         Lights_Set(LEFT_BLINK,OFF);
         
-        Display_SetLeftBlink(false);
-        Display_SetRightBlink(false);
+        UpdateDisplay_SetLeftBlink(false);
+        UpdateDisplay_SetRightBlink(false);
     }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
     
-    Display_SetLeftBlink(leftblink);
-    Display_SetRightBlink(rightblink);
+    UpdateDisplay_SetLeftBlink(leftblink);
+    UpdateDisplay_SetRightBlink(rightblink);
     
     if(leftblink==0){
         Lights_Set(LEFT_BLINK,OFF);
-        Display_SetLeftBlink(false);
+        UpdateDisplay_SetLeftBlink(false);
     }
     if(rightblink==0){
         Lights_Set(RIGHT_BLINK,OFF);
-        Display_SetRightBlink(false);
+        UpdateDisplay_SetRightBlink(false);
     }
     
 }

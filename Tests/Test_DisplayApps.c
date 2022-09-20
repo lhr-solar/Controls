@@ -6,7 +6,7 @@
 // #include "bsp.h"
 // #include "MotorController.h"
 // #include "Contactors.h"
-#include "SendDisplay.h"
+#include "UpdateDisplay.h"
 #include "FaultState.h"
 
 static OS_TCB Task1TCB;
@@ -63,12 +63,12 @@ void Task1(void *arg)
     OS_ERR err;
 
     OSTaskCreate(
-        (OS_TCB *)&SendDisplay_TCB,
-        (CPU_CHAR *)"SendDisplay_TCB",
-        (OS_TASK_PTR)Task_SendDisplay,
+        (OS_TCB *)&UpdateDisplay_TCB,
+        (CPU_CHAR *)"UpdateDisplay_TCB",
+        (OS_TASK_PTR)Task_UpdateDisplay,
         (void *)NULL,
         (OS_PRIO)13,
-        (CPU_STK *)SendDisplay_Stk,
+        (CPU_STK *)UpdateDisplay_Stk,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
         (OS_MSG_QTY)0,
@@ -83,32 +83,32 @@ void Task1(void *arg)
 
     while (1)
     {
-        testBoolComp(&Display_SetLeftBlink);
-        testBoolComp(&Display_SetHeadlight);
-        testBoolComp(&Display_SetLeftBlink);
-        testTriStateComp(&Display_SetGear);
+        testBoolComp(&UpdateDisplay_SetLeftBlink);
+        testBoolComp(&UpdateDisplay_SetHeadlight);
+        testBoolComp(&UpdateDisplay_SetLeftBlink);
+        testTriStateComp(&UpdateDisplay_SetGear);
         
-        Display_SetVelocity(12);
+        UpdateDisplay_SetVelocity(12);
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        Display_SetVelocity(345);
+        UpdateDisplay_SetVelocity(345);
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        Display_SetVelocity(6789);
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-
-        testTriStateComp(&Display_SetCruiseState);
-        testTriStateComp(&Display_SetRegenState);
-        testBoolComp(&Display_SetMotor);
-        testBoolComp(&Display_SetArray);
-        testPercentageComp(&Display_SetSOC);
-
-        Display_SetSBPV(12);
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        Display_SetSBPV(345);
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        Display_SetSBPV(6789);
+        UpdateDisplay_SetVelocity(6789);
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
 
-        testPercentageComp(&Display_SetAccel);
+        testTriStateComp(&UpdateDisplay_SetCruiseState);
+        testTriStateComp(&UpdateDisplay_SetRegenState);
+        testBoolComp(&UpdateDisplay_SetMotor);
+        testBoolComp(&UpdateDisplay_SetArray);
+        testPercentageComp(&UpdateDisplay_SetSOC);
+
+        UpdateDisplay_SetSBPV(12);
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+        UpdateDisplay_SetSBPV(345);
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+        UpdateDisplay_SetSBPV(6789);
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+
+        testPercentageComp(&UpdateDisplay_SetAccel);
 
         Display_Fault(OSErrLocBitmap, FaultBitmap);
         OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err);

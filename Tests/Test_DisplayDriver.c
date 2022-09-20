@@ -8,7 +8,7 @@
 // #include "Contactors.h"
 #include "Display.h"
 
-// Stolen from SendDisplay.c
+// Stolen from UpdateDisplay.c
 /**
  * Enum and corresponding array for easy component selection.
  */

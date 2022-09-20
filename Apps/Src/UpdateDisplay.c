@@ -1,5 +1,5 @@
 /** Copyright (c) 2022 UT Longhorn Racing Solar
- * @file SendDisplay.c
+ * @file UpdateDisplay.c
  * @brief Function implementations for the display application.
  * 
  * This contains functions relevant to modifying states of specific
@@ -10,7 +10,7 @@
  * @author Roie Gal (Cam0Cow)
  * @author Nathaniel Delgado (NathanielDelgado)
 */
-#include "SendDisplay.h"
+#include "UpdateDisplay.h"
 #include "Minions.h"
 #include "MotorController.h"
 #include <math.h>
@@ -75,6 +75,13 @@ const char* compStrings[15]= {
 	"faulterr"
 };
 
+bool UpdateDisplay_Init(){
+	disp_fifo_renew(&msg_queue);
+	UpdateDisplay_SetPage(INFO);
+	
+	return true;
+}
+
 /**
  * @brief Pops the next display message from the queue and passes
  * it to the display driver. Pends on semaphore and mutex to ensure that:
@@ -82,7 +89,7 @@ const char* compStrings[15]= {
  *  2) queue is not currently being written to by a separate thread (mutex)
  * @returns bool: false for ERROR, true for SUCCESS
  */
-static bool Display_PopNext(){
+static bool UpdateDisplay_PopNext(){
     Display_Cmd_t cmd;
 
     OS_ERR err;
@@ -107,7 +114,7 @@ static bool Display_PopNext(){
  * and signals semaphore upon successful fifo_put.
  * @returns bool: false for ERROR, true for SUCCESS
  */
-static bool Display_PutNext(Display_Cmd_t cmd){
+static bool UpdateDisplay_PutNext(Display_Cmd_t cmd){
 	CPU_TS ticks;
 	OS_ERR err;
 
@@ -133,7 +140,7 @@ static bool Display_PutNext(Display_Cmd_t cmd){
  * blinkers, gear selector, cruise control and regen braking indicator.
  * @returns bool: false for ERROR, true for SUCCESS
  */
-static bool Display_Refresh(){
+static bool UpdateDisplay_Refresh(){
 	Display_Cmd_t refreshCmd = {
 		.compOrCmd = "click",
 		.attr = NULL,
@@ -145,7 +152,7 @@ static bool Display_Refresh(){
 			{.num=1}
 		}
 	};
-	return Display_PutNext(refreshCmd);
+	return UpdateDisplay_PutNext(refreshCmd);
 }
 
 /**
@@ -155,7 +162,7 @@ static bool Display_Refresh(){
  * @param val value
  * @return bool: false for ERROR, true for SUCCESS
  */
-static bool Display_SetComponent(Component_t comp, uint32_t val){
+static bool UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
 	// For components that are on/off
 	if(comp <= MOTOR && val <= 1){
 		// If timer components, set the toggle of the timer instead of the visibility of an item
@@ -170,7 +177,7 @@ static bool Display_SetComponent(Component_t comp, uint32_t val){
 					{.num=val}
 				}
 			};
-			return Display_PutNext(toggleCmd) || Display_Refresh();
+			return UpdateDisplay_PutNext(toggleCmd) || UpdateDisplay_Refresh();
 		}
 		else{
 			Display_Cmd_t visCmd = {
@@ -184,7 +191,7 @@ static bool Display_SetComponent(Component_t comp, uint32_t val){
 					{.num=val}
 				}
 			};
-			return Display_PutNext(visCmd);
+			return UpdateDisplay_PutNext(visCmd);
 		}
 	}
 	// For components that have a non-boolean value
@@ -199,7 +206,7 @@ static bool Display_SetComponent(Component_t comp, uint32_t val){
 				{.num=val}
 			}
 		};
-		return Display_PutNext(setCmd);
+		return UpdateDisplay_PutNext(setCmd);
 	}
 	else{
 		return false;
@@ -207,7 +214,7 @@ static bool Display_SetComponent(Component_t comp, uint32_t val){
 	return true;
 }
 
-bool Display_SetPage(Page_t page){
+bool UpdateDisplay_SetPage(Page_t page){
 	Display_Cmd_t pgCmd = {
 		.compOrCmd = "page",
 		.attr = NULL,
@@ -218,71 +225,68 @@ bool Display_SetPage(Page_t page){
 			{.num=page}
 		}
 	};
-	return Display_PutNext(pgCmd);
+	return UpdateDisplay_PutNext(pgCmd);
 }
 
 /* WRAPPERS */
 
-bool Display_SetSOC(uint8_t percent){	// Integer percentage from 0-100
-	return Display_SetComponent(SOC, percent) || Display_Refresh();
+bool UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentage from 0-100
+	return UpdateDisplay_SetComponent(SOC, percent) || UpdateDisplay_Refresh();
 }
 
-bool Display_SetSBPV(uint32_t mv){
-	return Display_SetComponent(SUPP_BATT, mv/100) || Display_Refresh();
+bool UpdateDisplay_SetSBPV(uint32_t mv){
+	return UpdateDisplay_SetComponent(SUPP_BATT, mv/100) || UpdateDisplay_Refresh();
 }
 
-bool Display_SetVelocity(uint32_t mphTenths){
+bool UpdateDisplay_SetVelocity(uint32_t mphTenths){
 	// units of .1 mph
-	return Display_SetComponent(VELOCITY, mphTenths);
+	return UpdateDisplay_SetComponent(VELOCITY, mphTenths);
 }
 
-bool Display_SetAccel(uint8_t percent){
-	return Display_SetComponent(ACCEL_METER, percent);
+bool UpdateDisplay_SetAccel(uint8_t percent){
+	return UpdateDisplay_SetComponent(ACCEL_METER, percent);
 }
 
-bool Display_SetArray(bool state){
-	return Display_SetComponent(ARRAY, state);
+bool UpdateDisplay_SetArray(bool state){
+	return UpdateDisplay_SetComponent(ARRAY, state);
 }
 
-bool Display_SetMotor(bool state){
-	return Display_SetComponent(MOTOR, state);
+bool UpdateDisplay_SetMotor(bool state){
+	return UpdateDisplay_SetComponent(MOTOR, state);
 }
 
-bool Display_SetGear(TriState_t gear){
-	return Display_SetComponent(GEAR, (uint32_t)gear) || Display_Refresh();
+bool UpdateDisplay_SetGear(TriState_t gear){
+	return UpdateDisplay_SetComponent(GEAR, (uint32_t)gear) || UpdateDisplay_Refresh();
 }
 
-bool Display_SetRegenState(TriState_t state){
-	return Display_SetComponent(REGEN_ST, (uint32_t)state) || Display_Refresh();
+bool UpdateDisplay_SetRegenState(TriState_t state){
+	return UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state) || UpdateDisplay_Refresh();
 }
 
-bool Display_SetCruiseState(TriState_t state){
-	return Display_SetComponent(CRUISE_ST, (uint32_t)state) || Display_Refresh();
+bool UpdateDisplay_SetCruiseState(TriState_t state){
+	return UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state) || UpdateDisplay_Refresh();
 }
 
-bool Display_SetLeftBlink(bool state){
-	return Display_SetComponent(LEFT, state);
+bool UpdateDisplay_SetLeftBlink(bool state){
+	return UpdateDisplay_SetComponent(LEFT, state);
 }
 
-bool Display_SetRightBlink(bool state){
-	return Display_SetComponent(RIGHT, state);
+bool UpdateDisplay_SetRightBlink(bool state){
+	return UpdateDisplay_SetComponent(RIGHT, state);
 }
 
-bool Display_SetHeadlight(bool state){
-	return Display_SetComponent(HEAD, state);
+bool UpdateDisplay_SetHeadlight(bool state){
+	return UpdateDisplay_SetComponent(HEAD, state);
 }
 
 /**
  * @brief Loops through the display queue and sends all messages
  */
-void Task_SendDisplay(void *p_arg) {
+void Task_UpdateDisplay(void *p_arg) {
     OS_ERR err;
 
-    disp_fifo_new();
-    Display_SetPage(INFO);
-
     while (1) {
-			if(!Display_PopNext()){
+			if(!UpdateDisplay_PopNext()){
 					FaultBitmap |= FAULT_DISPLAY;
 					
 					OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
