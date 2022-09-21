@@ -75,11 +75,9 @@ const char* compStrings[15]= {
 	"faulterr"
 };
 
-bool UpdateDisplay_Init(){
+UpdateDisplay_Error_t UpdateDisplay_Init(){
 	disp_fifo_renew(&msg_queue);
-	UpdateDisplay_SetPage(INFO);
-	
-	return true;
+	return UpdateDisplay_SetPage(INFO);
 }
 
 /**
@@ -87,9 +85,9 @@ bool UpdateDisplay_Init(){
  * it to the display driver. Pends on semaphore and mutex to ensure that:
  *  1) queue has messages to send (signaled by semaphore)
  *  2) queue is not currently being written to by a separate thread (mutex)
- * @returns bool: false for ERROR, true for SUCCESS
+ * @returns UpdateDisplay_Error_t
  */
-static bool UpdateDisplay_PopNext(){
+static UpdateDisplay_Error_t UpdateDisplay_PopNext(){
     Display_Cmd_t cmd;
 
     OS_ERR err;
@@ -105,21 +103,25 @@ static bool UpdateDisplay_PopNext(){
     OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_NONE, &err);
     assertOSError(OS_SEND_CAN_LOC, err);
 
-    return result && Display_Send(cmd);
+    if(!result)
+			return UPDATEDISPLAY_ERR_FIFO_POP;
+		
+		assertDisplayError(Display_Send(cmd));
+		return UPDATEDISPLAY_ERR_NONE;
 }
 
 /**
  * @brief Pops the next display message from the queue and passes
  * it to the display driver. Pends on mutex to ensure threadsafe memory access
  * and signals semaphore upon successful fifo_put.
- * @returns bool: false for ERROR, true for SUCCESS
+ * @returns UpdateDisplay_Error_t
  */
-static bool UpdateDisplay_PutNext(Display_Cmd_t cmd){
+static UpdateDisplay_Error_t UpdateDisplay_PutNext(Display_Cmd_t cmd){
 	CPU_TS ticks;
 	OS_ERR err;
 
 	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_POST_NONE, &ticks, &err);
-    assertOSError(OS_DISPLAY_LOC, err);  
+  assertOSError(OS_DISPLAY_LOC, err);
 	
 	bool success = disp_fifo_put(&msg_queue, cmd);
 
@@ -130,17 +132,20 @@ static bool UpdateDisplay_PutNext(Display_Cmd_t cmd){
 		OSSemPost(&DisplayQ_Sem4, OS_OPT_POST_NONE, &err);
 		assertOSError(OS_DISPLAY_LOC, err);
 	}
+	else{
+		return UPDATEDISPLAY_ERR_FIFO_PUT;
+	}
 
-	return success;
+	return UPDATEDISPLAY_ERR_NONE;
 }
 
 /**
  * @brief Several elements on the display do not update their
  * state until a touch/click event is triggered. This includes the
  * blinkers, gear selector, cruise control and regen braking indicator.
- * @returns bool: false for ERROR, true for SUCCESS
+ * @returns UpdateDisplay_Error_t
  */
-static bool UpdateDisplay_Refresh(){
+static UpdateDisplay_Error_t UpdateDisplay_Refresh(){
 	Display_Cmd_t refreshCmd = {
 		.compOrCmd = "click",
 		.attr = NULL,
@@ -160,9 +165,9 @@ static bool UpdateDisplay_Refresh(){
  * Differentiates between timers, variables, and components to assign values.
  * @param comp component to set value of
  * @param val value
- * @return bool: false for ERROR, true for SUCCESS
+ * @return UpdateDisplay_Error_t
  */
-static bool UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
+static UpdateDisplay_Error_t UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
 	// For components that are on/off
 	if(comp <= MOTOR && val <= 1){
 		// If timer components, set the toggle of the timer instead of the visibility of an item
@@ -177,7 +182,11 @@ static bool UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
 					{.num=val}
 				}
 			};
-			return UpdateDisplay_PutNext(toggleCmd) || UpdateDisplay_Refresh();
+
+			UpdateDisplay_Error_t err = UpdateDisplay_PutNext(toggleCmd);
+			if(err != UPDATEDISPLAY_ERR_NONE) return err;
+
+			return UpdateDisplay_Refresh();
 		}
 		else{
 			Display_Cmd_t visCmd = {
@@ -191,6 +200,7 @@ static bool UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
 					{.num=val}
 				}
 			};
+
 			return UpdateDisplay_PutNext(visCmd);
 		}
 	}
@@ -206,15 +216,16 @@ static bool UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
 				{.num=val}
 			}
 		};
+
 		return UpdateDisplay_PutNext(setCmd);
 	}
 	else{
-		return false;
+		return UPDATEDISPLAY_ERR_PARSE_COMP;
 	}
-	return true;
+	return UPDATEDISPLAY_ERR_NONE;
 }
 
-bool UpdateDisplay_SetPage(Page_t page){
+UpdateDisplay_Error_t UpdateDisplay_SetPage(Page_t page){
 	Display_Cmd_t pgCmd = {
 		.compOrCmd = "page",
 		.attr = NULL,
@@ -229,68 +240,88 @@ bool UpdateDisplay_SetPage(Page_t page){
 }
 
 /* WRAPPERS */
+UpdateDisplay_Error_t UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentage from 0-100
+	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(SOC, percent);
+	if(err != UPDATEDISPLAY_ERR_NONE) return err;
 
-bool UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentage from 0-100
-	return UpdateDisplay_SetComponent(SOC, percent) || UpdateDisplay_Refresh();
+	return UpdateDisplay_Refresh();
 }
 
-bool UpdateDisplay_SetSBPV(uint32_t mv){
-	return UpdateDisplay_SetComponent(SUPP_BATT, mv/100) || UpdateDisplay_Refresh();
+UpdateDisplay_Error_t UpdateDisplay_SetSBPV(uint32_t mv){
+	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
+
+	if(err != UPDATEDISPLAY_ERR_NONE) return err;
+
+	return UpdateDisplay_Refresh();
 }
 
-bool UpdateDisplay_SetVelocity(uint32_t mphTenths){
+UpdateDisplay_Error_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
 	// units of .1 mph
 	return UpdateDisplay_SetComponent(VELOCITY, mphTenths);
 }
 
-bool UpdateDisplay_SetAccel(uint8_t percent){
+UpdateDisplay_Error_t UpdateDisplay_SetAccel(uint8_t percent){
 	return UpdateDisplay_SetComponent(ACCEL_METER, percent);
 }
 
-bool UpdateDisplay_SetArray(bool state){
-	return UpdateDisplay_SetComponent(ARRAY, state);
+UpdateDisplay_Error_t UpdateDisplay_SetArray(bool state){
+	return UpdateDisplay_SetComponent(ARRAY, (state)?1:0);
 }
 
-bool UpdateDisplay_SetMotor(bool state){
-	return UpdateDisplay_SetComponent(MOTOR, state);
+UpdateDisplay_Error_t UpdateDisplay_SetMotor(bool state){
+	return UpdateDisplay_SetComponent(MOTOR, (state)?1:0);
 }
 
-bool UpdateDisplay_SetGear(TriState_t gear){
-	return UpdateDisplay_SetComponent(GEAR, (uint32_t)gear) || UpdateDisplay_Refresh();
+UpdateDisplay_Error_t UpdateDisplay_SetGear(TriState_t gear){
+	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(GEAR, (uint32_t)gear);
+	if(err != UPDATEDISPLAY_ERR_NONE) return err;
+
+	return UpdateDisplay_Refresh();
 }
 
-bool UpdateDisplay_SetRegenState(TriState_t state){
-	return UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state) || UpdateDisplay_Refresh();
+UpdateDisplay_Error_t UpdateDisplay_SetRegenState(TriState_t state){
+	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state);
+	if(err != UPDATEDISPLAY_ERR_NONE) return err;
+	
+	return UpdateDisplay_Refresh();
 }
 
-bool UpdateDisplay_SetCruiseState(TriState_t state){
-	return UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state) || UpdateDisplay_Refresh();
+UpdateDisplay_Error_t UpdateDisplay_SetCruiseState(TriState_t state){
+	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state);
+	if(err != UPDATEDISPLAY_ERR_NONE) return err;
+
+	return UpdateDisplay_Refresh();
 }
 
-bool UpdateDisplay_SetLeftBlink(bool state){
-	return UpdateDisplay_SetComponent(LEFT, state);
+UpdateDisplay_Error_t UpdateDisplay_SetLeftBlink(bool state){
+	return UpdateDisplay_SetComponent(LEFT, (state)?1:0);
 }
 
-bool UpdateDisplay_SetRightBlink(bool state){
-	return UpdateDisplay_SetComponent(RIGHT, state);
+UpdateDisplay_Error_t UpdateDisplay_SetRightBlink(bool state){
+	return UpdateDisplay_SetComponent(RIGHT, (state)?1:0);
 }
 
-bool UpdateDisplay_SetHeadlight(bool state){
-	return UpdateDisplay_SetComponent(HEAD, state);
+UpdateDisplay_Error_t UpdateDisplay_SetHeadlight(bool state){
+	return UpdateDisplay_SetComponent(HEAD, (state)?1:0);
+}
+
+void assertUpdateDisplayError(UpdateDisplay_Error_t err){
+	OS_ERR os_err;
+
+	if(err != UPDATEDISPLAY_ERR_NONE){
+		FaultBitmap |= FAULT_DISPLAY;
+
+		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
+		assertOSError(OS_DISPLAY_LOC, os_err);
+	}
 }
 
 /**
  * @brief Loops through the display queue and sends all messages
  */
 void Task_UpdateDisplay(void *p_arg) {
-    OS_ERR err;
-
     while (1) {
-			if(!UpdateDisplay_PopNext()){
-					FaultBitmap |= FAULT_DISPLAY;
-					
-					OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-					assertOSError(OS_DISPLAY_LOC, err);
-			}
+			UpdateDisplay_Error_t err = UpdateDisplay_PopNext();
+			assertUpdateDisplayError(err);
     }
 }

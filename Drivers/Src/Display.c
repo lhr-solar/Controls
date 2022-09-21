@@ -17,13 +17,12 @@
 #define DISP_OUT UART_3
 static const char *TERMINATOR = "\xff\xff\xff";
 
-bool Display_Init(){
+Display_Error_t Display_Init(){
 	BSP_UART_Init(DISP_OUT);
-	Display_Reset();
-	return true;
+	return Display_Reset();
 }
 
-bool Display_Send(Display_Cmd_t cmd){
+Display_Error_t Display_Send(Display_Cmd_t cmd){
 	char msgArgs[16];
 	if((cmd.numArgs == 1 && cmd.args != NULL && cmd.argTypes != NULL) && cmd.op != NULL && cmd.attr != NULL){	// Assignment commands have only 1 arg, an operator, and an attribute
 		if(cmd.argTypes[0] == INT_ARG){
@@ -60,8 +59,8 @@ bool Display_Send(Display_Cmd_t cmd){
 		
 		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
 	}
-	else{	// Invalid command
-		return false;
+	else{	// Error parsing command struct
+		return DISPLAY_ERR_PARSE;
 	}
 	
 	BSP_UART_Write(DISP_OUT, msgArgs, strlen(msgArgs));
@@ -69,13 +68,31 @@ bool Display_Send(Display_Cmd_t cmd){
 
 	char buf[8];
 	BSP_UART_Read(DISP_OUT, buf);
-	if(buf[0] == 0x01){	// Successful command
-		return true;
+	
+	// Error validation
+	switch(buf[0]){
+		case 0x00:
+			return DISPLAY_ERR_INV_INSTR;
+		case 0x01:
+			return DISPLAY_ERR_NONE;
+		case 0x02:
+			return DISPLAY_ERR_INV_COMP;
+		case 0x03:
+			return DISPLAY_ERR_INV_PGID;
+		case 0x1A:
+			return DISPLAY_ERR_INV_VAR;
+		case 0x1B:
+			return DISPLAY_ERR_INV_VAROP;
+		case 0x1C:
+			return DISPLAY_ERR_ASSIGN;
+		case 0x1E:
+			return DISPLAY_ERR_PARAMS;
+		default:
+			return DISPLAY_ERR_OTHER;
 	}
-	return false;
 }
 
-bool Display_Reset(){
+Display_Error_t Display_Reset(){
 	Display_Cmd_t restCmd = {
 		.compOrCmd = "rest",
 		.attr = NULL,
@@ -88,7 +105,7 @@ bool Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-bool Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+Display_Error_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
 	BSP_UART_Write(DISP_OUT, (char*)TERMINATOR, strlen(TERMINATOR));	// Terminates any in progress command
 
 	char faultPage[7] = "page 2";
@@ -105,5 +122,16 @@ bool Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
 	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
 	BSP_UART_Write(DISP_OUT, (char*)TERMINATOR, strlen(TERMINATOR));
 
-	return true;
+	return DISPLAY_ERR_NONE;
+}
+
+void assertDisplayError(Display_Error_t err){
+	OS_ERR os_err;
+
+	if(err != DISPLAY_ERR_NONE){
+		FaultBitmap |= FAULT_DISPLAY;
+
+		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
+		assertOSError(OS_DISPLAY_LOC, os_err);
+	}
 }

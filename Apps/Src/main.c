@@ -81,7 +81,7 @@ void Task_Init(void *p_arg){
     CAN_Queue_Init();
 
     // Initialize applications
-    UpdateDisplay_Init();
+    assertUpdateDisplayError(UpdateDisplay_Init());
 
     // Initialize FaultState
     OSTaskCreate(

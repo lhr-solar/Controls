@@ -44,12 +44,12 @@ void Task_ReadSwitches(void* p_arg) {
             Contactors_Enable(ARRAY_CONTACTOR);
             Contactors_Enable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,ON);
-            UpdateDisplay_SetArray(true);
+            assertUpdateDisplayError(UpdateDisplay_SetArray(true));
         } else {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,OFF);
-            UpdateDisplay_SetArray(false);
+            assertUpdateDisplayError(UpdateDisplay_SetArray(false));
         }
         
         // motor on/off
@@ -120,7 +120,7 @@ static void UpdateSwitches() {
  */
 static void UpdateDispLights() {
     Lights_Set(Headlight_ON, Switches_Read(HEADLIGHT_SW));
-    UpdateDisplay_SetHeadlight(Switches_Read(HEADLIGHT_SW));
+    assertUpdateDisplayError(UpdateDisplay_SetHeadlight(Switches_Read(HEADLIGHT_SW)));
     
     int leftblink = Switches_Read(LEFT_SW) | 
                     Switches_Read(HZD_SW);
@@ -133,22 +133,22 @@ static void UpdateDispLights() {
         Lights_Set(RIGHT_BLINK,OFF);
         Lights_Set(LEFT_BLINK,OFF);
         
-        UpdateDisplay_SetLeftBlink(false);
-        UpdateDisplay_SetRightBlink(false);
+        assertUpdateDisplayError(UpdateDisplay_SetLeftBlink(false));
+        assertUpdateDisplayError(UpdateDisplay_SetRightBlink(false));
     }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
     
-    UpdateDisplay_SetLeftBlink(leftblink);
-    UpdateDisplay_SetRightBlink(rightblink);
+    assertUpdateDisplayError(UpdateDisplay_SetLeftBlink(leftblink));
+    assertUpdateDisplayError(UpdateDisplay_SetRightBlink(rightblink));
     
     if(leftblink==0){
         Lights_Set(LEFT_BLINK,OFF);
-        UpdateDisplay_SetLeftBlink(false);
+        assertUpdateDisplayError(UpdateDisplay_SetLeftBlink(false));
     }
     if(rightblink==0){
         Lights_Set(RIGHT_BLINK,OFF);
-        UpdateDisplay_SetRightBlink(false);
+        assertUpdateDisplayError(UpdateDisplay_SetRightBlink(false));
     }
     
 }
