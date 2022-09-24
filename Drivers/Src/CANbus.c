@@ -36,7 +36,6 @@ void CANbus_TxHandler_1(){
     CANbus_TxHandler(CAN_1);
 }
 
-
 void CANbus_RxHandler_1(){
     CANbus_RxHandler(CAN_1);
 }
@@ -48,17 +47,14 @@ void CANbus_RxHandler_3(){
 }
 
 /**
- * @brief   Initializes the CAN system
- * @param   None
- * @return  None
+ * @brief   Initializes the CAN system for a given bus. Must be called independently for each bus.
+ * @param   bus
  */
 void CANbus_Init(CAN_t bus)
 {
     // initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
     // initialize tx
     OS_ERR err;
-    
-    
     
     OSMutexCreate(&(CANbus_TxMutex[bus]), (bus == CAN_1 ? "CAN TX Lock 1":"CAN TX Lock 3"), &err);
     assertOSError(OS_CANDRIVER_LOC,err);
@@ -81,11 +77,11 @@ void CANbus_Init(CAN_t bus)
 }
 
 /**
- * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is necessary, please use IDX 
+ * @brief   Transmits data onto the specified CANbus. Transmits up to 8 bytes at a time. If more is necessary, please use an IDX message.
  * @param   id : CAN id of the message
  * @param 	payload : the data that will be sent.
- * @param blocking: Whether or not this should be a blocking call
- * @return  0 if data wasn't sent, otherwise it was sent.
+ * @param   blocking: Whether or not this should be a blocking call
+ * @return  ERROR if data wasn't sent, SUCCESS if it was sent.
  */
 ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 {
@@ -103,7 +99,6 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
         return ERROR;
     }
 
-
     // make sure that Can mailbox is available
     if (blocking == CAN_BLOCKING)
     {
@@ -113,7 +108,6 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
             OS_OPT_PEND_BLOCKING,
             &timestamp,
             &err);
-        assertOSError(OS_CANDRIVER_LOC,err);
     }
     else
     {
@@ -128,14 +122,14 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
         if(err == OS_ERR_PEND_WOULD_BLOCK){
             return ERROR;
         }
-        assertOSError(OS_CANDRIVER_LOC,err);
     }
-
-
     if (err != OS_ERR_NONE)
     {
+        assertOSError(OS_CANDRIVER_LOC,err);
         return ERROR;
     }
+
+
 
     uint8_t txdata[8];
     if(msginfo.idxEn){ //first byte of txData should be the idx value
@@ -175,10 +169,10 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 
 /**
  * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers. **DOES NOT POPULATE IDXen or IDX. You have to manually inspect the first byte and the ID**
- * @param   ID pointer to where to store the CAN id of the recieved msg
- * @param   pointer to buffer array to store message. MUST BE 8 BYTES OR LARGER
- * @param   blocking whether or not this read should be blocking
- * @returns ERROR if read failed, SUCCESS otherwise
+ * @param   MsgContainer Where to store the recieved message
+ * @param   blocking     Whether or not this read should be blocking
+ * @param   bus          Which bus to read a message from
+ * @returns              ERROR if read failed, SUCCESS otherwise
  */
 
 ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t bus)
@@ -194,7 +188,6 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
             OS_OPT_PEND_BLOCKING,
             &timestamp,
             &err);
-            assertOSError(OS_CANDRIVER_LOC,err);
     }
     else
     {
@@ -209,10 +202,10 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
         if(err == OS_ERR_PEND_WOULD_BLOCK){
             return ERROR;
         }
-        assertOSError(OS_CANDRIVER_LOC,err);
     }
     if (err != OS_ERR_NONE)
     {
+        assertOSError(OS_CANDRIVER_LOC,err);
         return ERROR;
     }
 
@@ -226,10 +219,8 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
 
     // Actually get the message
     uint32_t id;
-    uint64_t dat;
-    ErrorStatus status = BSP_CAN_Read(bus, &id, (uint8_t*)&dat);
-    MsgContainer->ID = id;
-    MsgContainer->data[0] = dat;
+    ErrorStatus status = BSP_CAN_Read(bus, &id, MsgContainer->data);
+    MsgContainer->ID = (CANId_t) id;
 
     OSMutexPost( // unlock RX line
         &(CANbus_RxMutex[bus]),
@@ -237,12 +228,16 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
         &err);
     assertOSError(OS_CANDRIVER_LOC,err);
     
-    //search LUT for idmatch to populate idx and trim data
-    CANId_t lookupid = (CANId_t) MsgContainer->data[0];
-    CANLUT_T entry = CANLUT[lookupid];
+    //search LUT for id to populate idx and trim data
+    CANLUT_T entry = CANLUT[MsgContainer->ID];
     if(entry.idxEn==true){
+        MsgContainer->idx = MsgContainer->data[0];
+        memcpy(
+            MsgContainer->data,
+            &(MsgContainer->data[1]),
+            7
+        );
 
     }
-
     return status;
 }
