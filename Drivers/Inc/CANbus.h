@@ -15,28 +15,28 @@
  * If changing the order of this enum, make sure to mirror that change in the lookup table, or
  * else the driver will not work properly. 
  * 
- * If adding new types of CAN messages, add the identifier above NUM_CAN_IDs, and then go to CANLUT.c to add an entry for
- * the new message in the lookup
+ * If adding new types of CAN messages, add the identifier wherever it fits in 
+ * (the enum is sorted in ascending order on purpus), and then add an entry to the lookup table.
  */
 typedef enum { 
-	CHARGE_ENABLE = 0,
-	STATE_OF_CHARGE,
-	SUPPLEMENTAL_VOLTAGE,
-	CAR_STATE,
-	MC_BUS,
-	VELOCITY,
-	MC_PHASE_CURRENT,
-	VOLTAGE_VEC,
-	CURRENT_VEC,
-	BACKEMF,
-	TEMPERATURE,
-	ODOMETER_AMPHOURS,
-	ARRAY_CONTACTOR_STATE_CHANGE,
-	MOTOR_DRIVE,
-	MOTOR_POWER,
-	MOTOR_RESET,
-	MOTOR_STATUS,
-	MOTOR_VELOCITY,
+	CHARGE_ENABLE 					= 0x10C,
+	STATE_OF_CHARGE 				= 0x106,
+	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
+	// CAR_STATE 						= 0x580,
+	MOTOR_DRIVE 					= 0x221,
+	MOTOR_POWER						= 0x222,
+	MOTOR_RESET 					= 0x223,
+	MOTOR_STATUS 					= 0x241,
+	MOTOR_VELOCITY 					= 0x243,
+	MC_BUS 							= 0x242,
+	VELOCITY 						= 0x243,
+	MC_PHASE_CURRENT 				= 0x244,
+	VOLTAGE_VEC 					= 0x245,
+	CURRENT_VEC 					= 0x246,
+	BACKEMF 						= 0x247,
+	TEMPERATURE 					= 0x248,
+	ODOMETER_AMPHOURS 				= 0x24E,
+	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
 	NUM_CAN_IDS
 } CANId_t;
 
@@ -49,7 +49,6 @@ typedef enum {
 typedef struct {
 	bool idxEn;
 	uint8_t size;
-	uint32_t ID;
 } CANLUT_T;
 
 /**

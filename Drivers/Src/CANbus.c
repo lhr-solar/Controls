@@ -238,8 +238,11 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
     assertOSError(OS_CANDRIVER_LOC,err);
     
     //search LUT for idmatch to populate idx and trim data
-    for(uint8_t i = 0; i<NUM_CAN_IDS;++i){
-        
+    CANId_t lookupid = (CANId_t) MsgContainer->data[0];
+    CANLUT_T entry = CANLUT[lookupid];
+    if(entry.idxEn==true){
+
     }
+
     return status;
 }
