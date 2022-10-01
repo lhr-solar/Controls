@@ -1,6 +1,17 @@
+/**
+ * @file Test_DisplayDriver.c
+ * @author Nathaniel Delgado (nathaniel.delgado@utexas.edu)
+ * @brief Tests the driver code for display
+ * @version 0.1
+ * @date 2022-10-00
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 // #include "common.h"
 // #include "config.h"
-#include "os.h"
+// #include "os.h"
 #include "Tasks.h"
 // #include "Display.h"
 // #include "bsp.h"
@@ -62,13 +73,15 @@ void delay(void){
 }
 
 int main(){
-    if(Display_Init() != SUCCESS){
-        return 0;
-    }
+	Display_Error_t err;
+
+    err = Display_Init();
+	assertDisplayError(err);
     delay();
     
-    // Test if the reset works (should show the start screen agian)
-    Display_Reset();
+    // Test if the reset works (should show the start screen again)
+    err = Display_Reset();
+	assertDisplayError(err);
     delay();
 
     // Display the fault page
@@ -82,7 +95,8 @@ int main(){
 			{.num=FAULT}
 		}
 	};
-    Display_Send(pgCmd);
+    err = Display_Send(pgCmd);
+	assertDisplayError(err);
     delay();
 
     // Display the info page
@@ -96,7 +110,8 @@ int main(){
 			{.num=INFO}
 		}
 	};
-    Display_Send(pgCmd);
+    err = Display_Send(pgCmd);
+	assertDisplayError(err);
     delay();
 
     // Show the array icon
@@ -110,7 +125,8 @@ int main(){
             {.num=1}
         }
     };
-    Display_Send(toggleCmd);
+    err = Display_Send(toggleCmd);
+	assertDisplayError(err);
     delay();
 
     // Don't show the array icon
@@ -124,13 +140,15 @@ int main(){
             {.num=0}
         }
     };
-    Display_Send(toggleCmd);
+    err = Display_Send(toggleCmd);
+	assertDisplayError(err);
     delay();
 
     // Test the fault screen
     os_error_loc_t osErrCode = 0x0420;
     fault_bitmap_t faultCode = 0x69;
-    Display_Fault(osErrCode, faultCode);
+    err = Display_Fault(osErrCode, faultCode);
+	assertDisplayError(err);
     
     while(1){
         
