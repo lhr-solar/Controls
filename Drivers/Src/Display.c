@@ -38,7 +38,7 @@ Display_Error_t Display_Send(Display_Cmd_t cmd){
 		BSP_UART_Write(DISP_OUT, cmd.op, strlen(cmd.op));
 	}
 	else if(cmd.op == NULL && cmd.attr == NULL){	// Operational commands have no attribute and no operator, just a command and >= 0 arguments
-		sprintf(msgArgs, "");
+		msgArgs[0] = '\0'; // No args
 		if(cmd.numArgs >= 1 && cmd.argTypes != NULL && cmd.args != NULL){	// If there are arguments
 			for(int i=0; i<cmd.numArgs; i++){
 				char arg[16];
