@@ -27,7 +27,7 @@ Display_Error_t Display_Init(){
 }
 
 Display_Error_t Display_Send(Display_Cmd_t cmd){
-	char msgArgs[16];
+	char msgArgs[32];
 	if(cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1){	// Assignment commands have only 1 arg, an operator, and an attribute
 		if(cmd.argTypes[0] == INT_ARG){
 			sprintf(msgArgs, "%d", (int)cmd.args[0].num);
@@ -43,7 +43,8 @@ Display_Error_t Display_Send(Display_Cmd_t cmd){
 	}
 	else if(cmd.op == NULL && cmd.attr == NULL){	// Operational commands have no attribute and no operator, just a command and >= 0 arguments
 		msgArgs[0] = '\0'; // No args
-		if(cmd.numArgs >= 1 && cmd.argTypes != NULL && cmd.args != NULL){	// If there are arguments
+		if (cmd.numArgs > MAX_ARGS) return DISPLAY_ERR_OTHER;
+		if(cmd.numArgs >= 1){	// If there are arguments
 			for(int i=0; i<cmd.numArgs; i++){
 				char arg[16];
 				if(cmd.argTypes[i] == INT_ARG){
