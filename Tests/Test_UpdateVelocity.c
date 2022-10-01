@@ -21,7 +21,7 @@ void Task1(void *p_arg) {
     BSP_UART_Init(UART_2);
     CANbus_Init();
     Contactors_Init();
-    Display_Init();
+    // Display_Init();
     Minions_Init();
     MotorController_Init(1.0f); // Let motor controller use 100% of bus current
     Pedals_Init();
@@ -52,19 +52,8 @@ void Task1(void *p_arg) {
         for(;;) x++;
     }
 
-    static bool lastCruiseEnPushed = true;
-    State cruiseEnablePushed = OFF;
     while (1) {
         OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT, &err);
-        Switches_UpdateStates(); //UpdateVelocity thread depends on switch Values
-        cruiseEnablePushed = Switches_Read(CRUZ_EN); //read cruise enable switch
-        if (!lastCruiseEnPushed && cruiseEnablePushed) { //Rising Edge detector for updateVelocity thread
-            UpdateVel_ToggleCruise = true;
-        }
-        lastCruiseEnPushed = cruiseEnablePushed;
-        CANbuff buf;
-        __unused
-		ErrorStatus status = MotorController_Read(&buf);
     }
 }
 

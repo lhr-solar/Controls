@@ -1,7 +1,7 @@
 /**
- * @file UpdateVelocity(1).c
+ * @file UpdateVelocity.c
  * @author Nathaniel Delgado (nathaniel.delgado@utexas.edu)
- * @brief 
+ * @brief Continually reads inputs from the system to decide how the motor acts
  * @version 0.1
  * @date 2022-09-17
  * 
@@ -31,12 +31,12 @@
 #define REGEN_RANGE (NEUTRAL_PEDALS_PERCENT - UNTOUCH_PEDALS_PERCENT_ACCEL)
 
 extern const float pedalToPercent[];
-static float convertPedaltoMotorPercent(uint8_t pedalPercentage){
-    if(pedalPercentage > 100){
-        return 1.0f;
-    }
-    return pedalToPercent[pedalPercentage];
-}
+// static float convertPedaltoMotorPercent(uint8_t pedalPercentage){
+//     if(pedalPercentage > 100){
+//         return 1.0f;
+//     }
+//     return pedalToPercent[pedalPercentage];
+// }
 
 // Convert a float velocity in meters per second to a desired RPM
 static float velocity_to_rpm(float velocity) {
@@ -50,74 +50,58 @@ static float velocity_to_rpm(float velocity) {
 #define IDLE 0
 #define ACCEL 1
 
-int state = IDLE;
-uint8_t accelPedalPercent = 0;
-uint8_t brakePedalPercent = 0;
-
-// Struct to envapsulate each state. Keeps track of what the state does and how to decide the next state
-typedef struct State{
-    void (*stateHandler)(void);
-    void (*stateDecider)(void);
-}State_t;
-
-void accel(void){
-    float desiredVelocity = 0;
-    float desiredMotorCurrent = 0;
-
-    if(Switches_Read(FOR_SW)){
-        desiredVelocity = MAX_VELOCITY;
-    } else if (Switches_Read(REV_SW)) {
-        desiredVelocity = -MAX_VELOCITY;
-    }
-
-    if(Contactors_Get(MOTOR_CONTACTOR)){
-        MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
-    }
-}
-
-void accelDecider(void){
-    if(brakePedalPercent > UNTOUCH_PEDALS_PERCENT_BRAKE){
-        state = IDLE;
-    }else if(!(Switches_Read(FOR_SW) || Switches_Read(REV_SW))){
-        state = IDLE;
-    }else if(Switches_Read(FOR_SW) || Switches_Read(REV_SW)){
-        state = ACCEL;
-    }
-}
-
-void idle(void){
-    float desiredVelocity = 0;
-    float desiredMotorCurrent = 0;
-
-    if(Contactors_Get(MOTOR_CONTACTOR)){
-        MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
-    }
-}
-
-void idleDecider(void){
-    if(brakePedalPercent > UNTOUCH_PEDALS_PERCENT_BRAKE){
-        state = IDLE;
-    }else if(!(Switches_Read(FOR_SW) || Switches_Read(REV_SW))){
-        state = IDLE;
-    }else if(Switches_Read(FOR_SW) || Switches_Read(REV_SW)){
-        state = ACCEL;
-    }
-}
-
-const State_t FSM[2] = {
-    {&idle, &idleDecider},
-    {&accel, &accelDecider},
-};
-
 void Task_UpdateVelocity(void *p_arg){
     OS_ERR err;
+
+    uint8_t state = IDLE;
     
     while(1){
-        FSM[state].stateHandler();    // do what the current state does
-
         // Get inputs to decide actions
-        accelPedalPercent = Pedals_Read(ACCELERATOR);
-        brakePedalPercent = Pedals_Read(BRAKE);
+        // uint8_t accelPedalPercent = Pedals_Read(ACCELERATOR);
+        uint8_t brakePedalPercent = Pedals_Read(BRAKE);
+
+        // Start of with idle parameters
+        float desiredVelocity = 0;
+        float desiredMotorCurrent = 0;
+
+        // Do output based on state and decide on the next state
+        switch(state){
+            case IDLE:
+                if(Contactors_Get(MOTOR_CONTACTOR)){
+                    MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
+                }
+
+                // Decide on the next state
+                if(brakePedalPercent > UNTOUCH_PEDALS_PERCENT_BRAKE){
+                    state = IDLE;
+                }else if(!(Switches_Read(FOR_SW) || Switches_Read(REV_SW))){
+                    state = IDLE;
+                }else if(Switches_Read(FOR_SW) || Switches_Read(REV_SW)){
+                    state = ACCEL;
+                }
+
+                break;
+            case ACCEL:
+                if(Switches_Read(FOR_SW)){
+                    desiredVelocity = MAX_VELOCITY;
+                } else if (Switches_Read(REV_SW)) {
+                    desiredVelocity = -MAX_VELOCITY;
+                }
+
+                if(Contactors_Get(MOTOR_CONTACTOR)){
+                    MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
+                }
+
+                // Decide on the next state
+                if(brakePedalPercent > UNTOUCH_PEDALS_PERCENT_BRAKE){
+                    state = IDLE;
+                }else if(!(Switches_Read(FOR_SW) || Switches_Read(REV_SW))){
+                    state = IDLE;
+                }else if(Switches_Read(FOR_SW) || Switches_Read(REV_SW)){
+                    state = ACCEL;
+                }
+                break;
+        }
 
         // Set brake lights
         if(brakePedalPercent <= UNTOUCH_PEDALS_PERCENT_BRAKE){
@@ -126,8 +110,6 @@ void Task_UpdateVelocity(void *p_arg){
         else{
             Lights_Set(BrakeLight, OFF);
         }
-
-        FSM[state].stateDecider();    // decide on the next state
 
         // Delay of few milliseconds (100)
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
