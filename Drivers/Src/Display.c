@@ -42,7 +42,8 @@ Display_Error_t Display_Send(Display_Cmd_t cmd){
 		BSP_UART_Write(DISP_OUT, cmd.op, strlen(cmd.op));
 	}
 	else if(cmd.op == NULL && cmd.attr == NULL){	// Operational commands have no attribute and no operator, just a command and >= 0 arguments
-		msgArgs[0] = '\0'; // No args
+		msgArgs[0] = ' '; // No args
+		msgArgs[1] = '\0';
 		if (cmd.numArgs > MAX_ARGS) return DISPLAY_ERR_OTHER;
 		if(cmd.numArgs >= 1){	// If there are arguments
 			for(int i=0; i<cmd.numArgs; i++){
@@ -121,13 +122,13 @@ Display_Error_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode
 	BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
 	BSP_UART_Write(DISP_OUT, (char*)TERMINATOR, strlen(TERMINATOR));
 
-	char setOSCode[15];
-	sprintf(setOSCode, "%s%04X", "oserr.txt=", (uint16_t)osErrCode);
+	char setOSCode[17];
+	sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
 	BSP_UART_Write(DISP_OUT, setOSCode, strlen(setOSCode));
 	BSP_UART_Write(DISP_OUT, (char*)TERMINATOR, strlen(TERMINATOR));
 
-	char setFaultCode[16];
-	sprintf(setFaultCode, "%s%02X", "faulterr.txt=", (uint8_t)faultCode);
+	char setFaultCode[18];
+	sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
 	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
 	BSP_UART_Write(DISP_OUT, (char*)TERMINATOR, strlen(TERMINATOR));
 

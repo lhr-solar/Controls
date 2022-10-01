@@ -68,7 +68,8 @@ static char *compStrings[15] = {
 // Delay; Don't know how long
 void delay(void)
 {
-	for (int i = 0; i < 999999; i++)
+	volatile int j;
+	for (j = 0; j < 9999999; j++)
 	{
 		continue;
 	}
@@ -82,11 +83,6 @@ int main()
 	assertDisplayError(err);
 	delay();
 
-	// Test if the reset works (should show the start screen again)
-	err = Display_Reset();
-	assertDisplayError(err);
-	delay();
-
 	// Display the fault page
 	Display_Cmd_t pgCmd = {
 			.compOrCmd = "page",
@@ -96,7 +92,7 @@ int main()
 			.argTypes = {true},
 			{{.num = FAULT}}};
 	err = Display_Send(pgCmd);
-	assertDisplayError(err);
+	//assertDisplayError(err);
 	delay();
 
 	// Display the info page
@@ -108,38 +104,38 @@ int main()
 			.argTypes = {true},
 			{{.num = INFO}}};
 	err = Display_Send(pgCmd);
-	assertDisplayError(err);
+	//assertDisplayError(err);
 	delay();
 
 	// Show the array icon
 	Display_Cmd_t toggleCmd = {
-			.compOrCmd = (char *)compStrings[ARRAY],
-			.attr = "en",
-			.op = "=",
-			.numArgs = 1,
-			.argTypes = {true},
-			{{.num = 1}}};
+			.compOrCmd = "vis",
+			.attr = NULL,
+			.op = NULL,
+			.numArgs = 2,
+			.argTypes = {STR_ARG, INT_ARG},
+			{{.str = compStrings[ARRAY]}, {.num = 1}}};
 	err = Display_Send(toggleCmd);
-	assertDisplayError(err);
+	//assertDisplayError(err);
 	delay();
 
 	// Don't show the array icon
 	toggleCmd = (Display_Cmd_t){
-			.compOrCmd = (char *)compStrings[ARRAY],
-			.attr = "en",
-			.op = "=",
-			.numArgs = 1,
-			.argTypes = {true},
-			{{.num = 0}}};
+			.compOrCmd = "vis",
+			.attr = NULL,
+			.op = NULL,
+			.numArgs = 2,
+			.argTypes = {STR_ARG, INT_ARG},
+			{{.str = compStrings[ARRAY]}, {.num = 0}}};
 	err = Display_Send(toggleCmd);
-	assertDisplayError(err);
+	//assertDisplayError(err);
 	delay();
 
 	// Test the fault screen
 	os_error_loc_t osErrCode = 0x0420;
 	fault_bitmap_t faultCode = 0x69;
 	err = Display_Fault(osErrCode, faultCode);
-	assertDisplayError(err);
+	//assertDisplayError(err);
 
 	while (1)
 	{

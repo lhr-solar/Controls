@@ -21,7 +21,7 @@
 #define DISP_Q_SIZE 5
 
 #define FIFO_TYPE Display_Cmd_t
-#define FIFO_SIZE sizeof(Display_Cmd_t)*DISP_Q_SIZE
+#define FIFO_SIZE DISP_Q_SIZE
 #define FIFO_NAME disp_fifo
 #include "fifo.h"
 
@@ -76,7 +76,12 @@ const char* compStrings[15]= {
 };
 
 UpdateDisplay_Error_t UpdateDisplay_Init(){
+	OS_ERR err;
 	disp_fifo_renew(&msg_queue);
+	OSMutexCreate(&DisplayQ_Mutex, "Display mutex", &err);
+	assertOSError(OS_DISPLAY_LOC, err);
+	OSSemCreate(&DisplayQ_Sem4, "Display sem4", 0, &err);
+	assertOSError(OS_DISPLAY_LOC, err);
 	return UpdateDisplay_SetPage(INFO);
 }
 
