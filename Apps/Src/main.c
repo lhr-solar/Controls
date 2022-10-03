@@ -54,9 +54,7 @@ int main(void) {
     while(1);
 
     return 0;
-}
 
-void Task_Init(void *p_arg){
     OS_ERR err;
 
     // Start systick    
@@ -82,7 +80,6 @@ void Task_Init(void *p_arg){
         (OS_TCB*)&FaultState_TCB,
         (CPU_CHAR*)"FaultState",
         (OS_TASK_PTR)Task_FaultState,
-        (void*)NULL,
         (OS_PRIO)TASK_FAULT_STATE_PRIO,
         (CPU_STK*)FaultState_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
