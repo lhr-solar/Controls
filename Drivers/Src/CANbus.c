@@ -88,16 +88,14 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
     CPU_TS timestamp;
     OS_ERR err;
 
-    CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    //error check the id
+    if(CanData.ID >= NUM_CAN_IDS){return ERROR;}
 
-    // lookup table def error checks
-    if(msginfo.idxEn & (msginfo.size>7)){ //idx message can only handle up to 7 bytes
-        return ERROR;
-    } else if (msginfo.size>8){ //non-idx message can only handle up to 8 bytes
-        return ERROR;
-    } else if (msginfo.size <= 0){ //no 0 size messages allowed
-        return ERROR;
-    }
+    CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    
+    //if they passed in an invalid id, it will be zero
+    if(msginfo.size == 0){return ERROR;}
+
 
     // make sure that Can mailbox is available
     if (blocking == CAN_BLOCKING)
