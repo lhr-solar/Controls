@@ -10,7 +10,7 @@ static OS_MUTEX CANbus_RxMutex[NUM_CAN];   // mutex to lock Rx line
 
 
 /**
- * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly.
+ * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly outside this driver.
  * @param bus The CAN bus to operate on. Should be CARCAN or MOTORCAN.
  */
 void CANbus_RxHandler(CAN_t bus)
@@ -21,7 +21,7 @@ void CANbus_RxHandler(CAN_t bus)
 }
 
 /**
- * @brief this function will be passed down to the BSP layer to trigger on TXend. Releases hold of the mailbox semaphore (Increments it to show mailbox available). Do not access directly.
+ * @brief this function will be passed down to the BSP layer to trigger on TXend. Releases hold of the mailbox semaphore (Increments it to show mailbox available). Do not access directly outside this driver.
  * @param bus The CAN bus to operate on. Should be CARCAN or MOTORCAN.
  */
 void CANbus_TxHandler(CAN_t bus)
@@ -50,12 +50,20 @@ void CANbus_RxHandler_3(){
  * @brief   Initializes the CAN system for a given bus. Must be called independently for each bus.
  * @param   bus
  */
-void CANbus_Init(CAN_t bus)
+ErrorStatus CANbus_Init(CAN_t bus)
 {
     // initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
     // initialize tx
     OS_ERR err;
     
+    if(bus==CAN_1){
+        BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1);
+    } else if (bus==CAN_3){
+        BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3);
+    } else {
+        return ERROR;
+    }
+
     OSMutexCreate(&(CANbus_TxMutex[bus]), (bus == CAN_1 ? "CAN TX Lock 1":"CAN TX Lock 3"), &err);
     assertOSError(OS_CANDRIVER_LOC,err);
 
@@ -68,12 +76,7 @@ void CANbus_Init(CAN_t bus)
     OSSemCreate(&(CANBus_RecieveSem4[bus]), (bus == CAN_1 ? "CAN Recieved Msg Queue Ctr 1":"CAN Recieved Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
     assertOSError(OS_CANDRIVER_LOC,err);
 
-    if(bus==CAN_1){
-        BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1);
-    } else if (bus==CAN_3){
-        BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3);
-    }
-
+    return SUCCESS;
 }
 
 /**
@@ -93,8 +96,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 
     CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
     
-    //if they passed in an invalid id, it will be zero
-    if(msginfo.size == 0){return ERROR;}
+    if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
 
 
     // make sure that Can mailbox is available
@@ -131,7 +133,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 
     uint8_t txdata[8];
     if(msginfo.idxEn){ //first byte of txData should be the idx value
-        memcpy(txdata,&CanData.idx,sizeof(CanData.idx));
+        memcpy(txdata,&CanData.idx,1);
         memcpy(&(txdata[sizeof(CanData.idx)]),&CanData.data,msginfo.size);
     } else { //non-idx case
         memcpy(txdata,&CanData.data,msginfo.size);

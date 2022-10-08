@@ -34,7 +34,7 @@ typedef enum {
 	VOLTAGE_VEC 					= 0x245,
 	CURRENT_VEC 					= 0x246,
 	BACKEMF 						= 0x247,
-	TEMPERATURE 					= 0x248,
+	TEMPERATURE 					= 0x24B,
 	ODOMETER_AMPHOURS 				= 0x24E,
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
 	NUM_CAN_IDS
@@ -43,18 +43,17 @@ typedef enum {
 /**
  * @brief Struct to use in CAN MSG LUT
  * @param idxEn Whether or not this message is part of a sequence of messages.
- * @param size Size of message's data
- * @param ID The actual CAN ID of this message
+ * @param size Size of message's data. Should be a maximum of eight (in decimal).
  */
 typedef struct {
-	bool idxEn;
-	uint8_t size;
+	bool idxEn: 1;
+	unsigned int size: 7;
 } CANLUT_T;
 
 /**
  * The lookup table containing the entries for all of our CAN messages. Located in CANLUT.c
  */
-extern CANLUT_T CANLUT[NUM_CAN_IDS];
+extern const CANLUT_T CANLUT[NUM_CAN_IDS];
 
 /**
  * Standard CAN packet
@@ -76,10 +75,10 @@ typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
 
 /**
  * @brief   Initializes the CAN system for a given bus
- * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN
+ * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
  * @return  None
  */
-void CANbus_Init(CAN_t bus);
+ErrorStatus CANbus_Init(CAN_t bus);
 
 /**
  * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is needed, 
