@@ -102,13 +102,13 @@ Display_Error_t Display_Send(Display_Cmd_t cmd);
  * @brief Initializes the display
  * @returns Display_Error_t
  */
-Display_Error_t Display_Init();
+Display_Error_t Display_Init(void);
 
 /**
  * @brief Resets (reboots) the display
  * @returns Display_Error_t
  */
-Display_Error_t Display_Reset();
+Display_Error_t Display_Reset(void);
 
 /**
  * @brief Overwrites any processing commands and triggers the display fault screen
