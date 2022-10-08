@@ -113,32 +113,4 @@ UpdateDisplay_Error_t UpdateDisplay_SetRegenState(TriState_t state);
  */
 UpdateDisplay_Error_t UpdateDisplay_SetCruiseState(TriState_t state);
 
-/**
- * @brief Sets the left blinker state on the display
- * @param state blinking or not blinking
- * @returns UpdateDisplay_Error_t
- */
-UpdateDisplay_Error_t UpdateDisplay_SetLeftBlink(bool state);
-
-/**
- * @brief Sets the right blinker state on the display
- * @param state blinking or not blinking
- * @returns UpdateDisplay_Error_t
- */
-UpdateDisplay_Error_t UpdateDisplay_SetRightBlink(bool state);
-
-/**
- * @brief Sets the headlight state on the display
- * @param state on or off
- * @returns UpdateDisplay_Error_t
- */
-UpdateDisplay_Error_t UpdateDisplay_SetHeadlight(bool state);
-
-/**
- * @brief Sets the hazard state on the display
- * @param state on or off
- * @returns UpdateDisplay_Error_t
- */
-UpdateDisplay_Error_t UpdateDisplay_SetHazard(bool state);
-
 #endif

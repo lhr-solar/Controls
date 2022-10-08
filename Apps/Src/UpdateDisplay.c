@@ -35,11 +35,7 @@ static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/re
  */
 typedef enum{
 	// Boolean components
-	LEFT=0,
-	HEAD,
-	RIGHT,
-	HZD,
-	ARRAY,
+	ARRAY=0,
 	MOTOR,
 	// Non-boolean components
 	VELOCITY,
@@ -56,10 +52,6 @@ typedef enum{
 
 const char* compStrings[15]= {
 	// Boolean components
-	"ltime",
-	"head",
-	"rtime",
-	"hzd",
 	"arr",
 	"mot",
 	// Non-boolean components
@@ -175,39 +167,19 @@ static UpdateDisplay_Error_t UpdateDisplay_Refresh(){
 static UpdateDisplay_Error_t UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
 	// For components that are on/off
 	if(comp <= MOTOR && val <= 1){
-		// If timer components, set the toggle of the timer instead of the visibility of an item
-		if(comp == LEFT || comp == RIGHT || comp == HZD){
-			Display_Cmd_t toggleCmd = {
-				.compOrCmd = (char*)compStrings[comp],
-				.attr = "en",
-				.op = "=",
-				.numArgs = 1,
-				.argTypes = {INT_ARG},
-				{
-					{.num=val}
-				}
-			};
+		Display_Cmd_t visCmd = {
+			.compOrCmd = "vis",
+			.attr = NULL,
+			.op = NULL,
+			.numArgs = 2,
+			.argTypes = {STR_ARG,INT_ARG},
+			{
+				{.str=(char*)compStrings[comp]},
+				{.num=val}
+			}
+		};
 
-			UpdateDisplay_Error_t err = UpdateDisplay_PutNext(toggleCmd);
-			if(err != UPDATEDISPLAY_ERR_NONE) return err;
-
-			return UpdateDisplay_Refresh();
-		}
-		else{
-			Display_Cmd_t visCmd = {
-				.compOrCmd = "vis",
-				.attr = NULL,
-				.op = NULL,
-				.numArgs = 2,
-				.argTypes = {STR_ARG,INT_ARG},
-				{
-					{.str=(char*)compStrings[comp]},
-					{.num=val}
-				}
-			};
-
-			return UpdateDisplay_PutNext(visCmd);
-		}
+		return UpdateDisplay_PutNext(visCmd);
 	}
 	// For components that have a non-boolean value
 	else if(comp > MOTOR){
@@ -296,18 +268,6 @@ UpdateDisplay_Error_t UpdateDisplay_SetCruiseState(TriState_t state){
 	if(err != UPDATEDISPLAY_ERR_NONE) return err;
 
 	return UpdateDisplay_Refresh();
-}
-
-UpdateDisplay_Error_t UpdateDisplay_SetLeftBlink(bool state){
-	return UpdateDisplay_SetComponent(LEFT, (state)?1:0);
-}
-
-UpdateDisplay_Error_t UpdateDisplay_SetRightBlink(bool state){
-	return UpdateDisplay_SetComponent(RIGHT, (state)?1:0);
-}
-
-UpdateDisplay_Error_t UpdateDisplay_SetHeadlight(bool state){
-	return UpdateDisplay_SetComponent(HEAD, (state)?1:0);
 }
 
 void assertUpdateDisplayError(UpdateDisplay_Error_t err){

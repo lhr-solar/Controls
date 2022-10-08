@@ -102,9 +102,6 @@ void Task1(void *arg)
 
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
-    testBoolComp(&UpdateDisplay_SetLeftBlink);
-    testBoolComp(&UpdateDisplay_SetHeadlight);
-    testBoolComp(&UpdateDisplay_SetLeftBlink);
     testTriStateComp(&UpdateDisplay_SetGear);
     
     err = UpdateDisplay_SetVelocity(12);
@@ -121,10 +118,6 @@ void Task1(void *arg)
     testTriStateComp(&UpdateDisplay_SetRegenState);
     testBoolComp(&UpdateDisplay_SetMotor);
     testBoolComp(&UpdateDisplay_SetArray);
-    testBoolComp(&UpdateDisplay_SetLeftBlink);
-    testBoolComp(&UpdateDisplay_SetRightBlink);
-    testBoolComp(&UpdateDisplay_SetHeadlight);
-    testBoolComp(&UpdateDisplay_SetHazard);
     testPercentageComp(&UpdateDisplay_SetSOC);
 
     err = UpdateDisplay_SetSBPV(12);
