@@ -120,7 +120,6 @@ static void UpdateSwitches() {
  */
 static void UpdateDispLights() {
     Lights_Set(Headlight_ON, Switches_Read(HEADLIGHT_SW));
-    assertUpdateDisplayError(UpdateDisplay_SetHeadlight(Switches_Read(HEADLIGHT_SW)));
     
     int leftblink = Switches_Read(LEFT_SW) | 
                     Switches_Read(HZD_SW);
@@ -132,23 +131,15 @@ static void UpdateDispLights() {
         Lights_Toggle_Set(LEFT_BLINK, OFF);
         Lights_Set(RIGHT_BLINK,OFF);
         Lights_Set(LEFT_BLINK,OFF);
-        
-        assertUpdateDisplayError(UpdateDisplay_SetLeftBlink(false));
-        assertUpdateDisplayError(UpdateDisplay_SetRightBlink(false));
     }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
-    
-    assertUpdateDisplayError(UpdateDisplay_SetLeftBlink(leftblink));
-    assertUpdateDisplayError(UpdateDisplay_SetRightBlink(rightblink));
-    
+
     if(leftblink==0){
         Lights_Set(LEFT_BLINK,OFF);
-        assertUpdateDisplayError(UpdateDisplay_SetLeftBlink(false));
     }
     if(rightblink==0){
         Lights_Set(RIGHT_BLINK,OFF);
-        assertUpdateDisplayError(UpdateDisplay_SetRightBlink(false));
     }
     
 }
