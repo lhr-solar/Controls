@@ -19,10 +19,6 @@ static const char *TERMINATOR = "\xff\xff\xff";
 
 Display_Error_t Display_Init(){
 	BSP_UART_Init(DISP_OUT);
-
-	char buf[8];	// Read buffer
-	BSP_UART_Read(DISP_OUT, (char*)buf);
-
 	return Display_Reset();
 }
 
@@ -77,29 +73,7 @@ Display_Error_t Display_Send(Display_Cmd_t cmd){
 	char buf[8];
 	BSP_UART_Read(DISP_OUT, buf);
 
-	if (strcmp(cmd.compOrCmd, "rest") == 0) return DISPLAY_ERR_NONE;
-	
-	// Error validation
-	switch(buf[4]){	// buf[4]: first byte of second half of response
-		case 0x00:
-			return DISPLAY_ERR_INV_INSTR;
-		case 0x01:
-			return DISPLAY_ERR_NONE;
-		case 0x02:
-			return DISPLAY_ERR_INV_COMP;
-		case 0x03:
-			return DISPLAY_ERR_INV_PGID;
-		case 0x1A:
-			return DISPLAY_ERR_INV_VAR;
-		case 0x1B:
-			return DISPLAY_ERR_INV_VAROP;
-		case 0x1C:
-			return DISPLAY_ERR_ASSIGN;
-		case 0x1E:
-			return DISPLAY_ERR_PARAMS;
-		default:
-			return DISPLAY_ERR_OTHER;
-	}
+	return DISPLAY_ERR_NONE;
 }
 
 Display_Error_t Display_Reset(){

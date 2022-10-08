@@ -134,4 +134,11 @@ UpdateDisplay_Error_t UpdateDisplay_SetRightBlink(bool state);
  */
 UpdateDisplay_Error_t UpdateDisplay_SetHeadlight(bool state);
 
+/**
+ * @brief Sets the hazard state on the display
+ * @param state on or off
+ * @returns UpdateDisplay_Error_t
+ */
+UpdateDisplay_Error_t UpdateDisplay_SetHazard(bool state);
+
 #endif

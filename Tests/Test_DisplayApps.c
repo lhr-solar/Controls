@@ -102,49 +102,54 @@ void Task1(void *arg)
 
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
-    
-    // testBoolComp(&UpdateDisplay_SetLeftBlink);
-    // testBoolComp(&UpdateDisplay_SetHeadlight);
-    // testBoolComp(&UpdateDisplay_SetLeftBlink);
-    // testTriStateComp(&UpdateDisplay_SetGear);
+    testBoolComp(&UpdateDisplay_SetLeftBlink);
+    testBoolComp(&UpdateDisplay_SetHeadlight);
+    testBoolComp(&UpdateDisplay_SetLeftBlink);
+    testTriStateComp(&UpdateDisplay_SetGear);
     
     err = UpdateDisplay_SetVelocity(12);
     assertUpdateDisplayError(err);
-    // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
-    // err = UpdateDisplay_SetVelocity(345);
-    // assertUpdateDisplayError(err);
-    // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
-    // err = UpdateDisplay_SetVelocity(6789);
-    // assertUpdateDisplayError(err);
-    // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
+    err = UpdateDisplay_SetVelocity(345);
+    assertUpdateDisplayError(err);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
+    err = UpdateDisplay_SetVelocity(6789);
+    assertUpdateDisplayError(err);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
 
-    // testTriStateComp(&UpdateDisplay_SetCruiseState);
-    // testTriStateComp(&UpdateDisplay_SetRegenState);
-    // testBoolComp(&UpdateDisplay_SetMotor);
-    // testBoolComp(&UpdateDisplay_SetArray);
-    // testPercentageComp(&UpdateDisplay_SetSOC);
+    testTriStateComp(&UpdateDisplay_SetCruiseState);
+    testTriStateComp(&UpdateDisplay_SetRegenState);
+    testBoolComp(&UpdateDisplay_SetMotor);
+    testBoolComp(&UpdateDisplay_SetArray);
+    testBoolComp(&UpdateDisplay_SetLeftBlink);
+    testBoolComp(&UpdateDisplay_SetRightBlink);
+    testBoolComp(&UpdateDisplay_SetHeadlight);
+    testBoolComp(&UpdateDisplay_SetHazard);
+    testPercentageComp(&UpdateDisplay_SetSOC);
 
-    // err = UpdateDisplay_SetSBPV(12);
-    // assertUpdateDisplayError(err);
-    // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
-    // err = UpdateDisplay_SetSBPV(345);
-    // assertUpdateDisplayError(err);
-    // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
-    // err = UpdateDisplay_SetSBPV(6789);
-    // assertUpdateDisplayError(err);
-    // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
+    err = UpdateDisplay_SetSBPV(12);
+    assertUpdateDisplayError(err);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
+    err = UpdateDisplay_SetSBPV(345);
+    assertUpdateDisplayError(err);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
+    err = UpdateDisplay_SetSBPV(6789);
+    assertUpdateDisplayError(err);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
 
-    // testPercentageComp(&UpdateDisplay_SetAccel);
+    testPercentageComp(&UpdateDisplay_SetAccel);
 
-    // error = Display_Fault(OSErrLocBitmap, FaultBitmap);
-    // assertDisplayError(error);
-    // OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
+    error = Display_Fault(OSErrLocBitmap, FaultBitmap);
+    assertDisplayError(error);
+    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
-    // error = Display_Reset();
-    // assertDisplayError(error);
-    // OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
+    error = Display_Reset();
+    assertDisplayError(error);
+    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
-    while (1) {}
+    while (1) {
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
+    }
 };
 
 int main()
@@ -180,7 +185,7 @@ int main()
         (CPU_CHAR *)"Task 1",
         (OS_TASK_PTR)Task1,
         (void *)NULL,
-        (OS_PRIO)13,
+        (OS_PRIO)12,
         (CPU_STK *)Task1Stk,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE,

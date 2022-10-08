@@ -100,12 +100,12 @@ static UpdateDisplay_Error_t UpdateDisplay_PopNext(){
 
     OSSemPend(&DisplayQ_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
     assertOSError(OS_DISPLAY_LOC, err);
-
-    OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_POST_NONE, &ticks, &err);
+		
+    OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
     assertOSError(OS_DISPLAY_LOC, err);
 
     bool result = disp_fifo_get(&msg_queue, &cmd);
-    OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_NONE, &err);
+    OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
     assertOSError(OS_SEND_CAN_LOC, err);
 
     if(!result)
@@ -125,16 +125,16 @@ static UpdateDisplay_Error_t UpdateDisplay_PutNext(Display_Cmd_t cmd){
 	CPU_TS ticks;
 	OS_ERR err;
 
-	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_POST_NONE, &ticks, &err);
+	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
   assertOSError(OS_DISPLAY_LOC, err);
 	
 	bool success = disp_fifo_put(&msg_queue, cmd);
 
-	OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_NONE, &err);
+	OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
 	assertOSError(OS_DISPLAY_LOC, err);
 
 	if(success){
-		OSSemPost(&DisplayQ_Sem4, OS_OPT_POST_NONE, &err);
+		OSSemPost(&DisplayQ_Sem4, OS_OPT_POST_ALL, &err);
 		assertOSError(OS_DISPLAY_LOC, err);
 	}
 	else{
