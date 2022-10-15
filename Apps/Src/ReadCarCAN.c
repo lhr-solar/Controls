@@ -5,6 +5,7 @@
 #include "Contactors.h"
 #include "Minions.h"
 #include "CAN_Queue.h"
+#include "os_tmr.c"
 
 
 static bool msg_recieved = false;
@@ -13,13 +14,22 @@ static OS_MUTEX msg_rcv_mutex;
 
 static int watchDogTripCounter = 0; //count how many times the CAN watchdog trips
 
-//CAN watchdog thread variables
+//XXXCAN watchdog thread variables
 static OS_TCB canWatchTCB;
 static CPU_STK canWatchSTK[DEFAULT_STACK_SIZE];
+
+//MMM CAN watchdog timer variables
+static OS_TMR canWatchTimer; // Is it ok to declare this here?
+static int canWatchTmrDlySeconds = 5;
+
+//MMM prechargeDlyTimer
+static OS_TMR prechargeDlyTimer;
 
 //Array restart thread variables
 static OS_TCB arrayTCB;
 static CPU_STK arraySTK[DEFAULT_STACK_SIZE];
+
+
 
 // Array restart thread lock
 static OS_MUTEX arrayRestartMutex;
@@ -74,9 +84,13 @@ static inline void chargingEnable(void) {
 
          if (Contactors_Set(ARRAY_PRECHARGE, ON) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
             restartingArray = true;
+
+            // Wait to make sure precharge is finished and then restart array
+            OSTmrStart(&prechargeDlyTimer, &err);
             
-            //Turn on the array restart thread
-            OSTaskCreate(
+            
+            //Turn on the array restart thread replaced by precharge timer and array restart callback
+           /* OSTaskCreate(
                 &arrayTCB,
                 "Array Restarter",
                 &ArrayRestart,
@@ -91,7 +105,7 @@ static inline void chargingEnable(void) {
                 OS_OPT_TASK_STK_CLR,
                 &err
             );
-            assertOSError(OS_READ_CAN_LOC,err);   
+            assertOSError(OS_READ_CAN_LOC,err); */  
         }
     }
 
@@ -113,7 +127,39 @@ void Task_ReadCarCAN(void *p_arg)
     OSMutexCreate(&msg_rcv_mutex, "message received mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
 
-    //Create+start the Can watchdog thread
+    //Create the CAN Watchdog (periodic) timer
+    OSTmrCreate(
+        &canWatchTimer,
+        "CAN Watch Timer",
+        0,
+        OS_CFG_TMR_TASK_RATE_HZ * canWatchTmrDlySeconds,
+        OS_OPT_TMR_PERIODIC,
+        &canWatchTimerCallback,
+        NULL,
+        &err
+    );
+    assertOSError(OS_READ_CAN_LOC, err);
+
+    OSTmrCreate(
+        &prechargeDlyTimer,
+        "Precharge Delay Timer",
+        OS_CFG_TMR_TASK_RATE_HZ * PRECHARGE_ARRAY_DELAY,
+        0,
+        OS_OPT_TMR_ONE_SHOT,
+        &arrayRestart,
+        NULL,
+        &err
+    );
+    assertOSError(OS_READ_CAN_LOC, err);
+
+    //Start CAN Watchdog timer
+    OSTmrStart(&canWatchTimer, &err);
+
+
+
+
+
+    //Create+start the Can watchdog thread XXX will be replaced with timer
     OSTaskCreate(
         &canWatchTCB,
         "CAN Watchdog",
@@ -130,6 +176,7 @@ void Task_ReadCarCAN(void *p_arg)
         &err
     );
     assertOSError(OS_READ_CAN_LOC,err);
+    
 
     while (1)
     {
@@ -181,7 +228,10 @@ void Task_ReadCarCAN(void *p_arg)
 /**
  * @brief This function is the handler thread for the CANWatchdog timer. It disconnects the array and disables regenerative braking if we do not get
  * a CAN message with the ID Charge_Enable within the desired interval.
+ * TODO: replace this with an OSTimer
 */
+
+/*
 static void CANWatchdog_Handler(void *p_arg){
     OS_ERR err;
     CPU_TS ts;
@@ -216,10 +266,57 @@ static void CANWatchdog_Handler(void *p_arg){
     }
 
 };
+*/
+
+/**
+ * @brief Disables charging and increments the trip counter
+ * when canWatchTimer hits 0 (when charge enable messages are missed)
+ * 
+*/
+void canWatchTimerCallback (){  //Probably needs its timer arguments
+    OS_ERR err;
+    CPU_TS ts;
+        
+    chargingDisable();
+
+    //increment trip counter
+    watchDogTripCounter += 1;
+
+}
+
+/**
+ * @brief callback function for after precharge is finished
+*/
+static void arrayRestart(OS_TMR *p_tmr, void *p_arg){
+    OS_ERR err;
+    CPU_TS ts;
+
+    if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
+        restartingArray = false;
+    }
+    else {
+        Contactors_Set(ARRAY_CONTACTOR, ON);
+        Contactors_Set(ARRAY_PRECHARGE, OFF);
+        Lights_Set(A_CNCTR, ON);
+        //Display_SetLight(A_CNCTR, ON);
+
+        // let array know the contactor is on
+        CANMSG_t msg;
+        msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
+        msg.payload.bytes = 1;
+        msg.payload.data.b = true;
+        CAN_Queue_Post(msg);
+
+        // done restarting the array
+        restartingArray = false;
+    }
+};
 
 /**
  *  * @brief This function is the array precharge thread that gets instantiated when array restart needs to happen.
 */
+
+/* To be replaced with a callback
 static void ArrayRestart(void *p_arg){
     OS_ERR err;
     CPU_TS ts;
@@ -271,3 +368,5 @@ static void ArrayRestart(void *p_arg){
     // delete this task
     OSTaskDel(&arrayTCB, &err);
 };
+
+*/
