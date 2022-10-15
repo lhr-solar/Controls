@@ -1,7 +1,28 @@
 #include "SendDisplay.h"
-#include "Minions.h"
 #include "MotorController.h"
 #include <math.h>
+#include "Minions.h"
+
+typedef enum {
+     HZD_SW=0, 
+     HEADLIGHT_SW,
+     LEFT_SW,
+     RIGHT_SW,
+     IGN_1,
+     IGN_2
+} switches_t;
+
+
+typedef enum {  
+    A_CNCTR = 0,
+    M_CNCTR,
+    CTRL_FAULT,
+    LEFT_BLINK,
+    RIGHT_BLINK,
+    Headlight_ON,
+    BrakeLight,
+    RSVD_LED
+} light_t;
 
 void Task_SendDisplay(void *p_arg) {
     OS_ERR err;
@@ -22,8 +43,8 @@ void Task_SendDisplay(void *p_arg) {
         Display_SetRegenEnabled(RegenEnable);
         Display_SetLight(A_CNCTR, Contactors_Get(ARRAY_CONTACTOR));
         Display_SetLight(M_CNCTR, Contactors_Get(MOTOR_CONTACTOR));
-        Display_SetGear(Switches_Read(FOR_SW), Switches_Read(REV_SW));
-        Display_SetLight(Headlight_ON, Switches_Read(HEADLIGHT_SW));
+        Display_SetGear(Minion_Read_Input(FOR_SW), Minion_Read_Input(REV_SW));
+        Display_SetLight(Headlight_ON, Minion_Read_Input(HEADLIGHT_SW));
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
     }
