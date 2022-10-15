@@ -25,6 +25,10 @@ static int canWatchTmrDlySeconds = 5;
 //MMM prechargeDlyTimer
 static OS_TMR prechargeDlyTimer;
 
+//MMM restart array and disable charging semaphonres
+static OS_SEM restartArraySem;
+static OS_SEM disableChargingSem;
+
 //Array restart thread variables
 static OS_TCB arrayTCB;
 static CPU_STK arraySTK[DEFAULT_STACK_SIZE];
@@ -126,6 +130,10 @@ void Task_ReadCarCAN(void *p_arg)
     assertOSError(OS_READ_CAN_LOC,err);
     OSMutexCreate(&msg_rcv_mutex, "message received mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
+    OSSemCreate(&restartArraySem, "array restart semaphore", 0, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
+    OSSemCreate(&disableChargingSem, "disable charging semaphore", 0, &err);
+
 
     //Create the CAN Watchdog (periodic) timer
     OSTmrCreate(
@@ -133,7 +141,7 @@ void Task_ReadCarCAN(void *p_arg)
         "CAN Watch Timer",
         0,
         OS_CFG_TMR_TASK_RATE_HZ * canWatchTmrDlySeconds,
-        OS_OPT_TMR_PERIODIC,
+        OS_OPT_TMR_PERIODIC,S
         &canWatchTimerCallback,
         NULL,
         &err
@@ -277,7 +285,9 @@ void canWatchTimerCallback (){  //Probably needs its timer arguments
     OS_ERR err;
     CPU_TS ts;
         
-    chargingDisable();
+    // If timer trips, notify ReadCarCAN to disable charging at its earliest convenience
+
+    
 
     //increment trip counter
     watchDogTripCounter += 1;
@@ -311,6 +321,9 @@ static void arrayRestart(OS_TMR *p_tmr, void *p_arg){
         restartingArray = false;
     }
 };
+
+
+static void callCANQueue ()
 
 /**
  *  * @brief This function is the array precharge thread that gets instantiated when array restart needs to happen.
@@ -369,4 +382,3 @@ static void ArrayRestart(void *p_arg){
     OSTaskDel(&arrayTCB, &err);
 };
 
-*/
