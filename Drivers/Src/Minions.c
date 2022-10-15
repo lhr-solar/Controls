@@ -22,7 +22,7 @@ const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
 void Minion_Init(void){
     OS_ERR err;
     for(uint8_t i = 0; i < MINIONPIN_NUM; i++){
-        BSP_GPIO_Init(PINS_LOOKARR[i].pinNumber, PINS_LOOKARR[i].port, PINS_LOOKARR[i].direction);
+        BSP_GPIO_Init(PINS_LOOKARR[i].pinMask, PINS_LOOKARR[i].port, PINS_LOOKARR[i].direction);
     }
     OSMutexCreate(&OutputMutex, "Minions Output Mutex", &err);
     assertOSError(OS_MINIONS_LOC, err);
@@ -33,7 +33,7 @@ bool Minion_Read_Input(MinionPin_t pin){
         return false; 
     }   
 
-    return (bool)BSP_GPIO_Read_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinNumber);
+    return (bool)BSP_GPIO_Read_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinMask);
 }
 
 bool Minion_Write_Output(MinionPin_t pin, bool status){
@@ -42,7 +42,7 @@ bool Minion_Write_Output(MinionPin_t pin, bool status){
 
     if(PINS_LOOKARR[pin].direction == OUTPUT){
         OSMutexPend(&OutputMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err); 
-        BSP_GPIO_Write_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinNumber, status);
+        BSP_GPIO_Write_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinMask, status);
         OSMutexPost(&OutputMutex, OS_OPT_POST_NONE, &err);
         assertOSError(OS_MINIONS_LOC, err);
         return true;

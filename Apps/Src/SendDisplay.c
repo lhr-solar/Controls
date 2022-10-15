@@ -8,8 +8,6 @@ typedef enum {
      HEADLIGHT_SW,
      LEFT_SW,
      RIGHT_SW,
-     IGN_1,
-     IGN_2
 } switches_t;
 
 

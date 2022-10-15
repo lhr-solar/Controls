@@ -20,7 +20,7 @@ typedef enum{
 } MinionPin_t; 
 
 typedef struct PinInfo{
-    uint16_t pinNumber;
+    uint16_t pinMask;
     port_t port;
     direction_t direction; //0 for input, 1 for output     
 } PinInfo_t;
