@@ -12,37 +12,37 @@ typedef enum{
     CRUZ_ST,
     //output
     BRAKELIGHT, 
+    //num of pins
     MINIONPIN_NUM,
 } MinionPin_t; 
 
 typedef struct PinInfo{
-    uint16_t pinmask;
+    uint16_t pinNumber;
     port_t port;
-    direction_t direction;        
+    direction_t direction; //0 for input, 1 for output     
 } PinInfo_t;
 
-PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
-    {GPIO_Pin_4, PORTA, INPUT},
-    {GPIO_Pin_5, PORTA, INPUT},
-    {GPIO_Pin_6, PORTA, INPUT},
-    {GPIO_Pin_7, PORTA, INPUT},
-    {GPIO_Pin_4, PORTB, INPUT},
-    {GPIO_Pin_5, PORTB, OUTPUT}
-};
 
 /**
- * @brief Initializes Switches and Brakelight
+ * @brief Initializes input switches, output pins, and output mutex
  * 
  */
 void Minion_Init(void);
 /**
- * @brief 
+ * @brief Reads current state of specified input pin
  * 
- * @param pin 
- * @return true *NOTE* If output pin is passed, will exit 
- * @return false 
+ * @param pin specific pin to be read 
+ * @return true
+ * @return false *NOTE* If output pin is passed, will exit 
  */
-bool Minion_Read_Switch(MinionPin_t pin);
-void Minion_Write_Brakelight(State state);
+bool Minion_Read_Input(MinionPin_t pin);
+
+/**
+ * @brief Writes given status to a specified output pin. Locks writing to all output pins
+ * 
+ * @param pin specific pin to be written to 
+ * @param status state of pin (0 or 1)
+ */
+void Minion_Write_Output(MinionPin_t pin, bool status);
 
 #endif 

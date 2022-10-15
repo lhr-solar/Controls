@@ -12,6 +12,7 @@
 #include "config.h"
 #include "stm32f4xx_gpio.h"
 #include <bsp.h>
+#include <stdbool.h>
 
 typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t; 
 typedef enum {INPUT = 0, OUTPUT} direction_t;
@@ -55,7 +56,7 @@ uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask);
  * @param   state ON or OFF
  * @return  None
  */ 
-void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, State state);
+void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state);
 
 /**
  * @brief   Returns state of output pin (not applicable to input pins)
