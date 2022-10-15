@@ -50,7 +50,7 @@ void MotorController_Init(float busCurrentFractionalSetPoint);
 
 /**
  * @brief   Sends MOTOR DRIVE command on CAN3
- * @param   newVelocity desired motor velocity setpoint in rpm
+ * @param   newVelocity desired motor velocity setpoint in m/s
  * @param   motorCurrent desired motor current setpoint as a fraction of max current setting
  * @return  None
  */ 
