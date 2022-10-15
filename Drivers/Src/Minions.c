@@ -7,7 +7,7 @@
 static OS_MUTEX OutputMutex; //Mutex to lock GPIO writes to input pins
 // Stores switch states:
 // IGN_1 | IGN_2 | HZD_SW | REGEN_SW | RIGHT_SW | LEFT_SW | Headlight_SW | FOR_SW | REV_SW | CRUZ_EN | CRUZ_ST
-static uint16_t switchStatesBitmap = 0;
+//static uint16_t switchStatesBitmap = 0;
 
 const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
     {GPIO_Pin_4, PORTA, INPUT},
