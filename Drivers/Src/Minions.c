@@ -5,11 +5,11 @@
 #include "Tasks.h"
 
 static OS_MUTEX OutputMutex; //Mutex to lock GPIO writes to input pins
-// Stores switch states:
-// IGN_1 | IGN_2 | HZD_SW | REGEN_SW | RIGHT_SW | LEFT_SW | Headlight_SW | FOR_SW | REV_SW | CRUZ_EN | CRUZ_ST
-//static uint16_t switchStatesBitmap = 0;
 
+//should be in sync with pin enum
 const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
+    {GPIO_Pin_0, PORTA, INPUT},
+    {GPIO_Pin_1, PORTA, INPUT},
     {GPIO_Pin_4, PORTA, INPUT},
     {GPIO_Pin_5, PORTA, INPUT},
     {GPIO_Pin_6, PORTA, INPUT},
@@ -36,16 +36,16 @@ bool Minion_Read_Input(MinionPin_t pin){
     return (bool)BSP_GPIO_Read_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinNumber);
 }
 
-void Minion_Write_Output(MinionPin_t pin, bool status){
+bool Minion_Write_Output(MinionPin_t pin, bool status){
     CPU_TS timestamp;
     OS_ERR err;
 
-    OSMutexPend(&OutputMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err); 
-
     if(PINS_LOOKARR[pin].direction == OUTPUT){
+        OSMutexPend(&OutputMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err); 
         BSP_GPIO_Write_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinNumber, status);
+        OSMutexPost(&OutputMutex, OS_OPT_POST_NONE, &err);
+        assertOSError(OS_MINIONS_LOC, err);
+        return true;
     }
-
-    OSMutexPost(&OutputMutex, OS_OPT_POST_NONE, &err);
-    assertOSError(OS_MINIONS_LOC, err);
+    return false;
 }
