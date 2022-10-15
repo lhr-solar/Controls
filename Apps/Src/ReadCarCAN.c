@@ -5,11 +5,12 @@
 #include "Contactors.h"
 #include "Minions.h"
 #include "CAN_Queue.h"
+#include "UpdateVelocity.h"
 
 
 static bool msg_recieved = false;
 static OS_MUTEX msg_rcv_mutex;
-
+bool ChargeEnable = false;
 
 static int watchDogTripCounter = 0; //count how many times the CAN watchdog trips
 
@@ -31,7 +32,7 @@ static void ArrayRestart(); //handler to turn array back on
 // helper function to call if charging should be disabled
 static inline void chargingDisable(void) {
     // mark regen as disabled
-    RegenEnable = OFF;
+    ChargeEnable = false;
     //kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF);
     Contactors_Set(ARRAY_PRECHARGE, OFF);

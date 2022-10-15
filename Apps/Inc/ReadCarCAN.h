@@ -8,5 +8,7 @@
 #include "Tasks.h"
 
 #include "CANbus.h"
+extern bool ChargeEnable;
+
 
 #endif
