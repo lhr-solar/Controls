@@ -22,8 +22,7 @@ void Task_ReadTritium(void *p_arg)
 			dataBuf.data[4] = buf.firstNum;
 			dataBuf.ID = buf.id;
 
-			__attribute__((unused))
-			ErrorStatus error = CAN_Queue_Post(dataBuf);
+			(void) CAN_Queue_Post(dataBuf);
 
 			// TODO: handle error
 		}

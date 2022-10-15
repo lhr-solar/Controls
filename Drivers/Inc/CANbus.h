@@ -16,7 +16,7 @@
  * else the driver will not work properly. 
  * 
  * If adding new types of CAN messages, add the identifier wherever it fits in 
- * (the enum is sorted in ascending order on purpus), and then add an entry to the lookup table.
+ * (the enum is sorted in ascending order on purpose), and then add an entry to the lookup table.
  */
 typedef enum { 
 	CHARGE_ENABLE 					= 0x10C,
@@ -81,7 +81,7 @@ typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
 ErrorStatus CANbus_Init(CAN_t bus);
 
 /**
- * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is needed, 
+ * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is necessary, please use an IDX message.
  * @param 	CanData 	The data to be transmitted
  * @param 	blocking 	Whether or not this transmission should be a blocking send.
  * @param  	bus			The bus to transmit on. This should be either CARCAN or MOTORCAN.

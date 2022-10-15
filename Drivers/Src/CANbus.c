@@ -133,10 +133,10 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
 
     uint8_t txdata[8];
     if(msginfo.idxEn){ //first byte of txData should be the idx value
-        memcpy(txdata,&CanData.idx,1);
-        memcpy(&(txdata[sizeof(CanData.idx)]),&CanData.data,msginfo.size);
+        memcpy(txdata, &CanData.idx, 1);
+        memcpy(&(txdata[sizeof(CanData.idx)]), &CanData.data, msginfo.size);
     } else { //non-idx case
-        memcpy(txdata,&CanData.data,msginfo.size);
+        memcpy(txdata, &CanData.data, msginfo.size);
     }
 
     OSMutexPend( // ensure that tx line is available
@@ -224,7 +224,7 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
 
     OSMutexPost( // unlock RX line
         &(CANbus_RxMutex[bus]),
-        OS_OPT_POST_1,
+        OS_OPT_POST_NONE,
         &err);
     assertOSError(OS_CANDRIVER_LOC,err);
     
@@ -232,10 +232,10 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
     CANLUT_T entry = CANLUT[MsgContainer->ID];
     if(entry.idxEn==true){
         MsgContainer->idx = MsgContainer->data[0];
-        memcpy(
+        memmove( // Can't use memcpy, as memory regions overlap
             MsgContainer->data,
             &(MsgContainer->data[1]),
-            7
+            7 // max size of data (8) - size of idx byte (1)
         );
 
     }
