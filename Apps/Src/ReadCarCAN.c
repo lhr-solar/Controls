@@ -27,7 +27,7 @@ static OS_TMR prechargeDlyTimer;
 
 //MMM restart array and disable charging semaphonres
 static OS_SEM restartArraySem;
-static OS_SEM disableChargingSem;
+static OS_SEM canWatchDisableChargingSem;
 
 //Array restart thread variables
 static OS_TCB arrayTCB;
@@ -41,6 +41,8 @@ static bool restartingArray = false;
 
 static void CANWatchdog_Handler(); //Handler if we stop getting messages
 static void ArrayRestart(); //handler to turn array back on
+
+// Need to add function prototypes here
 
 // helper function to call if charging should be disabled
 static inline void chargingDisable(void) {
@@ -92,24 +94,6 @@ static inline void chargingEnable(void) {
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&prechargeDlyTimer, &err);
             
-            
-            //Turn on the array restart thread replaced by precharge timer and array restart callback
-           /* OSTaskCreate(
-                &arrayTCB,
-                "Array Restarter",
-                &ArrayRestart,
-                NULL,
-                TASK_READ_CAR_CAN_PRIO,
-                arraySTK,
-                DEFAULT_STACK_SIZE/10,
-                DEFAULT_STACK_SIZE,
-                0,
-                1,
-                NULL,
-                OS_OPT_TASK_STK_CLR,
-                &err
-            );
-            assertOSError(OS_READ_CAN_LOC,err); */  
         }
     }
 
@@ -132,10 +116,14 @@ void Task_ReadCarCAN(void *p_arg)
     assertOSError(OS_READ_CAN_LOC,err);
     OSSemCreate(&restartArraySem, "array restart semaphore", 0, &err);
     assertOSError(OS_READ_CAN_LOC, err);
-    OSSemCreate(&disableChargingSem, "disable charging semaphore", 0, &err);
+    OSSemCreate(&canWatchDisableChargingSem, "disable charging semaphore", 0, &err);
 
 
     //Create the CAN Watchdog (periodic) timer
+    /**
+     * @brief This function is the handler thread for the CANWatchdog timer. It disconnects the array and disables regenerative braking if we do not get
+     * a CAN message with the ID Charge_Enable within the desired interval.
+    */
     OSTmrCreate(
         &canWatchTimer,
         "CAN Watch Timer",
@@ -195,7 +183,7 @@ void Task_ReadCarCAN(void *p_arg)
         }
 
         switch(canId){ //we got a message
-            case CHARGE_ENABLE: {
+            case CHARGE_ENABLE: { //M Don't think we need msg_received
                 OSMutexPend(&msg_rcv_mutex,
                     0,
                     OS_OPT_PEND_BLOCKING,
@@ -203,7 +191,7 @@ void Task_ReadCarCAN(void *p_arg)
                     &err);
                 assertOSError(OS_READ_CAN_LOC,err);
 
-                msg_recieved = true; //signal success recieved
+                msg_recieved = true; //signal success recieved //M Replace with restarting canWatchtimer
 
                 OSMutexPost(&msg_rcv_mutex,
                             OS_OPT_NONE,
@@ -230,51 +218,26 @@ void Task_ReadCarCAN(void *p_arg)
             default: 
                 break;
         }
+        // See if precharge finished and signaled to restart array
+        OSSemPend(&restartArraySem, 0, OS_OPT_PEND_NON_BLOCKING, &err); 
+        if (err == OS_ERR_NONE) 
+        {
+            // If semaphore is up, restart array
+            ArrayRestart();
+        }
+
+        // See if CAN Watch Timer tripped and signaled to disable charging
+        OSSemPend(&canWatchDisableChargingSem, 0, OS_OPT_PEND_NON_BLOCKING, &err);
+        if (err == OS_ERR_NONE) 
+        {
+            // If semaphore is up, disable charging
+            chargingDisable();
+        }  
+
     }
 }
 
-/**
- * @brief This function is the handler thread for the CANWatchdog timer. It disconnects the array and disables regenerative braking if we do not get
- * a CAN message with the ID Charge_Enable within the desired interval.
- * TODO: replace this with an OSTimer
-*/
 
-/*
-static void CANWatchdog_Handler(void *p_arg){
-    OS_ERR err;
-    CPU_TS ts;
-
-    while(1){
-        OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-        assertOSError(OS_READ_CAN_LOC,err);
-
-        OSMutexPend(&msg_rcv_mutex,
-                0,
-                OS_OPT_PEND_BLOCKING,
-                &ts,
-                &err);
-        assertOSError(OS_READ_CAN_LOC,err);
-        if(msg_recieved==true){
-            msg_recieved = false;
-            OSMutexPost(&msg_rcv_mutex,
-                        OS_OPT_NONE,
-                        &err);
-            assertOSError(OS_READ_CAN_LOC,err);
-            
-        } else {
-            chargingDisable();
-            OSMutexPost(&msg_rcv_mutex,
-                        OS_OPT_NONE,
-                        &err);
-            assertOSError(OS_READ_CAN_LOC,err);
-
-            //increment trip counter
-            watchDogTripCounter += 1;
-        }
-    }
-
-};
-*/
 
 /**
  * @brief Disables charging and increments the trip counter
@@ -286,7 +249,8 @@ void canWatchTimerCallback (){  //Probably needs its timer arguments
     CPU_TS ts;
         
     // If timer trips, notify ReadCarCAN to disable charging at its earliest convenience
-
+    OSSemPost(&canWatchDisableChargingSem, OS_OPT_POST_NO_SCHED, &err);
+    assertOSError(OS_READ_CAN_LOC, )
     
 
     //increment trip counter
@@ -295,9 +259,9 @@ void canWatchTimerCallback (){  //Probably needs its timer arguments
 }
 
 /**
- * @brief callback function for after precharge is finished
+ * @brief restart the array. 
 */
-static void arrayRestart(OS_TMR *p_tmr, void *p_arg){
+static void arrayRestart(void *p_arg){
     OS_ERR err;
     CPU_TS ts;
 
@@ -323,62 +287,4 @@ static void arrayRestart(OS_TMR *p_tmr, void *p_arg){
 };
 
 
-static void callCANQueue ()
-
-/**
- *  * @brief This function is the array precharge thread that gets instantiated when array restart needs to happen.
-*/
-
-/* To be replaced with a callback
-static void ArrayRestart(void *p_arg){
-    OS_ERR err;
-    CPU_TS ts;
-
-    OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
-    assertOSError(OS_READ_CAN_LOC,err);
-
-    if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        OSMutexPend(&arrayRestartMutex,
-                0,
-                OS_OPT_PEND_BLOCKING,
-                &ts,
-                &err);
-        restartingArray = false;
-        OSMutexPost(&arrayRestartMutex,
-                OS_OPT_NONE,
-                &err);
-        assertOSError(OS_READ_CAN_LOC,err);
-        return;
-    }
-
-    Contactors_Set(ARRAY_CONTACTOR, ON);
-    Contactors_Set(ARRAY_PRECHARGE, OFF);
-    Lights_Set(A_CNCTR, ON);
-    //Display_SetLight(A_CNCTR, ON);
-
-    // let array know the contactor is on
-    CANMSG_t msg;
-    msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
-    msg.payload.bytes = 1;
-    msg.payload.data.b = true;
-    CAN_Queue_Post(msg);
-
-    OSMutexPend(&arrayRestartMutex,
-                0,
-                OS_OPT_PEND_BLOCKING,
-                &ts,
-                &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
-    // done restarting the array
-    restartingArray = false;
-
-    OSMutexPost(&arrayRestartMutex,
-                OS_OPT_NONE,
-                &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
-    // delete this task
-    OSTaskDel(&arrayTCB, &err);
-};
 
