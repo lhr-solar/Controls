@@ -1,4 +1,5 @@
-/** Copyright (c) 2022 UT Longhorn Racing Solar
+/** 
+ * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
  * @file Display.c
  * @brief Function prototypes for the display driver.
  * 

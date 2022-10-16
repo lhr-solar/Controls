@@ -1,4 +1,5 @@
-/** Copyright (c) 2022 UT Longhorn Racing Solar
+/** 
+ * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
  * @file UpdateDisplay.h
  * @brief Function prototypes for the display application.
  * 
@@ -30,11 +31,6 @@ typedef enum{
 	UPDATEDISPLAY_ERR_FIFO_POP		=-2,	// Error popping command from fifo
 	UPDATEDISPLAY_ERR_PARSE_COMP	=-3,	// Error parsing component/val in SetComponent
 } UpdateDisplay_Error_t;
-
-/**
- * @brief Error handler for any UpdateDisplay errors. Call this after any display application function.
- */
-void assertUpdateDisplayError(UpdateDisplay_Error_t err);
 
 /**
  * @brief Initializes UpdateDisplay application

@@ -44,12 +44,12 @@ void Task_ReadSwitches(void* p_arg) {
             Contactors_Enable(ARRAY_CONTACTOR);
             Contactors_Enable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,ON);
-            assertUpdateDisplayError(UpdateDisplay_SetArray(true));
+            UpdateDisplay_SetArray(true);
         } else {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
             Lights_Set(A_CNCTR,OFF);
-            assertUpdateDisplayError(UpdateDisplay_SetArray(false));
+            UpdateDisplay_SetArray(false);
         }
         
         // motor on/off

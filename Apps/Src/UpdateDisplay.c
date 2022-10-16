@@ -1,4 +1,5 @@
-/** Copyright (c) 2022 UT Longhorn Racing Solar
+/** 
+ * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
  * @file UpdateDisplay.c
  * @brief Function implementations for the display application.
  * 
@@ -67,6 +68,20 @@ const char* compStrings[15]= {
 	"faulterr"
 };
 
+/**
+ * @brief Error handler for any UpdateDisplay errors. Call this after any display application function.
+ */
+static void assertUpdateDisplayError(UpdateDisplay_Error_t err){
+	OS_ERR os_err;
+
+	if(err != UPDATEDISPLAY_ERR_NONE){
+		FaultBitmap |= FAULT_DISPLAY;
+
+		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
+		assertOSError(OS_DISPLAY_LOC, os_err);
+	}
+}
+
 UpdateDisplay_Error_t UpdateDisplay_Init(){
 	OS_ERR err;
 	disp_fifo_renew(&msg_queue);
@@ -74,7 +89,10 @@ UpdateDisplay_Error_t UpdateDisplay_Init(){
 	assertOSError(OS_DISPLAY_LOC, err);
 	OSSemCreate(&DisplayQ_Sem4, "Display sem4", 0, &err);
 	assertOSError(OS_DISPLAY_LOC, err);
-	return UpdateDisplay_SetPage(INFO);
+	
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetPage(INFO);
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 /**
@@ -100,8 +118,10 @@ static UpdateDisplay_Error_t UpdateDisplay_PopNext(){
     OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
     assertOSError(OS_SEND_CAN_LOC, err);
 
-    if(!result)
+    if(!result){
+			assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
 			return UPDATEDISPLAY_ERR_FIFO_POP;
+		}
 		
 		assertDisplayError(Display_Send(cmd));
 		return UPDATEDISPLAY_ERR_NONE;
@@ -130,6 +150,7 @@ static UpdateDisplay_Error_t UpdateDisplay_PutNext(Display_Cmd_t cmd){
 		assertOSError(OS_DISPLAY_LOC, err);
 	}
 	else{
+		assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);
 		return UPDATEDISPLAY_ERR_FIFO_PUT;
 	}
 
@@ -154,7 +175,10 @@ static UpdateDisplay_Error_t UpdateDisplay_Refresh(){
 			{.num=1}
 		}
 	};
-	return UpdateDisplay_PutNext(refreshCmd);
+
+	UpdateDisplay_Error_t ret = UpdateDisplay_PutNext(refreshCmd);
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 /**
@@ -165,6 +189,8 @@ static UpdateDisplay_Error_t UpdateDisplay_Refresh(){
  * @return UpdateDisplay_Error_t
  */
 static UpdateDisplay_Error_t UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
+	UpdateDisplay_Error_t ret = UPDATEDISPLAY_ERR_NONE;
+	
 	// For components that are on/off
 	if(comp <= MOTOR && val <= 1){
 		Display_Cmd_t visCmd = {
@@ -178,8 +204,10 @@ static UpdateDisplay_Error_t UpdateDisplay_SetComponent(Component_t comp, uint32
 				{.num=val}
 			}
 		};
-
-		return UpdateDisplay_PutNext(visCmd);
+		
+		ret = UpdateDisplay_PutNext(visCmd);
+		assertUpdateDisplayError(ret);
+		return ret;
 	}
 	// For components that have a non-boolean value
 	else if(comp > MOTOR){
@@ -194,9 +222,12 @@ static UpdateDisplay_Error_t UpdateDisplay_SetComponent(Component_t comp, uint32
 			}
 		};
 
+		ret = UpdateDisplay_PutNext(setCmd);
+		assertUpdateDisplayError(ret);
 		return UpdateDisplay_PutNext(setCmd);
 	}
 	else{
+		assertUpdateDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);
 		return UPDATEDISPLAY_ERR_PARSE_COMP;
 	}
 	return UPDATEDISPLAY_ERR_NONE;
@@ -213,72 +244,84 @@ UpdateDisplay_Error_t UpdateDisplay_SetPage(Page_t page){
 			{.num=page}
 		}
 	};
-	return UpdateDisplay_PutNext(pgCmd);
+
+	UpdateDisplay_Error_t ret = UpdateDisplay_PutNext(pgCmd);
+	return ret;
 }
 
 /* WRAPPERS */
 UpdateDisplay_Error_t UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentage from 0-100
-	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(SOC, percent);
-	if(err != UPDATEDISPLAY_ERR_NONE) return err;
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(SOC, percent);
+	assertUpdateDisplayError(ret);
+	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
-	return UpdateDisplay_Refresh();
+	ret = UpdateDisplay_Refresh();
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 UpdateDisplay_Error_t UpdateDisplay_SetSBPV(uint32_t mv){
-	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
+	assertUpdateDisplayError(ret);
+	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
-	if(err != UPDATEDISPLAY_ERR_NONE) return err;
-
-	return UpdateDisplay_Refresh();
+	ret = UpdateDisplay_Refresh();
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 UpdateDisplay_Error_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
 	// units of .1 mph
-	return UpdateDisplay_SetComponent(VELOCITY, mphTenths);
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(VELOCITY, mphTenths);
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 UpdateDisplay_Error_t UpdateDisplay_SetAccel(uint8_t percent){
-	return UpdateDisplay_SetComponent(ACCEL_METER, percent);
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(ACCEL_METER, percent);
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 UpdateDisplay_Error_t UpdateDisplay_SetArray(bool state){
-	return UpdateDisplay_SetComponent(ARRAY, (state)?1:0);
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(ARRAY, (state)?1:0);
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 UpdateDisplay_Error_t UpdateDisplay_SetMotor(bool state){
-	return UpdateDisplay_SetComponent(MOTOR, (state)?1:0);
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(MOTOR, (state)?1:0);
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 UpdateDisplay_Error_t UpdateDisplay_SetGear(TriState_t gear){
-	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(GEAR, (uint32_t)gear);
-	if(err != UPDATEDISPLAY_ERR_NONE) return err;
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(GEAR, (uint32_t)gear);
+	assertUpdateDisplayError(ret);
+	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
-	return UpdateDisplay_Refresh();
+	ret = UpdateDisplay_Refresh();
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 UpdateDisplay_Error_t UpdateDisplay_SetRegenState(TriState_t state){
-	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state);
-	if(err != UPDATEDISPLAY_ERR_NONE) return err;
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state);
+	assertUpdateDisplayError(ret);
+	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 	
-	return UpdateDisplay_Refresh();
+	ret = UpdateDisplay_Refresh();
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 UpdateDisplay_Error_t UpdateDisplay_SetCruiseState(TriState_t state){
-	UpdateDisplay_Error_t err = UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state);
-	if(err != UPDATEDISPLAY_ERR_NONE) return err;
+	UpdateDisplay_Error_t ret = UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state);
+	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
-	return UpdateDisplay_Refresh();
-}
-
-void assertUpdateDisplayError(UpdateDisplay_Error_t err){
-	OS_ERR os_err;
-
-	if(err != UPDATEDISPLAY_ERR_NONE){
-		FaultBitmap |= FAULT_DISPLAY;
-
-		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
-		assertOSError(OS_DISPLAY_LOC, os_err);
-	}
+	ret = UpdateDisplay_Refresh();
+	assertUpdateDisplayError(ret);
+	return ret;
 }
 
 /**
