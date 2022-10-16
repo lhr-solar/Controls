@@ -5,8 +5,6 @@
 #include "Contactors.h"
 #include "Minions.h"
 #include "CAN_Queue.h"
-#include "UpdateVelocity.h"
-
 
 static bool msg_recieved = false;
 static OS_MUTEX msg_rcv_mutex;
