@@ -20,7 +20,7 @@ int main() {
                 Lights_Read(BrakeLight));
         fflush(stdout);  
         light_t light = rand() % 10;
-        State state = Lights_Read(light);
+        bool state = Lights_Read(light);
         Lights_Set(light, !state);
         usleep(10000);
     }

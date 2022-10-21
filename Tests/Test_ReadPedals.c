@@ -5,10 +5,10 @@
  */
 #include "RTOSPedals.h"
 
-#define INITIAL_SWITCH_STATES {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF}
-#define INITIAL_BLINKER_STATES {OFF, OFF, OFF}
+#define INITIAL_SWITCH_STATES {false, false, false, false, false, false, false, false, false, false, false}
+#define INITIAL_BLINKER_STATES {false, false, false}
 
-car_state_t carState = {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, INITIAL_SWITCH_STATES, INITIAL_BLINKER_STATES, OFF, OFF};
+car_state_t carState = {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, INITIAL_SWITCH_STATES, INITIAL_BLINKER_STATES, false, false};
 
 int main(void){
     OS_ERR err;

@@ -14,19 +14,19 @@ The following public functions use these types heavily.
 
 ``void Minions_Init(void)`` — Creates a mutex to ensure that SPI access are thread-safe. Initializes SPI, as well as calling private functions to initialize both the lights and the switches seperately. Finally, the function sets up a filter to make switch readings more reliable over SPI. See :ref:`minions-impl` for more information about the filter.
 
-``State Switches_Read(switches_t sw)`` — Reads the state of the given switch as stored in the driver. This does *not* query the hardware.
+``bool Switches_Read(switches_t sw)`` — Reads the state of the given switch as stored in the driver. This does *not* query the hardware.
 
-``State Lights_Read(light_t light)`` — Reads the state of the given light as stored in the driver. This does *not* query the hardware.
+``bool Lights_Read(light_t light)`` — Reads the state of the given light as stored in the driver. This does *not* query the hardware.
 
 ``void Switches_UpdateStates(void)`` — Queries GPIO pins and SPI to get the most up-to-date switch states. This function acquires the mutex to ensure that it is thread-safe. It also uses the filter (see :ref:`minions-impl`) to ensure that that switches connected over SPI return stable values. This function should be called fairly often (currently called every 10 ms) in order to make sure that we always have the most recent switch states stored by the driver.
 
-``void Lights_Set(light_t light, State state)``
+``void Lights_Set(light_t light, bool state)``
 
 ``uint16_t Lights_Bitmap_Read(void)`` — Returns a bitmap of light values, as stored by the driver. The least significant bit corresponds to a ``light_t`` value of zero.
 
 ``void Lights_Toggle(light_t light)`` — Toggles the given light.
 
-``void Lights_Toggle_Set(light_t light, State state)`` — Set a specific light in the internal toggle bitmaps. This is used for lights that need to be toggled often, but can be easily extended in the future if necessary.
+``void Lights_Toggle_Set(light_t light, bool state)`` — Set a specific light in the internal toggle bitmaps. This is used for lights that need to be toggled often, but can be easily extended in the future if necessary.
 
 ``State Lights_Toggle_Read(light_t light)`` — Reads the state of the internal toggle bitmap for the given light. This simplifies application-level toggling logic greatly.
 

@@ -31,10 +31,10 @@ static void ArrayRestart(); //handler to turn array back on
 // helper function to call if charging should be disabled
 static inline void chargingDisable(void) {
     // mark regen as disabled
-    RegenEnable = OFF;
+    RegenEnable = false;
     //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF);
-    Contactors_Set(ARRAY_PRECHARGE, OFF);
+    Contactors_Set(ARRAY_CONTACTOR, false);
+    Contactors_Set(ARRAY_PRECHARGE, false);
 
     // let array know we killed contactors
     CANMSG_t msg;
@@ -44,8 +44,8 @@ static inline void chargingDisable(void) {
     CAN_Queue_Post(msg);
 
     // turn off the array contactor light
-    Lights_Set(A_CNCTR, OFF);
-    //Display_SetLight(A_CNCTR, OFF);
+    Lights_Set(A_CNCTR, false);
+    //Display_SetLight(A_CNCTR, false);
 }
 
 // helper function to call if charging should be enabled
@@ -54,7 +54,7 @@ static inline void chargingEnable(void) {
     CPU_TS ts;
 
     // mark regen as enabled
-    RegenEnable = ON;
+    RegenEnable = true;
 
     // check if we need to run the precharge sequence to turn on the array
     bool shouldRestartArray = false;
@@ -67,12 +67,12 @@ static inline void chargingEnable(void) {
     assertOSError(OS_READ_CAN_LOC,err);
 
     // if nothing is precharging and we need to turn the array on, turn it on
-    shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==OFF) && (Contactors_Get(ARRAY_PRECHARGE)==OFF);
+    shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==false) && (Contactors_Get(ARRAY_PRECHARGE)==false);
 
     // start precharge for array 
     if(shouldRestartArray){
 
-         if (Contactors_Set(ARRAY_PRECHARGE, ON) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
+         if (Contactors_Set(ARRAY_PRECHARGE, true) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
             restartingArray = true;
             
             //Turn on the array restart thread
@@ -241,10 +241,10 @@ static void ArrayRestart(void *p_arg){
         return;
     }
 
-    Contactors_Set(ARRAY_CONTACTOR, ON);
-    Contactors_Set(ARRAY_PRECHARGE, OFF);
-    Lights_Set(A_CNCTR, ON);
-    //Display_SetLight(A_CNCTR, ON);
+    Contactors_Set(ARRAY_CONTACTOR, true);
+    Contactors_Set(ARRAY_PRECHARGE, false);
+    Lights_Set(A_CNCTR, true);
+    //Display_SetLight(A_CNCTR, true);
 
     // let array know the contactor is on
     CANMSG_t msg;

@@ -132,17 +132,17 @@ void TestReadSwitches(void *p_arg) {
     printf("array precharge | array contactor | motor contactor | IGN1 | IGN2 \n\r");
     while (1) {
         //attempt to turn on all contactors
-        // Contactors_Set(ARRAY_PRECHARGE, ON);
-        // Contactors_Set(ARRAY_CONTACTOR, ON);
-        // Contactors_Set(MOTOR_CONTACTOR, ON);
+        // Contactors_Set(ARRAY_PRECHARGE, true);
+        // Contactors_Set(ARRAY_CONTACTOR, true);
+        // Contactors_Set(MOTOR_CONTACTOR, true);
 
         printf(
             "      %s       |       %s       |       %s      |       %s       |       %s       |\r",
-            (Contactors_Get(ARRAY_PRECHARGE) == ON) ? "ON!" : "OFF",
-            (Contactors_Get(ARRAY_CONTACTOR) == ON) ? "ON!" : "OFF",
-            (Contactors_Get(MOTOR_CONTACTOR) == ON) ? "ON!" : "OFF",
-            (Switches_Read(IGN_1) == ON) ? "ON!" : "OFF" ,
-            (Switches_Read(IGN_2) == ON) ? "ON!" : "OFF" 
+            (Contactors_Get(ARRAY_PRECHARGE) == true) ? "ON!" : "OFF",
+            (Contactors_Get(ARRAY_CONTACTOR) == true) ? "ON!" : "OFF",
+            (Contactors_Get(MOTOR_CONTACTOR) == true) ? "ON!" : "OFF",
+            (Switches_Read(IGN_1) == true) ? "ON!" : "OFF" ,
+            (Switches_Read(IGN_2) == true) ? "ON!" : "OFF" 
         );
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err);

@@ -10,7 +10,7 @@ The display driver is responsible for all interactions with the display. As such
 
 ``ErrorStatus Display_SetMainView(void)`` — Sets the display to its main (non-precharged view). In general, we always want to be in this mode, so this function gets called very early on in the application code.
 
-``ErrorStatus Display_CruiseEnable(State on)`` — Sets the cruise enable component to the given state
+``ErrorStatus Display_CruiseEnable(bool on)`` — Sets the cruise enable component to the given state
 
 ``ErrorStatus Display_SetVelocity(float vel)`` — Sets the velocity component to the given value. ``vel`` is given in meters per second, but display in miles per hour (with one digit after the decimal point)
 
@@ -22,11 +22,11 @@ The display driver is responsible for all interactions with the display. As such
 
 ``ErrorStatus Display_SetChargeState(uint32_t chargeState)`` — Sets the charge component to a given value. The format of this value is set by BPS, and displayed with one digit after the decimal point.
 
-``ErrorStatus Display_SetRegenEnabled(State ChargeEnabled)`` — Sets the regen enable display component, letting the driver know whether regen is available to them at the moment.
+``ErrorStatus Display_SetRegenEnabled(bool ChargeEnabled)`` — Sets the regen enable display component, letting the driver know whether regen is available to them at the moment.
 
-``ErrorStatus Display_SetLight(uint8_t light, State on)``— Sets a light component to determined by the ``light`` to the given state. Whenever (and if) we get dedicated LEDs for blinkers, headlights, etc. this function will be deprecated.
+``ErrorStatus Display_SetLight(uint8_t light, bool on)``— Sets a light component to determined by the ``light`` to the given state. Whenever (and if) we get dedicated LEDs for blinkers, headlights, etc. this function will be deprecated.
 
-``ErrorStatus Display_SetGear(State fwd, State rev)``— Sets the gear component based on the given ``fwd`` and ``rev`` states. If neither are one, a neutral gear is displayed. If both are on, an error is returned.
+``ErrorStatus Display_SetGear(bool fwd, bool rev)``— Sets the gear component based on the given ``fwd`` and ``rev`` states. If neither are one, a neutral gear is displayed. If both are on, an error is returned.
 
 
 Internal Details

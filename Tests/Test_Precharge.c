@@ -24,10 +24,10 @@ int main() {
         if(!strcmp(board, motor)){
             if(!strcmp(status,on)){
                 printf("Writing to board...\n");
-                Precharge_Write(MOTOR_PRECHARGE, ON);
+                Precharge_Write(MOTOR_PRECHARGE, true);
             }
             else if(!strcmp(status,off)){
-                Precharge_Write(MOTOR_PRECHARGE, OFF);
+                Precharge_Write(MOTOR_PRECHARGE, false);
             }
             else{
                 printf("unrecognized status\n");
@@ -35,10 +35,10 @@ int main() {
         }
         else if(!strcmp(board,array)){
             if(!strcmp(status,on)){
-                Precharge_Write(ARRAY_PRECHARGE, ON);
+                Precharge_Write(ARRAY_PRECHARGE, true);
             }
             else if(!strcmp(status,off)){
-                Precharge_Write(ARRAY_PRECHARGE, OFF);
+                Precharge_Write(ARRAY_PRECHARGE, false);
             }
             else{
                 printf("unrecognized status\n");

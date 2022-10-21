@@ -69,7 +69,7 @@ void BSP_GPIO_Write(port_t port, uint16_t data){
  * @brief   Reads data from a specified input pin (not applicable to output pins)
  * @param   port The port to read from
  * @param   pin The pin to read from 
- * @return  State of the pin
+ * @return  bool of the pin
  */ 
 
 uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask){
@@ -84,13 +84,13 @@ uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask){
  * @brief   Writes data to a specified pin
  * @param   port The port to write to
  * @param   pin The pin to write to 
- * @param   state ON or OFF
+ * @param   state true or false
  * @return  None
  */ 
 
-void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, State state){
+void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
-	GPIO_WriteBit(gpio_port, pinmask, (state==ON)?Bit_SET:Bit_RESET);
+	GPIO_WriteBit(gpio_port, pinmask, (state==true)?Bit_SET:Bit_RESET);
 }
 
 

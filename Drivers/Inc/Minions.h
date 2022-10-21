@@ -54,16 +54,16 @@ void Minions_Init(void);
  * @brief   Reads the current state of 
  *          the specified switch
  * @param   sw the switch to read
- * @return  State of the switch (ON/OFF)
+ * @return  bool of the switch (true/false)
  */ 
-State Switches_Read(switches_t sw);
+bool Switches_Read(switches_t sw);
 
 /**
 * @brief   Read the state of the lights
 * @param   light Which Light to read
-* @return  returns state enum which indicates ON/OFF
+* @return  returns state enum which indicates true/false
 */ 
-State Lights_Read(light_t light);
+bool Lights_Read(light_t light);
 
 /**
  * @brief   Sends SPI messages to read switches values. Also reads from GPIO's for 
@@ -77,7 +77,7 @@ void Switches_UpdateStates(void);
  * @param   state what state to set the light to
  * @return  void
  */
-void Lights_Set(light_t light, State state);
+void Lights_Set(light_t light, bool state);
 
 /**
 * @brief   Read the lights bitmap
@@ -95,17 +95,17 @@ void Lights_Toggle(light_t light);
 
  * @brief   Set light toggling
  * @param   light Which light to enable toggling for
- * @param   state State to set toggling
+ * @param   state bool to set toggling
  * @return  void
  */
-void Lights_Toggle_Set(light_t light, State state);
+void Lights_Toggle_Set(light_t light, bool state);
 
 /**
 * @brief   Read the toggle enable state of a specific light from the toggle bitmap
 * @param   light Which Light to read
-* @return  returns State enum which indicates ON/OFF
+* @return  returns bool enum which indicates true/false
 */
-State Lights_Toggle_Read(light_t light);
+bool Lights_Toggle_Read(light_t light);
 
 /**
  * @brief   Read toggle bitmap

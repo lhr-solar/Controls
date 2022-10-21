@@ -21,7 +21,7 @@
 
 static float cruiseSpeed = 0; //cruising speed
 static float cruiseRPM = 0;
-static State cruiseState = OFF; //whether cruise is enabled
+static bool cruiseState = false; //whether cruise is enabled
 
 extern const float pedalToPercent[];
 
@@ -49,14 +49,14 @@ void Task_UpdateVelocity(void *p_arg)
     
     float desiredVelocity = 0; //reset desired velocity to 0
     float desiredMotorCurrent = 0; //reset desired current to 0
-    State RegenState = OFF; //reset regen state to 0. This state var denotes whether or not we are in the regen brake mode
+    bool RegenState = false; //reset regen state to 0. This state var denotes whether or not we are in the regen brake mode
 
     while (1)
     {
         uint8_t accelPedalPercent = Pedals_Read(ACCELERATOR);
         uint8_t brakePedalPercent = Pedals_Read(BRAKE);
-        State RegenSwitchState = Switches_Read(REGEN_SW);
-        RegenState = ((RegenSwitchState == ON) && (RegenEnable == ON)); //AND driver regen enable and system regen enable together to decide whether we are in regen brake mode
+        bool RegenSwitchState = Switches_Read(REGEN_SW);
+        RegenState = ((RegenSwitchState == true) && (RegenEnable == true)); //AND driver regen enable and system regen enable together to decide whether we are in regen brake mode
 
         // Set the cruise state accordingly
         if (UpdateVel_ToggleCruise) {
@@ -64,7 +64,7 @@ void Task_UpdateVelocity(void *p_arg)
         }
 
         if(cruiseSpeed<THRESHOLD_VEL){ //prevent trying to cruise to low value and reset edge detector
-            cruiseState=OFF;
+            cruiseState=false;
         }
         UpdateVel_ToggleCruise = false;
 
@@ -77,25 +77,25 @@ void Task_UpdateVelocity(void *p_arg)
         }
         // Set brake lights
         if(brakePedalPercent <= UNTOUCH_PEDALS_PERCENT_BRAKE){ //it is less than since we switched to a button instead of the adc
-            Lights_Set(BrakeLight, ON);
+            Lights_Set(BrakeLight, true);
         }
         else{
-            Lights_Set(BrakeLight, OFF);
+            Lights_Set(BrakeLight, false);
         }
 
-        cruiseState = OFF; //DISABLING CRUISE CONTROL FOR POWERED RUN, DEBUG FURTHER BEFORE REMOVING
+        cruiseState = false; //DISABLING CRUISE CONTROL FOR POWERED RUN, DEBUG FURTHER BEFORE REMOVING
 
         // Deadband comparison
         if(brakePedalPercent <= UNTOUCH_PEDALS_PERCENT_BRAKE){ //mech brake is pushed down NOTE: it is less than since we switched to a button 
             desiredVelocity = 0; //velocity setpoint becomes 0
-            cruiseState = OFF; //turn off cruise
-            desiredMotorCurrent = (RegenState == ON) ? REGEN_CURRENT : 0; //either regen brake or 0 current brake
+            cruiseState = false; //turn off cruise
+            desiredMotorCurrent = (RegenState == true) ? REGEN_CURRENT : 0; //either regen brake or 0 current brake
         } 
         else if( //One-pedal regen drive case. 
-                (RegenState == ON) //we're in regen mode
+                (RegenState == true) //we're in regen mode
                 && (MotorController_ReadVelocity() > THRESHOLD_VEL)  //we're above the threshold value
                 && accelPedalPercent < NEUTRAL_PEDALS_PERCENT //we're in the one-pedal drive range
-                && (cruiseState == OFF) //we're not in cruise mode
+                && (cruiseState == false) //we're not in cruise mode
             ){ 
             
             desiredVelocity = 0;
@@ -109,21 +109,21 @@ void Task_UpdateVelocity(void *p_arg)
         else {
             //determine the percentage of pedal range pushed
             uint8_t forwardPercent = 0;
-            if ((RegenSwitchState == OFF)&&(accelPedalPercent > UNTOUCH_PEDALS_PERCENT_ACCEL)){ //the accelerator is being pushed under non-regen pedal mapping. NOTE: RegenSwitchState used because driver should have exclusive control over which pedal mapping is used.
+            if ((RegenSwitchState == false)&&(accelPedalPercent > UNTOUCH_PEDALS_PERCENT_ACCEL)){ //the accelerator is being pushed under non-regen pedal mapping. NOTE: RegenSwitchState used because driver should have exclusive control over which pedal mapping is used.
                 forwardPercent = ((accelPedalPercent - UNTOUCH_PEDALS_PERCENT_ACCEL) * 100) / (100 - UNTOUCH_PEDALS_PERCENT_ACCEL);
             } else if (accelPedalPercent > NEUTRAL_PEDALS_PERCENT) {  // the accelerator is being pushed under regen enabled pedal mapping
                 forwardPercent = ((accelPedalPercent - NEUTRAL_PEDALS_PERCENT) * 100) / (100 - NEUTRAL_PEDALS_PERCENT);
             }
 
             if(Switches_Read(FOR_SW)){
-                desiredVelocity = (((cruiseState==ON)&&(forwardPercent == 0)) ? cruiseSpeed : MAX_VELOCITY); // if in cruise and not pushing accel pedal, use cruise speed, otherwise use max
+                desiredVelocity = (((cruiseState==true)&&(forwardPercent == 0)) ? cruiseSpeed : MAX_VELOCITY); // if in cruise and not pushing accel pedal, use cruise speed, otherwise use max
             } else if (Switches_Read(REV_SW)) {
                 desiredVelocity = -MAX_VELOCITY; //no cruising in reverse
-                cruiseState = OFF;
+                cruiseState = false;
             }
             
 
-            if((cruiseState == ON)&&(Switches_Read(FOR_SW))&&(forwardPercent==0)){ //we're in cruise mode and not accelerating so use total current to hit cruise velocity
+            if((cruiseState == true)&&(Switches_Read(FOR_SW))&&(forwardPercent==0)){ //we're in cruise mode and not accelerating so use total current to hit cruise velocity
                 desiredMotorCurrent = (float) 0.5;
             } else {
                 desiredMotorCurrent = convertPedaltoMotorPercent(forwardPercent);

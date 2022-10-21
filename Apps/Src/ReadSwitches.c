@@ -33,21 +33,21 @@ void Task_ReadSwitches(void* p_arg) {
 
     Contactors_Enable(MOTOR_CONTACTOR);
     static bool lastCruiseEnPushed = true; //cruise control edge detector variables
-    static State cruiseEnablePushed = OFF;
+    static bool cruiseEnablePushed = false;
     // Main loop
     while (1) {
 
         UpdateSwitches();
 
         // array on/off
-        if (Switches_Read(IGN_1) == ON || Switches_Read(IGN_2) == ON) {
+        if (Switches_Read(IGN_1) == true || Switches_Read(IGN_2) == true) {
             Contactors_Enable(ARRAY_CONTACTOR);
             Contactors_Enable(ARRAY_PRECHARGE);
         } else {
             Contactors_Disable(ARRAY_CONTACTOR);
             Contactors_Disable(ARRAY_PRECHARGE);
-            Lights_Set(A_CNCTR,OFF);
-            Display_SetLight(A_CNCTR,OFF);
+            Lights_Set(A_CNCTR,false);
+            Display_SetLight(A_CNCTR,false);
         }
         
         // motor on/off
@@ -97,18 +97,18 @@ static void UpdateSwitches() {
     int rightblink = Switches_Read(RIGHT_SW) | 
                      Switches_Read(HZD_SW);
     if((rightblink && leftblink) && (Lights_Read(LEFT_BLINK)!=Lights_Read(RIGHT_BLINK))){ //hazards are on and we are desynced
-        Lights_Toggle_Set(RIGHT_BLINK, OFF);
-        Lights_Toggle_Set(LEFT_BLINK, OFF);
-        Lights_Set(RIGHT_BLINK,OFF);
-        Lights_Set(LEFT_BLINK,OFF);
+        Lights_Toggle_Set(RIGHT_BLINK, false);
+        Lights_Toggle_Set(LEFT_BLINK, false);
+        Lights_Set(RIGHT_BLINK,false);
+        Lights_Set(LEFT_BLINK,false);
     }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
     if(leftblink==0){
-        Lights_Set(LEFT_BLINK,OFF);
+        Lights_Set(LEFT_BLINK,false);
     }
     if(rightblink==0){
-        Lights_Set(RIGHT_BLINK,OFF);
+        Lights_Set(RIGHT_BLINK,false);
     }
     
 }*/
@@ -125,22 +125,22 @@ static void UpdateDispLights() {
                      Switches_Read(HZD_SW);
     
     if((rightblink && leftblink) && (Lights_Read(LEFT_BLINK)!=Lights_Read(RIGHT_BLINK))){ //hazards are on and we are desynced
-        Lights_Toggle_Set(RIGHT_BLINK, OFF);
-        Lights_Toggle_Set(LEFT_BLINK, OFF);
-        Lights_Set(RIGHT_BLINK,OFF);
-        Lights_Set(LEFT_BLINK,OFF);
-        Display_SetLight(RIGHT_BLINK,OFF);
-        Display_SetLight(LEFT_BLINK,OFF);
+        Lights_Toggle_Set(RIGHT_BLINK, false);
+        Lights_Toggle_Set(LEFT_BLINK, false);
+        Lights_Set(RIGHT_BLINK,false);
+        Lights_Set(LEFT_BLINK,false);
+        Display_SetLight(RIGHT_BLINK,false);
+        Display_SetLight(LEFT_BLINK,false);
     }
     Lights_Toggle_Set(RIGHT_BLINK, rightblink);
     Lights_Toggle_Set(LEFT_BLINK, leftblink);
     if(leftblink==0){
-        Lights_Set(LEFT_BLINK,OFF);
-        Display_SetLight(LEFT_BLINK,OFF);
+        Lights_Set(LEFT_BLINK,false);
+        Display_SetLight(LEFT_BLINK,false);
     }
     if(rightblink==0){
-        Lights_Set(RIGHT_BLINK,OFF);
-        Display_SetLight(RIGHT_BLINK,OFF);
+        Lights_Set(RIGHT_BLINK,false);
+        Display_SetLight(RIGHT_BLINK,false);
     }
     
 }

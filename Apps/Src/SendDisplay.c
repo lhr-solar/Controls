@@ -7,12 +7,12 @@ void Task_SendDisplay(void *p_arg) {
     OS_ERR err;
 
     Display_SetMainView(); // Make sure we're in the main view first
-    Display_CruiseEnable(OFF);
-    Display_SetGear(OFF, OFF);
-    Display_SetLight(CTRL_FAULT,OFF);
+    Display_CruiseEnable(false);
+    Display_SetGear(false, false);
+    Display_SetLight(CTRL_FAULT,false);
 
     for(int i=0; i<6; i++)
-        Display_SetLight(i, OFF);
+        Display_SetLight(i, false);
 
     while (1) {
         float vel_mps = MotorController_ReadVelocity();

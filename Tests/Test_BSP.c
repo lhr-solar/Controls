@@ -177,17 +177,17 @@ int main() {
         int onOrOff = rand() % 2;                                                                                                           
         if (motorOrArray == 1){
             if (onOrOff == 1){
-                BSP_Contactors_Set(MOTOR, ON);
+                BSP_Contactors_Set(MOTOR, true);
             }
             else {
-                BSP_Contactors_Set(MOTOR, OFF);  
+                BSP_Contactors_Set(MOTOR, false);  
             }
         }else{
             if (onOrOff == 1){
-                BSP_Contactors_Set(ARRAY, ON);
+                BSP_Contactors_Set(ARRAY, true);
             }
             else {
-                BSP_Contactors_Set(ARRAY, OFF);
+                BSP_Contactors_Set(ARRAY, false);
             }
         }
         printf("MOTOR CONTACTOR STATE: %d\n", BSP_Contactors_Get(MOTOR));
@@ -202,19 +202,19 @@ int main() {
         switch (precCase)
         {
         case 0:
-            BSP_Precharge_Write(MOTOR_PRECHARGE, OFF);
+            BSP_Precharge_Write(MOTOR_PRECHARGE, false);
             printf("MOTOR PRECHARGE STATE SET TO: OFF\n");
             break;
         case 1:
-            BSP_Precharge_Write(MOTOR_PRECHARGE, ON);
+            BSP_Precharge_Write(MOTOR_PRECHARGE, true);
             printf("MOTOR PRECHARGE STATE SET TO: ON \n");
             break;
         case 2:
-            BSP_Precharge_Write(ARRAY_PRECHARGE, OFF);
+            BSP_Precharge_Write(ARRAY_PRECHARGE, false);
             printf("ARRAY PRECHARGE STATE SET TO: OFF\n");
             break;
         case 3:
-            BSP_Precharge_Write(ARRAY_PRECHARGE, ON);
+            BSP_Precharge_Write(ARRAY_PRECHARGE, true);
             printf("ARRAY PRECHARGE STATE SET TO: ON \n");
             break;
         default:

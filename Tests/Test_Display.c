@@ -42,14 +42,14 @@ void Task1(void *p_arg) {
     float vel = 0.0f;
     SupplementalVoltage = 200;
     StateOfCharge = 100000;
-    RegenEnable = ON;
-    //State cr = ON;
+    RegenEnable = true;
+    //bool cr = true;
     
     Display_SetVelocity(vel);
     Display_SetMainView(); // Make sure we're in the main view first
-    Display_CruiseEnable(OFF);
+    Display_CruiseEnable(false);
     for(int i=0; i<6; i++)
-        Display_SetLight(i, OFF);
+        Display_SetLight(i, false);
 
     while (1) {
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err);
@@ -58,8 +58,8 @@ void Task1(void *p_arg) {
         SupplementalVoltage += 100;
         StateOfCharge += 10000;
         if (vel > 30.0f) vel = 0.0f;
-        //cr = (cr==ON)?OFF:ON;
-        RegenEnable = (RegenEnable==ON)?OFF:ON;
+        //cr = (cr==true)?false:true;
+        RegenEnable = (RegenEnable==true)?false:true;
         
         Display_SetVelocity(vel);
         Display_SetSBPV(SupplementalVoltage);

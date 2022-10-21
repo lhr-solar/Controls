@@ -15,7 +15,7 @@
 int main(){
 
     car_state_t car ; //car_state object, don't need a reference
-    car.MotorErrorCode = (motor_error_code_t) {OFF, OFF, OFF, OFF};
+    car.MotorErrorCode = (motor_error_code_t) {false, false, false, false};
     MotorController_Init();
     float input1 = 2500.0f;
     float input2 = 1.0f;

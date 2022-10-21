@@ -21,7 +21,7 @@ void Display_Init();
  */
 ErrorStatus Display_SetMainView(void);
 
-ErrorStatus Display_CruiseEnable(State on);
+ErrorStatus Display_CruiseEnable(bool on);
 ErrorStatus Display_SetVelocity(float vel);
 ErrorStatus Display_SetSBPV(uint16_t mv);
 ErrorStatus Display_SetError(int idx, char *err);
@@ -39,10 +39,10 @@ ErrorStatus Display_SetChargeState(uint32_t chargeState);
  * @param ChargeEnabled a state value indicating whether or not charging is enabled
  * @return void
  */
-ErrorStatus Display_SetRegenEnabled(State ChargeEnabled);
+ErrorStatus Display_SetRegenEnabled(bool ChargeEnabled);
 
-ErrorStatus Display_SetLight(uint8_t light, State on);
+ErrorStatus Display_SetLight(uint8_t light, bool on);
 
-ErrorStatus Display_SetGear(State fwd, State rev);
+ErrorStatus Display_SetGear(bool fwd, bool rev);
 
 #endif

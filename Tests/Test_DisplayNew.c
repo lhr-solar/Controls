@@ -19,9 +19,9 @@ void Task1(void *arg)
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     SupplementalVoltage = 200;
     StateOfCharge = 12345678;
-    RegenEnable = ON;
+    RegenEnable = true;
     Contactors_Enable(ARRAY_CONTACTOR);
-    Contactors_Set(ARRAY_CONTACTOR, ON);
+    Contactors_Set(ARRAY_CONTACTOR, true);
 
     OS_ERR err;
 
@@ -48,13 +48,13 @@ void Task1(void *arg)
 
         SupplementalVoltage += 100;
         StateOfCharge += 100000;
-        if (RegenEnable == ON)
+        if (RegenEnable == true)
         {
-            RegenEnable = OFF;
+            RegenEnable = false;
         }
         else
         {
-            RegenEnable = ON;
+            RegenEnable = true;
         }
 
         // Testing driver directly

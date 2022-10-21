@@ -9,19 +9,19 @@
 static bool fromThread = false; //whether fault was tripped from thread
 
 static void ArrayMotorKill(void) {
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, false);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, false);
     while(1){;} //nonrecoverable
 }
 
 static void nonrecoverableFaultHandler(){
     //turn additional lights on to indicate critical error
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, OFF);
-    Display_SetLight(LEFT_BLINK, ON);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, OFF);
-    Display_SetLight(RIGHT_BLINK, ON);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, OFF);
-    Display_SetLight(CTRL_FAULT,ON); //turn on fault light
+    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, false);
+    Display_SetLight(LEFT_BLINK, true);
+    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, false);
+    Display_SetLight(RIGHT_BLINK, true);
+    BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, false);
+    Display_SetLight(CTRL_FAULT,true); //turn on fault light
     ArrayMotorKill();
 }
 
@@ -50,8 +50,8 @@ void EnterFaultState(void) {
                 nonrecoverableFaultHandler();
             } else {
                 tripcnt++;
-                //Lights_Set(CTRL_FAULT,OFF);
-                Display_SetLight(CTRL_FAULT,OFF);
+                //Lights_Set(CTRL_FAULT,false);
+                Display_SetLight(CTRL_FAULT,false);
                 MotorController_Restart(); //re-initialize motor
                 return;
             }
@@ -64,8 +64,8 @@ void EnterFaultState(void) {
                 nonrecoverableFaultHandler(); //we've failed to init the motor five times
             } else {
                 tripcnt++;
-                //Lights_Set(CTRL_FAULT,OFF);
-                Display_SetLight(CTRL_FAULT,OFF);
+                //Lights_Set(CTRL_FAULT,false);
+                Display_SetLight(CTRL_FAULT,false);
                 MotorController_Restart();
                 return;
             }

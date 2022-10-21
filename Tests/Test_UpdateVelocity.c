@@ -53,7 +53,7 @@ void Task1(void *p_arg) {
     }
 
     static bool lastCruiseEnPushed = true;
-    State cruiseEnablePushed = OFF;
+    bool cruiseEnablePushed = false;
     while (1) {
         OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT, &err);
         Switches_UpdateStates(); //UpdateVelocity thread depends on switch Values

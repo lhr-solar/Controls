@@ -33,16 +33,16 @@ void Contactors_Init();
  *          a specified contactor
  * @param   contactor the contactor
  *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
- * @return  The contactor's state (ON/OFF)
+ * @return  The contactor's state (true/false)
  */ 
-State Contactors_Get(contactor_t contactor);
+bool Contactors_Get(contactor_t contactor);
 
 /**
  * @brief   Sets the state of a specified contactor
  * @param   contactor the contactor (MOTOR/ARRAY)
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, State state);
+ErrorStatus Contactors_Set(contactor_t contactor, bool state);
 
 /**
  * @brief   Enable the specified contactor

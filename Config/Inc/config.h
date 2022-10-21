@@ -8,8 +8,6 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-typedef enum {OFF = 0, ON} State;
-
 // Wheel diameter in meters
 #define WHEEL_DIAMETER 0.5504f
 

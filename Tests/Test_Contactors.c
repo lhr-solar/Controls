@@ -24,36 +24,36 @@ int main() {
     char on[] = "ON";
     char off[] = "OFF";
     char state[4];
-    State result;
+    bool result;
     while(1) {
         printf("Enter the Contactor you wish to set followed by the state you would like to set it to\n");
         scanf("%s %s", &input, &state);
         if (strcmp(input, motor) == 0){
             if (strcmp(state, on) == 0){
-                Contactors_Set(MOTOR, ON);
+                Contactors_Set(MOTOR, true);
                 result = Contactors_Get(MOTOR);
             }
             else {
-                Contactors_Set(MOTOR, OFF);
+                Contactors_Set(MOTOR, false);
                 result = Contactors_Get(MOTOR);
             }
         }
         if (strcmp(input, array) == 0){
             if (strcmp(state, on) == 0){
-                Contactors_Set(ARRAY, ON);
+                Contactors_Set(ARRAY, true);
                 result = Contactors_Get(ARRAY);
             }
             else {
-                Contactors_Set(ARRAY, OFF);
+                Contactors_Set(ARRAY, false);
                 result = Contactors_Get(ARRAY);
             }
         }
         usleep(1000);
-        if(result == ON) {
-            printf("State confirmed: %s\n", on);
+        if(result == true) {
+            printf("bool confirmed: %s\n", on);
         }
-        if(result == OFF) {
-            printf("State confirmed: %s\n", off);
+        if(result == false) {
+            printf("bool confirmed: %s\n", off);
         }
     } 
 }

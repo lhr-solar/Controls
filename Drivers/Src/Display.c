@@ -210,9 +210,9 @@ ErrorStatus Display_SetChargeState(uint32_t chargeState)
  * @brief Updates the display with whether regenerative braking / charging is allowed or not
  * @param ChargeEnabled a state value indicating whether or not charging is enabled
  */
-ErrorStatus Display_SetRegenEnabled(State ChargeEnabled)
+ErrorStatus Display_SetRegenEnabled(bool ChargeEnabled)
 {
-    if (ChargeEnabled == ON)
+    if (ChargeEnabled == true)
     {
         return setComponentVisibility(REGEN_ENABLE, true);
     }
@@ -235,9 +235,9 @@ ErrorStatus Display_SetSBPV(uint16_t mv)
 /**
  * Update the cruise enable light on the display based on the given state
  */
-ErrorStatus Display_CruiseEnable(State on)
+ErrorStatus Display_CruiseEnable(bool on)
 {
-    if (on == ON)
+    if (on == true)
     {
         return setComponentVisibility(CRUISE_ENABLE, true);
     }
@@ -247,7 +247,7 @@ ErrorStatus Display_CruiseEnable(State on)
     }
 }
 
-ErrorStatus Display_SetGear(State fwd, State rev){
+ErrorStatus Display_SetGear(bool fwd, bool rev){
     if(!fwd && !rev){
         setComponentVisibility(NEUTRAL_BOX, true);
         setComponentVisibility(FWD_BOX, false);
@@ -313,13 +313,13 @@ ErrorStatus Display_SetMainView(void)
     return SUCCESS;
 }
 
-ErrorStatus Display_SetLight(uint8_t light, State on){
+ErrorStatus Display_SetLight(uint8_t light, bool on){
     if(light == 2){  // ctrl fault
-        if(on==ON)
+        if(on==true)
             return updateIntValue(PAGE, BCO, NEXTION_RED);
         return updateIntValue(PAGE, BCO, NEXTION_DARK_GREY);
     }
         
-    setComponentVisibility(light+19, on==ON);
+    setComponentVisibility(light+19, on==true);
     return SUCCESS;
 }

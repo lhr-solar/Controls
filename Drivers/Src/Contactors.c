@@ -17,10 +17,10 @@ static OS_MUTEX contactorsMutex;
  *          Should only be called if mutex is held and struct contactor has been checked
  * @param   contactor the contactor
  *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
- * @param   state the state to set (ON/OFF)
+ * @param   state the state to set (true/false)
  * @return  None
  */ 
-static void setContactor(contactor_t contactor, State state) {
+static void setContactor(contactor_t contactor, bool state) {
     switch (contactor) {
         case ARRAY_CONTACTOR :
             BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, state);
@@ -51,7 +51,7 @@ void Contactors_Init() {
     // start disabled
     for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
         contactors[contactor].enabled = false;
-        setContactor(contactor, OFF);
+        setContactor(contactor, false);
     }
 
     // initialize mutex
@@ -65,10 +65,10 @@ void Contactors_Init() {
  *          a specified contactor
  * @param   contactor the contactor
  *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
- * @return  The contactor's state (ON/OFF)
+ * @return  The contactor's state (true/false)
  */ 
-State Contactors_Get(contactor_t contactor) {
-    State state = OFF;
+bool Contactors_Get(contactor_t contactor) {
+    bool state = false;
     switch (contactor) {
         case ARRAY_CONTACTOR :
             state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN);
@@ -82,17 +82,17 @@ State Contactors_Get(contactor_t contactor) {
         default:
             break;
     }
-    return (state == ON) ? ON : OFF;
+    return (state == true) ? true : false;
 }
 
 /**
  * @brief   Sets the state of a specified contactor
  * @param   contactor the contactor
  *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
- * @param   state the state to set (ON/OFF)
+ * @param   state the state to set (true/false)
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, State state) {
+ErrorStatus Contactors_Set(contactor_t contactor, bool state) {
     CPU_TS timestamp;
     OS_ERR err;
     ErrorStatus result = ERROR;
@@ -151,7 +151,7 @@ void Contactors_Disable(contactor_t contactor) {
     contactors[contactor].enabled = false;
 
     // turn off the contactor
-    setContactor(contactor, OFF);
+    setContactor(contactor, false);
 
     // release lock
     OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);

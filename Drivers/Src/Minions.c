@@ -28,7 +28,7 @@ static uint8_t lightToggleBitmap = 0;   // Stores light toggle states (left, rig
  *  @param None
  */
 static void ChipSelect(void) {
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, OFF);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, false);
 }
 
 /**
@@ -37,7 +37,7 @@ static void ChipSelect(void) {
  *  @param None
  */
 static void ChipDeselect(void) {
-    BSP_GPIO_Write_Pin(PORTA, SPI_CS, ON);
+    BSP_GPIO_Write_Pin(PORTA, SPI_CS, true);
 }
 
 /**
@@ -109,10 +109,10 @@ static void Lights_Init(void) {
     OS_ERR err;
     CPU_TS timestamp;
     BSP_GPIO_Init(LIGHTS_PORT, 0x3C0, 1); // Pins 6,7,8,9 from Port C are out (0b1111000000)
-    BSP_GPIO_Write_Pin(LIGHTS_PORT,HEADLIGHT_PIN,ON); //These are negative logic, and I used write pin instead of write because write pin is atomic/threadsafe.
-    BSP_GPIO_Write_Pin(LIGHTS_PORT,LEFT_BLINK_PIN,ON);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT,RIGHT_BLINK_PIN,ON);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT,BRAKELIGHT_PIN,ON);
+    BSP_GPIO_Write_Pin(LIGHTS_PORT,HEADLIGHT_PIN,true); //These are negative logic, and I used write pin instead of write because write pin is atomic/threadsafe.
+    BSP_GPIO_Write_Pin(LIGHTS_PORT,LEFT_BLINK_PIN,true);
+    BSP_GPIO_Write_Pin(LIGHTS_PORT,RIGHT_BLINK_PIN,true);
+    BSP_GPIO_Write_Pin(LIGHTS_PORT,BRAKELIGHT_PIN,true);
 
     // Initialize txBuf and rxBuf
     uint8_t txReadBuf[2] = {SPI_OPCODE_R, SPI_IODIRB}; //0x01 is IODIRB in Bank 0 Mode
@@ -172,11 +172,11 @@ void Minions_Init(void){
 /**
 * @brief   Read the state of a specific light from the light bitmap
 * @param   light Which Light to read
-* @return  returns State enum which indicates ON/OFF
+* @return  returns bool enum which indicates true/false
 */ 
-State Lights_Read(light_t light) {
+bool Lights_Read(light_t light) {
     //Return from a stored state bitmap instead of actually querying hardware. 
-    return (State) ((lightStatesBitmap>>light)&0x0001);
+    return (bool) ((lightStatesBitmap>>light)&0x0001);
 }
 
 /**
@@ -191,24 +191,24 @@ uint16_t Lights_Bitmap_Read() {
 /**
  * @brief   Reads from static variable bitmap holding values of switches
  * @param   sw
- * @return  ON/OFF State
+ * @return  true/false bool
  */ 
-State Switches_Read(switches_t sw){
+bool Switches_Read(switches_t sw){
     if(sw != LEFT_SW && sw != RIGHT_SW && sw != FOR_SW && sw != REV_SW){
-        return (State) ((switchStatesBitmap >> sw) & 0x0001);
+        return (bool) ((switchStatesBitmap >> sw) & 0x0001);
     }else{
         if(sw == LEFT_SW || sw == RIGHT_SW){
             // If Left and Right are one, then in reality, none are selected
             if(((switchStatesBitmap&0x20) == 0x20)&&((switchStatesBitmap&0x40) == 0x40)){
-                return OFF;
+                return false;
             }
-            return (State) ((switchStatesBitmap >> sw) & 0x0001);
+            return (bool) ((switchStatesBitmap >> sw) & 0x0001);
         }else{
             // If Forward and Reverse are one, then in reality, none are selected
             if(((switchStatesBitmap&0x04) == 0x04)&&((switchStatesBitmap&0x08) == 0x08)){
-                return OFF;
+                return false;
             }
-            return (State) ((switchStatesBitmap >> sw) & 0x0001);
+            return (bool) ((switchStatesBitmap >> sw) & 0x0001);
         }
     }
     
@@ -288,11 +288,11 @@ void Switches_UpdateStates(void){
  * @param light Which light to toggle
 */
 void Lights_Toggle(light_t light){
-    State lightState = Lights_Read(light);
-    if(lightState == OFF){
-        Lights_Set(light, ON);
+    bool lightState = Lights_Read(light);
+    if(lightState == false){
+        Lights_Set(light, true);
     } else {
-        Lights_Set(light, OFF);
+        Lights_Set(light, false);
     }
 }
 
@@ -300,16 +300,16 @@ void Lights_Toggle(light_t light){
 
  * @brief   Set light toggling
  * @param   light Which light to enable/disable toggling for
- * @param   state State to set toggling (ON/OFF)
+ * @param   state bool to set toggling (true/false)
  * @return  void
  */
-void Lights_Toggle_Set(light_t light, State state) {
+void Lights_Toggle_Set(light_t light, bool state) {
     // Mutex not needed here because only BlinkLights uses this bitmap
     if(light == LEFT_BLINK){
-        (state == ON) ? (lightToggleBitmap |= 0x02) : (lightToggleBitmap &= 0xFD);
+        (state == true) ? (lightToggleBitmap |= 0x02) : (lightToggleBitmap &= 0xFD);
     }
     else if(light == RIGHT_BLINK){
-        (state == ON) ? (lightToggleBitmap |= 0x01) : (lightToggleBitmap &= 0xFE);
+        (state == true) ? (lightToggleBitmap |= 0x01) : (lightToggleBitmap &= 0xFE);
     }
 
 }
@@ -317,17 +317,17 @@ void Lights_Toggle_Set(light_t light, State state) {
 /**
 * @brief   Read the state of a specific toggleable light from the toggle bitmap
 * @param   light Which Light to read
-* @return  returns State enum which indicates ON/OFF
+* @return  returns bool enum which indicates true/false
 */
-State Lights_Toggle_Read(light_t light) {
+bool Lights_Toggle_Read(light_t light) {
     if(light == LEFT_BLINK){
-        return (State) ((lightToggleBitmap & 0x02) >> 1);
+        return (bool) ((lightToggleBitmap & 0x02) >> 1);
     }
     else if(light == RIGHT_BLINK){
-        return (State) (lightToggleBitmap & 0x01);
+        return (bool) (lightToggleBitmap & 0x01);
     }
     else{
-        return OFF;
+        return false;
     }
 }
 
@@ -346,10 +346,10 @@ uint8_t Lights_Toggle_Bitmap_Read(void) {
  * @param   state What state to set the light to
  * @return  void
  */
-void Lights_Set(light_t light, State state) {
+void Lights_Set(light_t light, bool state) {
     CPU_TS timestamp;
     OS_ERR err;
-    State lightCurrentState = Lights_Read(light);
+    bool lightCurrentState = Lights_Read(light);
     
     if(lightCurrentState != state){     // Check if state has changed
         uint8_t lightNewStates = lightStatesBitmap;
