@@ -20,6 +20,7 @@ void Task1(void *p_arg) {
     */
 
     CANDATA_t msg;
+    CANDATA_t response;
     msg.ID = MOTOR_DRIVE;
     msg.idx = 0;
     float vel = 312.0f;
@@ -28,12 +29,15 @@ void Task1(void *p_arg) {
     memcpy(&msg.data[4], &current, sizeof current);
 
     CANbus_Send(msg, CAN_BLOCKING, MOTORCAN);
+    CANbus_Read(&response, CAN_BLOCKING, CARCAN);
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
 
+    
     msg.ID = ARRAY_CONTACTOR_STATE_CHANGE;
     msg.idx = 0;
     msg.data[0] = 1;
     CANbus_Send(msg, CAN_BLOCKING, CARCAN);
+    CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
 
     // Now test non-blocking CAN send
@@ -46,16 +50,24 @@ void Task1(void *p_arg) {
     e = CANbus_Send(msg, CAN_NON_BLOCKING, MOTORCAN);
     e = CANbus_Send(msg, CAN_NON_BLOCKING, MOTORCAN); // Potentially an error?
     e = CANbus_Send(msg, CAN_NON_BLOCKING, MOTORCAN); // Almost definitely an error, check in GDB
+    
+    CANbus_Read(&response, CAN_BLOCKING, CARCAN);
+    CANbus_Read(&response, CAN_BLOCKING, CARCAN);
+    CANbus_Read(&response, CAN_BLOCKING, CARCAN);
+    CANbus_Read(&response, CAN_BLOCKING, CARCAN);
     (void) e;
     
     OSTimeDlyHMSM(0, 0, 2, 0, OS_OPT_TIME_HMSM_STRICT, &err);
 
+    /*
     // Now do the same test, but blocking this time
     // All of the operations should succeed, so we should see four CAN messages
     e = CANbus_Send(msg, CAN_BLOCKING, MOTORCAN);
     e = CANbus_Send(msg, CAN_BLOCKING, MOTORCAN);
     e = CANbus_Send(msg, CAN_BLOCKING, MOTORCAN);
     e = CANbus_Send(msg, CAN_BLOCKING, MOTORCAN);
+    */
+    
 
 
     /**
@@ -66,6 +78,11 @@ void Task1(void *p_arg) {
     // Might have to put CAN in loopback mode to test this?
 
     
+
+
+    while (1) {
+        OSTimeDlyHMSM(1, 0, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
 }
 
 
