@@ -6,6 +6,8 @@
 #include "Minions.h"
 #include "Contactors.h"
 
+// Make sure updated to the DATAMSG and carMSGID are reflected in the CAN Bus IDs excel sheet
+
 #define carMSGID 0x581
 
 typedef union DATAMSG{
