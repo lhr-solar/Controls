@@ -27,7 +27,8 @@ typedef enum {
      REGEN_SW,
      CRUZ_ST,
      IGN_1,
-     IGN_2
+     IGN_2,
+     NUM_SWITCHES,
 } switches_t;
 
 // Ordered by pin of minion board
