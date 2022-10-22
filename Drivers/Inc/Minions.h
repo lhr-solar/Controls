@@ -61,7 +61,7 @@ bool Switches_Read(switches_t sw);
 /**
 * @brief   Read the state of the lights
 * @param   light Which Light to read
-* @return  returns state enum which indicates true/false
+* @return  returns boolean true/false
 */ 
 bool Lights_Read(light_t light);
 
@@ -103,7 +103,7 @@ void Lights_Toggle_Set(light_t light, bool state);
 /**
 * @brief   Read the toggle enable state of a specific light from the toggle bitmap
 * @param   light Which Light to read
-* @return  returns bool enum which indicates true/false
+* @return  returns bool true/false
 */
 bool Lights_Toggle_Read(light_t light);
 
