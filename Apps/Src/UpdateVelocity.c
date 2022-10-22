@@ -25,15 +25,21 @@
 #define NEUTRAL_THRESHOLD 25    // for one-pedal driving
 
 // Setpoints
-static float CurrentSetpoint = 0;
-static float VelocitySetpoint = 0;
+static float currentSetpoint = 0;
+static float velocitySetpoint = 0;
 
 // Inputs
-static bool CruiseEnable = false;
-static bool CruiseSet = false;
-static bool RegenButton = false;
-static uint8_t BrakePedalPercent = 0;
-static uint8_t AccelPedalPercent = 0;
+static bool cruiseEnable = false;
+static bool cruiseSet = false;
+static bool regenToggle = false;
+static uint8_t brakePedalPercent = 0;
+static uint8_t accelPedalPercent = 0;
+
+// Toggles
+static bool regenPrevious = false;
+static bool regenButton = false;
+static bool cruisePrevious = false;
+static bool cruiseButton = false;
 
 // State Names
 typedef enum{
@@ -45,17 +51,17 @@ typedef enum{
     ONEPEDAL_DRIVE,
     DISABLE_CRUISE,
     DISABLE_REGEN
-} TritiumStateName_t;
+} TritiumStateName_e;
 
 // State Struct for FSM
-typedef struct State{
-    TritiumStateName_t name;
+typedef struct TritiumState{
+    TritiumStateName_e name;
     void (*stateHandler)(void);
     void (*stateDecider)(void);
 } TritiumState_t;
 
 // Current state
-static TritiumStateName_t state = NORMAL_DRIVE;
+static TritiumStateName_e state = NORMAL_DRIVE;
 
 // Handler & Decider Declarations
 void NormalDriveHandler(void);
@@ -92,19 +98,30 @@ const TritiumState_t FSM[8] = {
 */
 void readInputs(){
     // TODO: Change upon update to Minions driver
-    BrakePedalPercent = Pedals_Read(BRAKE);
-    AccelPedalPercent = Pedals_Read(ACCELERATOR);
+    brakePedalPercent = Pedals_Read(BRAKE);
+    accelPedalPercent = Pedals_Read(ACCELERATOR);
+    regenButton = Switches_Read(REGEN_SW)==ON?true:false;
+    cruiseButton = Switches_Read(CRUZ_EN)==ON?true:false;
 
     if(Switches_Read(FOR_SW) == ON){
-        CruiseEnable = Switches_Read(CRUZ_EN)==ON?true:false;
-        CruiseSet = Switches_Read(CRUZ_ST)==ON?true:false;
-        RegenButton = Switches_Read(REGEN_SW)==ON?true:false;
+        cruiseSet = Switches_Read(CRUZ_ST)==ON?true:false;
+
     }
     else{
-        CruiseEnable = false;
-        CruiseSet = false;
-        RegenButton = false;
+        cruiseEnable = false;
+        cruiseSet = false;
+        regenToggle = false;
     }
+
+    if(ChargeEnable && regenPrevious != regenButton && regenPrevious){
+        regenToggle = !regenToggle;
+    }
+    regenPrevious = regenButton;
+
+    if(cruisePrevious != cruiseButton && cruisePrevious){
+        cruiseEnable= !cruiseEnable;
+    }
+    cruisePrevious = cruiseButton;
 }
 
 /**
@@ -145,43 +162,43 @@ void Task_UpdateVelocity(void *p_arg){
 */
 void NormalDriveHandler(){
     if(Switches_Read(REV_SW) == ON && Switches_Read(FOR_SW) == OFF){
-        VelocitySetpoint = -MAX_VELOCITY;
-        CurrentSetpoint = percentToFloat(AccelPedalPercent);
+        velocitySetpoint = -MAX_VELOCITY;
+        currentSetpoint = percentToFloat(accelPedalPercent);
     }else if(Switches_Read(REV_SW) == OFF && Switches_Read(FOR_SW) == ON){
-        VelocitySetpoint = MAX_VELOCITY;
-        CurrentSetpoint = percentToFloat(AccelPedalPercent);
+        velocitySetpoint = MAX_VELOCITY;
+        currentSetpoint = percentToFloat(accelPedalPercent);
     }
     else if(Switches_Read(REV_SW) == OFF && Switches_Read(FOR_SW) == OFF){
-        CurrentSetpoint = 0;
+        currentSetpoint = 0;
     }
     Lights_Set(BrakeLight, OFF);
 }
 
 void NormalDriveDecider(){
-    if(CruiseSet && CruiseEnable && BrakePedalPercent == 0){
+    if(cruiseSet && cruiseEnable && brakePedalPercent == 0){
         state = RECORD_VELOCITY;
-    }else if(!CruiseEnable && RegenButton && ChargeEnable){
+    }else if(!cruiseEnable && regenToggle && ChargeEnable){
         state = ONEPEDAL_DRIVE;
-    }else if(BrakePedalPercent > 0){
+    }else if(brakePedalPercent > 0){
         state = BRAKE_STATE;
     }
 }
 
 /**
  * Record Velocity State. While pressing the cruise set button, the car will record the observed velocity
- * into VelocitySetpoint.
+ * into velocitySetpoint.
 */
 void RecordVelocityHandler(){
-    VelocitySetpoint = MotorController_ReadVelocity();
+    velocitySetpoint = MotorController_ReadVelocity();
     Lights_Set(BrakeLight, OFF);
 }
 
 void RecordVelocityDecider(){
-    if(CruiseEnable && !CruiseSet){
+    if(cruiseEnable && !cruiseSet){
         state = POWERED_CRUISE;
-    }else if(!CruiseEnable){
+    }else if(!cruiseEnable){
         state = NORMAL_DRIVE;
-    }else if(BrakePedalPercent > 0){
+    }else if(brakePedalPercent > 0){
         state = BRAKE_STATE;
     }
 }
@@ -191,18 +208,18 @@ void RecordVelocityDecider(){
  * Observed Velocity <= Velocity Setpoint
 */
 void PoweredCruiseHandler(){
-    CurrentSetpoint = 1.0f;
+    currentSetpoint = 1.0f;
     Lights_Set(BrakeLight, OFF);
 }
 
 void PoweredCruiseDecider(){
-    if(MotorController_ReadVelocity() > VelocitySetpoint){
+    if(MotorController_ReadVelocity() > velocitySetpoint){
         state = COASTING_CRUISE;
-    }else if(!CruiseEnable){
+    }else if(!cruiseEnable){
         state = NORMAL_DRIVE;
-    }else if(!CruiseEnable && !CruiseSet){
+    }else if(!cruiseEnable && !cruiseSet){
         state = RECORD_VELOCITY;
-    }else if(BrakePedalPercent > 0){
+    }else if(brakePedalPercent > 0){
         state = BRAKE_STATE;
     }
 }
@@ -213,16 +230,16 @@ void PoweredCruiseDecider(){
  * into the motor and let the car slow down naturally.
 */
 void CoastingCruiseHandler(){
-    CurrentSetpoint = 0;
+    currentSetpoint = 0;
     Lights_Set(BrakeLight, OFF);
 }
 
 void CoastingCruiseDecider(){
-    if(MotorController_ReadVelocity() <= VelocitySetpoint){
+    if(MotorController_ReadVelocity() <= velocitySetpoint){
         state = POWERED_CRUISE;
-    }else if(!CruiseEnable){
+    }else if(!cruiseEnable){
         state = NORMAL_DRIVE;
-    }else if(BrakePedalPercent > 0){
+    }else if(brakePedalPercent > 0){
         state = BRAKE_STATE;
     }
 }
@@ -231,15 +248,15 @@ void CoastingCruiseDecider(){
  * Brake State. Brake the car if the brake pedal is pressed.
 */
 void BrakeHandler(){
-    CurrentSetpoint = 0;
-    VelocitySetpoint = 0;
-    CruiseEnable = 0;
-    CruiseSet = 0;
+    currentSetpoint = 0;
+    velocitySetpoint = 0;
+    cruiseEnable = 0;
+    cruiseSet = 0;
     Lights_Set(BrakeLight, ON);
 }
 
 void BrakeDecider(){
-    if(BrakePedalPercent == 0){
+    if(brakePedalPercent == 0){
         state = ONEPEDAL_DRIVE;
     }
 }
@@ -251,31 +268,31 @@ void BrakeDecider(){
  * the NEUTRAL_THRESHOLD, the car will accelerate as normal.
 */
 void OnePedalDriveHandler(){
-    if(AccelPedalPercent < BRAKE_THRESHOLD){
+    if(accelPedalPercent < BRAKE_THRESHOLD){
         // Motor brake
-        CurrentSetpoint = percentToFloat(((BRAKE_THRESHOLD - AccelPedalPercent)*100)/BRAKE_THRESHOLD);
-        VelocitySetpoint = 0;
+        currentSetpoint = percentToFloat(((BRAKE_THRESHOLD - accelPedalPercent)*100)/BRAKE_THRESHOLD);
+        velocitySetpoint = 0;
         Lights_Set(BrakeLight, ON);
     }
-    else if(AccelPedalPercent < NEUTRAL_THRESHOLD  && AccelPedalPercent < BRAKE_THRESHOLD){
+    else if(accelPedalPercent < NEUTRAL_THRESHOLD  && accelPedalPercent < BRAKE_THRESHOLD){
         // Coast
-        CurrentSetpoint = 0;
-    }else if(AccelPedalPercent > NEUTRAL_THRESHOLD){
+        currentSetpoint = 0;
+    }else if(accelPedalPercent > NEUTRAL_THRESHOLD){
         // Accelerate
-        CurrentSetpoint = percentToFloat(((AccelPedalPercent - NEUTRAL_THRESHOLD)*100)/(100-NEUTRAL_THRESHOLD));
+        currentSetpoint = percentToFloat(((accelPedalPercent - NEUTRAL_THRESHOLD)*100)/(100-NEUTRAL_THRESHOLD));
     }
 }
 
 void OnePedalDriveDecider(){
-    if(!RegenButton || !ChargeEnable || CruiseEnable){
+    if(!regenToggle || !ChargeEnable || cruiseEnable){
         state = DISABLE_REGEN;
-    }else if(BrakePedalPercent > 0){
+    }else if(brakePedalPercent > 0){
         state = BRAKE_STATE;
     }
 }
 
 void DisableCruiseHandler(){
-    CruiseEnable = 0;
+    cruiseEnable = 0;
 }
 
 void DisableCruiseDecider(){
@@ -283,7 +300,7 @@ void DisableCruiseDecider(){
 }
 
 void DisableRegenHandler(){
-    RegenButton = 0;
+    regenToggle = 0;
 }
 
 void DisableRegenDecider(){
