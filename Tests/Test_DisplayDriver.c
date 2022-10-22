@@ -84,7 +84,7 @@ int main()
 	delay();
 
 	// Display the fault page
-	Display_Cmd_t pgCmd = {
+	DisplayCmd_t pgCmd = {
 			.compOrCmd = "page",
 			.attr = NULL,
 			.op = NULL,
@@ -96,7 +96,7 @@ int main()
 	delay();
 
 	// Display the info page
-	pgCmd = (Display_Cmd_t){
+	pgCmd = (DisplayCmd_t){
 			.compOrCmd = "page",
 			.attr = NULL,
 			.op = NULL,
@@ -108,7 +108,7 @@ int main()
 	delay();
 
 	// Show the array icon
-	Display_Cmd_t toggleCmd = {
+	DisplayCmd_t toggleCmd = {
 			.compOrCmd = "vis",
 			.attr = NULL,
 			.op = NULL,
@@ -120,7 +120,7 @@ int main()
 	delay();
 
 	// Don't show the array icon
-	toggleCmd = (Display_Cmd_t){
+	toggleCmd = (DisplayCmd_t){
 			.compOrCmd = "vis",
 			.attr = NULL,
 			.op = NULL,

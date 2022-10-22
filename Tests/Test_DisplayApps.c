@@ -14,7 +14,7 @@
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
-void testBoolComp(UpdateDisplay_Error_t(*function)(bool)){
+void testBoolComp(UpdateDisplayError_e(*function)(bool)){
     OS_ERR e;
 
     function(false);
@@ -25,7 +25,7 @@ void testBoolComp(UpdateDisplay_Error_t(*function)(bool)){
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
 }
 
-void testPercentageComp(UpdateDisplay_Error_t(*function)(uint8_t)){
+void testPercentageComp(UpdateDisplayError_e(*function)(uint8_t)){
     OS_ERR e;
 
     function(0);
@@ -48,7 +48,7 @@ void testPercentageComp(UpdateDisplay_Error_t(*function)(uint8_t)){
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
 }
 
-void testTriStateComp(UpdateDisplay_Error_t(*function)(TriState_t)){
+void testTriStateComp(UpdateDisplayError_e(*function)(TriState_t)){
     OS_ERR e;
 
     function(DISABLED);

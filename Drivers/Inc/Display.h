@@ -34,31 +34,31 @@ typedef enum{
 	DISPLAY_ERR_ASSIGN    =-7,	// Assignment failure nextion	(0x1C)
 	DISPLAY_ERR_PARAMS    =-8,	// Invalid number of parameters passed to nextion	(0x1E)
 	DISPLAY_ERR_MAX_ARGS  =-9,  // Command arg list exceeded MAX_ARGS elements
-	DISPLAY_ERR_OTHER    = -10  // Other nextion display error
-} Display_Error_t;
+	DISPLAY_ERR_OTHER     =-10  // Other nextion display error
+} DisplayError_e;
 
 /**
  * @brief Error handler for any display errors. Call this after any display driver function.
  */
-void assertDisplayError(Display_Error_t err);
+void assertDisplayError(DisplayError_e err);
 
 /**
  * All three pages on the HMI 
  */
 typedef enum{
-	STARTUP=0,
+	STARTUP	=0,
 	INFO,
 	FAULT
-} Page_t;
+} Page_e;
 
 /**
  * For display elements with three states
  */
 typedef enum{
-	STATE_0=0,
-	STATE_1=1,
-	STATE_2=2
-} TriState_t;
+	STATE_0	=0,
+	STATE_1	=1,
+	STATE_2	=2
+} TriState_e;
 
 // For cruise control and regen
 #define DISABLED STATE_0
@@ -76,7 +76,7 @@ typedef enum{
 typedef enum{
 	STR_ARG,
 	INT_ARG
-}	Arg_t;
+}	Arg_e;
 
 /**
  * Packages relevant display command data
@@ -86,30 +86,30 @@ typedef struct{
 	char* attr;
 	char* op;
 	uint8_t numArgs;
-	Arg_t argTypes[MAX_ARGS];	// TRUE for integers, FALSE for strings
+	Arg_e argTypes[MAX_ARGS];	// TRUE for integers, FALSE for strings
 	union{
 		char* str;
 		uint32_t num;
 	} args[MAX_ARGS];
-} Display_Cmd_t;
+} DisplayCmd_t;
 
 /**
  * @brief Sends a display message.
- * @returns Display_Error_t
+ * @returns DisplayError_e
  */
-Display_Error_t Display_Send(Display_Cmd_t cmd);
+DisplayError_e Display_Send(DisplayCmd_t cmd);
 
 /**
  * @brief Initializes the display
- * @returns Display_Error_t
+ * @returns DisplayError_e
  */
-Display_Error_t Display_Init(void);
+DisplayError_e Display_Init(void);
 
 /**
  * @brief Resets (reboots) the display
- * @returns Display_Error_t
+ * @returns DisplayError_e
  */
-Display_Error_t Display_Reset(void);
+DisplayError_e Display_Reset(void);
 
 /**
  * @brief Overwrites any processing commands and triggers the display fault screen
@@ -117,6 +117,6 @@ Display_Error_t Display_Reset(void);
  * @param faultCode the generic fault code (will be displayed in hex)
  * @returns bool: false for ERROR, true for SUCCESS
  */
-Display_Error_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+DisplayError_e Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
 
 #endif
