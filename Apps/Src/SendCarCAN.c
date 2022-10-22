@@ -8,6 +8,17 @@
 
 // Make sure updated to the DATAMSG and carMSGID are reflected in the CAN Bus IDs excel sheet
 
+/**
+ * @file SendCarCAN.c
+ * @brief Implements the SendCarCAN Task
+ * 
+ * Creates a datatype to house the data to be read by telemetry
+ * 
+ * Resends the feedback from the motor controller and gathers the information 
+ * of the pedals, lights, switches, and contactors to be read by telemetry
+ * 
+ */
+
 #define CARDATA_ID 0x581
 
 typedef union CarData{
@@ -22,6 +33,13 @@ typedef union CarData{
     uint64_t val;
 }CarData_t;
 
+
+/**
+ * @brief Sends the feedback from the motor controller to be read by telemetry and 
+ * sends pedal, switch, light, and contactor information to be read by telemetry
+ * 
+ * @param p_arg 
+ */
 void Task_SendCarCAN(void *p_arg){
     CANMSG_t motorMsg;
     CANMSG_t carMsg;
