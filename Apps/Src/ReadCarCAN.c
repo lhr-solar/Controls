@@ -163,7 +163,6 @@ void Task_ReadCarCAN(void *p_arg)
     OS_ERR err;
     uint8_t buffer[8]; // buffer for CAN message
     uint32_t canId;
-    CPU_TS ts;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
