@@ -25,6 +25,12 @@ static void nonrecoverableFaultHandler(){
     ArrayMotorKill();
 }
 
+static void killContactorHandler(void){
+    //kill contactors 
+    Contactors_Set(ARRAY_CONTACTOR, OFF);
+    Contactors_Set(ARRAY_PRECHARGE, OFF);
+}
+
 void EnterFaultState(void) {
     if(FaultBitmap & FAULT_OS){
         nonrecoverableFaultHandler();
@@ -79,8 +85,8 @@ void EnterFaultState(void) {
          * Temp error - Motor will throttle itself, and there's nothing we can do additional to cool it down
          */
     }
-    else if(FaultBitmap & FAULT_READBPS){ //This has been put in with future development in mind, it is not currently tripped by anything.
-        nonrecoverableFaultHandler();
+    else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
+        killContactorHandler();
     }
     else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
         nonrecoverableFaultHandler();

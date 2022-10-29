@@ -11,8 +11,9 @@
 static bool msg_recieved = false;
 static OS_MUTEX msg_rcv_mutex;
 
-
-static int watchDogTripCounter = 0; //count how many times the CAN watchdog trips
+// watchDogTripCounter variable and limit
+static int CANWatchTripCounter = 0; 
+static const int CANWATCH_TRIP_LIMIT = 2;
 
 //XXXCAN watchdog thread variables
 static OS_TCB canWatchTCB;
@@ -48,17 +49,11 @@ static void ArrayRestart(); //handler to turn array back on
 static inline void chargingDisable(void) {
     // mark regen as disabled
     RegenEnable = OFF;
+
     //kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
-
-    // let array know we killed contactors
-    CANMSG_t msg;
-    msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
-    msg.payload.bytes = 1;
-    msg.payload.data.b = false;
-    CAN_Queue_Post(msg);
-
+    
     // turn off the array contactor light
     Lights_Set(A_CNCTR, OFF);
     //Display_SetLight(A_CNCTR, OFF);
@@ -129,7 +124,7 @@ void Task_ReadCarCAN(void *p_arg)
         "CAN Watch Timer",
         0,
         OS_CFG_TMR_TASK_RATE_HZ * canWatchTmrDlySeconds,
-        OS_OPT_TMR_PERIODIC,S
+        OS_OPT_TMR_PERIODIC,
         &canWatchTimerCallback,
         NULL,
         &err
@@ -150,8 +145,6 @@ void Task_ReadCarCAN(void *p_arg)
 
     //Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
-
-
 
 
 
@@ -176,6 +169,8 @@ void Task_ReadCarCAN(void *p_arg)
 
     while (1)
     {
+
+        
         //Get any message that BPS Sent us
         ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); 
         if(status != SUCCESS) {
@@ -184,7 +179,7 @@ void Task_ReadCarCAN(void *p_arg)
 
         switch(canId){ //we got a message
             case CHARGE_ENABLE: { //M Don't think we need msg_received
-                OSMutexPend(&msg_rcv_mutex,
+                /*OSMutexPend(&msg_rcv_mutex,
                     0,
                     OS_OPT_PEND_BLOCKING,
                     &ts,
@@ -196,7 +191,9 @@ void Task_ReadCarCAN(void *p_arg)
                 OSMutexPost(&msg_rcv_mutex,
                             OS_OPT_NONE,
                             &err);
-                assertOSError(OS_READ_CAN_LOC,err);
+                assertOSError(OS_READ_CAN_LOC,err); */
+                //Start CAN Watchdog timer
+                OSTmrStart(&canWatchTimer, &err);
 
                 if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                     chargingDisable();
@@ -218,22 +215,6 @@ void Task_ReadCarCAN(void *p_arg)
             default: 
                 break;
         }
-        // See if precharge finished and signaled to restart array
-        OSSemPend(&restartArraySem, 0, OS_OPT_PEND_NON_BLOCKING, &err); 
-        if (err == OS_ERR_NONE) 
-        {
-            // If semaphore is up, restart array
-            ArrayRestart();
-        }
-
-        // See if CAN Watch Timer tripped and signaled to disable charging
-        OSSemPend(&canWatchDisableChargingSem, 0, OS_OPT_PEND_NON_BLOCKING, &err);
-        if (err == OS_ERR_NONE) 
-        {
-            // If semaphore is up, disable charging
-            chargingDisable();
-        }  
-
     }
 }
 
@@ -245,17 +226,22 @@ void Task_ReadCarCAN(void *p_arg)
  * 
 */
 void canWatchTimerCallback (){  //Probably needs its timer arguments
-    OS_ERR err;
-    CPU_TS ts;
-        
-    // If timer trips, notify ReadCarCAN to disable charging at its earliest convenience
-    OSSemPost(&canWatchDisableChargingSem, OS_OPT_POST_NO_SCHED, &err);
-    assertOSError(OS_READ_CAN_LOC, )
-    
+    // mark regen as disabled
+    RegenEnable = OFF;
 
     //increment trip counter
-    watchDogTripCounter += 1;
+    CANWatchTripCounter++;
+    
+    // Set fault bitmaps 
+    FaultBitmap |= FAULT_READBPS;
+    OSErrLocBitmap |= OS_READ_CAN_LOC;
 
+    // If we tripped the counter too many times, enter fault state
+    if(CANWatchTripCounter > CANWATCH_TRIP_LIMIT) {
+        EnterFaultState();
+    } else { // Otherwise signal fault state to kill contactors and return
+        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+    }
 }
 
 /**
@@ -269,17 +255,27 @@ static void arrayRestart(void *p_arg){
         restartingArray = false;
     }
     else {
+        if (contactors[ARRAY_CONTACTOR].enabled) {
+            setContactor(ARRAY_CONTACTOR, ON);
+        }
+        if (contactors[ARRAY_PRECHARGE].enabled) {
+            setContactor(ARRAY_PRECHARGE, OFF); //Is this whole just trying to turn off precharge thing ok? Maybe I should...um...
+        }
+        /*
         Contactors_Set(ARRAY_CONTACTOR, ON);
         Contactors_Set(ARRAY_PRECHARGE, OFF);
+        */
         Lights_Set(A_CNCTR, ON);
+
         //Display_SetLight(A_CNCTR, ON);
 
-        // let array know the contactor is on
+       /* // let array know the contactor is on
         CANMSG_t msg;
         msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
         msg.payload.bytes = 1;
         msg.payload.data.b = true;
         CAN_Queue_Post(msg);
+        */
 
         // done restarting the array
         restartingArray = false;
