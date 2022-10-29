@@ -5,24 +5,13 @@
 #include "Contactors.h"
 #include "Minions.h"
 #include "CAN_Queue.h"
-#include "os_tmr.c"
 #include "FaultState.h"
 #include "os_cfg_app.h"
-
-/*
-static bool msg_recieved = false;
-static OS_MUTEX msg_rcv_mutex;
-*/
 
 // watchDogTripCounter variable and limit
 static int CANWatchTripCounter = 0; 
 static const int CANWATCH_TRIP_LIMIT = 2;
 
-/*
-//XXXCAN watchdog thread variables
-static OS_TCB canWatchTCB;
-static CPU_STK canWatchSTK[DEFAULT_STACK_SIZE];
-*/
 
 //MMM CAN watchdog timer variables
 static OS_TMR canWatchTimer; // Is it ok to declare this here?
@@ -34,12 +23,6 @@ static OS_TMR prechargeDlyTimer;
 //MMM restart array and disable charging semaphonres
 static OS_SEM restartArraySem;
 static OS_SEM canWatchDisableChargingSem;
-
-/*
-//Array restart thread variables
-static OS_TCB arrayTCB;
-static CPU_STK arraySTK[DEFAULT_STACK_SIZE];
-*/
 
 
 // Array restart thread lock
@@ -64,7 +47,7 @@ static inline void chargingDisable(void) {
     
     // turn off the array contactor light
     Lights_Set(A_CNCTR, OFF);
-    //Display_SetLight(A_CNCTR, OFF);
+  
 }
 
 // helper function to call if charging should be enabled
@@ -107,7 +90,8 @@ static inline void chargingEnable(void) {
 }
 
 /**
- * @brief restart the array, non-blocking callback for precharge delay timer
+ * @brief Callback function for the precharge delay timer. Turns off precharge and restarts the array.
+ * 
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
 
@@ -166,8 +150,6 @@ void Task_ReadCarCAN(void *p_arg)
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
-    /*OSMutexCreate(&msg_rcv_mutex, "message received mutex", &err);
-    assertOSError(OS_READ_CAN_LOC,err);*/
     OSSemCreate(&restartArraySem, "array restart semaphore", 0, &err);
     assertOSError(OS_READ_CAN_LOC, err);
     OSSemCreate(&canWatchDisableChargingSem, "disable charging semaphore", 0, &err);
@@ -204,27 +186,6 @@ void Task_ReadCarCAN(void *p_arg)
 
     //Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
-
-
-    /*
-    //Create+start the Can watchdog thread XXX will be replaced with timer
-    OSTaskCreate(
-        &canWatchTCB,
-        "CAN Watchdog",
-        &CANWatchdog_Handler,
-        NULL,
-        TASK_READ_CAR_CAN_PRIO,
-        canWatchSTK,
-        DEFAULT_STACK_SIZE/10,
-        DEFAULT_STACK_SIZE,
-        0,
-        0,
-        NULL,
-        OS_OPT_TASK_STK_CLR,
-        &err
-    );
-    assertOSError(OS_READ_CAN_LOC,err);
-    */
     
 
     while (1)
@@ -239,19 +200,7 @@ void Task_ReadCarCAN(void *p_arg)
 
         switch(canId){ //we got a message
             case CHARGE_ENABLE: { //M Don't think we need msg_received
-                /*OSMutexPend(&msg_rcv_mutex,
-                    0,
-                    OS_OPT_PEND_BLOCKING,
-                    &ts,
-                    &err);
-                assertOSError(OS_READ_CAN_LOC,err);
 
-                msg_recieved = true; //signal success recieved //M Replace with restarting canWatchtimer
-
-                OSMutexPost(&msg_rcv_mutex,
-                            OS_OPT_NONE,
-                            &err);
-                assertOSError(OS_READ_CAN_LOC,err); */
                 //Start CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
 
