@@ -255,8 +255,6 @@ void canWatchTimerCallback (){  //Probably needs its timer arguments
  * @brief restart the array, non-blocking callback for precharge delay timer
 */
 static void arrayRestart(void *p_arg){
-    OS_ERR err;
-    CPU_TS ts;
 
     if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
         restartingArray = false;
