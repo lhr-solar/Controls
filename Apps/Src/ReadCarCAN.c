@@ -7,17 +7,20 @@
 #include "CAN_Queue.h"
 #include "os_tmr.c"
 
-
+/*
 static bool msg_recieved = false;
 static OS_MUTEX msg_rcv_mutex;
+*/
 
 // watchDogTripCounter variable and limit
 static int CANWatchTripCounter = 0; 
 static const int CANWATCH_TRIP_LIMIT = 2;
 
+/*
 //XXXCAN watchdog thread variables
 static OS_TCB canWatchTCB;
 static CPU_STK canWatchSTK[DEFAULT_STACK_SIZE];
+*/
 
 //MMM CAN watchdog timer variables
 static OS_TMR canWatchTimer; // Is it ok to declare this here?
@@ -30,18 +33,21 @@ static OS_TMR prechargeDlyTimer;
 static OS_SEM restartArraySem;
 static OS_SEM canWatchDisableChargingSem;
 
+/*
 //Array restart thread variables
 static OS_TCB arrayTCB;
 static CPU_STK arraySTK[DEFAULT_STACK_SIZE];
-
+*/
 
 
 // Array restart thread lock
 static OS_MUTEX arrayRestartMutex;
 static bool restartingArray = false;
 
-static void CANWatchdog_Handler(); //Handler if we stop getting messages
-static void ArrayRestart(); //handler to turn array back on
+/*
+static void CANWatchdog_Handler(); //Handler if we stop getting messages */
+static void arrayRestart(); //handler to turn array back on
+
 
 // Need to add function prototypes here
 
@@ -147,7 +153,7 @@ void Task_ReadCarCAN(void *p_arg)
     OSTmrStart(&canWatchTimer, &err);
 
 
-
+    /**/
     //Create+start the Can watchdog thread XXX will be replaced with timer
     OSTaskCreate(
         &canWatchTCB,
@@ -165,6 +171,7 @@ void Task_ReadCarCAN(void *p_arg)
         &err
     );
     assertOSError(OS_READ_CAN_LOC,err);
+    */
     
 
     while (1)
