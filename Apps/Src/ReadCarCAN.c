@@ -109,7 +109,7 @@ static inline void chargingEnable(void) {
 /**
  * @brief restart the array, non-blocking callback for precharge delay timer
 */
-static void arrayRestart(OS_TMR *p_tmr, void *p_arg){
+static void arrayRestart(void *p_tmr, void *p_arg){
 
     if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
         restartingArray = false;
@@ -135,7 +135,7 @@ static void arrayRestart(OS_TMR *p_tmr, void *p_arg){
  * when canWatchTimer hits 0 (when charge enable messages are missed)
  * 
 */
-void canWatchTimerCallback (OS_TMR *p_tmr, void *p_arg){  //Probably needs its timer arguments
+void canWatchTimerCallback (void *p_tmr, void *p_arg){  //Probably needs its timer arguments
     OS_ERR err;
 
     // mark regen as disabled
@@ -184,7 +184,7 @@ void Task_ReadCarCAN(void *p_arg)
         0,
         OS_CFG_TMR_TASK_RATE_HZ * CAN_WATCH_TMR_DLY_SECONDS,
         OS_OPT_TMR_PERIODIC,
-        &canWatchTimerCallback,
+        canWatchTimerCallback,
         NULL,
         &err
     );
@@ -196,7 +196,7 @@ void Task_ReadCarCAN(void *p_arg)
         OS_CFG_TMR_TASK_RATE_HZ * PRECHARGE_ARRAY_DELAY,
         0,
         OS_OPT_TMR_ONE_SHOT,
-        &arrayRestart,
+        arrayRestart,
         NULL,
         &err
     );
