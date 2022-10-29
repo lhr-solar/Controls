@@ -7,8 +7,9 @@ int test1(void);
 void test2(void);
 
 int main(void){
+    OSStart();
     test1();
-    test2();
+    //test2();
     while(1){}
 }
 

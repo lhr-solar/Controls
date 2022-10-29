@@ -22,7 +22,7 @@ const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
 void Minion_Init(void){
     OS_ERR err;
     for(uint8_t i = 0; i < MINIONPIN_NUM; i++){
-        BSP_GPIO_Init(PINS_LOOKARR[i].pinMask, PINS_LOOKARR[i].port, PINS_LOOKARR[i].direction);
+        BSP_GPIO_Init(PINS_LOOKARR[i].port, PINS_LOOKARR[i].pinMask, PINS_LOOKARR[i].direction);
     }
     OSMutexCreate(&OutputMutex, "Minions Output Mutex", &err);
     assertOSError(OS_MINIONS_LOC, err);
