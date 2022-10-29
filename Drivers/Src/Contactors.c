@@ -106,7 +106,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, State state, contactors_blocki
         }
         assertOSError(OS_CONTACTOR_LOC, err);
   
-    }
+    
    
 
     // if enabled, change contactor to match state

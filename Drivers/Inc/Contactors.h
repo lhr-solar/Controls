@@ -45,7 +45,7 @@ State Contactors_Get(contactor_t contactor);
  * @param   contactor the contactor (MOTOR/ARRAY)
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, State state, contactors_blocking_t, blocking);
+ErrorStatus Contactors_Set(contactor_t contactor, State state, contactors_blocking_t blocking);
 
 /**
  * @brief   Enable the specified contactor

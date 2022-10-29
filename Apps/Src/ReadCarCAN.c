@@ -6,6 +6,8 @@
 #include "Minions.h"
 #include "CAN_Queue.h"
 #include "os_tmr.c"
+#include "FaultState.h"
+#include "os_cfg_app.h"
 
 /*
 static bool msg_recieved = false;
@@ -24,7 +26,7 @@ static CPU_STK canWatchSTK[DEFAULT_STACK_SIZE];
 
 //MMM CAN watchdog timer variables
 static OS_TMR canWatchTimer; // Is it ok to declare this here?
-static int canWatchTmrDlySeconds = 5;
+static const int CAN_WATCH_TMR_DLY_SECONDS = 5;
 
 //MMM prechargeDlyTimer
 static OS_TMR prechargeDlyTimer;
@@ -104,17 +106,69 @@ static inline void chargingEnable(void) {
     assertOSError(OS_READ_CAN_LOC,err);
 }
 
+/**
+ * @brief restart the array, non-blocking callback for precharge delay timer
+*/
+static void arrayRestart(void *p_arg){
+
+    if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
+        restartingArray = false;
+    }
+    else {
+        // Try to turn on array, but only if we can successfully turn off precharge
+        if(Contactors_Set(ARRAY_PRECHARGE, OFF, CONTACTORS_NON_BLOCKING) == SUCCESS){
+
+            Contactors_Set(ARRAY_CONTACTOR, ON, CONTACTORS_NON_BLOCKING);
+
+        }
+    }
+
+        Lights_Set(A_CNCTR, ON);
+
+        // done restarting the array
+        restartingArray = false;
+
+};
+
+/**
+ * @brief Disables charging and increments the trip counter
+ * when canWatchTimer hits 0 (when charge enable messages are missed)
+ * 
+*/
+void canWatchTimerCallback (){  //Probably needs its timer arguments
+    OS_ERR err;
+
+    // mark regen as disabled
+    RegenEnable = OFF;
+
+    //increment trip counter
+    CANWatchTripCounter++;
+    
+    // Set fault bitmaps 
+    FaultBitmap |= FAULT_READBPS;
+    OSErrLocBitmap |= OS_READ_CAN_LOC;
+
+    // If we tripped the counter too many times, enter fault state
+    if(CANWatchTripCounter > CANWATCH_TRIP_LIMIT) {
+        EnterFaultState();
+    } else { // Otherwise signal fault state to kill contactors and return
+        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+    }
+}
+
+
+
 void Task_ReadCarCAN(void *p_arg)
 {
     OS_ERR err;
-    uint8_t buffer[8]; // buffer for CAN message
-    uint32_t canId;
+    /*uint8_t buffer[8]; // buffer for CAN message
+    uint32_t canId;*/
     CPU_TS ts;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
-    OSMutexCreate(&msg_rcv_mutex, "message received mutex", &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    /*OSMutexCreate(&msg_rcv_mutex, "message received mutex", &err);
+    assertOSError(OS_READ_CAN_LOC,err);*/
     OSSemCreate(&restartArraySem, "array restart semaphore", 0, &err);
     assertOSError(OS_READ_CAN_LOC, err);
     OSSemCreate(&canWatchDisableChargingSem, "disable charging semaphore", 0, &err);
@@ -129,7 +183,7 @@ void Task_ReadCarCAN(void *p_arg)
         &canWatchTimer,
         "CAN Watch Timer",
         0,
-        OS_CFG_TMR_TASK_RATE_HZ * canWatchTmrDlySeconds,
+        OS_CFG_TMR_TASK_RATE_HZ * CAN_WATCH_TMR_DLY_SECONDS,
         OS_OPT_TMR_PERIODIC,
         &canWatchTimerCallback,
         NULL,
@@ -153,7 +207,7 @@ void Task_ReadCarCAN(void *p_arg)
     OSTmrStart(&canWatchTimer, &err);
 
 
-    /**/
+    /*
     //Create+start the Can watchdog thread XXX will be replaced with timer
     OSTaskCreate(
         &canWatchTCB,
@@ -227,63 +281,7 @@ void Task_ReadCarCAN(void *p_arg)
 
 
 
-/**
- * @brief Disables charging and increments the trip counter
- * when canWatchTimer hits 0 (when charge enable messages are missed)
- * 
-*/
-void canWatchTimerCallback (){  //Probably needs its timer arguments
-    // mark regen as disabled
-    RegenEnable = OFF;
 
-    //increment trip counter
-    CANWatchTripCounter++;
-    
-    // Set fault bitmaps 
-    FaultBitmap |= FAULT_READBPS;
-    OSErrLocBitmap |= OS_READ_CAN_LOC;
-
-    // If we tripped the counter too many times, enter fault state
-    if(CANWatchTripCounter > CANWATCH_TRIP_LIMIT) {
-        EnterFaultState();
-    } else { // Otherwise signal fault state to kill contactors and return
-        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-    }
-}
-
-/**
- * @brief restart the array, non-blocking callback for precharge delay timer
-*/
-static void arrayRestart(void *p_arg){
-
-    if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        restartingArray = false;
-    }
-    else {
-        // Try to turn on array, but only if we can successfully turn off precharge
-        if(Contactors_Set(ARRAY_PRECHARGE, OFF, CONTACTORS_NON_BLOCKING) == SUCCESS){
-
-            Contactors_Set(ARRAY_CONTACTOR, ON, CONTACTORS_NON_BLOCKING);
-
-        }
-    }
-
-        Lights_Set(A_CNCTR, ON);
-
-        //Display_SetLight(A_CNCTR, ON);
-
-       /* // let array know the contactor is on
-        CANMSG_t msg;
-        msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
-        msg.payload.bytes = 1;
-        msg.payload.data.b = true;
-        CAN_Queue_Post(msg);
-        */
-
-        // done restarting the array
-        restartingArray = false;
-
-};
 
 
 
