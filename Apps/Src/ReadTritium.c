@@ -5,6 +5,27 @@
 #include "CANbus.h"
 #include <string.h>
 
+/* OBJECTIVES:
+Objective 1:
+- Receive motor status message from MotorController
+- interpret error status
+	- if error
+		- assertOSError
+- determine information important to telementry
+	- SendCarCAN
+- determine information important for storage
+	- acquire mutex on Storage Array
+	- Store information in Storage Array (based on index) 
+	- release mutex on Storage Array
+
+Objective 2:
+- create function able to read data from Storage Array
+	- pend on Storage Array mutex
+	- acquire Storage Array mutex
+	- read information of array index 
+	- release Storage Array mutex
+*/
+
 void Task_ReadTritium(void *p_arg)
 {
 
