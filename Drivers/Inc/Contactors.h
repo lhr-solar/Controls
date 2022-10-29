@@ -21,6 +21,9 @@ typedef enum {
     NUM_CONTACTORS
 } contactor_t;
 
+typedef enum {CONTACTORS_BLOCKING = 0, CONTACTORS_NON_BLOCKING = 0x8000u} contactors_blocking_t;
+
+
 /**
  * @brief   Initializes contactors to be used
  *          in connection with the Motor and Array

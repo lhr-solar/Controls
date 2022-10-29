@@ -57,8 +57,8 @@ static inline void chargingDisable(void) {
     RegenEnable = OFF;
 
     //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF);
-    Contactors_Set(ARRAY_PRECHARGE, OFF);
+    Contactors_Set(ARRAY_CONTACTOR, OFF, CONTACTORS_BLOCKING);
+    Contactors_Set(ARRAY_PRECHARGE, OFF, CONTACTORS_BLOCKING);
     
     // turn off the array contactor light
     Lights_Set(A_CNCTR, OFF);
@@ -89,7 +89,7 @@ static inline void chargingEnable(void) {
     // start precharge for array 
     if(shouldRestartArray){
 
-         if (Contactors_Set(ARRAY_PRECHARGE, ON) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
+         if (Contactors_Set(ARRAY_PRECHARGE, ON, CONTACTORS_BLOCKING) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
             restartingArray = true;
 
             // Wait to make sure precharge is finished and then restart array
@@ -206,7 +206,7 @@ void Task_ReadCarCAN(void *p_arg)
                     chargingDisable();
                 } else {
                     //We got a message of enable with a nonzero value, turn on Regen, If we are already in precharge / array is on, do nothing. 
-                    //If not initiate precharge and restart sequence. 
+                    //If not, initiate precharge and restart sequence. 
                     chargingEnable();
                 }
                 break;
@@ -252,7 +252,7 @@ void canWatchTimerCallback (){  //Probably needs its timer arguments
 }
 
 /**
- * @brief restart the array. 
+ * @brief restart the array, non-blocking callback for precharge delay timer
 */
 static void arrayRestart(void *p_arg){
     OS_ERR err;
@@ -262,16 +262,14 @@ static void arrayRestart(void *p_arg){
         restartingArray = false;
     }
     else {
-        if (contactors[ARRAY_CONTACTOR].enabled) {
-            setContactor(ARRAY_CONTACTOR, ON);
+        // Try to turn on array, but only if we can successfully turn off precharge
+        if(Contactors_Set(ARRAY_PRECHARGE, OFF, CONTACTORS_NON_BLOCKING) == SUCCESS){
+
+            Contactors_Set(ARRAY_CONTACTOR, ON, CONTACTORS_NON_BLOCKING);
+
         }
-        if (contactors[ARRAY_PRECHARGE].enabled) {
-            setContactor(ARRAY_PRECHARGE, OFF); //Is this whole just trying to turn off precharge thing ok? Maybe I should...um...
-        }
-        /*
-        Contactors_Set(ARRAY_CONTACTOR, ON);
-        Contactors_Set(ARRAY_PRECHARGE, OFF);
-        */
+    }
+
         Lights_Set(A_CNCTR, ON);
 
         //Display_SetLight(A_CNCTR, ON);
@@ -286,7 +284,7 @@ static void arrayRestart(void *p_arg){
 
         // done restarting the array
         restartingArray = false;
-    }
+
 };
 
 
