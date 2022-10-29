@@ -51,23 +51,15 @@ To build a new test, you need to use the following command:
     E.g. Call ```make stm32f413 TEST=Dashboard``` if you want to test Dashboard.c with the Test_Dashboard.c src file
 
 ## Setting up the Leaderboard/Nucleo Board
-We have an STM32 nucleo board whose only prupose is to flash and debug code to the leaderboard.
+* We have an STM32 nucleo board whose only prupose is to flash and debug code to the leaderboard.
+    - Note: Normally, the nucleo's programmer is wired to the nucleo board itself. Thus, it is necessary to remove the pair of jumpers on the nucleo board programmer to use it for an external chip. Picture of where the jumpers to remove is shown below.
 
-Note: Normally, the nucleo's programmer is wired to the nucleo board itself. Thus, it is necessary to remove the pair of jumpers on the nucleo board programmer to use it for an external chip. Picture of where the jumpers to remove is shown below.
-
-![](img/nucleo_JTAG_warning.png)
-
-To connect the JTAG connections on the nucleo's programmer to the leaderboard, follow the pictures below. Starting from the top of the nucleo board, pin 1 is VCC, pin 2 SCK, pin 3 is GND, and pin 4 is SWO.
-
-![](img/nucleo_JTAG_Pinout.png)
-![](img/leader_JTAG_Pinout.png)
-
-If you're using a power supply, simply connect +12V and GND to the leaderboard.
-
-If you're using a power supply (PSU for computers), you can find the 24 pin connector on the PSU and use the +12V and GND from there to power the leader board. This would be pin 11 (+12V) and pin 24 (GND). We would also need to pull PS-ON to GND for the power supply to turn on. We can short pin 3 (GND) and pin 16 (PS-ON) to do this. See pictures below
-
-![](img/PSU_24PinConnector.png)
-![](img/PSU_24PinConnectorDiagram.png)
+    - ![](img/nucleo_JTAG_warning.png)
+* To connect the JTAG connections on the nucleo's programmer to the leaderboard, follow the pictures below. Starting from the top of the nucleo board, pin 1 is VCC, pin 2 SCK, pin 3 is GND, and pin 4 is SWO.
+    - ![](img/nucleo_JTAG_Pinout.png) ![](img/leader_JTAG_Pinout.png)
+* If you're using a power supply, simply connect +12V and GND to the leaderboard.
+* If you're using a power supply (PSU for computers), you can find the 24 pin connector on the PSU and use the +12V and GND from there to power the leader board. This would be pin 11 (+12V) and pin 24 (GND). We would also need to pull PS-ON to GND for the power supply to turn on. We can short pin 3 (GND) and pin 16 (PS-ON) to do this. See pictures below
+    - ![](img/PSU_24PinConnector.png) ![](img/PSU_24PinConnectorDiagram.png)
 
 ## Rules
 Commit frequently into your own branches. Create a Pull Request whenever you are ready to add you working code to the master branch. You must select 1 reviewer for approval. Follow the coding guidelines in the Solar SharePoint. The reviewers will make sure everything is up to par with the coding standards.
