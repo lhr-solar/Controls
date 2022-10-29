@@ -90,7 +90,7 @@ State Contactors_Get(contactor_t contactor) {
  * @param   contactor the contactor
  *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @param   state the state to set (ON/OFF)
- * @param blocking whether or not this should be a blocking call
+ * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set
  */
 ErrorStatus Contactors_Set(contactor_t contactor, State state, contactors_blocking_t blocking) {

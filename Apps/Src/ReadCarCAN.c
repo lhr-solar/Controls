@@ -15,10 +15,12 @@ static const int CANWATCH_TRIP_LIMIT = 2;
 
 //MMM CAN watchdog timer variables
 static OS_TMR canWatchTimer; // Is it ok to declare this here?
-static const int CAN_WATCH_TMR_DLY_SECONDS = 5;
+static const int CAN_WATCH_TMR_DLY_MS = 500;
+static const int CAN_WATCH_TMR_DLY_TMR_TS = (CAN_WATCH_TMR_DLY_MS / DEF_TIME_NBR_mS_PER_SEC) * OS_CFG_TMR_TASK_RATE_HZ;
 
 //MMM prechargeDlyTimer
 static OS_TMR prechargeDlyTimer;
+static const int PRECHARGE_DLY_TMR_TS = PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ;
 
 //MMM restart array and disable charging semaphonres
 static OS_SEM restartArraySem;
@@ -33,8 +35,6 @@ static bool restartingArray = false;
 static void CANWatchdog_Handler(); //Handler if we stop getting messages */
 static void arrayRestart(); //handler to turn array back on
 
-
-// Need to add function prototypes here
 
 // helper function to call if charging should be disabled
 static inline void chargingDisable(void) {
@@ -91,6 +91,8 @@ static inline void chargingEnable(void) {
 
 /**
  * @brief Callback function for the precharge delay timer. Turns off precharge and restarts the array.
+ * @param p_tmr pointer to the timer that calls this function, passed by timer
+ * @param p_arg pointer to the argument passed by timer
  * 
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
@@ -117,7 +119,8 @@ static void arrayRestart(void *p_tmr, void *p_arg){
 /**
  * @brief Disables charging and increments the trip counter
  * when canWatchTimer hits 0 (when charge enable messages are missed)
- * 
+ * @param p_tmr pointer to the timer that calls this function, passed by timer
+ * @param p_arg pointer to the argument passed by timer
 */
 void canWatchTimerCallback (void *p_tmr, void *p_arg){  //Probably needs its timer arguments
     OS_ERR err;
@@ -164,7 +167,7 @@ void Task_ReadCarCAN(void *p_arg)
         &canWatchTimer,
         "CAN Watch Timer",
         0,
-        OS_CFG_TMR_TASK_RATE_HZ * CAN_WATCH_TMR_DLY_SECONDS,
+        CAN_WATCH_TMR_DLY_TMR_TS,
         OS_OPT_TMR_PERIODIC,
         canWatchTimerCallback,
         NULL,
@@ -175,7 +178,7 @@ void Task_ReadCarCAN(void *p_arg)
     OSTmrCreate(
         &prechargeDlyTimer,
         "Precharge Delay Timer",
-        OS_CFG_TMR_TASK_RATE_HZ * PRECHARGE_ARRAY_DELAY,
+        PRECHARGE_DLY_TMR_TS,
         0,
         OS_OPT_TMR_ONE_SHOT,
         arrayRestart,
