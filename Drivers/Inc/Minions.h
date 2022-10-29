@@ -3,8 +3,11 @@
 #include <stdbool.h>
 #include "BSP_GPIO.h"
 
+//should be in sync with lookup table
 typedef enum{
     //inputs
+    IGN_1,
+    IGN_2,
     REGEN_SW,
     FOR_SW,
     REV_SW,
@@ -17,7 +20,7 @@ typedef enum{
 } MinionPin_t; 
 
 typedef struct PinInfo{
-    uint16_t pinNumber;
+    uint16_t pinMask;
     port_t port;
     direction_t direction; //0 for input, 1 for output     
 } PinInfo_t;
@@ -42,7 +45,8 @@ bool Minion_Read_Input(MinionPin_t pin);
  * 
  * @param pin specific pin to be written to 
  * @param status state of pin (0 or 1)
+ * @return false if pin is not an output pin, true if it is
  */
-void Minion_Write_Output(MinionPin_t pin, bool status);
+bool Minion_Write_Output(MinionPin_t pin, bool status);
 
 #endif 
