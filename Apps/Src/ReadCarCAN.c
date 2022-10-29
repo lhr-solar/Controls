@@ -33,7 +33,7 @@ static bool restartingArray = false;
 
 /*
 static void CANWatchdog_Handler(); //Handler if we stop getting messages */
-static void arrayRestart(); //handler to turn array back on
+static void arrayRestart(void *p_tmr, void *p_arg); //handler to turn array back on
 
 
 // helper function to call if charging should be disabled
