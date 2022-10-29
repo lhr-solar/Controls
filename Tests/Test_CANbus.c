@@ -25,6 +25,7 @@ void Task1(void *p_arg) {
      * +-------------+
     */
 
+   /*
     CANDATA_t msg;
     CANDATA_t response;
     msg.ID = MOTOR_DRIVE;
@@ -83,6 +84,19 @@ void Task1(void *p_arg) {
     CANbus_Read(&msg2, CAN_BLOCKING, MOTORCAN);
     CANbus_Read(&msg3, CAN_BLOCKING, MOTORCAN);
     CANbus_Read(&msg4, CAN_BLOCKING, MOTORCAN);
+
+    */
+
+    CANDATA_t msg;
+    msg.ID = STATE_OF_CHARGE;
+    msg.idx = 0;
+    float a = 420.69f;
+    float b = 13.37f;
+    memcpy(&msg.data[0], &a, sizeof a);
+    memcpy(&msg.data[4], &b, sizeof b);
+    CANbus_Send(msg, CAN_BLOCKING, CARCAN);
+    CANbus_Read(&msg, CAN_BLOCKING, MOTORCAN);
+    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
 
 
     /**
