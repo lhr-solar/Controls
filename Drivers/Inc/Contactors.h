@@ -21,7 +21,7 @@ typedef enum {
     NUM_CONTACTORS
 } contactor_t;
 
-typedef enum {CONTACTORS_BLOCKING = 0, CONTACTORS_NON_BLOCKING = 0x8000u} contactors_blocking_t;
+typedef enum {SET_CONTACTORS_BLOCKING = 0, SET_CONTACTORS_NON_BLOCKING = 0x8000u} contactors_blocking_t;
 
 
 /**

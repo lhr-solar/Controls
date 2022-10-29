@@ -59,8 +59,8 @@ static inline void chargingDisable(void) {
     RegenEnable = OFF;
 
     //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, CONTACTORS_BLOCKING);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, CONTACTORS_BLOCKING);
+    Contactors_Set(ARRAY_CONTACTOR, OFF, SET_CONTACTORS_BLOCKING);
+    Contactors_Set(ARRAY_PRECHARGE, OFF, SET_CONTACTORS_BLOCKING);
     
     // turn off the array contactor light
     Lights_Set(A_CNCTR, OFF);
@@ -91,7 +91,7 @@ static inline void chargingEnable(void) {
     // start precharge for array 
     if(shouldRestartArray){
 
-         if (Contactors_Set(ARRAY_PRECHARGE, ON, CONTACTORS_BLOCKING) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
+         if (Contactors_Set(ARRAY_PRECHARGE, ON, SET_CONTACTORS_BLOCKING) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
             restartingArray = true;
 
             // Wait to make sure precharge is finished and then restart array
@@ -109,16 +109,16 @@ static inline void chargingEnable(void) {
 /**
  * @brief restart the array, non-blocking callback for precharge delay timer
 */
-static void arrayRestart(void *p_arg){
+static void arrayRestart(OS_TMR *p_tmr, void *p_arg){
 
     if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
         restartingArray = false;
     }
     else {
         // Try to turn on array, but only if we can successfully turn off precharge
-        if(Contactors_Set(ARRAY_PRECHARGE, OFF, CONTACTORS_NON_BLOCKING) == SUCCESS){
+        if(Contactors_Set(ARRAY_PRECHARGE, OFF, SET_CONTACTORS_NON_BLOCKING) == SUCCESS){
 
-            Contactors_Set(ARRAY_CONTACTOR, ON, CONTACTORS_NON_BLOCKING);
+            Contactors_Set(ARRAY_CONTACTOR, ON, SET_CONTACTORS_NON_BLOCKING);
 
         }
     }
@@ -135,7 +135,7 @@ static void arrayRestart(void *p_arg){
  * when canWatchTimer hits 0 (when charge enable messages are missed)
  * 
 */
-void canWatchTimerCallback (){  //Probably needs its timer arguments
+void canWatchTimerCallback (OS_TMR *p_tmr, void *p_arg){  //Probably needs its timer arguments
     OS_ERR err;
 
     // mark regen as disabled
@@ -161,8 +161,8 @@ void canWatchTimerCallback (){  //Probably needs its timer arguments
 void Task_ReadCarCAN(void *p_arg)
 {
     OS_ERR err;
-    /*uint8_t buffer[8]; // buffer for CAN message
-    uint32_t canId;*/
+    uint8_t buffer[8]; // buffer for CAN message
+    uint32_t canId;
     CPU_TS ts;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
