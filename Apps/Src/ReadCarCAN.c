@@ -40,6 +40,7 @@ static void ArrayRestart(); //handler to turn array back on
 
 // helper function to call if charging should be disabled
 static inline void chargingDisable(void) {
+    Minion_Error_t mErr;
     // mark regen as disabled
     RegenEnable = OFF;
     //kill contactors 
@@ -54,7 +55,7 @@ static inline void chargingDisable(void) {
     CAN_Queue_Post(msg);
 
     // turn off the array contactor light
-    Minion_Write_Output(A_CNCTR, false);
+    Minion_Write_Output(A_CNCTR, false, &mErr);
     //Display_SetLight(A_CNCTR, OFF);
 }
 
@@ -233,6 +234,7 @@ static void CANWatchdog_Handler(void *p_arg){
 static void ArrayRestart(void *p_arg){
     OS_ERR err;
     CPU_TS ts;
+    Minion_Error_t mErr;
 
     OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
     assertOSError(OS_READ_CAN_LOC,err);
@@ -253,7 +255,7 @@ static void ArrayRestart(void *p_arg){
 
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
-    Minion_Write_Output(A_CNCTR, true);
+    Minion_Write_Output(A_CNCTR, true, &mErr);
     //Display_SetLight(A_CNCTR, ON);
 
     // let array know the contactor is on

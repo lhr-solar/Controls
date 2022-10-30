@@ -3,6 +3,14 @@
 #include <stdbool.h>
 #include "BSP_GPIO.h"
 
+//errors bc ur bad
+typedef enum{
+    MINION_ERR_NONE = 0,
+    MINION_ERR_YOU_READ_OUTPUT_PIN,
+    MINION_ERR_YOU_WROTE_TO_INPUT_PIN,
+
+} Minion_Error_t;
+
 //should be in sync with lookup table
 typedef enum{
     //inputs
@@ -38,7 +46,7 @@ void Minion_Init(void);
  * @return true
  * @return false *NOTE* If output pin is passed, will exit 
  */
-bool Minion_Read_Input(MinionPin_t pin);
+bool Minion_Read_Input(MinionPin_t pin, Minion_Error_t* err);
 
 /**
  * @brief Writes given status to a specified output pin. Locks writing to all output pins
@@ -47,6 +55,6 @@ bool Minion_Read_Input(MinionPin_t pin);
  * @param status state of pin (0 or 1)
  * @return false if pin is not an output pin, true if it is
  */
-bool Minion_Write_Output(MinionPin_t pin, bool status);
+bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr);
 
 #endif 

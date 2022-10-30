@@ -19,6 +19,7 @@ void Task1(void *arg)
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
 
     OS_ERR e;
+    Minion_Error_t mErr;
 
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
@@ -44,8 +45,8 @@ void Task1(void *arg)
     // }
 
     //tests the edge cases
-    bool output = Minion_Write_Output(REV_SW, lightState);
-    bool input = Minion_Read_Input(BRAKELIGHT);
+    bool output = Minion_Write_Output(REV_SW, lightState, &mErr);
+    bool input = Minion_Read_Input(BRAKELIGHT, &mErr);
 
     printf("This should print 0: %d", input);
     printf("This should print 0: %d", output);
