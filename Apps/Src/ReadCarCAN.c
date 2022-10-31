@@ -8,10 +8,6 @@
 #include "FaultState.h"
 #include "os_cfg_app.h"
 
-// watchDogTripCounter variable and limit
-static int CANWatchTripCounter = 0; 
-static const int CANWATCH_TRIP_LIMIT = 2;
-
 
 //MMM CAN watchdog timer variables
 static OS_TMR canWatchTimer; // Is it ok to declare this here?
@@ -127,20 +123,15 @@ void canWatchTimerCallback (void *p_tmr, void *p_arg){  //Probably needs its tim
 
     // mark regen as disabled
     RegenEnable = OFF;
-
-    //increment trip counter
-    CANWatchTripCounter++;
     
     // Set fault bitmaps 
     FaultBitmap |= FAULT_READBPS;
     OSErrLocBitmap |= OS_READ_CAN_LOC;
 
-    // If we tripped the counter too many times, enter fault state
-    if(CANWatchTripCounter > CANWATCH_TRIP_LIMIT) {
-        EnterFaultState();
-    } else { // Otherwise signal fault state to kill contactors and return
-        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-    }
+    // Signal fault state to kill contactors at its earliest convenience
+    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+    assertOSError(OS_READ_CAN_LOC,err);
+
 }
 
 
@@ -216,7 +207,7 @@ void Task_ReadCarCAN(void *p_arg)
                 }
                 break;
             }
-            case SUPPLEMENTAL_VOLTAGE: {
+            case SUPPLEMENTAL_VOLTAGE: { //TODO: do some telemetry stuff with other messages 
                 SupplementalVoltage = *(uint16_t *) &buffer;
                 break;
             }

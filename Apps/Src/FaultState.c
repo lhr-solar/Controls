@@ -87,6 +87,7 @@ void EnterFaultState(void) {
     }
     else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
         killContactorHandler();
+        return;
     }
     else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
         nonrecoverableFaultHandler();
