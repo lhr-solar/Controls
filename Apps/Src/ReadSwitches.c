@@ -61,8 +61,8 @@ void Task_ReadSwitches(void* p_arg) {
         Lights_Set(M_CNCTR,Switches_Read(IGN_2));
 
         cruiseEnablePushed = Switches_Read(CRUZ_EN); //read cruise enable switch
-        if (!lastCruiseEnPushed && cruiseEnablePushed) { //Rising Edge detector for updateVelocity thread
-            UpdateVel_ToggleCruise = true; //updateVelocity thread depends on this
+        if (!lastCruiseEnPushed && cruiseEnablePushed) { //Rising Edge detector for SendTritium thread
+            UpdateVel_ToggleCruise = true; //SendTritium thread depends on this
         }
         
         lastCruiseEnPushed = cruiseEnablePushed;

@@ -1,8 +1,8 @@
 /**
  * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
  * 
- * @file UpdateVelocity.c
- * @brief Function implementations for the UpdateVelocity application.
+ * @file SendTritium.c
+ * @brief Function implementations for the SendTritium application.
  * 
  * This contains functions relevant to updating the velocity and current setpoitns
  * of the Tritium motor controller. The implementation includes a normal current
@@ -105,7 +105,6 @@ void readInputs(){
 
     if(Switches_Read(FOR_SW) == ON){
         cruiseSet = Switches_Read(CRUZ_ST)==ON?true:false;
-
     }
     else{
         cruiseEnable = false;
@@ -139,7 +138,7 @@ static float percentToFloat(uint8_t percent){
 /**
  * @brief Follows the FSM to update the velocity of the car
 */
-void Task_UpdateVelocity(void *p_arg){
+void Task_SendTritium(void *p_arg){
     OS_ERR err;
     
     while(1){

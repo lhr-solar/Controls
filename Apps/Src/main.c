@@ -95,14 +95,14 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Initialize UpdateVelocity
+    // Initialize SendTritium
     OSTaskCreate(
-        (OS_TCB*)&UpdateVelocity_TCB,
-        (CPU_CHAR*)"UpdateVelocity",
-        (OS_TASK_PTR)Task_UpdateVelocity,
+        (OS_TCB*)&SendTritium_TCB,
+        (CPU_CHAR*)"SendTritium",
+        (OS_TASK_PTR)Task_SendTritium,
         (void*)NULL,
         (OS_PRIO)TASK_UPDATE_VELOCITY_PRIO,
-        (CPU_STK*)UpdateVelocity_Stk,
+        (CPU_STK*)SendTritium_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_UPDATE_VELOCITY_STACK_SIZE,
         (OS_MSG_QTY)0,

@@ -52,7 +52,7 @@ void Task_FaultState(void* p_arg);
 
 void Task_Init(void* p_arg);
 
-void Task_UpdateVelocity(void* p_arg);
+void Task_SendTritium(void* p_arg);
 
 void Task_ReadCarCAN(void* p_arg);
 
@@ -71,7 +71,7 @@ void Task_BlinkLight(void* p_arg);
  */
 extern OS_TCB FaultState_TCB;
 extern OS_TCB Init_TCB;
-extern OS_TCB UpdateVelocity_TCB;
+extern OS_TCB SendTritium_TCB;
 extern OS_TCB ReadCarCAN_TCB;
 extern OS_TCB SendDisplay_TCB;
 extern OS_TCB ReadTritium_TCB;
@@ -85,7 +85,7 @@ extern OS_TCB BlinkLight_TCB;
  */
 extern CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
 extern CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
-extern CPU_STK UpdateVelocity_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
+extern CPU_STK SendTritium_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
 extern CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
 extern CPU_STK SendDisplay_Stk[TASK_SEND_DISPLAY_STACK_SIZE];
 extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
