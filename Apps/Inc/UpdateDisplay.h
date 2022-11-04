@@ -30,83 +30,84 @@ typedef enum{
 	UPDATEDISPLAY_ERR_FIFO_PUT		=-1,	// Error putting command in fifo
 	UPDATEDISPLAY_ERR_FIFO_POP		=-2,	// Error popping command from fifo
 	UPDATEDISPLAY_ERR_PARSE_COMP	=-3,	// Error parsing component/val in SetComponent
-} UpdateDisplayError_e;
+	UPDATEDISPLAY_ERR_NO_CHANGE	=-4,		// No change in component value
+} UpdateDisplayError_t;
 
 /**
  * @brief Initializes UpdateDisplay application
- * @returns UpdateDisplayError_e
+ * @returns UpdateDisplayError_t
  */
 
-UpdateDisplayError_e UpdateDisplay_Init();
+UpdateDisplayError_t UpdateDisplay_Init();
 
 /**
  * @brief Selects visible page on the display
  * @param page which page to select
- * @returns UpdateDisplayError_e
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetPage(Page_e page);
+UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page);
 
 /**
  * @brief Sets the state of charge value on the display
- * @param percent charge as a percent
- * @returns UpdateDisplayError_e
+ * @param percent charge as a percent (0 digits of precision)
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetSOC(uint8_t percent);
+UpdateDisplayError_t UpdateDisplay_SetSOC(uint8_t percent);
 
 /**
  * @brief Sets the supplemental battery pack voltage value on the display
  * @param mv supplemental battery pack voltage in millivolts
- * @returns UpdateDisplayError_e
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetSBPV(uint32_t mv);
+UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv);
 
 /**
  * @brief Sets the velocity of the vehicle on the display
- * @param mphTenths velocity of the vehicle in tenths of mph
- * @returns UpdateDisplayError_e
+ * @param mphTenths velocity of the vehicle in tenths of mph (1 digit of precision)
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetVelocity(uint32_t mphTenths);
+UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);
 
 /**
  * @brief Sets the accelerator slider value on the display
  * @param percent pressure on accelerator in percent
- * @returns UpdateDisplayError_e
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetAccel(uint8_t percent);
+UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent);
 
 /**
  * @brief Sets the array indicator state on the display
- * @param state on or off
- * @returns UpdateDisplayError_e
+ * @param state array contactor on (true) or off (false)
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetArray(bool state);
+UpdateDisplayError_t UpdateDisplay_SetArray(bool state);
 
 /**
- * @brief Sets the motor indicator state on the display
- * @param state on or off
- * @returns UpdateDisplayError_e
+ * @brief Sets the motor contactor indicator state on the display
+ * @param state motor contactor on (true) or off (false)
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetMotor(bool state);
+UpdateDisplayError_t UpdateDisplay_SetMotor(bool state);
 
 /**
  * @brief Sets the gear selection state on the display
  * @param gear DISABLED=N, ENABLED=F, ACTIVE=R
- * @returns UpdateDisplayError_e
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetGear(TriState_e gear);
+UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear);
 
 /**
  * @brief Sets the regenerative braking indicator state on the display
  * @param state DISABLED, ENABLED, or ACTIVE
- * @returns UpdateDisplayError_e
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetRegenState(TriState_e state);
+UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
 
 /**
  * @brief Sets the cruise control indicator state on the display
  * @param state DISABLED, ENABLED, or ACTIVE
- * @returns UpdateDisplayError_e
+ * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_e UpdateDisplay_SetCruiseState(TriState_e state);
+UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 
 #endif

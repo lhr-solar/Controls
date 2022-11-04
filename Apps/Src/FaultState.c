@@ -43,11 +43,11 @@ void EnterFaultState(void) {
 
         if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
             // Note: separate tripcnt from T_INIT_FAIL
-            static uint8_t tripcnt = 0; //trip counter
-            if(tripcnt>3){ //try to restart the motor a few times and then fail out
+            static uint8_t hall_fault_cnt = 0; //trip counter
+            if(hall_fault_cnt>3){ //try to restart the motor a few times and then fail out
                 nonrecoverableFaultHandler();
             } else {
-                tripcnt++;
+                hall_fault_cnt++;
                 MotorController_Restart(); //re-initialize motor
                 return;
             }
@@ -55,11 +55,11 @@ void EnterFaultState(void) {
 
         if(TritiumError & T_INIT_FAIL){
             // Note: separate tripcnt from T_HALL_SENSOR_ERR
-            static uint8_t tripcnt = 0;
-            if(tripcnt>5){
+            static uint8_t init_fault_cnt = 0;
+            if(init_fault_cnt>5){
                 nonrecoverableFaultHandler(); //we've failed to init the motor five times
             } else {
-                tripcnt++;
+                init_fault_cnt++;
                 MotorController_Restart();
                 return;
             }
@@ -80,11 +80,11 @@ void EnterFaultState(void) {
         nonrecoverableFaultHandler();
     }
     else if(FaultBitmap & FAULT_DISPLAY){
-        static uint8_t tripcnt = 0;
-        if(tripcnt>3){
+        static uint8_t disp_fault_cnt = 0;
+        if(disp_fault_cnt>3){
             Display_Fault(OSErrLocBitmap, FaultBitmap);
         } else {
-            tripcnt++;
+            disp_fault_cnt++;
             Display_Reset();
             return;
         }

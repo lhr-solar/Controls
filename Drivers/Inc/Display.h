@@ -35,12 +35,12 @@ typedef enum{
 	DISPLAY_ERR_PARAMS    =-8,	// Invalid number of parameters passed to nextion	(0x1E)
 	DISPLAY_ERR_MAX_ARGS  =-9,  // Command arg list exceeded MAX_ARGS elements
 	DISPLAY_ERR_OTHER     =-10  // Other nextion display error
-} DisplayError_e;
+} DisplayError_t;
 
 /**
  * @brief Error handler for any display errors. Call this after any display driver function.
  */
-void assertDisplayError(DisplayError_e err);
+void assertDisplayError(DisplayError_t err);
 
 /**
  * All three pages on the HMI 
@@ -49,7 +49,7 @@ typedef enum{
 	STARTUP	=0,
 	INFO,
 	FAULT
-} Page_e;
+} Page_t;
 
 /**
  * For display elements with three states
@@ -58,7 +58,7 @@ typedef enum{
 	STATE_0	=0,
 	STATE_1	=1,
 	STATE_2	=2
-} TriState_e;
+} TriState_t;
 
 // For cruise control and regen
 #define DISABLED STATE_0
@@ -95,21 +95,21 @@ typedef struct{
 
 /**
  * @brief Sends a display message.
- * @returns DisplayError_e
+ * @returns DisplayError_t
  */
-DisplayError_e Display_Send(DisplayCmd_t cmd);
+DisplayError_t Display_Send(DisplayCmd_t cmd);
 
 /**
  * @brief Initializes the display
- * @returns DisplayError_e
+ * @returns DisplayError_t
  */
-DisplayError_e Display_Init(void);
+DisplayError_t Display_Init(void);
 
 /**
  * @brief Resets (reboots) the display
- * @returns DisplayError_e
+ * @returns DisplayError_t
  */
-DisplayError_e Display_Reset(void);
+DisplayError_t Display_Reset(void);
 
 /**
  * @brief Overwrites any processing commands and triggers the display fault screen
@@ -117,6 +117,6 @@ DisplayError_e Display_Reset(void);
  * @param faultCode the generic fault code (will be displayed in hex)
  * @returns bool: false for ERROR, true for SUCCESS
  */
-DisplayError_e Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
 
 #endif
