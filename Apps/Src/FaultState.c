@@ -7,7 +7,7 @@
 #include "Contactors.h"
 #include "Minions.h"
 static bool fromThread = false; //whether fault was tripped from thread
-extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes
+extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 
 static void ArrayMotorKill(void) {
