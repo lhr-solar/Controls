@@ -32,10 +32,16 @@ void Task_ReadTritium(void *p_arg)
 	OS_ERR err;
 
 	CANMSG_t msg;
+
+	CANId_t ID;
+	CANDATA_t data;
+	CAN_blocking_t blocking;
+
   
 	while (1)
 	{
-		
+		ErrorStatus status = CANbus_Read(CANDATA_t* data, CAN_blocking_t blocking, CAN_t MOTORCAN);
+
 /*		CANbuff buf;
 		ErrorStatus status = MotorController_Read(&buf);
 
