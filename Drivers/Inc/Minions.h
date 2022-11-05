@@ -44,7 +44,7 @@ void Minion_Init(void);
  * @brief Polls the ignition switch and enables/disables contactors accordingly 
  * 
  */
-void Minion_Ignition_Enable_Contactors(void);
+void Task_Contactor_Ignition(void);
 
 /**
  * @brief Reads current state of specified input pin

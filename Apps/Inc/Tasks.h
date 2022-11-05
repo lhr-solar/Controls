@@ -66,6 +66,8 @@ void Task_SendCarCAN(void* p_arg);
 
 void Task_BlinkLight(void* p_arg);
 
+void Task_Contactor_Ignition(void);
+
 /**
  * TCBs
  */
