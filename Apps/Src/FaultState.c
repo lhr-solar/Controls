@@ -7,6 +7,8 @@
 #include "Contactors.h"
 #include "Minions.h"
 static bool fromThread = false; //whether fault was tripped from thread
+extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes
+
 
 static void ArrayMotorKill(void) {
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
@@ -15,11 +17,9 @@ static void ArrayMotorKill(void) {
 }
 
 static void nonrecoverableFaultHandler(){
-    //turn additional lights on to indicate critical error
-    Display_Fault(OSErrLocBitmap, FaultBitmap);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, OFF);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, OFF);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, OFF);
+    Minion_Error_t mErr;
+    //turn additional brakelight on to indicate critical error
+    BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
     ArrayMotorKill();
 }
 

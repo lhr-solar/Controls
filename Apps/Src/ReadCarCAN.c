@@ -6,7 +6,6 @@
 #include "Minions.h"
 #include "CAN_Queue.h"
 
-
 static bool msg_recieved = false;
 static OS_MUTEX msg_rcv_mutex;
 
@@ -44,7 +43,6 @@ static inline void chargingDisable(void) {
     CAN_Queue_Post(msg);
 
     // turn off the array contactor light
-    Lights_Set(A_CNCTR, OFF);
     UpdateDisplay_SetArray(false);
 }
 
@@ -244,9 +242,7 @@ static void ArrayRestart(void *p_arg){
 
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
-    Lights_Set(A_CNCTR, ON);
     UpdateDisplay_SetArray(true);
-
     // let array know the contactor is on
     CANMSG_t msg;
     msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
