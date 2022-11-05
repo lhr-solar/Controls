@@ -20,7 +20,7 @@ static void nonrecoverableFaultHandler(){
     //turn additional lights on to indicate critical error
     //Display_SetLight(LEFT_BLINK, ON);
     //Display_SetLight(RIGHT_BLINK, ON);
-    Minion_Write_Output(BRAKELIGHT, false, &mErr);
+    Minion_Write_Output(BRAKELIGHT, true, &mErr);
     //Display_SetLight(CTRL_FAULT,ON); //turn on fault light
     ArrayMotorKill();
 }

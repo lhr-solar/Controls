@@ -1,4 +1,7 @@
 #include "IgnitionContactor.h"
+#include "os.h"
+#include "common.h"
+#include "Tasks.h"
 #include "Minions.h"
 #include "Contactors.h"
 
