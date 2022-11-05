@@ -1,116 +1,64 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
-#ifndef MINIONS_H
-#define MINIONS_H
-#include "BSP_SPI.h"
+#ifndef MINION_H
+#define MINION_H
+#include <stdbool.h>
 #include "BSP_GPIO.h"
-#include "common.h"
-#include "config.h"
-#include "GPIOExpander.h"
-#include "Tasks.h"
 
-#define SPI_CS          GPIO_Pin_4
-#define LIGHTS_PORT     PORTC
-#define HEADLIGHT_PIN   GPIO_Pin_6
-#define BRAKELIGHT_PIN  GPIO_Pin_7
-#define RIGHT_BLINK_PIN GPIO_Pin_8
-#define LEFT_BLINK_PIN  GPIO_Pin_9
 
-typedef enum {
-     HZD_SW=0, 
-     CRUZ_EN, 
-     REV_SW,
-     FOR_SW,
-     HEADLIGHT_SW,
-     LEFT_SW,
-     RIGHT_SW,
-     REGEN_SW,
-     CRUZ_ST,
-     IGN_1,
-     IGN_2
-} switches_t;
+//errors bc ur bad
+typedef enum{
+    MINION_ERR_NONE = 0,
+    MINION_ERR_YOU_READ_OUTPUT_PIN,
+    MINION_ERR_YOU_WROTE_TO_INPUT_PIN,
 
-// Ordered by pin of minion board
-//TODO: Double check that this ordering remains valid
-typedef enum {  
-    A_CNCTR = 0,
-    M_CNCTR,
-    CTRL_FAULT,
-    LEFT_BLINK,
-    RIGHT_BLINK,
-    Headlight_ON,
-    BrakeLight,
-    RSVD_LED
-} light_t;
+} Minion_Error_t;
+
+//used to index into lookup table
+//if changed, PINS_LOOKARR should be changed in Minions.c
+typedef enum{
+    //inputs
+    IGN_1,
+    IGN_2,
+    REGEN_SW,
+    FOR_SW,
+    REV_SW,
+    CRUZ_EN,
+    CRUZ_ST,
+    //output
+    BRAKELIGHT, 
+    //num of pins
+    MINIONPIN_NUM,
+} MinionPin_t; 
+
+typedef struct PinInfo{
+    uint16_t pinMask;
+    port_t port;
+    direction_t direction; //0 for input, 1 for output     
+} PinInfo_t;
+
 
 /**
- * @brief   Initializes all Lights and Switches
- * @param   None
- * @return  None
- */ 
-void Minions_Init(void);
-
-/**
- * @brief   Reads the current state of 
- *          the specified switch
- * @param   sw the switch to read
- * @return  State of the switch (ON/OFF)
- */ 
-State Switches_Read(switches_t sw);
-
-/**
-* @brief   Read the state of the lights
-* @param   light Which Light to read
-* @return  returns state enum which indicates ON/OFF
-*/ 
-State Lights_Read(light_t light);
-
-/**
- * @brief   Sends SPI messages to read switches values. Also reads from GPIO's for 
- *          ignition switch values
- */ 
-void Switches_UpdateStates(void);
-
-/**
- * @brief   Set light to given state
- * @param   light which light to set
- * @param   state what state to set the light to
- * @return  void
+ * @brief Initializes input switches, output pins, and output mutex
+ * 
  */
-void Lights_Set(light_t light, State state);
+void Minion_Init(void);
 
 /**
-* @brief   Read the lights bitmap
-* @return  returns uint16_t with lights bitmap
-*/ 
-uint16_t Lights_Bitmap_Read();
-
-/**
- * @brief Toggles a light. Should be used only after Toggle_Enable has been called for this light so that we are accurately tracking the enabled and disabled lights
- * @param light Which light to toggle
-*/
-void Lights_Toggle(light_t light);
-
-/**
-
- * @brief   Set light toggling
- * @param   light Which light to enable toggling for
- * @param   state State to set toggling
- * @return  void
+ * @brief Reads current state of specified input pin
+ * 
+ * @param pin specific pin to be read 
+ * @return true
+ * @return false *NOTE* If output pin is passed, will exit 
  */
-void Lights_Toggle_Set(light_t light, State state);
+bool Minion_Read_Input(MinionPin_t pin, Minion_Error_t* err);
 
 /**
-* @brief   Read the toggle enable state of a specific light from the toggle bitmap
-* @param   light Which Light to read
-* @return  returns State enum which indicates ON/OFF
-*/
-State Lights_Toggle_Read(light_t light);
-
-/**
- * @brief   Read toggle bitmap
- * @return  returns uint8_t bitmap for toggle (LEFT/RIGHT)
+ * @brief Writes given status to a specified output pin. Locks writing to all output pins
+ * 
+ * @param pin specific pin to be written to 
+ * @param status state of pin (0 or 1)
+ * @return false if pin is not an output pin, true if it is
  */
-uint8_t Lights_Toggle_Bitmap_Read(void);
+bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr);
 
-#endif
+
+#endif 

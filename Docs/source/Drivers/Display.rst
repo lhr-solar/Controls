@@ -2,38 +2,31 @@
 Display Driver
 **************
 
-**Note: This driver is about to go through a major overhaul. If the docs don't seem to match the code, let someone know!**
+The display driver is responsible for all interactions with the display. As such, it includes many functions to set various screen elements' values. The driver defines a command struct, which represents a command to be sent to the display. The driver exposes the following functions:
 
-The display driver is responsible for all interactions with the display. As such, it includes many functions to set various screen elements' values. The public interface of the display driver is as follows:
+* ``Display_Error_t Display_Init(void)`` — Initializes UART and resets the display.
 
-``void Display_Init(void)`` — Makes sure UART is initialized, and then sets the display background color.
+* ``Display_Error_t Display_Reset(void)`` — Sends the reset command to the display.
 
-``ErrorStatus Display_SetMainView(void)`` — Sets the display to its main (non-precharged view). In general, we always want to be in this mode, so this function gets called very early on in the application code.
+* ``Display_Error_t Display_Send(Display_Cmd_t cmd)`` — Send the given command to the display. In general, this function shouldn't be called directly. See FILLER for more details on where it's called.
 
-``ErrorStatus Display_CruiseEnable(State on)`` — Sets the cruise enable component to the given state
+* ``Display_Error_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode)`` — Display the fault page on the display, presenting ``osErrCode`` and ``faultCode`` to the user.
 
-``ErrorStatus Display_SetVelocity(float vel)`` — Sets the velocity component to the given value. ``vel`` is given in meters per second, but display in miles per hour (with one digit after the decimal point)
+.. _cmd:
 
-``ErrorStatus Display_SetSBPV(uint16_t mv)`` — Sets the battery pack voltage component. Displayed to the driver with one digit after the decimal point.
+Command Structure
+-----------------
 
-``ErrorStatus Display_SetError(int idx, char *err)`` — Deprecated. Do not use.
+A more detailed description of the command structure is given below. For more information on the command syntax, see the `Nextion Documentation <https://nextion.tech/instruction-set/>`_:
 
-``ErrorStatus Display_NoErrors(void)`` — Deprecated. Do not use.
+* ``char* compOrCmd`` — Either a component or a command, depending on the next few values
 
-``ErrorStatus Display_SetChargeState(uint32_t chargeState)`` — Sets the charge component to a given value. The format of this value is set by BPS, and displayed with one digit after the decimal point.
+* ``char *attr`` — When the above is a component, the attribute of that component. Else, ``NULL``
 
-``ErrorStatus Display_SetRegenEnabled(State ChargeEnabled)`` — Sets the regen enable display component, letting the driver know whether regen is available to them at the moment.
+* ``char *op`` — The operation when the above two are set, usually ``=``. Else, NULL
 
-``ErrorStatus Display_SetLight(uint8_t light, State on)``— Sets a light component to determined by the ``light`` to the given state. Whenever (and if) we get dedicated LEDs for blinkers, headlights, etc. this function will be deprecated.
+* ``numArgs`` — The number of arguments the command takes. Should be 1 if setting component
 
-``ErrorStatus Display_SetGear(State fwd, State rev)``— Sets the gear component based on the given ``fwd`` and ``rev`` states. If neither are one, a neutral gear is displayed. If both are on, an error is returned.
+* ``argTypes[]`` — A list of the argument types to follow
 
-
-Internal Details
-================
-
-The display expects command strings over UART. The driver operates by constructing these strings in chunks and sending them over UART. For example say we have the component ``CHARGE_STATE``, and we wish to change its text to display 37.2. Internally, we'd first call ``updateIntValue(CHARGE_STATE, TXT, 372)``. This calls ``sendStartOfAssignment``, which fetches the string representation of the first two arguments (``x1`` and ``txt`` in this case), and then constructs the string ``"x1.txt="``, sending over UART. To complete the statement, ``updateIntValue`` then sends the number 372 and a message terminator. At this point the command is complete, and the display sends a return value, which the function interprets as success or failure.
-
-The rest of the driver is built upon these basic building blocks. **WHENEVER THIS DRIVER IS UPDATE, THESE ARE EXPECTED TO CHANGE SIGNIFICANTLY.** This interface is not public for a reason, so don't attempt to use it from any application-level code.
-
-Components are defined in an enum, the value of which is used to index an array of strings (**NOTE: THIS WILL BE CHANGED IN THE NEAR FUTURE**). The list of enum values is long and subject to change, so it won't be reproduced here. Check ``Drivers/Src/Display.c`` for details.
+* ``args`` — The actual arguments for the command (strings or ints)

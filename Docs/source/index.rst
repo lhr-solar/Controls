@@ -40,7 +40,7 @@ Keep the docs clear and readible. Reach out to more experienced team members wit
    Apps/ReadSwitches
    Apps/ReadTritium
    Apps/SendCarCAN
-   Apps/SendDisplay
+   Apps/UpdateDisplay
    Apps/UpdateVelocity
    Apps/ExtraFiles
 

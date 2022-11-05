@@ -17,11 +17,11 @@ OS_TCB FaultState_TCB;
 OS_TCB Init_TCB;
 OS_TCB SendTritium_TCB;
 OS_TCB ReadCarCAN_TCB;
-OS_TCB SendDisplay_TCB;
+OS_TCB UpdateDisplay_TCB;
 OS_TCB ReadTritium_TCB;
-OS_TCB ReadSwitches_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB BlinkLight_TCB;
+OS_TCB IgnCont_TCB;
 
 /**
  * Stacks
@@ -30,11 +30,11 @@ CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
 CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 CPU_STK SendTritium_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
 CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
-CPU_STK SendDisplay_Stk[TASK_SEND_DISPLAY_STACK_SIZE];
+CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
-CPU_STK ReadSwitches_Stk[TASK_READ_SWITCHES_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
+CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
 
 /**
  * Semaphores
@@ -47,11 +47,7 @@ OS_SEM FaultState_Sem4;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
-State RegenEnable = OFF; 
-// supplemental voltage read from Supplemental Voltage board over CAN
-uint16_t SupplementalVoltage = 0; 
-//8 digit fixed point value from bps read over CAN. 88750000 = 88.750000%
-uint32_t StateOfCharge = 0; 
+State RegenEnable = OFF;
 
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
