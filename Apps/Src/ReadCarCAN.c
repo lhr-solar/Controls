@@ -1,7 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "ReadCarCAN.h"
-#include "Display.h"
+#include "UpdateDisplay.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "CAN_Queue.h"
@@ -42,7 +42,11 @@ static inline void chargingDisable(void) {
     Contactors_Set(ARRAY_PRECHARGE, OFF, SET_CONTACTORS_BLOCKING);
     
     // turn off the array contactor light
+<<<<<<< HEAD
     //Display_SetLight(A_CNCTR, OFF);
+=======
+    UpdateDisplay_SetArray(false);
+>>>>>>> master
 }
 
 // helper function to call if charging should be enabled
@@ -206,12 +210,18 @@ void Task_ReadCarCAN(void *p_arg)
                 }
                 break;
             }
+<<<<<<< HEAD
             case SUPPLEMENTAL_VOLTAGE: { //TODO: do some telemetry stuff with other messages 
                 SupplementalVoltage = *(uint16_t *) &buffer;
+=======
+            case SUPPLEMENTAL_VOLTAGE: {
+                UpdateDisplay_SetSBPV(*(uint16_t *) &buffer); // Receive value in mV
+>>>>>>> master
                 break;
             }
             case STATE_OF_CHARGE:{
-                StateOfCharge = *(uint32_t*) &buffer; //get the 32 bit message and store it
+                uint8_t SOC = (*(uint32_t*) &buffer)/(100000);  // Convert to integer percent
+                UpdateDisplay_SetSOC(SOC);
                 break;
             }
             default: 
@@ -226,3 +236,51 @@ void Task_ReadCarCAN(void *p_arg)
 
 
 
+<<<<<<< HEAD
+=======
+    OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
+    assertOSError(OS_READ_CAN_LOC,err);
+
+    if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
+        OSMutexPend(&arrayRestartMutex,
+                0,
+                OS_OPT_PEND_BLOCKING,
+                &ts,
+                &err);
+        restartingArray = false;
+        OSMutexPost(&arrayRestartMutex,
+                OS_OPT_NONE,
+                &err);
+        assertOSError(OS_READ_CAN_LOC,err);
+        return;
+    }
+
+    Contactors_Set(ARRAY_CONTACTOR, ON);
+    Contactors_Set(ARRAY_PRECHARGE, OFF);
+    UpdateDisplay_SetArray(true);
+    // let array know the contactor is on
+    CANMSG_t msg;
+    msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
+    msg.payload.bytes = 1;
+    msg.payload.data.b = true;
+    CAN_Queue_Post(msg);
+
+    OSMutexPend(&arrayRestartMutex,
+                0,
+                OS_OPT_PEND_BLOCKING,
+                &ts,
+                &err);
+    assertOSError(OS_READ_CAN_LOC,err);
+
+    // done restarting the array
+    restartingArray = false;
+
+    OSMutexPost(&arrayRestartMutex,
+                OS_OPT_NONE,
+                &err);
+    assertOSError(OS_READ_CAN_LOC,err);
+
+    // delete this task
+    OSTaskDel(&arrayTCB, &err);
+};
+>>>>>>> master
