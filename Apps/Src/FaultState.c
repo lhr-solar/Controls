@@ -8,6 +8,7 @@
 #include "Minions.h"
 static bool fromThread = false; //whether fault was tripped from thread
 
+
 static void ArrayMotorKill(void) {
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
@@ -15,13 +16,12 @@ static void ArrayMotorKill(void) {
 }
 
 static void nonrecoverableFaultHandler(){
+    Minion_Error_t mErr;
     //turn additional lights on to indicate critical error
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, LEFT_BLINK_PIN, OFF);
-    Display_SetLight(LEFT_BLINK, ON);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, RIGHT_BLINK_PIN, OFF);
-    Display_SetLight(RIGHT_BLINK, ON);
-    BSP_GPIO_Write_Pin(LIGHTS_PORT, BRAKELIGHT_PIN, OFF);
-    Display_SetLight(CTRL_FAULT,ON); //turn on fault light
+    //Display_SetLight(LEFT_BLINK, ON);
+    //Display_SetLight(RIGHT_BLINK, ON);
+    Minion_Write_Output(BRAKELIGHT, true, &mErr);
+    //Display_SetLight(CTRL_FAULT,ON); //turn on fault light
     ArrayMotorKill();
 }
 
@@ -51,7 +51,7 @@ void EnterFaultState(void) {
             } else {
                 tripcnt++;
                 //Lights_Set(CTRL_FAULT,OFF);
-                Display_SetLight(CTRL_FAULT,OFF);
+                //Display_SetLight(CTRL_FAULT,OFF);
                 MotorController_Restart(); //re-initialize motor
                 return;
             }
@@ -65,7 +65,7 @@ void EnterFaultState(void) {
             } else {
                 tripcnt++;
                 //Lights_Set(CTRL_FAULT,OFF);
-                Display_SetLight(CTRL_FAULT,OFF);
+                //Display_SetLight(CTRL_FAULT,OFF);
                 MotorController_Restart();
                 return;
             }

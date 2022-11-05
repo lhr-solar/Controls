@@ -74,7 +74,7 @@ void Task_Init(void *p_arg){
     CANbus_Init();
     Contactors_Init();
     Display_Init();
-    Minions_Init();
+    Minion_Init();
     CAN_Queue_Init();
 
     // Initialize FaultState
@@ -167,24 +167,6 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Initialize ReadSwitches
-    OSTaskCreate(
-        (OS_TCB*)&ReadSwitches_TCB,
-        (CPU_CHAR*)"ReadSwitches",
-        (OS_TASK_PTR)Task_ReadSwitches,
-        (void*)NULL,
-        (OS_PRIO)TASK_READ_SWITCHES_PRIO,
-        (CPU_STK*)ReadSwitches_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_READ_SWITCHES_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
     // Initialize SendCarCAN
     OSTaskCreate(
         (OS_TCB*)&SendCarCAN_TCB,
@@ -203,16 +185,16 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Initialize BlinkLights
+    // Initialize IgnitionContactor
     OSTaskCreate(
-        (OS_TCB*)&BlinkLight_TCB,
-        (CPU_CHAR*)"BlinkLight",
-        (OS_TASK_PTR)Task_BlinkLight,
+        (OS_TCB*)&IgnCont_TCB,
+        (CPU_CHAR*)"IgnitionContactor",
+        (OS_TASK_PTR)Task_Contactor_Ignition,
         (void*)NULL,
-        (OS_PRIO)TASK_BLINK_LIGHT_PRIO,
-        (CPU_STK*)BlinkLight_Stk,
+        (OS_PRIO)TASK_IGN_CONT_PRIO,
+        (CPU_STK*)IgnCont_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_BLINK_LIGHT_STACK_SIZE,
+        (CPU_STK_SIZE)TASK_IGN_CONT_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
