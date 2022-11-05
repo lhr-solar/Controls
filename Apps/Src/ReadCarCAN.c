@@ -42,8 +42,7 @@ static inline void chargingDisable(void) {
     Contactors_Set(ARRAY_PRECHARGE, OFF, SET_CONTACTORS_BLOCKING);
     
     // turn off the array contactor light
-    Lights_Set(A_CNCTR, OFF);
-  
+    //Display_SetLight(A_CNCTR, OFF);
 }
 
 // helper function to call if charging should be enabled
