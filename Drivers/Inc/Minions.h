@@ -12,7 +12,8 @@ typedef enum{
 
 } Minion_Error_t;
 
-//should be in sync with lookup table
+//used to index into lookup table
+//if changed, PINS_LOOKARR should be changed in Minions.c
 typedef enum{
     //inputs
     IGN_1,
