@@ -27,7 +27,7 @@
 #define TASK_READ_SWITCHES_PRIO             7
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_BLINK_LIGHT_PRIO               9
-#define TASK_IGN_CONT_PRIO                  9
+#define TASK_IGN_CONT_PRIO                  7
 
 /**
  * Stack Sizes
