@@ -43,6 +43,7 @@ static inline void chargingDisable(void) {
     CAN_Queue_Post(msg);
 
     // turn off the array contactor light
+    //Lights_Set(A_CNTR, OFF);
     //Display_SetLight(A_CNCTR, OFF);
 }
 
@@ -242,7 +243,7 @@ static void ArrayRestart(void *p_arg){
     Contactors_Set(ARRAY_CONTACTOR, ON);
     Contactors_Set(ARRAY_PRECHARGE, OFF);
     //Display_SetLight(A_CNCTR, ON);
-
+    //Lights_Set(A_CNTR, OFF);
     // let array know the contactor is on
     CANMSG_t msg;
     msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
