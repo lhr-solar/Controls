@@ -38,6 +38,7 @@ bool Minion_Read_Input(MinionPin_t pin, Minion_Error_t* err){
     return (bool)BSP_GPIO_Read_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinMask);
 }
 
+
 bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
     CPU_TS timestamp;
     OS_ERR err;
@@ -50,7 +51,6 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
         assertOSError(OS_MINIONS_LOC, err);
         return true;
     }
-
     *mErr = MINION_ERR_YOU_WROTE_TO_INPUT_PIN;
     return false;
 }

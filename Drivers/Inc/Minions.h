@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "BSP_GPIO.h"
 
+
 //errors bc ur bad
 typedef enum{
     MINION_ERR_NONE = 0,
@@ -57,5 +58,6 @@ bool Minion_Read_Input(MinionPin_t pin, Minion_Error_t* err);
  * @return false if pin is not an output pin, true if it is
  */
 bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr);
+
 
 #endif 

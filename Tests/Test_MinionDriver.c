@@ -21,6 +21,7 @@ void Task1(void *arg)
     OS_ERR e;
     Minion_Error_t mErr;
 
+
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     // tests the reading and writing
