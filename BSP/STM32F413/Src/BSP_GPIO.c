@@ -84,7 +84,7 @@ uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask){
  * @brief   Writes data to a specified pin
  * @param   port The port to write to
  * @param   pin The pin to write to 
- * @param   state ON or OFF
+ * @param   state true=ON or false=OFF
  * @return  None
  */ 
 
