@@ -19,7 +19,7 @@
 /**
  * Creates queue for display commands.
  */
-#define DISP_Q_SIZE 5
+#define DISP_Q_SIZE 10
 
 #define FIFO_TYPE DisplayCmd_t
 #define FIFO_SIZE DISP_Q_SIZE
