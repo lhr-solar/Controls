@@ -29,19 +29,16 @@ void Task_Contactor_Ignition(void* p_arg) {
         //UpdateSwitches();
 
         // array on/off
-        if (Minion_Read_Input(IGN_1, &Merr) == true || Minion_Read_Input(IGN_2, &Merr) == true) {
+        if (Minion_Read_Input(IGN_1, &Merr)) {
             Contactors_Enable(ARRAY_CONTACTOR);
-            Contactors_Enable(ARRAY_PRECHARGE);
         } else {
-            Contactors_Disable(ARRAY_CONTACTOR);
-            Contactors_Disable(ARRAY_PRECHARGE);
-            //Lights_Set(A_CNCTR,OFF);
-            //Display_SetLight(A_CNCTR,OFF);
+           Contactors_Disable(ARRAY_CONTACTOR);
         }
         assertOSError(OS_MINIONS_LOC, err);
-
-        // motor on/off
+   
+        //turn motor on/off
         Contactors_Set(MOTOR_CONTACTOR, Minion_Read_Input(IGN_2, &Merr));
+        assertOSError(OS_MINIONS_LOC, err);
         assertOSError(OS_MINIONS_LOC, err);
         //Lights_Set(M_CNCTR,Switches_Read(IGN_2));
 
