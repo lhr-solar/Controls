@@ -41,12 +41,6 @@ typedef struct PinInfo{
 void Minion_Init(void);
 
 /**
- * @brief Polls the ignition switch and enables/disables contactors accordingly 
- * 
- */
-void Task_Contactor_Ignition(void);
-
-/**
  * @brief Reads current state of specified input pin
  * 
  * @param pin specific pin to be read 

@@ -1,9 +1,16 @@
+#include "IgnitionContactor.h"
 #include "Minions.h"
-#include "os.h"
 #include "Contactors.h"
-#include "Tasks.h"
 
-void Task_Contactor_Ignition(void) {
+#define IGN_CONT_PERIOD 10
+
+/**
+ * @brief A task that reads the switches and enables/disables the 
+ * contactors based on that
+ * 
+ */
+
+void Task_Contactor_Ignition(void* p_arg) {
     OS_ERR err;
     Minion_Error_t Merr;
 
@@ -44,7 +51,7 @@ void Task_Contactor_Ignition(void) {
         //lastCruiseEnPushed = cruiseEnablePushed;
 
 
-        //OSTimeDlyHMSM(0, 0, 0, READ_SWITCH_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-        //assertOSError(OS_SWITCHES_LOC, err);
+        OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        assertOSError(OS_MINIONS_LOC, err);
     }
 }

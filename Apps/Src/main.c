@@ -185,6 +185,24 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
+    // Initialize IgnitionContactor
+    OSTaskCreate(
+        (OS_TCB*)&IgnCont_TCB,
+        (CPU_CHAR*)"IgnitionContactor",
+        (OS_TASK_PTR)Task_Contactor_Ignition,
+        (void*)NULL,
+        (OS_PRIO)TASK_IGN_CONT_PRIO,
+        (CPU_STK*)IgnCont_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_IGN_CONT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
+
     while(1){
         OSTimeDlyHMSM(1,0,0,0,OS_OPT_TIME_HMSM_STRICT,&err);
     }
