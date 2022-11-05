@@ -7,7 +7,7 @@
 
 /* OBJECTIVES:
 Objective 1:
-- Receive motor status message from MotorController
+- Receive motor status message from MotorController (18.4.2)
 - interpret error status
 	- if error
 		- assertOSError
@@ -32,10 +32,11 @@ void Task_ReadTritium(void *p_arg)
 	OS_ERR err;
 
 	CANMSG_t msg;
-
+  
 	while (1)
 	{
-		CANbuff buf;
+		
+/*		CANbuff buf;
 		ErrorStatus status = MotorController_Read(&buf);
 
 		if (status == SUCCESS)
@@ -49,6 +50,7 @@ void Task_ReadTritium(void *p_arg)
 
 			// TODO: handle error
 		}
+*/
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
 		assertOSError(OS_READ_TRITIUM_LOC, err);
 	}
