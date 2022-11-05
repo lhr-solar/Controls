@@ -43,7 +43,8 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
     OS_ERR err;
 
     if(PINS_LOOKARR[pin].direction == OUTPUT){
-        OSMutexPend(&OutputMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err); 
+        OSMutexPend(&OutputMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+        assertOSError(OS_MINIONS_LOC, err); 
         BSP_GPIO_Write_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinMask, status);
         OSMutexPost(&OutputMutex, OS_OPT_POST_NONE, &err);
         assertOSError(OS_MINIONS_LOC, err);
