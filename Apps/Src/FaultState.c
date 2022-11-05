@@ -17,7 +17,6 @@ static void ArrayMotorKill(void) {
 }
 
 static void nonrecoverableFaultHandler(){
-    Minion_Error_t mErr;
     //turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
     ArrayMotorKill();

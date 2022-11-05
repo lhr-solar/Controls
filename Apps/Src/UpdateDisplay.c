@@ -49,7 +49,7 @@ typedef enum{
 	// Fault code components
 	OS_CODE,
 	FAULT_CODE
-} Component_e;
+} Component_t;
 
 const char* compStrings[15]= {
 	// Boolean components
@@ -128,9 +128,8 @@ static UpdateDisplayError_t UpdateDisplay_PopNext(){
 }
 
 /**
- * @brief Pops the next display message from the queue and passes
- * it to the display driver. Pends on mutex to ensure threadsafe memory access
- * and signals semaphore upon successful fifo_put.
+ * @brief Puts a new display message in the queue. Pends on mutex to ensure
+ * threadsafe memory access and signals semaphore upon successful fifo_put.
  * @returns UpdateDisplayError_t
  */
 static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
@@ -188,7 +187,7 @@ static UpdateDisplayError_t UpdateDisplay_Refresh(){
  * @param val value
  * @return UpdateDisplayError_t
  */
-static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_e comp, uint32_t val){
+static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
 	UpdateDisplayError_t ret = UPDATEDISPLAY_ERR_NONE;
 	
 	// For components that are on/off

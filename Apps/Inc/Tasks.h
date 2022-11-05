@@ -23,7 +23,7 @@
 #define TASK_READ_TRITIUM_PRIO              3
 #define TASK_UPDATE_VELOCITY_PRIO           4
 #define TASK_READ_CAR_CAN_PRIO              5
-#define TASK_SEND_DISPLAY_PRIO              6
+#define TASK_UPDATE_DISPLAY_PRIO            6
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_BLINK_LIGHT_PRIO               9
 #define TASK_IGN_CONT_PRIO                  7
