@@ -9,4 +9,6 @@
 
 #include "CANbus.h"
 
+#define SAT_BUF_LENGTH 5
+
 #endif

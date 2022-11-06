@@ -27,10 +27,32 @@ static OS_SEM canWatchDisableChargingSem;
 static OS_MUTEX arrayRestartMutex;
 static bool restartingArray = false;
 
+// MMM saturation buffer variables
+static int chargeMsgBuffer[SAT_BUF_LENGTH];
+static int saturationThreshold;
+static int chargeMsgSaturation;
+static int oldestMsgIdx = 0;
+
 /*
 static void CANWatchdog_Handler(); //Handler if we stop getting messages */
 static void arrayRestart(void *p_tmr, void *p_arg); //handler to turn array back on
 
+/**
+ * @brief adds messages to the charge message saturation buffer and updates saturation
+ * @param chargeMessage whether bps message was charge enable or disable. Pass 1 for enable, -1 for disable.
+*/
+static void updateSaturation(int chargeMessage){
+    // Replace oldest message with new charge messge and update index for oldest message
+    chargeMsgBuffer[oldestMsgIdx] = chargeMessage;
+    oldestMsgIdx = (oldestMsgIdx + 1) % SAT_BUF_LENGTH;
+
+    // Calculate the new saturation value by assigning weightings of [1, num messages] from oldest to newest
+    int newSaturation = 0;
+    for (int i = 0; i < SAT_BUF_LENGTH; i++){
+        newSaturation += chargeMsgBuffer[(oldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
+    }
+    chargeMsgSaturation = newSaturation;
+}
 
 // helper function to call if charging should be disabled
 static inline void chargingDisable(void) {
@@ -42,11 +64,8 @@ static inline void chargingDisable(void) {
     Contactors_Set(ARRAY_PRECHARGE, OFF, SET_CONTACTORS_BLOCKING);
     
     // turn off the array contactor light
-<<<<<<< HEAD
-    //Display_SetLight(A_CNCTR, OFF);
-=======
     UpdateDisplay_SetArray(false);
->>>>>>> master
+
 }
 
 // helper function to call if charging should be enabled
@@ -70,17 +89,14 @@ static inline void chargingEnable(void) {
     // if nothing is precharging and we need to turn the array on, turn it on
     shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==OFF) && (Contactors_Get(ARRAY_PRECHARGE)==OFF);
 
-    // start precharge for array 
+    // wait for precharge for array 
     if(shouldRestartArray){
-
-         if (Contactors_Set(ARRAY_PRECHARGE, ON, SET_CONTACTORS_BLOCKING) == SUCCESS) {    // only run through precharge sequence if we successfully start precharge
-            restartingArray = true;
 
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&prechargeDlyTimer, &err);
             
         }
-    }
+    
 
     OSMutexPost(&arrayRestartMutex,
                 OS_OPT_NONE,
@@ -108,7 +124,7 @@ static void arrayRestart(void *p_tmr, void *p_arg){
         }
     }
 
-        Lights_Set(A_CNCTR, ON);
+        //Lights_Set(A_CNCTR, ON); Don't know where this function is. Does it even exist?
 
         // done restarting the array
         restartingArray = false;
@@ -150,6 +166,13 @@ void Task_ReadCarCAN(void *p_arg)
     OSSemCreate(&restartArraySem, "array restart semaphore", 0, &err);
     assertOSError(OS_READ_CAN_LOC, err);
     OSSemCreate(&canWatchDisableChargingSem, "disable charging semaphore", 0, &err);
+
+    // Calculate threshold value for the charge enable saturation buffer based on buffer length
+    // Values decrease by one each position, and the threshold is halfway between 0 and max
+    for (int i = 0; i < SAT_BUF_LENGTH; i++) {
+        chargeMsgSaturation += i + 1;
+    }
+    saturationThreshold /= 2;
 
 
     //Create the CAN Watchdog (periodic) timer
@@ -196,27 +219,28 @@ void Task_ReadCarCAN(void *p_arg)
         }
 
         switch(canId){ //we got a message
-            case CHARGE_ENABLE: { //M Don't think we need msg_received
+            case CHARGE_ENABLE: { 
 
                 //Start CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
 
                 if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                     chargingDisable();
-                } else {
-                    //We got a message of enable with a nonzero value, turn on Regen, If we are already in precharge / array is on, do nothing. 
-                    //If not, initiate precharge and restart sequence. 
-                    chargingEnable();
+                    updateSaturation(-1);
+                } else { //We got a message of enable with a nonzero value
+                    updateSaturation(1);
+
+                    // If the charge message saturation is above the threshold, wait for precharge and restart sequence then enable charging.
+                    // If we are already precharging/array is on, nothing will be done 
+                    if (chargeMsgSaturation >= saturationThreshold){
+                        chargingEnable();
+                    }
+                    
                 }
                 break;
             }
-<<<<<<< HEAD
-            case SUPPLEMENTAL_VOLTAGE: { //TODO: do some telemetry stuff with other messages 
-                SupplementalVoltage = *(uint16_t *) &buffer;
-=======
             case SUPPLEMENTAL_VOLTAGE: {
                 UpdateDisplay_SetSBPV(*(uint16_t *) &buffer); // Receive value in mV
->>>>>>> master
                 break;
             }
             case STATE_OF_CHARGE:{
@@ -236,51 +260,3 @@ void Task_ReadCarCAN(void *p_arg)
 
 
 
-<<<<<<< HEAD
-=======
-    OSTimeDlyHMSM(0,0,PRECHARGE_ARRAY_DELAY,0,OS_OPT_TIME_HMSM_STRICT,&err); //delay
-    assertOSError(OS_READ_CAN_LOC,err);
-
-    if(!RegenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        OSMutexPend(&arrayRestartMutex,
-                0,
-                OS_OPT_PEND_BLOCKING,
-                &ts,
-                &err);
-        restartingArray = false;
-        OSMutexPost(&arrayRestartMutex,
-                OS_OPT_NONE,
-                &err);
-        assertOSError(OS_READ_CAN_LOC,err);
-        return;
-    }
-
-    Contactors_Set(ARRAY_CONTACTOR, ON);
-    Contactors_Set(ARRAY_PRECHARGE, OFF);
-    UpdateDisplay_SetArray(true);
-    // let array know the contactor is on
-    CANMSG_t msg;
-    msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
-    msg.payload.bytes = 1;
-    msg.payload.data.b = true;
-    CAN_Queue_Post(msg);
-
-    OSMutexPend(&arrayRestartMutex,
-                0,
-                OS_OPT_PEND_BLOCKING,
-                &ts,
-                &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
-    // done restarting the array
-    restartingArray = false;
-
-    OSMutexPost(&arrayRestartMutex,
-                OS_OPT_NONE,
-                &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
-    // delete this task
-    OSTaskDel(&arrayTCB, &err);
-};
->>>>>>> master
