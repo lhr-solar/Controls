@@ -206,7 +206,6 @@ void Task_ReadCarCAN(void *p_arg)
 
     while (1)
     {
-
         
         //Get any message that BPS Sent us
         ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); 
