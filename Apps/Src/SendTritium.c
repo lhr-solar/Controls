@@ -23,10 +23,12 @@
 #define MAX_VELOCITY 50.0f  // m/s
 #define BRAKE_THRESHOLD 20  // for one-pedal driving
 #define NEUTRAL_THRESHOLD 25    // for one-pedal driving
+#define BUTTON_BITMASK 0b111 // length of bitmap holding previous button values (in binary logic)
 
-// Setpoints
+// Outputs
 static float currentSetpoint = 0;
 static float velocitySetpoint = 0;
+static bool brakelightState = false;
 
 // Inputs
 static bool cruiseEnable = false;
@@ -34,12 +36,22 @@ static bool cruiseSet = false;
 static bool regenToggle = false;
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
+static bool reverseSwitch = false;
+static bool forwardSwitch = false;
 
-// Toggles
-static bool regenPrevious = false;
+// Bitmap buffers
+static uint8_t regenBitmap = 0;
+static uint8_t cruiseEnableBitmap = 0;
+static uint8_t cruiseSetBitmap = 0;
+
+
+//button states
 static bool regenButton = false;
-static bool cruisePrevious = false;
-static bool cruiseButton = false;
+static bool regenPrevious = false;
+
+static bool cruiseEnableButton = false;
+static bool cruiseEnablePrevious = false;
+
 
 // State Names
 typedef enum{
@@ -97,14 +109,21 @@ const TritiumState_t FSM[8] = {
  * @brief   Reads inputs from the system
 */
 void readInputs(){
-    // TODO: Change upon update to Minions driver
+    Minion_Error_t err;
+
     brakePedalPercent = Pedals_Read(BRAKE);
     accelPedalPercent = Pedals_Read(ACCELERATOR);
-    regenButton = Switches_Read(REGEN_SW)==ON?true:false;
-    cruiseButton = Switches_Read(CRUZ_EN)==ON?true:false;
+    
+    // UPDATE BUTTONS
+    if(Minion_Read_Input(REGEN_SW, &err)){regenBitmap |= 1;}
+    if(Minion_Read_Input(CRUZ_EN, &err)){cruiseEnableBitmap |= 1;}
+    if(Minion_Read_Input(CRUZ_ST, &err)){cruiseSetBitmap |= 1;}
 
-    if(Switches_Read(FOR_SW) == ON){
-        cruiseSet = Switches_Read(CRUZ_ST)==ON?true:false;
+    forwardSwitch = Minion_Read_Input(FOR_SW, &err);
+    reverseSwitch = Minion_Read_Input(REV_SW, &err);
+
+    if(forwardSwitch == ON){
+        cruiseSet = Minion_Read_Input(CRUZ_ST, &err);
     }
     else{
         cruiseEnable = false;
@@ -112,15 +131,42 @@ void readInputs(){
         regenToggle = false;
     }
 
-    if(ChargeEnable && regenPrevious != regenButton && regenPrevious){
-        regenToggle = !regenToggle;
-    }
-    regenPrevious = regenButton;
+    // DEBOUNCING
+    regenBitmap &= BUTTON_BITMASK; //selecting the last n bits
 
-    if(cruisePrevious != cruiseButton && cruisePrevious){
-        cruiseEnable= !cruiseEnable;
+    if(regenBitmap == BUTTON_BITMASK){
+        regenButton = true;
+    }else if(regenBitmap != BUTTON_BITMASK){
+        regenButton = false;
     }
-    cruisePrevious = cruiseButton;
+
+    cruiseEnableBitmap &= BUTTON_BITMASK; //selecting the last n bits
+
+    if(cruiseEnableBitmap == BUTTON_BITMASK){
+        cruiseEnableButton = true;
+    }else if(cruiseEnableBitmap != BUTTON_BITMASK){
+        cruiseEnableButton = false;
+    }
+
+    cruiseSetBitmap &= BUTTON_BITMASK; //selecting the last n bits
+
+    if(cruiseSetBitmap == BUTTON_BITMASK){
+        cruiseSet = true;
+    }else if(cruiseEnableBitmap != BUTTON_BITMASK){
+        cruiseSet = false;
+    }
+
+    // TOGGLE
+    if(ChargeEnable && regenButton != regenPrevious && regenPrevious){regenToggle = !regenToggle;}
+    regenPrevious = regenButton;
+    
+    if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious){cruiseEnable = !cruiseEnable;}
+    cruiseEnablePrevious = cruiseEnableButton;
+
+    // LEFT SHIFT
+    cruiseEnableBitmap <<= 1; 
+    regenBitmap <<= 1;
+    cruiseSetBitmap <<= 1;
 }
 
 /**
@@ -140,6 +186,7 @@ static float percentToFloat(uint8_t percent){
 */
 void Task_SendTritium(void *p_arg){
     OS_ERR err;
+    Minion_Error_t minion_err;
     
     while(1){
         FSM[state].stateHandler();    // do what the current state does
@@ -151,6 +198,8 @@ void Task_SendTritium(void *p_arg){
         if (err != OS_ERR_NONE){
             assertOSError(OS_UPDATE_VEL_LOC, err);
         }
+        // Sets brakelight
+        Minion_Write_Output(BRAKELIGHT, brakelightState, &minion_err);
     }
 }
 
@@ -160,17 +209,17 @@ void Task_SendTritium(void *p_arg){
  * Normal Drive State. Accelerator is mapped directly to current setpoint.
 */
 void NormalDriveHandler(){
-    if(Switches_Read(REV_SW) == ON && Switches_Read(FOR_SW) == OFF){
+    if(reverseSwitch && !forwardSwitch){
         velocitySetpoint = -MAX_VELOCITY;
         currentSetpoint = percentToFloat(accelPedalPercent);
-    }else if(Switches_Read(REV_SW) == OFF && Switches_Read(FOR_SW) == ON){
+    }else if(!reverseSwitch && forwardSwitch){
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = percentToFloat(accelPedalPercent);
     }
-    else if(Switches_Read(REV_SW) == OFF && Switches_Read(FOR_SW) == OFF){
+    else if(!reverseSwitch && !forwardSwitch){
         currentSetpoint = 0;
     }
-    Lights_Set(BrakeLight, OFF);
+    brakelightState = false;
 }
 
 void NormalDriveDecider(){
@@ -189,7 +238,7 @@ void NormalDriveDecider(){
 */
 void RecordVelocityHandler(){
     velocitySetpoint = MotorController_ReadVelocity();
-    Lights_Set(BrakeLight, OFF);
+    brakelightState = true;
 }
 
 void RecordVelocityDecider(){
@@ -208,7 +257,7 @@ void RecordVelocityDecider(){
 */
 void PoweredCruiseHandler(){
     currentSetpoint = 1.0f;
-    Lights_Set(BrakeLight, OFF);
+    brakelightState = false;
 }
 
 void PoweredCruiseDecider(){
@@ -230,7 +279,7 @@ void PoweredCruiseDecider(){
 */
 void CoastingCruiseHandler(){
     currentSetpoint = 0;
-    Lights_Set(BrakeLight, OFF);
+    brakelightState = false;
 }
 
 void CoastingCruiseDecider(){
@@ -251,7 +300,7 @@ void BrakeHandler(){
     velocitySetpoint = 0;
     cruiseEnable = 0;
     cruiseSet = 0;
-    Lights_Set(BrakeLight, ON);
+    brakelightState = true;
 }
 
 void BrakeDecider(){
@@ -271,7 +320,7 @@ void OnePedalDriveHandler(){
         // Motor brake
         currentSetpoint = percentToFloat(((BRAKE_THRESHOLD - accelPedalPercent)*100)/BRAKE_THRESHOLD);
         velocitySetpoint = 0;
-        Lights_Set(BrakeLight, ON);
+        brakelightState = true;
     }
     else if(accelPedalPercent < NEUTRAL_THRESHOLD  && accelPedalPercent < BRAKE_THRESHOLD){
         // Coast
