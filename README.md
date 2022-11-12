@@ -1,20 +1,24 @@
 # Controls
 This repository contains all code related to Longhorn Racing Solar's Controls System
 
+## Documentation
+Controls documentation is hosted on [Read the Docs](https://controls-docs.readthedocs.io/en/latest/). Make sure to update the documentation as new features are implemented. The link always points to the most up-to-date docs i.e. whatever is on the master branch.
+
 ## Setup
 There is currently one option to develop the Controls system. This option is to use a terminal in a linux environment to build and flash the program.
 
 ### Setup for Terminal Development
 The system can be built and deployed from a terminal.
 1. Ensure that you have some type of linux machine such as Ubuntu, Windows Subsystem for Linux, etc. Windows will not work.
-2. The Controls code supports multiple microcontrollers and different architectures. Depending on which on you're using, make sure you have the correct toolchain.
-    - STM32F413: Follow the instructions in this [repo](https://github.com/SijWoo/ARM-Toolchain-Setup) to setup the toolchains for the current Controls system.
-    - Simulator: Install gcc and gdb using the following lines
-        ```
-        sudo apt install gcc gdb
-        ```
-3. Download [VSCode](https://code.visualstudio.com/)
-4. In VSCode, download the following extensions (Click on the block icon on the left column):
+    - A Linux Virtual Machine is highly recommended. You will not be able to flash code onto the board with WSL.
+    - Use this link to download the Ubuntu Server image: [Ubuntu Server 22.04 Install](https://releases.ubuntu.com/22.04/)
+    - Once the server is set up, you can ssh into it (basically connecting your development environment on the host machine to the code on the virtual machine). Ask another experienced member/lead to help you out with this step.
+2. Download [VSCode](https://code.visualstudio.com/)
+3. Clone the repository and its submodules with: 
+```git clone --recurse-submodules https://github.com/lhr-solar/Controls.git``` 
+4. Run install.sh to install the appropriate dependencies for both microcontroller and simulator development.
+    - The install script will not work on systems that do not use the apt package manager. Please ask a lead to help install if you have a system without apt. 
+5. In VSCode, download the following extensions (Click on the block icon on the left column):
     - C/C++
     - ARM
     - cortex-debug
@@ -47,9 +51,10 @@ To build a new test, you need to use the following command:
     E.g. Call ```make stm32f413 TEST=Dashboard``` if you want to test Dashboard.c with the Test_Dashboard.c src file
 
 ## Rules
-Commit frequently into your own branches. Create a Pull Request whenever you are ready to add you working code to the master branch. You must select 1 reviewer for approval. Follow the coding guidelines in the Solar Google Drive. The reviewers will make sure everything is up to par with the coding standards.
+Commit frequently into your own branches. Create a Pull Request whenever you are ready to add you working code to the master branch. You must select 1 reviewer for approval. Follow the coding guidelines in the Solar SharePoint. The reviewers will make sure everything is up to par with the coding standards.
 
 Reviewers:
-1. Rishi Ponnekanti
+1. Sidharth Babu
 2. Roie Gal
-3. Erick Cortez Valdez
+3. Ishan Deshpande
+4. Nathaniel Delgado

@@ -1,325 +1,126 @@
-#include "bsp.h"
+/**
+ * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
+ * @file Display.c
+ * @brief Function implementations for the display driver.
+ *
+ * This contains functions relevant to sending/receiving messages
+ * to/from our Nextion display.
+ *
+ * @author Ishan Deshpande (IshDeshpa)
+ * @author Roie Gal (Cam0Cow)
+ * @author Nathaniel Delgado (NathanielDelgado)
+ */
+
 #include "Display.h"
-#include <math.h>
-#include <string.h>
+#include "bsp.h"   // for writing to UART
+#include "Tasks.h" // for os and fault error codes
 
-#define NEXTION_INSTRUCTION_SUCCESSFUL 0x01
 #define DISP_OUT UART_3
-// The conversion factor between meters per second to deci-miles per hour (3.6 / 1.609 * 10)
-#define MPS_TO_dMPH 22.374f
+#define MAX_MSG_LEN 32
+#define MAX_ARG_LEN 16
+// Assignment commands have only 1 arg, an operator, and an attribute
+#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
+// Operational commands have no attribute and no operator, just a command and >= 0 arguments
+#define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
 
-#define CHECK(expr)      \
-    if ((expr) == ERROR) \
-    return ERROR
-static const char *DELIMITER = ".";
-static const char *ASSIGNMENT = "=";
 static const char *TERMINATOR = "\xff\xff\xff";
-static const char *NO_ERROR = "No Error";
 
-// Color defintions for display
-static const uint16_t NEXTION_GREEN = 2016;
-static const uint16_t NEXTION_RED = 63488;
-//static const uint16_t NEXTION_LIGHT_GREY = 42260;
-static const uint16_t NEXTION_DARK_GREY = 23275;
-// static const uint16_t NEXTION_BURNT_ORANGE = 51872;
-
-static inline int IsNextionFailure(uint32_t val)
-{
-    return (val >> 24) != 1;
+DisplayError_t Display_Init(){
+	BSP_UART_Init(DISP_OUT);
+	return Display_Reset();
 }
 
-// List of names of possible strings to build a command out of
-enum CommandString_t
-{
-    VELOCITY,
-    CRUISE_ENABLE,
-    CRUISE_SET,
-    REGEN_ENABLE,
-    VALUE,
-    TEXT,
-    PCO,
-    BCO,
-    VIS,
-    SYSTEM,
-    PAGE,
-    ERROR0,
-    ERROR1,
-    ERROR2,
-    ERROR3,
-    ERROR4,
-    ERROR5,
-    SUPPL_VOLT,
-    CHARGE_STATE,
-    ARR_BOX,
-    MOT_BOX,
-    FWD_BOX,
-    LEFT_BOX,
-    RIGHT_BOX,
-    HDLT_BOX,
-    REV_BOX,
-    NEUTRAL_BOX
-};
+DisplayError_t Display_Send(DisplayCmd_t cmd){
+	char msgArgs[MAX_MSG_LEN];
+	if (isAssignCmd(cmd)){
+		if (cmd.argTypes[0] == INT_ARG){
+			sprintf(msgArgs, "%d", (int)cmd.args[0].num);
+		}
+		else{
+			if (cmd.args[0].str == NULL){return DISPLAY_ERR_PARSE;}
+			sprintf(msgArgs, "%s", cmd.args[0].str);
+		}
 
-// The command strings themselves
-static char *CommandStrings[] = {
-    "x0",
-    "t1",
-    "t2",
-    "t3",
-    "val",
-    "txt",
-    "pco",
-    "bco",
-    "vis",
-    "",
-    "page1",
-    "t4",
-    "t5",
-    "t6",
-    "t7",
-    "t8",
-    "t9",
-    "x1",
-    "x2",
-    "l0",
-    "l1",
-    "l2",
-    "l3",
-    "l4",
-    "l5",
-    "l6",
-    "l7"};
+		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
+		BSP_UART_Write(DISP_OUT, ".", 1);
+		BSP_UART_Write(DISP_OUT, cmd.attr, strlen(cmd.attr));
+		BSP_UART_Write(DISP_OUT, cmd.op, strlen(cmd.op));
+	}
+	else if (isOpCmd(cmd)){
+		msgArgs[0] = ' '; // No args
+		msgArgs[1] = '\0';
+		if (cmd.numArgs > MAX_ARGS){return DISPLAY_ERR_OTHER;}
+		if (cmd.numArgs >= 1){ // If there are arguments
+			for (int i = 0; i < cmd.numArgs; i++){
+				char arg[MAX_ARG_LEN];
+				if (cmd.argTypes[i] == INT_ARG){
+					sprintf(arg, "%d", (int)cmd.args[i].num);
+				}
+				else{
+					sprintf(arg, "%s", cmd.args[i].str);
+				}
 
-/**
- * Sends a string of the form "obj_index.attr_index=" or "attr_index=" over UART
- * Do not call on its own, should only be called by the updateValue subroutines
- */
-static void sendStartOfAssignment(enum CommandString_t obj_index, enum CommandString_t attr_index)
-{
-    char *obj = CommandStrings[obj_index];
-    char *attr = CommandStrings[attr_index];
-    int len = strlen(obj);
+				strcat(msgArgs, arg);
 
-    if (len != 0)
-    { // If not global
-        BSP_UART_Write(DISP_OUT, obj, len);
-        BSP_UART_Write(DISP_OUT, (char *)DELIMITER, strlen(DELIMITER));
-    }
+				if (i < cmd.numArgs - 1){ // delimiter
+					strcat(msgArgs, ",");
+				}
+			}
+		}
+		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
+	}
+	else{ // Error parsing command struct
+		return DISPLAY_ERR_PARSE;
+	}
 
-    BSP_UART_Write(DISP_OUT, attr, strlen(attr)); // Send the attribute
-    BSP_UART_Write(DISP_OUT, (char *)ASSIGNMENT, 1);
+	if (cmd.numArgs >= 1){ // If there are arguments
+		BSP_UART_Write(DISP_OUT, msgArgs, strlen(msgArgs));
+	}
+
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+
+	return DISPLAY_ERR_NONE;
 }
 
-/**
- * Sends out a string of the form "obj.attr=msg" or "attr=msg"
- * Use to update string fields of display objects
- */
-static ErrorStatus updateStringValue(enum CommandString_t obj_index, enum CommandString_t attr_index, char *msg)
-{
-    sendStartOfAssignment(obj_index, attr_index);
+DisplayError_t Display_Reset(){
+	DisplayCmd_t restCmd = {
+		.compOrCmd = "rest",
+		.attr = NULL,
+		.op = NULL,
+		.numArgs = 0};
 
-    BSP_UART_Write(DISP_OUT, msg, strlen(msg));
-    BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
-    // Get a response from the display
-    char buf[8];
-    BSP_UART_Read(DISP_OUT, buf);
-    return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
+	return Display_Send(restCmd);
 }
 
-/**
- * Sends out a string of the form "obj.attr=val" or "attr=val"
- * Use to update integer fields of display objects
- */
-static ErrorStatus updateIntValue(enum CommandString_t obj_index, enum CommandString_t attr_index, int32_t val)
-{
-    sendStartOfAssignment(obj_index, attr_index);
+DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
-    char number[12]; // To store converted int
-    sprintf(number, "%ld", val);
+	char faultPage[7] = "page 2";
+	BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
-    BSP_UART_Write(DISP_OUT, number, strlen(number));
-    BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	char setOSCode[17];
+	sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
+	BSP_UART_Write(DISP_OUT, setOSCode, strlen(setOSCode));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
-    // Get a response from the display
-    char buf[8];
-    BSP_UART_Read(DISP_OUT, buf);
-    return (IsNextionFailure(buf[0])) ? ERROR : SUCCESS;
+	char setFaultCode[18];
+	sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+
+	return DISPLAY_ERR_NONE;
 }
 
-/*
- * Sets a component's visiblity
- */
-ErrorStatus setComponentVisibility(enum CommandString_t comp, bool vis)
-{
-    char out[24];
-    sprintf(out, "%s %s,%d%s", CommandStrings[VIS], CommandStrings[comp], vis ? 1 : 0, TERMINATOR);
+void assertDisplayError(DisplayError_t err){
+	OS_ERR os_err;
 
-    BSP_UART_Write(DISP_OUT, out, strlen(out));
+	if (err != DISPLAY_ERR_NONE){
+		FaultBitmap |= FAULT_DISPLAY;
 
-    char buf[8];
-    BSP_UART_Read(DISP_OUT, buf);
-    return (IsNextionFailure(buf[0]) ? ERROR : SUCCESS);
-}
-
-/*
- * Initialize the Nextion display
- */
-void Display_Init()
-{
-    char ret[8];
-    for (int i = 0; i < 8; i++)
-        ret[i] = 0;
-    volatile char *x = ret;
-    BSP_UART_Init(DISP_OUT);
-
-    // The display sends 0x88 when ready, but that might be
-    // before we initialize our UART
-    BSP_UART_Read(DISP_OUT, (char *)x);
-    if (ret[0] == 0x88)
-    {
-        volatile int a = 0;
-        while (1)
-            a++;
-    }
-
-    updateIntValue(PAGE, BCO, NEXTION_DARK_GREY);
-}
-
-/**
- * Set the displayed velocity to vel
- */
-ErrorStatus Display_SetVelocity(float vel)
-{
-    int32_t vel_fix = (uint32_t)floorf(vel * MPS_TO_dMPH);
-    return updateIntValue(VELOCITY, VALUE, vel_fix);
-}
-
-/**
- * @brief Update the charge state on the display.
- * @param chargeState
- * @return void
- */
-ErrorStatus Display_SetChargeState(uint32_t chargeState)
-{
-    int32_t format = (int32_t)(chargeState / 100000); // charge state comes in 6 digit precision, we only care about the integer and one decimal places
-    return updateIntValue(CHARGE_STATE, VALUE, format);
-}
-
-/**
- * @brief Updates the display with whether regenerative braking / charging is allowed or not
- * @param ChargeEnabled a state value indicating whether or not charging is enabled
- */
-ErrorStatus Display_SetRegenEnabled(State ChargeEnabled)
-{
-    if (ChargeEnabled == ON)
-    {
-        return setComponentVisibility(REGEN_ENABLE, true);
-    }
-    else
-    {
-        return setComponentVisibility(REGEN_ENABLE, false);
-    }
-}
-
-/**
- * Set the displayed supplemental battery pack voltage.
- * Units of millivolts
- */
-ErrorStatus Display_SetSBPV(uint16_t mv)
-{
-    int32_t sbpv = mv / 100; // One tenth of a volt precision
-    return updateIntValue(SUPPL_VOLT, VALUE, sbpv);
-}
-
-/**
- * Update the cruise enable light on the display based on the given state
- */
-ErrorStatus Display_CruiseEnable(State on)
-{
-    if (on == ON)
-    {
-        return setComponentVisibility(CRUISE_ENABLE, true);
-    }
-    else
-    {
-        return setComponentVisibility(CRUISE_ENABLE, false);
-    }
-}
-
-ErrorStatus Display_SetGear(State fwd, State rev){
-    if(!fwd && !rev){
-        setComponentVisibility(NEUTRAL_BOX, true);
-        setComponentVisibility(FWD_BOX, false);
-        return setComponentVisibility(REV_BOX, false);
-    }
-    else if(fwd && !rev){
-        setComponentVisibility(NEUTRAL_BOX, false);
-        setComponentVisibility(FWD_BOX, true);
-        return setComponentVisibility(REV_BOX, false);
-    }
-    else if(rev && !fwd){
-        setComponentVisibility(NEUTRAL_BOX, false);
-        setComponentVisibility(REV_BOX, true);
-        return setComponentVisibility(FWD_BOX, false);
-    }
-    else{
-        return ERROR;
-    }
-}
-
-
-/**
- * Set ERROR<idx> to err
- * If err is an empty string, then the error will be cleared
- */
-ErrorStatus Display_SetError(int idx, char *err)
-{
-    if (idx < 0 || idx > 5)
-        return ERROR; // Index out of bounds
-    if (strlen(err) == 0)
-    {
-        CHECK(setComponentVisibility(ERROR0 + idx, false)); // Hide text if no error
-    }
-    else
-    {
-        CHECK(updateStringValue(ERROR0 + idx, TEXT, err)); // Set error string
-        CHECK(updateIntValue(ERROR0 + idx, PCO, NEXTION_RED));
-        CHECK(setComponentVisibility(ERROR0 + idx, true));
-    }
-    return SUCCESS;
-}
-
-/**
- * Set the first error slot to say "No Error" and set its color to green
- * User must clear the remaining slots manually using Display_SetError
- */
-ErrorStatus Display_NoErrors(void)
-{
-    CHECK(updateStringValue(ERROR0, TEXT, (char *)NO_ERROR));
-    CHECK(updateIntValue(ERROR0, PCO, NEXTION_GREEN));
-    CHECK(setComponentVisibility(ERROR0, true));
-    return SUCCESS;
-}
-
-/**
- * Set the display to the main view
- */
-ErrorStatus Display_SetMainView(void)
-{
-    //return updateIntValue(SYSTEM, PAGE, 1);
-    char *page = "page1\xff\xff\xff";
-    BSP_UART_Write(DISP_OUT, page, strlen(page));
-    return SUCCESS;
-}
-
-ErrorStatus Display_SetLight(uint8_t light, State on){
-    if(light == 2){  // ctrl fault
-        if(on==ON)
-            return updateIntValue(PAGE, BCO, NEXTION_RED);
-        return updateIntValue(PAGE, BCO, NEXTION_DARK_GREY);
-    }
-        
-    setComponentVisibility(light+19, on==ON);
-    return SUCCESS;
+		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
+		assertOSError(OS_DISPLAY_LOC, os_err);
+	}
 }
