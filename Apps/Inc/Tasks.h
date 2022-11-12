@@ -23,10 +23,10 @@
 #define TASK_READ_TRITIUM_PRIO              3
 #define TASK_UPDATE_VELOCITY_PRIO           4
 #define TASK_READ_CAR_CAN_PRIO              5
-#define TASK_SEND_DISPLAY_PRIO              6
-#define TASK_READ_SWITCHES_PRIO             7
+#define TASK_UPDATE_DISPLAY_PRIO            6
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_BLINK_LIGHT_PRIO               9
+#define TASK_IGN_CONT_PRIO                  7
 
 /**
  * Stack Sizes
@@ -38,11 +38,11 @@
 #define TASK_INIT_STACK_SIZE                DEFAULT_STACK_SIZE
 #define TASK_UPDATE_VELOCITY_STACK_SIZE     DEFAULT_STACK_SIZE
 #define TASK_READ_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_SEND_DISPLAY_STACK_SIZE        DEFAULT_STACK_SIZE
+#define TASK_UPDATE_DISPLAY_STACK_SIZE      DEFAULT_STACK_SIZE
 #define TASK_READ_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_READ_SWITCHES_STACK_SIZE       DEFAULT_STACK_SIZE
 #define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_BLINK_LIGHT_STACK_SIZE         DEFAULT_STACK_SIZE
+#define TASK_IGN_CONT_STACK_SIZE            DEFAULT_STACK_SIZE
 
 
 /**
@@ -56,15 +56,15 @@ void Task_UpdateVelocity(void* p_arg);
 
 void Task_ReadCarCAN(void* p_arg);
 
-void Task_SendDisplay(void* p_arg);
+void Task_UpdateDisplay(void* p_arg);
 
 void Task_ReadTritium(void* p_arg);
-
-void Task_ReadSwitches(void* p_arg);
 
 void Task_SendCarCAN(void* p_arg);
 
 void Task_BlinkLight(void* p_arg);
+
+void Task_Contactor_Ignition(void* p_arg);
 
 /**
  * TCBs
@@ -73,11 +73,11 @@ extern OS_TCB FaultState_TCB;
 extern OS_TCB Init_TCB;
 extern OS_TCB UpdateVelocity_TCB;
 extern OS_TCB ReadCarCAN_TCB;
-extern OS_TCB SendDisplay_TCB;
+extern OS_TCB UpdateDisplay_TCB;
 extern OS_TCB ReadTritium_TCB;
-extern OS_TCB ReadSwitches_TCB;
 extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB BlinkLight_TCB;
+extern OS_TCB IgnCont_TCB;
 
 
 /**
@@ -87,11 +87,11 @@ extern CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
 extern CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 extern CPU_STK UpdateVelocity_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
 extern CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
-extern CPU_STK SendDisplay_Stk[TASK_SEND_DISPLAY_STACK_SIZE];
+extern CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
-extern CPU_STK ReadSwitches_Stk[TASK_READ_SWITCHES_STACK_SIZE];
 extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 extern CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
+extern CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
 
 /**
  * Queues
@@ -131,10 +131,11 @@ typedef enum{
     OS_UPDATE_VEL_LOC = 0x020,
     OS_BLINK_LIGHTS_LOC = 0x040,
     OS_CONTACTOR_LOC = 0x080,
-    OS_SWITCHES_LOC = 0x100,
+    OS_MINIONS_LOC = 0x100,
     OS_MAIN_LOC = 0x200,
     OS_CANDRIVER_LOC = 0x400,
-    OS_MOTOR_CONNECTION_LOC = 0x800
+    OS_MOTOR_CONNECTION_LOC = 0x800,
+    OS_DISPLAY_LOC = 0x1000
 } os_error_loc_t;
 
 /**
