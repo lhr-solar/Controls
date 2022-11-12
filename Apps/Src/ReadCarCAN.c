@@ -8,22 +8,18 @@
 #include "FaultState.h"
 #include "os_cfg_app.h"
 
-// Threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
+// Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
 #define saturationThreshold (SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH / 4 
 
 
 // CAN watchdog timer variable
 static OS_TMR canWatchTimer;
-static const uint16_t CAN_WATCH_TMR_DLY_MS = 500;
-static const uint8_t CAN_WATCH_TMR_DLY_TMR_TS = (CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u); //1000 for ms -> s conversion
+#define CAN_WATCH_TMR_DLY_MS 500u
+#define CAN_WATCH_TMR_DLY_TMR_TS (CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u) //1000 for ms -> s conversion
 
 // prechargeDlyTimer and delay constant
 static OS_TMR prechargeDlyTimer;
-static const int PRECHARGE_DLY_TMR_TS = PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ;
-
-// restart array and disable charging semaphores
-static OS_SEM restartArraySem;
-static OS_SEM canWatchDisableChargingSem;
+#define PRECHARGE_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ);
 
 // Array restart thread lock
 static OS_MUTEX arrayRestartMutex;
@@ -160,9 +156,6 @@ void Task_ReadCarCAN(void *p_arg)
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
-    OSSemCreate(&restartArraySem, "array restart semaphore", 0, &err);
-    assertOSError(OS_READ_CAN_LOC, err);
-    OSSemCreate(&canWatchDisableChargingSem, "disable charging semaphore", 0, &err);
 
 
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
