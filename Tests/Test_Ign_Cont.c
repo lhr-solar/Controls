@@ -15,10 +15,12 @@ void Task1(void *arg)
     
     BSP_UART_Init(UART_2);
     Minion_Init();
+    Contactors_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
 
     OS_ERR err;
+    Minion_Error_t Merr;
 
     // Initialize IgnitionContactor
     OSTaskCreate(
@@ -39,6 +41,7 @@ void Task1(void *arg)
     assertOSError(OS_MAIN_LOC, err);
     
     while(1){
+        printf("Ign 1: %d, Ign 2: %d\n\r", Minion_Read_Input(IGN_1, &Merr), Minion_Read_Input(IGN_2, &Merr));
         printf("Array Precharge: %d, Array Contactor: %d, Motor Contactor: %d\n\r", 
         Contactors_Get(ARRAY_PRECHARGE), Contactors_Get(ARRAY_CONTACTOR), Contactors_Get(MOTOR_CONTACTOR));
 

@@ -14,47 +14,44 @@ void Task1(void *arg)
     
     BSP_UART_Init(UART_2);
     Minion_Init();
-    bool lightState=false;
+    // bool lightState=false;
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
 
     OS_ERR e;
     Minion_Error_t mErr;
-
-
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     // tests the reading and writing
-    // while (1){
-    //     char str[128];
-    //     bool regen = Minion_Read_Input(REGEN_SW);
-    //     bool forward = Minion_Read_Input(FOR_SW);
-    //     bool reverse = Minion_Read_Input(REV_SW);
-    //     bool enable = Minion_Read_Input(CRUZ_EN);
-    //     bool set = Minion_Read_Input(CRUZ_ST);
-    //     bool ign1 = Minion_Read_Input(IGN_1);
-    //     bool ign2 = Minion_Read_Input(IGN_2);
+    while (1){
+        char str[128];
+        bool regen = Minion_Read_Input(REGEN_SW, &mErr);
+        bool forward = Minion_Read_Input(FOR_SW, &mErr);
+        bool reverse = Minion_Read_Input(REV_SW, &mErr);
+        bool enable = Minion_Read_Input(CRUZ_EN, &mErr);
+        bool set = Minion_Read_Input(CRUZ_ST, &mErr);
+        bool ign1 = Minion_Read_Input(IGN_1, &mErr);
+        bool ign2 = Minion_Read_Input(IGN_2, &mErr);
 
 
-    //     int size = sprintf(str, "regen = %d, forward = %d, reverse = %d, enable = %d, set = %d IGN1 = %d, IGN2 = %d \r", regen, forward,reverse,enable,set,ign1,ign2);
-    //     BSP_UART_Write(UART_2, str, size);
+        int size = sprintf(str, "regen = %d, forward = %d, reverse = %d, enable = %d, set = %d IGN1 = %d, IGN2 = %d \r", regen, forward,reverse,enable,set,ign1,ign2);
+        BSP_UART_Write(UART_2, str, size);
         
-    //     lightState=!lightState;
-    //     Minion_Write_Output(BRAKELIGHT, lightState);
+        // lightState=!lightState;
+        // Minion_Write_Output(BRAKELIGHT, lightState);
 
-    //     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);           
-    // }
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);           
+    }
 
     //tests the edge cases
-    bool output = Minion_Write_Output(REV_SW, lightState, &mErr);
-    bool input = Minion_Read_Input(BRAKELIGHT, &mErr);
+    // bool output = Minion_Write_Output(REV_SW, lightState, &mErr);
+    // bool input = Minion_Read_Input(BRAKELIGHT, &mErr);
 
-    printf("This should print 0: %d", input);
-    printf("This should print 0: %d", output);
+    // printf("This should print 0: %d", input);
+    // printf("This should print 0: %d", output);
 
-    lightState = !lightState;
-    for(int i = 0; i < 999999; i++){}//should be half a second
-};
+    // lightState = !lightState;
+    // for(int i = 0; i < 999999; i++){}//should be half a second
+}
 
 int main()
 {
