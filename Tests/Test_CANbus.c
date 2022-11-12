@@ -94,8 +94,8 @@ void Task1(void *p_arg) {
     float b = 13.37f;
     memcpy(&msg.data[0], &a, sizeof a);
     memcpy(&msg.data[4], &b, sizeof b);
-    CANbus_Send(msg, CAN_BLOCKING, CARCAN);
-    CANbus_Read(&msg, CAN_BLOCKING, MOTORCAN);
+    //CANbus_Send(msg, CAN_BLOCKING, CARCAN);
+    CANbus_Read(&msg, CAN_BLOCKING, CARCAN);
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
 
 

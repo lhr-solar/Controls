@@ -227,6 +227,27 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t 
         OS_OPT_POST_NONE,
         &err);
     assertOSError(OS_CANDRIVER_LOC,err);
+
+    // Make sure this is a message we can receive
+    switch (MsgContainer->ID) {
+        case CHARGE_ENABLE:
+	    case STATE_OF_CHARGE:
+	    case SUPPLEMENTAL_VOLTAGE:
+	    case MOTOR_DRIVE:
+	    case MOTOR_POWER:
+	    case MOTOR_RESET:
+	    case MOTOR_STATUS:
+	    case MC_BUS:
+	    case VELOCITY:
+	    case MC_PHASE_CURRENT:
+	    case VOLTAGE_VEC:
+	    case CURRENT_VEC:
+	    case BACKEMF:
+	    case TEMPERATURE:
+	    case ODOMETER_AMPHOURS:
+	    case ARRAY_CONTACTOR_STATE_CHANGE: break; // Continue if value is valid
+        default: return ERROR; // Error if we get an unexpected value
+    }
     
     //search LUT for id to populate idx and trim data
     CANLUT_T entry = CANLUT[MsgContainer->ID];
