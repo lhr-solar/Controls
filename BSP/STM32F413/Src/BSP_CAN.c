@@ -89,7 +89,7 @@ void BSP_CAN1_Init() {
     CAN_InitStruct.CAN_AWUM = DISABLE;
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
-    CAN_InitStruct.CAN_TXFP = DISABLE;
+    CAN_InitStruct.CAN_TXFP = ENABLE;
     CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
@@ -184,8 +184,8 @@ void BSP_CAN3_Init()
     CAN_InitStruct.CAN_AWUM = DISABLE;
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
-    CAN_InitStruct.CAN_TXFP = DISABLE;
-    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal; // TODO: change back to Normal after testing
+    CAN_InitStruct.CAN_TXFP = ENABLE;
+    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
     /* CAN Baudrate = 125 KBps

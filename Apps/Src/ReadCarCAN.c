@@ -146,8 +146,10 @@ void canWatchTimerCallback (void *p_tmr, void *p_arg){
 void Task_ReadCarCAN(void *p_arg)
 {
     OS_ERR err;
-    uint8_t buffer[8]; // buffer for CAN message
-    uint32_t canId;
+
+    //data struct for CAN message
+    CANDATA_t dataBuf;
+    CPU_TS ts;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
@@ -188,19 +190,20 @@ void Task_ReadCarCAN(void *p_arg)
     {
         
         //Get any message that BPS Sent us
-        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); 
+        ErrorStatus status = CANbus_Read(&dataBuf,CAN_BLOCKING,CARCAN);  
         if(status != SUCCESS) {
             continue;
         }
 
-        switch(canId){ //we got a message
+        switch(dataBuf.ID){ //we got a message
             case CHARGE_ENABLE: { 
 
                 // Restart CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
                 assertOSError(OS_READ_CAN_LOC, err);
 
-                if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
+
+                if((&dataBuf.data)[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                     chargingDisable();
                     updateSaturation(-1); // Update saturation and buffer
 
@@ -217,11 +220,11 @@ void Task_ReadCarCAN(void *p_arg)
                 break;
             }
             case SUPPLEMENTAL_VOLTAGE: {
-                UpdateDisplay_SetSBPV(*(uint16_t *) &buffer); // Receive value in mV
+                UpdateDisplay_SetSBPV(*(uint16_t *) &dataBuf.data); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
-                uint8_t SOC = (*(uint32_t*) &buffer)/(100000);  // Convert to integer percent
+                uint8_t SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }
