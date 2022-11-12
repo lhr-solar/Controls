@@ -18,6 +18,7 @@
 #include "ReadCarCAN.h"
 #include "MotorController.h"
 #include "Minions.h"
+//#include "Test_SendTritium.h"
 
 // Macros
 #define MAX_VELOCITY 50.0f  // m/s
@@ -26,28 +27,32 @@
 #define NEUTRAL_THRESHOLD 25    // percent
 #define BUTTON_BITMASK 0b111 // length of bitmap holding previous button values (in binary logic)
 
+#ifdef __TEST_SENDTRITIUM
+#define SCOPE
+#else
+#define SCOPE static
+#endif
+
 // Inputs
-static bool cruiseEnable = false;
-static bool cruiseSet = false;
-static bool regenToggle = false;
-static uint8_t brakePedalPercent = 0;
-static uint8_t accelPedalPercent = 0;
-static bool reverseSwitch = false;
-static bool forwardSwitch = false;
+SCOPE bool cruiseEnable = false;
+SCOPE bool cruiseSet = false;
+SCOPE bool regenToggle = false;
+SCOPE uint8_t brakePedalPercent = 0;
+SCOPE uint8_t accelPedalPercent = 0;
+SCOPE bool reverseSwitch = false;
+SCOPE bool forwardSwitch = false;
 
 // Outputs
 static float currentSetpoint = 0;
 static float velocitySetpoint = 0;
 static bool brakelightState = false;
-static uint8_t brakeThreshold = 0;
 
 // Bitmap buffers
 static uint8_t regenBitmap = 0;
 static uint8_t cruiseEnableBitmap = 0;
 static uint8_t cruiseSetBitmap = 0;
 
-
-//button states
+// Button states
 static bool regenButton = false;
 static bool regenPrevious = false;
 
@@ -74,7 +79,7 @@ typedef struct TritiumState{
 } TritiumState_t;
 
 // Current state
-static TritiumStateName_e state = NORMAL_DRIVE;
+SCOPE TritiumStateName_e state = NORMAL_DRIVE;
 
 // Handler & Decider Declarations
 void NormalDriveHandler(void);
@@ -116,14 +121,16 @@ void readInputs(){
     accelPedalPercent = Pedals_Read(ACCELERATOR);
     
     // UPDATE BUTTONS
+    #ifndef __TEST_SENDTRITIUM
+
     if(Minion_Read_Input(REGEN_SW, &err)){regenBitmap |= 1;}
     if(Minion_Read_Input(CRUZ_EN, &err)){cruiseEnableBitmap |= 1;}
     if(Minion_Read_Input(CRUZ_ST, &err)){cruiseSetBitmap |= 1;}
-
+    
     forwardSwitch = Minion_Read_Input(FOR_SW, &err);
     reverseSwitch = Minion_Read_Input(REV_SW, &err);
 
-    if(forwardSwitch == ON){
+    if(forwardSwitch){
         cruiseSet = Minion_Read_Input(CRUZ_ST, &err);
     }
     else{
@@ -131,6 +138,7 @@ void readInputs(){
         cruiseSet = false;
         regenToggle = false;
     }
+    #endif
 
     // DEBOUNCING
     regenBitmap &= BUTTON_BITMASK; //selecting the last n bits

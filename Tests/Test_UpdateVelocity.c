@@ -1,6 +1,5 @@
 #include "common.h"
 #include "config.h"
-#include "SendTritium.h"
 #include "BSP_UART.h"
 #include "CANbus.h"
 #include "Display.h"
@@ -33,10 +32,10 @@ void Task1(void *p_arg) {
         (CPU_CHAR*)"SendTritium",
         (OS_TASK_PTR)Task_SendTritium,
         (void*) NULL,
-        (OS_PRIO)TASK_UPDATE_VELOCITY_PRIO,
+        (OS_PRIO)TASK_SEND_TRITIUM_PRIO,
         (CPU_STK*)SendTritium_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT/10,
-        (CPU_STK_SIZE)TASK_UPDATE_VELOCITY_STACK_SIZE,
+        (CPU_STK_SIZE)TASK_SEND_TRITIUM_STACK_SIZE,
         (OS_MSG_QTY) 0,
         (OS_TICK)NULL,
         (void*)NULL,
