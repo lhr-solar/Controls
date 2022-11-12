@@ -21,8 +21,6 @@ typedef enum {
     NUM_CONTACTORS
 } contactor_t;
 
-typedef enum {SET_CONTACTORS_BLOCKING = 0, SET_CONTACTORS_NON_BLOCKING = 0x8000u} contactors_blocking_t;
-
 
 /**
  * @brief   Initializes contactors to be used
@@ -47,7 +45,7 @@ State Contactors_Get(contactor_t contactor);
  * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, State state, contactors_blocking_t blocking);
+ErrorStatus Contactors_Set(contactor_t contactor, State state, bool blocking);
 
 /**
  * @brief   Enable the specified contactor

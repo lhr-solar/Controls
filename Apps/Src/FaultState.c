@@ -24,8 +24,8 @@ static void nonrecoverableFaultHandler(){
 
 static void killContactorHandler(void){
     //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, SET_CONTACTORS_BLOCKING);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, SET_CONTACTORS_BLOCKING);
+    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
 }
 
 void EnterFaultState(void) {

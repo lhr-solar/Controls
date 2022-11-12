@@ -8,20 +8,19 @@
 #include "FaultState.h"
 #include "os_cfg_app.h"
 
+// Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
+#define saturationThreshold (SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH / 4 
 
+// timer delay constants
+#define CAN_WATCH_TMR_DLY_MS 500u
+#define CAN_WATCH_TMR_DLY_TMR_TS (CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u) //1000 for ms -> s conversion
+#define PRECHARGE_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
 
-// CAN watchdog timer variables and constants
+// CAN watchdog timer variable
 static OS_TMR canWatchTimer;
-static const int CAN_WATCH_TMR_DLY_MS = 500;
-static const int CAN_WATCH_TMR_DLY_TMR_TS = (CAN_WATCH_TMR_DLY_MS / DEF_TIME_NBR_mS_PER_SEC) * OS_CFG_TMR_TASK_RATE_HZ;
 
 // prechargeDlyTimer and delay constant
 static OS_TMR prechargeDlyTimer;
-static const int PRECHARGE_DLY_TMR_TS = PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ;
-
-// restart array and disable charging semaphores
-static OS_SEM restartArraySem;
-static OS_SEM canWatchDisableChargingSem;
 
 // Array restart thread lock
 static OS_MUTEX arrayRestartMutex;
@@ -29,13 +28,12 @@ static bool restartingArray = false;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
-static State regenEnable = OFF;
+static bool regenEnable = false;
 
 // Saturation buffer variables
-static int chargeMsgBuffer[SAT_BUF_LENGTH];
-static int saturationThreshold = 0;
+static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
 static int chargeMsgSaturation;
-static int oldestMsgIdx = 0;
+static uint8_t oldestMsgIdx = 0;
 
 // Handler to turn array back on
 static void arrayRestart(void *p_tmr, void *p_arg); 
@@ -44,7 +42,7 @@ static void arrayRestart(void *p_tmr, void *p_arg);
  * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
  * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
 */
-static void updateSaturation(int chargeMessage){
+static void updateSaturation(int8_t chargeMessage){
     // Replace oldest message with new charge message and update index for oldest message
     chargeMsgBuffer[oldestMsgIdx] = chargeMessage;
     oldestMsgIdx = (oldestMsgIdx + 1) % SAT_BUF_LENGTH;
@@ -52,7 +50,7 @@ static void updateSaturation(int chargeMessage){
     // Calculate the new saturation value by assigning weightings from 1 to buffer length
     // in order of oldest to newest
     int newSaturation = 0;
-    for (int i = 0; i < SAT_BUF_LENGTH; i++){
+    for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++){
         newSaturation += chargeMsgBuffer[(oldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
     }
     chargeMsgSaturation = newSaturation;
@@ -61,11 +59,11 @@ static void updateSaturation(int chargeMessage){
 // helper function to call if charging should be disabled
 static inline void chargingDisable(void) {
     // mark regen as disabled
-    regenEnable = OFF;
+    regenEnable = false;
 
     //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, SET_CONTACTORS_BLOCKING);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, SET_CONTACTORS_BLOCKING);
+    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
     
     // turn off the array contactor light
     UpdateDisplay_SetArray(false);
@@ -78,54 +76,45 @@ static inline void chargingEnable(void) {
     CPU_TS ts;
 
     // mark regen as enabled
-    regenEnable = ON;
+    regenEnable = true;
 
     // check if we need to run the precharge sequence to turn on the array
     bool shouldRestartArray = false;
 
-    OSMutexPend(&arrayRestartMutex,
-                0,
-                OS_OPT_PEND_BLOCKING,
-                &ts,
-                &err);
+    OSMutexPend(&arrayRestartMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
     assertOSError(OS_READ_CAN_LOC,err);
 
-    // if nothing is precharging and we need to turn the array on, turn it on
-    shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==OFF) && (Contactors_Get(ARRAY_PRECHARGE)==OFF);
+    // if the array is off and we're not already turning it on, start turning it on
+    shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==OFF);
 
     // wait for precharge for array 
     if(shouldRestartArray){
 
+            restartingArray = true;
+
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&prechargeDlyTimer, &err);
+            assertOSError(OS_READ_CAN_LOC, err);
             
         }
     
 
-    OSMutexPost(&arrayRestartMutex,
-                OS_OPT_NONE,
-                &err);
+    OSMutexPost(&arrayRestartMutex, OS_OPT_NONE, &err);
     assertOSError(OS_READ_CAN_LOC,err);
 }
 
 /**
- * @brief Callback function for the precharge delay timer. Turns off precharge and restarts the array.
+ * @brief Callback function for the precharge delay timer. Waits for precharge and then restarts the array.
  * @param p_tmr pointer to the timer that calls this function, passed by timer
  * @param p_arg pointer to the argument passed by timer
  * 
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
 
-    if(!regenEnable){    // If regen enable has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        restartingArray = false;
+    if(regenEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
+        Contactors_Set(ARRAY_CONTACTOR, ON, false);
+        UpdateDisplay_SetArray(true);
     }
-    else {
-       
-            Contactors_Set(ARRAY_CONTACTOR, ON, SET_CONTACTORS_NON_BLOCKING);
-    }
-
-        //Lights_Set(A_CNCTR, ON); Don't know where this function is. Does it even exist?
-
         // done restarting the array
         restartingArray = false;
 
@@ -140,7 +129,7 @@ void canWatchTimerCallback (void *p_tmr, void *p_arg){
     OS_ERR err;
 
     // mark regen as disabled
-    regenEnable = OFF;
+    regenEnable = false;
     
     // Set fault bitmaps 
     FaultBitmap |= FAULT_READBPS;
@@ -162,16 +151,6 @@ void Task_ReadCarCAN(void *p_arg)
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
-    OSSemCreate(&restartArraySem, "array restart semaphore", 0, &err);
-    assertOSError(OS_READ_CAN_LOC, err);
-    OSSemCreate(&canWatchDisableChargingSem, "disable charging semaphore", 0, &err);
-
-    // Calculate threshold value for the charge-enable saturation buffer based on buffer length
-    // Values decrease by one each position, and the threshold is halfway between 0 and max
-    for (int i = 1; i <= SAT_BUF_LENGTH; i++) {
-        saturationThreshold += i;
-    }
-    saturationThreshold /= 2;
 
 
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
@@ -202,6 +181,7 @@ void Task_ReadCarCAN(void *p_arg)
 
     //Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
     
 
     while (1)
@@ -218,6 +198,7 @@ void Task_ReadCarCAN(void *p_arg)
 
                 // Restart CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
+                assertOSError(OS_READ_CAN_LOC, err);
 
                 if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                     chargingDisable();
@@ -226,7 +207,7 @@ void Task_ReadCarCAN(void *p_arg)
                 } else { //We got a message of enable with a nonzero value
                     updateSaturation(1);
 
-                    // If the charge message saturation is above the threshold, wait for precharge and restart sequence then enable charging.
+                    // If the charge message saturation is above the threshold, wait for restart precharge sequence then enable charging.
                     // If we are already precharging/array is on, nothing will be done 
                     if (chargeMsgSaturation >= saturationThreshold){
                         chargingEnable();
