@@ -31,28 +31,21 @@ void Task_ReadTritium(void *p_arg)
 
 	OS_ERR err;
 
-	CANMSG_t msg;
-
-	CANId_t ID;
-	CANDATA_t data;
-	CAN_blocking_t blocking;
-
-  
+	// CANDATA_t dataBuf;
 	while (1)
 	{
-		ErrorStatus status = CANbus_Read(CANDATA_t* data, CAN_blocking_t blocking, CAN_t MOTORCAN);
+		// ErrorStatus status = CANbus_Read(CANDATA_t* data, CAN_blocking_t blocking, CAN_t MOTORCAN);
 
 /*		CANbuff buf;
 		ErrorStatus status = MotorController_Read(&buf);
 
 		if (status == SUCCESS)
 		{
+			dataBuf.data[0] = buf.secondNum;
+			dataBuf.data[4] = buf.firstNum;
+			dataBuf.ID = buf.id;
 
-			msg.id = buf.id;
-			msg.payload.data.d = ((uint64_t)buf.firstNum << 32) | ((uint64_t)buf.secondNum);
-
-			__unused
-				ErrorStatus error = CAN_Queue_Post(msg);
+			(void) CAN_Queue_Post(dataBuf);
 
 			// TODO: handle error
 		}

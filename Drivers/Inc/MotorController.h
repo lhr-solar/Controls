@@ -1,4 +1,9 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * NOTE: THIS DRIVER IS ACTIVELY BEING DEPRECATED. LEGACY SUPPORT IS NOT GUARANTEED, 
+ * YOU SHOULD MIGRATE TO USING THE MULTI-BUS CAN DRIVER
+ */
+
 
 #ifndef __MOTORCONTROLLER_H
 #define __MOTORCONTROLLER_H
@@ -38,11 +43,13 @@ typedef enum{
 
 /**
  * @brief Returns the current error status of the tritium controller
+ * @brief THIS FUNCTION IS DEPRECATED. LEGACY SUPPORT IS NOT GUARANTEED
  */
 tritium_error_code_t MotorController_getTritiumError(void);
 
 /**
  * @brief   Initializes the motor controller
+ * @brief THIS FUNCTION IS DEPRECATED. LEGACY SUPPORT IS NOT GUARANTEED
  * @param   busCurrentFractionalSetPoint fraction of the bus current to allow the motor to draw
  * @return  None
  */ 
@@ -50,6 +57,7 @@ void MotorController_Init(float busCurrentFractionalSetPoint);
 
 /**
  * @brief   Sends MOTOR DRIVE command on CAN3
+ *  @brief THIS FUNCTION IS DEPRECATED. LEGACY SUPPORT IS NOT GUARANTEED
  * @param   newVelocity desired motor velocity setpoint in rpm
  * @param   motorCurrent desired motor current setpoint as a fraction of max current setting
  * @return  None
@@ -58,6 +66,7 @@ void MotorController_Drive(float newVelocity, float motorCurrent);
 
 /**
  * @brief   Reads most recent command from CAN3 bus
+ * @brief THIS FUNCTION IS DEPRECATED. LEGACY SUPPORT IS NOT GUARANTEED
  * @param   message the buffer in which the info for the CAN message will be stored
  * @return  SUCCESS if a message is read
  */ 
@@ -65,6 +74,7 @@ ErrorStatus MotorController_Read(CANbuff *message);
 
 /**
  * @brief   Reads velocity
+ * @brief THIS FUNCTION IS DEPRECATED. LEGACY SUPPORT IS NOT GUARANTEED
  * @return  Velocity
  */ 
 float MotorController_ReadVelocity(void);
@@ -72,7 +82,7 @@ float MotorController_ReadVelocity(void);
 
 /**
  * @brief Reads RPM of motor
- * 
+ * @brief THIS FUNCTION IS DEPRECATED. LEGACY SUPPORT IS NOT GUARANTEED
  * @return RPM
  */
 float MotorController_ReadRPM(void);
@@ -80,7 +90,7 @@ float MotorController_ReadRPM(void);
 
 /**
  * @brief Restarts the motor controller. THIS FUNCTION IS FOR FAULT STATE USE ONLY.
- * 
+ * @brief THIS FUNCTION IS DEPRECATED. LEGACY SUPPORT IS NOT GUARANTEED
  * @param busCurrentFractionalSetPoint 
  */
 void MotorController_Restart(void);
