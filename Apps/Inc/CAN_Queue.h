@@ -10,8 +10,8 @@
 
 void CAN_Queue_Init(void);
 
-ErrorStatus CAN_Queue_Post(CANMSG_t message);
+ErrorStatus CAN_Queue_Post(CANDATA_t message);
 
-ErrorStatus CAN_Queue_Pend(CANMSG_t *message);
+ErrorStatus CAN_Queue_Pend(CANDATA_t *message);
 
 #endif

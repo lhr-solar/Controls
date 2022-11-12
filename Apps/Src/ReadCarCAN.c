@@ -36,11 +36,11 @@ static inline void chargingDisable(void) {
     Contactors_Set(ARRAY_PRECHARGE, OFF);
 
     // let array know we killed contactors
-    CANMSG_t msg;
-    msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
-    msg.payload.bytes = 1;
-    msg.payload.data.b = false;
-    CAN_Queue_Post(msg);
+    CANDATA_t message;
+    message.ID = ARRAY_CONTACTOR_STATE_CHANGE;
+    message.idx = 0;
+    message.data[0] = false;
+    CAN_Queue_Post(message);
 
     // turn off the array contactor light
     UpdateDisplay_SetArray(false);
@@ -102,8 +102,9 @@ static inline void chargingEnable(void) {
 void Task_ReadCarCAN(void *p_arg)
 {
     OS_ERR err;
-    uint8_t buffer[8]; // buffer for CAN message
-    uint32_t canId;
+
+    //data struct for CAN message
+    CANDATA_t dataBuf;
     CPU_TS ts;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
@@ -132,12 +133,12 @@ void Task_ReadCarCAN(void *p_arg)
     while (1)
     {
         //Get any message that BPS Sent us
-        ErrorStatus status = CANbus_Read(&canId, buffer, CAN_BLOCKING); 
+        ErrorStatus status = CANbus_Read(&dataBuf,CAN_BLOCKING,CARCAN);  
         if(status != SUCCESS) {
             continue;
         }
 
-        switch(canId){ //we got a message
+        switch(dataBuf.ID){ //we got a message
             case CHARGE_ENABLE: {
                 OSMutexPend(&msg_rcv_mutex,
                     0,
@@ -153,7 +154,7 @@ void Task_ReadCarCAN(void *p_arg)
                             &err);
                 assertOSError(OS_READ_CAN_LOC,err);
 
-                if(buffer[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
+                if((&dataBuf.data)[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                     chargingDisable();
                 } else {
                     //We got a message of enable with a nonzero value, turn on Regen, If we are already in precharge / array is on, do nothing. 
@@ -163,11 +164,11 @@ void Task_ReadCarCAN(void *p_arg)
                 break;
             }
             case SUPPLEMENTAL_VOLTAGE: {
-                UpdateDisplay_SetSBPV(*(uint16_t *) &buffer); // Receive value in mV
+                UpdateDisplay_SetSBPV(*(uint16_t *) &dataBuf.data); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
-                uint8_t SOC = (*(uint32_t*) &buffer)/(100000);  // Convert to integer percent
+                uint8_t SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }
@@ -244,11 +245,11 @@ static void ArrayRestart(void *p_arg){
     Contactors_Set(ARRAY_PRECHARGE, OFF);
     UpdateDisplay_SetArray(true);
     // let array know the contactor is on
-    CANMSG_t msg;
-    msg.id = ARRAY_CONTACTOR_STATE_CHANGE;
-    msg.payload.bytes = 1;
-    msg.payload.data.b = true;
-    CAN_Queue_Post(msg);
+    CANDATA_t databuf;
+    databuf.ID = ARRAY_CONTACTOR_STATE_CHANGE;
+    databuf.data[0] = true;
+    databuf.idx = 0;
+    CAN_Queue_Post(databuf);
 
     OSMutexPend(&arrayRestartMutex,
                 0,

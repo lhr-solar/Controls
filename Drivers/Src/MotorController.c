@@ -1,17 +1,13 @@
 #include "MotorController.h"
 #include "os.h"
 #include "Tasks.h"
-#include "Minions.h"
+
 #include "Display.h"
+#include "CANbus.h"
 
 #include "Contactors.h"
 
-#define MOTOR_DRIVE 0x221
-#define MOTOR_POWER 0x222
-#define MOTOR_RESET 0x223
-#define MOTOR_STATUS 0x241
-#define MOTOR_VELOCITY 0x243
-#define MAX_CAN_LEN 8
+
 
 //status msg masks
 #define MASK_LOW_VOLTAGE_LOCKOUT_ERR (1<<22) //Low voltage rail lockout happened
@@ -24,8 +20,6 @@
 
 #define BYTES_TO_UINT32(bytes) ((bytes[]))
 
-static OS_SEM MotorController_MailSem4;
-static OS_SEM MotorController_ReceiveSem4;
 static bool restartFinished = true;
 static float CurrentVelocity = 0;
 static float CurrentRPM = 0;
@@ -44,7 +38,7 @@ static bool is_initialized = false;
 static void _assertTritiumError(tritium_error_code_t motor_err)
 {
     
-    if(restartFinished){    // && Contactors_Get(MOTOR_CONTACTOR)
+    if(restartFinished){    
         OS_ERR err;
         if(motor_err != T_NONE){
             FaultBitmap |= FAULT_TRITIUM;
@@ -64,52 +58,16 @@ static void _assertTritiumError(tritium_error_code_t motor_err)
 #define assertTritiumError(motor_err) _assertTritiumError(motor_err);
 #endif
 
-/**
- * @brief   Releases hold of the mailbox semaphore.
- * @note	Do not call directly.
- */
-static void MotorController_Release(void)
-{
-    OS_ERR err;
 
-    OSSemPost(&MotorController_MailSem4,
-              OS_OPT_POST_1,
-              &err);
-    assertOSError(0, err);
-}
 
-/**
- * @brief	Increments the receive semaphore.
- * @note	Do not call directly.
- */
-static void MotorController_CountIncoming(void)
-{
-    OS_ERR err;
-
-    OSSemPost(&MotorController_ReceiveSem4,
-              OS_OPT_POST_1,
-              &err);
-    assertOSError(0, err);
-}
-
-static void MotorController_InitCommand(){ //transmits the init command with id 0x222
-    OS_ERR err;
-    CPU_TS ts;
-    uint8_t data[8] = {0};
-    memcpy(
-        data + 4, // Tritium expects the setpoint in the Most significant 32 bits, so we offset
-        &busCurrent,
-        sizeof(busCurrent));
-    OSSemPend(&MotorController_MailSem4,
-              0,
-              OS_OPT_PEND_BLOCKING,
-              &ts,
-              &err);
-    assertOSError(0, err);
-    ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_POWER, data, MAX_CAN_LEN);
+static void MotorController_InitCommand(){ //transmits the init command
+    CANDATA_t initData;
+    initData.data[4] = busCurrent; //put 32bit busCurrent value in most significant 32 bits
+    initData.ID = MOTOR_POWER;
+    initData.idx = 0;
+    ErrorStatus initCommand = CANbus_Send(initData,CAN_BLOCKING,MOTORCAN);
     if (initCommand == ERROR)
     {
-        MotorController_Release();
         Motor_FaultBitmap = T_INIT_FAIL;
         assertTritiumError(Motor_FaultBitmap);
     }
@@ -125,25 +83,6 @@ void MotorController_Init(float busCurrentFractionalSetPoint)
     if (is_initialized)
         return;
     is_initialized = true; // Ensure that we only execute the function once
-    OS_ERR err;
-    OSSemCreate(&MotorController_MailSem4,
-                "Motor Controller Mailbox Semaphore",
-                3, // Number of mailboxes
-                &err);
-    assertOSError(0, err);
-
-    OSSemCreate(&MotorController_ReceiveSem4,
-                "Motor Controller Receive Semaphore",
-                0, // Number of mailboxes
-                &err);
-    assertOSError(0, err);
-
-    OSMutexCreate(&restartFinished_Mutex,
-                "Motor Controller Restart Mutex",
-                &err);
-    assertOSError(0, err);
-
-    BSP_CAN_Init(CAN_3, MotorController_CountIncoming, MotorController_Release);
     busCurrent = busCurrentFractionalSetPoint;
     MotorController_InitCommand();
 }
@@ -151,30 +90,23 @@ void MotorController_Init(float busCurrentFractionalSetPoint)
 /**
  * @brief Restarts the motor controller. 
  * 
- * @param busCurrentFractionalSetPoint 
  */
 void MotorController_Restart(void){
     CPU_TS ts;
 	OS_ERR err;
     OSMutexPend(&restartFinished_Mutex, 0, OS_OPT_POST_NONE, &ts, &err);
     assertOSError(0, err);
-    uint8_t data[8] = {0};
     restartFinished = false;
 
-    OSSemPend(&MotorController_MailSem4,
-            0,
-            OS_OPT_PEND_BLOCKING,
-            &ts,
-            &err);
-	assertOSError(0, err);
-    ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_RESET, data, MAX_CAN_LEN); //send reset command
+    CANDATA_t restartCommand;
+    restartCommand.data[0] = 0;
+    restartCommand.ID = MOTOR_RESET;
+    restartCommand.idx = 0;
+    ErrorStatus initCommand = CANbus_Send(restartCommand,CAN_BLOCKING,MOTORCAN);
     if (initCommand == ERROR) {
         restartFinished = true;
-		MotorController_Release();
-
         OSMutexPost(&restartFinished_Mutex, OS_OPT_POST_NONE, &err);
         assertOSError(0, err);
-
         Motor_FaultBitmap = T_INIT_FAIL;
         assertTritiumError(Motor_FaultBitmap);
         return;
@@ -192,24 +124,12 @@ void MotorController_Restart(void){
  */
 void MotorController_Drive(float newVelocity, float motorCurrent)
 {
-    CPU_TS ts;
-    OS_ERR err;
-
-    uint8_t data[8];
-    memcpy(data, &newVelocity, sizeof(newVelocity));
-    memcpy(data + sizeof(newVelocity), &motorCurrent, sizeof(motorCurrent));
-
-    OSSemPend(&MotorController_MailSem4,
-              0,
-              OS_OPT_PEND_BLOCKING,
-              &ts,
-              &err);
-    assertOSError(0, err);
-    ErrorStatus result = BSP_CAN_Write(CAN_3, MOTOR_DRIVE, data, MAX_CAN_LEN);
-    if (result == ERROR)
-    {
-        MotorController_Release();
-    }
+    CANDATA_t driveCommand;
+    *((uint32_t*)&driveCommand.data) = newVelocity; //copy velocity into LS 32 bits
+    *(((uint32_t*)&driveCommand.data)+1) = motorCurrent; //copy current into MS 32 bits
+    driveCommand.ID = MOTOR_DRIVE;
+    driveCommand.idx = 0;
+    CANbus_Send(driveCommand,CAN_NON_BLOCKING,MOTORCAN);
 }
 
 /**
@@ -222,42 +142,24 @@ void MotorController_Drive(float newVelocity, float motorCurrent)
 ErrorStatus MotorController_Read(CANbuff *message)
 {
 
-    uint32_t id;
-    uint8_t data[8] = {0};
     uint32_t firstSum = 0;
     uint32_t secondSum = 0;
     CPU_TS ts;
     OS_ERR err;
 
-    // Check to see if a mailbox is available: BLOCKING
-    OSSemPend(
-        &MotorController_ReceiveSem4,
-        0,
-        OS_OPT_PEND_BLOCKING,
-        &ts,
-        &err);
-    assertOSError(0, err);
-    ErrorStatus status = BSP_CAN_Read(CAN_3, &id, data);
+    CANDATA_t motormsg;
+    ErrorStatus status = CANbus_Read(&motormsg,CAN_NON_BLOCKING,MOTORCAN);
 
     if (status == SUCCESS)
     {
-        message->id = id;
-        //get first number (bits 0-31)
-        for(int j = (MAX_CAN_LEN/2)-1 ; j >= 0; j--){
-            firstSum <<= 8;
-            firstSum += data[j];
-        }
+        firstSum = *(uint32_t*)&(motormsg.data); //first 32 bits
+        secondSum = *(((uint32_t*)&(motormsg.data))+1); //second 32 bits
 
-        //get second number (bits 32-63)
-        for(int k = MAX_CAN_LEN - 1; k >= (MAX_CAN_LEN/2); k--){
-            secondSum <<= 8;
-            secondSum += data[k];
-        }
-
+        message->id = motormsg.ID;
         message->firstNum = firstSum;
         message->secondNum = secondSum;
         
-        switch (id) {
+        switch (motormsg.ID) {
             // If we're reading the output from the Motor Status command (0x241) then 
             // Check the status bits we care about and set flags accordingly
             case MOTOR_STATUS: {
@@ -303,6 +205,9 @@ ErrorStatus MotorController_Read(CANbuff *message)
             case MOTOR_VELOCITY: {
                 CurrentVelocity = *(float *) &secondSum;
                 CurrentRPM = *(float*) &firstSum;
+                break;
+            }
+            default: {
                 break;
             }
 

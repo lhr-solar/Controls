@@ -1,3 +1,5 @@
+.. _velocity:
+
 ********************
 Update Velocity Task
 ********************
