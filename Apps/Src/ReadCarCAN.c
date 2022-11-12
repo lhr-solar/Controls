@@ -149,7 +149,6 @@ void Task_ReadCarCAN(void *p_arg)
 
     //data struct for CAN message
     CANDATA_t dataBuf;
-    CPU_TS ts;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
     assertOSError(OS_READ_CAN_LOC,err);
