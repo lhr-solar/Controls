@@ -47,8 +47,7 @@ void Minion_Init(void);
  * @return true
  * @return false *NOTE* If output pin is passed, will exit 
  */
-bool Minion_Read_Input(MinionPin_t pin, Minion_Error_t* err);
-
+bool Minion_Read_Pin(MinionPin_t pin, Minion_Error_t* err);
 /**
  * @brief Writes given status to a specified output pin. Locks writing to all output pins
  * 

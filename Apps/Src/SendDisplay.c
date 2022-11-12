@@ -24,8 +24,8 @@ void Task_SendDisplay(void *p_arg) {
         Display_SetRegenEnabled(RegenEnable);
         //Display_SetLight(A_CNCTR, Contactors_Get(ARRAY_CONTACTOR));
         //Display_SetLight(M_CNCTR, Contactors_Get(MOTOR_CONTACTOR));
-        Display_SetGear(Minion_Read_Input(FOR_SW, &mErr), Minion_Read_Input(REV_SW, &mErr));
-        //Display_SetLight(Headlight_ON, Minion_Read_Input(HEADLIGHT_SW, &mErr));
+        Display_SetGear(Minion_Read_Pin(FOR_SW, &mErr), Minion_Read_Pin(REV_SW, &mErr));
+        //Display_SetLight(Headlight_ON, Minion_Read_Pin(HEADLIGHT_SW, &mErr));
 
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_NON_STRICT, &err); // Update screen at roughly 10 fps
     }

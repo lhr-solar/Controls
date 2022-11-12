@@ -56,7 +56,7 @@ void Task_UpdateVelocity(void *p_arg)
     {
         uint8_t accelPedalPercent = Pedals_Read(ACCELERATOR);
         uint8_t brakePedalPercent = Pedals_Read(BRAKE);
-        State RegenSwitchState = Minion_Read_Input(REGEN_SW, &mErr);
+        State RegenSwitchState = Minion_Read_Pin(REGEN_SW, &mErr);
         RegenState = ((RegenSwitchState == ON) && (RegenEnable == ON)); //AND driver regen enable and system regen enable together to decide whether we are in regen brake mode
 
         // Set the cruise state accordingly
@@ -116,15 +116,15 @@ void Task_UpdateVelocity(void *p_arg)
                 forwardPercent = ((accelPedalPercent - NEUTRAL_PEDALS_PERCENT) * 100) / (100 - NEUTRAL_PEDALS_PERCENT);
             }
 
-            if(Minion_Read_Input(FOR_SW, &mErr)){
+            if(Minion_Read_Pin(FOR_SW, &mErr)){
                 desiredVelocity = (((cruiseState==ON)&&(forwardPercent == 0)) ? cruiseSpeed : MAX_VELOCITY); // if in cruise and not pushing accel pedal, use cruise speed, otherwise use max
-            } else if (Minion_Read_Input(REV_SW, &mErr)) {
+            } else if (Minion_Read_Pin(REV_SW, &mErr)) {
                 desiredVelocity = -MAX_VELOCITY; //no cruising in reverse
                 cruiseState = OFF;
             }
             
 
-            if((cruiseState == ON)&&(Minion_Read_Input(FOR_SW, &mErr))&&(forwardPercent==0)){ //we're in cruise mode and not accelerating so use total current to hit cruise velocity
+            if((cruiseState == ON)&&(Minion_Read_Pin(FOR_SW, &mErr))&&(forwardPercent==0)){ //we're in cruise mode and not accelerating so use total current to hit cruise velocity
                 desiredMotorCurrent = (float) 0.5;
             } else {
                 desiredMotorCurrent = convertPedaltoMotorPercent(forwardPercent);
@@ -132,7 +132,7 @@ void Task_UpdateVelocity(void *p_arg)
 
         }
 
-        if ((Contactors_Get(MOTOR_CONTACTOR)) && ((Minion_Read_Input(FOR_SW, &mErr) || Minion_Read_Input(REV_SW, &mErr)))) {
+        if ((Contactors_Get(MOTOR_CONTACTOR)) && ((Minion_Read_Pin(FOR_SW, &mErr) || Minion_Read_Pin(REV_SW, &mErr)))) {
             MotorController_Drive(velocity_to_rpm(desiredVelocity), desiredMotorCurrent);
         }
 
