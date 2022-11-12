@@ -14,4 +14,9 @@ Other messages
 
 We also expect to receive supplemental voltage and state of charge messages from BPS. We simply store both to show on the display.
 
-**This task will be greatly simplified when/if timers are successfully implemented.**
+Implementation Details
+======================
+
+The Read Car CAN task uses timer callbacks to make sure message timings remain appropriate. More specifically, there's a timer for making sure the precharge contactor is opened and closed at the correct time, and another timer for ensuring that a charge enable message is received from BPS at least every five seconds. If not such message is received, the timer automatically puts the car in fault state, classifying it as one of the :ref:`recoverable`, and opening the contactors controlled by the system.
+
+In order to avoid disabling charging unnecessarily disabling charging, a saturation buffer is used to smooth over changes. See `ReadCarCAN.c` for more details, as this is subject to change.
