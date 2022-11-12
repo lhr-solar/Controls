@@ -50,6 +50,9 @@ void Task_SendCarCAN(void *p_arg){
         CAN_Queue_Pend(&motorMsg);
         CANbus_Send(motorMsg.id, motorMsg.payload, CAN_BLOCKING);
 
+        //Initialize CarData
+        data.val = 0;
+
         // Get pedal information
         data.accelPedal = Pedals_Read(ACCELERATOR);
         data.brakePedal = Pedals_Read(BRAKE);
