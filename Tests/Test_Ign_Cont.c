@@ -6,15 +6,19 @@
 #include "common.h"
 #include "Contactors.h"
 
+static OS_TCB Task1TCB;
+static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
-int main(void)
-{
-    OS_ERR err;
-    OSInit(&err);
-    Contactors_Init();
-    Minion_Init();
+void Task1(void *arg)
+{   
     CPU_Init();
+    
+    BSP_UART_Init(UART_2);
+    Minion_Init();
+
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+
+    OS_ERR err;
 
     // Initialize IgnitionContactor
     OSTaskCreate(
@@ -32,6 +36,36 @@ int main(void)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
+    assertOSError(OS_MAIN_LOC, err);
+    
+    while(1){
+        printf("Array Precharge: %d, Array Contactor: %d, Motor Contactor: %d\n\r", 
+        Contactors_Get(ARRAY_PRECHARGE), Contactors_Get(ARRAY_CONTACTOR), Contactors_Get(MOTOR_CONTACTOR));
+
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+};
+
+int main()
+{
+    OS_ERR err;
+    OSInit(&err);
+
+    // create tester thread
+    OSTaskCreate(
+        (OS_TCB *)&Task1TCB,
+        (CPU_CHAR *)"Task 1",
+        (OS_TASK_PTR)Task1,
+        (void *)NULL,
+        (OS_PRIO)13,
+        (CPU_STK *)Task1Stk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void *)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR *)&err);
     assertOSError(OS_MAIN_LOC, err);
 
     OSStart(&err);
