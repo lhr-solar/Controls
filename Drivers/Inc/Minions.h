@@ -3,13 +3,11 @@
 #include <stdbool.h>
 #include "BSP_GPIO.h"
 
-
 //errors bc ur bad
 typedef enum{
     MINION_ERR_NONE = 0,
     MINION_ERR_YOU_READ_OUTPUT_PIN,
     MINION_ERR_YOU_WROTE_TO_INPUT_PIN,
-
 } Minion_Error_t;
 
 //used to index into lookup table
