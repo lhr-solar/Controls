@@ -8,90 +8,72 @@
 #include "Contactors.h"
 #include "common.h"
 #include <errno.h> 
-//contactors
-#define FOREACH_CONTACTOR(CONTACTOR) \
-        CONTACTOR(ARRAY_CONTACTOR)   \
-        CONTACTOR(ARRAY_PRECHARGE)  \
-        CONTACTOR(MOTOR_CONTACTOR)   \
-        CONTACTOR(NUM_CONTACTORS)  \
+#include "Tasks.h"
 
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
-
-enum CONTACTOR_ENUM {
-    FOREACH_CONTACTOR(GENERATE_ENUM)
-};
-
-static const char *CONTACTOR_STRING[] = {
-    FOREACH_CONTACTOR(GENERATE_STRING)
-};
-
-
-//minion switches
-#define FOREACH_MSWITCH(MSWITCH) \
-        MSWITCH(IGN_1)   \
-        MSWITCH(IGN_2)  \
-        MSWITCH(REGEN_SW)   \
-        MSWITCH(FOR_SW)  \
-        MSWITCH(REV_SW)  \
-        MSWITCH(REGEN_SW)   \
-        MSWITCH(CRUZ_EN)  \
-        MSWITCH(CRUZ_ST)  \
-
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
-
-enum MSWITCH_ENUM {
-    FOREACH_MSWITCH(GENERATE_ENUM)
-};
-
-static const char *MSWITCH_STRING[] = {
-    FOREACH_MSWITCH(GENERATE_STRING)
-};
+extern FaultBitmap;
+extern OSErrLocBitmap;
+extern SupplementalVoltage;
+extern StateOfCharge;
+extern switch_state;
+extern RegenEnable;
+extern msg_queue;
+extern UpdateVel_ToggleCruise;
 
 
 
 
-
-
-
-
-
-void Task_Contactor_Ignition(void* p_arg) {
-    OS_ERR err;
+void Task_DebugDump(void* p_arg) {
+    //OS_ERR err;
     Minion_Error_t mErr;
 
 
     // Get pedal information
     int8_t accelPedal = Pedals_Read(ACCELERATOR);
-    char* testStr = "ACCELERATOR: %d", accelPedal;
-    BSP_UART_Write(UART_3, testStr , strlen(testStr));
+    printf("ACCELERATOR: %d", accelPedal);
 
     int8_t brakePedal = Pedals_Read(BRAKE);
-    char* testStr = "BRAKE: %d", brakePedal;
-    BSP_UART_Write(UART_3, testStr , strlen(testStr));
+    printf("BRAKE: %d", brakePedal);
 
 
-    // Get switch information
+    // Get minion switch information
     for(MinionPin_t swtch = 0; swtch < MINIONPIN_NUM; swtch++){
-        bool switchState = Minion_Read_Input(swtch, &mErr) == ON ? true : false;
-        char* testStr = "%s: %d      Error: %s",uhh,switchState,mErr;
-        BSP_UART_Write(UART_3, (char*) testStr , strlen(testStr));
+        bool switchState = Minion_Read_Input(swtch, &mErr) == true ? true : false;
+        printf("%s: %d",MSWITCH_STRING[swtch],switchState);
     }
 
 
-
-    // Get light information
-    bool light_info = (bool)Minion_Read_Input(BRAKELIGHT, &mErr);//WRONG BUT HOW ELSE DO U DO IT
-    char* testStr = "BRAKELIGHT: %d      Error: %c",light_info,mErr;
-    BSP_UART_Write(UART_3, (char*) testStr , strlen(testStr));
+    // // Get minion light information(reading from an ouput-an error for this function 'Minion_Read_Input')
+    // bool light_info = (bool)Minion_Read_Input(BRAKELIGHT, &mErr);
+    // testStr = "BRAKELIGHT: %d",light_info;
+    // BSP_UART_Write(UART_3, (char*) testStr , strlen(testStr));
 
 
     // Get contactor info   
     for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-        bool switchState = Contactors_Get(contactor) == ON ? true : false;
-        char* testStr = "%s: %d", CONTACTOR_SRING[contactor], switch_state;
-        BSP_UART_Write(UART_3, testStr , strlen(testStr));
+        bool switchState = Contactors_Get(contactor) == true ? true : false;
+        printf("%s: %d", CONTACTOR_STRING[contactor], switch_state);
     } 
 
+
+    //FaultState and errlocbitmap    
+    printf("FaultBitmap: %s", FAULT_BITMAP_STRING[FaultBitmap]);  //*what is this
+
+    printf("OSErrLocBitmap: %s", OS_LOC_STRING[OSErrLocBitmap]);  //*what is this
+
+    printf("SupplementalVoltage: %d", SupplementalVoltage);  //*what is this
+
+    printf("StateOfCharge: %d", StateOfCharge);  //*what is this
+
+
+
+    // RegenEnable
+    printf("RegenEnable: %d", RegenEnable);
+
+
+    //UpdateVelocity Globals
+    printf("UpdateVel_ToggleCruise: %d", UpdateVel_ToggleCruise);
+
+
+    //UpdateDisplay Globals
+    printf("msg_queue: %c", msg_queue);  //*what is this
 }

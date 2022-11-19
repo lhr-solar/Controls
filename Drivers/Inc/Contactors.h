@@ -14,12 +14,30 @@
 #define MOTOR_CONTACTOR_PIN GPIO_Pin_12
 
 
-typedef enum {
-    ARRAY_CONTACTOR = 0,
-    ARRAY_PRECHARGE,
-    MOTOR_CONTACTOR,
-    NUM_CONTACTORS
-} contactor_t;
+// typedef enum {
+//     ARRAY_CONTACTOR = 0,
+//     ARRAY_PRECHARGE,
+//     MOTOR_CONTACTOR,
+//     NUM_CONTACTORS
+// } contactor_t;
+
+//for DebugDump
+#define FOREACH_CONTACTOR(CONTACTOR) \
+        CONTACTOR(ARRAY_CONTACTOR)   \
+        CONTACTOR(ARRAY_PRECHARGE)  \
+        CONTACTOR(MOTOR_CONTACTOR)   \
+        CONTACTOR(NUM_CONTACTORS)  \
+
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+enum CONTACTOR_ENUM {
+    FOREACH_CONTACTOR(GENERATE_ENUM)
+};
+
+static const char *CONTACTOR_STRING[] = {
+    FOREACH_CONTACTOR(GENERATE_STRING)
+};
 
 /**
  * @brief   Initializes contactors to be used

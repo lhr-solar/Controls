@@ -35,6 +35,30 @@ typedef struct PinInfo{
     direction_t direction; //0 for input, 1 for output     
 } PinInfo_t;
 
+//for DebugDump
+//minion switches
+#define FOREACH_MSWITCH(MSWITCH) \
+        MSWITCH(IGN_1)   \
+        MSWITCH(IGN_2)  \
+        MSWITCH(REGEN_SW)   \
+        MSWITCH(FOR_SW)  \
+        MSWITCH(REV_SW)  \
+        MSWITCH(REGEN_SW)   \
+        MSWITCH(CRUZ_EN)  \
+        MSWITCH(CRUZ_ST)  \
+
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+enum MSWITCH_ENUM {
+    FOREACH_MSWITCH(GENERATE_ENUM)
+};
+
+static const char *MSWITCH_STRING[] = {
+    FOREACH_MSWITCH(GENERATE_STRING)
+};
+
+
 
 /**
  * @brief Initializes input switches, output pins, and output mutex
