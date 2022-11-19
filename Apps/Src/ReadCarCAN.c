@@ -9,11 +9,11 @@
 #include "os_cfg_app.h"
 
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
-#define saturationThreshold (SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH / 4 
+#define saturationThreshold ((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH / 4) 
 
 // timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u
-#define CAN_WATCH_TMR_DLY_TMR_TS (CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u) //1000 for ms -> s conversion
+#define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) //1000 for ms -> s conversion
 #define PRECHARGE_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
 
 // CAN watchdog timer variable
@@ -32,7 +32,7 @@ static bool regenEnable = false;
 
 // Saturation buffer variables
 static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
-static int chargeMsgSaturation;
+static int chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
 
 // Handler to turn array back on
@@ -202,7 +202,7 @@ void Task_ReadCarCAN(void *p_arg)
                 assertOSError(OS_READ_CAN_LOC, err);
 
 
-                if((&dataBuf.data)[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
+                if(dataBuf.data[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
                     chargingDisable();
                     updateSaturation(-1); // Update saturation and buffer
 
