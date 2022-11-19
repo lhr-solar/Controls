@@ -1,10 +1,12 @@
 #include "Minions.h"
 #include "Pedals.h"
+#include "FaultState.h"
 #include "CANbus.h"
 #include "MotorController.h"
 #include "ReadCarCAN.h"
-
-#define __TEST_SENDTRITIUM
+#include "BSP_UART.h"
+#include "Tasks.h"
+#include "SendTritium.h"
 
 // Inputs
 extern bool cruiseEnable;
@@ -14,19 +16,25 @@ extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
 extern bool reverseSwitch;
 extern bool forwardSwitch;
+extern uint8_t state;
+extern float currentSetpoint;
+extern float velocitySetpoint;
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
+
+
 
 void Task1(void *arg)
 {
     OS_ERR err;
 
     CPU_Init();
+    BSP_UART_Init(UART_2);
     Pedals_Init();
-    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    //OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
     MotorController_Init(1.0f); // Let motor controller use 100% of bus current
-    OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    //OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     CANbus_Init();
     Minion_Init();
 
@@ -48,16 +56,62 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
+    //assertOSError(err);
 
     // Normal Drive
+    cruiseEnable = false;
+    cruiseSet = false;
+    regenToggle = false;
+    brakePedalPercent = 0;
+    accelPedalPercent = 0;
+    reverseSwitch = false;
+    forwardSwitch = false;
     
+    printf("State: %d\n\r", state);
+    
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    
+    // Record Velocity
+    cruiseEnable = false;
+    cruiseSet = false;
+    regenToggle = false;
+    brakePedalPercent = 0;
+    accelPedalPercent = 0;
+    reverseSwitch = false;
+    forwardSwitch = false;
+    
+    printf("State: %d\n\r", state);
 
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
 
-    while (1)
-    {
+    // Powered Cruise
+
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+
+    // Coasting Cruise
+
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+
+    // Brake State
+
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+
+    // One Pedal Drive
+
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+
+    // Cruise Disable
+
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+
+    // One Pedal Disable
+    
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+
+    while (1){
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
-        }
+    }
 };
 
 int main()

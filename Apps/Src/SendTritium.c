@@ -18,7 +18,7 @@
 #include "ReadCarCAN.h"
 #include "MotorController.h"
 #include "Minions.h"
-
+#include "SendTritium.h"
 
 // Macros
 #define MAX_VELOCITY 50.0f  // m/s
@@ -43,10 +43,11 @@ SCOPE bool reverseSwitch = false;
 SCOPE bool forwardSwitch = false;
 
 // Outputs
-static float currentSetpoint = 0;
-static float velocitySetpoint = 0;
+SCOPE float currentSetpoint = 0;
+SCOPE float velocitySetpoint = 0;
 static bool brakelightState = false;
 
+#ifndef __TEST_SENDTRITIUM
 // Debouncing counters
 static uint8_t regenCounter = 0;
 static uint8_t cruiseEnableCounter = 0;
@@ -58,6 +59,7 @@ static bool regenPrevious = false;
 
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
+#endif
 
 // State Names
 typedef enum{
@@ -143,7 +145,6 @@ void readInputs(){
         regenToggle = false;
     }
 
-    #endif
 
     // DEBOUNCING
     if(regenCounter == DEBOUNCE_PERIOD){regenButton = true;}
@@ -162,6 +163,9 @@ void readInputs(){
     if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious){cruiseEnable = !cruiseEnable;}
     cruiseEnablePrevious = cruiseEnableButton;
 
+    #endif
+
+    
 }
 
 /**
@@ -192,7 +196,9 @@ void Task_SendTritium(void *p_arg){
         Minion_Write_Output(BRAKELIGHT, brakelightState, &minion_err);
 
         // Drive
+        #ifndef __TEST_SENDTRITIUM
         MotorController_Drive(velocitySetpoint, currentSetpoint);
+        #endif
 
         // Delay of few milliseconds (100)
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
