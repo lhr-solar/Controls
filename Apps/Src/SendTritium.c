@@ -59,6 +59,8 @@ static bool regenPrevious = false;
 
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
+#else
+float velocityObserved = 0;
 #endif
 
 // State Names
@@ -240,7 +242,12 @@ void NormalDriveDecider(){
  * into velocitySetpoint.
 */
 void RecordVelocityHandler(){
+    #ifndef __TEST_SENDTRITIUM
     velocitySetpoint = MotorController_ReadVelocity();
+    #else
+    velocitySetpoint = velocityObserved;
+    #endif
+
 }
 
 void RecordVelocityDecider(){
@@ -262,14 +269,23 @@ void PoweredCruiseHandler(){
 }
 
 void PoweredCruiseDecider(){
+    #ifndef __TEST_SENDTRITIUM
     if(MotorController_ReadVelocity() > velocitySetpoint){
         state = COASTING_CRUISE;
-    }else if(!cruiseEnable){
+    }
+    #else
+    if(velocityObserved > velocitySetpoint){
+        state = COASTING_CRUISE;
+    }
+    #endif
+    else if(!cruiseEnable){
         state = NORMAL_DRIVE;
     }else if(cruiseEnable && cruiseSet){
         state = RECORD_VELOCITY;
     }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
         state = BRAKE_STATE;
+    }else if(regenToggle){
+        state = CRUISE_DISABLE;
     }
 }
 
@@ -289,6 +305,8 @@ void CoastingCruiseDecider(){
         state = NORMAL_DRIVE;
     }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
         state = BRAKE_STATE;
+    }else if(regenToggle){
+        state = CRUISE_DISABLE;
     }
 }
 
@@ -342,7 +360,7 @@ void OnePedalDriveDecider(){
 }
 
 void CruiseDisableHandler(){
-    cruiseEnable = 0;
+    cruiseEnable = false;
 }
 
 void CruiseDisableDecider(){

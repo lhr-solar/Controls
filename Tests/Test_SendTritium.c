@@ -19,11 +19,33 @@ extern bool forwardSwitch;
 extern uint8_t state;
 extern float currentSetpoint;
 extern float velocitySetpoint;
+extern float velocityObserved;
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
+void dumpInfo(){
+    OS_ERR err;
+    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+    assertOSError(OS_UPDATE_VEL_LOC, err);
 
+    printf("-------------------\n\r");
+    printf("State: %d\n\r", state);
+    printf("cruiseEnable: %d\n\r", cruiseEnable);
+    printf("cruiseSet: %d\n\r", cruiseSet);
+    printf("regenToggle: %d\n\r", regenToggle);
+    printf("brakePedalPercent: %d\n\r", brakePedalPercent);
+    printf("accelPedalPercent: %d\n\r", accelPedalPercent);
+    printf("reverseSwitch: %d\n\r", reverseSwitch);
+    printf("forwardSwitch: %d\n\r", forwardSwitch);
+    printf("currentSetpoint: %f\n\r", currentSetpoint);
+    printf("velocitySetpoint: %f\n\r", velocitySetpoint);
+    printf("velocityObserved: %f\n\r", velocityObserved);
+    printf("-------------------\n\r");
+
+    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    assertOSError(OS_UPDATE_VEL_LOC, err);
+}
 
 void Task1(void *arg)
 {
@@ -66,48 +88,47 @@ void Task1(void *arg)
     accelPedalPercent = 0;
     reverseSwitch = false;
     forwardSwitch = false;
-    
-    printf("State: %d\n\r", state);
-    
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    
-    // Record Velocity
-    cruiseEnable = false;
-    cruiseSet = false;
-    regenToggle = false;
-    brakePedalPercent = 0;
-    accelPedalPercent = 0;
-    reverseSwitch = false;
-    forwardSwitch = false;
-    
-    printf("State: %d\n\r", state);
+    velocityObserved = 0;
+    dumpInfo();
 
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    // Record Velocity
+    cruiseEnable = true;
+    cruiseSet = true;
+    dumpInfo();
 
     // Powered Cruise
-
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    cruiseEnable = true;
+    cruiseSet = false;
+    dumpInfo();
 
     // Coasting Cruise
+    cruiseEnable = true;
+    cruiseSet = false;
+    velocityObserved = 40;
+    velocitySetpoint = 30;
+    dumpInfo();
 
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    // Powered Cruise
+    cruiseEnable = true;
+    cruiseSet = false;
+    velocityObserved = 30;
+    velocitySetpoint = 40;
+    dumpInfo();
 
     // Brake State
+    brakePedalPercent = 15;
+    dumpInfo();
 
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    // Normal Drive
+    brakePedalPercent = 0;
+    dumpInfo();
 
     // One Pedal Drive
-
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-
-    // Cruise Disable
-
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-
-    // One Pedal Disable
+    cruiseEnable = false;
+    regenToggle = true;
+    ChargeEnable = true;
+    dumpInfo();
     
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-
     while (1){
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
