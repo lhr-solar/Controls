@@ -25,7 +25,7 @@
 #define NORMAL_BRAKE_THRESHOLD 5  // percent
 #define ONEPEDAL_BRAKE_THRESHOLD 20  // percent
 #define NEUTRAL_THRESHOLD 25    // percent
-#define BUTTON_BITMASK 0b111 // length of bitmap holding previous button values (in binary logic)
+#define DEBOUNCE_PERIOD 2 // in 100 m/s
 
 #ifdef __TEST_SENDTRITIUM
 #define SCOPE
@@ -47,10 +47,10 @@ static float currentSetpoint = 0;
 static float velocitySetpoint = 0;
 static bool brakelightState = false;
 
-// Bitmap buffers
-static uint8_t regenBitmap = 0;
-static uint8_t cruiseEnableBitmap = 0;
-static uint8_t cruiseSetBitmap = 0;
+// Debouncing counters
+static uint8_t regenCounter = 0;
+static uint8_t cruiseEnableCounter = 0;
+static uint8_t cruiseSetCounter = 0;
 
 // Button states
 static bool regenButton = false;
@@ -58,7 +58,6 @@ static bool regenPrevious = false;
 
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
-
 
 // State Names
 typedef enum{
@@ -115,17 +114,22 @@ const TritiumState_t FSM[8] = {
  * @brief   Reads inputs from the system
 */
 void readInputs(){
+
+    #ifndef __TEST_SENDTRITIUM
     Minion_Error_t err;
 
     brakePedalPercent = Pedals_Read(BRAKE);
     accelPedalPercent = Pedals_Read(ACCELERATOR);
     
     // UPDATE BUTTONS
-    #ifndef __TEST_SENDTRITIUM
+    if(Minion_Read_Input(REGEN_SW, &err) && regenCounter < DEBOUNCE_PERIOD){regenCounter++;}
+    else if(regenCounter > 0){regenCounter--;}
 
-    if(Minion_Read_Input(REGEN_SW, &err)){regenBitmap |= 1;}
-    if(Minion_Read_Input(CRUZ_EN, &err)){cruiseEnableBitmap |= 1;}
-    if(Minion_Read_Input(CRUZ_ST, &err)){cruiseSetBitmap |= 1;}
+    if(Minion_Read_Input(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
+    else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
+
+    if(Minion_Read_Input(CRUZ_EN, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
+    else if(cruiseSetCounter > 0){cruiseSetCounter--;}
     
     forwardSwitch = Minion_Read_Input(FOR_SW, &err);
     reverseSwitch = Minion_Read_Input(REV_SW, &err);
@@ -138,32 +142,18 @@ void readInputs(){
         cruiseSet = false;
         regenToggle = false;
     }
+
     #endif
 
     // DEBOUNCING
-    regenBitmap &= BUTTON_BITMASK; //selecting the last n bits
+    if(regenCounter == DEBOUNCE_PERIOD){regenButton = true;}
+    else if(regenCounter == 0){regenButton = false;}
 
-    if(regenBitmap == BUTTON_BITMASK){
-        regenButton = true;
-    }else if(regenBitmap != BUTTON_BITMASK){
-        regenButton = false;
-    }
+    if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
+    else if(cruiseEnableCounter == 0){cruiseEnableButton = false;}
 
-    cruiseEnableBitmap &= BUTTON_BITMASK; //selecting the last n bits
-
-    if(cruiseEnableBitmap == BUTTON_BITMASK){
-        cruiseEnableButton = true;
-    }else if(cruiseEnableBitmap != BUTTON_BITMASK){
-        cruiseEnableButton = false;
-    }
-
-    cruiseSetBitmap &= BUTTON_BITMASK; //selecting the last n bits
-
-    if(cruiseSetBitmap == BUTTON_BITMASK){
-        cruiseSet = true;
-    }else if(cruiseEnableBitmap != BUTTON_BITMASK){
-        cruiseSet = false;
-    }
+    if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSet = true;}
+    else if(cruiseSetCounter == 0){cruiseSet = false;}
 
     // TOGGLE
     if(ChargeEnable && regenButton != regenPrevious && regenPrevious){regenToggle = !regenToggle;}
@@ -172,10 +162,6 @@ void readInputs(){
     if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious){cruiseEnable = !cruiseEnable;}
     cruiseEnablePrevious = cruiseEnableButton;
 
-    // LEFT SHIFT
-    cruiseEnableBitmap <<= 1;
-    regenBitmap <<= 1;
-    cruiseSetBitmap <<= 1;
 }
 
 /**
@@ -204,6 +190,9 @@ void Task_SendTritium(void *p_arg){
 
         // Sets brakelight
         Minion_Write_Output(BRAKELIGHT, brakelightState, &minion_err);
+
+        // Drive
+        MotorController_Drive(velocitySetpoint, currentSetpoint);
 
         // Delay of few milliseconds (100)
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);

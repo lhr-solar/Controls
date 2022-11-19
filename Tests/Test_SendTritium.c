@@ -1,17 +1,11 @@
-#include "common.h"
-#include "config.h"
-#include "BSP_UART.h"
-#include "CANbus.h"
-#include "Display.h"
-#include "Contactors.h"
 #include "Minions.h"
-#include "MotorController.h"
 #include "Pedals.h"
-#include "CAN_Queue.h"
+#include "CANbus.h"
+#include "MotorController.h"
 #include "ReadCarCAN.h"
-//#include "SendTritium.c"
 
 #define __TEST_SENDTRITIUM
+
 // Inputs
 extern bool cruiseEnable;
 extern bool cruiseSet;
@@ -21,34 +15,23 @@ extern uint8_t accelPedalPercent;
 extern bool reverseSwitch;
 extern bool forwardSwitch;
 
-// Current State
-//extern TritiumStateName_e state;
-
-
-
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 void Task1(void *arg)
 {
+    OS_ERR err;
+
     CPU_Init();
-    Contactors_Init();
-   Display_Init();
-    CANbus_Init();
-   // Minions_Init();
-    MotorController_Init(1.0f);
     Pedals_Init();
-    CAN_Queue_Init();
-    BSP_UART_Init(UART_2);
+    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
+    OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    CANbus_Init();
+    Minion_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-    SupplementalVoltage = 200;
-    StateOfCharge = 12345678;
-    RegenEnable = ON;
-    Contactors_Enable(ARRAY_CONTACTOR);
-    Contactors_Set(ARRAY_CONTACTOR, ON);
-
-    OS_ERR err;
+    ChargeEnable = ON;
 
     OSTaskCreate(
         (OS_TCB*)&SendTritium_TCB,
@@ -66,48 +49,14 @@ void Task1(void *arg)
         (OS_ERR*)&err
     );
 
-// Normal Drive
-//printf(state);
-
-// Normal Drive
-accelPedalPercent = 45;
-brakePedalPercent = 1;
-cruiseSet = false;
-cruiseEnable = false;
-//printf(state);
-
-// Record Velocity
-accelPedalPercent = 45;
-brakePedalPercent = 1;
-cruiseSet = true;
-cruiseEnable = true;
-printf("accelPedalPercent");
-
+    // Normal Drive
     
-    
-    /*
-    switches_t(CRUZ_EN) = 1;
-        switches_t(CRUZ_SW) = 1;
-        brakePedalPercent;
-        printf("Print out");
-    */    
-        
-  
-        // Testing SendTritium directly
-        /*Display_SetSBPV(SupplementalVoltage);
-        Display_SetChargeState(StateOfCharge);
-        Display_SetRegenEnabled(RegenEnable);
-        Display_SetVelocity(25.0);*/
+
 
     while (1)
     {
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
-
-        SupplementalVoltage += 100;
-        StateOfCharge += 100000;
-     
-    
         }
 };
 
