@@ -10,14 +10,16 @@
 #include <errno.h> 
 #include "Tasks.h"
 
-extern FaultBitmap;
-extern OSErrLocBitmap;
-extern SupplementalVoltage;
-extern StateOfCharge;
-extern switch_state;
-extern RegenEnable;
-extern msg_queue;
-extern UpdateVel_ToggleCruise;
+extern fault_bitmap_t FaultBitmap;
+extern os_error_loc_t OSErrLocBitmap;
+extern uint16_t SupplementalVoltage;
+extern uint32_t StateOfCharge;
+extern bool switch_state;
+extern State RegenEnable;
+extern int msg_queue;
+extern bool UpdateVel_ToggleCruise;
+extern char* FAULT_BITMAP_STRING[];
+extern char* OS_LOC_STRING[];
 
 
 
@@ -38,7 +40,7 @@ void Task_DebugDump(void* p_arg) {
     // Get minion switch information
     for(MinionPin_t swtch = 0; swtch < MINIONPIN_NUM; swtch++){
         bool switchState = Minion_Read_Input(swtch, &mErr) == true ? true : false;
-        printf("%s: %d",MSWITCH_STRING[swtch],switchState);
+        printf("%s: %d", MSWITCH_STRING[swtch],switchState);
     }
 
 
@@ -51,7 +53,7 @@ void Task_DebugDump(void* p_arg) {
     // Get contactor info   
     for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
         bool switchState = Contactors_Get(contactor) == true ? true : false;
-        printf("%s: %d", CONTACTOR_STRING[contactor], switch_state);
+        printf("%s: %d", CONTACTOR_STRING[contactor], switchState);
     } 
 
 
@@ -62,7 +64,7 @@ void Task_DebugDump(void* p_arg) {
 
     printf("SupplementalVoltage: %d", SupplementalVoltage);  //*what is this
 
-    printf("StateOfCharge: %d", StateOfCharge);  //*what is this
+    printf("StateOfCharge: %ld", StateOfCharge);  //*what is this
 
 
 
@@ -75,5 +77,5 @@ void Task_DebugDump(void* p_arg) {
 
 
     //UpdateDisplay Globals
-    printf("msg_queue: %c", msg_queue);  //*what is this
+    printf("msg_queue: %d", msg_queue);  //*what is this
 }

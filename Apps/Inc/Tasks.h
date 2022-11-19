@@ -121,92 +121,62 @@ extern uint32_t StateOfCharge;
  * Stores error data to indicate which part of the code
  * an error is coming from.
  */
-// typedef enum{
-//     OS_NONE_LOC = 0x000,
-//     OS_ARRAY_LOC = 0x001,
-//     OS_READ_CAN_LOC = 0x002,
-//     OS_READ_TRITIUM_LOC = 0x004,
-//     OS_SEND_CAN_LOC = 0x008,
-//     OS_SEND_TRITIUM_LOC = 0x010,
-//     OS_UPDATE_VEL_LOC = 0x020,
-//     OS_BLINK_LIGHTS_LOC = 0x040,
-//     OS_CONTACTOR_LOC = 0x080,
-//     OS_MINIONS_LOC = 0x100,
-//     OS_MAIN_LOC = 0x200,
-//     OS_CANDRIVER_LOC = 0x400,
-//     OS_MOTOR_CONNECTION_LOC = 0x800,
-//     OS_DISPLAY_LOC = 0x1000
-// } os_error_loc_t;
+typedef enum{
+    OS_NONE_LOC = 0x000,
+    OS_ARRAY_LOC = 0x001,
+    OS_READ_CAN_LOC = 0x002,
+    OS_READ_TRITIUM_LOC = 0x004,
+    OS_SEND_CAN_LOC = 0x008,
+    OS_SEND_TRITIUM_LOC = 0x010,
+    OS_UPDATE_VEL_LOC = 0x020,
+    OS_BLINK_LIGHTS_LOC = 0x040,
+    OS_CONTACTOR_LOC = 0x080,
+    OS_MINIONS_LOC = 0x100,
+    OS_MAIN_LOC = 0x200,
+    OS_CANDRIVER_LOC = 0x400,
+    OS_MOTOR_CONNECTION_LOC = 0x800,
+    OS_DISPLAY_LOC = 0x1000
+} os_error_loc_t;
+
+char* OS_LOC_STRING[] = { 
+    [0x000] = "OS_NONE_LOC", 
+    [0x001] = "OS_ARRAY_LOC", 
+    [0x002] = "OS_READ_CAN_LOC", 
+    [0x004] = "OS_READ_TRITIUM_LOC",
+    [0x008] = "OS_SEND_CAN_LOC",
+    [0x010] = "OS_SEND_TRITIUM_LOC",
+    [0x020] = "OS_UPDATE_VEL_LOC",
+    [0x040] = "OS_BLINK_LIGHTS_LOC",
+    [0x080] = "OS_CONTACTOR_LOC",
+    [0x100] = "OS_MINIONS_LOC",
+    [0x200] = "OS_MAIN_LOC",
+    [0x400] = "OS_CANDRIVER_LOC",
+    [0x800] = "OS_MOTOR_CONNECTION_LOC",
+    [0x1000] = "OS_DISPLAY_LOC"
+    };
 
 /**
  * Fault Enum
  * 
  * Different fault states that need to be handled by the FaultState task
  */
-// typedef enum{
-//     FAULT_NONE = 0x00,      // No fault
-//     FAULT_OS = 0x01,         // for OS faults
-//     FAULT_UNREACH = 0x02,    // for unreachable conditions
-//     FAULT_TRITIUM = 0x04,      // for errors sent from the tritium
-//     FAULT_READBPS = 0x08,    // for unsuccessfully reading from BPS CAN
-//     FAULT_DISPLAY = 0x10,    // for display faults
-// } fault_bitmap_t;
+typedef enum{
+    FAULT_NONE = 0x00,      // No fault
+    FAULT_OS = 0x01,         // for OS faults
+    FAULT_UNREACH = 0x02,    // for unreachable conditions
+    FAULT_TRITIUM = 0x04,      // for errors sent from the tritium
+    FAULT_READBPS = 0x08,    // for unsuccessfully reading from BPS CAN
+    FAULT_DISPLAY = 0x10    // for display faults
+} fault_bitmap_t;
 
-//for DebugDump:
-//FaultState and errlocbitmap
-//OS_LOC(DebugDump)
-#define FOREACH_OS_LOC(OS_LOC) \
-        OS_LOC(OS_NONE_LOC) = 0x000   \
-        OS_LOC(OS_ARRAY_LOC) = 0x001\
-        OS_LOC(OS_READ_CAN_LOC) =  0x002\
-        OS_LOC(OS_READ_TRITIUM_LOC) = 0x004 \
-        OS_LOC(OS_SEND_CAN_LOC) = 0x008\
-        OS_LOC(OS_SEND_TRITIUM_LOC) = 0x010 \
-        OS_LOC(OS_UPDATE_VEL_LOC) = 0x020 \
-        OS_LOC(OS_BLINK_LIGHTS_LOC) = 0x040 \
-        OS_LOC(OS_CONTACTOR_LOC) = 0x080 \
-        OS_LOC(OS_MINIONS_LOC) = 0x100 \
-        OS_LOC(OS_MAIN_LOC) = 0x200  \
-        OS_LOC(OS_CANDRIVER_LOC) = 0x400 \
-        OS_LOC(OS_MOTOR_CONNECTION_LOC) = 0x800 \
-        OS_LOC(OS_DISPLAY_LOC) = 0x1000 \
-
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
-
-enum OS_LOC_ENUM {
-    FOREACH_OS_LOC(GENERATE_ENUM)
-};
-
-static const char *OS_LOC_STRING[] = {
-    FOREACH_OS_LOC(GENERATE_STRING)
-};
-
-//FAULT_BITMAP(DebugDump)
-#define FOREACH_FAULT_BITMAP(FAULT_BITMAP) \
-        FAULT_BITMAP(FAULT_NONE) = 0x00  \
-        FAULT_BITMAP(FAULT_OS) = 0x01 \
-        FAULT_BITMAP(FAULT_UNREACH) = 0x02  \
-        FAULT_BITMAP(FAULT_TRITIUM) = 0x04 \
-        FAULT_BITMAP(FAULT_READBPS) = 0x08 \
-        FAULT_BITMAP(FAULT_DISPLAY) = 0x10  \
-        
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
-
-enum FAULT_BITMAP_ENUM {
-    FOREACH_FAULT_BITMAP(GENERATE_ENUM)
-};
-
-static const char *FAULT_BITMAP_STRING[] = {
-    FOREACH_FAULT_BITMAP(GENERATE_STRING)
-};
-
-
-
-
-
-
+char* FAULT_BITMAP_STRING[] = { 
+    [0x000] = "FAULT_NONE", 
+    [0x001] = "FAULT_OS", 
+    [0x002] = "FAULT_UNREACH", 
+    [0x004] = "FAULT_TRITIUM",
+    [0x008] = "FAULT_READBPS",
+    [0x010] = "FAULT_DISPLAY"
+    };
 
 
 /**
