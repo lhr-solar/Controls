@@ -168,11 +168,17 @@ void Task1(void *arg)
     regenToggle = true;
     ChargeEnable = true;
     stateBuffer();
-    
-    // Powered Cruise
-    goToPoweredCruise();
 
-    cruiseEnable = false;
+    /**
+     * ======= Powered Cruise ==========
+     * State Transitions: 
+     * Coasting Cruise, Normal State, Record Velocity, Brake State, Cruise Disable
+    */
+
+    // Powered Cruise to Coasting Cruise
+    goToPoweredCruise();
+    velocityObserved = 40;
+    velocitySetpoint = 30;
     stateBuffer();
 
     // Powered Cruise to Normal Drive
@@ -180,16 +186,27 @@ void Task1(void *arg)
     cruiseEnable = false;
     stateBuffer();
 
-    // Powered Cruise to Record State
+    // Powered Cruise to Record Velocity
     goToPoweredCruise();
     cruiseSet = true;
     cruiseEnable = true;
+    stateBuffer();
+
+    // Powered Cruise to Brake State
+    goToPoweredCruise();
+    brakePedalPercent = 15;
     stateBuffer();
 
     // Powered Cruise to Cruise Disable
     goToPoweredCruise();
     regenToggle = true;
     stateBuffer();
+
+    /**
+     * ======= Coasting Cruise ==========
+     * State Transitions: 
+     * Powered Cruise, Normal Drive, Brake State, Cruise Disable
+    */
 
     // Coasting Cruise to Powered Cruise
     goToCoastingCruise();
@@ -206,6 +223,36 @@ void Task1(void *arg)
     goToCoastingCruise();
     brakePedalPercent = 15;
     stateBuffer();
+
+    // Coasting Cruise to Cruise Disable -> Normal State
+    goToCoastingCruise();
+    brakePedalPercent = 15;
+    stateBuffer();
+
+    /**
+     * ======= Normal Drive ==========
+     * State Transitions: 
+     * Record Velocity, One Pedal Drive, Brake State
+    */
+
+   // Normal Drive to Record Velocity
+   goToNormalState();
+   cruiseEnable = true;
+   cruiseSet = true;
+   brakePedalPercent = 0;
+   stateBuffer();
+
+   // Normal Drive to One Pedal Drive
+   goToNormalState();
+   cruiseEnable = false;
+   regenToggle = true;
+   ChargeEnable = true;
+   stateBuffer();
+
+   // Normal Drive to Brake State
+   goToNormalState();
+   brakePedalPercent = 15;
+   stateBuffer();
 
 
 
