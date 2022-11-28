@@ -24,27 +24,67 @@ extern float velocityObserved;
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
-void dumpInfo(){
+void stateBuffer(){
     OS_ERR err;
     OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
     assertOSError(OS_UPDATE_VEL_LOC, err);
+}
 
-    printf("-------------------\n\r");
-    printf("State: %d\n\r", state);
-    printf("cruiseEnable: %d\n\r", cruiseEnable);
-    printf("cruiseSet: %d\n\r", cruiseSet);
-    printf("regenToggle: %d\n\r", regenToggle);
-    printf("brakePedalPercent: %d\n\r", brakePedalPercent);
-    printf("accelPedalPercent: %d\n\r", accelPedalPercent);
-    printf("reverseSwitch: %d\n\r", reverseSwitch);
-    printf("forwardSwitch: %d\n\r", forwardSwitch);
-    printf("currentSetpoint: %f\n\r", currentSetpoint);
-    printf("velocitySetpoint: %f\n\r", velocitySetpoint);
-    printf("velocityObserved: %f\n\r", velocityObserved);
-    printf("-------------------\n\r");
 
-    OSTimeDlyHMSM(0, 0, 20, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    assertOSError(OS_UPDATE_VEL_LOC, err);
+void goToNormalState(){
+    printf("\n\rGoing to Normal State\n\r");
+
+    // Brake State
+    brakePedalPercent = 15;
+    stateBuffer();
+
+    // Disable One Pedal --> Normal State
+    brakePedalPercent = 0;
+    stateBuffer();
+}
+
+void goToPoweredCruise(){
+    printf("\n\rGoing to Powered Cruise State\n\r");
+
+    goToNormalState();
+
+    // Record Velocity
+    cruiseEnable = true;
+    cruiseSet = true;
+    stateBuffer();
+
+    // Powered Cruise
+    cruiseEnable = true;
+    cruiseSet = false;
+    velocityObserved = 30;
+    velocitySetpoint = 40;
+    stateBuffer();
+}
+
+void goToCoastingCruise(){
+    printf("\n\rGoing to Coasting Cruise State\n\r");
+
+    goToNormalState();
+
+    // Record Velocity
+    cruiseEnable = true;
+    cruiseSet = true;
+    stateBuffer();
+
+    // Powered Cruise
+    cruiseEnable = true;
+    cruiseSet = false;
+    velocityObserved = 30;
+    velocitySetpoint = 40;
+    stateBuffer();
+
+    // Coasting Cruise
+    cruiseEnable = true;
+    cruiseSet = false;
+    velocityObserved = 40;
+    velocitySetpoint = 30;
+    stateBuffer();
+
 }
 
 void Task1(void *arg)
@@ -89,46 +129,88 @@ void Task1(void *arg)
     reverseSwitch = false;
     forwardSwitch = false;
     velocityObserved = 0;
-    dumpInfo();
+    stateBuffer();
 
     // Record Velocity
     cruiseEnable = true;
     cruiseSet = true;
-    dumpInfo();
+    stateBuffer();
 
     // Powered Cruise
     cruiseEnable = true;
     cruiseSet = false;
-    dumpInfo();
+    stateBuffer();
 
     // Coasting Cruise
     cruiseEnable = true;
     cruiseSet = false;
     velocityObserved = 40;
     velocitySetpoint = 30;
-    dumpInfo();
+    stateBuffer();
 
     // Powered Cruise
     cruiseEnable = true;
     cruiseSet = false;
     velocityObserved = 30;
     velocitySetpoint = 40;
-    dumpInfo();
+    stateBuffer();
 
     // Brake State
     brakePedalPercent = 15;
-    dumpInfo();
+    stateBuffer();
 
     // Normal Drive
     brakePedalPercent = 0;
-    dumpInfo();
+    stateBuffer();
 
     // One Pedal Drive
     cruiseEnable = false;
     regenToggle = true;
     ChargeEnable = true;
-    dumpInfo();
+    stateBuffer();
     
+    // Powered Cruise
+    goToPoweredCruise();
+
+    cruiseEnable = false;
+    stateBuffer();
+
+    // Powered Cruise to Normal Drive
+    goToPoweredCruise();
+    cruiseEnable = false;
+    stateBuffer();
+
+    // Powered Cruise to Record State
+    goToPoweredCruise();
+    cruiseSet = true;
+    cruiseEnable = true;
+    stateBuffer();
+
+    // Powered Cruise to Cruise Disable
+    goToPoweredCruise();
+    regenToggle = true;
+    stateBuffer();
+
+    // Coasting Cruise to Powered Cruise
+    goToCoastingCruise();
+    velocitySetpoint = 30;
+    velocityObserved = 40;
+    stateBuffer();
+
+    // Coasting Cruise to Normal State
+    goToCoastingCruise();
+    cruiseEnable = false;
+    stateBuffer();
+
+    // Coasting Cruise to Brake State
+    goToCoastingCruise();
+    brakePedalPercent = 15;
+    stateBuffer();
+
+
+
+
+
     while (1){
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);

@@ -202,6 +202,24 @@ void Task_SendTritium(void *p_arg){
         MotorController_Drive(velocitySetpoint, currentSetpoint);
         #endif
 
+        // Dump Info for Testing
+        #ifdef __TEST_SENDTRITIUM
+        printf("-------------------\n\r");
+        printf("State: %d\n\r", state);
+        printf("cruiseEnable: %d\n\r", cruiseEnable);
+        printf("cruiseSet: %d\n\r", cruiseSet);
+        printf("regenToggle: %d\n\r", regenToggle);
+        printf("brakePedalPercent: %d\n\r", brakePedalPercent);
+        printf("accelPedalPercent: %d\n\r", accelPedalPercent);
+        printf("reverseSwitch: %d\n\r", reverseSwitch);
+        printf("forwardSwitch: %d\n\r", forwardSwitch);
+        printf("currentSetpoint: %f\n\r", currentSetpoint);
+        printf("velocitySetpoint: %f\n\r", velocitySetpoint);
+        printf("velocityObserved: %f\n\r", velocityObserved);
+        printf("-------------------\n\r");
+        #endif
+
+
         // Delay of few milliseconds (100)
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
