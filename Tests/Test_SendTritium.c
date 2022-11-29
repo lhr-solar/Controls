@@ -30,28 +30,44 @@ void stateBuffer(){
     assertOSError(OS_UPDATE_VEL_LOC, err);
 }
 
-
-void goToNormalState(){
-    printf("\n\rGoing to Normal State\n\r");
-
+void goToBrakeState(){
     // Brake State
     brakePedalPercent = 15;
     stateBuffer();
+}
+
+
+void goToNormalState(){
+    goToBrakeState();
 
     // Disable One Pedal --> Normal State
     brakePedalPercent = 0;
     stateBuffer();
 }
 
-void goToPoweredCruise(){
-    printf("\n\rGoing to Powered Cruise State\n\r");
 
+void goToOnePedalDrive(){
+    goToNormalState();
+
+    // One Pedal Drive
+    cruiseEnable = false;
+    regenToggle = true;
+    ChargeEnable = true;
+    stateBuffer();
+}
+
+void goToRecordVelocity(){
     goToNormalState();
 
     // Record Velocity
     cruiseEnable = true;
     cruiseSet = true;
     stateBuffer();
+
+}
+
+void goToPoweredCruise(){
+    goToRecordVelocity();
 
     // Powered Cruise
     cruiseEnable = true;
@@ -62,21 +78,7 @@ void goToPoweredCruise(){
 }
 
 void goToCoastingCruise(){
-    printf("\n\rGoing to Coasting Cruise State\n\r");
-
-    goToNormalState();
-
-    // Record Velocity
-    cruiseEnable = true;
-    cruiseSet = true;
-    stateBuffer();
-
-    // Powered Cruise
-    cruiseEnable = true;
-    cruiseSet = false;
-    velocityObserved = 30;
-    velocitySetpoint = 40;
-    stateBuffer();
+    goToPoweredCruise();
 
     // Coasting Cruise
     cruiseEnable = true;
@@ -120,60 +122,12 @@ void Task1(void *arg)
     );
     //assertOSError(err);
 
-    // Normal Drive
-    cruiseEnable = false;
-    cruiseSet = false;
-    regenToggle = false;
-    brakePedalPercent = 0;
-    accelPedalPercent = 0;
-    reverseSwitch = false;
-    forwardSwitch = false;
-    velocityObserved = 0;
-    stateBuffer();
-
-    // Record Velocity
-    cruiseEnable = true;
-    cruiseSet = true;
-    stateBuffer();
-
-    // Powered Cruise
-    cruiseEnable = true;
-    cruiseSet = false;
-    stateBuffer();
-
-    // Coasting Cruise
-    cruiseEnable = true;
-    cruiseSet = false;
-    velocityObserved = 40;
-    velocitySetpoint = 30;
-    stateBuffer();
-
-    // Powered Cruise
-    cruiseEnable = true;
-    cruiseSet = false;
-    velocityObserved = 30;
-    velocitySetpoint = 40;
-    stateBuffer();
-
-    // Brake State
-    brakePedalPercent = 15;
-    stateBuffer();
-
-    // Normal Drive
-    brakePedalPercent = 0;
-    stateBuffer();
-
-    // One Pedal Drive
-    cruiseEnable = false;
-    regenToggle = true;
-    ChargeEnable = true;
-    stateBuffer();
-
     /**
      * ======= Powered Cruise ==========
      * State Transitions: 
      * Coasting Cruise, Normal State, Record Velocity, Brake State, Cruise Disable
     */
+    printf("\n\r============ Testing Powered Cruise State ============\n\r");
 
     // Powered Cruise to Coasting Cruise
     goToPoweredCruise();
@@ -207,6 +161,7 @@ void Task1(void *arg)
      * State Transitions: 
      * Powered Cruise, Normal Drive, Brake State, Cruise Disable
     */
+    printf("\n\r============ Testing Coasting Cruise State ============\n\r");
 
     // Coasting Cruise to Powered Cruise
     goToCoastingCruise();
@@ -234,29 +189,81 @@ void Task1(void *arg)
      * State Transitions: 
      * Record Velocity, One Pedal Drive, Brake State
     */
+    printf("\n\r============ Testing Normal State ============\n\r");
 
-   // Normal Drive to Record Velocity
-   goToNormalState();
-   cruiseEnable = true;
-   cruiseSet = true;
-   brakePedalPercent = 0;
-   stateBuffer();
+    // Normal Drive to Record Velocity
+    goToNormalState();
+    cruiseEnable = true;
+    cruiseSet = true;
+    brakePedalPercent = 0;
+    stateBuffer();
 
-   // Normal Drive to One Pedal Drive
-   goToNormalState();
-   cruiseEnable = false;
-   regenToggle = true;
-   ChargeEnable = true;
-   stateBuffer();
+    // Normal Drive to Brake State
+    goToNormalState();
+    brakePedalPercent = 15;
+    stateBuffer();
 
-   // Normal Drive to Brake State
-   goToNormalState();
-   brakePedalPercent = 15;
-   stateBuffer();
+    // Normal Drive to One Pedal Drive
+    goToNormalState();
+    cruiseEnable = false;
+    regenToggle = true;
+    ChargeEnable = true;
+    stateBuffer();
+
+   /**
+     * ======= Brake State ==========
+     * State Transitions: 
+     * Brake Disable State
+    */
+    printf("\n\r============ Testing Brake State ============\n\r");
 
 
+    // Brake State to One Pedal Drive
+    goToBrakeState();
+    brakePedalPercent = 0;
+    stateBuffer();
+   
+   /**
+     * ======= Record Velocity ==========
+     * State Transitions: 
+     * Brake State, Powered Cruise, Normal Drive
+    */
+    printf("\n\r============ Testing Record Velocity State ============\n\r");
 
+    // Record Velocity to Brake State
+    goToRecordVelocity();
+    brakePedalPercent = 15;
+    stateBuffer();
 
+    // Record Velocity to Powered Cruise
+    goToRecordVelocity();
+    cruiseEnable = true;
+    cruiseSet = false;
+    stateBuffer();
+
+    // Record Velocity to Normal Drive
+    goToRecordVelocity();
+    cruiseEnable = false;
+    stateBuffer();
+
+    /**
+     * ======= One Pedal Drive ==========
+     * State Transitions: 
+     * One Pedal Disable, Brake State
+    */
+    printf("\n\r============ Testing One Pedal Drive State ============\n\r");
+
+    // One Pedal Drive to One Pedal Disable
+    goToOnePedalDrive();
+    regenToggle = false;
+    ChargeEnable = false;
+    cruiseEnable = true;
+    stateBuffer();
+
+    // One Pedal Drive to Brake State
+    goToOnePedalDrive();
+    brakePedalPercent = 15;
+    stateBuffer();
 
     while (1){
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
