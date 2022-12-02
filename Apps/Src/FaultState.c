@@ -7,6 +7,7 @@
 #include "Contactors.h"
 #include "Minions.h"
 static bool fromThread = false; //whether fault was tripped from thread
+extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 
 static void ArrayMotorKill(void) {
@@ -16,12 +17,8 @@ static void ArrayMotorKill(void) {
 }
 
 static void nonrecoverableFaultHandler(){
-    Minion_Error_t mErr;
-    //turn additional lights on to indicate critical error
-    //Display_SetLight(LEFT_BLINK, ON);
-    //Display_SetLight(RIGHT_BLINK, ON);
-    Minion_Write_Output(BRAKELIGHT, true, &mErr);
-    //Display_SetLight(CTRL_FAULT,ON); //turn on fault light
+    //turn additional brakelight on to indicate critical error
+    BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
     ArrayMotorKill();
 }
 
@@ -45,13 +42,11 @@ void EnterFaultState(void) {
 
         if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
             // Note: separate tripcnt from T_INIT_FAIL
-            static uint8_t tripcnt = 0; //trip counter
-            if(tripcnt>3){ //try to restart the motor a few times and then fail out
+            static uint8_t hall_fault_cnt = 0; //trip counter
+            if(hall_fault_cnt>3){ //try to restart the motor a few times and then fail out
                 nonrecoverableFaultHandler();
             } else {
-                tripcnt++;
-                //Lights_Set(CTRL_FAULT,OFF);
-                //Display_SetLight(CTRL_FAULT,OFF);
+                hall_fault_cnt++;
                 MotorController_Restart(); //re-initialize motor
                 return;
             }
@@ -59,13 +54,11 @@ void EnterFaultState(void) {
 
         if(TritiumError & T_INIT_FAIL){
             // Note: separate tripcnt from T_HALL_SENSOR_ERR
-            static uint8_t tripcnt = 0;
-            if(tripcnt>5){
+            static uint8_t init_fault_cnt = 0;
+            if(init_fault_cnt>5){
                 nonrecoverableFaultHandler(); //we've failed to init the motor five times
             } else {
-                tripcnt++;
-                //Lights_Set(CTRL_FAULT,OFF);
-                //Display_SetLight(CTRL_FAULT,OFF);
+                init_fault_cnt++;
                 MotorController_Restart();
                 return;
             }
@@ -86,8 +79,14 @@ void EnterFaultState(void) {
         nonrecoverableFaultHandler();
     }
     else if(FaultBitmap & FAULT_DISPLAY){
-        // TODO: Send reset command to display ("reset")
-        // To be implemented when display driver is complete
+        static uint8_t disp_fault_cnt = 0;
+        if(disp_fault_cnt>3){
+            Display_Fault(OSErrLocBitmap, FaultBitmap);
+        } else {
+            disp_fault_cnt++;
+            Display_Reset();
+            return;
+        }
     }
     if(fromThread){//no recovering if fault state was entered outside of the fault thread
         return;
