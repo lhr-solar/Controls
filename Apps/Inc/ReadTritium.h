@@ -9,4 +9,6 @@
 
 #include "MotorController.h"
 
+uint32_t MotorVelocity_Get();
+
 #endif

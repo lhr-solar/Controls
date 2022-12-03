@@ -5,6 +5,10 @@
 #include "CANbus.h"
 #include <string.h>
 
+uint32_t MotorVelocity_Get(){
+	return 0;
+}
+
 void Task_ReadTritium(void *p_arg)
 {
 

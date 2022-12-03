@@ -16,16 +16,15 @@
 
 #include "Pedals.h"
 #include "ReadCarCAN.h"
-#include "MotorController.h"
 #include "Minions.h"
 #include "SendTritium.h"
 
 // Macros
-#define MAX_VELOCITY 50.0f  // m/s
+#define MAX_VELOCITY 20000.0f // rpm
 #define NORMAL_BRAKE_THRESHOLD 5  // percent
 #define ONEPEDAL_BRAKE_THRESHOLD 20  // percent
 #define NEUTRAL_THRESHOLD 25    // percent
-#define DEBOUNCE_PERIOD 2 // in 100 m/s
+#define DEBOUNCE_PERIOD 2 // in 100 ms
 #define VELOCITY_THRESHOLD 20.0f // m/s
 
 #define MotorMsgPeriod 100
