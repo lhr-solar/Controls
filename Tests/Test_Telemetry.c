@@ -48,10 +48,13 @@ void Task1(void *arg)
 
     bool lightState = false;
     State contactorState = OFF;
+
+    uint32_t id;
+    uint8_t buf[8];
     
     while (1){
         // Switches can be modified through hardware
-        
+
         // Check light
         lightState = !lightState;
         Minion_Write_Output(BRAKELIGHT, lightState, &Merr);
@@ -61,7 +64,9 @@ void Task1(void *arg)
         Contactors_Set(MOTOR_CONTACTOR, contactorState);
         Contactors_Set(ARRAY_CONTACTOR, contactorState);
 
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);       
+        CANbus_Read(&id, buf, CAN_BLOCKING);
+
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         // Use a logic analyzer to read the CAN line and see if the data shows up correctly    
     }
 }
@@ -77,7 +82,7 @@ int main()
         (CPU_CHAR *)"Task 1",
         (OS_TASK_PTR)Task1,
         (void *)NULL,
-        (OS_PRIO)13,
+        (OS_PRIO)5,
         (CPU_STK *)Task1Stk,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
