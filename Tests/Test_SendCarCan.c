@@ -6,6 +6,8 @@
 #include "Pedals.h"
 #include "Minions.h"
 #include "Contactors.h"
+#include "CANbus.h"
+#include "CAN_Queue.h"
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
@@ -14,6 +16,8 @@ void Task1(void *arg)
 {   
     CPU_Init();
     
+    CANbus_Init();
+    CAN_Queue_Init();
     // BSP_UART_Init(UART_2);
     Pedals_Init();
     Minion_Init();

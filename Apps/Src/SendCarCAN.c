@@ -41,6 +41,7 @@ void Task_SendCarCAN(void *p_arg){
     CANMSG_t motorMsg;
     CANMSG_t carMsg;
     CarData_t data;
+    OS_ERR err;
 
     Minion_Error_t Merr;
 
@@ -70,6 +71,11 @@ void Task_SendCarCAN(void *p_arg){
         // Send car msg
         carMsg.payload.data.d = *((uint64_t*)&data);
         CANbus_Send(CARDATA_ID, carMsg.payload, CAN_BLOCKING);
+
+        // Delay of few milliseconds (100)
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+        if (err != OS_ERR_NONE){
+            assertOSError(OS_UPDATE_VEL_LOC, err);
+        }
     }
-    
 }
