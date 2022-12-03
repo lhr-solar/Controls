@@ -46,11 +46,6 @@ OS_SEM FaultState_Sem4;
 /**
  * Global Variables
  */
-
-// NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
-// Indicates whether or not regenerative braking / charging is enabled.
-State RegenEnable = OFF;
-
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 

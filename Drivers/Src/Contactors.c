@@ -90,16 +90,24 @@ State Contactors_Get(contactor_t contactor) {
  * @param   contactor the contactor
  *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @param   state the state to set (ON/OFF)
+ * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, State state) {
+ErrorStatus Contactors_Set(contactor_t contactor, State state, bool blocking) {
     CPU_TS timestamp;
     OS_ERR err;
     ErrorStatus result = ERROR;
 
-    // acquire lock
-    OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+    // acquire lock if its available
+    OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &timestamp, &err);
+    
+    if(err == OS_ERR_PEND_WOULD_BLOCK){
+        return ERROR;
+    }
     assertOSError(OS_CONTACTOR_LOC, err);
+
+
+
 
     // if enabled, change contactor to match state
     if (contactors[contactor].enabled) {
