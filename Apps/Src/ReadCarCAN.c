@@ -211,7 +211,7 @@ void Task_ReadCarCAN(void *p_arg)
 
                     // If the charge message saturation is above the threshold, wait for restart precharge sequence then enable charging.
                     // If we are already precharging/array is on, nothing will be done 
-                    if (chargeMsgSaturation >= saturationThreshold){
+                    if (chargeMsgSaturation >= SATURATION_THRESHOLD){
                         chargingEnable();
                     }
                     
