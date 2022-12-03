@@ -16,7 +16,7 @@ void Task1(void *arg)
 {   
     CPU_Init();
     
-    CANbus_Init();
+    CANbus_Init(CARCAN);
     CAN_Queue_Init();
     // BSP_UART_Init(UART_2);
     Pedals_Init();
@@ -49,8 +49,7 @@ void Task1(void *arg)
     bool lightState = false;
     State contactorState = OFF;
 
-    uint32_t id;
-    uint8_t buf[8];
+    CANDATA_t msg;
     
     while (1){
         // Switches can be modified through hardware
@@ -61,10 +60,10 @@ void Task1(void *arg)
 
         // Check contactors (HAVE NOTHING HOOKED UP TO CONTACTORS)
         contactorState = contactorState == OFF ? ON : OFF;
-        Contactors_Set(MOTOR_CONTACTOR, contactorState);
-        Contactors_Set(ARRAY_CONTACTOR, contactorState);
+        Contactors_Set(MOTOR_CONTACTOR, contactorState, true);
+        Contactors_Set(ARRAY_CONTACTOR, contactorState, true);
 
-        CANbus_Read(&id, buf, CAN_BLOCKING);
+        CANbus_Read(&msg, CAN_BLOCKING, CARCAN);
 
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         // Use a logic analyzer to read the CAN line and see if the data shows up correctly    
