@@ -6,6 +6,10 @@
 #include "MotorController.h"
 #include "Contactors.h"
 #include "Minions.h"
+#include "ReadTritium.h"
+
+#define RESTART_THRESHOLD 3
+
 static bool fromThread = false; //whether fault was tripped from thread
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
@@ -44,7 +48,7 @@ void EnterFaultState(void) {
         if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
             // Note: separate tripcnt from T_INIT_FAIL
             static uint8_t hall_fault_cnt = 0; //trip counter
-            if(hall_fault_cnt>3){ //try to restart the motor a few times and then fail out
+            if(hall_fault_cnt > RESTART_THRESHOLD){ //try to restart the motor a few times and then fail out
                 nonrecoverableFaultHandler();
             } else {
                 hall_fault_cnt++;
@@ -57,6 +61,14 @@ void EnterFaultState(void) {
             nonrecoverableFaultHandler();
         }
             
+        if(TritiumError & T_DESAT_FAULT_ERR){ //Desaturation fault error
+            nonrecoverableFaultHandler();
+        }
+
+        if(TritiumError & T_MOTOR_OVER_SPEED_ERR){ //Motor over speed error
+            nonrecoverableFaultHandler();
+        }
+
         return;
 
         /**
@@ -65,8 +77,7 @@ void EnterFaultState(void) {
          * 
          * Under Voltage Lockout Error - Not really much we can do if we're not giving the controller enough voltage,
          * and if we miss drive messages as a result, it will shut itself off.
-         * 
-         * Desaturation Fault Error - 
+
          */
     }
     else if(FaultBitmap & FAULT_READBPS){ //This has been put in with future development in mind, it is not currently tripped by anything.
