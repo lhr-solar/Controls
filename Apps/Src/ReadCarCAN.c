@@ -9,7 +9,7 @@
 #include "os_cfg_app.h"
 
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
-#define saturationThreshold (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
+#define SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
 // timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u
