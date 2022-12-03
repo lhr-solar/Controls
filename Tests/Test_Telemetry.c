@@ -30,7 +30,7 @@ void Task1(void *arg)
 
     // Initialize Telemetry
     OSTaskCreate(
-        (OS_TCB*)&Task_Telemetry,
+        (OS_TCB*)&Telemetry_TCB,
         (CPU_CHAR*)"Telemetry",
         (OS_TASK_PTR)Task_Telemetry,
         (void*)NULL,
@@ -51,7 +51,7 @@ void Task1(void *arg)
     
     while (1){
         // Switches can be modified through hardware
-
+        
         // Check light
         lightState = !lightState;
         Minion_Write_Output(BRAKELIGHT, lightState, &Merr);
