@@ -31,12 +31,12 @@
 #define MotorMsgPeriod 100
 #define FSMPeriod 20
 #define MotorMsgCounterThreshold (MotorMsgPeriod)/(FSMPeriod)
-static int MotorCounter = 0;
 
 #ifdef __TEST_SENDTRITIUM
 #define SCOPE
 #else
 #define SCOPE static
+static int MotorCounter = 0;
 #endif
 
 // Inputs
