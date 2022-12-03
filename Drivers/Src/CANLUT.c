@@ -31,5 +31,4 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
 	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
 	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
 	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
-	[MOTOR_VELOCITY] 				= {NOIDX, DOUBLE}, /**     MOTOR_VELOCITY                  **/
 };

@@ -27,7 +27,6 @@ typedef enum {
 	MOTOR_POWER						= 0x222,
 	MOTOR_RESET 					= 0x223,
 	MOTOR_STATUS 					= 0x241,
-	MOTOR_VELOCITY 					= 0x243,
 	MC_BUS 							= 0x242,
 	VELOCITY 						= 0x243,
 	MC_PHASE_CURRENT 				= 0x244,

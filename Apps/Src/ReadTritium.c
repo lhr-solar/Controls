@@ -10,9 +10,11 @@
 
 uint16_t Motor_FaultBitmap = T_NONE;
 
+static uint32_t Motor_Velocity = 0;
+static uint32_t Car_Velocity = 0;
 
 /**
- * @brief Return the static error field from this layer
+ * @brief Returns highest priority tritium error code
  * 
  */
 tritium_error_code_t MotorController_getTritiumError(void){
@@ -22,6 +24,7 @@ tritium_error_code_t MotorController_getTritiumError(void){
 			return ((tritium_error_code_t)(1<<i));
 		}
 	}
+	return T_NONE;
 }
 
 /**
@@ -71,11 +74,24 @@ void Task_ReadTritium(void *p_arg){
 			switch(dataBuf.ID){
 				case MOTOR_STATUS:{
 					// motor status error flags is in bytes 4-5
-					uint16_t errorFlags = *((uint16_t*)(&dataBuf.data[4]));
-					Motor_FaultBitmap = errorFlags;
-					assertTritiumError(errorFlags);
+					Motor_FaultBitmap = *((uint16_t*)(&dataBuf.data[4])); //Storing error flags into Motor_FaultBitmap
+					assertTritiumError(Motor_FaultBitmap);
 					break;
 				}
+				
+				case VELOCITY:{
+					//Motor Velocity (in rpm) is in bytes 0-3
+					Motor_Velocity = *((uint32_t*)(&dataBuf.data[0]));
+
+					//Car Velocity (in m/s) is in bytes 4-7
+					Car_Velocity = *((uint32_t*)(&dataBuf.data[4]));
+					Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
+					Car_Velocity = ((Car_Velocity / 160934) / 10); //Converting from m/h to mph, dividing by 10 to account for displaying
+
+					UpdateDisplay_SetVelocity(Car_Velocity);
+
+				}
+
 				default:{
 					break; //for cases not handled currently
 				}
@@ -88,4 +104,12 @@ void Task_ReadTritium(void *p_arg){
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
 		assertOSError(OS_READ_TRITIUM_LOC, err);
 	}
+}
+
+uint32_t MotorVelocity_Get(){
+	return Motor_Velocity;
+}
+
+uint32_t CarVelocity_Get(){
+	return Car_Velocity;
 }
