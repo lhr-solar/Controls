@@ -28,42 +28,45 @@ void EnterFaultState(void) {
     }
     else if(FaultBitmap & FAULT_TRITIUM){ //This gets tripped by the ReadTritium thread
         tritium_error_code_t TritiumError = MotorController_getTritiumError(); //get error code to segregate based on fault type
-        if(TritiumError & T_HARDWARE_OVER_CURRENT_ERR){ //Tritium signaled too much current
-            nonrecoverableFaultHandler();
-        }
-        
-        if(TritiumError & T_SOFTWARE_OVER_CURRENT_ERR){
-            nonrecoverableFaultHandler();
-        }
-        
-        if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
-            // Note: separate tripcnt from T_INIT_FAIL
-            static uint8_t hall_fault_cnt = 0; //trip counter
-            if(hall_fault_cnt>3){ //try to restart the motor a few times and then fail out
+        if(TritiumError != T_NONE){
+    
+            if(TritiumError & T_HARDWARE_OVER_CURRENT_ERR){ //Tritium signaled too much current
                 nonrecoverableFaultHandler();
-            } else {
-                hall_fault_cnt++;
-                MotorController_Restart(); //re-initialize motor
-                return;
             }
-        }
-        
-        if(TritiumError & T_DC_BUS_OVERVOLT_ERR){ //DC bus overvoltage
-            nonrecoverableFaultHandler();
-        }
-        
+            
+            if(TritiumError & T_SOFTWARE_OVER_CURRENT_ERR){
+                nonrecoverableFaultHandler();
+            }
 
-        if(TritiumError & T_INIT_FAIL){
-            // Note: separate tripcnt from T_HALL_SENSOR_ERR
-            static uint8_t init_fault_cnt = 0;
-            if(init_fault_cnt>5){
-                nonrecoverableFaultHandler(); //we've failed to init the motor five times
-            } else {
-                init_fault_cnt++;
-                MotorController_Restart();
-                return;
+            if(TritiumError & T_DC_BUS_OVERVOLT_ERR){ //DC bus overvoltage
+                nonrecoverableFaultHandler();
             }
-        }
+            
+            if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
+                // Note: separate tripcnt from T_INIT_FAIL
+                static uint8_t hall_fault_cnt = 0; //trip counter
+                if(hall_fault_cnt>3){ //try to restart the motor a few times and then fail out
+                    nonrecoverableFaultHandler();
+                } else {
+                    hall_fault_cnt++;
+                    MotorController_Restart(); //re-initialize motor
+                    return;
+                }
+            }
+            
+
+            if(TritiumError & T_INIT_FAIL){
+                // Note: separate tripcnt from T_HALL_SENSOR_ERR
+                static uint8_t init_fault_cnt = 0;
+                if(init_fault_cnt>5){
+                    nonrecoverableFaultHandler(); //we've failed to init the motor five times
+                } else {
+                    init_fault_cnt++;
+                    MotorController_Restart();
+                    return;
+                }
+            }
+        } 
         return;
 
         /**
