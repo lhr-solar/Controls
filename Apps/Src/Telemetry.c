@@ -39,6 +39,7 @@ typedef struct CarData{
 void Task_Telemetry(void *p_arg){
     CANMSG_t carMsg;
     CarData_t data;
+    data.reserved = 0;
     OS_ERR err;
 
     Minion_Error_t Merr;
@@ -64,7 +65,7 @@ void Task_Telemetry(void *p_arg){
 
         // Send car msg
         carMsg.payload.data.d = *((uint64_t*)&data);
-        CANbus_Send(CARDATA_ID, carMsg.payload, CAN_BLOCKING);
+        CANbus_Send(ODOMETER_AMPHOURS, carMsg.payload, CAN_BLOCKING);   // ID is wrong
 
         // Delay of few milliseconds (100)
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
