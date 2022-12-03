@@ -12,8 +12,8 @@
 #define SAT_BUF_LENGTH 5
 
 /**
- * @brief Returns whether regen braking is on or off
- * @return  Whether regen braking is on or off
+ * @brief Returns whether regen braking is enabled or not
+ * @return  Whether regen braking is enabled or not
 */
 bool RegenEnable_Get();
 

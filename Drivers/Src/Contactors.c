@@ -98,16 +98,16 @@ ErrorStatus Contactors_Set(contactor_t contactor, State state, bool blocking) {
     OS_ERR err;
     ErrorStatus result = ERROR;
 
-        // acquire lock if its available
-        OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &timestamp, &err);
-        
-        if(err == OS_ERR_PEND_WOULD_BLOCK){
-            return ERROR;
-        }
-        assertOSError(OS_CONTACTOR_LOC, err);
-  
+    // acquire lock if its available
+    OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &timestamp, &err);
     
-   
+    if(err == OS_ERR_PEND_WOULD_BLOCK){
+        return ERROR;
+    }
+    assertOSError(OS_CONTACTOR_LOC, err);
+
+
+
 
     // if enabled, change contactor to match state
     if (contactors[contactor].enabled) {

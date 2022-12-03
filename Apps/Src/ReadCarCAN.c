@@ -35,8 +35,17 @@ static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
 static int chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
 
+
 // Handler to turn array back on
 static void arrayRestart(void *p_tmr, void *p_arg); 
+
+
+// Getter function for regenEnable
+bool RegenEnable_Get() 
+{
+    return regenEnable;
+}
+
 
 /**
  * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
@@ -232,13 +241,6 @@ void Task_ReadCarCAN(void *p_arg)
         }
     }
 }
-
-
-bool RegenEnable_Get() 
-{
-    return regenEnable;
-}
-
 
 
 
