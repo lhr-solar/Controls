@@ -20,7 +20,7 @@ Most of the functions below take a ``contactor_t`` parameter in order to determi
 
 ``State Contactors_Get(contactor_t contactor)`` — Gets the state of a given contactor. This operation simply queries the GPIO pin state, and as such doesn't require acquiring the mutex lock.
 
-``ErrorStatus Contactors_Set(contactor_t contactor, State state)`` — Sets the state of a given contactor. The change only occurs if ``contactor`` is enabled. To keep this operation thread safe, the function attempts to acquire the mutex before proceeding, releasing it at the end.
+``ErrorStatus Contactors_Set(contactor_t contactor, State state, bool blocking)`` — Sets the state of a given contactor. The change only occurs if ``contactor`` is enabled. To keep this operation thread safe, the function attempts to acquire the mutex before proceeding, releasing it at the end. If blocking is true, the call will block until the mutex is acquired; else, the function will return an error without waiting.
 
 ``void Contactors_Enable(contactor_t contactor)`` — Enables the given contactor, allowing it to be modified by ``Contactor_Set``
 
