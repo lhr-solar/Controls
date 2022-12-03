@@ -22,7 +22,7 @@ static void nonrecoverableFaultHandler(){
     ArrayMotorKill();
 }
 
-static void killContactorHandler(void){
+static void readBPS_ContactorHandler(void){
     //kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
     Contactors_Set(ARRAY_PRECHARGE, OFF, true);
