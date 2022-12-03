@@ -19,7 +19,7 @@
 // CAN watchdog timer variable
 static OS_TMR canWatchTimer;
 
-// prechargeDlyTimer and delay constant
+// prechargeDlyTimer
 static OS_TMR prechargeDlyTimer;
 
 // Array restart thread lock
