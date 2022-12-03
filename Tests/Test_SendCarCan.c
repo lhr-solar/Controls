@@ -14,9 +14,9 @@ void Task1(void *arg)
 {   
     CPU_Init();
     
-    BSP_UART_Init(UART_2);
+    // BSP_UART_Init(UART_2);
     Pedals_Init();
-    Minions_Init();
+    Minion_Init();
     Contactors_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
@@ -57,7 +57,8 @@ void Task1(void *arg)
         Contactors_Set(MOTOR_CONTACTOR, contactorState);
         Contactors_Set(ARRAY_CONTACTOR, contactorState);
 
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);           
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);       
+        // Use a logic analyzer to read the CAN line and see if the data shows up correctly    
     }
 }
 
