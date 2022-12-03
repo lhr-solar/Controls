@@ -27,7 +27,7 @@ static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 void stateBuffer(){
     OS_ERR err;
-    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+    OSTimeDlyHMSM(0, 0, 0, 20, OS_OPT_TIME_HMSM_STRICT, &err);
     assertOSError(OS_UPDATE_VEL_LOC, err);
 }
 

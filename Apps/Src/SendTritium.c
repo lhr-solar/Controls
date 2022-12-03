@@ -28,6 +28,10 @@
 #define DEBOUNCE_PERIOD 2 // in 100 m/s
 #define VELOCITY_THRESHOLD 20.0f // m/s
 
+#define MotorMsgPeriod 100
+#define FSMPeriod 20
+#define MotorMsgCounterThreshold (MotorMsgPeriod)/(FSMPeriod)
+static int MotorCounter = 0;
 
 #ifdef __TEST_SENDTRITIUM
 #define SCOPE
@@ -185,7 +189,7 @@ static float percentToFloat(uint8_t percent){
 void Task_SendTritium(void *p_arg){
     OS_ERR err;
     Minion_Error_t minion_err;
-    
+
     while(1){
         FSM[state].stateHandler();    // do what the current state does
         readInputs();   // read inputs from the system
@@ -196,7 +200,12 @@ void Task_SendTritium(void *p_arg){
 
         // Drive
         #ifndef __TEST_SENDTRITIUM
-        MotorController_Drive(velocitySetpoint, currentSetpoint);
+         if(MotorMsgCounterThreshold%MotorCounter == 0){
+            MotorCounter = 0;
+            MotorController_Drive(velocitySetpoint, currentSetpoint);
+        }else{
+            MotorCounter++;
+        }
         #endif
 
         // Dump Info for Testing
@@ -218,7 +227,7 @@ void Task_SendTritium(void *p_arg){
 
 
         // Delay of few milliseconds (100)
-        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, 20, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
             assertOSError(OS_UPDATE_VEL_LOC, err);
         }
@@ -395,5 +404,4 @@ void AccelerateCruiseDecider(){
     if(accelPedalPercent == 0){
         state = COASTING_CRUISE;
     }
-
 }
