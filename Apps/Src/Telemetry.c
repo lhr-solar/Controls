@@ -21,16 +21,6 @@
 
 // Make sure updated to the CarData_t and carMSGID are reflected in the CAN Bus IDs excel sheet
 
-#define CARDATA_ID 0x581
-
-// typedef struct CarData{
-//     uint8_t accelPedal;
-//     uint8_t brakePedal;
-//     uint8_t minionBitmap;
-//     uint8_t contactorBitmap;
-//     uint32_t reserved;
-// }CarData_t;
-
 /**
  * @brief Sends pedal, switch, light, and contactor information to be read by telemetry
  * 
@@ -38,9 +28,10 @@
  */
 void Task_Telemetry(void *p_arg){
     CANDATA_t carMsg;
-    // CarData_t data;
-    // data.reserved = 0;
-    carMsg.ID = ODOMETER_AMPHOURS;  // ID is wrong
+    carMsg.ID = CARDATA;  // ID is wrong
+    for(int i = 4; i < 8; i++){
+        carMsg.data[i] = 0;
+    }
     OS_ERR err;
 
     Minion_Error_t Merr;
@@ -65,11 +56,10 @@ void Task_Telemetry(void *p_arg){
         }
 
         // Send car msg
-        // carMsg.data[0] = *((uint64_t*)&data);
         CANbus_Send(carMsg, CAN_BLOCKING, CARCAN);
 
-        // Delay of few milliseconds (100)
-        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+        // Delay of few milliseconds (500)
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
             assertOSError(OS_UPDATE_VEL_LOC, err);
         }
