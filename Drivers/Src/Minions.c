@@ -50,6 +50,6 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
         assertOSError(OS_MINIONS_LOC, err);
         return true;
     }
-    *mErr = MINION_ERR_YOU_WROTE_TO_INPUT_PIN;
+    *mErr = MINION_ERR_WROTE_INPUT;
     return false;
 }
