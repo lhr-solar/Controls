@@ -20,6 +20,7 @@ extern uint8_t state;
 extern float currentSetpoint;
 extern float velocitySetpoint;
 extern float velocityObserved;
+extern float cruiseVelSetpoint;
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
@@ -40,7 +41,7 @@ void goToBrakeState(){
 void goToNormalState(){
     goToBrakeState();
 
-    // Disable One Pedal --> Normal State
+    //Normal State
     brakePedalPercent = 0;
     stateBuffer();
 }

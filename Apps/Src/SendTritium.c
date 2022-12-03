@@ -26,6 +26,8 @@
 #define ONEPEDAL_BRAKE_THRESHOLD 20  // percent
 #define NEUTRAL_THRESHOLD 25    // percent
 #define DEBOUNCE_PERIOD 2 // in 100 m/s
+#define VELOCITY_THRESHOLD 20.0f // m/s
+
 
 #ifdef __TEST_SENDTRITIUM
 #define SCOPE
@@ -45,6 +47,7 @@ SCOPE bool forwardSwitch = false;
 // Outputs
 SCOPE float currentSetpoint = 0;
 SCOPE float velocitySetpoint = 0;
+SCOPE float cruiseVelSetpoint = 0;
 static bool brakelightState = false;
 
 #ifndef __TEST_SENDTRITIUM
@@ -71,8 +74,7 @@ typedef enum{
     COASTING_CRUISE,
     BRAKE_STATE,
     ONEPEDAL_DRIVE,
-    CRUISE_DISABLE,
-    ONEPEDAL_DISABLE
+    ACCELERATE_CRUISE
 } TritiumStateName_e;
 
 // State Struct for FSM
@@ -97,21 +99,18 @@ void BrakeHandler(void);
 void BrakeDecider(void);
 void OnePedalDriveHandler(void);
 void OnePedalDriveDecider(void);
-void CruiseDisableHandler(void);
-void CruiseDisableDecider(void);
-void OnePedalDisableHandler(void);
-void OnePedalDisableDecider(void);
+void AccelerateCruiseHandler(void);
+void AccelerateCruiseDecider(void);
 
 // FSM
-const TritiumState_t FSM[8] = {
+const TritiumState_t FSM[9] = {
     {&NormalDriveHandler, &NormalDriveDecider},
     {&RecordVelocityHandler, &RecordVelocityDecider},
     {&PoweredCruiseHandler, &PoweredCruiseDecider},
     {&CoastingCruiseHandler, &CoastingCruiseDecider},
     {&BrakeHandler, &BrakeDecider},
     {&OnePedalDriveHandler, &OnePedalDriveDecider},
-    {&CruiseDisableHandler, &CruiseDisableDecider},
-    {&OnePedalDisableHandler, &OnePedalDisableDecider}
+    {&AccelerateCruiseHandler, &AccelerateCruiseDecider}
 };
 
 /**
@@ -166,8 +165,6 @@ void readInputs(){
     cruiseEnablePrevious = cruiseEnableButton;
 
     #endif
-
-    
 }
 
 /**
@@ -246,7 +243,7 @@ void NormalDriveHandler(){
 }
 
 void NormalDriveDecider(){
-    if(cruiseSet && cruiseEnable && brakePedalPercent < NORMAL_BRAKE_THRESHOLD){
+    if(cruiseSet && cruiseEnable && brakePedalPercent < NORMAL_BRAKE_THRESHOLD  && velocitySetpoint > VELOCITY_THRESHOLD){
         state = RECORD_VELOCITY;
     }else if(!cruiseEnable && regenToggle && ChargeEnable){
         state = ONEPEDAL_DRIVE;
@@ -288,6 +285,7 @@ void PoweredCruiseHandler(){
 
 void PoweredCruiseDecider(){
     #ifndef __TEST_SENDTRITIUM
+    cruiseVelSetpoint = velocitySetpoint;
     if(MotorController_ReadVelocity() > velocitySetpoint){
         state = COASTING_CRUISE;
     }
@@ -298,12 +296,13 @@ void PoweredCruiseDecider(){
     #endif
     else if(!cruiseEnable){
         state = NORMAL_DRIVE;
-    }else if(cruiseEnable && cruiseSet){
+    }else if(cruiseEnable && cruiseSet && velocitySetpoint > VELOCITY_THRESHOLD){
         state = RECORD_VELOCITY;
     }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
         state = BRAKE_STATE;
     }else if(regenToggle){
-        state = CRUISE_DISABLE;
+        cruiseEnable = false;
+        state = NORMAL_DRIVE;
     }
 }
 
@@ -324,7 +323,8 @@ void CoastingCruiseDecider(){
     }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
         state = BRAKE_STATE;
     }else if(regenToggle){
-        state = CRUISE_DISABLE;
+        cruiseEnable = false;
+        state = NORMAL_DRIVE;
     }
 }
 
@@ -341,7 +341,7 @@ void BrakeHandler(){
 
 void BrakeDecider(){
     if(brakePedalPercent < NORMAL_BRAKE_THRESHOLD){
-        state = ONEPEDAL_DISABLE;
+        state = NORMAL_DRIVE;
         brakelightState = false;
     }
 }
@@ -371,24 +371,29 @@ void OnePedalDriveHandler(){
 
 void OnePedalDriveDecider(){
     if(!regenToggle || !ChargeEnable || cruiseEnable){
-        state = ONEPEDAL_DISABLE;
+        regenToggle = 0;
+        state = NORMAL_DRIVE;
     }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
         state = BRAKE_STATE;
     }
 }
 
-void CruiseDisableHandler(){
-    cruiseEnable = false;
+
+void AccelerateCruiseHandler(){
+    if(reverseSwitch && !forwardSwitch){
+        velocitySetpoint = -MAX_VELOCITY;
+        currentSetpoint = percentToFloat(accelPedalPercent);
+    }else if(!reverseSwitch && forwardSwitch){
+        velocitySetpoint = MAX_VELOCITY;
+        currentSetpoint = percentToFloat(accelPedalPercent);
+    }else if(!reverseSwitch && !forwardSwitch){
+        currentSetpoint = 0;
+    }
 }
 
-void CruiseDisableDecider(){
-    state = NORMAL_DRIVE;
-}
+void AccelerateCruiseDecider(){
+    if(accelPedalPercent == 0){
+        state = COASTING_CRUISE;
+    }
 
-void OnePedalDisableHandler(){
-    regenToggle = 0;
-}
-
-void OnePedalDisableDecider(){
-    state = NORMAL_DRIVE;
 }
