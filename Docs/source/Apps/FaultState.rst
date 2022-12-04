@@ -7,7 +7,7 @@ The fault state task was selected to be the highest priority task in the system 
 ``FaultBitmap``
 ===============
 
-The fault bitmap keeps track of the type of error that was encountered. The types of errors represented include OS errors, motor controller errors, and display errors. Check ``Tasks.h`` for the full definition of the bitmap. Based on the value of this bitmap, the fault state task can select what action to take based on the fault type. Furthermore, tritium errors are supplemented by a another bitmap that contains more specific information about the fault. The motor controller driver maintains this bitmap, and fault state uses it to discriminate between recoverable, non-recoverable, and ignorable errors. Check ``MotorController.h`` for the full definition of this bitmap.
+The fault bitmap keeps track of the type of error that was encountered. The types of errors represented include OS errors, motor controller errors, and display errors. Check ``Tasks.h`` for the full definition of the bitmap. Based on the value of this bitmap, the fault state task can select what action to take based on the fault type. Furthermore, tritium errors are supplemented by a another bitmap that contains more specific information about the fault. The motor controller driver maintains this bitmap, and fault state uses it to discriminate between recoverable, non-recoverable, and ignorable errors. Check ``ReadTritium.h`` for the full definition of this bitmap.
 
 
 Non-recoverable Faults

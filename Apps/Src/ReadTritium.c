@@ -3,6 +3,7 @@
 #include "ReadTritium.h"
 #include "CAN_Queue.h"
 #include "CANbus.h"
+#include "UpdateDisplay.h"
 #include <string.h>
 
 //status limit flag masks
@@ -10,8 +11,8 @@
 
 uint16_t Motor_FaultBitmap = T_NONE;
 
+static uint32_t Motor_RPM = 0;
 static uint32_t Motor_Velocity = 0;
-static uint32_t Car_Velocity = 0;
 
 /**
  * @brief Returns highest priority tritium error code
@@ -80,11 +81,13 @@ void Task_ReadTritium(void *p_arg){
 				}
 				
 				case VELOCITY:{
-					//Motor Velocity (in rpm) is in bytes 0-3
-					Motor_Velocity = *((uint32_t*)(&dataBuf.data[0]));
+					//Motor RPM is in bytes 0-3
+					Motor_RPM = *((uint32_t*)(&dataBuf.data[0]));
 
 					//Car Velocity (in m/s) is in bytes 4-7
-					Car_Velocity = *((uint32_t*)(&dataBuf.data[4]));
+					Motor_Velocity = *((uint32_t*)(&dataBuf.data[4]));
+					uint32_t Car_Velocity = Motor_Velocity;
+					
 					Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
 					Car_Velocity = ((Car_Velocity / 160934) / 10); //Converting from m/h to mph, dividing by 10 to account for displaying
 
@@ -106,10 +109,10 @@ void Task_ReadTritium(void *p_arg){
 	}
 }
 
-uint32_t MotorVelocity_Get(){
-	return Motor_Velocity;
+uint32_t Motor_RPM_Get(){ //getter function for motor RPM
+	return Motor_RPM;
 }
 
-uint32_t CarVelocity_Get(){
-	return Car_Velocity;
+uint32_t Motor_Velocity_Get(){ //getter function for motor velocity
+	return Motor_Velocity;
 }

@@ -2,7 +2,6 @@
 #include "Pedals.h"
 #include "Tasks.h"
 #include "Minions.h"
-#include "MotorController.h"
 #include "Contactors.h"
 #include <math.h>
 

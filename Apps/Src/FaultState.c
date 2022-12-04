@@ -3,7 +3,6 @@
 #include "Contactors.h"
 #include "os.h"
 #include "Tasks.h"
-#include "MotorController.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "ReadTritium.h"
@@ -52,7 +51,9 @@ void EnterFaultState(void) {
                 nonrecoverableFaultHandler();
             } else {
                 hall_fault_cnt++;
-                MotorController_Restart(); //re-initialize motor
+                //MotorController_Restart(); //re-initialize motor
+                //DEVELOP RESTART SEQUENCE
+
                 return;
             }
         }

@@ -3,7 +3,6 @@
 
 #include "Pedals.h"
 #include "Display.h"
-#include "MotorController.h"
 #include "CANbus.h"
 
 int main() {

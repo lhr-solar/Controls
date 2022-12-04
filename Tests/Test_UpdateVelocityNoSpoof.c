@@ -6,7 +6,6 @@
 #include "Display.h"
 #include "Contactors.h"
 #include "Minions.h"
-#include "MotorController.h"
 #include "Pedals.h"
 #include "CAN_Queue.h"
 
