@@ -6,6 +6,8 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
+#define MOTOR_STOPPED 0
+#define CAR_STOPPED 0
 
 /**
  * Motor Error States

@@ -11,8 +11,8 @@
 
 uint16_t Motor_FaultBitmap = T_NONE;
 
-static uint32_t Motor_RPM = 0;
-static uint32_t Motor_Velocity = 0;
+static uint32_t Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
+static uint32_t Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
 
 /**
  * @brief Returns highest priority tritium error code
@@ -89,7 +89,7 @@ void Task_ReadTritium(void *p_arg){
 					uint32_t Car_Velocity = Motor_Velocity;
 					
 					Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
-					Car_Velocity = ((Car_Velocity / 160934) / 10); //Converting from m/h to mph, dividing by 10 to account for displaying
+					Car_Velocity = ((Car_Velocity / 160934) * 10); //Converting from m/h to mph, multiplying by 10 to make value "larger" for displaying
 
 					UpdateDisplay_SetVelocity(Car_Velocity);
 
