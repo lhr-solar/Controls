@@ -30,9 +30,9 @@
 #define DEBOUNCE_PERIOD 2 // in 100 ms
 #define VELOCITY_THRESHOLD 20.0f // m/s
 
-#define MotorMsgPeriod 100
-#define FSMPeriod 20
-#define MotorMsgCounterThreshold (MotorMsgPeriod)/(FSMPeriod)
+#define MOTOR_MSG_PERIOD 100
+#define FSM_PERIOD 20
+#define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
 #ifdef __TEST_SENDTRITIUM
 #define SCOPE
@@ -213,7 +213,7 @@ void Task_SendTritium(void *p_arg){
 
         // Drive
         #ifndef __TEST_SENDTRITIUM
-         if(MotorMsgCounterThreshold%MotorCounter == 0){
+         if(MOTOR_MSG_COUNTER_THRESHOLD%MotorCounter == 0){ // if smaller numbers, MOTOR_MSG_COUNTER_THRESHOLD-MotorCounter == 0
             MotorCounter = 0;
 
            // MotorController_Drive(velocitySetpoint, currentSetpoint);
