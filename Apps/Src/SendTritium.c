@@ -18,9 +18,11 @@
 #include "ReadCarCAN.h"
 #include "Minions.h"
 #include "SendTritium.h"
+//#include "MotorController.h"
+#include "ReadTritium.h"
 
 // Macros
-#define MAX_VELOCITY 20000.0f // rpm
+#define MAX_VELOCITY 50.0f // m/s    if rmp: 20000.0f // rpm
 #define NORMAL_BRAKE_THRESHOLD 5  // percent
 #define ONEPEDAL_BRAKE_THRESHOLD 20  // percent
 #define NEUTRAL_THRESHOLD 25    // percent
@@ -201,7 +203,7 @@ void Task_SendTritium(void *p_arg){
         #ifndef __TEST_SENDTRITIUM
          if(MotorMsgCounterThreshold%MotorCounter == 0){
             MotorCounter = 0;
-            MotorController_Drive(velocitySetpoint, currentSetpoint);
+           //MotorController_Drive(velocitySetpoint, currentSetpoint);
         }else{
             MotorCounter++;
         }
@@ -266,7 +268,7 @@ void NormalDriveDecider(){
 */
 void RecordVelocityHandler(){
     #ifndef __TEST_SENDTRITIUM
-    velocitySetpoint = MotorController_ReadVelocity();
+    velocitySetpoint = MotorVelocity_Get();
     #else
     velocitySetpoint = velocityObserved;
     #endif
@@ -294,7 +296,7 @@ void PoweredCruiseHandler(){
 void PoweredCruiseDecider(){
     #ifndef __TEST_SENDTRITIUM
     cruiseVelSetpoint = velocitySetpoint;
-    if(MotorController_ReadVelocity() > velocitySetpoint){
+    if(MotorVelocity_Get() > velocitySetpoint){
         state = COASTING_CRUISE;
     }
     #else
@@ -324,7 +326,7 @@ void CoastingCruiseHandler(){
 }
 
 void CoastingCruiseDecider(){
-    if(MotorController_ReadVelocity() <= velocitySetpoint){
+    if(MotorVelocity_Get() <= velocitySetpoint){
         state = POWERED_CRUISE;
     }else if(!cruiseEnable){
         state = NORMAL_DRIVE;

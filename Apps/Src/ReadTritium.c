@@ -11,7 +11,7 @@ uint32_t MotorVelocity_Get(){
 
 void Task_ReadTritium(void *p_arg)
 {
-
+/*
 	OS_ERR err;
 
 	CANMSG_t msg;
@@ -27,12 +27,13 @@ void Task_ReadTritium(void *p_arg)
 			msg.id = buf.id;
 			msg.payload.data.d = ((uint64_t)buf.firstNum << 32) | ((uint64_t)buf.secondNum);
 
-			__unused
-				ErrorStatus error = CAN_Queue_Post(msg);
+			 __unused
+			 	ErrorStatus error = CAN_Queue_Post(msg);
 
 			// TODO: handle error
 		}
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
 		assertOSError(OS_READ_TRITIUM_LOC, err);
 	}
+	*/
 }
