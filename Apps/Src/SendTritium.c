@@ -18,8 +18,9 @@
 #include "ReadCarCAN.h"
 #include "Minions.h"
 #include "SendTritium.h"
-//#include "MotorController.h"
 #include "ReadTritium.h"
+#include "CANbus.h"
+
 
 // Macros
 #define MAX_VELOCITY 50.0f // m/s    if rmp: 20000.0f // rpm
@@ -67,6 +68,7 @@ static bool regenPrevious = false;
 
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
+
 #else
 float velocityObserved = 0;
 #endif
@@ -191,6 +193,16 @@ void Task_SendTritium(void *p_arg){
     OS_ERR err;
     Minion_Error_t minion_err;
 
+#ifndef __TEST_SENDTRITIUM
+    CANPayload_t velocityPayload;
+            velocityPayload.bytes = 32;
+            velocityPayload.data.d = velocitySetpoint;
+
+    CANPayload_t currentPayload;
+            currentPayload.bytes = 32;
+            currentPayload.data.d = currentSetpoint;
+#endif
+
     while(1){
         FSM[state].stateHandler();    // do what the current state does
         readInputs();   // read inputs from the system
@@ -203,7 +215,11 @@ void Task_SendTritium(void *p_arg){
         #ifndef __TEST_SENDTRITIUM
          if(MotorMsgCounterThreshold%MotorCounter == 0){
             MotorCounter = 0;
-           //MotorController_Drive(velocitySetpoint, currentSetpoint);
+
+           // MotorController_Drive(velocitySetpoint, currentSetpoint);
+            CANbus_Send(VELOCITY, velocityPayload, CAN_NON_BLOCKING);
+            CANbus_Send(CURRENT_VEC, currentPayload, CAN_NON_BLOCKING);
+
         }else{
             MotorCounter++;
         }
