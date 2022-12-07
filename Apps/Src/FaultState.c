@@ -51,9 +51,7 @@ void EnterFaultState(void) {
                 nonrecoverableFaultHandler();
             } else {
                 hall_fault_cnt++;
-                //MotorController_Restart(); //re-initialize motor
-                //DEVELOP RESTART SEQUENCE
-
+                MotorController_Restart(); //re-initialize motor
                 return;
             }
         }
@@ -67,6 +65,10 @@ void EnterFaultState(void) {
         }
 
         if(TritiumError & T_MOTOR_OVER_SPEED_ERR){ //Motor over speed error
+            nonrecoverableFaultHandler();
+        }
+
+        if(TritiumError & T_INIT_FAIL){ //motorcontroller fails to restart or initialize
             nonrecoverableFaultHandler();
         }
 

@@ -8,11 +8,16 @@
 
 //status limit flag masks
 #define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
+#define MAX_CAN_LEN 8
+
 
 uint16_t Motor_FaultBitmap = T_NONE;
-
 static uint32_t Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
 static uint32_t Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
+static OS_MUTEX restartFinished_Mutex; //mutex used for restart function
+static bool restartFinished = true; //initially sets restarted value to true since motor controller is technically restarted upon initialization
+static OS_SEM MotorController_MailSem;
+static OS_SEM MotorController_ReceiveSem;
 
 /**
  * @brief Returns highest priority tritium error code
@@ -108,6 +113,41 @@ void Task_ReadTritium(void *p_arg){
 		assertOSError(OS_READ_TRITIUM_LOC, err);
 	}
 }
+
+void MotorController_Restart(void){
+	CPU_TS ts;
+	OS_ERR err;
+
+	OSMutexPend(&restartFinished_Mutex, 0, OS_OPT_POST_NONE, &ts, &err);
+    assertOSError(0, err);
+    uint8_t data[8] = {0};
+    restartFinished = false;
+
+ 	OSSemPend(&MotorController_MailSem,
+            0,
+            OS_OPT_PEND_BLOCKING,
+            &ts,
+            &err);
+	assertOSError(0, err);
+
+	ErrorStatus initCommand = BSP_CAN_Write(CAN_3, MOTOR_RESET, data, MAX_CAN_LEN); //send motor controller reset command
+    if (initCommand == ERROR) { //error found, post mutex and shut off motor controller in FaultState.c
+        restartFinished = true;
+		MotorController_Release();
+
+		OSMutexPost(&restartFinished_Mutex, OS_OPT_POST_NONE, &err);
+        assertOSError(0, err);
+
+        Motor_FaultBitmap = T_INIT_FAIL;
+        assertTritiumError(Motor_FaultBitmap);
+        return;
+		}
+
+    OSMutexPost(&restartFinished_Mutex, OS_OPT_POST_NONE, &err);
+    assertOSError(0, err);
+
+}
+
 
 uint32_t Motor_RPM_Get(){ //getter function for motor RPM
 	return Motor_RPM;
