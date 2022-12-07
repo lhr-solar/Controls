@@ -404,5 +404,7 @@ void AccelerateCruiseHandler(){
 void AccelerateCruiseDecider(){
     if(accelPedalPercent == 0){
         state = COASTING_CRUISE;
+    }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
+        state = BRAKE_STATE;
     }
 }
