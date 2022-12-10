@@ -6,6 +6,8 @@
 #include "MotorController.h"
 #include "Contactors.h"
 #include "Minions.h"
+#include "UpdateDisplay.h"
+
 static bool fromThread = false; //whether fault was tripped from thread
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
@@ -26,6 +28,9 @@ static void readBPS_ContactorHandler(void){
     //kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
     Contactors_Set(ARRAY_PRECHARGE, OFF, true);
+
+    // turn off the array contactor light
+    UpdateDisplay_SetArray(false);
 }
 
 void EnterFaultState(void) {
