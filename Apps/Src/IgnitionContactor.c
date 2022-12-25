@@ -37,7 +37,7 @@ void Task_Contactor_Ignition(void* p_arg) {
         assertOSError(OS_MINIONS_LOC, err);
    
         //turn motor on/off
-        Contactors_Set(MOTOR_CONTACTOR, Minion_Read_Input(IGN_2, &Merr));
+        Contactors_Set(MOTOR_CONTACTOR, Minion_Read_Input(IGN_2, &Merr), true);
         assertOSError(OS_MINIONS_LOC, err);
         assertOSError(OS_MINIONS_LOC, err);
         //Lights_Set(M_CNCTR,Switches_Read(IGN_2));

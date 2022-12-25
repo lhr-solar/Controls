@@ -25,6 +25,12 @@ static void nonrecoverableFaultHandler(){
     ArrayMotorKill();
 }
 
+static void readBPS_ContactorHandler(void){
+    //kill contactors 
+    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
+}
+
 void EnterFaultState(void) {
     if(FaultBitmap & FAULT_OS){
         nonrecoverableFaultHandler();
@@ -83,8 +89,9 @@ void EnterFaultState(void) {
 
          */
     }
-    else if(FaultBitmap & FAULT_READBPS){ //This has been put in with future development in mind, it is not currently tripped by anything.
-        nonrecoverableFaultHandler();
+    else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
+        readBPS_ContactorHandler();
+        return;
     }
     else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
         nonrecoverableFaultHandler();

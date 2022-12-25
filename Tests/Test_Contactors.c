@@ -30,21 +30,21 @@ int main() {
         scanf("%s %s", &input, &state);
         if (strcmp(input, motor) == 0){
             if (strcmp(state, on) == 0){
-                Contactors_Set(MOTOR, ON);
+                Contactors_Set(MOTOR, ON, true);
                 result = Contactors_Get(MOTOR);
             }
             else {
-                Contactors_Set(MOTOR, OFF);
+                Contactors_Set(MOTOR, OFF, true);
                 result = Contactors_Get(MOTOR);
             }
         }
         if (strcmp(input, array) == 0){
             if (strcmp(state, on) == 0){
-                Contactors_Set(ARRAY, ON);
+                Contactors_Set(ARRAY, ON, true);
                 result = Contactors_Get(ARRAY);
             }
             else {
-                Contactors_Set(ARRAY, OFF);
+                Contactors_Set(ARRAY, OFF, true);
                 result = Contactors_Get(ARRAY);
             }
         }
