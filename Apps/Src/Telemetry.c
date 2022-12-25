@@ -44,7 +44,7 @@ void Task_Telemetry(void *p_arg){
         // Get minion information
         carMsg.data[2] = 0;
         for(MinionPin_t pin = 0; pin < MINIONPIN_NUM; pin++){
-            bool pinState = Minion_Read_Input(pin, &Merr);
+            bool pinState = Minion_Read_Pin(pin, &Merr);
             carMsg.data[2] |= pinState << pin;
         }
 

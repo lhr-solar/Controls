@@ -8,9 +8,9 @@ The CANbus driver is responsible for all incoming and outgoing CAN communication
 
 * ``ErrorStatus CANbus_Init(CAN_t bus)`` — Initialize the canbus given by the ``bus`` argument. The options are ``MOTORCAN`` and ``CARCAN``.
 
-* ``ErrorStatus CANbus_Send(CANDATA_t CanData, CAN_blocking_t blocking, CAN_t bus)`` — Send The given ``CANDATA`` structure to ``bus``. If ``blocking`` is true, the call blocks until the message can be deposited in a vacant CAN mailbox. Else, the function will return an error if no mailbox is vacant.
+* ``ErrorStatus CANbus_Send(CANDATA_t CanData, bool blocking, CAN_t bus)`` — Send The given ``CANDATA`` structure to ``bus``. If ``blocking`` is true, the call blocks until the message can be deposited in a vacant CAN mailbox. Else, the function will return an error if no mailbox is vacant.
 
-* ``ErrorStatus CANbus_Read(CANDATA_t* data, CAN_blocking_t blocking, CAN_t bus)`` — Read a CAN message from ``bus`` into the given data structure. If ``blocking`` is true, wait until a CAN message is available to be read. Else, the function will return an error if no message is ready to be read.
+* ``ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus)`` — Read a CAN message from ``bus`` into the given data structure. If ``blocking`` is true, wait until a CAN message is available to be read. Else, the function will return an error if no message is ready to be read.
 
 Data Types
 ==========

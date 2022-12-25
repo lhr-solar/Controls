@@ -4,12 +4,9 @@
 #include "BSP_GPIO.h"
 
 
-//errors bc ur bad
 typedef enum{
     MINION_ERR_NONE = 0,
-    MINION_ERR_YOU_READ_OUTPUT_PIN,
-    MINION_ERR_YOU_WROTE_TO_INPUT_PIN,
-
+    MINION_ERR_WROTE_INPUT,
 } Minion_Error_t;
 
 //used to index into lookup table
@@ -49,7 +46,7 @@ void Minion_Init(void);
  * @return true
  * @return false *NOTE* If output pin is passed, will exit 
  */
-bool Minion_Read_Input(MinionPin_t pin, Minion_Error_t* err);
+bool Minion_Read_Pin(MinionPin_t pin, Minion_Error_t* err);
 
 /**
  * @brief Writes given status to a specified output pin. Locks writing to all output pins
