@@ -3,8 +3,6 @@
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
-#include "Minions.h"
-#include "CAN_Queue.h"
 #include "FaultState.h"
 #include "os_cfg_app.h"
 
@@ -65,17 +63,20 @@ static void updateSaturation(int8_t chargeMessage){
     chargeMsgSaturation = newSaturation;
 }
 
-// helper function to call if charging should be disabled
+// helper function to disable charging
+// Turns off contactors by setting fault bitmap and signaling fault state
 static inline void chargingDisable(void) {
+    OS_ERR err;
+    
     // mark regen as disabled
     regenEnable = false;
 
-    //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
-    
-    // turn off the array contactor light
-    UpdateDisplay_SetArray(false);
+    // Set fault bitmap 
+    FaultBitmap |= FAULT_READBPS;
+
+    // Signal fault state to kill contactors at its earliest convenience
+    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+    assertOSError(OS_READ_CAN_LOC,err);
 
 }
 
@@ -121,8 +122,11 @@ static inline void chargingEnable(void) {
 static void arrayRestart(void *p_tmr, void *p_arg){
 
     if(regenEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        Contactors_Set(ARRAY_CONTACTOR, ON, false);
-        UpdateDisplay_SetArray(true);
+        
+        if (Contactors_Set(ARRAY_CONTACTOR, ON, false) != ERROR){ // Only update display if we successfully turn on the array
+            UpdateDisplay_SetArray(true);
+        }
+       
     }
         // done restarting the array
         restartingArray = false;
@@ -135,19 +139,11 @@ static void arrayRestart(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 void canWatchTimerCallback (void *p_tmr, void *p_arg){
-    OS_ERR err;
 
     // mark regen as disabled
     regenEnable = false;
-    
-    // Set fault bitmaps 
-    FaultBitmap |= FAULT_READBPS;
-    OSErrLocBitmap |= OS_READ_CAN_LOC;
 
-    // Signal fault state to kill contactors at its earliest convenience
-    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
+    chargingDisable();
 }
 
 
