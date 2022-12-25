@@ -198,7 +198,7 @@ void Task_ReadCarCAN(void *p_arg)
     {
         
         //Get any message that BPS Sent us
-        ErrorStatus status = CANbus_Read(&dataBuf,CAN_BLOCKING,CARCAN);  
+        ErrorStatus status = CANbus_Read(&dataBuf,true,CARCAN);  
         if(status != SUCCESS) {
             continue;
         }

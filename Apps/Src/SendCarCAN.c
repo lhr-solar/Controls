@@ -24,7 +24,7 @@ void Task_SendCarCAN(void *p_arg){
     while (1) {
         // Send motor msg
         CAN_Queue_Pend(&motorMsg);
-        CANbus_Send(motorMsg, CAN_BLOCKING, CARCAN);
+        CANbus_Send(motorMsg, true, CARCAN);
 
         // Delay of few milliseconds (100)
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);

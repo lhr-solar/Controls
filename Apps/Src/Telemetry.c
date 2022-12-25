@@ -56,7 +56,7 @@ void Task_Telemetry(void *p_arg){
         }
 
         // Send car msg
-        CANbus_Send(carMsg, CAN_BLOCKING, CARCAN);
+        CANbus_Send(carMsg, true, CARCAN);
 
         // Delay of few milliseconds (500)
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);

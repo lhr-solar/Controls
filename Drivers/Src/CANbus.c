@@ -86,7 +86,7 @@ ErrorStatus CANbus_Init(CAN_t bus)
  * @param   blocking: Whether or not this should be a blocking call
  * @return  ERROR if data wasn't sent, SUCCESS if it was sent.
  */
-ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
+ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
 {
     CPU_TS timestamp;
     OS_ERR err;
@@ -175,7 +175,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
  * @returns              ERROR if read failed, SUCCESS otherwise
  */
 
-ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t bus)
+ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
 {
     CPU_TS timestamp;
     OS_ERR err;
