@@ -25,6 +25,7 @@
 #define TASK_READ_CAR_CAN_PRIO              5
 #define TASK_UPDATE_DISPLAY_PRIO            6
 #define TASK_SEND_CAR_CAN_PRIO              8
+#define TASK_TELEMETRY_PRIO                 9
 #define TASK_BLINK_LIGHT_PRIO               9
 #define TASK_IGN_CONT_PRIO                  7
 
@@ -41,6 +42,7 @@
 #define TASK_UPDATE_DISPLAY_STACK_SIZE      DEFAULT_STACK_SIZE
 #define TASK_READ_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
+#define TASK_TELEMETRY_STACK_SIZE           DEFAULT_STACK_SIZE
 #define TASK_BLINK_LIGHT_STACK_SIZE         DEFAULT_STACK_SIZE
 #define TASK_IGN_CONT_STACK_SIZE            DEFAULT_STACK_SIZE
 
@@ -62,6 +64,8 @@ void Task_ReadTritium(void* p_arg);
 
 void Task_SendCarCAN(void* p_arg);
 
+void Task_Telemetry(void* p_arg);
+
 void Task_BlinkLight(void* p_arg);
 
 void Task_Contactor_Ignition(void* p_arg);
@@ -76,6 +80,7 @@ extern OS_TCB ReadCarCAN_TCB;
 extern OS_TCB UpdateDisplay_TCB;
 extern OS_TCB ReadTritium_TCB;
 extern OS_TCB SendCarCAN_TCB;
+extern OS_TCB Telemetry_TCB;
 extern OS_TCB BlinkLight_TCB;
 extern OS_TCB IgnCont_TCB;
 
@@ -90,6 +95,7 @@ extern CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
 extern CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
+extern CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 extern CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
 extern CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
 
@@ -111,7 +117,6 @@ extern OS_SEM FaultState_Sem4;
 
 //Put all global state variables here
 extern bool UpdateVel_ToggleCruise;
-extern State RegenEnable;
 extern uint16_t SupplementalVoltage;
 extern uint32_t StateOfCharge;
 

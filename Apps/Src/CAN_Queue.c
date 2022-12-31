@@ -9,7 +9,7 @@
 #include "Tasks.h"
 
 // fifo
-#define FIFO_TYPE CANMSG_t
+#define FIFO_TYPE CANDATA_t
 #define FIFO_SIZE 256
 #define FIFO_NAME CAN_fifo
 #include "fifo.h"
@@ -35,7 +35,7 @@ void CAN_Queue_Init(void) {
     assertOSError(OS_SEND_CAN_LOC, err);
 }
 
-ErrorStatus CAN_Queue_Post(CANMSG_t message) {
+ErrorStatus CAN_Queue_Post(CANDATA_t message) {
     OS_ERR err;
     CPU_TS ticks;
     OSMutexPend(&canFifo_Mutex, 0, OS_OPT_POST_NONE, &ticks, &err);
@@ -52,7 +52,7 @@ ErrorStatus CAN_Queue_Post(CANMSG_t message) {
     return success ? SUCCESS : ERROR;
 }
 
-ErrorStatus CAN_Queue_Pend(CANMSG_t *message) {
+ErrorStatus CAN_Queue_Pend(CANDATA_t *message) {
     OS_ERR err;
 	CPU_TS ticks;
     

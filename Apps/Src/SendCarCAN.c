@@ -1,20 +1,35 @@
-#include "os.h"
 #include "Tasks.h"
-#include "bsp.h"
 #include "CANbus.h"
 #include "CAN_Queue.h"
-
+#include "common.h"
 
 /**
- * @brief This Task is a basic queue consumer that takes CAN Messages out of the OS Queue and sends them
-*/
+ * @file SendCarCAN.c
+ * @brief Implements the SendCarCAN Task
+ * 
+ * Resends the feedback from the motor controller
+ * 
+ */
 
+/**
+ * @brief Sends the feedback from the motor controller to be read by telemetry and 
+ * sends pedal, switch, light, and contactor information to be read by telemetry
+ * 
+ * @param p_arg 
+ */
 void Task_SendCarCAN(void *p_arg){
-    CANMSG_t msg;
+    CANDATA_t motorMsg;
+    OS_ERR err;
 
     while (1) {
-        CAN_Queue_Pend(&msg);
-        CANbus_Send(msg.id,msg.payload,CAN_BLOCKING); //send message
+        // Send motor msg
+        CAN_Queue_Pend(&motorMsg);
+        CANbus_Send(motorMsg, CAN_BLOCKING, CARCAN);
+
+        // Delay of few milliseconds (100)
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+        if (err != OS_ERR_NONE){
+            assertOSError(OS_UPDATE_VEL_LOC, err);
+        }
     }
-    
 }

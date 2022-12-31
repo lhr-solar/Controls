@@ -20,6 +20,7 @@ OS_TCB ReadCarCAN_TCB;
 OS_TCB UpdateDisplay_TCB;
 OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
+OS_TCB Telemetry_TCB;
 OS_TCB BlinkLight_TCB;
 OS_TCB IgnCont_TCB;
 
@@ -33,6 +34,7 @@ CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
 CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
+CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
 CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
 
@@ -44,11 +46,6 @@ OS_SEM FaultState_Sem4;
 /**
  * Global Variables
  */
-
-// NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
-// Indicates whether or not regenerative braking / charging is enabled.
-State RegenEnable = OFF;
-
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 
