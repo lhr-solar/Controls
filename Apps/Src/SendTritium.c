@@ -33,16 +33,6 @@
 #define MOTOR_MSG_PERIOD 100
 #define FSM_PERIOD 20
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
-<<<<<<< HEAD
-=======
-
-#ifdef __TEST_SENDTRITIUM
-#define SCOPE
-#else
-#define SCOPE static
-static int MotorCounter = 0;
-#endif
->>>>>>> f3aa833eae10d5b35cd32e90a7851ea0213000f3
 
 // Inputs
 static bool cruiseEnable = false;
@@ -251,13 +241,8 @@ void Task_SendTritium(void *p_arg){
 
         // Drive
         #ifndef __TEST_SENDTRITIUM
-<<<<<<< HEAD
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
             motorMsgCounter = 0;
-=======
-         if(MOTOR_MSG_COUNTER_THRESHOLD%MotorCounter == 0){ // if smaller numbers, MOTOR_MSG_COUNTER_THRESHOLD-MotorCounter == 0
-            MotorCounter = 0;
->>>>>>> f3aa833eae10d5b35cd32e90a7851ea0213000f3
 
             CANbus_Send(VELOCITY, velocityPayload, CAN_NON_BLOCKING);
             CANbus_Send(CURRENT_VEC, currentPayload, CAN_NON_BLOCKING);
