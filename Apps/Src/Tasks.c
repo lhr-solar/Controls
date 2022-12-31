@@ -52,8 +52,6 @@ State RegenEnable = OFF;
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 
-bool UpdateVel_ToggleCruise;
-
 void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 {
     if (err != OS_ERR_NONE)

@@ -8,7 +8,8 @@
 
 static bool msg_recieved = false;
 static OS_MUTEX msg_rcv_mutex;
-bool ChargeEnable = false;
+
+// TODO: Add getter function stub from ReadCarCAN
 
 static int watchDogTripCounter = 0; //count how many times the CAN watchdog trips
 

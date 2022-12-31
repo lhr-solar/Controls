@@ -266,6 +266,23 @@ void Task1(void *arg)
     brakePedalPercent = 15;
     stateBuffer();
 
+    /**
+     * ======= Accelerate Cruise State ==========
+     * State Transitions: 
+     * Coasting Cruise, Brake State
+    */
+    printf("\n\r============ Testing Accelerate Cruise State ============\n\r");
+
+    // Accelerate Cruise to Coasting Cruise
+    goToCoastingCruise();
+    accelPedalPercent = 0;
+    stateBuffer();
+
+    // Accelerate Cruise to Brake States
+    goToOnePedalDrive();
+    brakePedalPercent = 15;
+    stateBuffer();
+
     while (1){
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
