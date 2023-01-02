@@ -8,8 +8,6 @@
 #include "Tasks.h"
 
 #include "CANbus.h"
-extern bool ChargeEnable;
-
 
 #define SAT_BUF_LENGTH 5
 

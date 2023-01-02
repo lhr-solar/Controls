@@ -24,20 +24,25 @@
 
 // Macros
 #define MAX_VELOCITY 50.0f // m/s    if rmp: 20000.0f // rpm
-#define NORMAL_BRAKE_THRESHOLD 5  // percent
-#define ONEPEDAL_BRAKE_THRESHOLD 20  // percent
-#define NEUTRAL_THRESHOLD 25    // percent
-#define DEBOUNCE_PERIOD 2 // in 100 ms
-#define VELOCITY_THRESHOLD 20.0f // m/s
+#define MIN_CRUISE_VELOCITY 20.0f // m/s
+#define MAX_GEARSWITCH_VELOCITY 5.0f // m/s
+
+#define BRAKE_PEDAL_THRESHOLD 5  // percent
+#define ACCEL_CRUISE_THRESHOLD 10 // percent
+
+#define CRUISE_CURR_LIMIT 1.0f // A
 
 #define MOTOR_MSG_PERIOD 100
 #define FSM_PERIOD 20
+#define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
 // Inputs
 static bool cruiseEnable = false;
 static bool cruiseSet = false;
-static bool regenToggle = false;
+static bool onePedalEnable = false;
+static bool chargeEnable = false;
+
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
 
@@ -59,13 +64,13 @@ static uint8_t motorMsgCounter = 0;
 
 #ifndef __TEST_SENDTRITIUM
 // Debouncing counters
-static uint8_t regenCounter = 0;
+static uint8_t onePedalCounter = 0;
 static uint8_t cruiseEnableCounter = 0;
 static uint8_t cruiseSetCounter = 0;
 
 // Button states
-static bool regenButton = false;
-static bool regenPrevious = false;
+static bool onePedalButton = false;
+static bool onePedalPrevious = false;
 
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
@@ -73,8 +78,12 @@ static bool cruiseEnablePrevious = false;
 #endif
 
 // Handler & Decider Declarations
-void NormalDriveHandler(void);
-void NormalDriveDecider(void);
+void ForwardDriveHandler(void);
+void ForwardDriveDecider(void);
+void NeutralDriveHandler(void);
+void NeutralDriveDecider(void);
+void ReverseDriveHandler(void);
+void ReverseDriveDecider(void);
 void RecordVelocityHandler(void);
 void RecordVelocityDecider(void);
 void PoweredCruiseHandler(void);
@@ -90,12 +99,14 @@ void AccelerateCruiseDecider(void);
 
 // State Names
 typedef enum{
-    NORMAL_DRIVE,
+    FORWARD_DRIVE,
+    NEUTRAL_DRIVE,
+    REVERSE_DRIVE,
     RECORD_VELOCITY,
     POWERED_CRUISE,
     COASTING_CRUISE,
     BRAKE_STATE,
-    ONEPEDAL_DRIVE,
+    ONEPEDAL,
     ACCELERATE_CRUISE
 } TritiumStateName_t;
 
@@ -107,7 +118,9 @@ typedef struct TritiumState{
 
 // FSM
 static const TritiumState_t FSM[9] = {
-    {&NormalDriveHandler, &NormalDriveDecider},
+    {&ForwardDriveHandler, &ForwardDriveDecider},
+    {&NeutralDriveHandler, &NeutralDriveDecider},
+    {&ReverseDriveHandler, &ReverseDriveDecider},
     {&RecordVelocityHandler, &RecordVelocityDecider},
     {&PoweredCruiseHandler, &PoweredCruiseDecider},
     {&CoastingCruiseHandler, &CoastingCruiseDecider},
@@ -128,7 +141,7 @@ void dumpInfo(){
     printf("State: %d\n\r", state);
     printf("cruiseEnable: %d\n\r", cruiseEnable);
     printf("cruiseSet: %d\n\r", cruiseSet);
-    printf("regenToggle: %d\n\r", regenToggle);
+    printf("onePedalEnable: %d\n\r", onePedalEnable);
     printf("brakePedalPercent: %d\n\r", brakePedalPercent);
     printf("accelPedalPercent: %d\n\r", accelPedalPercent);
     printf("reverseSwitch: %d\n\r", reverseSwitch);
@@ -147,12 +160,16 @@ void readInputs(){
     #ifndef __TEST_SENDTRITIUM
     Minion_Error_t err;
 
+    // Update pedals
     brakePedalPercent = Pedals_Read(BRAKE);
     accelPedalPercent = Pedals_Read(ACCELERATOR);
     
-    // UPDATE BUTTONS
-    if(Minion_Read_Input(REGEN_SW, &err) && regenCounter < DEBOUNCE_PERIOD){regenCounter++;}
-    else if(regenCounter > 0){regenCounter--;}
+    // Update charge enable
+    chargeEnable = RegenEnable_Get();
+
+    // Update buttons
+    if(Minion_Read_Input(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
+    else if(onePedalCounter > 0){onePedalCounter--;}
 
     if(Minion_Read_Input(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
     else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
@@ -160,28 +177,22 @@ void readInputs(){
     if(Minion_Read_Input(CRUZ_ST, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
     else if(cruiseSetCounter > 0){cruiseSetCounter--;}
     
-    // UPDATE GEARS
+    // Update gears
     bool forwardSwitch = Minion_Read_Input(FOR_SW, &err);
     bool reverseSwitch = Minion_Read_Input(REV_SW, &err);
     forwardGear = (forwardSwitch && !reverseSwitch);
     reverseGear = (!forwardSwitch && reverseSwitch);
     neutralGear = (!forwardSwitch && !reverseSwitch);
 
-    if(forwardSwitch){
-        cruiseSet = Minion_Read_Input(CRUZ_ST, &err);
-    }
-    else{
-        cruiseEnable = false;
-        cruiseSet = false;
-        regenToggle = false;
+    uint8_t gearFault = (uint8_t) forwardGear + (uint8_t) reverseGear + (uint8_t) neutralGear;
+    
+    if(gearFault != 1){
+        // TODO: Determine fault behavior
     }
 
-    if(forwardGear ^ reverseGear ^ neutralGear == false)
-    ; // TODO: jump to fault state for incorrect button read
-
-    // DEBOUNCING
-    if(regenCounter == DEBOUNCE_PERIOD){regenButton = true;}
-    else if(regenCounter == 0){regenButton = false;}
+    // Debouncing
+    if(onePedalCounter == DEBOUNCE_PERIOD){onePedalButton = true;}
+    else if(onePedalCounter == 0){onePedalButton = false;}
 
     if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
     else if(cruiseEnableCounter == 0){cruiseEnableButton = false;}
@@ -189,12 +200,15 @@ void readInputs(){
     if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSet = true;}
     else if(cruiseSetCounter == 0){cruiseSet = false;}
 
-    // TOGGLE
-    if(ChargeEnable && regenButton != regenPrevious && regenPrevious){regenToggle = !regenToggle;}
-    regenPrevious = regenButton;
+    // Toggle
+    if(chargeEnable && onePedalButton != onePedalPrevious && onePedalPrevious){onePedalEnable = !onePedalEnable;}
+    onePedalPrevious = onePedalButton;
     
     if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious){cruiseEnable = !cruiseEnable;}
     cruiseEnablePrevious = cruiseEnableButton;
+    
+    // Get observed velocity
+    velocityObserved = MotorVelocity_Get();
 
     #endif
 }
@@ -219,17 +233,24 @@ void Task_SendTritium(void *p_arg){
     Minion_Error_t minion_err;
 
     // Initialize current state to NORMAL_DRIVE
-    state = FSM[NORMAL_DRIVE];
+    state = FSM[FORWARD_DRIVE];
 
-    #ifndef __TEST_SENDTRITIUM
-    CANPayload_t velocityPayload;
-    velocityPayload.bytes = 32;
-    velocityPayload.data.d = velocitySetpoint;
+    CANbus_Init(MOTORCAN);
+    CANDATA_t driveCmd = {
+        .ID=MOTOR_VELOCITY, 
+        .idx=0,
+        .data=0,
+    };
 
-    CANPayload_t currentPayload;
-    currentPayload.bytes = 32;
-    currentPayload.data.d = currentSetpoint;
-    #endif
+    // #ifndef __TEST_SENDTRITIUM
+    // CANPayload_t velocityPayload;
+    // velocityPayload.bytes = 32;
+    // velocityPayload.data.d = velocitySetpoint;
+
+    // CANPayload_t currentPayload;
+    // currentPayload.bytes = 32;
+    // currentPayload.data.d = currentSetpoint;
+    // #endif
 
     while(1){
         state.stateHandler();    // do what the current state does
@@ -242,11 +263,8 @@ void Task_SendTritium(void *p_arg){
         // Drive
         #ifndef __TEST_SENDTRITIUM
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
+            CANbus_Send(&driveCmd, CAN_NON_BLOCKING, MOTORCAN);
             motorMsgCounter = 0;
-
-            CANbus_Send(VELOCITY, velocityPayload, CAN_NON_BLOCKING);
-            CANbus_Send(CURRENT_VEC, currentPayload, CAN_NON_BLOCKING);
-
         }else{
             motorMsgCounter++;
         }
@@ -268,28 +286,60 @@ void Task_SendTritium(void *p_arg){
 // State Handlers & Deciders
 
 /**
- * Normal Drive State. Accelerator is mapped directly to current setpoint.
+ * Forward Drive State. Accelerator is mapped directly to current setpoint.
 */
-void NormalDriveHandler(){
-    if(forwardGear){
-        velocitySetpoint = MAX_VELOCITY;
-        currentSetpoint = percentToFloat(accelPedalPercent);
-    }else if(reverseGear){
-        velocitySetpoint = -MAX_VELOCITY;
-        currentSetpoint = percentToFloat(accelPedalPercent);
-    }else if(neutralGear){
-        velocitySetpoint = MAX_VELOCITY;
-        currentSetpoint = 0;
+void ForwardDriveHandler(){
+    velocitySetpoint = MAX_VELOCITY;
+    currentSetpoint = percentToFloat(accelPedalPercent);
+}
+
+void ForwardNormalDriveDecider(){
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+        state = FSM[BRAKE];
+    }else if(cruiseSet && cruiseEnable && velocityObserved >= MIN_CRUISE_VELOCITY){
+        state = FSM[RECORD_VELOCITY];
+    }else if(onePedalEnable && chargeEnable){
+        state = FSM[ONEPEDAL];
+    }else if(neutralGear || reverseGear){
+        state = FSM[NEUTRAL_DRIVE];
     }
 }
 
-void NormalDriveDecider(){
-    if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
-        state = BRAKE_STATE;
-    }else if(cruiseSet && cruiseEnable && velocitySetpoint > VELOCITY_THRESHOLD){
-        state = RECORD_VELOCITY;
-    }else if(!cruiseEnable && regenToggle && ChargeEnable){
-        state = ONEPEDAL_DRIVE;
+/**
+ * Neutral Drive State. No current is sent to the motor.
+ * 
+*/
+void NeutralDriveHandler(){
+    velocitySetpoint = MAX_VELOCITY;
+    cruiseEnable = false;
+    onePedalEnable = false;
+    currentSetpoint = 0.0f;
+}
+
+void NeutralDriveDecider(){
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+        state = FSM[BRAKE];
+    }else if(forwardGear && velocityObserved < MAX_GEARSWITCH_VELOCITY){
+        state = FSM[FORWARD_DRIVE];
+    }else if(reverseGear && velocityObserved < MAX_GEARSWITCH_VELOCITY){
+        state = FSM[REVERSE_DRIVE];
+    }
+}
+
+/**
+ * Reverse Drive State. Accelerator is mapped directly to current setpoint (at negative velocity).
+*/
+void ReverseDriveHandler(){
+    velocitySetpoint = -MAX_VELOCITY;
+    currentSetpoint = percentToFloat(accelPedalPercent);
+}
+
+void ReverseDriveDecider(){
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+        state = FSM[BRAKE];
+    }
+    else if(neutralGear || forwardGear){
+        state = FSM[NEUTRAL_DRIVE];
     }
 }
 
@@ -298,21 +348,23 @@ void NormalDriveDecider(){
  * into velocitySetpoint.
 */
 void RecordVelocityHandler(){
-    #ifndef __TEST_SENDTRITIUM
-    velocitySetpoint = MotorVelocity_Get();
-    #else
-    velocitySetpoint = velocityObserved;
-    #endif
-
+    cruiseVelSetpoint = velocityObserved;
 }
 
 void RecordVelocityDecider(){
-    if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
-        state = BRAKE_STATE;
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+        state = FSM[BRAKE_STATE];
+    }else if(neutralGear){
+        state = FSM[NEUTRAL_DRIVE];
+    }else if(reverseGear){
+        state = FSM[REVERSE_DRIVE];
+    }else if(onePedalEnable){
+        cruiseEnable = false;
+        state = FSM[ONEPEDAL];
+    }else if(!cruiseEnable){
+        state = FSM[FORWARD_DRIVE];
     }else if(cruiseEnable && !cruiseSet){
-        state = POWERED_CRUISE;
-    }else if(!cruiseEnable || !forwardGear){
-        state = NORMAL_DRIVE;
+        state = FSM[POWERED_CRUISE];
     }
 }
 
@@ -321,69 +373,59 @@ void RecordVelocityDecider(){
  * Observed Velocity <= Velocity Setpoint
 */
 void PoweredCruiseHandler(){
-    currentSetpoint = 1.0f;
+    velocitySetpoint = cruiseVelSetpoint;
+    currentSetpoint = CRUISE_CURR_LIMIT;
 }
 
 void PoweredCruiseDecider(){
-    #ifndef __TEST_SENDTRITIUM
-    cruiseVelSetpoint = velocitySetpoint;
-    if(MotorVelocity_Get() > velocitySetpoint){
-        state = COASTING_CRUISE;
-    }
-    #else
-    if(velocityObserved > velocitySetpoint){
-        state = COASTING_CRUISE;
-    }
-    #endif
-    else if(!cruiseEnable){
-        state = NORMAL_DRIVE;
-    }else if(cruiseEnable && cruiseSet && velocitySetpoint > VELOCITY_THRESHOLD){
-        state = RECORD_VELOCITY;
-    }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
-        state = BRAKE_STATE;
-    }else if(regenToggle){
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+        state = FSM[BRAKE_STATE];
+    }else if(neutralGear){
+        state = FSM[NEUTRAL_DRIVE];
+    }else if(reverseGear){
+        state = FSM[REVERSE_DRIVE];
+    }else if(onePedalEnable){
         cruiseEnable = false;
-        state = NORMAL_DRIVE;
+        state = FSM[ONEPEDAL];
+    }else if(!cruiseEnable){
+        state = FSM[FORWARD_DRIVE];
+    }else if(cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY){
+        state = FSM[RECORD_VELOCITY];
+    }else if(accelPedalPercent >= ACCEL_CRUISE_THRESHOLD){
+        state = FSM[ACCELERATE_CRUISE];
+    }else if(velocityObserved > cruiseVelSetpoint){
+        state = FSM[COASTING_CRUISE];
     }
 }
 
 /**
  * Coasting Cruise State. We do not want to utilize motor braking in cruise control mode.
- * Coast the motor (do not motor brake) if we want to slow down; instead, stop putting power
+ * Coast the motor (do not motor brake) if we want to slow down; instead, stop putting current
  * into the motor and let the car slow down naturally.
 */
 void CoastingCruiseHandler(){
+    velocitySetpoint = cruiseVelSetpoint;
     currentSetpoint = 0;
 }
 
 void CoastingCruiseDecider(){
-    if(MotorVelocity_Get() <= velocitySetpoint){
-        state = POWERED_CRUISE;
-    }else if(!cruiseEnable){
-        state = NORMAL_DRIVE;
-    }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
-        state = BRAKE_STATE;
-    }else if(regenToggle){
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+        state = FSM[BRAKE_STATE];
+    }else if(neutralGear){
+        state = FSM[NEUTRAL_DRIVE];
+    }else if(reverseGear){
+        state = FSM[REVERSE_DRIVE];
+    }else if(onePedalEnable){
         cruiseEnable = false;
-        state = NORMAL_DRIVE;
-    }
-}
-
-/**
- * Brake State. Brake the car if the brake pedal is pressed.
-*/
-void BrakeHandler(){
-    currentSetpoint = 0;
-    velocitySetpoint = 0;
-    cruiseEnable = 0;
-    cruiseSet = 0;
-    brakelightState = true;
-}
-
-void BrakeDecider(){
-    if(brakePedalPercent < NORMAL_BRAKE_THRESHOLD){
-        state = NORMAL_DRIVE;
-        brakelightState = false;
+        state = FSM[ONEPEDAL];
+    }else if(!cruiseEnable){
+        state = FSM[FORWARD_DRIVE];
+    }else if(cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY){
+        state = FSM[RECORD_VELOCITY];
+    }else if(accelPedalPercent >= ACCEL_CRUISE_THRESHOLD){
+        state = FSM[ACCELERATE_CRUISE];
+    }else if(velocityObserved <= cruiseVelSetpoint){
+        state = FSM[POWERED_CRUISE];
     }
 }
 
@@ -412,8 +454,8 @@ void OnePedalDriveHandler(){
 }
 
 void OnePedalDriveDecider(){
-    if(!regenToggle || !ChargeEnable || cruiseEnable){
-        regenToggle = 0;
+    if(!onePedalEnable || !chargeEnable || cruiseEnable){
+        onePedalEnable = 0;
         state = NORMAL_DRIVE;
     }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
         state = BRAKE_STATE;
@@ -438,5 +480,23 @@ void AccelerateCruiseDecider(){
         state = COASTING_CRUISE;
     }else if(brakePedalPercent >= NORMAL_BRAKE_THRESHOLD){
         state = BRAKE_STATE;
+    }
+}
+
+/**
+ * Brake State. Brake the car if the brake pedal is pressed.
+*/
+void BrakeHandler(){
+    currentSetpoint = 0;
+    velocitySetpoint = 0;
+    cruiseEnable = 0;
+    cruiseSet = 0;
+    brakelightState = true;
+}
+
+void BrakeDecider(){
+    if(brakePedalPercent < NORMAL_BRAKE_THRESHOLD){
+        state = NORMAL_DRIVE;
+        brakelightState = false;
     }
 }

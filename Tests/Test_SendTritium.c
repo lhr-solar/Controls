@@ -8,20 +8,6 @@
 #include "Tasks.h"
 #include "SendTritium.h"
 
-// Inputs
-extern bool cruiseEnable;
-extern bool cruiseSet;
-extern bool regenToggle;
-extern uint8_t brakePedalPercent;
-extern uint8_t accelPedalPercent;
-extern bool reverseSwitch;
-extern bool forwardSwitch;
-extern uint8_t state;
-extern float currentSetpoint;
-extern float velocitySetpoint;
-extern float velocityObserved;
-extern float cruiseVelSetpoint;
-
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
@@ -52,8 +38,8 @@ void goToOnePedalDrive(){
 
     // One Pedal Drive
     cruiseEnable = false;
-    regenToggle = true;
-    ChargeEnable = true;
+    onePedalEnable = true;
+    chargeEnable = true;
     stateBuffer();
 }
 
@@ -104,7 +90,7 @@ void Task1(void *arg)
     Minion_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-    ChargeEnable = ON;
+    chargeEnable = ON;
 
     OSTaskCreate(
         (OS_TCB*)&SendTritium_TCB,
@@ -154,7 +140,7 @@ void Task1(void *arg)
 
     // Powered Cruise to Cruise Disable
     goToPoweredCruise();
-    regenToggle = true;
+    onePedalEnable = true;
     stateBuffer();
 
     /**
@@ -207,8 +193,8 @@ void Task1(void *arg)
     // Normal Drive to One Pedal Drive
     goToNormalState();
     cruiseEnable = false;
-    regenToggle = true;
-    ChargeEnable = true;
+    onePedalEnable = true;
+    chargeEnable = true;
     stateBuffer();
 
    /**
@@ -256,8 +242,8 @@ void Task1(void *arg)
 
     // One Pedal Drive to One Pedal Disable
     goToOnePedalDrive();
-    regenToggle = false;
-    ChargeEnable = false;
+    onePedalEnable = false;
+    chargeEnable = false;
     cruiseEnable = true;
     stateBuffer();
 
