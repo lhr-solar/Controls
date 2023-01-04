@@ -6,6 +6,9 @@
 #include "ReadCarCAN.h"
 #include "BSP_UART.h"
 #include "Tasks.h"
+
+// Test macro for SendTritium
+#define __TEST_SENDTRITIUM
 #include "SendTritium.h"
 
 static OS_TCB Task1TCB;
@@ -13,7 +16,7 @@ static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 void stateBuffer(){
     OS_ERR err;
-    OSTimeDlyHMSM(0, 0, 0, 20, OS_OPT_TIME_HMSM_STRICT, &err);
+    OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD + 10, OS_OPT_TIME_HMSM_STRICT, &err);
     assertOSError(OS_UPDATE_VEL_LOC, err);
 }
 
@@ -24,17 +27,46 @@ void goToBrakeState(){
 }
 
 
-void goToNormalState(){
+void goToForwardDrive(){
     goToBrakeState();
 
-    //Normal State
+    //Forward Drive
     brakePedalPercent = 0;
+    forwardGear = true;
+    neutralGear = false;
+    reverseGear = false;
+
     stateBuffer();
+}
+
+void goToNeutralDrive(){
+    goToForwardDrive();
+
+    // Neutral Drive
+    forwardGear = false;
+    neutralGear = true;
+    reverseGear = false;
+
+    stateBuffer();
+}
+
+void goToReverseDrive(){
+    goToForwardDrive();
+    
+    // Reverse Drive
+    forwardGear = false;
+    neutralGear = false;
+    reverseGear = true;
+
+    stateBuffer();  // Transition to neutral
+
+    velocityObserved = 5;
+    stateBuffer();  // Transition to reverse
 }
 
 
 void goToOnePedalDrive(){
-    goToNormalState();
+    goToForwardDrive();
 
     // One Pedal Drive
     cruiseEnable = false;
@@ -44,7 +76,7 @@ void goToOnePedalDrive(){
 }
 
 void goToRecordVelocity(){
-    goToNormalState();
+    goToForwardDrive();
 
     // Record Velocity
     cruiseEnable = true;
@@ -60,7 +92,7 @@ void goToPoweredCruise(){
     cruiseEnable = true;
     cruiseSet = false;
     velocityObserved = 30;
-    velocitySetpoint = 40;
+    cruiseVelSetpoint = 40;
     stateBuffer();
 }
 
@@ -71,9 +103,20 @@ void goToCoastingCruise(){
     cruiseEnable = true;
     cruiseSet = false;
     velocityObserved = 40;
-    velocitySetpoint = 30;
+    cruiseVelSetpoint = 30;
     stateBuffer();
+}
 
+void goToAccelerateCruise(){
+    goToPoweredCruise();
+
+    // Coasting Cruise
+    cruiseEnable = true;
+    cruiseSet = false;
+    velocityObserved = 30;
+    cruiseVelSetpoint = 30;
+    accelPedalPercent = 10;
+    stateBuffer();
 }
 
 void Task1(void *arg)
@@ -83,10 +126,7 @@ void Task1(void *arg)
     CPU_Init();
     BSP_UART_Init(UART_2);
     Pedals_Init();
-    //OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
-    //OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
-    CANbus_Init();
+    CANbus_Init(MOTORCAN);
     Minion_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
@@ -110,91 +150,249 @@ void Task1(void *arg)
     //assertOSError(err);
 
     /**
+     * ======= Forward Drive ==========
+     * State Transitions: 
+     * Brake, Record Velocity, One Pedal, Neutral Drive
+    */
+    printf("\n\r============ Testing Forward Drive State ============\n\r");
+
+    // Forward Drive to Brake
+    printf("\n\rTesting: Forward Drive -> Brake\n\r");
+    goToForwardDrive();
+    brakePedalPercent = 15;
+    stateBuffer();
+
+    // Forward Drive to Record Velocity
+    printf("\n\rTesting: Forward Drive -> Record Velocity\n\r");
+    goToForwardDrive();
+    cruiseEnable = true;
+    cruiseSet = true;
+    stateBuffer();
+
+    // Forward Drive to One Pedal
+    printf("\n\rTesting: Forward Drive -> One Pedal\n\r");
+    goToForwardDrive();
+    onePedalEnable = true;
+    stateBuffer();
+
+    // Forward Drive to Neutral Drive
+    printf("\n\rTesting: Forward Drive -> Neutral Drive\n\r");
+    goToForwardDrive();
+    forwardGear = false;
+    neutralGear = true;
+    reverseGear = false;
+
+    // Forward Drive to Reverse Drive
+    printf("\n\rTesting: Reverse Drive -> Forward Drive\n\r");
+    goToReverseDrive();
+    forwardGear = false;
+    neutralGear = false;
+    reverseGear = true;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
+    stateBuffer();
+
+    /**
+     * ======= Neutral Drive ==========
+     * State Transitions: 
+     * Brake, Forward Drive, Reverse Drive
+    */
+
+    printf("\n\r============ Testing Neutral Drive State ============\n\r");
+
+    // Neutral Drive to Brake
+    printf("\n\rTesting: Neutral Drive -> Brake\n\r");
+    goToNeutralDrive();
+    brakePedalPercent = 15;
+    stateBuffer();
+
+    // Neutral Drive to Forward Drive
+    printf("\n\rTesting: Neutral Drive -> Forward Drive\n\r");
+    goToNeutralDrive();
+    velocityObserved = 5;
+    forwardGear = true;
+    neutralGear = false;
+    reverseGear = false;
+    stateBuffer();
+
+    // Neutral Drive to Reverse Drive
+    printf("\n\rTesting: Neutral Drive -> Reverse Drive\n\r");
+    goToNeutralDrive();
+    velocityObserved = 5;
+    forwardGear = false;
+    neutralGear = false;
+    reverseGear = true;
+    stateBuffer();
+
+    /**
+     * ======= Reverse Drive ==========
+     * State Transitions: 
+     * Brake, Neutral Drive
+    */
+
+    printf("\n\r============ Testing Reverse Drive State ============\n\r");
+    
+    // Reverse Drive to Brake
+    printf("\n\rTesting: Reverse Drive -> Brake\n\r");
+    goToReverseDrive();
+    brakePedalPercent = 15;
+    stateBuffer();
+
+    // Reverse Drive to Neutral Drive
+    printf("\n\rTesting: Reverse Drive -> Neutral Drive\n\r");
+    goToReverseDrive();
+    forwardGear = false;
+    neutralGear = true;
+    reverseGear = false;
+    stateBuffer();
+
+    // Reverse Drive to Forward Drive
+    printf("\n\rTesting: Reverse Drive -> Forward Drive\n\r");
+    goToReverseDrive();
+    forwardGear = true;
+    neutralGear = false;
+    reverseGear = false;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
+    stateBuffer();
+
+    /**
+     * ======= One Pedal Drive ==========
+     * State Transitions: 
+     * Brake, Neutral Drive, Forward Drive
+    */
+
+    printf("\n\r============ Testing One Pedal Drive State ============\n\r");
+
+    // One Pedal Drive to Brake
+    printf("\n\rTesting: One Pedal Drive -> Brake\n\r");
+    goToOnePedalDrive();
+    brakePedalPercent = 15;
+    stateBuffer();
+
+    // One Pedal Drive to Neutral Drive
+    printf("\n\rTesting: One Pedal Drive -> Neutral Drive\n\r");
+    goToOnePedalDrive();
+    forwardGear = false;
+    neutralGear = true;
+    reverseGear = false;
+    stateBuffer();
+
+    // One Pedal Drive to Forward Drive
+    printf("\n\rTesting: One Pedal Drive -> Forward Drive\n\r");
+    goToOnePedalDrive();
+    forwardGear = true;
+    neutralGear = false;
+    reverseGear = false;
+    stateBuffer();
+
+    /**
      * ======= Powered Cruise ==========
      * State Transitions: 
-     * Coasting Cruise, Normal State, Record Velocity, Brake State, Cruise Disable
+     * Brake, Neutral, One Pedal, Forward Drive, Record Velocity, Accelerate Cruise, Coasting Cruise
     */
     printf("\n\r============ Testing Powered Cruise State ============\n\r");
 
-    // Powered Cruise to Coasting Cruise
+    // Powered Cruise to Brake State
+    printf("\n\rTesting: Powered Cruise -> Brake\n\r");
     goToPoweredCruise();
-    velocityObserved = 40;
-    velocitySetpoint = 30;
+    brakePedalPercent = 15;
     stateBuffer();
 
-    // Powered Cruise to Normal Drive
+    // Powered Cruise to Neutral Drive
+    printf("\n\rTesting: Powered Cruise -> Neutral Drive\n\r");
+    goToPoweredCruise();
+    forwardGear = false;
+    neutralGear = true;
+    reverseGear = false;
+    stateBuffer();
+
+    // Powered Cruise to One Pedal Drive
+    printf("\n\rTesting: Powered Cruise -> One Pedal Drive\n\r");
+    goToPoweredCruise();
+    onePedalEnable = true;
+    stateBuffer();
+
+    // Powered Cruise to Forward Drive
+    printf("\n\rTesting: Powered Cruise -> Forward Drive\n\r");
     goToPoweredCruise();
     cruiseEnable = false;
     stateBuffer();
 
     // Powered Cruise to Record Velocity
+    printf("\n\rTesting: Powered Cruise -> Record Velocity\n\r");
     goToPoweredCruise();
     cruiseSet = true;
     cruiseEnable = true;
     stateBuffer();
 
-    // Powered Cruise to Brake State
+    // Powered Cruise to Accelerate Cruise
+    printf("\n\rTesting: Powered Cruise -> Accelerate Cruise\n\r");
     goToPoweredCruise();
-    brakePedalPercent = 15;
+    accelPedalPercent = 10;
     stateBuffer();
 
-    // Powered Cruise to Cruise Disable
+    // Powered Cruise to Coasting Cruise
+    printf("\n\rTesting: Powered Cruise -> Coasting Cruise\n\r");
     goToPoweredCruise();
-    onePedalEnable = true;
+    velocityObserved = 40;
+    cruiseVelSetpoint = 30;
     stateBuffer();
 
     /**
      * ======= Coasting Cruise ==========
      * State Transitions: 
-     * Powered Cruise, Normal Drive, Brake State, Cruise Disable
+     * Brake, Neutral Drive, One Pedal, Forward Drive, Record Velocity, 
+     * Accelerate Cruise, Powered Cruise
     */
     printf("\n\r============ Testing Coasting Cruise State ============\n\r");
 
-    // Coasting Cruise to Powered Cruise
-    goToCoastingCruise();
-    velocitySetpoint = 30;
-    velocityObserved = 40;
-    stateBuffer();
-
-    // Coasting Cruise to Normal State
-    goToCoastingCruise();
-    cruiseEnable = false;
-    stateBuffer();
-
     // Coasting Cruise to Brake State
+    printf("\n\rTesting: Coasting Cruise -> Brake\n\r");
     goToCoastingCruise();
     brakePedalPercent = 15;
     stateBuffer();
 
-    // Coasting Cruise to Cruise Disable -> Normal State
+    // Coasting Cruise to Neutral Drive
+    printf("\n\rTesting: Coasting Cruise -> Neutral Drive\n\r");
     goToCoastingCruise();
-    brakePedalPercent = 15;
+    forwardGear = false;
+    neutralGear = true;
+    reverseGear = false;
     stateBuffer();
 
-    /**
-     * ======= Normal Drive ==========
-     * State Transitions: 
-     * Record Velocity, One Pedal Drive, Brake State
-    */
-    printf("\n\r============ Testing Normal State ============\n\r");
-
-    // Normal Drive to Record Velocity
-    goToNormalState();
-    cruiseEnable = true;
-    cruiseSet = true;
-    brakePedalPercent = 0;
-    stateBuffer();
-
-    // Normal Drive to Brake State
-    goToNormalState();
-    brakePedalPercent = 15;
-    stateBuffer();
-
-    // Normal Drive to One Pedal Drive
-    goToNormalState();
-    cruiseEnable = false;
+    // Coasting Cruise to One Pedal Drive
+    printf("\n\rTesting: Coasting Cruise -> One Pedal Drive\n\r");
+    goToCoastingCruise();
     onePedalEnable = true;
-    chargeEnable = true;
+    stateBuffer();
+
+    // Coasting Cruise to Forward Drive
+    printf("\n\rTesting: Coasting Cruise -> Forward Drive\n\r");
+    goToCoastingCruise();
+    cruiseEnable = false;
+    stateBuffer();
+
+    // Coasting Cruise to Record Velocity
+    printf("\n\rTesting: Coasting Cruise -> Record Velocity\n\r");
+    goToCoastingCruise();
+    cruiseSet = true;
+    cruiseEnable = true;
+    stateBuffer();
+
+    // Coasting Cruise to Accelerate Cruise
+    printf("\n\rTesting: Coasting Cruise -> Accelerate Cruise\n\r");
+    goToCoastingCruise();
+    accelPedalPercent = 10;
+    stateBuffer();
+
+    // Coasting Cruise to Powered Cruise
+    printf("\n\rTesting: Powered Cruise -> Coasting Cruise\n\r");
+    goToPoweredCruise();
+    velocityObserved = 29;
+    cruiseVelSetpoint = 30;
     stateBuffer();
 
    /**

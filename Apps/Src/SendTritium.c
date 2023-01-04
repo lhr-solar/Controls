@@ -9,6 +9,9 @@
  * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
  * The logic is determined through a finite state machine implementation.
  * 
+ * If the macro __TEST_SENDTRITIUM is defined prior to including SendTritium.h, relevant
+ * variables will be exposed as externs for unit testing.
+ * 
  * @author Nathaniel Delgado (NathanielDelgado)
  * @author Diya Rajon (diyarajon)
  * @author Ishan Deshpande (IshDeshpa, ishdeshpa@utexas.edu)
@@ -25,7 +28,7 @@
 // Macros
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
 #define MIN_CRUISE_VELOCITY 20.0f // m/s
-#define MAX_GEARSWITCH_VELOCITY 5.0f // m/s
+#define MAX_GEARSWITCH_VELOCITY 8.0f // m/s
 
 #define BRAKE_PEDAL_THRESHOLD 5  // percent
 #define ACCEL_PEDAL_THRESHOLD 10 // percent
@@ -35,31 +38,32 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-#define MOTOR_MSG_PERIOD 100
-#define FSM_PERIOD 20
-#define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
-#define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
+#ifdef __TEST_SENDTRITIUM
+#define STATIC(def) static def
+#else
+#define STATIC(def) def
+#endif
 
 // Inputs
-static bool cruiseEnable = false;
-static bool cruiseSet = false;
-static bool onePedalEnable = false;
-static bool chargeEnable = false;
+STATIC(bool cruiseEnable = false;)
+STATIC(bool cruiseSet = false;)
+STATIC(bool onePedalEnable = false;)
+STATIC(bool chargeEnable = false;)
 
-static uint8_t brakePedalPercent = 0;
-static uint8_t accelPedalPercent = 0;
+STATIC(uint8_t brakePedalPercent = 0;)
+STATIC(uint8_t accelPedalPercent = 0;)
 
-static bool forwardGear = false;
-static bool neutralGear = false;
-static bool reverseGear = false;
+STATIC(bool forwardGear = false;)
+STATIC(bool neutralGear = false;)
+STATIC(bool reverseGear = false;)
 
 // Outputs
-static float currentSetpoint = 0;
-static float velocitySetpoint = 0;
-static float cruiseVelSetpoint = 0;
+float currentSetpoint = 0;
+float velocitySetpoint = 0;
+float cruiseVelSetpoint = 0;
 
 // Current observed velocity
-static float velocityObserved = 0;
+STATIC(float velocityObserved = 0;)
 
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
@@ -209,7 +213,8 @@ static void readInputs(){
     else if(cruiseSetCounter == 0){cruiseSet = false;}
 
     // Toggle
-    if(chargeEnable && onePedalButton != onePedalPrevious && onePedalPrevious){onePedalEnable = !onePedalEnable;}
+    if(onePedalButton != onePedalPrevious && onePedalPrevious){onePedalEnable = !onePedalEnable;}
+    if(!chargeEnable) onePedalEnable = false;
     onePedalPrevious = onePedalButton;
     
     if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious){cruiseEnable = !cruiseEnable;}
@@ -312,6 +317,8 @@ static void NeutralDriveDecider(){
 static void ReverseDriveHandler(){
     velocitySetpoint = -MAX_VELOCITY;
     currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, 100, 0, 100));
+    cruiseEnable = false;
+    onePedalEnable = false;
 }
 
 /**
@@ -514,8 +521,8 @@ static void BrakeHandler(){
     Minion_Error_t minion_err;
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = 0;
-    cruiseEnable = 0;
-    onePedalEnable = 0;
+    cruiseEnable = false;
+    onePedalEnable = false;
     Minion_Write_Output(BRAKELIGHT, true, &minion_err);
 }
 
