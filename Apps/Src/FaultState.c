@@ -29,7 +29,7 @@ static void readBPS_ContactorHandler(void){
     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
     Contactors_Set(ARRAY_PRECHARGE, OFF, true);
 
-    // turn off the array contactor light
+    // turn off the array contactor display light
     UpdateDisplay_SetArray(false);
 }
 

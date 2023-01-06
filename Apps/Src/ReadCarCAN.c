@@ -123,7 +123,7 @@ static void arrayRestart(void *p_tmr, void *p_arg){
 
     if(regenEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
         
-        if (Contactors_Set(ARRAY_CONTACTOR, ON, false) != ERROR){ // Only update display if we successfully turn on the array
+        if(Contactors_Set(ARRAY_CONTACTOR, ON, false) != ERROR){ // Only update display if we successfully turn on the array
             UpdateDisplay_SetArray(true);
         }
        
@@ -139,9 +139,6 @@ static void arrayRestart(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 void canWatchTimerCallback (void *p_tmr, void *p_arg){
-
-    // mark regen as disabled
-    regenEnable = false;
 
     chargingDisable();
 }
