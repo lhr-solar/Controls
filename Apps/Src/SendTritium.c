@@ -173,18 +173,18 @@ static void readInputs(){
     regenEnable = RegenEnable_Get();
 
     // Update buttons
-    if(Minion_Read_Input(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
+    if(Minion_Read_Pin(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
     else if(onePedalCounter > 0){onePedalCounter--;}
 
-    if(Minion_Read_Input(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
+    if(Minion_Read_Pin(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
     else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
 
-    if(Minion_Read_Input(CRUZ_ST, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
+    if(Minion_Read_Pin(CRUZ_ST, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
     else if(cruiseSetCounter > 0){cruiseSetCounter--;}
     
     // Update gears
-    bool forwardSwitch = Minion_Read_Input(FOR_SW, &err);
-    bool reverseSwitch = Minion_Read_Input(REV_SW, &err);
+    bool forwardSwitch = Minion_Read_Pin(FOR_SW, &err);
+    bool reverseSwitch = Minion_Read_Pin(REV_SW, &err);
     bool forwardGear = (forwardSwitch && !reverseSwitch);
     bool reverseGear = (!forwardSwitch && reverseSwitch);
     bool neutralGear = (!forwardSwitch && !reverseSwitch);
@@ -225,7 +225,7 @@ static void readInputs(){
     cruiseEnablePrevious = cruiseEnableButton;
     
     // Get observed velocity
-    velocityObserved = MotorVelocity_Get();
+    velocityObserved = Motor_Velocity_Get();
 }
 
 /**
@@ -233,7 +233,6 @@ static void readInputs(){
 */
 static void sendDisplay(){
     UpdateDisplay_SetAccel(accelPedalPercent);
-    UpdateDisplay_SetVelocity((uint32_t)(velocityObserved*10));
 }
 #endif
 
@@ -591,7 +590,7 @@ void Task_SendTritium(void *p_arg){
 
     CANbus_Init(MOTORCAN);
     CANDATA_t driveCmd = {
-        .ID=MOTOR_VELOCITY, 
+        .ID=MOTOR_DRIVE, 
         .idx=0,
         .data={0.0f, 0.0f},
     };
