@@ -4,7 +4,6 @@
 #include "config.h"
 #include <bsp.h>
 #include <unistd.h>
-#include "MotorController.h"
 #include "CarState.h"
 #include "UpdateVelocity.h"
 #include <math.h>

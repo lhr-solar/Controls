@@ -7,7 +7,6 @@
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
-#include "MotorController.h"
 #include "Pedals.h"
 
 /**

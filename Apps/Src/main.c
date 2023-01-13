@@ -8,7 +8,6 @@
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
-#include "MotorController.h"
 #include "Pedals.h"
 #include "CAN_Queue.h"
 
@@ -71,7 +70,6 @@ void Task_Init(void *p_arg){
     // Initialize drivers
     Pedals_Init();
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
     OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     BSP_UART_Init(UART_2);
     CANbus_Init(CARCAN);
