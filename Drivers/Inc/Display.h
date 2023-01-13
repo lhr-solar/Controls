@@ -52,25 +52,6 @@ typedef enum{
 } Page_t;
 
 /**
- * For display elements with three states
- */
-typedef enum{
-	STATE_0	=0,
-	STATE_1	=1,
-	STATE_2	=2
-} TriState_t;
-
-// For cruise control and regen
-#define DISABLED STATE_0
-#define ENABLED STATE_1	// Able to be used
-#define ACTIVE STATE_2	// Actively being used right now
-
-// For gear changes
-#define NEUTRAL STATE_0
-#define FORWARD STATE_1
-#define REVERSE STATE_2
-
-/**
  * Argument types
  */
 typedef enum{

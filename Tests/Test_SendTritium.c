@@ -71,7 +71,7 @@ void goToOnePedalDrive(){
     // One Pedal Drive
     cruiseEnable = false;
     onePedalEnable = true;
-    chargeEnable = true;
+    regenEnable = true;
     stateBuffer();
 }
 
@@ -130,7 +130,7 @@ void Task1(void *arg)
     Minion_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-    chargeEnable = ON;
+    regenEnable = ON;
 
     OSTaskCreate(
         (OS_TCB*)&SendTritium_TCB,
@@ -441,7 +441,7 @@ void Task1(void *arg)
     // One Pedal Drive to One Pedal Disable
     goToOnePedalDrive();
     onePedalEnable = false;
-    chargeEnable = false;
+    regenEnable = false;
     cruiseEnable = true;
     stateBuffer();
 

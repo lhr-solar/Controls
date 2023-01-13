@@ -34,6 +34,25 @@ typedef enum{
 } UpdateDisplayError_t;
 
 /**
+ * For display elements with three states
+ */
+typedef enum{
+	STATE_0	=0,
+	STATE_1	=1,
+	STATE_2	=2
+} TriState_t;
+
+// For cruise control and regen
+#define DISP_DISABLED STATE_0
+#define DISP_ENABLED STATE_1	// Able to be used
+#define DISP_ACTIVE STATE_2	// Actively being used right now
+
+// For gear changes
+#define DISP_NEUTRAL STATE_0
+#define DISP_FORWARD STATE_1
+#define DISP_REVERSE STATE_2
+
+/**
  * @brief Initializes UpdateDisplay application
  * @returns UpdateDisplayError_t
  */

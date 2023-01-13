@@ -6,19 +6,23 @@
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
+typedef enum{
+	FORWARD_GEAR,
+	NEUTRAL_GEAR,
+	REVERSE_GEAR
+} Gear_t;
+
 #ifdef __TEST_SENDTRITIUM
 // Inputs
 extern bool cruiseEnable;
 extern bool cruiseSet;
 extern bool onePedalEnable;
-extern bool chargeEnable;
+extern bool regenEnable;
 
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
 
-extern bool forwardGear;
-extern bool neutralGear;
-extern bool reverseGear;
+extern Gear_t gear;
 
 extern uint8_t state;
 extern float velocityObserved;
