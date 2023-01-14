@@ -15,6 +15,6 @@
  * @brief Returns whether regen braking is enabled or not
  * @return  Whether regen braking is enabled or not
 */
-bool RegenEnable_Get();
+bool ChargeEnable_Get();
 
 #endif

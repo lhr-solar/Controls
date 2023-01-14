@@ -26,7 +26,7 @@ static bool restartingArray = false;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
-static bool regenEnable = false;
+static bool chargeEnable = false;
 
 // Saturation buffer variables
 static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
@@ -38,10 +38,10 @@ static uint8_t oldestMsgIdx = 0;
 static void arrayRestart(void *p_tmr, void *p_arg); 
 
 
-// Getter function for regenEnable
-bool RegenEnable_Get() 
+// Getter function for chargeEnable
+bool ChargeEnable_Get() 
 {
-    return regenEnable;
+    return chargeEnable;
 }
 
 
@@ -69,7 +69,7 @@ static inline void chargingDisable(void) {
     OS_ERR err;
     
     // mark regen as disabled
-    regenEnable = false;
+    chargeEnable = false;
 
     // Set fault bitmap 
     FaultBitmap |= FAULT_READBPS;
@@ -86,7 +86,7 @@ static inline void chargingEnable(void) {
     CPU_TS ts;
 
     // mark regen as enabled
-    regenEnable = true;
+    chargeEnable = true;
 
     // check if we need to run the precharge sequence to turn on the array
     bool shouldRestartArray = false;
@@ -121,9 +121,9 @@ static inline void chargingEnable(void) {
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
 
-    if(regenEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
+    if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
         
-        if (Contactors_Set(ARRAY_CONTACTOR, ON, false) != ERROR){ // Only update display if we successfully turn on the array
+        if(Contactors_Set(ARRAY_CONTACTOR, ON, false) != ERROR){ // Only update display if we successfully turn on the array
             UpdateDisplay_SetArray(true);
         }
        
@@ -141,7 +141,7 @@ static void arrayRestart(void *p_tmr, void *p_arg){
 void canWatchTimerCallback (void *p_tmr, void *p_arg){
 
     // mark regen as disabled
-    regenEnable = false;
+    chargeEnable= false;
 
     chargingDisable();
 }
@@ -207,7 +207,7 @@ void Task_ReadCarCAN(void *p_arg)
                 assertOSError(OS_READ_CAN_LOC, err);
 
 
-                if(dataBuf.data[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
+                if(dataBuf.data[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off chargeEnable and turn array off
                     chargingDisable();
                     updateSaturation(-1); // Update saturation and buffer
 

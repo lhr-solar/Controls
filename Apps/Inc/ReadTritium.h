@@ -38,6 +38,4 @@ uint32_t Motor_RPM_Get();
 uint32_t Motor_Velocity_Get();
 void MotorController_Restart();
 
-
-
 #endif
