@@ -95,10 +95,10 @@ timer1: Timers.STM32_Timer @ sysbus <0x40010000, +0x400>
     initialLimit: 0xffff
     frequency: 100000000
 
-uart8: UART.STM32_UART @ sysbus <0x40007C00, +0x400>
+uart8: UART.STM32_UART @ sysbus <0x40007C00, 0x40007FFF>
     -> nvic@83
 
-uart7: UART.STM32_UART @ sysbus <0x40007BFF, +0x400>
+uart7: UART.STM32_UART @ sysbus <0x40007800, 0x40007BFF>
     -> nvic@82
 
 can3: CAN.STMCAN @ sysbus <0x40006C00, 0x40006FFF>
@@ -149,18 +149,13 @@ spi2i2s2: SPI.STM32SPI @ sysbus 0x40003800
 
 i2s2ext: SPI.STM32SPI @ sysbus 0x40003400
 
-iwdg: Timers.STM32_IndependentWatchdog @ sysbus 0x40003000
+iwdg: Timers.STM32F4_IndependentWatchdog @ sysbus 0x40003000
     frequency: 32000
-    windowOption: false
-    defaultPrescaler: 0x4
+    // windowOption: false
+    // defaultPrescaler: 0x4
 
 rtc: Timers.STM32F4_RTC @ sysbus 0x40002800
     AlarmIRQ -> exti@17
-
-lptim1: Timers.STM32_LPTimer @ sysbus 0x40002400
-    initialLimit: 0xffff
-    frequency: 50000000
-    -> nvic@97
 
 timer14: Timers.STM32_Timer @ sysbus <0x40002000, +0x400>
     initialLimit: 0xffff
@@ -213,6 +208,12 @@ sram: Memory.MappedMemory @ {
     }
     size: 0x40000
 
+sram2: Memory.MappedMemory @ {
+//         sysbus 0x0; // BOOT 11
+        sysbus 0x20040000
+    }
+    size: 0x10000
+
 // The original size is 0x210, but due to limitations of the MappedMemory
 // size has to be aligned to the guest page size.
 otp: Memory.MappedMemory @ sysbus 0x1FFF7800
@@ -227,17 +228,17 @@ ram: Memory.MappedMemory @ {
 
 // For aliasing `flash` is split into `flash0` and `flash1` to alias only 0x40000 bytes,
 // for other boot options this could be simplified to a single `flash` peripheral.
-flash: Memory.MappedMemory @ sysbus 0x8000000
-     size: 0x180000
+// flash: Memory.MappedMemory @ sysbus 0x8000000
+//    size: 0x180000  
 
-//flash0: Memory.MappedMemory @ {
-//        sysbus 0x0; // BOOT x0
-//        sysbus 0x8000000
-//    }
-//    size: 0x40000
+flash0: Memory.MappedMemory @ {
+        sysbus 0x0; // BOOT x0
+        sysbus 0x8000000
+    }
+    size: 0x40000
 
-//flash1: Memory.MappedMemory @ sysbus 0x8040000
-//    size: 0xc0000
+flash1: Memory.MappedMemory @ sysbus 0x8040000
+    size: 0x140000
 
 sysbus:
     init:

@@ -1,0 +1,3 @@
+mach create
+machine LoadPlatformDescription @../Controls/Renode/stm32f413.repl
+sysbus LoadELF @../Controls/Objects/controls-leader.elf
