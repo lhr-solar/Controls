@@ -170,7 +170,7 @@ static void readInputs(){
     accelPedalPercent = Pedals_Read(ACCELERATOR);
     
     // Update regen enable
-    regenEnable = RegenEnable_Get();
+    regenEnable = ChargeEnable_Get();
 
     // Update buttons
     if(Minion_Read_Pin(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
