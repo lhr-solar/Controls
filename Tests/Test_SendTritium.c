@@ -2,7 +2,7 @@
 #include "Pedals.h"
 #include "FaultState.h"
 #include "CANbus.h"
-#include "MotorController.h"
+//#include "MotorController.h"
 #include "ReadCarCAN.h"
 #include "BSP_UART.h"
 #include "Tasks.h"
@@ -26,15 +26,13 @@ void goToBrakeState(){
     stateBuffer();
 }
 
-
 void goToForwardDrive(){
     goToBrakeState();
 
     //Forward Drive
     brakePedalPercent = 0;
-    forwardGear = true;
-    neutralGear = false;
-    reverseGear = false;
+
+    gear = FORWARD_GEAR;
 
     stateBuffer();
 }
@@ -43,9 +41,7 @@ void goToNeutralDrive(){
     goToForwardDrive();
 
     // Neutral Drive
-    forwardGear = false;
-    neutralGear = true;
-    reverseGear = false;
+    gear = NEUTRAL_GEAR;
 
     stateBuffer();
 }
@@ -54,9 +50,7 @@ void goToReverseDrive(){
     goToForwardDrive();
     
     // Reverse Drive
-    forwardGear = false;
-    neutralGear = false;
-    reverseGear = true;
+    gear = REVERSE_GEAR;
 
     stateBuffer();  // Transition to neutral
 
@@ -152,7 +146,7 @@ void Task1(void *arg)
     /**
      * ======= Forward Drive ==========
      * State Transitions: 
-     * Brake, Record Velocity, One Pedal, Neutral Drive
+     * Brake, Record Velocity, One Pedal, Neutral, Reverse
     */
     printf("\n\r============ Testing Forward Drive State ============\n\r");
 
@@ -167,6 +161,9 @@ void Task1(void *arg)
     goToForwardDrive();
     cruiseEnable = true;
     cruiseSet = true;
+    velocityObserved = 20.0;
+    stateBuffer();
+    velocityObserved = 25.0;
     stateBuffer();
 
     // Forward Drive to One Pedal
@@ -178,16 +175,13 @@ void Task1(void *arg)
     // Forward Drive to Neutral Drive
     printf("\n\rTesting: Forward Drive -> Neutral Drive\n\r");
     goToForwardDrive();
-    forwardGear = false;
-    neutralGear = true;
-    reverseGear = false;
+    gear = NEUTRAL_GEAR;
+    stateBuffer();
 
     // Forward Drive to Reverse Drive
-    printf("\n\rTesting: Reverse Drive -> Forward Drive\n\r");
-    goToReverseDrive();
-    forwardGear = false;
-    neutralGear = false;
-    reverseGear = true;
+    printf("\n\rTesting: Forward Drive -> Reverse Drive\n\r");
+    goToForwardDrive();
+    gear = REVERSE_GEAR;
     velocityObserved = 35;
     stateBuffer();
     velocityObserved = 5;
@@ -211,18 +205,17 @@ void Task1(void *arg)
     printf("\n\rTesting: Neutral Drive -> Forward Drive\n\r");
     goToNeutralDrive();
     velocityObserved = 5;
-    forwardGear = true;
-    neutralGear = false;
-    reverseGear = false;
+    gear = FORWARD_GEAR;
     stateBuffer();
 
     // Neutral Drive to Reverse Drive
     printf("\n\rTesting: Neutral Drive -> Reverse Drive\n\r");
     goToNeutralDrive();
     velocityObserved = 5;
-    forwardGear = false;
-    neutralGear = false;
-    reverseGear = true;
+    gear = REVERSE_GEAR;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
     stateBuffer();
 
     /**
@@ -242,50 +235,64 @@ void Task1(void *arg)
     // Reverse Drive to Neutral Drive
     printf("\n\rTesting: Reverse Drive -> Neutral Drive\n\r");
     goToReverseDrive();
-    forwardGear = false;
-    neutralGear = true;
-    reverseGear = false;
+    velocityObserved = 35;
+    gear = NEUTRAL_GEAR;
     stateBuffer();
 
     // Reverse Drive to Forward Drive
     printf("\n\rTesting: Reverse Drive -> Forward Drive\n\r");
     goToReverseDrive();
-    forwardGear = true;
-    neutralGear = false;
-    reverseGear = false;
+    gear = FORWARD_GEAR;
     velocityObserved = 35;
     stateBuffer();
     velocityObserved = 5;
     stateBuffer();
 
-    /**
-     * ======= One Pedal Drive ==========
+      /**
+     * ======= Record Velocity ==========
      * State Transitions: 
-     * Brake, Neutral Drive, Forward Drive
+     * Brake State, Neutral, One Pedal, Forward Drive, Powered Cruise
     */
+    printf("\n\r============ Testing Record Velocity State ============\n\r");
 
-    printf("\n\r============ Testing One Pedal Drive State ============\n\r");
-
-    // One Pedal Drive to Brake
-    printf("\n\rTesting: One Pedal Drive -> Brake\n\r");
-    goToOnePedalDrive();
+    // Record Velocity to Brake State
+    printf("\n\rTesting: Record Velocity -> Brake\n\r");
+    goToRecordVelocity();
     brakePedalPercent = 15;
     stateBuffer();
 
-    // One Pedal Drive to Neutral Drive
-    printf("\n\rTesting: One Pedal Drive -> Neutral Drive\n\r");
-    goToOnePedalDrive();
-    forwardGear = false;
-    neutralGear = true;
-    reverseGear = false;
+    // Record Velocity to Neutral Drive
+    printf("\n\rTesting: Record Velocity -> Brake\n\r");
+    goToRecordVelocity();
+    gear = NEUTRAL_GEAR;
     stateBuffer();
 
-    // One Pedal Drive to Forward Drive
-    printf("\n\rTesting: One Pedal Drive -> Forward Drive\n\r");
-    goToOnePedalDrive();
-    forwardGear = true;
-    neutralGear = false;
-    reverseGear = false;
+    // Record Velocity to Reverse Drive
+    printf("\n\rTesting: Record Velocity -> Reverse Drive\n\r");
+    goToRecordVelocity();
+    gear = REVERSE_GEAR;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
+    stateBuffer();
+
+    // Record Velocity to One Pedal Drive
+    printf("\n\rTesting: Record Velocity -> One Pedal Drive\n\r");
+    goToRecordVelocity();
+    onePedalEnable = true;
+    stateBuffer();
+
+    // Record Velocity to Forward Normal Drive
+    printf("\n\rTesting: Record Velocity -> Forward Drive\n\r");
+    goToRecordVelocity();
+    cruiseEnable = false;
+    stateBuffer();
+    
+    // Record Velocity to Powered Cruise
+    printf("\n\rTesting: Record Velocity -> Powered Cruise\n\r");
+    goToRecordVelocity();
+    cruiseEnable = true;
+    cruiseSet = false;
     stateBuffer();
 
     /**
@@ -304,9 +311,16 @@ void Task1(void *arg)
     // Powered Cruise to Neutral Drive
     printf("\n\rTesting: Powered Cruise -> Neutral Drive\n\r");
     goToPoweredCruise();
-    forwardGear = false;
-    neutralGear = true;
-    reverseGear = false;
+    gear = NEUTRAL_GEAR;
+    stateBuffer();
+
+    // Powered Cruise to Reverse Drive
+    printf("\n\rTesting: Powered Cruise -> Reverse Drive\n\r");
+    goToPoweredCruise();
+    gear = REVERSE_GEAR;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
     stateBuffer();
 
     // Powered Cruise to One Pedal Drive
@@ -325,7 +339,6 @@ void Task1(void *arg)
     printf("\n\rTesting: Powered Cruise -> Record Velocity\n\r");
     goToPoweredCruise();
     cruiseSet = true;
-    cruiseEnable = true;
     stateBuffer();
 
     // Powered Cruise to Accelerate Cruise
@@ -358,9 +371,16 @@ void Task1(void *arg)
     // Coasting Cruise to Neutral Drive
     printf("\n\rTesting: Coasting Cruise -> Neutral Drive\n\r");
     goToCoastingCruise();
-    forwardGear = false;
-    neutralGear = true;
-    reverseGear = false;
+    gear = NEUTRAL_GEAR;
+    stateBuffer();
+
+    // Coasting Cruise to Reverse Drive
+    printf("\n\rTesting: Coasting Cruise -> Reverse Drive\n\r");
+    goToCoastingCruise();
+    gear = REVERSE_GEAR;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
     stateBuffer();
 
     // Coasting Cruise to One Pedal Drive
@@ -379,7 +399,7 @@ void Task1(void *arg)
     printf("\n\rTesting: Coasting Cruise -> Record Velocity\n\r");
     goToCoastingCruise();
     cruiseSet = true;
-    cruiseEnable = true;
+    velocityObserved = 25.0;
     stateBuffer();
 
     // Coasting Cruise to Accelerate Cruise
@@ -395,61 +415,6 @@ void Task1(void *arg)
     cruiseVelSetpoint = 30;
     stateBuffer();
 
-   /**
-     * ======= Brake State ==========
-     * State Transitions: 
-     * Brake Disable State
-    */
-    printf("\n\r============ Testing Brake State ============\n\r");
-
-
-    // Brake State to One Pedal Drive
-    goToBrakeState();
-    brakePedalPercent = 0;
-    stateBuffer();
-   
-   /**
-     * ======= Record Velocity ==========
-     * State Transitions: 
-     * Brake State, Powered Cruise, Normal Drive
-    */
-    printf("\n\r============ Testing Record Velocity State ============\n\r");
-
-    // Record Velocity to Brake State
-    goToRecordVelocity();
-    brakePedalPercent = 15;
-    stateBuffer();
-
-    // Record Velocity to Powered Cruise
-    goToRecordVelocity();
-    cruiseEnable = true;
-    cruiseSet = false;
-    stateBuffer();
-
-    // Record Velocity to Normal Drive
-    goToRecordVelocity();
-    cruiseEnable = false;
-    stateBuffer();
-
-    /**
-     * ======= One Pedal Drive ==========
-     * State Transitions: 
-     * One Pedal Disable, Brake State
-    */
-    printf("\n\r============ Testing One Pedal Drive State ============\n\r");
-
-    // One Pedal Drive to One Pedal Disable
-    goToOnePedalDrive();
-    onePedalEnable = false;
-    regenEnable = false;
-    cruiseEnable = true;
-    stateBuffer();
-
-    // One Pedal Drive to Brake State
-    goToOnePedalDrive();
-    brakePedalPercent = 15;
-    stateBuffer();
-
     /**
      * ======= Accelerate Cruise State ==========
      * State Transitions: 
@@ -457,14 +422,115 @@ void Task1(void *arg)
     */
     printf("\n\r============ Testing Accelerate Cruise State ============\n\r");
 
+    // Accelerate Cruise to Brake State
+    printf("\n\rTesting: Accelerate Cruise -> Brake\n\r");
+    goToOnePedalDrive();
+    brakePedalPercent = 15;
+    stateBuffer();
+
+    // Accelerate Cruise to Neutral Drive
+    printf("\n\rTesting: Accelerate Cruise -> Nuetral Drive\n\r");
+    goToOnePedalDrive();
+    gear = NEUTRAL_GEAR;
+    stateBuffer();
+
+    // Accelerate Cruise to Reverse Drive
+    printf("\n\rTesting: Accelerate Cruise -> Reverse Drive\n\r");
+    goToOnePedalDrive();
+    gear = REVERSE_GEAR;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
+    stateBuffer();
+
+    // Accelerate Cruise to One Pedal Drive
+    printf("\n\rTesting: Accelerate Cruise -> One Pedal Drive\n\r");
+    goToOnePedalDrive();
+    onePedalEnable = true;
+    stateBuffer();
+
+    // Accelerate Cruise to Normal Drive
+    printf("\n\rTesting: Accelerate Cruise -> Forward Normal Drive\n\r");
+    goToOnePedalDrive();
+    cruiseEnable = false;
+    stateBuffer();
+
+    // Accelerate Cruise to Record Velocity
+    printf("\n\rTesting: Accelerate Cruise -> Record Velocity\n\r");
+    goToOnePedalDrive();
+    cruiseSet = true;
+    velocityObserved = 25.0;
+    stateBuffer();
+
     // Accelerate Cruise to Coasting Cruise
+    printf("\n\rTesting: Accelerate Cruise -> Coasting Cruise\n\r");
     goToCoastingCruise();
     accelPedalPercent = 0;
     stateBuffer();
 
-    // Accelerate Cruise to Brake States
+    /**
+     * ======= One Pedal Drive ==========
+     * State Transitions: 
+     * Brake, Neutral Drive, Forward Drive
+    */
+
+    printf("\n\r============ Testing One Pedal Drive State ============\n\r");
+
+    // One Pedal Drive to Brake
+    printf("\n\rTesting: One Pedal Drive -> Brake\n\r");
     goToOnePedalDrive();
     brakePedalPercent = 15;
+    stateBuffer();
+
+    // One Pedal Drive to Neutral Drive
+    printf("\n\rTesting: One Pedal Drive -> Neutral Drive\n\r");
+    gear = NEUTRAL_GEAR;
+    stateBuffer();
+
+    // One Pedal Drive to Reverse Drive
+    printf("\n\rTesting: One Pedal Drive -> Reverse Drive\n\r");
+    gear = NEUTRAL_GEAR;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
+    stateBuffer();
+
+    // One Pedal Drive to Record Velocity
+    printf("\n\rTesting: One Pedal Drive -> Record Velocity\n\r");
+    cruiseSet = true;
+    cruiseEnable = true;
+    velocityObserved = 25.0;
+    stateBuffer();
+
+   /**
+     * ======= Brake State ==========
+     * State Transitions: 
+     * Brake Disable State
+    */
+    printf("\n\r============ Testing Brake State ============\n\r");
+
+    // Brake State to Forward Drive
+    printf("\n\rTesting: Brake -> Forward Drive\n\r");
+    goToBrakeState();
+    brakePedalPercent = 1;
+    gear = FORWARD_GEAR;
+    stateBuffer();
+
+    // Brake State to Neutral Drive
+    printf("\n\rTesting: Brake -> Neutral Drive\n\r");
+    goToBrakeState();
+    brakePedalPercent = 1;
+    gear = NEUTRAL_GEAR;
+    stateBuffer();
+
+    // Brake State to Reverse Drive
+    printf("\n\rTesting: Brake -> Reverse Drive\n\r");
+    goToBrakeState();
+    brakePedalPercent = 1;
+    gear = REVERSE_GEAR;
+    velocityObserved = 35;
+    stateBuffer();
+    velocityObserved = 5;
     stateBuffer();
 
     while (1){

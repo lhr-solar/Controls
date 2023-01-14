@@ -227,13 +227,6 @@ static void readInputs(){
     // Get observed velocity
     velocityObserved = Motor_Velocity_Get();
 }
-
-/**
- * @brief Send regular messages to display
-*/
-static void sendDisplay(){
-    UpdateDisplay_SetAccel(accelPedalPercent);
-}
 #endif
 
 // Helper Functions
@@ -601,7 +594,7 @@ void Task_SendTritium(void *p_arg){
         state.stateHandler();    // do what the current state does
         #ifndef __TEST_SENDTRITIUM
         readInputs();   // read inputs from the system
-        sendDisplay();
+        UpdateDisplay_SetAccel(accelPedalPercent);
         #endif
         state.stateDecider();    // decide what the next state is
 
