@@ -3,6 +3,30 @@
 #include <stdbool.h>
 #include "BSP_GPIO.h"
 
+#define FOREACH_PIN(PIN) \
+        // inputs
+        PIN(IGN_1)   \
+        PIN(IGN_2)  \
+        PIN(REGEN_SW)   \
+        PIN(FOR_SW)  \
+        PIN(REV_SW)  \
+        PIN(CRUZ_EN)  \
+        PIN(CRUZ_ST)  \
+        // outputs
+        PIN(BRAKELIGHT)  \
+        // num of pins
+        PIN(MINIONPIN_NUM)  \
+
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+typedef enum PIN_e {
+    FOREACH_PIN(GENERATE_ENUM)
+}MinionPin_t;
+
+static const char *PIN_STRING[] = {
+    FOREACH_PIN(GENERATE_STRING)
+};
 
 //errors bc ur bad
 typedef enum{
@@ -34,22 +58,6 @@ typedef struct PinInfo{
     port_t port;
     direction_t direction; //0 for input, 1 for output     
 } PinInfo_t;
-
-
-char* MSWITCH_STRING[] = {
-    //inputs
-    [IGN_1] = "IGN_1",
-    [IGN_2] = "IGN_2",
-    [REGEN_SW] = "REGEN_SW",
-    [FOR_SW] = "FOR_SW",
-    [REV_SW] = "REV_SW",
-    [CRUZ_EN] = "CRUZ_EN",
-    [CRUZ_ST] = "CRUZ_ST",
-    //output
-    [BRAKELIGHT] = "BRAKELIGHT", 
-    //num of pins
-    [MINIONPIN_NUM] = "MINIONPIN_NUM"
-};
 
 
 /**

@@ -25,7 +25,7 @@ extern char* OS_LOC_STRING[];
 
 
 void Task_DebugDump(void* p_arg) {
-    //OS_ERR err;
+    // OS_ERR err;
     Minion_Error_t mErr;
 
 
@@ -37,8 +37,8 @@ void Task_DebugDump(void* p_arg) {
     printf("BRAKE: %d", brakePedal);
 
 
-    // Get minion switch information
-    for(MinionPin_t swtch = 0; swtch < MINIONPIN_NUM; swtch++){
+    // Get minion information
+    for(MinionPin_t pin = 0; pin < MINIONPIN_NUM; pin++){
         bool switchState = Minion_Read_Input(swtch, &mErr) == true ? true : false;
         printf("%s: %d", MSWITCH_STRING[swtch],switchState);
     }
