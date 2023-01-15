@@ -25,37 +25,27 @@ extern char* OS_LOC_STRING[];
 
 
 void Task_DebugDump(void* p_arg) {
-    // OS_ERR err;
-    Minion_Error_t mErr;
-
+    OS_ERR err;
+    // Minion_Error_t mErr;
 
     // Get pedal information
     int8_t accelPedal = Pedals_Read(ACCELERATOR);
-    printf("ACCELERATOR: %d", accelPedal);
+    printf("ACCELERATOR: %d\n", accelPedal);
 
     int8_t brakePedal = Pedals_Read(BRAKE);
-    printf("BRAKE: %d", brakePedal);
-
+    printf("BRAKE: %d\n", brakePedal);
 
     // Get minion information
-    for(MinionPin_t pin = 0; pin < MINIONPIN_NUM; pin++){
-        bool switchState = Minion_Read_Input(swtch, &mErr) == true ? true : false;
-        printf("%s: %d", MSWITCH_STRING[swtch],switchState);
+    for(MinionPin_t pin = 0; pin < MINIONPIN_NUM-1; pin++){ // Plan to change MINIONPIN_NUM-1 -> MINIONPIN_NUM after Minion function is fixed
+        bool pinState = Minion_Read_Input(pin, &mErr);
+        printf("%s: %d\n", MINIONPIN_STRING[pin], pinState);
     }
 
-
-    // // Get minion light information(reading from an ouput-an error for this function 'Minion_Read_Input')
-    // bool light_info = (bool)Minion_Read_Input(BRAKELIGHT, &mErr);
-    // testStr = "BRAKELIGHT: %d",light_info;
-    // BSP_UART_Write(UART_3, (char*) testStr , strlen(testStr));
-
-
-    // Get contactor info   
-    for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-        bool switchState = Contactors_Get(contactor) == true ? true : false;
-        printf("%s: %d", CONTACTOR_STRING[contactor], switchState);
+    // Get contactor info
+    for(contactor_t contactor = 0; contactor < CONTACTOR_NUM; contactor++){
+        bool contactorState = Contactors_Get(contactor) == ON ? true : false;
+        printf("%s: %d\n", CONTACTOR_STRING[contactor], contactorState);
     } 
-
 
     //FaultState and errlocbitmap    
     printf("FaultBitmap: %s", FAULT_BITMAP_STRING[FaultBitmap]);  //*what is this
@@ -78,4 +68,10 @@ void Task_DebugDump(void* p_arg) {
 
     //UpdateDisplay Globals
     printf("msg_queue: %d", msg_queue);  //*what is this
+
+    // Delay of 5 seconds (100)
+    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    if (err != OS_ERR_NONE){
+        assertOSError(OS_UPDATE_VEL_LOC, err);
+    }
 }

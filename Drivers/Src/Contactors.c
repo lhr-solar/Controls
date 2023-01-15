@@ -9,7 +9,7 @@
 struct contactor {
     bool enabled;
 };
-static struct contactor contactors[NUM_CONTACTORS];
+static struct contactor contactors[CONTACTOR_NUM];
 static OS_MUTEX contactorsMutex;
 
 /**
