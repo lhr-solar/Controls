@@ -4,6 +4,9 @@
 
 int main(void){
     BSP_UART_Init(UART_2);
-    BSP_UART_Write(UART_2, "Hello World!\r", 14);
+    while(1){
+        BSP_UART_Write(UART_2, "Hello World!\n", 14);
+        for(int i = 0; i < 999999999; i++){}
+    }
     return 0;
 }
