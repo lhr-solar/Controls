@@ -1,4 +1,5 @@
 mach create
 machine LoadPlatformDescription @../Controls/Renode/stm32f413.repl
 sysbus LoadELF @../Controls/Objects/controls-leader.elf
+logLevel 3
 uart_connect sysbus.usart2
