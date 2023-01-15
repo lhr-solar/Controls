@@ -1,3 +1,15 @@
+$bin?=@controls-leader.elf
+
 mach create
-machine LoadPlatformDescription @../Controls/Renode/stm32f413.repl
-sysbus LoadELF @../Controls/Objects/controls-leader.elf
+machine LoadPlatformDescription @stm32f413.repl
+sysbus LoadELF @controls-leader.elf
+logLevel 3
+
+showAnalyzer sysbus.usart2
+
+macro reset
+"""
+    sysbus LoadELF $bin
+"""
+
+runMacro $reset
