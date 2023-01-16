@@ -38,7 +38,7 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-#ifdef __TEST_SENDTRITIUM
+#ifndef __TEST_SENDTRITIUM
 #define STATIC(def) static def
 #else
 #define STATIC(def) def
@@ -63,10 +63,10 @@ float cruiseVelSetpoint = 0;
 // Current observed velocity
 STATIC(float) velocityObserved = 0;
 
+#ifndef __TEST_SENDTRITIUM
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 
-#ifndef __TEST_SENDTRITIUM
 // Debouncing counters
 static uint8_t onePedalCounter = 0;
 static uint8_t cruiseEnableCounter = 0;
@@ -101,26 +101,6 @@ static void OnePedalDriveDecider(void);
 static void AccelerateCruiseHandler(void);
 static void AccelerateCruiseDecider(void);
 
-// State Names
-typedef enum{
-    FORWARD_DRIVE,
-    NEUTRAL_DRIVE,
-    REVERSE_DRIVE,
-    RECORD_VELOCITY,
-    POWERED_CRUISE,
-    COASTING_CRUISE,
-    BRAKE_STATE,
-    ONEPEDAL,
-    ACCELERATE_CRUISE
-} TritiumStateName_t;
-
-// State Struct for FSM
-typedef struct TritiumState{
-    TritiumStateName_t name;
-    void (*stateHandler)(void);
-    void (*stateDecider)(void);
-} TritiumState_t;
-
 // FSM
 static const TritiumState_t FSM[9] = {
     {FORWARD_DRIVE, &ForwardDriveHandler, &ForwardDriveDecider},
@@ -135,25 +115,62 @@ static const TritiumState_t FSM[9] = {
 };
 
 static TritiumState_t prevState; // Previous state
-static TritiumState_t state; // Current state
+STATIC(TritiumState_t) state; // Current state
 
 /**
  * @brief Dumps info to UART during testing
 */
 #ifdef __TEST_SENDTRITIUM
+static void getName(char* nameStr, uint8_t stateNameNum){
+    switch(stateNameNum){
+        case FORWARD_DRIVE:
+            strcpy(nameStr, "FORWARD_DRIVE");
+            break;
+        case NEUTRAL_DRIVE:
+            strcpy(nameStr, "NEUTRAL_DRIVE");
+            break;
+        case REVERSE_DRIVE:
+            strcpy(nameStr, "REVERSE_DRIVE");
+            break;
+        case RECORD_VELOCITY:
+            strcpy(nameStr, "RECORD_VELOCITY");
+            break;
+        case POWERED_CRUISE:
+            strcpy(nameStr, "POWERED_CRUISE");
+            break;
+        case COASTING_CRUISE:
+            strcpy(nameStr, "COASTING_CRUISE");
+            break;
+        case BRAKE_STATE:
+            strcpy(nameStr, "BRAKE_STATE");
+            break;
+        case ONEPEDAL:
+            strcpy(nameStr, "ONEPEDAL");
+            break;
+        case ACCELERATE_CRUISE:
+            strcpy(nameStr, "ACCELERATE_CRUISE");
+            break;
+        default:
+            strcpy(nameStr, "UNKNOWN");
+            break;
+    }
+    return;
+}
+
 static void dumpInfo(){
     printf("-------------------\n\r");
-    printf("State: %d\n\r", state);
+    char stateName[20];
+    getName(stateName, state.name);
+    printf("State: %s\n\r", stateName);
     printf("cruiseEnable: %d\n\r", cruiseEnable);
     printf("cruiseSet: %d\n\r", cruiseSet);
     printf("onePedalEnable: %d\n\r", onePedalEnable);
     printf("brakePedalPercent: %d\n\r", brakePedalPercent);
     printf("accelPedalPercent: %d\n\r", accelPedalPercent);
-    printf("reverseSwitch: %d\n\r", reverseSwitch);
-    printf("forwardSwitch: %d\n\r", forwardSwitch);
-    printf("currentSetpoint: %f\n\r", currentSetpoint);
-    printf("velocitySetpoint: %f\n\r", velocitySetpoint);
-    printf("velocityObserved: %f\n\r", velocityObserved);
+    printf("gear: %d\n\r", (uint8_t)gear);
+    printf("currentSetpoint: %4.2f\n\r", currentSetpoint);
+    printf("velocitySetpoint: %4.2f\n\r", velocitySetpoint);
+    printf("velocityObserved: %4.2f\n\r", velocityObserved);
     printf("-------------------\n\r");
 }
 #endif
@@ -284,7 +301,7 @@ static void ForwardDriveHandler(){
 */
 static void ForwardDriveDecider(){
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
-        state = FSM[BRAKE];
+        state = FSM[BRAKE_STATE];
     }else if(cruiseSet && cruiseEnable && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
     }else if(onePedalEnable){
@@ -316,7 +333,7 @@ static void NeutralDriveHandler(){
 */
 static void NeutralDriveDecider(){
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
-        state = FSM[BRAKE];
+        state = FSM[BRAKE_STATE];
     }else if(gear == FORWARD_GEAR && velocityObserved >= -MAX_GEARSWITCH_VELOCITY){
         state = FSM[FORWARD_DRIVE];
     }else if(gear == REVERSE_GEAR && velocityObserved <= MAX_GEARSWITCH_VELOCITY){
@@ -346,7 +363,7 @@ static void ReverseDriveHandler(){
 */
 static void ReverseDriveDecider(){
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
-        state = FSM[BRAKE];
+        state = FSM[BRAKE_STATE];
     }
     else if(gear == NEUTRAL_GEAR || gear == FORWARD_GEAR){
         state = FSM[NEUTRAL_DRIVE];
@@ -527,7 +544,7 @@ static void OnePedalDriveHandler(){
 static void OnePedalDriveDecider(){
     Minion_Error_t minion_err;
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
-        state = FSM[BRAKE];
+        state = FSM[BRAKE_STATE];
     }else if(cruiseSet && cruiseEnable && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
         Minion_Write_Output(BRAKELIGHT, false, &minion_err);
@@ -581,12 +598,14 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
+    #ifndef __TEST_SENDTRITIUM
     CANbus_Init(MOTORCAN);
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
         .data={0.0f, 0.0f},
     };
+    #endif
 
     while(1){
         prevState = state;

@@ -1,8 +1,8 @@
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
 
-#define MOTOR_MSG_PERIOD 100
-#define FSM_PERIOD 20
+#define MOTOR_MSG_PERIOD 500
+#define FSM_PERIOD 250
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
@@ -12,6 +12,27 @@ typedef enum{
 	REVERSE_GEAR
 } Gear_t;
 
+// State Names
+typedef enum{
+    FORWARD_DRIVE,
+    NEUTRAL_DRIVE,
+    REVERSE_DRIVE,
+    RECORD_VELOCITY,
+    POWERED_CRUISE,
+    COASTING_CRUISE,
+    BRAKE_STATE,
+    ONEPEDAL,
+    ACCELERATE_CRUISE
+} TritiumStateName_t;
+
+// State Struct for FSM
+typedef struct TritiumState{
+    TritiumStateName_t name;
+    void (*stateHandler)(void);
+    void (*stateDecider)(void);
+} TritiumState_t;
+
+#define __TEST_SENDTRITIUM
 #ifdef __TEST_SENDTRITIUM
 // Inputs
 extern bool cruiseEnable;
@@ -24,7 +45,7 @@ extern uint8_t accelPedalPercent;
 
 extern Gear_t gear;
 
-extern uint8_t state;
+extern TritiumState_t state;
 extern float velocityObserved;
 extern float cruiseVelSetpoint;
 #endif
