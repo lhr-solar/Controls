@@ -7,93 +7,7 @@
 #include "CAN_Queue.h"
 #include "FaultState.h"
 #include "os_cfg_app.h"
-
-// Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
-#define SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
-
-// timer delay constants
-#define CAN_WATCH_TMR_DLY_MS 500u
-#define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) //1000 for ms -> s conversion
-#define PRECHARGE_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
-
-// CAN watchdog timer variable
-static OS_TMR canWatchTimer;
-
-// prechargeDlyTimer
-static OS_TMR prechargeDlyTimer;
-
-// Array restart thread lock
-static OS_MUTEX arrayRestartMutex;
-static bool restartingArray = false;
-
-// NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
-// Indicates whether or not regenerative braking / charging is enabled.
-static bool regenEnable = false;
-
-// Saturation buffer variables
-static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
-static int chargeMsgSaturation = 0;
-static uint8_t oldestMsgIdx = 0;
-
-
-// Handler to turn array back on
-static void arrayRestart(void *p_tmr, void *p_arg); 
-
-
-// Getter function for regenEnable
-bool RegenEnable_Get() 
-{
-    return regenEnable;
-}
-
-
-/**
- * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
- * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
-*/
-static void updateSaturation(int8_t chargeMessage){
-    // Replace oldest message with new charge message and update index for oldest message
-    chargeMsgBuffer[oldestMsgIdx] = chargeMessage;
-    oldestMsgIdx = (oldestMsgIdx + 1) % SAT_BUF_LENGTH;
-
-    // Calculate the new saturation value by assigning weightings from 1 to buffer length
-    // in order of oldest to newest
-    int newSaturation = 0;
-    for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++){
-        newSaturation += chargeMsgBuffer[(oldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
-    }
-    chargeMsgSaturation = newSaturation;
-}
-
-// helper function to call if charging should be disabled
-static inline void chargingDisable(void) {
-    // mark regen as disabled
-    regenEnable = false;
-
-    //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
-    
-    // turn off the array contactor light
-    UpdateDisplay_SetArray(false);
-
-}
-
-// helper function to call if charging should be enabled
-static inline void chargingEnable(void) {
-    OS_ERR err;
-    CPU_TS ts;
-
-    // mark regen as enabled
-    regenEnable = true;
-
-    // check if we need to run the precharge sequence to turn on the array
-    bool shouldRestartArray = false;
-
-    OSMutexPend(&arrayRestartMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
-    // if the array is off and we're not already turning it on, start turning it on
+ing it on, start turning it on
     shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==OFF);
 
     // wait for precharge for array 
@@ -198,6 +112,92 @@ void Task_ReadCarCAN(void *p_arg)
     {
         
         //Get any message that BPS Sent us
+// Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
+#define SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
+
+// timer delay constants
+#define CAN_WATCH_TMR_DLY_MS 500u
+#define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) //1000 for ms -> s conversion
+#define PRECHARGE_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
+
+// CAN watchdog timer variable
+static OS_TMR canWatchTimer;
+
+// prechargeDlyTimer
+static OS_TMR prechargeDlyTimer;
+
+// Array restart thread lock
+static OS_MUTEX arrayRestartMutex;
+static bool restartingArray = false;
+
+// NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
+// Indicates whether or not regenerative braking / charging is enabled.
+static bool regenEnable = false;
+
+// Saturation buffer variables
+static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
+static int chargeMsgSaturation = 0;
+static uint8_t oldestMsgIdx = 0;
+
+
+// Handler to turn array back on
+static void arrayRestart(void *p_tmr, void *p_arg); 
+
+
+// Getter function for regenEnable
+bool RegenEnable_Get() 
+{
+    return regenEnable;
+}
+
+
+/**
+ * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
+ * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
+*/
+static void updateSaturation(int8_t chargeMessage){
+    // Replace oldest message with new charge message and update index for oldest message
+    chargeMsgBuffer[oldestMsgIdx] = chargeMessage;
+    oldestMsgIdx = (oldestMsgIdx + 1) % SAT_BUF_LENGTH;
+
+    // Calculate the new saturation value by assigning weightings from 1 to buffer length
+    // in order of oldest to newest
+    int newSaturation = 0;
+    for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++){
+        newSaturation += chargeMsgBuffer[(oldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
+    }
+    chargeMsgSaturation = newSaturation;
+}
+
+// helper function to call if charging should be disabled
+static inline void chargingDisable(void) {
+    // mark regen as disabled
+    regenEnable = false;
+
+    //kill contactors 
+    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
+    
+    // turn off the array contactor light
+    UpdateDisplay_SetArray(false);
+
+}
+
+// helper function to call if charging should be enabled
+static inline void chargingEnable(void) {
+    OS_ERR err;
+    CPU_TS ts;
+
+    // mark regen as enabled
+    regenEnable = true;
+
+    // check if we need to run the precharge sequence to turn on the array
+    bool shouldRestartArray = false;
+
+    OSMutexPend(&arrayRestartMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+    assertOSError(OS_READ_CAN_LOC,err);
+
+    // if the array is off and we're not already turn
         ErrorStatus status = CANbus_Read(&dataBuf,CAN_BLOCKING,CARCAN);  
         if(status != SUCCESS) {
             continue;
