@@ -630,7 +630,7 @@ void Task_SendTritium(void *p_arg){
         #else
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
             driveCmd.data[0] = currentSetpoint;
-            driveCmd.data[1] = velocitySetpoint;
+            driveCmd.data[4] = velocitySetpoint;
             CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
             motorMsgCounter = 0;
         }else{
