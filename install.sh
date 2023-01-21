@@ -3,10 +3,10 @@
 RED='\033[0;31m'
 NC='\033[0m'
 distro=$(cat /etc/issue)
-distro=${distro:0:4} #special case for arch linux
 
-if [ "$distro" = "Arch" ]; then
-sudo pacman -Sy arm-none-eabi-newlib stlink openocd arm-none-eabi-gdb --noconfirm
+if [ "${distro:0:4}" = "Arch" ]; then
+#special case for arch linux
+sudo pacman -Sy arm-none-eabi-newlib stlink openocd --noconfirm
 else
 # Compile code for the microcontroller
 echo -e "${RED}\nInstall Arm Toolchain...\n==================================\n${NC}"
