@@ -157,6 +157,13 @@ static void getName(char* nameStr, uint8_t stateNameNum){
     return;
 }
 
+static void print_float(float f) {
+    int n = (int) f;
+    f -= n;
+    f *= (10 << 2);
+    printf("%d.%d\n\r", n, (int) f);
+}
+
 static void dumpInfo(){
     printf("-------------------\n\r");
     char stateName[20];
@@ -168,9 +175,9 @@ static void dumpInfo(){
     printf("brakePedalPercent: %d\n\r", brakePedalPercent);
     printf("accelPedalPercent: %d\n\r", accelPedalPercent);
     printf("gear: %d\n\r", (uint8_t)gear);
-    printf("currentSetpoint: %4.2f\n\r", currentSetpoint);
-    printf("velocitySetpoint: %4.2f\n\r", velocitySetpoint);
-    printf("velocityObserved: %4.2f\n\r", velocityObserved);
+    printf("currentSetpoint: "); print_float(currentSetpoint);
+    printf("velocitySetpoint: "); print_float(velocitySetpoint);
+    printf("velocityObserved: "); print_float(velocityObserved);
     printf("-------------------\n\r");
 }
 #endif
