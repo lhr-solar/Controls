@@ -1,25 +1,51 @@
 #include "os.h"
 #include "CANbus.h"
 #include <stdio.h>
+#include "Tasks.h"
 
 //global variables
 static int velocity; 
 static CANDATA_t oldCD;
 //lookup table goes here
 static int ctr = 0;
-static 
+#define MS_TIME_DELAY_MS 100
 
+static OS_TCB Task1TCB;
+static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
-
-int main(void){
-    while(1){
+void Task1(void *arg)
+{
+    while (1)
+    {
+        OS_ERR err;
         CANDATA_t newCD;
-        CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); //returns data value into newCD
-        
+        CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD
 
-
-
+        OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 }
+    
+int main()
+{
+    OS_ERR err;
+    OSInit(&err);
 
+    // create tester thread
+    OSTaskCreate(
+        (OS_TCB *)&Task1TCB,
+        (CPU_CHAR *)"Task 1",
+        (OS_TASK_PTR)Task1,
+        (void *)NULL,
+        (OS_PRIO)12,
+        (CPU_STK *)Task1Stk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void *)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR *)&err);
+    assertOSError(OS_MAIN_LOC, err);
 
+    OSStart(&err);
+    }
