@@ -19,8 +19,17 @@ void Task1(void *arg)
     {
         OS_ERR err;
         CANDATA_t newCD;
-        CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD
-
+        ErrorStatus error = CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD
+        if (error == ERROR)
+        {
+            newCD = oldCD;
+        }
+        ++ctr;
+        if (ctr == 3)
+        { // send message to read canbus every 300 ms
+            ctr = 0;
+            CANbus_Send(newCD, CAN_NON_BLOCKING, MOTORCAN);
+        }
         OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 }
