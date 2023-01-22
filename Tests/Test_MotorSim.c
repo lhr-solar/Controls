@@ -9,6 +9,8 @@ static float total_accel;
 static CANDATA_t oldCD;
 //lookup table goes here
 static int ctr = 0;
+
+// Macros for calculation the velocity of the car
 #define MS_TIME_DELAY_MS 100
 #define TIME_DELAY_S (MS_TIME_DELAY_MS / 1000)
 #define DECELERATION 2.0
@@ -24,19 +26,23 @@ void Task1(void *arg)
         OS_ERR err;
         CANDATA_t newCD;
         ErrorStatus error = CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD
-        if (error == ERROR)
+        if (error == ERROR) // If there is no new value to read, use the old CAN data
         {
             newCD = oldCD;
         }
+
+        // Net acceleration is dependent on the torque from the motor (based on current), mass of the car, 
+        // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
         total_accel = ((/*force from LUT   /   */  CAR_MASS_KG) - DECELERATION);
         velocity += (total_accel * TIME_DELAY_S);
+
         ++ctr;
         if (ctr == 3)
         { // send message to read canbus every 300 ms
             ctr = 0;
             CANbus_Send(newCD, CAN_NON_BLOCKING, MOTORCAN);
         }
-        oldCD = newCD;
+        oldCD = newCD; // Update old CAN data to match most recent values received
         OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 }
