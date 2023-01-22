@@ -4,8 +4,8 @@
 #include "Tasks.h"
 
 //global variables
-static uint16_t velocity; 
-static int8_t total_accel;
+static float velocity; 
+static float total_accel;
 static CANDATA_t oldCD;
 //lookup table goes here
 static int ctr = 0;
@@ -36,6 +36,7 @@ void Task1(void *arg)
             ctr = 0;
             CANbus_Send(newCD, CAN_NON_BLOCKING, MOTORCAN);
         }
+        oldCD = newCD;
         OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 }
