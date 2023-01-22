@@ -4,11 +4,15 @@
 #include "Tasks.h"
 
 //global variables
-static int velocity; 
+static uint16_t velocity; 
+static int8_t total_accel;
 static CANDATA_t oldCD;
 //lookup table goes here
 static int ctr = 0;
 #define MS_TIME_DELAY_MS 100
+#define TIME_DELAY_S (MS_TIME_DELAY_MS / 1000)
+#define DECELERATION 2.0
+#define CAR_MASS_KG 270
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
@@ -24,6 +28,8 @@ void Task1(void *arg)
         {
             newCD = oldCD;
         }
+        total_accel = ((/*force from LUT   /   */  CAR_MASS_KG) - DECELERATION);
+        velocity += (total_accel * TIME_DELAY_S);
         ++ctr;
         if (ctr == 3)
         { // send message to read canbus every 300 ms
