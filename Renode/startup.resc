@@ -2,11 +2,6 @@ $bin?=@Objects/controls-leader.elf
 $BPS_bin?=@Renode/bpsSim.elf
 $platform?=@Renode/stm32f413.repl
 
-macro show_dispUart
-"""
-    showAnalyzer sysbus.usart3
-"""
-
 macro reset
 """
     sysbus LoadELF $bin
@@ -14,8 +9,14 @@ macro reset
 
 macro show_printUart
 """
-    emulation CreateServerSocketTerminal 1234 "uart-con" false
-    connector Connect sysbus.usart2 uart-con
+    emulation CreateServerSocketTerminal 49152 "debug-uart-con" false
+    connector Connect sysbus.usart2 debug-uart-con
+"""
+
+macro show_dispUart
+"""
+    emulation CreateServerSocketTerminal 49153 "disp-uart-con" false
+    connector Connect sysbus.usart3 disp-uart-con
 """
 
 set periphWriteHook """
@@ -44,15 +45,25 @@ elif(hex(offset) == "0x18cL"):
     print("\n")
 """
 
-mach create
-machine LoadPlatformDescription $platform
-sysbus LoadELF $bin
-logLevel 3
-using sysbus
-sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
 emulation CreateCANHub "carCan"
 emulation CreateCANHub "motorCan"
 
-runMacro $reset
+mach create "ctrl-leader"
+machine LoadPlatformDescription $platform
+sysbus LoadELF $bin
+logLevel 3
+sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
+runMacro $show_printUart
+connector Connect sysbus.can1 carCan
+connector Connect sysbus.can3 motorCan
 
+mach create "bps-sim"
+mach set "bps-sim"
+machine LoadPlatformDescription $platform
+sysbus LoadELF $BPS_bin
+logLevel 3
+sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
+connector Connect sysbus.can1 carCan
+
+mach set "ctrl-leader"
 

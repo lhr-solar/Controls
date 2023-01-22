@@ -2,6 +2,9 @@
 #include "CANbus.h"
 #include "CAN_Queue.h"
 #include "ReadCarCAN.h"
+#include "Contactors.h"
+#include "Display.h"
+#include "UpdateDisplay.h"
 
 static OS_TCB Task1_TCB;
 #define STACK_SIZE 128
@@ -12,8 +15,13 @@ void Task1(){
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-
+    Contactors_Init();
+    Contactors_Enable(ARRAY_CONTACTOR);
+    Contactors_Enable(MOTOR_CONTACTOR);
+    Contactors_Enable(ARRAY_PRECHARGE);
     CANbus_Init(CARCAN);
+    Display_Init();
+    UpdateDisplay_Init();
     BSP_UART_Init(UART_2);
     
     OSTaskCreate(
