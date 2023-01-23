@@ -3,10 +3,20 @@
 #include <stdio.h>
 #include "Tasks.h"
 
-//global variables
-static int velocity; 
+// Global variables
+static float velocity; 
+static float current; 
 static CANDATA_t oldCD;
-//lookup table goes here
+//static float force_motor;
+
+// Lookup table goes here
+int ForceLUT[];
+
+// Current to ForceLUT
+// force_motor = ForceLUT[current]; // uncomment + rename(if needed) when Lookup is merged 
+
+ 
+
 static int ctr = 0;
 #define MS_TIME_DELAY_MS 100
 
@@ -19,6 +29,14 @@ void Task1(void *arg)
     {
         OS_ERR err;
         CANDATA_t newCD;
+
+        // Velocity Measurement
+        current = newCD.data[0];
+        velocity = newCD.data[4];
+
+        // Lookup Table used here
+        ForceLUT 
+
         ErrorStatus error = CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD
         if (error == ERROR)
         {
