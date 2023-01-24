@@ -13,7 +13,7 @@ static int ctr = 0;
 static int forceLUTIndex;
 
 // ForceLUT Info for index calculations
-#define FORCELUT_SIZE 20               // change once force lut is merged
+#define FORCELUT_SIZE 20               // update once force lut is merged
 
 // Macros for calculation the velocity of the car
 #define MS_TIME_DELAY_MS 100
@@ -31,7 +31,6 @@ inline int currentPercentToIndex(float currentPercent, float sizeOfLUT){
 
 void Task1(void *arg)
 {
-    
     while (1)
     {
         OS_ERR err;
@@ -44,7 +43,7 @@ void Task1(void *arg)
         }
 
         // Parsing Measurements
-        velocity = newCD.data[0]; // RPM
+        velocity = newCD.data[0]; // m/s
         current = newCD.data[4]; // Percent from 0.0 to 1.0
         
 
