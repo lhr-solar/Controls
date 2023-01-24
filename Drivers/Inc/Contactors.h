@@ -27,6 +27,7 @@ typedef enum contactor_ENUM {
 }contactor_t;
 
 
+
 /**
  * @brief   Initializes contactors to be used
  *          in connection with the Motor and Array
@@ -46,9 +47,11 @@ State Contactors_Get(contactor_t contactor);
 /**
  * @brief   Sets the state of a specified contactor
  * @param   contactor the contactor (MOTOR/ARRAY)
+ * @param   state the state to set (ON/OFF)
+ * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, State state);
+ErrorStatus Contactors_Set(contactor_t contactor, State state, bool blocking);
 
 /**
  * @brief   Enable the specified contactor

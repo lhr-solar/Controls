@@ -4,6 +4,7 @@
 #include "Minions.h"
 #include "MotorController.h"
 #include "Contactors.h"
+#include "ReadCarCAN.h"
 #include <math.h>
 
 // REGEN_CURRENT AS A PERCENTAGE (DECIMAL NUMBER) OF MAX CURRENT
@@ -57,7 +58,7 @@ void Task_UpdateVelocity(void *p_arg)
         uint8_t accelPedalPercent = Pedals_Read(ACCELERATOR);
         uint8_t brakePedalPercent = Pedals_Read(BRAKE);
         State RegenSwitchState = Minion_Read_Input(REGEN_SW, &mErr);
-        RegenState = ((RegenSwitchState == ON) && (RegenEnable == ON)); //AND driver regen enable and system regen enable together to decide whether we are in regen brake mode
+        RegenState = ((RegenSwitchState == ON) && (RegenEnable_Get() == ON)); //AND driver regen enable and system regen enable together to decide whether we are in regen brake mode
 
         // Set the cruise state accordingly
         if (UpdateVel_ToggleCruise) {

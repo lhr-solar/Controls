@@ -89,7 +89,7 @@ void BSP_CAN1_Init() {
     CAN_InitStruct.CAN_AWUM = DISABLE;
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
-    CAN_InitStruct.CAN_TXFP = DISABLE;
+    CAN_InitStruct.CAN_TXFP = ENABLE;
     CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
@@ -140,6 +140,7 @@ void BSP_CAN1_Init() {
     if(NULL != gTxEnd[0]) {
         // Enable Tx Interrupts
         CAN_ITConfig(CAN1, CAN_IT_TME, ENABLE);
+        NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn; 
         NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
         NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
         NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -184,8 +185,8 @@ void BSP_CAN3_Init()
     CAN_InitStruct.CAN_AWUM = DISABLE;
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
-    CAN_InitStruct.CAN_TXFP = DISABLE;
-    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal; // TODO: change back to Normal after testing
+    CAN_InitStruct.CAN_TXFP = ENABLE;
+    CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
     /* CAN Baudrate = 125 KBps
