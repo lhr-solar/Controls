@@ -13,7 +13,7 @@ static int ctr = 0;
 static int forceLUTIndex;
 
 // ForceLUT Info for index calculations
-#define FORCELUT_SIZE 20               // update once force lut is merged
+#define FORCELUT_SIZE 20 // update once force lut is merged
 
 // Macros for calculation the velocity of the car
 #define MS_TIME_DELAY_MS 100
@@ -25,8 +25,8 @@ static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 // Helper function to convert from current to desired FORCELUT index
-inline int currentPercentToIndex(float currentPercent, float sizeOfLUT){
-        return ((int)(currentPercent*sizeOfLUT));
+inline int currentPercentToIndex(float currentPercent, float LUTSize){
+        return ((int)(currentPercent*LUTSize));
     }
 
 void Task1(void *arg)
@@ -49,8 +49,8 @@ void Task1(void *arg)
 
         // Lookup table goes here
         
-        forceLUTIndex = currentPercentToIndex(current, FORCELUT_SIZE); // Converts current to ForceLUTIndex
-       // motor_force = FORCELUT[forceLUTIndex];
+        forceLUTIndex = currentPercentToIndex(current, FORCELUT_SIZE); // Converts current to index for FORCELUT
+        // motor_force = FORCELUT[forceLUTIndex];
 
         // Net acceleration is dependent on the torque from the motor (based on current), mass of the car, 
         // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
