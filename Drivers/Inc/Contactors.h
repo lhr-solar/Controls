@@ -26,10 +26,6 @@ typedef enum contactor_ENUM {
     CONTACTOR_NUM,
 }contactor_t;
 
-static const char *CONTACTOR_STRING[] = {
-    FOREACH_contactor(GENERATE_STRING)
-};
-
 
 /**
  * @brief   Initializes contactors to be used

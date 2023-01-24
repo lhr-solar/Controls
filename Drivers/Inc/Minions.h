@@ -5,8 +5,7 @@
 
 // used to index into lookup table
 // if changed, PINS_LOOKARR should be changed in Minions.c
-#define FOREACH_MinionPin(MinionPin) \
-        // inputs
+#define FOREACH_MinionPin(PIN) \
         PIN(IGN_1)   \
         PIN(IGN_2)  \
         PIN(REGEN_SW)   \
@@ -14,7 +13,6 @@
         PIN(REV_SW)  \
         PIN(CRUZ_EN)  \
         PIN(CRUZ_ST)  \
-        // outputs
         PIN(BRAKELIGHT)  \
 
 #define GENERATE_ENUM(ENUM) ENUM,
@@ -24,10 +22,6 @@ typedef enum MINIONPIN_ENUM {
     FOREACH_MinionPin(GENERATE_ENUM)
     MINIONPIN_NUM,
 }MinionPin_t;
-
-static const char *MINIONPIN_STRING[] = {
-    FOREACH_MinionPin(GENERATE_STRING)
-};
 
 
 //errors bc ur bad
