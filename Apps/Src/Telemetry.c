@@ -50,7 +50,7 @@ void Task_Telemetry(void *p_arg){
 
         // Get contactor info
         carMsg.data[3] = 0;
-        for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
+        for(contactor_t contactor = 0; contactor < CONTACTOR_NUM; contactor++){
             bool contactorState = Contactors_Get(contactor) == ON ? true : false;
             carMsg.data[3] |= contactorState << contactor;
         }
