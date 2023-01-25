@@ -2,7 +2,12 @@
 
 RED='\033[0;31m'
 NC='\033[0m'
+distro=$(cat /etc/issue)
 
+if [ "${distro:0:4}" = "Arch" ]; then
+#special case for arch linux
+sudo pacman -Sy arm-none-eabi-newlib stlink openocd --noconfirm
+else
 # Compile code for the microcontroller
 echo -e "${RED}\nInstall Arm Toolchain...\n==================================\n${NC}"
 wget "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz?rev=95edb5e17b9d43f28c74ce824f9c6f10&hash=176C4D884DBABB657ADC2AC886C8C095409547C4" --show-progress &&
@@ -29,7 +34,7 @@ sudo apt-get -y install gdb-multiarch
 # Run make command and compile projects
 echo -e "${RED}\nInstall build-essential...\n==================================\n${NC}"
 sudo apt-get -y install build-essential
-
+fi
 # Make sure that necessary OS submodules are initialized
 if [ -d ".git" ]; then
     echo -e "${RED}\nUpdate and initialize submodules...\n==================================\n${NC}"
