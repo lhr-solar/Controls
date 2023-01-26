@@ -17,7 +17,6 @@ static int forceLUTIndex;
 
 // Macros for calculation the velocity of the car
 #define MS_TIME_DELAY_MS 100
-#define TIME_DELAY_S (MS_TIME_DELAY_MS / 1000)
 #define DECELERATION 2.0
 #define CAR_MASS_KG 270
 
@@ -26,8 +25,13 @@ static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 // Helper function to convert from current to desired FORCELUT index
 inline int currentPercentToIndex(float currentPercent, float LUTSize){
-        return ((int)(currentPercent*LUTSize));
-    }
+    return ((int)(currentPercent*LUTSize));
+}
+
+// Helper function to convert time delay from ms to s
+inline float millisToS(int timeInMS) {
+    return (((float)MS_TIME_DELAY_MS) / 1000);
+}
 
 void Task1(void *arg)
 {
@@ -55,7 +59,7 @@ void Task1(void *arg)
         // Net acceleration is dependent on the torque from the motor (based on current), mass of the car, 
         // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
         total_accel = ((/*force from LUT   /   */  CAR_MASS_KG) - DECELERATION);
-        velocity += (total_accel * TIME_DELAY_S);
+        velocity += (total_accel * millisToS(MS_TIME_DELAY_MS));
 
         ++ctr;
         if (ctr == 3)
