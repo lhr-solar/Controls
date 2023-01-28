@@ -65,13 +65,18 @@ void Task1(void *arg)
         }
         oldCD = newCD; // Update old CAN data to match most recent values received
         OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
+        assertOSError(OS_MAIN_LOC, err);
     }
 }
     
 int main()
 {
+    // Disable interrupts
+    __disable_irq();
+
     OS_ERR err;
     OSInit(&err);
+    assertOSError(OS_MAIN_LOC, err);
 
     // create tester thread
     OSTaskCreate(
@@ -90,5 +95,15 @@ int main()
         (OS_ERR *)&err);
     assertOSError(OS_MAIN_LOC, err);
 
+    // Enable interrupts
+    __enable_irq();
+
+    //start_OS
     OSStart(&err);
+    assertOSError(OS_MAIN_LOC, err);
+
+    while (1);
+
+    return 0;
+
     }
