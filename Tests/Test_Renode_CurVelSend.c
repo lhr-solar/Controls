@@ -19,7 +19,7 @@ int main(void){
     //velocity -> 735
     //current is a percentage -> 0 to 1 (current reaches its max in this loop [i = 1])
     for(i = 0; i <= 1; i += .02f){ //current
-        for(vel = -735; vel <= 735; vel += 50){
+        for(vel = -544; vel <= 544; vel += 50){
 
             memcpy(&message.data[0], &vel, sizeof(vel));
             memcpy(&message.data[4], &i, sizeof(i));         
