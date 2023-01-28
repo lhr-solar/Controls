@@ -18,7 +18,7 @@ static uint8_t forceLUTIndex = 0;
 // FORCELUT Size
 #define FORCELUT_SIZE 21 
 // Force Lookup Table: Indexed by Current%toIndex, returns a force applied by current % (in Newtons)
-const int FORCELUT[FORCELUT_SIZE] = {
+static const int FORCELUT[FORCELUT_SIZE] = {
     0,
     309,
     618,
@@ -49,7 +49,7 @@ const int FORCELUT[FORCELUT_SIZE] = {
 #define MAX_VELOCITY 20000.0f
 
 //linear acceleration used for velocity control mode
-static const int linear_accel = FORCELUT[20] / (CAR_MASS_KG * 5);
+static int linear_accel = FORCELUT[20]/(CAR_MASS_KG * 5);
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
