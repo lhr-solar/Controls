@@ -2,15 +2,17 @@
 #include "CANbus.h"
 #include <stdio.h>
 #include "Tasks.h"
+#include <math.h>
 
 // Global variables
-static float velocity; 
-static float current; 
-static float total_accel;
+static float setpointVelocity = 0.0f; 
+static float velocity = 0.0f;
+static float current = 0.0f; 
+static float total_accel = 0.0f;
 static CANDATA_t oldCD;
-static int ctr = 0;
-static float motor_force;
-static int forceLUTIndex;
+static uint8_t cycle_ctr = 0;
+static uint16_t motor_force = 0;
+static uint8_t forceLUTIndex = 0;
 
 // FORCE LUT 
 // FORCELUT Size
@@ -18,44 +20,43 @@ static int forceLUTIndex;
 // Force Lookup Table: Indexed by Current%toIndex, returns a force applied by current % (in Newtons)
 const int FORCELUT[FORCELUT_SIZE] = {
     0,
-    235,
-    471,
-    706,
-    941,
-    1176,
-    1412,
-    1647,
-    1882,
-    2118,
-    2353,
-    2588,
-    2824,
-    3059,
-    3294,
-    3529,
-    3765,
-    4000,
-    4235,
-    4471,
-    4706
+    309,
+    618,
+    926,
+    1235,
+    1544,
+    1853,
+    2162,
+    2471,
+    2779,
+    3088,
+    3397,
+    3706,
+    4015,
+    4324,
+    4632,
+    4941,
+    5250,
+    5559,
+    5868,
+    6176
 };
 
 // Macros for calculation the velocity of the car
 #define MS_TIME_DELAY_MS 100
 #define DECELERATION 2.0
 #define CAR_MASS_KG 270
+#define MAX_VELOCITY 20000.0f
+
+//linear acceleration used for velocity control mode
+static const int linear_accel = FORCELUT[20] / (CAR_MASS_KG * 5);
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 // Helper function to convert from current to desired FORCELUT index
 inline int currentPercentToIndex(float currentPercent){
-        return ((int)(currentPercent*FORCELUT_SIZE));
-    }
-
-// Helper function to convert time delay from ms to s
-inline float millisToS(int timeInMS) {
-    return (((float)MS_TIME_DELAY_MS) / 1000);
+    return ((int)(currentPercent*(FORCELUT_SIZE - 1)));
 }    
 
 void Task1(void *arg)
@@ -72,22 +73,48 @@ void Task1(void *arg)
         }
 
         // Parsing Measurements
-        velocity = newCD.data[0]; // m/s
-        current = newCD.data[4]; // Percent from 0.0 to 1.0
+        memcpy(&newCD.data[0], &setpointVelocity, sizeof setpointVelocity); // in RPM 
+        memcpy(&newCD.data[4], &current, sizeof current); // Percent from 0.0 to 1.0
         
-        
-        forceLUTIndex = currentPercentToIndex(current); // Converts current to index for FORCELUT
-        motor_force = FORCELUT[forceLUTIndex];
+        if (abs(setpointVelocity) == MAX_VELOCITY){
 
-        // Net acceleration is dependent on the force from the motor (based on current), mass of the car, 
-        // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
-        total_accel = ((motor_force / CAR_MASS_KG) - DECELERATION);
-        velocity += (total_accel * mmillisToS(MS_TIME_DELAY_MS));
+            forceLUTIndex = currentPercentToIndex(current); // Converts current to index for FORCELUT
+            motor_force = FORCELUT[forceLUTIndex];
 
-        ++ctr;
-        if (ctr == 3)
+            // Net acceleration is dependent on the force from the motor (based on current), mass of the car, 
+            // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
+            if (setpointVelocity < 0) {
+                total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
+            } else{
+                total_accel = ((float)(motor_force * -1) / CAR_MASS_KG + DECELERATION);
+            }
+
+            velocity += ((total_accel * MS_TIME_DELAY_MS) / 1000); //Divide by 1000 to turn into seconds from ms
+
+            // NEED TO RETURN VELOCITY AS PART OF NEWCD
+
+        } else {
+            setpointVelocity = ((setpointVelocity * WHEEL_DIAMETER * M_PI) / 60); // Converts setpointVelocity from RPM to m/s
+            
+            if (setpointVelocity > velocity){
+
+                velocity += ((float)(linear_accel * MS_TIME_DELAY_MS) / 1000); //Divide by 1000 to turn into seconds from ms
+
+            } else if (setpointVelocity < velocity){
+
+                velocity -= ((float)(linear_accel * MS_TIME_DELAY_MS) / 1000); //Divide by 1000 to turn into seconds from ms
+
+            }
+
+            // NEED TO RETURN VELOCITY AS PART OF NEWCD
+             
+        }
+
+
+        ++cycle_ctr;
+        if (cycle_ctr == 3)
         { // send message to read canbus every 300 ms
-            ctr = 0;
+            cycle_ctr = 0;
             CANbus_Send(newCD, CAN_NON_BLOCKING, MOTORCAN);
         }
         oldCD = newCD; // Update old CAN data to match most recent values received
@@ -133,4 +160,4 @@ int main()
 
     return 0;
 
-    }
+}
