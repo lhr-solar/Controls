@@ -27,8 +27,9 @@
 
 // Macros
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
-#define MIN_CRUISE_VELOCITY 20.0f // m/s
-#define MAX_GEARSWITCH_VELOCITY 8.0f // m/s
+
+#define MIN_CRUISE_VELOCITY mpsToRpm(20.0f) // rpm
+#define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
 #define BRAKE_PEDAL_THRESHOLD 5  // percent
 #define ACCEL_PEDAL_THRESHOLD 10 // percent
@@ -116,6 +117,21 @@ static const TritiumState_t FSM[9] = {
 
 static TritiumState_t prevState; // Previous state
 STATIC(TritiumState_t) state; // Current state
+
+// Helper Functions
+
+/**
+ * @brief Converts integer percentage to float percentage
+ * @param percent integer percentage from 0-100
+ * @returns float percentage from 0.0-1.0
+*/
+extern const float pedalToPercent[];
+static float percentToFloat(uint8_t percent){
+    if(percent > 100){
+        return 1.0f;
+    }
+    return pedalToPercent[percent];
+}
 
 /**
  * @brief Dumps info to UART during testing
@@ -249,24 +265,9 @@ static void readInputs(){
     cruiseEnablePrevious = cruiseEnableButton;
     
     // Get observed velocity
-    velocityObserved = Motor_Velocity_Get();
+    velocityObserved = Motor_RPM_Get();
 }
 #endif
-
-// Helper Functions
-
-/**
- * @brief Converts integer percentage to float percentage
- * @param percent integer percentage from 0-100
- * @returns float percentage from 0.0-1.0
-*/
-extern const float pedalToPercent[];
-static float percentToFloat(uint8_t percent){
-    if(percent > 100){
-        return 1.0f;
-    }
-    return pedalToPercent[percent];
-}
 
 /**
  * @brief Linearly map range of integers to another range of integers. 
@@ -285,6 +286,14 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
     else return ((out_max - in_max) * (input - in_min))/(out_min - in_min) + out_min;
 }
 
+/**
+ * @brief Meters per second to rpm conversion
+ * @param velocity_mps velocity in meters per second
+ * @returns rpm
+*/
+inline static float mpsToRpm(float velocity_mps){
+    return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
+}
 
 // State Handlers & Deciders
 
@@ -629,14 +638,16 @@ void Task_SendTritium(void *p_arg){
         dumpInfo();
         #else
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
-            driveCmd.data[0] = currentSetpoint;
-            driveCmd.data[4] = velocitySetpoint;
+            memcpy(&driveCmd.data[0], &currentSetpoint, sizeof(float));
+            memcpy(&driveCmd.data[4], &velocitySetpoint, sizeof(float));
             CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
             motorMsgCounter = 0;
         }else{
             motorMsgCounter++;
         }
         #endif
+
+        
 
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);

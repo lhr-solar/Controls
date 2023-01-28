@@ -12,8 +12,8 @@
 
 
 uint16_t Motor_FaultBitmap = T_NONE;
-static uint32_t Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
-static uint32_t Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
+static float Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
+static float Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
 
 /**
  * @brief Returns highest priority tritium error code
@@ -82,11 +82,14 @@ void Task_ReadTritium(void *p_arg){
 				}
 				
 				case VELOCITY:{
+                    memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+                    memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+
 					//Motor RPM is in bytes 0-3
-					Motor_RPM = *((uint32_t*)(&dataBuf.data[0]));
+					Motor_RPM = *((float*)(&dataBuf.data[0]));
 
 					//Car Velocity (in m/s) is in bytes 4-7
-					Motor_Velocity = *((uint32_t*)(&dataBuf.data[4]));
+					Motor_Velocity = *((float*)(&dataBuf.data[4]));
 					uint32_t Car_Velocity = Motor_Velocity;
 					
 					Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
@@ -117,10 +120,10 @@ void MotorController_Restart(void){
 }
 
 
-uint32_t Motor_RPM_Get(){ //getter function for motor RPM
+float Motor_RPM_Get(){ //getter function for motor RPM
 	return Motor_RPM;
 }
 
-uint32_t Motor_Velocity_Get(){ //getter function for motor velocity
+float Motor_Velocity_Get(){ //getter function for motor velocity
 	return Motor_Velocity;
 }
