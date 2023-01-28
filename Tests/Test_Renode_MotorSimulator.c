@@ -9,11 +9,36 @@ static float current;
 static float total_accel;
 static CANDATA_t oldCD;
 static int ctr = 0;
-//static float motor_force;
+static float motor_force;
 static int forceLUTIndex;
 
-// ForceLUT Info for index calculations
-#define FORCELUT_SIZE 20 // update once force lut is merged
+// FORCE LUT 
+// FORCELUT Size
+#define FORCELUT_SIZE 21 
+// Force Lookup Table: Indexed by Current%toIndex, returns a force applied by current % (in Newtons)
+const int FORCELUT[FORCELUT_SIZE] = {
+    0,
+    235,
+    471,
+    706,
+    941,
+    1176,
+    1412,
+    1647,
+    1882,
+    2118,
+    2353,
+    2588,
+    2824,
+    3059,
+    3294,
+    3529,
+    3765,
+    4000,
+    4235,
+    4471,
+    4706
+};
 
 // Macros for calculation the velocity of the car
 #define MS_TIME_DELAY_MS 100
@@ -24,14 +49,14 @@ static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 // Helper function to convert from current to desired FORCELUT index
-inline int currentPercentToIndex(float currentPercent, float LUTSize){
-    return ((int)(currentPercent*LUTSize));
-}
+inline int currentPercentToIndex(float currentPercent){
+        return ((int)(currentPercent*FORCELUT_SIZE));
+    }
 
 // Helper function to convert time delay from ms to s
 inline float millisToS(int timeInMS) {
     return (((float)MS_TIME_DELAY_MS) / 1000);
-}
+}    
 
 void Task1(void *arg)
 {
@@ -50,16 +75,14 @@ void Task1(void *arg)
         velocity = newCD.data[0]; // m/s
         current = newCD.data[4]; // Percent from 0.0 to 1.0
         
-
-        // Lookup table goes here
         
-        forceLUTIndex = currentPercentToIndex(current, FORCELUT_SIZE); // Converts current to index for FORCELUT
-        // motor_force = FORCELUT[forceLUTIndex];
+        forceLUTIndex = currentPercentToIndex(current); // Converts current to index for FORCELUT
+        motor_force = FORCELUT[forceLUTIndex];
 
-        // Net acceleration is dependent on the torque from the motor (based on current), mass of the car, 
+        // Net acceleration is dependent on the force from the motor (based on current), mass of the car, 
         // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
-        total_accel = ((/*force from LUT   /   */  CAR_MASS_KG) - DECELERATION);
-        velocity += (total_accel * millisToS(MS_TIME_DELAY_MS));
+        total_accel = ((motor_force / CAR_MASS_KG) - DECELERATION);
+        velocity += (total_accel * mmillisToS(MS_TIME_DELAY_MS));
 
         ++ctr;
         if (ctr == 3)
