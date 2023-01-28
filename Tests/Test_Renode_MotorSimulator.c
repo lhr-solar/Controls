@@ -82,7 +82,7 @@ void Task1(void *arg)
         // Net acceleration is dependent on the force from the motor (based on current), mass of the car, 
         // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
         total_accel = ((motor_force / CAR_MASS_KG) - DECELERATION);
-        velocity += (total_accel * mmillisToS(MS_TIME_DELAY_MS));
+        velocity += (total_accel * millisToS(MS_TIME_DELAY_MS));
 
         ++ctr;
         if (ctr == 3)
