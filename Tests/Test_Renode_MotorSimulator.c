@@ -42,11 +42,11 @@ static const int FORCELUT[FORCELUT_SIZE] = {
     6176
 };
 
-// Macros for calculation the velocity of the car
+// Macros for calculating the velocity of the car
 #define MS_TIME_DELAY_MS 100
-#define DECELERATION 2.0
+#define DECELERATION 2.0 // In m/s^2
 #define CAR_MASS_KG 270
-#define MAX_VELOCITY 20000.0f
+#define MAX_VELOCITY 20000.0f // rpm
 
 //linear acceleration used for velocity control mode
 static int linear_accel = FORCELUT[20]/(CAR_MASS_KG * 5);
@@ -73,8 +73,8 @@ void Task1(void *arg)
         }
 
         // Parsing Measurements
-        memcpy(&newCD.data[0], &setpointVelocity, sizeof setpointVelocity); // in RPM 
-        memcpy(&newCD.data[4], &current, sizeof current); // Percent from 0.0 to 1.0
+        memcpy(&setpointVelocity, &newCD.data[0], sizeof setpointVelocity); // in RPM 
+        memcpy(&current, &newCD.data[4], sizeof current); // Percent from 0.0 to 1.0
         
         if (abs(setpointVelocity) == MAX_VELOCITY){
 
