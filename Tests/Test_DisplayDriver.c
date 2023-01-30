@@ -82,62 +82,59 @@ int main()
 	err = Display_Init();
 	assertDisplayError(err);
 	delay();
+	while(1){
+		// Display the fault page
+		DisplayCmd_t pgCmd = {
+				.compOrCmd = "page",
+				.attr = NULL,
+				.op = NULL,
+				.numArgs = 1,
+				.argTypes = {true},
+				{{.num = FAULT}}};
+		err = Display_Send(pgCmd);
+		//assertDisplayError(err);
+		delay();
 
-	// Display the fault page
-	DisplayCmd_t pgCmd = {
-			.compOrCmd = "page",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 1,
-			.argTypes = {true},
-			{{.num = FAULT}}};
-	err = Display_Send(pgCmd);
-	//assertDisplayError(err);
-	delay();
+		// Display the info page
+		pgCmd = (DisplayCmd_t){
+				.compOrCmd = "page",
+				.attr = NULL,
+				.op = NULL,
+				.numArgs = 1,
+				.argTypes = {true},
+				{{.num = INFO}}};
+		err = Display_Send(pgCmd);
+		//assertDisplayError(err);
+		delay();
 
-	// Display the info page
-	pgCmd = (DisplayCmd_t){
-			.compOrCmd = "page",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 1,
-			.argTypes = {true},
-			{{.num = INFO}}};
-	err = Display_Send(pgCmd);
-	//assertDisplayError(err);
-	delay();
+		// Show the array icon
+		DisplayCmd_t toggleCmd = {
+				.compOrCmd = "vis",
+				.attr = NULL,
+				.op = NULL,
+				.numArgs = 2,
+				.argTypes = {STR_ARG, INT_ARG},
+				{{.str = compStrings[ARRAY]}, {.num = 1}}};
+		err = Display_Send(toggleCmd);
+		//assertDisplayError(err);
+		delay();
 
-	// Show the array icon
-	DisplayCmd_t toggleCmd = {
-			.compOrCmd = "vis",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 2,
-			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[ARRAY]}, {.num = 1}}};
-	err = Display_Send(toggleCmd);
-	//assertDisplayError(err);
-	delay();
+		// Don't show the array icon
+		toggleCmd = (DisplayCmd_t){
+				.compOrCmd = "vis",
+				.attr = NULL,
+				.op = NULL,
+				.numArgs = 2,
+				.argTypes = {STR_ARG, INT_ARG},
+				{{.str = compStrings[ARRAY]}, {.num = 0}}};
+		err = Display_Send(toggleCmd);
+		//assertDisplayError(err);
+		delay();
 
-	// Don't show the array icon
-	toggleCmd = (DisplayCmd_t){
-			.compOrCmd = "vis",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 2,
-			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[ARRAY]}, {.num = 0}}};
-	err = Display_Send(toggleCmd);
-	//assertDisplayError(err);
-	delay();
-
-	// Test the fault screen
-	os_error_loc_t osErrCode = 0x0420;
-	fault_bitmap_t faultCode = 0x69;
-	err = Display_Fault(osErrCode, faultCode);
-	//assertDisplayError(err);
-
-	while (1)
-	{
+		// Test the fault screen
+		os_error_loc_t osErrCode = 0x0420;
+		fault_bitmap_t faultCode = 0x69;
+		err = Display_Fault(osErrCode, faultCode);
+		//assertDisplayError(err);
 	}
 }
