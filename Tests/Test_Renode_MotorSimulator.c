@@ -10,6 +10,7 @@ static float velocity = 0.0f;
 static float current = 0.0f; 
 static float total_accel = 0.0f;
 static CANDATA_t oldCD;
+static CANDATA_t currCD; // CANmsg we will be sending
 static uint8_t cycle_ctr = 0;
 static uint16_t motor_force = 0;
 static uint8_t forceLUTIndex = 0;
@@ -40,15 +41,18 @@ static const int FORCELUT[FORCELUT_SIZE] = {
     5559,
     5868,
     6176
-};
+}; //TODO: Waiting for confirmation on newly calculated force values
 
+// CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
 #define MS_TIME_DELAY_MS 100
 #define DECELERATION 2.0 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
 
-//linear acceleration used for velocity control mode
+
+// VELOCITY CONTROL MODE
+// linear acceleration used for velocity control mode
 static int linear_accel = FORCELUT[20]/(CAR_MASS_KG * 5);
 
 static OS_TCB Task1TCB;
@@ -76,7 +80,9 @@ void Task1(void *arg)
         memcpy(&setpointVelocity, &newCD.data[0], sizeof setpointVelocity); // in RPM 
         memcpy(&current, &newCD.data[4], sizeof current); // Percent from 0.0 to 1.0
         
-        if (abs(setpointVelocity) == MAX_VELOCITY){
+        if (abs(setpointVelocity) == MAX_VELOCITY){ 
+
+            // CURRENT CONTROLLED MODE
 
             forceLUTIndex = currentPercentToIndex(current); // Converts current to index for FORCELUT
             motor_force = FORCELUT[forceLUTIndex];
@@ -86,14 +92,17 @@ void Task1(void *arg)
             if (setpointVelocity < 0) {
                 total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
             } else{
-                total_accel = ((float)(motor_force * -1) / CAR_MASS_KG + DECELERATION);
+                total_accel = ((float)(-motor_force) / CAR_MASS_KG + DECELERATION);
             }
 
             velocity += ((total_accel * MS_TIME_DELAY_MS) / 1000); //Divide by 1000 to turn into seconds from ms
 
-            // NEED TO RETURN VELOCITY AS PART OF NEWCD
+            // TODO: Return velocity as part of currCD
 
         } else {
+            
+            // VELOCITY CONTROLLED MODE
+
             setpointVelocity = ((setpointVelocity * WHEEL_DIAMETER * M_PI) / 60); // Converts setpointVelocity from RPM to m/s
             
             if (setpointVelocity > velocity){
@@ -106,7 +115,7 @@ void Task1(void *arg)
 
             }
 
-            // NEED TO RETURN VELOCITY AS PART OF NEWCD
+            // TODO: Return velocity as part of currCD
              
         }
 
