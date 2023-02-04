@@ -7,8 +7,11 @@ machine LoadPlatformDescription $platform
 using sysbus
 sysbus LoadELF $bin
 logLevel 3
-emulation CreateUartPtyTerminal "term" "/tmp/uart" true
-connector Connect sysbus.usart3 term
 
 mach set "ctrl-leader"
 
+machine StartGdbServer 3333
+
+start
+
+uart_connect sysbus.usart2
