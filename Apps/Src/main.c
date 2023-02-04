@@ -8,7 +8,6 @@
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
-#include "MotorController.h"
 #include "Pedals.h"
 #include "CAN_Queue.h"
 
@@ -71,7 +70,6 @@ void Task_Init(void *p_arg){
     // Initialize drivers
     Pedals_Init();
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-    MotorController_Init(1.0f); // Let motor controller use 100% of bus current
     OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     BSP_UART_Init(UART_2);
     CANbus_Init(CARCAN);
@@ -102,16 +100,16 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Initialize UpdateVelocity
+    // Initialize SendTritium
     OSTaskCreate(
-        (OS_TCB*)&UpdateVelocity_TCB,
-        (CPU_CHAR*)"UpdateVelocity",
-        (OS_TASK_PTR)Task_UpdateVelocity,
+        (OS_TCB*)&SendTritium_TCB,
+        (CPU_CHAR*)"SendTritium",
+        (OS_TASK_PTR)Task_SendTritium,
         (void*)NULL,
-        (OS_PRIO)TASK_UPDATE_VELOCITY_PRIO,
-        (CPU_STK*)UpdateVelocity_Stk,
+        (OS_PRIO)TASK_SEND_TRITIUM_PRIO,
+        (CPU_STK*)SendTritium_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_UPDATE_VELOCITY_STACK_SIZE,
+        (CPU_STK_SIZE)TASK_SEND_TRITIUM_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,

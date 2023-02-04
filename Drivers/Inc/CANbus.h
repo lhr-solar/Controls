@@ -27,7 +27,6 @@ typedef enum {
 	MOTOR_POWER						= 0x222,
 	MOTOR_RESET 					= 0x223,
 	MOTOR_STATUS 					= 0x241,
-	MOTOR_VELOCITY 					= 0x243,
 	MC_BUS 							= 0x242,
 	VELOCITY 						= 0x243,
 	MC_PHASE_CURRENT 				= 0x244,
@@ -71,8 +70,14 @@ typedef struct {
 
 /**
  * Standard identifier for whether or not a CAN transaction is blocking or not
+ * (DEPRECATED)
  */
-typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
+// typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
+
+//Compatibility macros for deprecated enum
+#define CAN_BLOCKING true
+#define CAN_NON_BLOCKING false
+
 
 /**
  * @brief   Initializes the CAN system for a given bus
@@ -88,7 +93,7 @@ ErrorStatus CANbus_Init(CAN_t bus);
  * @param  	bus			The bus to transmit on. This should be either CARCAN or MOTORCAN.
  * @return  ERROR if data wasn't sent, otherwise it was sent.
  */
-ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus);
+ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
 
 /**
  * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers.
@@ -97,6 +102,6 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus);
  * @param   bus 		The bus to use. This should either be CARCAN or MOTORCAN.
  * @returns ERROR if read failed, SUCCESS otherwise
  */
-ErrorStatus CANbus_Read(CANDATA_t* data, CAN_blocking_t blocking, CAN_t bus);
+ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
 
 #endif
