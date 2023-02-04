@@ -70,6 +70,8 @@ void Task_BlinkLight(void* p_arg);
 
 void Task_Contactor_Ignition(void* p_arg);
 
+void Task_CommandLine(void* p_arg);
+
 /**
  * TCBs
  */

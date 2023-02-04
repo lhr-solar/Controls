@@ -93,7 +93,7 @@ bool executeCommand(char *input) {
 }
 
 // *********** Command line (shell) ************
-void Task_CommandLine(void) { 
+void Task_CommandLine(void* p_arg) { 
 	OS_ERR err;
 
 	// output welcome/help screen
