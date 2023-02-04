@@ -100,7 +100,9 @@ void Task_CommandLine(void* p_arg) {
 	printf(help);
 	
 	while(1){
+		printf("> ");
 		BSP_UART_Read(UART_2, input);
+		printf("\n\r");
 
 		if (!executeCommand(input)) { // If command failed, error
 			printf("Bad cmd. Please try again\n\r");
@@ -125,7 +127,7 @@ static bool cmd_help(void) {
 static bool cmd_CANbus_Send(void){
 	char *data = strtok_r(NULL, " ", &save);
 	CANDATA_t msg = {.ID=0x0582, .idx=0};		// this would change in the future (don't assume char as data)
-	for(int i = 0; i < 8 || strlen(data); i++){
+	for(int i = 0; i < 8 && i < strlen(data); i++){
 		msg.data[i] = data[0];
 	}
 
@@ -154,6 +156,7 @@ static bool cmd_CANbus_Send(void){
 	}
 
 	CANbus_Send(msg, blocking, bus);
+	printf("msg sent on %s (%s)\n\r", "can", blockInput);
 	return true;
 }
 
@@ -184,10 +187,14 @@ static bool cmd_CANbus_Read(void){
 		return false;
 	}
 
-	CANbus_Read(&msg, blocking, bus);
-	printf("ID: %d, Data: ", msg.ID);
-	for(int i = 0; i < 8; i++){
-		printf("[%d] %x \n", i, msg.data[i]);
+	if(CANbus_Read(&msg, blocking, bus) == SUCCESS){
+		printf("msg recieved on %s (%s)\n\r", busInput, blockInput);
+		printf("ID: %d, Data: ", msg.ID);
+		for(int i = 0; i < 8; i++){
+			printf("[%d] %x \n\r", i, msg.data[i]);
+		}
+	}else{
+		printf("read failed on %s (%s)\n\r", busInput, blockInput);
 	}
 	return true;
 }
@@ -208,7 +215,7 @@ static bool cmd_Contactors_Get(void){
 		return false;
 	}
 
-	printf("State: %s\n", Contactors_Get(contactor) == ON ? "On" : "Off");
+	printf("%s state: %s\n", contactorInput, Contactors_Get(contactor) == ON ? "on" : "off");
 	return true;
 }
 
@@ -242,10 +249,10 @@ static bool cmd_Contactors_Set(void){
 
 	char *blockingInput = strtok_r(NULL, " ", &save);
 	bool blocking;
-	if(strcmp(blockingInput, "array_c") == 0){
+	if(strcmp(blockingInput, "blocking") == 0){
 		blocking = true;
 	}
-	else if(strcmp(blockingInput, "array_p") == 0){
+	else if(strcmp(blockingInput, "nonblocking") == 0){
 		blocking = false;
 	}
 	else{
@@ -253,6 +260,7 @@ static bool cmd_Contactors_Set(void){
 	}
 
 	Contactors_Set(contactor, state, blocking);
+	printf("%s set to %s (%s)\n\r", contactorInput, stateInput, blockingInput);
 	return true;
 }
 
@@ -273,6 +281,7 @@ static bool cmd_Contactors_Enable(void){
 	}
 
 	Contactors_Enable(contactor);
+	printf("%s enabled\n\r", contactorInput);
 	return true;
 }
 
@@ -293,6 +302,7 @@ static bool cmd_Contactors_Disable(void){
 	}
 
 	Contactors_Disable(contactor);
+	printf("%s disabled\n\r", contactorInput);
 	return true;
 }
 
@@ -328,7 +338,7 @@ static bool cmd_Minion_Read_Input(void){
 		return false;
 	}
 
-	Minion_Read_Input(pin, &err);
+	printf("%s is %s\n\r", pinInput, Minion_Read_Input(pin, &err) ? "on" : "off");
 	return true;
 }
 
@@ -356,6 +366,7 @@ static bool cmd_Minion_Write_Output(void){
 	}
 
 	Minion_Write_Output(pin, state, &err);
+	printf("%s set to %s\n\r", pinInput, stateInput);
 	return true;
 }
 
@@ -372,6 +383,6 @@ static bool cmd_Pedals_Read(void){
 		return false;
 	}
 
-	printf("%s: %d\n", pedalInput, Pedals_Read(pedal));
+	printf("%s: %d\n\r", pedalInput, Pedals_Read(pedal));
 	return true;
 }
