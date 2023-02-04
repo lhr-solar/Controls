@@ -19,9 +19,13 @@
  * (the enum is sorted in ascending order on purpose), and then add an entry to the lookup table.
  */
 typedef enum { 
-	CHARGE_ENABLE 					= 0x10C,
+	BPS_TRIP						= 0x002,
+	BPS_ALL_CLEAR					= 0x101,
+	BPS_CONTACTOR_STATE				= 0x102,
 	STATE_OF_CHARGE 				= 0x106,
+	WDOG_TRIGGERED					= 0x107,
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
+	CHARGE_ENABLE 					= 0x10C,
 	// CAR_STATE 						= 0x580,
 	MOTOR_DRIVE 					= 0x221,
 	MOTOR_POWER						= 0x222,

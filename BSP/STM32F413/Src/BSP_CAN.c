@@ -2,6 +2,7 @@
 #include "BSP_CAN.h"
 #include "stm32f4xx.h"
 #include "os.h"
+#include "CANbus.h"
 
 // The message information that we care to receive
 typedef struct _msg
@@ -15,6 +16,25 @@ typedef struct _msg
 #define FIFO_SIZE 25
 #define FIFO_NAME msg_queue
 #include "fifo.h"
+
+// Number of hardware filters to initialize
+#define NUM_HARDWARE_FILTERS 4
+// Number of CAN IDs we deem critical
+#define NUM_CRITICAL_CAN_IDS 7
+// Number of 16 bit registers in a filter
+#define NUM_FILTER_REGS 4
+
+// Critical CAN IDs
+const CANId_t CriticalIDs[NUM_CRITICAL_CAN_IDS] = {
+	BPS_TRIP,
+	BPS_ALL_CLEAR,
+	BPS_CONTACTOR_STATE,
+	CHARGE_ENABLE,
+	STATE_OF_CHARGE,
+	SUPPLEMENTAL_VOLTAGE,
+	TEMPERATURE
+};
+//return error if someone tries to call from motor can
 
 static msg_queue_t gRxQueue[2];
 
@@ -103,16 +123,34 @@ void BSP_CAN1_Init() {
     CAN_Init(CAN1, &CAN_InitStruct);
 
     /* CAN filter init */
-    CAN_FilterInitStruct.CAN_FilterNumber = 0;
-    CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
-    CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
-    CAN_FilterInitStruct.CAN_FilterIdHigh = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterIdLow = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
+    // initializes hardware filter banks to be used for filtering Car CAN IDs
+   
+    CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList; //list mode
+    CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_16bit;
     CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
     CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+    uint16_t* CANIDptr =(uint16_t*) &(CAN_FilterInitStruct); //address of CAN Filter Struct
+
+    for(uint8_t CANIDs = 0; CANIDs < NUM_CAN_IDS; CANIDs++){
+
+        CAN_FilterInitStruct.CAN_FilterNumber = CANIDs / NUM_FILTER_REGS; //determines filter number based on CAN ID
+        *(CANIDptr + (CANIDs%NUM_FILTER_REGS)) = CriticalIDs[CANIDs];
+
+        if(CANIDs % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_CilterInit()
+            CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+        }
+        
+        else if(CANIDs == NUM_CAN_IDS - 1){ //we are out of elements, call CAN_CilterInit()
+            for(uint8_t i = CANIDs%4 + 1; i <= NUM_FILTER_REGS - 1; i++)
+                *(CANIDptr + (i)) = 0x0000;
+
+            CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+        }
+    }
+
+/*
     CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+*/
 
     /* Transmit Structure preparation */
     gTxMessage[0].ExtId = 0x5;

@@ -3,6 +3,8 @@
 #include "os.h"
 #include "Tasks.h"
 
+#define NUM_FILTER_BANKS 4
+
 static OS_SEM CANMail_Sem4[NUM_CAN];       // sem4 to count how many sending hardware mailboxes we have left (start at 3)
 static OS_SEM CANBus_RecieveSem4[NUM_CAN]; // sem4 to count how many msgs in our recieving queue
 static OS_MUTEX CANbus_TxMutex[NUM_CAN];   // mutex to lock tx line
