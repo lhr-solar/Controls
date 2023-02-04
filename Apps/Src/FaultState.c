@@ -62,6 +62,7 @@ void EnterFaultState(void) {
             } else {
                 hall_fault_cnt++;
                 MotorController_Restart(); //re-initialize motor
+                FaultBitmap = FAULT_NONE; // Clearing entire bitmap because it can only hold one error
                 return;
             }
         }
@@ -102,6 +103,9 @@ void EnterFaultState(void) {
     }
     else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
         readBPS_ContactorHandler();
+
+        // Reset FaultBitmap since this is a recoverable fault
+        FaultBitmap = FAULT_NONE; // Clears everything because only one error can be set at a time
         return;
     }
     else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
@@ -114,6 +118,7 @@ void EnterFaultState(void) {
         } else {
             disp_fault_cnt++;
             Display_Reset();
+            FaultBitmap = FAULT_NONE; // Clearing bitmap is ok because it will only hold one error
             return;
         }
     }
