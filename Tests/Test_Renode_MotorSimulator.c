@@ -45,15 +45,25 @@ static const int FORCELUT[FORCELUT_SIZE] = {
 
 // CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
-#define MS_TIME_DELAY_MS 100
+#define MS_TIME_DELAY_MILSEC 100
 #define DECELERATION 2.0 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
 
 
 // VELOCITY CONTROL MODE
-// linear acceleration used for velocity control mode
-static int linear_accel = FORCELUT[20]/(CAR_MASS_KG * 5);
+//TODO: tune PID with actual pack and fans, and then change values below to appropiate value
+#define PROPORTION 1
+#define INTEGRAL 1
+#define DERIVATIVE 1
+#define MAX_RPM 179026 // 30m/s in RPM, decimal 2 places from right
+#define DIVISOR 10000
+// Variables to help with PID calculation
+static int32_t ErrorSum = 0;
+static int32_t Error;
+static int32_t Rate;
+static int32_t PreviousError = 0;
+
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
@@ -62,6 +72,29 @@ static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 inline int currentPercentToIndex(float currentPercent){
     return ((int)(currentPercent*(FORCELUT_SIZE - 1)));
 }    
+
+//
+float Velocity_PID_Output() {
+    Error = setpointVelocity - velocity;
+    ErrorSum = ErrorSum + Error;
+
+    if (PreviousError == 0) {PreviousError = Error;} //init previous val first time
+
+    Rate = (Error - PreviousError) / MS_TIME_DELAY_MILSEC;
+    PreviousError = Error;     //updates previous err value
+
+    if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) > MAX_RPM) {
+        return MAX_RPM;
+    }
+    else if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) < -MAX_RPM) {
+        return -MAX_RPM;
+    }
+    else {
+        return (PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR;
+    }
+
+}
+
 
 void Task1(void *arg)
 {
@@ -95,7 +128,7 @@ void Task1(void *arg)
                 total_accel = ((float)(-motor_force) / CAR_MASS_KG + DECELERATION);
             }
 
-            velocity += ((total_accel * MS_TIME_DELAY_MS) / 1000); //Divide by 1000 to turn into seconds from ms
+            velocity += ((total_accel * MS_TIME_DELAY_MILSEC) / 1000); //Divide by 1000 to turn into seconds from ms
 
             // TODO: Return velocity as part of currCD
 
@@ -103,17 +136,8 @@ void Task1(void *arg)
             
             // VELOCITY CONTROLLED MODE
 
-            setpointVelocity = ((setpointVelocity * WHEEL_DIAMETER * M_PI) / 60); // Converts setpointVelocity from RPM to m/s
+            velocity = Velocity_PID_Output(setpointVelocity);
             
-            if (setpointVelocity > velocity){
-
-                velocity += ((float)(linear_accel * MS_TIME_DELAY_MS) / 1000); //Divide by 1000 to turn into seconds from ms
-
-            } else if (setpointVelocity < velocity){
-
-                velocity -= ((float)(linear_accel * MS_TIME_DELAY_MS) / 1000); //Divide by 1000 to turn into seconds from ms
-
-            }
 
             // TODO: Return velocity as part of currCD
              
@@ -127,7 +151,7 @@ void Task1(void *arg)
             CANbus_Send(newCD, CAN_NON_BLOCKING, MOTORCAN);
         }
         oldCD = newCD; // Update old CAN data to match most recent values received
-        OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MILSEC, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
     }
 }
