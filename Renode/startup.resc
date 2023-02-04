@@ -1,0 +1,14 @@
+$bin?=@Objects/controls-leader.elf
+$BPS_bin?=@Renode/bpsSim.elf
+$platform?=@Renode/stm32f413.repl
+
+mach create "ctrl-leader"
+machine LoadPlatformDescription $platform
+using sysbus
+sysbus LoadELF $bin
+logLevel 3
+emulation CreateUartPtyTerminal "term" "/tmp/uart" true
+connector Connect sysbus.usart3 term
+
+mach set "ctrl-leader"
+
