@@ -122,12 +122,12 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	char soc[13];
-	sprintf(soc, "%s%d", "soc.val=", SOC_percent);
+	sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
 	BSP_UART_Write(DISP_OUT, soc, strlen(soc));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	char supp[18];
-	sprintf(supp, "%s\"%02x\"", "supp.val=", supp);
+	sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
 	BSP_UART_Write(DISP_OUT, supp, strlen(supp));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
