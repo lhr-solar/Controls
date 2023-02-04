@@ -93,6 +93,13 @@ void EnterFaultState(void) {
 
          */
     }
+    else if(FaultBitmap & FAULT_BPS){ // BPS has been tripped
+
+        /* TODO: set display to show BPS has been tripped */
+
+        nonrecoverableFaultHandler();
+        return;
+    }
     else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
         readBPS_ContactorHandler();
         return;

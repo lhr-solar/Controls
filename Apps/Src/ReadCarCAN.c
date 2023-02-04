@@ -197,6 +197,19 @@ void Task_ReadCarCAN(void *p_arg)
         }
 
         switch(dataBuf.ID){ //we got a message
+            case BPS_TRIP: {
+
+                // BPS has a fault and we need to enter fault state (probably)
+                if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
+                    OS_ERR err;
+
+                    // Set fault bitmap and assert the error
+                    FaultBitmap |= FAULT_BPS;
+                    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+                    assertOSError(OS_READ_CAN_LOC, err);
+                    
+                }
+            }
             case CHARGE_ENABLE: { 
 
                 // Restart CAN Watchdog timer
