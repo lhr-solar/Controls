@@ -13,35 +13,7 @@ static CANDATA_t oldCD;
 static CANDATA_t currCD; // CANmsg we will be sending
 static uint8_t cycle_ctr = 0;
 static uint16_t motor_force = 0;
-static uint8_t forceLUTIndex = 0;
 
-// FORCE LUT 
-// FORCELUT Size
-#define FORCELUT_SIZE 21 
-// Force Lookup Table: Indexed by Current%toIndex, returns a force applied by current % (in Newtons)
-static const int FORCELUT[FORCELUT_SIZE] = {
-    0,
-    309,
-    618,
-    926,
-    1235,
-    1544,
-    1853,
-    2162,
-    2471,
-    2779,
-    3088,
-    3397,
-    3706,
-    4015,
-    4324,
-    4632,
-    4941,
-    5250,
-    5559,
-    5868,
-    6176
-}; //TODO: Waiting for confirmation on newly calculated force values
 
 // CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
@@ -49,14 +21,18 @@ static const int FORCELUT[FORCELUT_SIZE] = {
 #define DECELERATION 2.0 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
+#define TORQUE_SLOPE 
+#define MAX_CURRENT 50
+#define WHEEL_RADIUS 0.2667f // In m
+#define TORQUE_SLOPE 1.15384615384615f // in kgfcm/A
 
 
 // VELOCITY CONTROL MODE
-//TODO: tune PID with actual pack and fans, and then change values below to appropiate value
+
 #define PROPORTION 1
 #define INTEGRAL 1
 #define DERIVATIVE 1
-#define MAX_RPM 179026 // 30m/s in RPM, decimal 2 places from right
+#define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
 #define DIVISOR 10000
 // Variables to help with PID calculation
 static int32_t ErrorSum = 0;
@@ -68,12 +44,8 @@ static int32_t PreviousError = 0;
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
-// Helper function to convert from current to desired FORCELUT index
-inline int currentPercentToIndex(float currentPercent){
-    return ((int)(currentPercent*(FORCELUT_SIZE - 1)));
-}    
 
-//
+//Function returns new velocity, calculated via PID
 float Velocity_PID_Output() {
     Error = setpointVelocity - velocity;
     ErrorSum = ErrorSum + Error;
@@ -117,8 +89,8 @@ void Task1(void *arg)
 
             // CURRENT CONTROLLED MODE
 
-            forceLUTIndex = currentPercentToIndex(current); // Converts current to index for FORCELUT
-            motor_force = FORCELUT[forceLUTIndex];
+            // FORCE = Current% * Max Current (A) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
+            motor_force = (current*MAX_CURRENT*TORQUE_SLOPE*100) / WHEEL_RADIUS;
 
             // Net acceleration is dependent on the force from the motor (based on current), mass of the car, 
             // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
@@ -136,7 +108,7 @@ void Task1(void *arg)
             
             // VELOCITY CONTROLLED MODE
 
-            velocity = Velocity_PID_Output(setpointVelocity);
+            velocity = Velocity_PID_Output();
             
 
             // TODO: Return velocity as part of currCD
