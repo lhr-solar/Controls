@@ -30,8 +30,8 @@ static uint16_t motor_force = 0;
 // VELOCITY CONTROL MODE
 
 #define PROPORTION 1
-#define INTEGRAL 1
-#define DERIVATIVE 1
+#define INTEGRAL 0
+#define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
 #define DIVISOR 10000
 // Variables to help with PID calculation
@@ -67,8 +67,19 @@ float Velocity_PID_Output() {
 
 }
 
+void ReturnVelocity_CANDATA_t(){
+    CANDATA_t message;
+    message.ID = MOTOR_DRIVE;
+    message.idx = 0;
 
-void Task1(void *arg)
+    memcpy(&message.data[0], &velocity, sizeof(velocity));
+    memcpy(&message.data[4], &current, sizeof(current));
+
+    CANbus_Send(message, CAN_BLOCKING, MOTORCAN);
+}
+
+    void
+    Task1(void *arg)
 {
     while (1)
     {
@@ -94,7 +105,7 @@ void Task1(void *arg)
 
             // Net acceleration is dependent on the force from the motor (based on current), mass of the car, 
             // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
-            if (setpointVelocity < 0) {
+            if (setpointVelocity > 0) {
                 total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
             } else{
                 total_accel = ((float)(-motor_force) / CAR_MASS_KG + DECELERATION);
@@ -102,17 +113,15 @@ void Task1(void *arg)
 
             velocity += ((total_accel * MS_TIME_DELAY_MILSEC) / 1000); //Divide by 1000 to turn into seconds from ms
 
-            // TODO: Return velocity as part of currCD
-
-        } else {
-            
+            // Return velocity as part of currCD
+            ReturnVelocity_CANDATA_t();
+        } 
+        else {
             // VELOCITY CONTROLLED MODE
-
             velocity = Velocity_PID_Output();
             
-
-            // TODO: Return velocity as part of currCD
-             
+            // Return velocity as part of currCD
+            ReturnVelocity_CANDATA_t();
         }
 
 
