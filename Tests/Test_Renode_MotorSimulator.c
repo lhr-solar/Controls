@@ -7,6 +7,7 @@
 // Global variables
 static float setpointVelocity = 0.0f; 
 static float velocity = 0.0f;
+static float setpointCurrent = 0.0f;
 static float current = 0.0f; 
 static float total_accel = 0.0f;
 static CANDATA_t oldCD;
@@ -94,7 +95,7 @@ void ReturnVelocity_CANDATA_t(){
 
         // Parsing Measurements
         memcpy(&setpointVelocity, &newCD.data[0], sizeof setpointVelocity); // in RPM 
-        memcpy(&current, &newCD.data[4], sizeof current); // Percent from 0.0 to 1.0
+        memcpy(&setpointCurrent, &newCD.data[4], sizeof setpointCurrent); // Percent from 0.0 to 1.0
         
         if (abs(setpointVelocity) == MAX_VELOCITY){ 
 
