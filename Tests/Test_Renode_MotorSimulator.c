@@ -34,20 +34,22 @@ static uint16_t motor_force = 0;
 #define INTEGRAL 0
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
-#define DIVISOR 10000
+#define DIVISOR 1
+
 // Variables to help with PID calculation
 static int32_t ErrorSum = 0;
 static int32_t Error;
 static int32_t Rate;
 static int32_t PreviousError = 0;
 
+static CANDATA_t newCD;
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 
-//Function returns new velocity, calculated via PID
-float Velocity_PID_Output() {
+//Function returns calculated current, calculated via PID
+float Velocity_PID_Output() { 
     Error = setpointVelocity - velocity;
     ErrorSum = ErrorSum + Error;
 
@@ -56,36 +58,53 @@ float Velocity_PID_Output() {
     Rate = (Error - PreviousError) / MS_TIME_DELAY_MILSEC;
     PreviousError = Error;     //updates previous err value
 
-    if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) > MAX_RPM) {
-        return MAX_RPM;
+    if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) > 1.0f) {
+        return 1.0f;
     }
-    else if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) < -MAX_RPM) {
-        return -MAX_RPM;
+    else if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) < 0.0f) {
+        return 0.0f;
     }
     else {
         return (PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR;
     }
 
+    // TODO: Tweak the PID constants such that the output is a float from 0.0 to 1.0 
+}
+
+float CurrentToMotorForce(){ // Simulate giving the motor a current and returning a force
+    
+    return (current*(setpointCurrent*MAX_CURRENT)*TORQUE_SLOPE*100) / WHEEL_RADIUS;
+
+}
+
+float MotorForceToVelocity(){
+
+    if (setpointVelocity > 0) {
+        total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
+    } else{
+        total_accel = ((float)(-motor_force) / CAR_MASS_KG + DECELERATION);
+    }
+
+    return velocity + ((total_accel * MS_TIME_DELAY_MILSEC) / 1000); //Divide by 1000 to turn into seconds from ms;
 }
 
 void ReturnVelocity_CANDATA_t(){
-    CANDATA_t message;
-    message.ID = MOTOR_DRIVE;
-    message.idx = 0;
+    newCD.ID = MOTOR_DRIVE;
+    newCD.idx = 0;
 
-    memcpy(&message.data[0], &velocity, sizeof(velocity));
-    memcpy(&message.data[4], &current, sizeof(current));
+    memcpy(&newCD.data[0], &velocity, sizeof(velocity));
+    memcpy(&newCD.data[4], &current, sizeof(current));
 
-    CANbus_Send(message, CAN_BLOCKING, MOTORCAN);
+    CANbus_Send(newCD, CAN_BLOCKING, MOTORCAN);
 }
 
-    void
-    Task1(void *arg)
+    void Task1(void *arg)
 {
+    CANbus_Init(MOTORCAN);
+    
     while (1)
     {
         OS_ERR err;
-        CANDATA_t newCD;
 
         ErrorStatus error = CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD
         if (error == ERROR) // If there is no new value to read, use the old CAN data
@@ -97,40 +116,33 @@ void ReturnVelocity_CANDATA_t(){
         memcpy(&setpointVelocity, &newCD.data[0], sizeof setpointVelocity); // in RPM 
         memcpy(&setpointCurrent, &newCD.data[4], sizeof setpointCurrent); // Percent from 0.0 to 1.0
         
-        if (abs(setpointVelocity) == MAX_VELOCITY){ 
+        if (abs(setpointVelocity) == MAX_VELOCITY){  // CURRENT CONTROLLED MODE
 
-            // CURRENT CONTROLLED MODE
+            current = 1.0f; // Calculated Current = 1
 
-            // FORCE = Current% * Max Current (A) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
-            motor_force = (current*MAX_CURRENT*TORQUE_SLOPE*100) / WHEEL_RADIUS;
+            // FORCE = Current(%) * Max Current (A) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
+            motor_force = CurrentToMotorForce();
 
-            // Net acceleration is dependent on the force from the motor (based on current), mass of the car, 
-            // and resistive forces which are being substituted with a constant 2m/s^2 negative acceleration
-            if (setpointVelocity > 0) {
-                total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
-            } else{
-                total_accel = ((float)(-motor_force) / CAR_MASS_KG + DECELERATION);
-            }
+            velocity = MotorForceToVelocity();
 
-            velocity += ((total_accel * MS_TIME_DELAY_MILSEC) / 1000); //Divide by 1000 to turn into seconds from ms
-
-            // Return velocity as part of currCD
-            ReturnVelocity_CANDATA_t();
         } 
-        else {
-            // VELOCITY CONTROLLED MODE
-            velocity = Velocity_PID_Output();
+        else { // VELOCITY CONTROLLED MODE
             
-            // Return velocity as part of currCD
-            ReturnVelocity_CANDATA_t();
+            current = Velocity_PID_Output();
+
+            motor_force = CurrentToMotorForce();
+
+            velocity = MotorForceToVelocity();
+
         }
 
 
         ++cycle_ctr;
         if (cycle_ctr == 3)
-        { // send message to read canbus every 300 ms
+        { // send newCD to read canbus every 300 ms
             cycle_ctr = 0;
-            CANbus_Send(newCD, CAN_NON_BLOCKING, MOTORCAN);
+            // Return velocity as part of currCD
+            ReturnVelocity_CANDATA_t();
         }
         oldCD = newCD; // Update old CAN data to match most recent values received
         OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MILSEC, OS_OPT_TIME_HMSM_STRICT, &err);
