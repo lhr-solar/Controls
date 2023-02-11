@@ -61,6 +61,36 @@ To build a new test, you need to use the following command:
 * If you're using a power supply (PSU for computers), you can find the 24 pin connector on the PSU and use the +12V and GND from there to power the leader board. This would be pin 11 (+12V) and pin 24 (GND). We would also need to pull PS-ON to GND for the power supply to turn on. We can short pin 3 (GND) and pin 16 (PS-ON) to do this. See pictures below
     - ![](img/PSU_24PinConnector.png) ![](img/PSU_24PinConnectorDiagram.png)
 
+## Extending Partition and Filesystem
+There is an issue where if you run out of space on your VM, stuff stops working. In this case, you need to add space to your virtual disk, create a partition, extend your main partition and tell the file system to reflect this. The following are steps from this [website](https://www.techrepublic.com/article/extending-partitions-on-linux-vmware-virtual-machines/) on 2/11/2023. Note: The volume group for ubuntu should be `ubuntu-vg` and the logical volume (volume/lv) should be 'ubuntu-lv`. Note: The steps refrence the Figure A/B/C. Ignore it. The figures are gone 😢
+
+1. Shutdown the VM
+2. Right click the VM and select Edit Settings
+3. Select the hard disk you would like to extend
+4. On the right side, make the provisioned size as large as you need it
+5. Click OK
+6. Power on the VM
+7. Connect to the command line of the Linux VM via the console or putty session
+8. Log in as root
+9. The fdisk command provides disk partitioning functions and using it with the -l switch lists information about your disk partitions.  At the command prompt type `fdisk -l`
+10. The response should say something like Disk /dev/sda : xxGB. (See Figure A)
+11. At the command prompt type fdisk /dev/sda. (if dev/sda is what was returned after step 10 as shown in Figure A)
+12. Type p to print the partition table and press Enter (also shown in Figure A)
+13. Type n to add a new partition
+14. Type p again to make it a primary partition
+15. Now you’ll be prompted to pick the first cylinder which will most likely come at the end of your last partition (ex: /dev/sda3 ends at 2610).  So I chose 2611 for my first cylinder, which is also listed as the default.
+16. If you want it to take up the rest of the space available (as allocated in step 4), just choose the default value for the last cylinder.
+17. Type w to save these changes
+18. Restart the VM
+19. Log back in as root
+20. At the command prompt type fdisk -l. You’ll notice another partition is present.  In Figure B it is listed as sda4.
+21. You need to initialize this new partition as a physical volume so you can manipulate it later using the Logical Volume Manager (LVM).
+22. Now you’ll add the physical volume to the existing volume group using the vgextend command. First type `df -h` to find the name of the volume group.  In Figure C, the name of the volume group is vg_root. Now type `vgextend [volume group] /dev/sdaX`. (ex: vgextend vg_root /dev/sda4)
+23. To find the amount of free space available on the physical volume type `vgdisplay [volume group] | grep “Free”`
+24. Extend the logical volume by the amount of free space shown in the previous step by typing `lvextend  -L+[freespace]G /dev/volgroup/volume`. (ex: lvextend -L+20G /dev/vg_root/lv_root)
+25. You can finally expand the ext3 file system in the logical volume using the command `resize2fs /dev/volgroup/volume` (ex: resize2fs /dev/vg_root/lv_root).
+26. You can now run the `df -h` command to verify that you have more space
+
 ## Rules
 Commit frequently into your own branches. Create a Pull Request whenever you are ready to add you working code to the master branch. You must select 1 reviewer for approval. Follow the coding guidelines in the Solar SharePoint. The reviewers will make sure everything is up to par with the coding standards.
 
