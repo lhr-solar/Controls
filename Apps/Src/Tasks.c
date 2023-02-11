@@ -21,8 +21,6 @@ OS_TCB UpdateDisplay_TCB;
 OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB Telemetry_TCB;
-OS_TCB BlinkLight_TCB;
-OS_TCB IgnCont_TCB;
 
 /**
  * Stacks
@@ -35,8 +33,7 @@ CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
-CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
-CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
+
 
 /**
  * Semaphores
