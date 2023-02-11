@@ -7,6 +7,7 @@
 #include "Minions.h"
 #include "UpdateDisplay.h"
 #include "ReadTritium.h"
+#include "CANbus.h"
 
 #define RESTART_THRESHOLD 3
 
@@ -95,9 +96,6 @@ void EnterFaultState(void) {
          */
     }
     else if(FaultBitmap & FAULT_BPS){ // BPS has been tripped
-
-        /* TODO: set display to show BPS has been tripped */
-
         nonrecoverableFaultHandler();
         return;
     }

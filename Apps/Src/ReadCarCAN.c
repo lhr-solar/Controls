@@ -33,6 +33,10 @@ static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
 static int chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
 
+// SOC and Supp V
+static uint8_t SOC = 0;
+static uint32_t SBPV = 0;
+
 
 // Handler to turn array back on
 static void arrayRestart(void *p_tmr, void *p_arg); 
@@ -198,16 +202,16 @@ void Task_ReadCarCAN(void *p_arg)
 
         switch(dataBuf.ID){ //we got a message
             case BPS_TRIP: {
-
                 // BPS has a fault and we need to enter fault state (probably)
                 if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
                     OS_ERR err;
+
+                    Display_Evac(SOC, SBPV);    // Display evacuation message
 
                     // Set fault bitmap and assert the error
                     FaultBitmap |= FAULT_BPS;
                     OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
                     assertOSError(OS_READ_CAN_LOC, err);
-                    
                 }
             }
             case CHARGE_ENABLE: { 
@@ -234,11 +238,12 @@ void Task_ReadCarCAN(void *p_arg)
                 break;
             }
             case SUPPLEMENTAL_VOLTAGE: {
-                UpdateDisplay_SetSBPV(*(uint16_t *) &dataBuf.data); // Receive value in mV
+                SBPV = (*(uint16_t *) &dataBuf.data);
+                UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
-                uint8_t SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
+                SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }
