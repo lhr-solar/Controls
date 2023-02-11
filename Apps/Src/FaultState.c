@@ -101,7 +101,7 @@ void EnterFaultState(void) {
     }
     else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
         readBPS_ContactorHandler();
-
+        
         // Reset FaultBitmap since this is a recoverable fault
         FaultBitmap = FAULT_NONE; // Clears everything because only one error can be set at a time
         return;
