@@ -1,0 +1,63 @@
+#include "Tasks.h"
+#include "CANbus.h"
+
+static OS_TCB Task1_TCB;
+static CPU_STK Task1_Stk[128];
+
+#define STACK_SIZE 128
+
+void Task1(void *p_arg){
+    CPU_Init();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+    CANbus_Init(CARCAN, NULL, 0);
+
+    CANDATA_t dataBuf; // To store messages
+
+    while(1){
+
+        ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
+        if (status != SUCCESS) {
+            printf("CANbus Read error status: %d\n", status);
+        }
+
+        printf("%d\n", dataBuf.ID);
+
+      
+    }
+
+}
+
+int main(void){ //startup OS stuff, spawn task
+    OS_ERR err;
+    OSInit(&err);
+    if(err != OS_ERR_NONE){
+        printf("OS error code %d\n",err);
+    }
+
+    OSTaskCreate(
+        (OS_TCB*)&Task1_TCB,
+        (CPU_CHAR*)"Task1",
+        (OS_TASK_PTR)Task1,
+        (void*)NULL,
+        (OS_PRIO)4,
+        (CPU_STK*)Task1_Stk,
+        (CPU_STK_SIZE)STACK_SIZE/10,
+        (CPU_STK_SIZE)STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
+        (OS_ERR*)&err
+    );
+
+    
+    if (err != OS_ERR_NONE) {
+        printf("Task1 error code %d\n", err);
+    }
+    OSStart(&err);
+    if (err != OS_ERR_NONE) {
+        printf("OS error code %d\n", err);
+    }
+    return 0;
+
+}
