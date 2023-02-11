@@ -1,5 +1,4 @@
-
-#include "CANbus.h"
+#include "CANConfig.h"
 
 #define BYTE 1
 #define HALFWORD 2
@@ -7,7 +6,6 @@
 #define DOUBLE 8
 #define NOIDX false
 #define IDX true
-
 
 /**
  * @brief Lookup table to simplify user-defined packet structs. Contains fields that are always the same for every message of a given ID.
@@ -36,3 +34,16 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
 	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
 	[CARDATA] 						= {NOIDX, DOUBLE}, /**     CARDAT			               **/
 };
+
+/**
+ * @brief Lists of CAN IDs that we want to receive. Used to initialize the CAN filters for CarCAN and MotorCAN.
+*/
+
+const CANId_t carCANFilterList[NUM_FILTERS_CARCAN] = {
+    BPS_TRIP, 
+    STATE_OF_CHARGE,
+    SUPPLEMENTAL_VOLTAGE,
+    CHARGE_ENABLE
+};
+
+const CANId_t motorCANFilterList[NUM_FILTERS_MOTORCAN] = {};

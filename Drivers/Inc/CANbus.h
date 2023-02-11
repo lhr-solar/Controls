@@ -4,6 +4,7 @@
 #define CAN_H__
 
 #include "BSP_CAN.h"
+
 #define CARCAN CAN_1 //convenience aliases for the CANBuses
 #define MOTORCAN CAN_3
 
@@ -55,11 +56,6 @@ typedef struct {
 } CANLUT_T;
 
 /**
- * The lookup table containing the entries for all of our CAN messages. Located in CANLUT.c
- */
-extern const CANLUT_T CANLUT[NUM_CAN_IDS];
-
-/**
  * Standard CAN packet
  * @param ID 	CANId_t value indicating which message we are trying to send
  * @param idx 	If message is part of a sequence of messages (for messages longer than 64 bits), this indicates the index of the message. 
@@ -86,9 +82,11 @@ typedef struct {
 /**
  * @brief   Initializes the CAN system for a given bus
  * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
- * @return  None
+ * @param   idWhitelist A list of CAN IDs that we want to receive. If NULL, we will receive all messages.
+ * @param   idWhitelistSize The size of the whitelist.
+ * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
  */
-ErrorStatus CANbus_Init(CAN_t bus);
+ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize);
 
 /**
  * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is necessary, please use an IDX message.
