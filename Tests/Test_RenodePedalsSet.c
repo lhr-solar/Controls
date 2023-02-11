@@ -1,4 +1,5 @@
 #include "Pedals.h"
+#include "BSP_UART.h"
 
 int main(void){
     Pedals_Init();
