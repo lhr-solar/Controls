@@ -96,8 +96,16 @@ DisplayError_t Display_Reset(void);
  * @brief Overwrites any processing commands and triggers the display fault screen
  * @param osErrCode the os error location (will be displayed in hex)
  * @param faultCode the generic fault code (will be displayed in hex)
- * @returns bool: false for ERROR, true for SUCCESS
+ * @returns DisplayError_t
  */
 DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+
+/**
+ * @brief Overwrites any processing commands and triggers the evacuation screen
+ * @param SOC_percent the state of charge of the battery in percent
+ * @param supp_mv the voltage of the battery in millivolts
+ * @returns DisplayError_t
+*/
+DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
 
 #endif
