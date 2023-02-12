@@ -13,7 +13,7 @@ void Task_BPS(void *p_arg){
     CPU_Init(); // I guess we need to start this?
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz); // I don't know what this is
     OS_ERR err;
-    CANbus_Init(CARCAN); // Yes, I think so
+    CANbus_Init(CARCAN, NULL, 0);
 
     int CANMsgs[] = {
         0x001,
@@ -55,6 +55,7 @@ void Task_BPS(void *p_arg){
     while(1){
         //Do any message changes
         CANbus_Send(msg, true, CARCAN); //is blocking ok?
+        printf("Sending message %d", msg.ID);
         if (msg.ID == 0xFFFF) {
             idIndex = 0;
         } else {
