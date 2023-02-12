@@ -2,12 +2,14 @@
 #include "os.h"
 #include "CANbus.h"
 #include <string.h>
+#include "BSP_UART.h"
 
 //loop through range of currents from 0 to 1
 //loop through range of velocity in rpm
 //loop by varying both
 int main(void){
     //initialize CANBus message
+    BSP_UART_Init(UART_2);
     CANDATA_t response;
     CANDATA_t message;
     message.ID = MOTOR_DRIVE;

@@ -12,6 +12,7 @@ static float current = 0.0f;
 static float total_accel = 0.0f;
 static CANDATA_t oldCD;
 static CANDATA_t currCD; // CANmsg we will be sending
+static CANDATA_t newCD;
 static uint8_t cycle_ctr = 0;
 static uint16_t motor_force = 0;
 
@@ -22,7 +23,6 @@ static uint16_t motor_force = 0;
 #define DECELERATION 2.0 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
-#define TORQUE_SLOPE 
 #define MAX_CURRENT 50
 #define WHEEL_RADIUS 0.2667f // In m
 #define TORQUE_SLOPE 1.15384615384615f // in kgfcm/A
@@ -42,7 +42,7 @@ static int32_t Error;
 static int32_t Rate;
 static int32_t PreviousError = 0;
 
-static CANDATA_t newCD;
+
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
@@ -89,13 +89,13 @@ float MotorForceToVelocity(){
 }
 
 void ReturnVelocity_CANDATA_t(){
-    newCD.ID = MOTOR_DRIVE;
-    newCD.idx = 0;
+    currCD.ID = MOTOR_DRIVE;
+    currCD.idx = 0;
 
-    memcpy(&newCD.data[0], &velocity, sizeof(velocity));
-    memcpy(&newCD.data[4], &current, sizeof(current));
+    memcpy(&currCD.data[0], &velocity, sizeof(velocity));
+    memcpy(&currCD.data[4], &current, sizeof(current));
 
-    CANbus_Send(newCD, CAN_BLOCKING, MOTORCAN);
+    CANbus_Send(currCD, CAN_BLOCKING, MOTORCAN);
 }
 
     void Task1(void *arg)
@@ -139,7 +139,7 @@ void ReturnVelocity_CANDATA_t(){
 
         ++cycle_ctr;
         if (cycle_ctr == 3)
-        { // send newCD to read canbus every 300 ms
+        { // send currCD to read canbus every 300 ms
             cycle_ctr = 0;
             // Return velocity as part of currCD
             ReturnVelocity_CANDATA_t();
