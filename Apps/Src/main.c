@@ -13,7 +13,7 @@
 #include "CAN_Queue.h"
 #include "UpdateDisplay.h"
 
-#define IGN_CONT_PERIOD 10
+#define IGN_CONT_PERIOD 100
 
 int main(void) {
     // Disable interrupts
