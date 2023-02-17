@@ -71,8 +71,8 @@ static inline void chargingDisable(void) {
     regenEnable = false;
 
     //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
+    Contactors_Set(ARRAY_CONTACTOR, false, true);
+    Contactors_Set(ARRAY_PRECHARGE, false, true);
     
     // turn off the array contactor light
     UpdateDisplay_SetArray(false);
@@ -119,13 +119,13 @@ static inline void chargingEnable(void) {
  * 
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
-
+    Minion_Error_t Merr;
     if(regenEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        Contactors_Set(ARRAY_CONTACTOR, ON, false);
+        Contactors_Set(ARRAY_CONTACTOR, (Minion_Read_Input(IGN_1, &Merr)), false); //turn on array contactor if the ign switch lets us
         UpdateDisplay_SetArray(true);
     }
-        // done restarting the array
-        restartingArray = false;
+    // done restarting the array
+    restartingArray = false;
 
 };
 

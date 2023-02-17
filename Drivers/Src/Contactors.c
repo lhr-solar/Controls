@@ -5,11 +5,7 @@
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
 
-// keep track of contactor desired state and if enabled here
-struct contactor {
-    bool enabled;
-};
-static struct contactor contactors[NUM_CONTACTORS];
+
 static OS_MUTEX contactorsMutex;
 
 /**
@@ -20,7 +16,7 @@ static OS_MUTEX contactorsMutex;
  * @param   state the state to set (ON/OFF)
  * @return  None
  */ 
-static void setContactor(contactor_t contactor, State state) {
+static void setContactor(contactor_t contactor, bool state) {
     switch (contactor) {
         case ARRAY_CONTACTOR :
             BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, state);
@@ -50,7 +46,6 @@ void Contactors_Init() {
 
     // start disabled
     for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
-        contactors[contactor].enabled = false;
         setContactor(contactor, OFF);
     }
 
@@ -67,7 +62,7 @@ void Contactors_Init() {
  *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @return  The contactor's state (ON/OFF)
  */ 
-State Contactors_Get(contactor_t contactor) {
+bool Contactors_Get(contactor_t contactor) {
     State state = OFF;
     switch (contactor) {
         case ARRAY_CONTACTOR :
@@ -93,7 +88,7 @@ State Contactors_Get(contactor_t contactor) {
  * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, State state, bool blocking) {
+ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     CPU_TS timestamp;
     OS_ERR err;
     ErrorStatus result = ERROR;
@@ -106,63 +101,14 @@ ErrorStatus Contactors_Set(contactor_t contactor, State state, bool blocking) {
     }
     assertOSError(OS_CONTACTOR_LOC, err);
 
-
-
-
-    // if enabled, change contactor to match state
-    if (contactors[contactor].enabled) {
-        setContactor(contactor, state);
-        result = SUCCESS;
-    }
+    // change contactor to match state and make sure it worked
+    setContactor(contactor, state);
+    bool ret = (bool)Contactors_Get(contactor);
+    result = (ret == state) ? SUCCESS: ERROR;
 
     // release lock
     OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
     assertOSError(OS_CONTACTOR_LOC, err);
 
     return result;
-}
-
-/**
- * @brief   Enable the specified contactor
- *          Contactor will turn on if enabled and state is on
- * @return  None
- */ 
-void Contactors_Enable(contactor_t contactor) {
-    CPU_TS timestamp;
-    OS_ERR err;
-
-    // acquire lock
-    OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
-    assertOSError(OS_CONTACTOR_LOC, err);
-
-    // mark contactor as enabled
-    contactors[contactor].enabled = true;
-
-    // release lock
-    OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
-    assertOSError(OS_CONTACTOR_LOC, err);
-}
-
-/**
- * @brief   Disable the specified contactor
- * @return  None
- */ 
-void Contactors_Disable(contactor_t contactor) {
-    CPU_TS timestamp;
-    OS_ERR err;
-
-    // acquire lock
-    OSMutexPend(&contactorsMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
-    assertOSError(OS_CONTACTOR_LOC, err);
-
-    // mark contactor as disabled
-    contactors[contactor].enabled = false;
-
-    // turn off the contactor
-    setContactor(contactor, OFF);
-
-    // release lock
-    OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
-    assertOSError(OS_CONTACTOR_LOC, err);
-
 }
