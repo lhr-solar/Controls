@@ -1,5 +1,5 @@
-$Test_bin?=@Objects/controls-leader.elf
-$MotSim_bin?=@Objects/MotorSim.elf
+$Test_bin?=@Objects/TestMotorSim.elf
+$MotSim_bin?=@Objects/controls-leader.elf
 $platform?=@Renode/stm32f413.repl
 
 emulation CreateCANHub "carCan"
