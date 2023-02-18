@@ -13,7 +13,8 @@ macro reset
 
 macro show_printUart
 """
-    showAnalyzer sysbus.usart2
+    emulation CreateServerSocketTerminal 49152 "uart-con" false
+    connector Connect sysbus.usart2 uart-con
 """
 
 
@@ -53,6 +54,8 @@ logLevel 3
 using sysbus
 mach set "Controls leader"
 connector Connect sysbus.can1 carCan
+emulation CreateServerSocketTerminal 49152 "uart-con-1"
+connector Connect sysbus.usart2 uart-con-1
 
 mach create "BPS board"
 machine LoadPlatformDescription @../Controls/Renode/stm32f413.repl
@@ -61,3 +64,5 @@ logLevel 3
 using sysbus
 mach set "BPS board"
 connector Connect sysbus.can1 carCan
+emulation CreateServerSocketTerminal 49153 "uart-con-2"
+connector Connect sysbus.usart2 uart-con-2

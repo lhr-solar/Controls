@@ -1,5 +1,6 @@
 #include "Tasks.h"
 #include "CANbus.h"
+#include "BSP_UART.h"
 
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[128];
@@ -11,28 +12,31 @@ void Task1(void *p_arg){
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(CARCAN, NULL, 0);
 
-    CANDATA_t dataBuf; // To store messages
+    CANDATA_t dataBuf; // A buffer in which we can store the messages we read
 
     while(1){
 
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
         if (status != SUCCESS) {
-            printf("CANbus Read error status: %d\n", status);
+            printf("CANbus Read error status: %d\n\r", status);
         }
 
-        printf("%d\n", dataBuf.ID);
+        // Print the message ID we receive out
+        printf("%d\n\r", dataBuf.ID); 
 
       
     }
 
 }
 
-int main(void){ //startup OS stuff, spawn task
+int main(void){ //initialize things and spawn task
     OS_ERR err;
     OSInit(&err);
     if(err != OS_ERR_NONE){
-        printf("OS error code %d\n",err);
+        printf("OS error code %d\n\r",err);
     }
+
+    BSP_UART_Init(UART_2);
 
     OSTaskCreate(
         (OS_TCB*)&Task1_TCB,
@@ -52,11 +56,11 @@ int main(void){ //startup OS stuff, spawn task
 
     
     if (err != OS_ERR_NONE) {
-        printf("Task1 error code %d\n", err);
+        printf("Task1 error code %d\n\r", err);
     }
     OSStart(&err);
     if (err != OS_ERR_NONE) {
-        printf("OS error code %d\n", err);
+        printf("OS error code %d\n\r", err);
     }
     return 0;
 
