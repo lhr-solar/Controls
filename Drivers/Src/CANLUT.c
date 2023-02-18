@@ -10,14 +10,13 @@
 
 
 /**
- * @brief Lookup table to simplify user-defined packet structs. Contains fields that are always the same for every message of a given ID.
+ * @brief Lookup table to simplify user-defined packet structs. Contains metadata fields that are always the same for every message of a given ID.
  *        Indexed by CANId_t values. Any changes or additions must be made in parallel with changes made to the CANID_t enum in CANbus.h
  */
 const CANLUT_T CANLUT[NUM_CAN_IDS] = {
 	[CHARGE_ENABLE] 				= {NOIDX, DOUBLE}, /**     CHARGE_ENABLE                   **/
 	[STATE_OF_CHARGE] 				= {NOIDX, DOUBLE}, /**     STATE_OF_CHARGE                 **/
 	[SUPPLEMENTAL_VOLTAGE] 			= {NOIDX, DOUBLE}, /**     SUPPLEMENTAL_VOLTAGE            **/
-	// [CAR_STATE] = {NOIDX, DOUBLE, 0x580}, /**     CAR_STATE                       **/
 	[MC_BUS] 						= {NOIDX, DOUBLE}, /**     MC_BUS                          **/
 	[VELOCITY] 						= {NOIDX, DOUBLE}, /**     VELOCITY                        **/
 	[MC_PHASE_CURRENT] 				= {NOIDX, DOUBLE}, /**     MC_PHASE_CURRENT                **/

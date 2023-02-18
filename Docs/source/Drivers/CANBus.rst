@@ -15,9 +15,17 @@ The CANbus driver is responsible for all incoming and outgoing CAN communication
 Data Types
 ==========
 
-CAN messages are sent from and received into ``CANDATA_t``, which contains the CAN ID, idx byte, and up to 8 data bytes. Internally, the driver also uses the ``CANLUT_T`` type, which is the entry type of a lookup table used to determine the data types used by incoming messages. See ``CANbus.h`` and ``CANLUT.c`` for details.
+CAN messages are sent from and received into ``CANDATA_t``, which contains the CAN ID, idx byte, and up to 8 data bytes. 
+Internally, the driver also uses the ``CANLUT_T`` type, which is the entry type of a lookup table used to determine the data types used by incoming messages. 
+This lookup table can also be used to determine the length of incoming messages if it is needed.
+See ``CANbus.h`` and ``CANLUT.c`` for details.
 
 Implementation Details
 ======================
 
-The microcontroller's CAN hardware block includes three sending and three receiving mailboxes, which act as a small queue of CAN messages. The driver will read and write to those mailboxes as long as they aren't empty or full, respectively, blocking otherwise. This is done since tasks that read and write CAN messages don't usually have anything else to do while waiting, which makes blocking fairly efficient. If a more important task such as :ref:`velocity` needed to send CAN messages, then perhaps it a software queue would've been used to supplement the hardware mailboxes.
+The microcontroller's CAN hardware block includes three sending and three receiving mailboxes, which act as a small queue of CAN messages. The recieve mailboxes are constantly emptied (by the CAN recieve interrupt) 
+into a software queue in the BSP layer, in order to deepen the queue (we recieve a lot of messages). 
+When writing, the driver will write directly to the write mailboxes, as long as they aren't full, blocking otherwise. 
+When reading, the driver will read directly from a software queue in the BSP layer. It will return an error if the queue is empty.
+The driver will read from the software queue and write to those hardware mailboxes as long as they aren't empty or full, respectively, blocking otherwise. 
+This is done since tasks that read and write CAN messages don't usually have anything else to do while waiting, which makes blocking fairly efficient. 
