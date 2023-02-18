@@ -94,6 +94,33 @@ There is an issue where if you run out of space on your VM, stuff stops working.
 ## Rules
 Commit frequently into your own branches. Create a Pull Request whenever you are ready to add you working code to the master branch. You must select 1 reviewer for approval. Follow the coding guidelines in the Solar SharePoint. The reviewers will make sure everything is up to par with the coding standards.
 
+### Using GDB:
+NOTE: The below is one way to debug the program. GDB is not that compatible with debugging the code so another method of debugging is also available.
+GDB is a debugger program that can be used to step through a program as it is being run on the board. To use, you need two terminals open, as well as a USB connection to the ST-Link programmer (as if you were going to flash the program to the board). 
+1. In one terminal, run ```st-util```. This will launch a program that will interface with the board. 
+2. In the other terminal, start gdb with the command ```gdb-multiarch ./Objects/bps-leader.elf``` (assuming that you are doing this in the root of the project directory.
+3. This will launch GDB and read in all of the symbols from the program that you are running on the board. In order to actually connect gdb to the board, exectue the command ```target extended-remote localhost:4242```, which will connect to the st-util command from earlier.
+### Using OPENOCD
+OpenOCD is another debugger program that is open source and compatible with the STM32F413. 
+1. Run ```st-util``` in one terminal.
+2. Replace step 2 above with ```./openocd-debug.sh```.
+3. Replace step 3 above with ```target extended-remote localhost:3333```
+**Note:** If you get an error message for Permission denied, try giving openocd read/write permissions using chmod: ```chmod 764 openocd```
+https://linuxcommand.org/lc3_lts0090.php
+## Rules
+Make sure to have fun!
+Commit frequently into your own branches. Create a Pull Request whenever you are ready to add you working code to the master branch. Make sure that your code compiles without any errors or warnings before you open a pull request. At least one approver must approve your pull request before it can be merged. The reviewers will make sure everything is up to par with the coding standards.
+### Code Reviews
+You can review a pull request even if you are not an approver. In addition to helping us catch bugs, code reviews are a good opportunity to learn more about the BPS codebase. Some examples on what you can include in a code review are:
+- Ask why the author wrote a certain part of code in a way they did
+- Point out potential bugs in the code
+- Point out that part of the code is not well documented or hard to read
+You can either approve, comment, or request changes at the end of your pull request. These are the scenarios in which I would use each option:
+- **Approve:** You are signing off that this pull request is ready to merge. You and the pull request author "own" this part of the code now.
+- **Request Changes:** You have found problems with the code that must be addressed before it can be merged. Note that this will block the pull request from merging until you re-review the code.
+- **Comment:** Do this if you do not want to explicitly approve or request changes.
+
+
 Reviewers:
 1. Sidharth Babu
 2. Roie Gal
