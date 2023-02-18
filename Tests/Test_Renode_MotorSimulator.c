@@ -155,6 +155,10 @@ int main()
     // Disable interrupts
     __disable_irq();
 
+    CPU_Init();
+    
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+
     OS_ERR err;
     OSInit(&err);
     assertOSError(OS_MAIN_LOC, err);

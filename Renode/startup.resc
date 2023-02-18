@@ -1,5 +1,5 @@
-$Test_bin?=@Objects/TestMotorSim.elf
-$MotSim_bin?=@Objects/controls-leader.elf
+$Test_bin?=@Objects/controls-leader.elf
+$MotSim_bin?=@Objects/MotorSim.elf
 $platform?=@Renode/stm32f413.repl
 
 emulation CreateCANHub "carCan"
@@ -10,12 +10,12 @@ machine LoadPlatformDescription $platform
 sysbus LoadELF $Test_bin
 logLevel 3
 connector Connect sysbus.can3 motorCan
+machine StartGdbServer 3333
 
 mach create "motor_sim"
-mach set "motor_sim"
 machine LoadPlatformDescription $platform
 sysbus LoadELF $MotSim_bin
 logLevel 3
 connector Connect sysbus.can3 motorCan
 
-machine StartGdbServer 3333
+mach set "test_motor_sim"

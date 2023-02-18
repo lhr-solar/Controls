@@ -10,12 +10,14 @@
 int main(void){
     //initialize CANBus message
     BSP_UART_Init(UART_2);
+    CANbus_Init(MOTORCAN);
     CANDATA_t response;
     CANDATA_t message;
     message.ID = MOTOR_DRIVE;
     message.idx = 0;
     float vel = 0.0f;
     float i = 0.0f;
+
 
 
     //velocity -> 735
@@ -29,7 +31,7 @@ int main(void){
             CANbus_Send(message, CAN_BLOCKING, MOTORCAN);   
             CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
             
-            printf("Sending (Current: %f, Velocity %f), Receiving: (Current: %f, Velocity %f)",
+            printf("Sending (Current: %f, Velocity: %f), Receiving: (Current: %f, Velocity: %f)",
             *((float*)&message.data[4]), *((float*)&message.data[0]), *((float*)&response.data[4]), 
             *((float*)&response.data[0]));          
 
@@ -48,9 +50,9 @@ int main(void){
         CANbus_Send(message, CAN_BLOCKING, MOTORCAN);
         CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
 
-        printf("Sending (Current: %f, Velocity %f), Receiving: (Current: %f, Velocity %f)",
-        *((float*)&message.data[4]), *((float*)&message.data[0]), *((float*)&response.data[4]), 
-        *((float*)&response.data[0]));  
+        printf("Sending (Current: %d, Velocity: %d), Receiving: (Current: %d, Velocity: %d)\n\r",
+        *((int*)&message.data[4]), *((int*)&message.data[0]), *((int*)&response.data[4]), 
+        *((int*)&response.data[0]));  
 
         for(int d = 0; d < 1000000; d++){} //delay
 
