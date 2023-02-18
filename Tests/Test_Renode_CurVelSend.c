@@ -4,6 +4,13 @@
 #include <string.h>
 #include "BSP_UART.h"
 
+static void print_float(float f){
+    int n = (int)f;
+    f -= n;
+    f *= (1000);
+    printf("%d.%d", n, (int)f);
+}
+
 //loop through range of currents from 0 to 1
 //loop through range of velocity in rpm
 //loop by varying both
@@ -15,14 +22,14 @@ int main(void){
     CANDATA_t message;
     message.ID = MOTOR_DRIVE;
     message.idx = 0;
-    float vel = 0.0f;
+    float vel = 0;
     float i = 0.0f;
 
 
 
     //velocity -> 735
     //current is a percentage -> 0 to 1 (current reaches its max in this loop [i = 1])
-    for(i = 0; i <= 1; i += .02f){ //current
+    for(i = 0.0f; i <= 1.0f; i += 0.02f){ //current
         for(vel = -544; vel <= 544; vel += 50){
 
             memcpy(&message.data[0], &vel, sizeof(vel));
@@ -30,14 +37,19 @@ int main(void){
 
             CANbus_Send(message, CAN_BLOCKING, MOTORCAN);   
             CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
-            
-            printf("Sending (Current: %f, Velocity: %f), Receiving: (Current: %f, Velocity: %f)",
-            *((float*)&message.data[4]), *((float*)&message.data[0]), *((float*)&response.data[4]), 
-            *((float*)&response.data[0]));          
 
+            
+            printf("Sending (Current: ");
+            print_float(*((float *)&message.data[4]));
+            printf(", Velocity:");
+            print_float(*((float *)&message.data[0]));
+            printf("), \n\rReceiving: (Current: ");
+            print_float(*((float *)&response.data[4]));
+            printf(", Velocity: ");
+            print_float(*((float *)&response.data[0]));
+            printf(") \n\r");
 
             for(int d = 0; d < 1000000; d++){} //delay
-
         }
     }
 
@@ -50,9 +62,15 @@ int main(void){
         CANbus_Send(message, CAN_BLOCKING, MOTORCAN);
         CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
 
-        printf("Sending (Current: %d, Velocity: %d), Receiving: (Current: %d, Velocity: %d)\n\r",
-        *((int*)&message.data[4]), *((int*)&message.data[0]), *((int*)&response.data[4]), 
-        *((int*)&response.data[0]));  
+        printf("Sending (Current: ");
+        print_float(*((float *)&message.data[4]));
+        printf(", Velocity:");
+        print_float(*((float *)&message.data[0]));
+        printf("), \n\rReceiving: (Current: ");
+        print_float(*((float *)&response.data[4]));
+        printf(", Velocity: ");
+        print_float(*((float *)&response.data[0]));
+        printf(") \n\r");
 
         for(int d = 0; d < 1000000; d++){} //delay
 
@@ -63,12 +81,18 @@ int main(void){
     for(i = 0; i <= 1; i += .02f){
         memcpy(&message.data[4], &i, sizeof(i));
         CANbus_Send(message, CAN_BLOCKING, MOTORCAN);  
-        CANbus_Read(&response, CAN_BLOCKING, MOTORCAN); 
+        CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
 
-        printf("Sending (Current: %f, Velocity %f), Receiving: (Current: %f, Velocity %f)",
-        *((float*)&message.data[4]), *((float*)&message.data[0]), *((float*)&response.data[4]), 
-        *((float*)&response.data[0]));  
-   
+        printf("Sending (Current: ");
+        print_float(*((float *)&message.data[4]));
+        printf(", Velocity:");
+        print_float(*((float *)&message.data[0]));
+        printf("), \n\rReceiving: (Current: ");
+        print_float(*((float *)&response.data[4]));
+        printf(", Velocity: ");
+        print_float(*((float *)&response.data[0]));
+        printf(") \n\r");
+
         for(int d = 0; d < 1000000; d++){} //delay
 
     }    
@@ -79,11 +103,17 @@ int main(void){
         memcpy(&message.data[0], &vel, sizeof(vel));
         memcpy(&message.data[4], &i, sizeof(i));
         CANbus_Send(message, CAN_BLOCKING, MOTORCAN);  
-        CANbus_Read(&response, CAN_BLOCKING, MOTORCAN); 
+        CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
 
-        printf("Sending (Current: %f, Velocity %f), Receiving: (Current: %f, Velocity %f)",
-        *((float*)&message.data[4]), *((float*)&message.data[0]), *((float*)&response.data[4]), 
-        *((float*)&response.data[0]));  
+        printf("Sending (Current: ");
+        print_float(*((float *)&message.data[4]));
+        printf(", Velocity:");
+        print_float(*((float *)&message.data[0]));
+        printf("), \n\rReceiving: (Current: ");
+        print_float(*((float *)&response.data[4]));
+        printf(", Velocity: ");
+        print_float(*((float *)&response.data[0]));
+        printf(") \n\r");
 
         for(int d = 0; d < 1000000; d++){} //delay
 
@@ -96,11 +126,17 @@ int main(void){
         memcpy(&message.data[0], &vel, sizeof(vel));
         memcpy(&message.data[4], &i, sizeof(i));
         CANbus_Send(message, CAN_BLOCKING, MOTORCAN);  
-        CANbus_Read(&response, CAN_BLOCKING, MOTORCAN); 
+        CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
 
-        printf("Sending (Current: %f, Velocity %f), Receiving: (Current: %f, Velocity %f)",
-        *((float*)&message.data[4]), *((float*)&message.data[0]), *((float*)&response.data[4]), 
-        *((float*)&response.data[0]));  
+        printf("Sending (Current: ");
+        print_float(*((float *)&message.data[4]));
+        printf(", Velocity:");
+        print_float(*((float *)&message.data[0]));
+        printf("), \n\rReceiving: (Current: ");
+        print_float(*((float *)&response.data[4]));
+        printf(", Velocity: ");
+        print_float(*((float *)&response.data[0]));
+        printf(") \n\r");
 
         for(int d = 0; d < 1000000; d++){} //delay
 
