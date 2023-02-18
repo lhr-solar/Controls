@@ -42,7 +42,7 @@ void Task1(){
     assertOSError(OS_MAIN_LOC, err);
 
     while(1){
-        printf("\nRegenEnable: %d", RegenEnable_Get());
+        printf("\nchargeEnable: %d", chargeEnable_Get());
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
     }
