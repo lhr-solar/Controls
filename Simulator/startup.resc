@@ -17,6 +17,11 @@ macro show_printUart
     connector Connect sysbus.usart2 uart-con
 """
 
+macro show_dispUart
+"""
+    emulation CreateServerSocketTerminal 49153 "disp-uart-con" false
+    connector Connect sysbus.usart3 disp-uart-con
+"""
 
 set periphWriteHook """
 print "START WRITE HOOK" 
@@ -47,22 +52,21 @@ elif(hex(offset) == "0x18cL"):
 emulation CreateCANHub "carCan"
 emulation CreateCANHub "motorCan"
 
-mach create "Controls leader"
-machine LoadPlatformDescription @../Controls/Renode/stm32f413.repl
+mach create "ctrl-leader"
+machine LoadPlatformDescription $platform
 sysbus LoadELF $bin
 logLevel 3
-using sysbus
-mach set "Controls leader"
+sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
+runMacro $show_printUart
 connector Connect sysbus.can1 carCan
-emulation CreateServerSocketTerminal 49152 "uart-con-1"
-connector Connect sysbus.usart2 uart-con-1
+connector Connect sysbus.can3 motorCan
 
-mach create "BPS board"
-machine LoadPlatformDescription @../Controls/Renode/stm32f413.repl
+mach create "bps-sim"
+mach set "bps-sim"
+machine LoadPlatformDescription $platform
 sysbus LoadELF $BPS_bin
 logLevel 3
-using sysbus
-mach set "BPS board"
+sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
 connector Connect sysbus.can1 carCan
-emulation CreateServerSocketTerminal 49153 "uart-con-2"
-connector Connect sysbus.usart2 uart-con-2
+
+mach set "ctrl-leader"
