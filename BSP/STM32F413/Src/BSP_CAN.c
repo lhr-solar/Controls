@@ -122,26 +122,42 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
         CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
     } else{
         // Filter CAN IDs
-        CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList; //list mode
-        CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_16bit;
+
+        // Added in to attempt to debug hardware filtering
+        CAN_FilterInitStruct.CAN_FilterNumber = 0;
+        CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList;
+        CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
+        CAN_FilterInitStruct.CAN_FilterIdHigh = 000;
+        CAN_FilterInitStruct.CAN_FilterIdLow = 268;
+        CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
         CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
         CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+        CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
         
-        uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
-        for(uint8_t i = 0; i < idWhitelistSize; i++){
-            CAN_FilterInitStruct.CAN_FilterNumber = i / NUM_FILTER_REGS; //determines filter number based on CAN ID
-            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i];
+        // Commented out below is the code that was here before we started changing things for debugging
 
-            if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
-                CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
-            }
-            else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
-                for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
-                    *(FilterStructPtr + j) = 0x0000;
 
-                CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
-            }
-        }
+        // CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList; //list mode
+        // CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_16bit;
+        // CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
+        // CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+        
+        // uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
+        // for(uint8_t i = 0; i < idWhitelistSize; i++){
+        //     CAN_FilterInitStruct.CAN_FilterNumber = i / NUM_FILTER_REGS; //determines filter number based on CAN ID
+        //     *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i];
+
+        //     if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
+        //         CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+        //     }
+        //     else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
+        //         for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
+        //             *(FilterStructPtr + j) = 0x0000;
+
+        //         CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+        //     }
+        // }
     }
 
     /* Transmit Structure preparation */

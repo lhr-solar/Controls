@@ -5,10 +5,13 @@
 #include "Contactors.h"
 #include "Display.h"
 #include "UpdateDisplay.h"
+#include "CANConfig.h"
 
 static OS_TCB Task1_TCB;
 #define STACK_SIZE 128
 static CPU_STK Task1_Stk[STACK_SIZE];
+
+#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
 void Task1(){
     OS_ERR err;
@@ -19,7 +22,7 @@ void Task1(){
     Contactors_Enable(ARRAY_CONTACTOR);
     Contactors_Enable(MOTOR_CONTACTOR);
     Contactors_Enable(ARRAY_PRECHARGE);
-    CANbus_Init(CARCAN);
+    CANbus_Init(CARCAN, &carCANFilterList, CARCAN_FILTER_SIZE);
     Display_Init();
     UpdateDisplay_Init();
     BSP_UART_Init(UART_2);

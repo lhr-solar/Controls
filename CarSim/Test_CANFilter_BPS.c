@@ -1,36 +1,36 @@
 #include"Tasks.h"
 #include "CANbus.h"
 #include "BSP_UART.h"
+#include "CANConfig.h"
 
 
 static OS_TCB TaskBPS_TCB;
 static CPU_STK TaskBPS_Stk[128];
 #define STACK_SIZE 128
 
+#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
+
 // Test CANbus hardware filtering by flooding the bus with messages
 void Task_BPS(void *p_arg){
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
+    // CANbus_Init(CARCAN, carCANFilterList, CARCAN_FILTER_SIZE);
     CANbus_Init(CARCAN, NULL, 0);
 
     // An array consisting of messages we read with random "noise" messages interspersed
     int CANMsgs[] = {
-        0x001,
-        0x024,
         BPS_TRIP,
         CHARGE_ENABLE,
         STATE_OF_CHARGE,
         SUPPLEMENTAL_VOLTAGE,
         MOTOR_DRIVE,
-        0x7F9,
         MOTOR_POWER,
         MOTOR_RESET,
         MOTOR_STATUS,
         MC_BUS,
         VELOCITY,
         MC_PHASE_CURRENT,
-        0x423,
         VOLTAGE_VEC,
         CURRENT_VEC,
         BACKEMF,
@@ -38,7 +38,6 @@ void Task_BPS(void *p_arg){
         ODOMETER_AMPHOURS,
         ARRAY_CONTACTOR_STATE_CHANGE,
 	    CARDATA,
-        0x0F23,
         0xFFFF // Ending sentinel- the task's id index returns to the beginning after finding this
     };
 

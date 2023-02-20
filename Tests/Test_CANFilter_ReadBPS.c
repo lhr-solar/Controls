@@ -1,16 +1,20 @@
 #include "Tasks.h"
 #include "CANbus.h"
 #include "BSP_UART.h"
+#include "CANConfig.h"
 
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[128];
 
 #define STACK_SIZE 128
 
+#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
+
 void Task1(void *p_arg){
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    CANbus_Init(CARCAN, NULL, 0);
+    CANbus_Init(CARCAN, carCANFilterList, 1);
+    // CANbus_Init(CARCAN, NULL, 0);
 
     CANDATA_t dataBuf; // A buffer in which we can store the messages we read
 

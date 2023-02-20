@@ -53,7 +53,7 @@ void CANbus_RxHandler_3(){
  * @param   idWhitelistSize The size of the whitelist.
  * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
  */
-ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize)
+ErrorStatus CANbus_Init(CAN_t bus, const CANId_t* idWhitelist, uint8_t idWhitelistSize)
 {
     // initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
     // initialize tx
@@ -232,28 +232,40 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
     assertOSError(OS_CANDRIVER_LOC,err);
 
     // Make sure this is a message we can receive
-    switch (MsgContainer->ID) {
-        case CHARGE_ENABLE:
-	    case STATE_OF_CHARGE:
-	    case SUPPLEMENTAL_VOLTAGE:
-	    case MOTOR_DRIVE:
-	    case MOTOR_POWER:
-	    case MOTOR_RESET:
-	    case MOTOR_STATUS:
-	    case MC_BUS:
-	    case VELOCITY:
-	    case MC_PHASE_CURRENT:
-	    case VOLTAGE_VEC:
-	    case CURRENT_VEC:
-	    case BACKEMF:
-	    case TEMPERATURE:
-	    case ODOMETER_AMPHOURS:
-	    case ARRAY_CONTACTOR_STATE_CHANGE: break; // Continue if value is valid
-        default: return ERROR; // Error if we get an unexpected value
+    // switch (MsgContainer->ID) {
+    //     case CHARGE_ENABLE:
+	//     case STATE_OF_CHARGE:
+	//     case SUPPLEMENTAL_VOLTAGE:
+	//     case MOTOR_DRIVE:
+	//     case MOTOR_POWER:
+	//     case MOTOR_RESET:
+	//     case MOTOR_STATUS:
+	//     case MC_BUS:
+	//     case VELOCITY:
+	//     case MC_PHASE_CURRENT:
+	//     case VOLTAGE_VEC:
+	//     case CURRENT_VEC:
+	//     case BACKEMF:
+	//     case TEMPERATURE:
+	//     case ODOMETER_AMPHOURS:
+	//     case ARRAY_CONTACTOR_STATE_CHANGE: break; // Continue if value is valid
+    //     default: return ERROR; // Error if we get an unexpected value
+    // }
+    if(status == ERROR){
+        return ERROR;
     }
-    
-    //search LUT for id to populate idx and trim data
-    CANLUT_T entry = CANLUT[MsgContainer->ID];
+
+    //error check the id
+    MsgContainer->ID = (CANId_t) id;
+    if(MsgContainer->ID >= NUM_CAN_IDS){
+        MsgContainer = NULL;
+        return ERROR;
+    }
+    CANLUT_T entry = CANLUT[MsgContainer->ID]; //lookup msg information in table
+    if(entry.size == 0){
+        MsgContainer = NULL;
+        return ERROR;
+    } 
     if(entry.idxEn==true){
         MsgContainer->idx = MsgContainer->data[0];
         memmove( // Can't use memcpy, as memory regions overlap

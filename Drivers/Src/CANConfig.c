@@ -40,10 +40,12 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
 */
 
 const CANId_t carCANFilterList[NUM_FILTERS_CARCAN] = {
-    BPS_TRIP, 
-    STATE_OF_CHARGE,
-    SUPPLEMENTAL_VOLTAGE,
+    //BPS_TRIP, 
+    //STATE_OF_CHARGE,
+    //SUPPLEMENTAL_VOLTAGE,
     CHARGE_ENABLE
 };
+#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
 const CANId_t motorCANFilterList[NUM_FILTERS_MOTORCAN] = {};
+#define MOTORCAN_FILTER_SIZE (sizeof motorCANFilterList / sizeof(CANId_t))

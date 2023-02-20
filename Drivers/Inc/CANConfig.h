@@ -2,7 +2,7 @@
 #define CAN_CONFIG
 #include "CANbus.h"
 
-#define NUM_FILTERS_CARCAN 4
+#define NUM_FILTERS_CARCAN 1
 #define NUM_FILTERS_MOTORCAN 0
 
 /**
