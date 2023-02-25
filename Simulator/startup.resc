@@ -63,6 +63,7 @@ sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
 runMacro $show_printUart
 connector Connect sysbus.can1 carCan
 connector Connect sysbus.can3 motorCan
+machine StartGdbServer 1111
 
 mach create "motor-sim"
 mach set "motor-sim"
@@ -71,6 +72,7 @@ sysbus LoadELF $motor_bin
 runMacro $show_printUart2
 logLevel 3
 connector Connect sysbus.can3 motorCan
+machine StartGdbServer 3333
 
 mach set "ctrl-leader"
 

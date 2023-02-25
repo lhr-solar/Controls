@@ -7,8 +7,8 @@
 static void print_float(float f){
     int n = (int)f;
     f -= n;
-    f *= (1000);
-    printf("%d.%03d", n, (int)f);
+    f *= (100);
+    printf("%d.%02d", n, (int)f);
 }
 
 //loop through range of currents from 0 to 1
@@ -27,10 +27,10 @@ int main(void){
 
 
 
-    //velocity -> 735
+    //velocity -> -500 to 500
     //current is a percentage -> 0 to 1 (current reaches its max in this loop [i = 1])
-    for(i = 0.000f; i <= 1.000f; i += 0.020f){ //current
-        for(vel = -544; vel <= 544; vel += 50){
+    for(i = 0.00f; i <= 1.00f; i += 0.05f){ //current
+        for(vel = -500; vel <= 500; vel += 50){
 
             memcpy(&message.data[0], &vel, sizeof(vel));
             memcpy(&message.data[4], &i, sizeof(i));         
@@ -49,7 +49,7 @@ int main(void){
             print_float(*((float *)&response.data[0]));
             printf(") \n\r");
 
-            for(int d = 0; d < 1000000; d++){} //delay
+            for(int d = 0; d < 10000; d++){} //delay
         }
     }
 

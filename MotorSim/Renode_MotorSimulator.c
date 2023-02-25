@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "Tasks.h"
 #include <math.h>
+#include "BSP_UART.h"
 
 // Global variables
 static float setpointVelocity = 0.0f; 
@@ -14,23 +15,23 @@ static CANDATA_t oldCD;
 static CANDATA_t currCD; // CANmsg we will be sending
 static CANDATA_t newCD;
 static uint8_t cycle_ctr = 0;
-static uint16_t motor_force = 0;
+static float motor_force = 0.00f;
 
 
 // CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
-#define MS_TIME_DELAY_MILSEC 100
-#define DECELERATION 2.0 // In m/s^2
+#define MS_TIME_DELAY_MILSEC 10
+#define DECELERATION 0.5 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
-#define MAX_CURRENT 50
+#define MAX_CURRENT 50 // in Amps
 #define WHEEL_RADIUS 0.2667f // In m
 #define TORQUE_SLOPE 1.15384615384615f // in kgfcm/A
 
 
 // VELOCITY CONTROL MODE
 
-#define PROPORTION .001
+#define PROPORTION .00001
 #define INTEGRAL 0
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
@@ -51,6 +52,7 @@ static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 //Function returns calculated current, calculated via PID
 float Velocity_PID_Output() { 
     Error = setpointVelocity - velocity;
+    printf("%d\n\r", (int)Error);
     ErrorSum = ErrorSum + Error;
 
     if (PreviousError == 0) {PreviousError = Error;} //init previous val first time
@@ -61,14 +63,14 @@ float Velocity_PID_Output() {
     if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) > 1.0f) {
         return 1.0f;
     }
-    else if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) < 0.0f) {
-        return 0.0f;
+    else if (((PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR) < -1.0f) {
+        return -1.0f;
     }
     else {
         return (PROPORTION*(Error) + INTEGRAL*(ErrorSum) + DERIVATIVE*(Rate))/DIVISOR;
     }
 
-    // TODO: Tweak the PID constants such that the output is a float from 0.0 to 1.0 
+    // TODO: Tweak the PID constants such that the output is a float from -1.0 to 1.0 
 }
 
 float CurrentToMotorForce(){ // Simulate giving the motor a current and returning a force
@@ -87,7 +89,7 @@ float MotorForceToVelocity(){
         total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
     }
 
-    return velocity + ((total_accel * MS_TIME_DELAY_MILSEC) / 1000); //Divide by 1000 to turn into seconds from ms;
+    return velocity + ((total_accel * MS_TIME_DELAY_MILSEC) * 1000); //Multiply by 1000 to turn into seconds from ms;
 }
 
 void ReturnVelocity_CANDATA_t(){
@@ -103,7 +105,8 @@ void ReturnVelocity_CANDATA_t(){
 void Task1(void *arg)
 {
     CANbus_Init(MOTORCAN);
-    
+    BSP_UART_Init(UART_2);
+
     while (1)
     {
         OS_ERR err;
