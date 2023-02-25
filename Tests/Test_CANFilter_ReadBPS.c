@@ -11,7 +11,7 @@ static CPU_STK Task1_Stk[128];
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
 #define TEST_FilterListLen 8
-const CANId_t TEST_FilterList[TEST_FilterListLen] = {
+ CANId_t TEST_FilterList[TEST_FilterListLen] = {
     MC_PHASE_CURRENT,
     VOLTAGE_VEC,
     CURRENT_VEC,

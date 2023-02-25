@@ -38,10 +38,10 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
  * @brief Lists of CAN IDs that we want to receive. Used to initialize the CAN filters for CarCAN and MotorCAN.
 */
 
-const CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
+CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
     BPS_TRIP, 
     STATE_OF_CHARGE,
     SUPPLEMENTAL_VOLTAGE,
     CHARGE_ENABLE
 };
-const CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {};
+CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {};
