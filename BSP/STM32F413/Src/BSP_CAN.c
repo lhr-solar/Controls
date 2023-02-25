@@ -122,26 +122,16 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
         CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
     } else{
         // Filter CAN IDs
-        //So far, if we shift whatever id we need by 5, it works
-
-        // // DEBUG FOR FILTERING
-        // // Added in to attempt to debug hardware filtering
-        // CAN_FilterInitStruct.CAN_FilterNumber = 0;
-        // CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList;
-        // CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_16bit;
-        // CAN_FilterInitStruct.CAN_FilterIdHigh = 268 << 5;
-        // CAN_FilterInitStruct.CAN_FilterIdLow = 2 << 5;
-        // CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 262 << 5;
-        // CAN_FilterInitStruct.CAN_FilterMaskIdLow = 267 << 5;
-        // CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
-        // CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-        // CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+        // So far, if we shift whatever id we need by 5, it works
+        // If whitelist is passed but no valid ID exists inside of it, filter nothing i.e. no ID gets through
+        // MAXIMUM CAN ID ALLOWED IS 2047
 
         CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList; //list mode
         CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_16bit;
         CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
         CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-        
+        uint16_t validIDCounter = 0;
+
         uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
         for(uint8_t i = 0; i < idWhitelistSize; i++){
             if (idWhitelist[i] == 0){ //zero ID check
@@ -150,6 +140,7 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
                 
             CAN_FilterInitStruct.CAN_FilterNumber = i / NUM_FILTER_REGS; //determines filter number based on CAN ID
             *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i] << 5;
+            validIDCounter++;
 
             if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
                 CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
@@ -159,6 +150,13 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
                     *(FilterStructPtr + j) = 0x0000;
 
                 CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+            }
+            else if(validIDCounter > 112){ //All filter banks are to be filled and there is no point in filtering
+                for(uint8_t filter = 0; filter < 28; filter++){//Therefore, let all IDs through (no filtering)
+                    CAN_FilterInitStruct.CAN_FilterNumber = filter;
+                    CAN_FilterInitStruct.CAN_FilterActivation = DISABLE;
+                    CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+                } 
             }
         }
     }
