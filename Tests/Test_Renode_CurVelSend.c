@@ -22,14 +22,14 @@ int main(void){
     CANDATA_t message;
     message.ID = MOTOR_DRIVE;
     message.idx = 0;
-    float vel = 0;
-    float i = 0.0f;
+    float vel = 0.00f;
+    float i = 0.000f;
 
 
 
     //velocity -> 735
     //current is a percentage -> 0 to 1 (current reaches its max in this loop [i = 1])
-    for(i = 0.0f; i <= 1.0f; i += 0.02f){ //current
+    for(i = 0.000f; i <= 1.000f; i += 0.020f){ //current
         for(vel = -544; vel <= 544; vel += 50){
 
             memcpy(&message.data[0], &vel, sizeof(vel));
