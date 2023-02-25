@@ -12,6 +12,11 @@
 #include "CANbus.h"
 #include "Contactors.h"
 #include "ReadCarCAN.h"
+#include "CAN_Queue.h"
+#include "Minions.h"
+#include "BSP_UART.h"
+#include "Display.h"
+#include "UpdateDisplay.h"
 
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[128];
@@ -28,6 +33,10 @@ void Task1(void *p_arg){
     Contactors_Init();
     Contactors_Enable(ARRAY_CONTACTOR);
     Contactors_Enable(ARRAY_PRECHARGE);
+
+    CAN_Queue_Init();
+
+    Minion_Init();
 
     while(1){
         printf("\nchargeEnable: %d", ChargeEnable_Get());
@@ -102,6 +111,21 @@ int main(void){ //startup OS stuff, spawn test task
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
+
+    // OSTaskCreate(
+    //     (OS_TCB *)&UpdateDisplay_TCB,
+    //     (CPU_CHAR *)"UpdateDisplay_TCB",
+    //     (OS_TASK_PTR)Task_UpdateDisplay,
+    //     (void *)NULL,
+    //     (OS_PRIO)13,
+    //     (CPU_STK *)UpdateDisplay_Stk,
+    //     (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
+    //     (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+    //     (OS_MSG_QTY)0,
+    //     (OS_TICK)NULL,
+    //     (void *)NULL,
+    //     (OS_OPT)(OS_OPT_TASK_STK_CLR),
+    //     (OS_ERR *)&err);
 
     if (err != OS_ERR_NONE) {
         printf("Task error code %d\n", err);

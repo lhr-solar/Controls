@@ -39,7 +39,7 @@ void Task1(void *p_arg){
     // Message for BPS Fault
     CANDATA_t tripBPSMsg;
     tripBPSMsg.ID = BPS_TRIP;
-    *(uint64_t*)(&chargeMsg.data) = 0;
+    *(uint64_t*)(&tripBPSMsg.data) = 0;
     tripBPSMsg.idx = 0;
 
 
@@ -48,9 +48,11 @@ void Task1(void *p_arg){
         for(int i = 0; i<10; i++){
             CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
             OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
+            printf("\nSent chargeMsg %d", i);
         }
 
         CANbus_Send(tripBPSMsg, CAN_BLOCKING, CARCAN);
+        printf("\nSent trip message %d", tripBPSMsg.data[0]);
         
 
         for(int i = 0; i<10; i++){
