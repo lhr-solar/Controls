@@ -37,13 +37,13 @@ endif
 
 motor-sim:
 ifneq ($(TEST_MOTOR), none)
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(MOTORSIM) TEST=MotorSim/$(TEST_MOTOR)
+	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(MOTORSIM) TEST=MotorSim/Test_$(TEST_MOTOR)
 	@echo "${BLUE}Compiled for motor sim! Jolly Good!${NC}"
 endif
 
 car-sim:
 ifneq ($(TEST_CAR), none)
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(CARSIM) TEST=CarSim/$(TEST_CAR)
+	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(CARSIM) TEST=CarSim/Test_$(TEST_CAR)
 	@echo "${BLUE}Compiled for car sim! Jolly Good!${NC}"
 endif
 

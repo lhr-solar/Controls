@@ -1,16 +1,26 @@
 $bin?=@Objects/controls-leader.elf
-$BPS_bin?=@Renode/bpsSim.elf
-$platform?=@Renode/stm32f413.repl
+$BPS_bin?=@Objects/car-sim.elf
+$platform=@Simulator/stm32f413.repl
+
+macro show_dispUart
+"""
+    showAnalyzer sysbus.usart3
+"""
 
 macro reset
 """
     sysbus LoadELF $bin
 """
 
-macro show_printUart
+macro show_printUartldr
 """
     emulation CreateServerSocketTerminal 49152 "debug-uart-con" false
     connector Connect sysbus.usart2 debug-uart-con
+"""
+macro show_printUartbps
+"""
+    emulation CreateServerSocketTerminal 59152 "uart-conb" false
+    connector Connect sysbus.usart2 uart-conb
 """
 
 macro show_dispUart
@@ -52,8 +62,8 @@ mach create "ctrl-leader"
 machine LoadPlatformDescription $platform
 sysbus LoadELF $bin
 logLevel 3
-sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
-runMacro $show_printUart
+runMacro $show_printUartldr
+machine StartGdbServer 3333
 connector Connect sysbus.can1 carCan
 connector Connect sysbus.can3 motorCan
 
@@ -62,7 +72,7 @@ mach set "bps-sim"
 machine LoadPlatformDescription $platform
 sysbus LoadELF $BPS_bin
 logLevel 3
-sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
+runMacro $show_printUartbps
 connector Connect sysbus.can1 carCan
 
 mach set "ctrl-leader"
