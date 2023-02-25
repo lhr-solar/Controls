@@ -78,18 +78,13 @@ float CurrentToMotorForce(){ // Simulate giving the motor a current and returnin
 }
 
 float MotorForceToVelocity(){
+    //drag calculations
     if (velocity==0){
-        if (setpointVelocity > 0) {
-            total_accel = ((float)motor_force / CAR_MASS_KG);
-        } else{
-            total_accel = ((float)(-motor_force) / CAR_MASS_KG);
-        }
-    } else{
-        if (setpointVelocity > 0) {
-            total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
-        } else{
-            total_accel = ((float)(-motor_force) / CAR_MASS_KG + DECELERATION);
-        }
+        total_accel = ((float)motor_force / CAR_MASS_KG);
+    } else if (velocity < 0){
+        total_accel = ((float)motor_force / CAR_MASS_KG + DECELERATION);
+    } else if (velocity > 0){
+        total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
     }
 
     return velocity + ((total_accel * MS_TIME_DELAY_MILSEC) / 1000); //Divide by 1000 to turn into seconds from ms;
@@ -125,7 +120,7 @@ void Task1(void *arg)
         
         if (abs(setpointVelocity) == MAX_VELOCITY){  // CURRENT CONTROLLED MODE
 
-            current = 1.0f; // Calculated Current = 1
+            current = (setpointVelocity < 0) ? -1.0f : 1.0f; // Calculated Current = 1 or -1
 
             // FORCE = Current(%) * Max Current (A) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
             motor_force = CurrentToMotorForce();

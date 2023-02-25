@@ -1,6 +1,7 @@
 $bin?=@Objects/controls-leader.elf
-$BPS_bin?=@Renode/bpsSim.elf
-$platform?=@Renode/stm32f413.repl
+$BPS_bin?=@Objects/car-sim.elf
+$motor_bin?=@Objects/motor-sim.elf
+$platform?=@Simulator/stm32f413.repl
 
 macro reset
 """
@@ -9,8 +10,14 @@ macro reset
 
 macro show_printUart
 """
-    emulation CreateServerSocketTerminal 49152 "debug-uart-con" false
-    connector Connect sysbus.usart2 debug-uart-con
+    emulation CreateServerSocketTerminal 49152 "leader-uart-con" false
+    connector Connect sysbus.usart2 leader-uart-con
+"""
+
+macro show_printUart2
+"""
+    emulation CreateServerSocketTerminal 49153 "motor-uart-con" false
+    connector Connect sysbus.usart2 motor-uart-con
 """
 
 macro show_dispUart
@@ -57,13 +64,13 @@ runMacro $show_printUart
 connector Connect sysbus.can1 carCan
 connector Connect sysbus.can3 motorCan
 
-mach create "bps-sim"
-mach set "bps-sim"
+mach create "motor-sim"
+mach set "motor-sim"
 machine LoadPlatformDescription $platform
-sysbus LoadELF $BPS_bin
+sysbus LoadELF $motor_bin
+runMacro $show_printUart2
 logLevel 3
-sysbus SetHookBeforePeripheralWrite sysbus.can1 $can1_WriteHook
-connector Connect sysbus.can1 carCan
+connector Connect sysbus.can3 motorCan
 
 mach set "ctrl-leader"
 

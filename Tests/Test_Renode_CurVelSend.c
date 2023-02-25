@@ -8,7 +8,7 @@ static void print_float(float f){
     int n = (int)f;
     f -= n;
     f *= (1000);
-    printf("%d.%d", n, (int)f);
+    printf("%d.%03d", n, (int)f);
 }
 
 //loop through range of currents from 0 to 1
