@@ -30,7 +30,7 @@ static uint16_t motor_force = 0;
 
 // VELOCITY CONTROL MODE
 
-#define PROPORTION 1
+#define PROPORTION .001
 #define INTEGRAL 0
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
@@ -78,11 +78,18 @@ float CurrentToMotorForce(){ // Simulate giving the motor a current and returnin
 }
 
 float MotorForceToVelocity(){
-
-    if (setpointVelocity > 0) {
-        total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
+    if (velocity==0){
+        if (setpointVelocity > 0) {
+            total_accel = ((float)motor_force / CAR_MASS_KG);
+        } else{
+            total_accel = ((float)(-motor_force) / CAR_MASS_KG);
+        }
     } else{
-        total_accel = ((float)(-motor_force) / CAR_MASS_KG + DECELERATION);
+        if (setpointVelocity > 0) {
+            total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
+        } else{
+            total_accel = ((float)(-motor_force) / CAR_MASS_KG + DECELERATION);
+        }
     }
 
     return velocity + ((total_accel * MS_TIME_DELAY_MILSEC) / 1000); //Divide by 1000 to turn into seconds from ms;
@@ -98,7 +105,7 @@ void ReturnVelocity_CANDATA_t(){
     CANbus_Send(currCD, CAN_BLOCKING, MOTORCAN);
 }
 
-    void Task1(void *arg)
+void Task1(void *arg)
 {
     CANbus_Init(MOTORCAN);
     

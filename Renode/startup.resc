@@ -1,4 +1,4 @@
-$Test_bin?=@Objects/TestMotorSim.elf
+$Test_bin?=@Objects/Test_MotorSim.elf
 $MotSim_bin?=@Objects/controls-leader.elf
 $platform?=@Renode/stm32f413.repl
 
