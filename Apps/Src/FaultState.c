@@ -116,7 +116,7 @@ void EnterFaultState(void) {
         } else {
             disp_fault_cnt++;
             Display_Reset();
-            FaultBitmap = FAULT_DISPLAY; // Clear the display fault bit in FaultBitmap
+            FaultBitmap &= ~FAULT_DISPLAY; // Clear the display fault bit in FaultBitmap
             return;
         }
     }
