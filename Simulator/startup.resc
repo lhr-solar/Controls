@@ -63,7 +63,7 @@ machine LoadPlatformDescription $platform
 sysbus LoadELF $bin
 logLevel 3
 runMacro $show_printUartldr
-machine StartGdbServer 3333
+machine StartGdbServer 3333 true
 connector Connect sysbus.can1 carCan
 connector Connect sysbus.can3 motorCan
 

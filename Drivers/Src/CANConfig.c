@@ -18,7 +18,6 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
 	[CHARGE_ENABLE] 				= {NOIDX, DOUBLE}, /**     CHARGE_ENABLE                   **/
 	[STATE_OF_CHARGE] 				= {NOIDX, DOUBLE}, /**     STATE_OF_CHARGE                 **/
 	[SUPPLEMENTAL_VOLTAGE] 			= {NOIDX, DOUBLE}, /**     SUPPLEMENTAL_VOLTAGE            **/
-	// [CAR_STATE] = {NOIDX, DOUBLE, 0x580}, /**     CAR_STATE                       **/
 	[MC_BUS] 						= {NOIDX, DOUBLE}, /**     MC_BUS                          **/
 	[VELOCITY] 						= {NOIDX, DOUBLE}, /**     VELOCITY                        **/
 	[MC_PHASE_CURRENT] 				= {NOIDX, DOUBLE}, /**     MC_PHASE_CURRENT                **/
@@ -39,13 +38,10 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
  * @brief Lists of CAN IDs that we want to receive. Used to initialize the CAN filters for CarCAN and MotorCAN.
 */
 
-const CANId_t carCANFilterList[NUM_FILTERS_CARCAN] = {
-    //BPS_TRIP, 
-    //STATE_OF_CHARGE,
-    //SUPPLEMENTAL_VOLTAGE,
+const CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
+    BPS_TRIP, 
+    STATE_OF_CHARGE,
+    SUPPLEMENTAL_VOLTAGE,
     CHARGE_ENABLE
 };
-#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
-
-const CANId_t motorCANFilterList[NUM_FILTERS_MOTORCAN] = {};
-#define MOTORCAN_FILTER_SIZE (sizeof motorCANFilterList / sizeof(CANId_t))
+const CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {};

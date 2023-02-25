@@ -16,7 +16,7 @@ void Task_BPS(void *p_arg){
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
     // CANbus_Init(CARCAN, carCANFilterList, CARCAN_FILTER_SIZE);
-    CANbus_Init(CARCAN, NULL, 0);
+    CANbus_Init(CARCAN, carCANFilterList, 0);
 
     // An array consisting of messages we read with random "noise" messages interspersed
     int CANMsgs[] = {

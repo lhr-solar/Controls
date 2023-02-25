@@ -27,7 +27,6 @@ typedef enum {
 	WDOG_TRIGGERED					= 0x107,
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
 	CHARGE_ENABLE 					= 0x10C,
-	// CAR_STATE 						= 0x580,
 	MOTOR_DRIVE 					= 0x221,
 	MOTOR_POWER						= 0x222,
 	MOTOR_RESET 					= 0x223,
@@ -86,7 +85,7 @@ typedef struct {
  * @param   idWhitelistSize The size of the whitelist.
  * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
  */
-ErrorStatus CANbus_Init(CAN_t bus, const CANId_t* idWhitelist, uint8_t idWhitelistSize);
+ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize);
 
 /**
  * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is necessary, please use an IDX message.
