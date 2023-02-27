@@ -43,9 +43,9 @@ int main(void){
             print_float(*((float *)&message.data[4]));
             printf(", Velocity:");
             print_float(*((float *)&message.data[0]));
-            printf("), \n\rReceiving: (Current: ");
+            printf("), \n\rReceiving: (Velocity (m/s): ");
             print_float(*((float *)&response.data[4]));
-            printf(", Velocity: ");
+            printf(", Velocity (RPM): ");
             print_float(*((float *)&response.data[0]));
             printf(") \n\r");
 

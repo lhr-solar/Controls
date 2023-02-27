@@ -7,7 +7,8 @@
 
 // Global variables
 static float setpointVelocity = 0.0f; 
-static float velocity = 0.0f;
+static float velocityRPM = 0.0f;
+static float velocityMPS = 0.0f;
 static float setpointCurrent = 0.0f;
 static float current = 0.0f; 
 static float total_accel = 0.0f;
@@ -51,7 +52,7 @@ static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 //Function returns calculated current, calculated via PID
 float Velocity_PID_Output() { 
-    Error = setpointVelocity - velocity;
+    Error = setpointVelocity - velocityRPM;
     printf("%d\n\r", (int)Error);
     ErrorSum = ErrorSum + Error;
 
@@ -75,29 +76,35 @@ float Velocity_PID_Output() {
 
 float CurrentToMotorForce(){ // Simulate giving the motor a current and returning a force
     
+    // FORCE = Current(%) * (CurrentSetpoint * Max Current (A)) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
     return (current*(setpointCurrent*MAX_CURRENT)*TORQUE_SLOPE*100) / WHEEL_RADIUS;
 
 }
 
-float MotorForceToVelocity(){
+float MotorForceToVelocity(){ 
     //drag calculations
-    if (velocity==0){
+    if (velocityRPM==0){
         total_accel = ((float)motor_force / CAR_MASS_KG);
-    } else if (velocity < 0){
+    } else if (velocityRPM < 0){
         total_accel = ((float)motor_force / CAR_MASS_KG + DECELERATION);
-    } else if (velocity > 0){
+    } else if (velocityRPM > 0){
         total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
     }
 
-    return velocity + ((total_accel * MS_TIME_DELAY_MILSEC) * 1000); //Multiply by 1000 to turn into seconds from ms;
+    return velocityRPM + ((total_accel * MS_TIME_DELAY_MILSEC) * (1000 * 60)); // Multiply by 1000*60 to go from R/MS to RPM
+}
+
+float RevPerMinToMetersPerSec(){
+    //converting the new velocity from RPM to M/S
+    return ((velocityRPM * (2 * M_PI * WHEEL_RADIUS)) / 60); 
 }
 
 void ReturnVelocity_CANDATA_t(){
     currCD.ID = MOTOR_DRIVE;
     currCD.idx = 0;
 
-    memcpy(&currCD.data[0], &velocity, sizeof(velocity));
-    memcpy(&currCD.data[4], &current, sizeof(current));
+    memcpy(&currCD.data[0], &velocityRPM, sizeof(velocityRPM));
+    memcpy(&currCD.data[4], &velocityMPS, sizeof(velocityMPS));
 
     CANbus_Send(currCD, CAN_BLOCKING, MOTORCAN);
 }
@@ -125,10 +132,11 @@ void Task1(void *arg)
 
             current = (setpointVelocity < 0) ? -1.0f : 1.0f; // Calculated Current = 1 or -1
 
-            // FORCE = Current(%) * Max Current (A) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
             motor_force = CurrentToMotorForce();
 
-            velocity = MotorForceToVelocity();
+            velocityMPS = MotorForceToVelocity();
+
+            velocityRPM = RevPerMinToMetersPerSec();
 
         } 
         else { // VELOCITY CONTROLLED MODE
@@ -137,7 +145,9 @@ void Task1(void *arg)
 
             motor_force = CurrentToMotorForce();
 
-            velocity = MotorForceToVelocity();
+            velocityRPM = MotorForceToVelocity();
+
+            velocityMPS = RevPerMinToMetersPerSec();
 
         }
 
