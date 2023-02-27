@@ -32,7 +32,7 @@ static float motor_force = 0.00f;
 
 // VELOCITY CONTROL MODE
 
-#define PROPORTION .00001
+#define PROPORTION .0001
 #define INTEGRAL 0
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
@@ -50,10 +50,23 @@ static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 
+//function to convert from RPM to M/S
+float RevPerMinToMetersPerSec(float velRPM){
+    //converting the velocity from RPM to M/S
+    return ((velRPM * (2 * M_PI * WHEEL_RADIUS)) / 60); 
+}
+
+//Function to convert from M/S to RPM
+float MetersPerSecToRevPerMin(float velMPS){
+    //converting the velocity from M/S to RPM
+    return ((velMPS * 60) / (2 * M_PI * WHEEL_RADIUS)); 
+}
+
 //Function returns calculated current, calculated via PID
 float Velocity_PID_Output() { 
-    Error = setpointVelocity - velocityRPM;
+    Error = RevPerMinToMetersPerSec(setpointVelocity) - velocityMPS;
     printf("%d\n\r", (int)Error);
+    
     ErrorSum = ErrorSum + Error;
 
     if (PreviousError == 0) {PreviousError = Error;} //init previous val first time
@@ -77,26 +90,21 @@ float Velocity_PID_Output() {
 float CurrentToMotorForce(){ // Simulate giving the motor a current and returning a force
     
     // FORCE = Current(%) * (CurrentSetpoint * Max Current (A)) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
-    return (current*(setpointCurrent*MAX_CURRENT)*TORQUE_SLOPE*100) / WHEEL_RADIUS;
+    return (current * (setpointCurrent * MAX_CURRENT) * TORQUE_SLOPE * 100) / WHEEL_RADIUS;
 
 }
 
 float MotorForceToVelocity(){ 
     //drag calculations
-    if (velocityRPM==0){
+    if (velocityMPS==0){
         total_accel = ((float)motor_force / CAR_MASS_KG);
-    } else if (velocityRPM < 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG + DECELERATION);
-    } else if (velocityRPM > 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG - DECELERATION);
+    } else if (velocityMPS < 0){
+        total_accel = ((float)motor_force / CAR_MASS_KG + (DECELERATION));
+    } else if (velocityMPS > 0){
+        total_accel = ((float)motor_force / CAR_MASS_KG - (DECELERATION));
     }
 
-    return velocityRPM + ((total_accel * MS_TIME_DELAY_MILSEC) * (1000 * 60)); // Multiply by 1000*60 to go from R/MS to RPM
-}
-
-float RevPerMinToMetersPerSec(){
-    //converting the new velocity from RPM to M/S
-    return ((velocityRPM * (2 * M_PI * WHEEL_RADIUS)) / 60); 
+    return velocityMPS + ((total_accel * MS_TIME_DELAY_MILSEC) * (1000)); // Multiply by 1000 to go from m/ms to m/s
 }
 
 void ReturnVelocity_CANDATA_t(){
@@ -136,7 +144,7 @@ void Task1(void *arg)
 
             velocityMPS = MotorForceToVelocity();
 
-            velocityRPM = RevPerMinToMetersPerSec();
+            velocityRPM = MetersPerSecToRevPerMin(velocityMPS);
 
         } 
         else { // VELOCITY CONTROLLED MODE
@@ -145,9 +153,9 @@ void Task1(void *arg)
 
             motor_force = CurrentToMotorForce();
 
-            velocityRPM = MotorForceToVelocity();
+            velocityMPS = MotorForceToVelocity();
 
-            velocityMPS = RevPerMinToMetersPerSec();
+            velocityRPM = MetersPerSecToRevPerMin(velocityMPS);
 
         }
 
