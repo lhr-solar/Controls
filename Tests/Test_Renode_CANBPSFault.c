@@ -34,9 +34,13 @@ void Task1(void *p_arg){
     Contactors_Enable(ARRAY_CONTACTOR);
     Contactors_Enable(ARRAY_PRECHARGE);
 
-    CAN_Queue_Init();
+    Display_Init();
+    UpdateDisplay_Init();
+    BSP_UART_Init(UART_2);
 
-    Minion_Init();
+    //CAN_Queue_Init();
+
+    //Minion_Init();
 
     while(1){
         printf("\nchargeEnable: %d", ChargeEnable_Get());
@@ -71,7 +75,7 @@ int main(void){ //startup OS stuff, spawn test task
         (OS_ERR*)&err
     );
 
-       OSTaskCreate( //create readCarCAN task
+       OSTaskCreate( // Create readCarCAN task
         (OS_TCB*)&ReadCarCAN_TCB,
         (CPU_CHAR*)"Read Car CAN",
         (OS_TASK_PTR)Task_ReadCarCAN,
@@ -87,7 +91,7 @@ int main(void){ //startup OS stuff, spawn test task
         (OS_ERR*)&err
     );
 
-    OSSemCreate( //create fault sem4
+    OSSemCreate( // Create fault sem4
         &FaultState_Sem4,
         "Fault State Semaphore",
         0,
@@ -96,7 +100,7 @@ int main(void){ //startup OS stuff, spawn test task
     assertOSError(OS_MAIN_LOC,err); 
 
 
-    OSTaskCreate( //create fault task
+    OSTaskCreate( // Create fault task
         (OS_TCB*)&FaultState_TCB,
         (CPU_CHAR*)"Fault State",
         (OS_TASK_PTR)&Task_FaultState,
@@ -112,20 +116,20 @@ int main(void){ //startup OS stuff, spawn test task
         (OS_ERR*)&err
     );
 
-    // OSTaskCreate(
-    //     (OS_TCB *)&UpdateDisplay_TCB,
-    //     (CPU_CHAR *)"UpdateDisplay_TCB",
-    //     (OS_TASK_PTR)Task_UpdateDisplay,
-    //     (void *)NULL,
-    //     (OS_PRIO)13,
-    //     (CPU_STK *)UpdateDisplay_Stk,
-    //     (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
-    //     (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
-    //     (OS_MSG_QTY)0,
-    //     (OS_TICK)NULL,
-    //     (void *)NULL,
-    //     (OS_OPT)(OS_OPT_TASK_STK_CLR),
-    //     (OS_ERR *)&err);
+    OSTaskCreate(
+        (OS_TCB *)&UpdateDisplay_TCB,
+        (CPU_CHAR *)"UpdateDisplay_TCB",
+        (OS_TASK_PTR)Task_UpdateDisplay,
+        (void *)NULL,
+        (OS_PRIO)13,
+        (CPU_STK *)UpdateDisplay_Stk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void *)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR *)&err);
 
     if (err != OS_ERR_NONE) {
         printf("Task error code %d\n", err);

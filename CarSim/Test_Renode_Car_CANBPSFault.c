@@ -60,7 +60,7 @@ void Task1(void *p_arg){
             OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
         }
         
-        *(uint64_t*)(&chargeMsg.data) = 1;
+        *(uint64_t*)(&tripBPSMsg.data) = 1;
         CANbus_Send(tripBPSMsg, CAN_BLOCKING, CARCAN);
         
     }
