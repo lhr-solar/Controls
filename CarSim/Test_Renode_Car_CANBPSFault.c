@@ -5,9 +5,6 @@
  * It is designed to send messages on CAN1 (CARCAN) to test ReadCarCAN's fault handling
  * Specifically, it sends the BPS trip message so we can check that this message sends the car to Fault State
  * 
- * Author: (indirectly) Sidharth N. Babu
- * Date Written: 2023-02-24
- * Email: sidharth.n.babu@utexas.edu
 */
 
 

@@ -1,10 +1,6 @@
 /**
- * This file tests the ReadCarCAN module by spawning tasks and then reading the status of the car.
+ * This file tests the ReadCarCAN module by spawning tasks and then reading the chargeEnable of the car.
  *
- * 
- * Author: Madeleine Lee
- * Date Written: 2023-02-25
- * Email: madeleinercflee@utexas.edu
 */
 
 
@@ -38,13 +34,9 @@ void Task1(void *p_arg){
     UpdateDisplay_Init();
     BSP_UART_Init(UART_2);
 
-    //CAN_Queue_Init();
-
-    //Minion_Init();
 
     while(1){
-        printf("\nchargeEnable: %d", ChargeEnable_Get());
-        printf("\nfault bitmap: %x", FaultBitmap);       
+        printf("\nchargeEnable: %d", ChargeEnable_Get());  
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 }

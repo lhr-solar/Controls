@@ -9,6 +9,7 @@ static CPU_STK TaskBPS_Stk[128];
 #define STACK_SIZE 128
 
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
+#define CANMSG_ARR_SIZE (sizeof(CANMsgs) / sizeof(CANMsgs[0]))
 
 // Test CANbus hardware filtering by flooding the bus with messages
 void Task_BPS(void *p_arg){
@@ -37,35 +38,25 @@ void Task_BPS(void *p_arg){
         TEMPERATURE,
         ODOMETER_AMPHOURS,
         ARRAY_CONTACTOR_STATE_CHANGE,
-	    CARDATA,
-        0xFFFF // Ending sentinel- the task's id index returns to the beginning after finding this
+	    CARDATA
     };
 
-    uint8_t idIndex = 0;
-
-    // Make a CAN message
+    // Make a CAN message. Message id is set in the for loop
     CANDATA_t msg;
-    msg.ID = 0x001;
-    msg.idx = 0; // Do I need to test longer messages?
+    msg.idx = 0;
     *(uint64_t*)(&msg.data) = 0; // Just an empty message without data
 
     
 
     while(1){
         
-        CANbus_Send(msg, true, CARCAN); // Send the current message and print the id to the uart
-        printf("Sent %d\n\r", msg.ID);
-
-        // If we're at the end of the message array, set the index back to 0.
-        if (msg.ID == 0xFFFF) {
-            idIndex = 0;
-        } else { // Otherwise increment the index
-            idIndex++;
+        for (uint8_t i = 0; i < CANMSG_ARR_SIZE; i++) {
+            msg.ID = CANMsgs[i];
+            CANbus_Send(msg, true, CARCAN); // Send the current message
+            printf("Sent %d\n\r", msg.ID); //print the id to the uart
+            OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
         }
-
-        msg.ID = CANMsgs[idIndex]; // Set the ID to send to the next message id
-
-        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+        
     }
 
 }
@@ -86,14 +77,14 @@ int main(void){ //OS initialization and task spawning
         (CPU_CHAR*)"TaskBPS",
         (OS_TASK_PTR)Task_BPS,
         (void*)NULL,
-        (OS_PRIO)3, // Don't know if this is correct @@@@@
+        (OS_PRIO)3,
         (CPU_STK*)TaskBPS_Stk,
         (CPU_STK_SIZE)STACK_SIZE,
         (CPU_STK_SIZE)STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)NULL,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK), // Not sure if this is necessary @@@@@
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
 
