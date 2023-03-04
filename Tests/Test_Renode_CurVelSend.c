@@ -23,14 +23,14 @@ int main(void){
     CANDATA_t message;
     message.ID = MOTOR_DRIVE;
     message.idx = 0;
-    float vel = 320.0f;
+    float vel = 650.0f;
     float i = 1.0f;
     
 
     memcpy(&message.data[0], &vel, sizeof(vel));
     memcpy(&message.data[4], &i, sizeof(i));         
 
-    
+    int ct=0;
 
     while(1){
         CANbus_Send(message, CAN_BLOCKING, MOTORCAN);   
@@ -45,7 +45,7 @@ int main(void){
         printf(", Velocity (RPM): ");
         print_float(*((float *)&response.data[0]));
         printf(") \n\r");
-
+        printf("%d \n\r", ct++);
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 

@@ -22,7 +22,7 @@ static float motor_force = 0.00f;
 // CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
 #define MS_TIME_DELAY_MILSEC 10
-#define DECELERATION 0.00005 // In m/s^2
+#define DECELERATION 0.00001 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
 #define MAX_CURRENT 50 // in Amps
@@ -95,10 +95,13 @@ float CurrentToMotorForce(){ // Simulate giving the motor a current and returnin
 
 float MotorForceToVelocity(){ 
     //drag calculations
-    if (velocityMPS <= 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG + (DECELERATION*velocityMPS*velocityMPS));
-    } else if (velocityMPS > 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG - (DECELERATION*velocityMPS*velocityMPS));
+
+    float predictedVel = (((float)motor_force / CAR_MASS_KG)*(MS_TIME_DELAY_MILSEC) * (1000));
+    
+    if (predictedVel <= 0){
+        total_accel = ((float)motor_force / CAR_MASS_KG + (DECELERATION*predictedVel*predictedVel));
+    } else if (predictedVel > 0){
+        total_accel = ((float)motor_force / CAR_MASS_KG - (DECELERATION*predictedVel*predictedVel));
     }
 
     return velocityMPS + ((total_accel * MS_TIME_DELAY_MILSEC) * (1000)); // Multiply by 1000 to go from m/ms to m/s
