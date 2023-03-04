@@ -22,18 +22,18 @@ static float motor_force = 0.00f;
 // CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
 #define MS_TIME_DELAY_MILSEC 10
-#define DECELERATION 0.00001 // In m/s^2
+#define DECELERATION 0.0000000118 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
 #define MAX_CURRENT 50 // in Amps
 #define WHEEL_RADIUS 0.2667f // In m
-#define TORQUE_SLOPE 1.15384615384615f // in kgfcm/A
+#define TORQUE_SLOPE 11.5384615384615f // in kgfcm/A
 
 
 // VELOCITY CONTROL MODE
 
-#define PROPORTION 0.0000005
-#define INTEGRAL   0.000000001
+#define PROPORTION .00001
+#define INTEGRAL   0
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
 #define DIVISOR 1
@@ -89,7 +89,7 @@ float Velocity_PID_Output() {
 float CurrentToMotorForce(){ // Simulate giving the motor a current and returning a force
     
     // FORCE = Current(%) * (CurrentSetpoint * Max Current (A)) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
-    return (current * (setpointCurrent * MAX_CURRENT) * TORQUE_SLOPE * 100) / WHEEL_RADIUS;
+    return (current * (setpointCurrent * MAX_CURRENT) * TORQUE_SLOPE * 9.8 / 100) / WHEEL_RADIUS;
 
 }
 

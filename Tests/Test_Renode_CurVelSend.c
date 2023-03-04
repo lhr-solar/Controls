@@ -7,8 +7,8 @@
 static void print_float(float f){
     int n = (int)f;
     f -= n;
-    f *= (100);
-    printf("%d.%02d", n, (int)f);
+    f *= 100;
+    printf("%d.%02d", n, (int)abs(f));
 }
 
 //loop through range of currents from 0 to 1
@@ -23,7 +23,7 @@ int main(void){
     CANDATA_t message;
     message.ID = MOTOR_DRIVE;
     message.idx = 0;
-    float vel = 650.0f;
+    float vel = 20000.0f;
     float i = 1.0f;
     
 
