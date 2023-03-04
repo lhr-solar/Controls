@@ -22,7 +22,7 @@ static float motor_force = 0.00f;
 // CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
 #define MS_TIME_DELAY_MILSEC 10
-#define DECELERATION 0.5 // In m/s^2
+#define DECELERATION 0.00005 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
 #define MAX_CURRENT 50 // in Amps
@@ -32,17 +32,17 @@ static float motor_force = 0.00f;
 
 // VELOCITY CONTROL MODE
 
-#define PROPORTION .0001
-#define INTEGRAL 0
+#define PROPORTION 0.0000005
+#define INTEGRAL   0.000000001
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
 #define DIVISOR 1
 
 // Variables to help with PID calculation
-static int32_t ErrorSum = 0;
-static int32_t Error;
-static int32_t Rate;
-static int32_t PreviousError = 0;
+static float ErrorSum = 0;
+static float Error;
+static float Rate;
+static float PreviousError = 0;
 
 
 
@@ -65,7 +65,6 @@ float MetersPerSecToRevPerMin(float velMPS){
 //Function returns calculated current, calculated via PID
 float Velocity_PID_Output() { 
     Error = RevPerMinToMetersPerSec(setpointVelocity) - velocityMPS;
-    printf("%d\n\r", (int)Error);
     
     ErrorSum = ErrorSum + Error;
 
@@ -96,12 +95,10 @@ float CurrentToMotorForce(){ // Simulate giving the motor a current and returnin
 
 float MotorForceToVelocity(){ 
     //drag calculations
-    if (velocityMPS==0){
-        total_accel = ((float)motor_force / CAR_MASS_KG);
-    } else if (velocityMPS < 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG + (DECELERATION));
+    if (velocityMPS <= 0){
+        total_accel = ((float)motor_force / CAR_MASS_KG + (DECELERATION*velocityMPS*velocityMPS));
     } else if (velocityMPS > 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG - (DECELERATION));
+        total_accel = ((float)motor_force / CAR_MASS_KG - (DECELERATION*velocityMPS*velocityMPS));
     }
 
     return velocityMPS + ((total_accel * MS_TIME_DELAY_MILSEC) * (1000)); // Multiply by 1000 to go from m/ms to m/s
@@ -126,7 +123,7 @@ void Task1(void *arg)
     {
         OS_ERR err;
 
-        ErrorStatus error = CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD
+        ErrorStatus error = CANbus_Read(&newCD, CAN_BLOCKING, MOTORCAN); // returns data value into newCD //MAKE SURE TO CHANGE BACK
         if (error == ERROR) // If there is no new value to read, use the old CAN data
         {
             newCD = oldCD;

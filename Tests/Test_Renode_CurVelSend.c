@@ -16,16 +16,41 @@ static void print_float(float f){
 //loop by varying both
 int main(void){
     //initialize CANBus message
+    OS_ERR err;
     BSP_UART_Init(UART_2);
     CANbus_Init(MOTORCAN);
     CANDATA_t response;
     CANDATA_t message;
     message.ID = MOTOR_DRIVE;
     message.idx = 0;
-    float vel = 0.00f;
-    float i = 0.000f;
+    float vel = 320.0f;
+    float i = 1.0f;
+    
+
+    memcpy(&message.data[0], &vel, sizeof(vel));
+    memcpy(&message.data[4], &i, sizeof(i));         
+
+    
+
+    while(1){
+        CANbus_Send(message, CAN_BLOCKING, MOTORCAN);   
+        CANbus_Read(&response, CAN_BLOCKING, MOTORCAN);
+        
+        printf("Sending (Current: ");
+        print_float(*((float *)&message.data[4]));
+        printf(", Velocity:");
+        print_float(*((float *)&message.data[0]));
+        printf("), \n\rReceiving: (Velocity (m/s): ");
+        print_float(*((float *)&response.data[4]));
+        printf(", Velocity (RPM): ");
+        print_float(*((float *)&response.data[0]));
+        printf(") \n\r");
+
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
 
 
+    
 
     //velocity -> -500 to 500
     //current is a percentage -> 0 to 1 (current reaches its max in this loop [i = 1])
