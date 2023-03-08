@@ -22,7 +22,7 @@ static float motor_force = 0.00f;
 // CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
 #define MS_TIME_DELAY_MILSEC 10
-#define DECELERATION 0.00000001275 // In m/s^2
+#define DECELERATION 0.00000001273 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
 #define MAX_CURRENT 50 // in Amps
@@ -32,7 +32,7 @@ static float motor_force = 0.00f;
 
 // VELOCITY CONTROL MODE
 
-#define PROPORTION .00001
+#define PROPORTION .00002
 #define INTEGRAL   0
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
