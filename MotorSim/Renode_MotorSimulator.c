@@ -22,7 +22,7 @@ static float motor_force = 0.00f;
 // CURRENT CONTROLLED MODE
 // Macros for calculating the velocity of the car
 #define MS_TIME_DELAY_MILSEC 10
-#define DECELERATION 0.00000001273 // In m/s^2
+#define DECELERATION 0.00000001273625 // In m/s^2
 #define CAR_MASS_KG 270
 #define MAX_VELOCITY 20000.0f // rpm
 #define MAX_CURRENT 50 // in Amps
@@ -32,7 +32,7 @@ static float motor_force = 0.00f;
 
 // VELOCITY CONTROL MODE
 
-#define PROPORTION .00002
+#define PROPORTION .000025
 #define INTEGRAL   0
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
@@ -88,7 +88,7 @@ float Velocity_PID_Output() {
 
 float CurrentToMotorForce(){ // Simulate giving the motor a current and returning a force
     
-    // FORCE = Current(%) * (CurrentSetpoint * Max Current (A)) * Slope (kfgcm/A) * 100 / Wheel Radius (m)
+    // FORCE = Current(%) * (CurrentSetpoint * Max Current (A)) * Slope (kfgcm/A) * 9.8 / 100 / Wheel Radius (m)
     return (current * (setpointCurrent * MAX_CURRENT) * TORQUE_SLOPE * 9.8 / 100) / WHEEL_RADIUS;
 
 }
@@ -96,12 +96,12 @@ float CurrentToMotorForce(){ // Simulate giving the motor a current and returnin
 float MotorForceToVelocity(){ 
     //drag calculations
 
-    float predictedVel = (((float)motor_force / CAR_MASS_KG)*(MS_TIME_DELAY_MILSEC) * (1000));
+    float predictedVel = (((float)motor_force / CAR_MASS_KG)*(MS_TIME_DELAY_MILSEC) * (1000)); //in m/s
     
     if (predictedVel <= 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG + (DECELERATION*predictedVel*predictedVel));
+        total_accel = ((float)motor_force / CAR_MASS_KG + (DECELERATION*predictedVel*predictedVel)); //in m/s^2
     } else if (predictedVel > 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG - (DECELERATION*predictedVel*predictedVel));
+        total_accel = ((float)motor_force / CAR_MASS_KG - (DECELERATION*predictedVel*predictedVel)); //in m/s^2
     }
 
     return velocityMPS + ((total_accel * MS_TIME_DELAY_MILSEC) * (1000)); // Multiply by 1000 to go from m/ms to m/s
@@ -126,7 +126,7 @@ void Task1(void *arg)
     {
         OS_ERR err;
 
-        ErrorStatus error = CANbus_Read(&newCD, CAN_BLOCKING, MOTORCAN); // returns data value into newCD //MAKE SURE TO CHANGE BACK
+        ErrorStatus error = CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD 
         if (error == ERROR) // If there is no new value to read, use the old CAN data
         {
             newCD = oldCD;

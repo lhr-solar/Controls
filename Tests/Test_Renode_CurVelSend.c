@@ -8,7 +8,11 @@ static void print_float(float f){
     int n = (int)f;
     f -= n;
     f *= 100;
-    printf("%d.%02d", n, (int)abs(f));
+    if (f >= 0){
+        printf("%d.%02d", n, (int)f);
+    } else {
+        printf("-%d.%02d", abs(n), (int)abs(f));
+    }
 }
 
 //loop through range of currents from 0 to 1
@@ -16,7 +20,7 @@ static void print_float(float f){
 //loop by varying both
 int main(void){
     //initialize CANBus message
-    OS_ERR err;
+    
     BSP_UART_Init(UART_2);
     CANbus_Init(MOTORCAN);
     CANDATA_t response;
@@ -26,7 +30,8 @@ int main(void){
     float vel = 20000.0f;
     float i = 1.0f;
     
-
+    
+    OS_ERR err;
     memcpy(&message.data[0], &vel, sizeof(vel));
     memcpy(&message.data[4], &i, sizeof(i));         
 
@@ -49,12 +54,12 @@ int main(void){
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 
-
+    
     
 
     //velocity -> -500 to 500
     //current is a percentage -> 0 to 1 (current reaches its max in this loop [i = 1])
-    for(i = 0.00f; i <= 1.00f; i += 0.05f){ //current
+    for(i = 0.05f; i <= 1.00f; i += 0.05f){ //current
         for(vel = -500; vel <= 500; vel += 50){
 
             memcpy(&message.data[0], &vel, sizeof(vel));
