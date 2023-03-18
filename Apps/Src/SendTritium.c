@@ -37,24 +37,29 @@
 #define ONEPEDAL_BRAKE_THRESHOLD 25 // percent
 #define ONEPEDAL_NEUTRAL_THRESHOLD 35 // percent
 
+#define PEDAL_MIN 0  // percent
+#define PEDAL_MAX 100 // percent
+#define CURRENT_SP_MIN 0 // percent
+#define CURRENT_SP_MAX 100 // percent
+
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
 #ifndef __TEST_SENDTRITIUM
-#define STATIC(def) static def
+#define SCOPE static
 #else
-#define STATIC(def) def
+#define SCOPE 
 #endif
 
 // Inputs
-STATIC(bool) cruiseEnable = false;
-STATIC(bool) cruiseSet = false;
-STATIC(bool) onePedalEnable = false;
-STATIC(bool) regenEnable = false;
+SCOPE bool cruiseEnable = false;
+SCOPE bool cruiseSet = false;
+SCOPE bool onePedalEnable = false;
+SCOPE bool regenEnable = false;
 
-STATIC(uint8_t) brakePedalPercent = 0;
-STATIC(uint8_t) accelPedalPercent = 0;
+SCOPE uint8_t brakePedalPercent = 0;
+SCOPE uint8_t accelPedalPercent = 0;
 
-STATIC(Gear_t) gear = NEUTRAL_GEAR;
+SCOPE Gear_t gear = NEUTRAL_GEAR;
 
 // Outputs
 float currentSetpoint = 0;
@@ -62,7 +67,7 @@ float velocitySetpoint = 0;
 float cruiseVelSetpoint = 0;
 
 // Current observed velocity
-STATIC(float) velocityObserved = 0;
+SCOPE float velocityObserved = 0;
 
 #ifndef __TEST_SENDTRITIUM
 // Counter for sending setpoints to motor
@@ -116,7 +121,7 @@ static const TritiumState_t FSM[9] = {
 };
 
 static TritiumState_t prevState; // Previous state
-STATIC(TritiumState_t) state; // Current state
+SCOPE TritiumState_t state; // Current state
 
 // Helper Functions
 
@@ -280,10 +285,22 @@ static void readInputs(){
  * @returns integer value from out_min to out_max
 */
 static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_min, uint8_t out_max){
-    if(in_max >= in_min) in_max = in_min;
-    if(input <= in_min) return out_min;
-    else if(input >= in_max) return out_max;
-    else return ((out_max - in_max) * (input - in_min))/(out_min - in_min) + out_min;
+    if(in_min >= in_max) in_max = in_min;   // The minimum of the input range should never be greater than the maximum of the input range
+    
+    if(input <= in_min){
+        // Lower bound the input to the minimum possible output
+        return out_min;
+    } else if(input >= in_max){
+        // Upper bound the input to the maximum output
+        return out_max;
+    } else{
+        // Linear mapping between ranges
+        uint8_t offset_in = input - in_min;  // If input went from A -> B, it now goes from 0 -> B-A
+        uint8_t in_range = in_max - in_min;   // Input range
+        uint8_t out_range = out_max - out_min;    // Output range
+        uint8_t offset_out = out_min;
+        return (offset_in * out_range)/in_range + offset_out;   // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
+    }
 }
 
 /**
@@ -308,7 +325,7 @@ static void ForwardDriveHandler(){
         UpdateDisplay_SetGear(DISP_FORWARD);
     }
     velocitySetpoint = MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, 100, 0, 100));
+    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
 }
 
 /**
@@ -368,7 +385,7 @@ static void ReverseDriveHandler(){
         UpdateDisplay_SetGear(DISP_REVERSE);
     }
     velocitySetpoint = -MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, 100, 0, 100));
+    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
     cruiseEnable = false;
     onePedalEnable = false;
 }
@@ -495,7 +512,7 @@ static void CoastingCruiseDecider(){
 */
 static void AccelerateCruiseHandler(){
     velocitySetpoint = MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, 100, 0, 100));
+    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
 }
 
 /**
@@ -535,7 +552,7 @@ static void OnePedalDriveHandler(){
     if(accelPedalPercent <= ONEPEDAL_BRAKE_THRESHOLD){
         // Regen brake: Map 0 -> brake to 100 -> 0
         velocitySetpoint = 0;
-        currentSetpoint = percentToFloat(map(accelPedalPercent, 0, ONEPEDAL_BRAKE_THRESHOLD, 100, 0));
+        currentSetpoint = percentToFloat(map(accelPedalPercent, PEDAL_MIN, ONEPEDAL_BRAKE_THRESHOLD, CURRENT_SP_MAX, CURRENT_SP_MIN));
         Minion_Write_Output(BRAKELIGHT, true, &minion_err);
         UpdateDisplay_SetRegenState(DISP_ACTIVE);
     }else if(ONEPEDAL_BRAKE_THRESHOLD < accelPedalPercent && accelPedalPercent <= ONEPEDAL_NEUTRAL_THRESHOLD){
@@ -547,7 +564,7 @@ static void OnePedalDriveHandler(){
     }else if(ONEPEDAL_NEUTRAL_THRESHOLD < accelPedalPercent){
         // Accelerate: Map neutral -> 100 to 0 -> 100
         velocitySetpoint = MAX_VELOCITY;
-        currentSetpoint = percentToFloat(map(accelPedalPercent, ONEPEDAL_NEUTRAL_THRESHOLD, 100, 0, 100));
+        currentSetpoint = percentToFloat(map(accelPedalPercent, ONEPEDAL_NEUTRAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
         Minion_Write_Output(BRAKELIGHT, false, &minion_err);
         UpdateDisplay_SetRegenState(DISP_ENABLED);
     }
