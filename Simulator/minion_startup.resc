@@ -1,0 +1,30 @@
+$platform?=@Simulator/stm32f413.repl
+$bin?=@Objects/controls-leader.elf
+
+mach create "ctrl-leader"
+machine LoadPlatformDescription $platform
+sysbus LoadELF $bin
+logLevel 3
+
+set minion_portA_print """
+print("IGN_1: 1") if value & 0x01 else print("IGN_1: 0")
+print("IGN_2: 1") if value & 0x02 else print("IGN_2: 0")
+print("REGEN_SW: 1") if value & 0x10 else print("REGEN_SW: 0")
+print("FOR_SW: 1") if value & 0x20 else print("FOR_SW: 0")
+print("REV_SW: 1") if value & 0x40 else print("REV_SW: 0")
+print("CRUZ_EN: 1") if value & 0x80 else print("CRUZ_EN: 0")
+"""
+
+set minion_portB_print """
+print("CRUZ_ST: 1") if value & 0x10 else print("CRUZ_ST: 0")
+print("BRAKELIGHT: 1") if value & 0x20 else print("BRAKELIGHT: 0")
+"""
+
+macro minion_setup
+"""
+    sysbus AddWatchpointHook 0x40020010 DoubleWord Write minion_portA_print
+    sysbus AddWatchpointHook 0x40024010 DoubleWord Write minion_portB_print
+"""
+
+runMacro $minion_setup
+

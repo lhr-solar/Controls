@@ -5,8 +5,6 @@
 #include "Tasks.h"
 #include "Contactors.h"
 
-static OS_MUTEX OutputMutex; //Mutex to lock GPIO writes to input pins
-
 //should be in sync with pin enum
 const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
     {GPIO_Pin_0, PORTA, INPUT},
@@ -24,7 +22,6 @@ void Minion_Init(void){
     for(uint8_t i = 0; i < MINIONPIN_NUM; i++){
         BSP_GPIO_Init(PINS_LOOKARR[i].port, PINS_LOOKARR[i].pinMask, PINS_LOOKARR[i].direction);
     }
-    OSMutexCreate(&OutputMutex, "Minions Output Mutex", &err);
     assertOSError(OS_MINIONS_LOC, err);
 }
 
@@ -44,11 +41,7 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
     OS_ERR err;
 
     if(PINS_LOOKARR[pin].direction == OUTPUT){
-        OSMutexPend(&OutputMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
-        assertOSError(OS_MINIONS_LOC, err); 
         BSP_GPIO_Write_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinMask, status);
-        OSMutexPost(&OutputMutex, OS_OPT_POST_NONE, &err);
-        assertOSError(OS_MINIONS_LOC, err);
         return true;
     }
     *mErr = MINION_ERR_YOU_WROTE_TO_INPUT_PIN;
