@@ -129,8 +129,6 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
         return ERROR;
     }
 
-
-
     uint8_t txdata[8];
     if(msginfo.idxEn){ //first byte of txData should be the idx value
         memcpy(txdata, &CanData.idx, 1);
@@ -220,37 +218,29 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
     // Actually get the message
     uint32_t id;
     ErrorStatus status = BSP_CAN_Read(bus, &id, MsgContainer->data);
-    MsgContainer->ID = (CANId_t) id;
 
     OSMutexPost( // unlock RX line
         &(CANbus_RxMutex[bus]),
         OS_OPT_POST_NONE,
         &err);
     assertOSError(OS_CANDRIVER_LOC,err);
-
-    // Make sure this is a message we can receive
-    switch (MsgContainer->ID) {
-        case CHARGE_ENABLE:
-	    case STATE_OF_CHARGE:
-	    case SUPPLEMENTAL_VOLTAGE:
-	    case MOTOR_DRIVE:
-	    case MOTOR_POWER:
-	    case MOTOR_RESET:
-	    case MOTOR_STATUS:
-	    case MC_BUS:
-	    case VELOCITY:
-	    case MC_PHASE_CURRENT:
-	    case VOLTAGE_VEC:
-	    case CURRENT_VEC:
-	    case BACKEMF:
-	    case TEMPERATURE:
-	    case ODOMETER_AMPHOURS:
-	    case ARRAY_CONTACTOR_STATE_CHANGE: break; // Continue if value is valid
-        default: return ERROR; // Error if we get an unexpected value
+    if(status == ERROR){
+        return ERROR;
     }
+
+    //error check the id
+    MsgContainer->ID = (CANId_t) id;
+    if(MsgContainer->ID >= NUM_CAN_IDS){
+        MsgContainer = NULL;
+        return ERROR;
+    }
+    CANLUT_T entry = CANLUT[MsgContainer->ID]; //lookup msg information in table
+    if(entry.size == 0){
+        MsgContainer = NULL;
+        return ERROR;
+    } //if they passed in an invalid id, it will be zero
     
     //search LUT for id to populate idx and trim data
-    CANLUT_T entry = CANLUT[MsgContainer->ID];
     if(entry.idxEn==true){
         MsgContainer->idx = MsgContainer->data[0];
         memmove( // Can't use memcpy, as memory regions overlap
@@ -258,7 +248,6 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
             &(MsgContainer->data[1]),
             7 // max size of data (8) - size of idx byte (1)
         );
-
     }
     return status;
 }
