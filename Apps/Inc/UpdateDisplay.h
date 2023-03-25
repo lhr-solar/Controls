@@ -53,6 +53,12 @@ typedef enum{
 #define DISP_REVERSE STATE_2
 
 /**
+ * @brief Returns a static counter for semaphore, to be used in DebugDump.c
+*/
+OS_OBJ_QTY  GetDisplaySem4(void); //gets number of display messages in queue
+
+
+/**
  * @brief Initializes UpdateDisplay application
  * @returns UpdateDisplayError_t
  */

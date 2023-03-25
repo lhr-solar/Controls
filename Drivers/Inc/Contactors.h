@@ -13,13 +13,19 @@
 #define ARRAY_CONTACTOR_PIN GPIO_Pin_11
 #define MOTOR_CONTACTOR_PIN GPIO_Pin_12
 
+#define FOREACH_contactor(contactor) \
+        contactor(ARRAY_CONTACTOR)   \
+        contactor(ARRAY_PRECHARGE)  \
+        contactor(MOTOR_CONTACTOR)   \
 
-typedef enum {
-    ARRAY_CONTACTOR = 0,
-    ARRAY_PRECHARGE,
-    MOTOR_CONTACTOR,
-    NUM_CONTACTORS
-} contactor_t;
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+typedef enum contactor_ENUM {
+    FOREACH_contactor(GENERATE_ENUM)
+    CONTACTOR_NUM,
+}contactor_t;
+
 
 
 /**

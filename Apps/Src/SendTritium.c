@@ -120,6 +120,11 @@ STATIC(TritiumState_t) state; // Current state
 
 // Helper Functions
 
+//Get function
+TritiumStateName_t GetCurrentState(void){
+    return state.name;
+}
+
 /**
  * @brief Converts integer percentage to float percentage
  * @param percent integer percentage from 0-100

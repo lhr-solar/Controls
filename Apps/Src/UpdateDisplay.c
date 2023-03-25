@@ -30,6 +30,10 @@ disp_fifo_t msg_queue;
 static OS_SEM DisplayQ_Sem4;    // counting semaphore for queue message availability
 static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/reading to queue
 
+OS_OBJ_QTY  GetDisplaySem4(void){ //gets number of display messages in queue
+	return DisplayQ_Sem4.Ctr;
+}
+
 /**
  * Enum and corresponding array for easy component selection.
  */

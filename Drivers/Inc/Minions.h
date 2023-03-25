@@ -3,28 +3,34 @@
 #include <stdbool.h>
 #include "BSP_GPIO.h"
 
+// used to index into lookup table
+// if changed, PINS_LOOKARR should be changed in Minions.c
+#define FOREACH_MinionPin(PIN) \
+        PIN(IGN_1)   \
+        PIN(IGN_2)  \
+        PIN(REGEN_SW)   \
+        PIN(FOR_SW)  \
+        PIN(REV_SW)  \
+        PIN(CRUZ_EN)  \
+        PIN(CRUZ_ST)  \
+        PIN(BRAKELIGHT)  \
 
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+typedef enum MINIONPIN_ENUM {
+    FOREACH_MinionPin(GENERATE_ENUM)
+    MINIONPIN_NUM,
+}MinionPin_t;
+
+
+//errors bc ur bad
 typedef enum{
     MINION_ERR_NONE = 0,
-    MINION_ERR_WROTE_INPUT,
+    MINION_ERR_YOU_READ_OUTPUT_PIN,
+    MINION_ERR_YOU_WROTE_TO_INPUT_PIN,
 } Minion_Error_t;
 
-//used to index into lookup table
-//if changed, PINS_LOOKARR should be changed in Minions.c
-typedef enum{
-    //inputs
-    IGN_1,
-    IGN_2,
-    REGEN_SW,
-    FOR_SW,
-    REV_SW,
-    CRUZ_EN,
-    CRUZ_ST,
-    //output
-    BRAKELIGHT, 
-    //num of pins
-    MINIONPIN_NUM,
-} MinionPin_t; 
 
 typedef struct PinInfo{
     uint16_t pinMask;
@@ -46,7 +52,7 @@ void Minion_Init(void);
  * @return true
  * @return false *NOTE* If output pin is passed, will exit 
  */
-bool Minion_Read_Pin(MinionPin_t pin, Minion_Error_t* err);
+bool Minion_Read_Input(MinionPin_t pin, Minion_Error_t* err);
 
 /**
  * @brief Writes given status to a specified output pin. Locks writing to all output pins

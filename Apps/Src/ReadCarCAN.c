@@ -39,8 +39,7 @@ static void arrayRestart(void *p_tmr, void *p_arg);
 
 
 // Getter function for chargeEnable
-bool ChargeEnable_Get() 
-{
+bool ChargeEnable_Get() {
     return chargeEnable;
 }
 

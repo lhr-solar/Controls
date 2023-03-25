@@ -13,6 +13,9 @@
 static bool fromThread = false; //whether fault was tripped from thread
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
+bool GetfromThread(void){
+    return fromThread;
+}
 
 static void ArrayMotorKill(void) {
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);

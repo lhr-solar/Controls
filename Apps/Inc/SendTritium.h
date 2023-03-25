@@ -25,6 +25,32 @@ typedef enum{
     ACCELERATE_CRUISE
 } TritiumStateName_t;
 
+/* TODO: LET NATHANIEL FINISH THIS
+
+// used to index into lookup table
+// if changed, PINS_LOOKARR should be changed in Minions.c
+#define FOREACH_CurrentState(STATE) \
+        STATE(FORWARD_DRIVE)   \
+        STATE(NEUTRAL_DRIVE)  \
+        PIN(REVERSE_DRIVE)   \
+        PIN(RECORD_VELOCITY)  \
+        PIN(POWERED_CRUISE)  \
+        PIN(COASTING_CRUISE)  \
+        PIN(BRAKE_STATE)  \
+        PIN(ONEPEDAL)  \
+        PIN(ACCELERATE_CRUISE)  \
+
+
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+typedef enum MINIONPIN_ENUM {
+    FOREACH_MinionPin(GENERATE_ENUM)
+    MINIONPIN_NUM,
+}TritiumStateName_t;
+
+*/
+
 // State Struct for FSM
 typedef struct TritiumState{
     TritiumStateName_t name;

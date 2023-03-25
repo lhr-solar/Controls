@@ -9,6 +9,10 @@
 #include "common.h"
 #include <errno.h> 
 #include "Tasks.h"
+#include "FaultState.h"
+#include "SendTritium.h"
+#include "UpdateDisplay.h"
+#include "ReadCarCAN.h"
 
 #define FAULT_BITMAP_NUM 6
 #define OS_LOC_NUM 14
@@ -26,6 +30,12 @@ static const char *MINIONPIN_STRING[] = {
 static const char *CONTACTOR_STRING[] = {
     FOREACH_contactor(GENERATE_STRING)
 };
+
+/*
+static const char *CURRENTSTATE_STRING[] {
+    FOREACH_currentstate(GENERATE_CURRENTSTATE)
+};
+*/
 
 // Need to keep this in sync with Task.h
 static const char *OS_LOC_STRING[] = { 
@@ -66,60 +76,77 @@ void Task_DebugDump(void* p_arg) {
     int8_t brakePedal = Pedals_Read(BRAKE);
     printf("BRAKE: %d\n", brakePedal);
 
-    // Get minion information
-    for(MinionPin_t pin = 0; pin < MINIONPIN_NUM-1; pin++){ // Plan to change MINIONPIN_NUM-1 -> MINIONPIN_NUM after Minion function is fixed
-        bool pinState = Minion_Read_Input(pin, &mErr);
-        printf("%s: %d\n", MINIONPIN_STRING[pin], pinState);
-    }
+    while(1){
+        // Get minion information
+        for(MinionPin_t pin = 0; pin < MINIONPIN_NUM-1; pin++){ // Plan to change MINIONPIN_NUM-1 -> MINIONPIN_NUM after Minion function is fixed
+            bool pinState = Minion_Read_Input(pin, &mErr);
+            printf("%s: %d\n", MINIONPIN_STRING[pin], pinState);
+        }
 
-    // Get contactor info
-    for(contactor_t contactor = 0; contactor < CONTACTOR_NUM; contactor++){
-        bool contactorState = Contactors_Get(contactor) == ON ? true : false;
-        printf("%s: %d\n", CONTACTOR_STRING[contactor], contactorState);
-    } 
+        // Get contactor info
+        for(contactor_t contactor = 0; contactor < CONTACTOR_NUM; contactor++){
+            bool contactorState = Contactors_Get(contactor) == ON ? true : false;
+            printf("%s: %d\n", CONTACTOR_STRING[contactor], contactorState);
+        } 
 
-    // fault bitmap
-    printf("Fault Bitmap: ");
-    if(FaultBitmap == 0){
-        printf("%s\n", FAULT_BITMAP_STRING[0]);
-    }
-    else{
-        for(int i = 0; i < FAULT_BITMAP_NUM; i++){
-            uint32_t result = (FaultBitmap & 1 << i) >> i;
-            if(result){
-                printf("%s ", FAULT_BITMAP_STRING[i]);
+        // fault bitmap
+        printf("Fault Bitmap: ");
+        if(FaultBitmap == 0){
+            printf("%s\n", FAULT_BITMAP_STRING[0]);
+        }
+        else{
+            for(int i = 0; i < FAULT_BITMAP_NUM; i++){
+                uint32_t result = (FaultBitmap & 1 << i) >> i;
+                if(result){
+                    printf("%s ", FAULT_BITMAP_STRING[i]);
+                }
             }
         }
-    }
-    printf("\n");
+        printf("\n");
 
-    // os loc bitmap
-    printf("Os Loc Bitmap: ");
-    if(OSErrLocBitmap == 0){
-        printf("%s\n", OS_LOC_STRING[0]);
-    }
-    else{
-        for(int i = 0; i < OS_LOC_NUM; i++){
-            uint32_t result = (OSErrLocBitmap & 1 << i) >> i;
-            if(result){
-                printf("%s ", OS_LOC_STRING[i]);
+        // os loc bitmap
+        printf("Os Loc Bitmap: ");
+        if(OSErrLocBitmap == 0){
+            printf("%s\n", OS_LOC_STRING[0]);
+        }
+        else{
+            for(int i = 0; i < OS_LOC_NUM; i++){
+                uint32_t result = (OSErrLocBitmap & 1 << i) >> i;
+                if(result){
+                    printf("%s ", OS_LOC_STRING[i]);
+                }
             }
         }
-    }
-    printf("\n");
+        printf("\n");
 
-    // regen enable
-    printf("RegenEnable: %s\n", RegenEnable == ON ? "On" : "Off");
+        // regen enable
+        printf("RegenEnable: %s\n", RegenEnable == ON ? "On" : "Off");
 
-    // update velocity toggle cruise
-    printf("UpdateVel_ToggleCruise: %s\n", UpdateVel_ToggleCruise == true ? "True" : "False");
+        // update velocity toggle cruise
+        printf("UpdateVel_ToggleCruise: %s\n", UpdateVel_ToggleCruise == true ? "True" : "False");
 
-    // // display fifo
-    // printf("msg_queue: %d", msg_queue);
+        // // display fifo
+        // printf("msg_queue: %d", msg_queue);
 
-    // Delay of 5 seconds
-    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    if (err != OS_ERR_NONE){
-        assertOSError(OS_NONE_LOC, err);
+        //Fault State
+        printf("Fault was tripped by a thread: %s", GetfromThread() ? "true" : "false");
+
+        //Velocity of car
+        printf("Velocity of car: %f", velocityObserved);
+
+        //UpdateDisplay
+        printf("Number of update display messages in queue: %d", GetDisplaySem4());
+
+        //SendTritium
+        printf("Current state of car in SendTritium: "); //TODO by Nathaniel
+
+        //ReadCarCAN
+        printf("Charge enable: %s", ChargeEnable_Get() ? "true" : "false");
+
+        // Delay of 5 seconds
+        OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        if (err != OS_ERR_NONE){
+            assertOSError(OS_NONE_LOC, err);
+        }
     }
 }

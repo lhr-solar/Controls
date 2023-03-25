@@ -44,19 +44,19 @@ void Task_Telemetry(void *p_arg){
         // Get minion information
         carMsg.data[2] = 0;
         for(MinionPin_t pin = 0; pin < MINIONPIN_NUM; pin++){
-            bool pinState = Minion_Read_Pin(pin, &Merr);
+            bool pinState = Minion_Read_Input(pin, &Merr);
             carMsg.data[2] |= pinState << pin;
         }
 
         // Get contactor info
         carMsg.data[3] = 0;
-        for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
+        for(contactor_t contactor = 0; contactor < CONTACTOR_NUM; contactor++){
             bool contactorState = Contactors_Get(contactor) == ON ? true : false;
             carMsg.data[3] |= contactorState << contactor;
         }
 
         // Send car msg
-        CANbus_Send(carMsg, true, CARCAN);
+        CANbus_Send(carMsg, CAN_BLOCKING, CARCAN);
 
         // Delay of few milliseconds (500)
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);

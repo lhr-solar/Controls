@@ -9,7 +9,7 @@
 struct contactor {
     bool enabled;
 };
-static struct contactor contactors[NUM_CONTACTORS];
+static struct contactor contactors[CONTACTOR_NUM];
 static OS_MUTEX contactorsMutex;
 
 /**
@@ -49,7 +49,7 @@ void Contactors_Init() {
                   1);
 
     // start disabled
-    for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
+    for (int contactor = 0; contactor < CONTACTOR_NUM; ++contactor) {
         contactors[contactor].enabled = false;
         setContactor(contactor, OFF);
     }
