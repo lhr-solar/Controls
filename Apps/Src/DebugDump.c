@@ -109,7 +109,7 @@ void Task_DebugDump(void* p_arg) {
     printf("\n");
 
     // regen enable
-    printf("RegenEnable: %s\n", RegenEnable == ON ? "On" : "Off");
+    // printf("RegenEnable: %s\n", RegenEnable == ON ? "On" : "Off");
 
     // update velocity toggle cruise
     printf("UpdateVel_ToggleCruise: %s\n", UpdateVel_ToggleCruise == true ? "True" : "False");

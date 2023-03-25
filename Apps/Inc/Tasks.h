@@ -28,6 +28,7 @@
 #define TASK_TELEMETRY_PRIO                 9
 #define TASK_BLINK_LIGHT_PRIO               9
 #define TASK_IGN_CONT_PRIO                  7
+#define TASK_DEBUG_DUMP_PRIO                10
 
 /**
  * Stack Sizes
@@ -45,6 +46,7 @@
 #define TASK_TELEMETRY_STACK_SIZE           DEFAULT_STACK_SIZE
 #define TASK_BLINK_LIGHT_STACK_SIZE         DEFAULT_STACK_SIZE
 #define TASK_IGN_CONT_STACK_SIZE            DEFAULT_STACK_SIZE
+#define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
 
 
 /**
@@ -72,6 +74,8 @@ void Task_Contactor_Ignition(void* p_arg);
 
 void Task_CommandLine(void* p_arg);
 
+void Task_DebugDump(void *p_arg);
+
 /**
  * TCBs
  */
@@ -85,6 +89,7 @@ extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB Telemetry_TCB;
 extern OS_TCB BlinkLight_TCB;
 extern OS_TCB IgnCont_TCB;
+extern OS_TCB DebugDump_TCB;
 
 
 /**
@@ -100,6 +105,7 @@ extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 extern CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 extern CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
 extern CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
+extern CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 
 /**
  * Queues

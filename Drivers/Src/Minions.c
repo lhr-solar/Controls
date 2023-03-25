@@ -18,11 +18,10 @@ const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
 };
 
 void Minion_Init(void){
-    OS_ERR err;
+
     for(uint8_t i = 0; i < MINIONPIN_NUM; i++){
         BSP_GPIO_Init(PINS_LOOKARR[i].port, PINS_LOOKARR[i].pinMask, PINS_LOOKARR[i].direction);
     }
-    assertOSError(OS_MINIONS_LOC, err);
 }
 
 
@@ -37,8 +36,6 @@ bool Minion_Read_Input(MinionPin_t pin, Minion_Error_t* err){
 
 
 bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
-    CPU_TS timestamp;
-    OS_ERR err;
 
     if(PINS_LOOKARR[pin].direction == OUTPUT){
         BSP_GPIO_Write_Pin(PINS_LOOKARR[pin].port, PINS_LOOKARR[pin].pinMask, status);
