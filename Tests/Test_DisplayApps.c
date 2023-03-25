@@ -67,7 +67,7 @@ void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
 
 void Task1(void *arg)
 {   
-    Display_Error_t error;
+    DisplayError_t error;
 
     CPU_Init();
     error = Display_Init();
