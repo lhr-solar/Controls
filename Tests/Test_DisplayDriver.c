@@ -76,7 +76,7 @@ void delay(void)
 
 int main()
 {
-	Display_Error_t err;
+	DisplayError_t err;
 
 	err = Display_Init();
 	assertDisplayError(err);
