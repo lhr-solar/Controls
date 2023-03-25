@@ -11,7 +11,6 @@ static void print_float(float f){
     int32_t n = (int32_t)f;
     f -= n;
     f *= 100;
-    if (f < 0) printf("-");
     int32_t d = (f<0)?-f:f;
     printf("%d.%02d", (int)n, (int)d);
 }
@@ -49,10 +48,6 @@ int main(void){
     memcpy(&message.data[4], &current, sizeof(current));
 
     uint8_t ms=0;
-    
-    print_float(123.1321);
-    printf("\n");
-    print_float(-123.1321);
 
     // Test ramp up to 15 mph
     while(*((float *)&(response.data[4])) < MAXVEL_MPS){
