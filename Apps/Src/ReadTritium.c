@@ -12,8 +12,8 @@
 
 
 uint16_t Motor_FaultBitmap = T_NONE;
-static float Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
-static float Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
+static float Motor_RPM = CAR_STOPPED; //Car is stopped until velocity is read
+static float Motor_Velocity = CAR_STOPPED; //^^^^
 
 /**
  * @brief Returns highest priority tritium error code
