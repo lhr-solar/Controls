@@ -32,7 +32,7 @@ static float motor_force = 0.00f;
 
 
 // VELOCITY CONTROL MODE MACROS
-#define PROPORTION 1
+#define PROPORTION 50
 #define INTEGRAL   0
 #define DERIVATIVE 0
 #define MAX_RPM 10741616 // 30m/s in RPM, decimal 2 places from right
@@ -153,7 +153,7 @@ void Task1(void *arg)
             
             current = Velocity_PID_Output();
 
-            motor_force = CurrentToMotorForce();
+            motor_force = CurrentToMotorForce(); 
 
             velocityMPS = MotorForceToVelocity();
 

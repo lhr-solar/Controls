@@ -20,7 +20,7 @@ static void send_motor_data(CANDATA_t message, CANDATA_t* response_ptr){
     CANbus_Read(response_ptr, CAN_BLOCKING, MOTORCAN);
     printf("Sending (Current: ");
     print_float(*((float *)&message.data[4]));
-    printf(", Velocity:");
+    printf(", Velocity: ");
     print_float(*((float *)&message.data[0]));
     printf("), \n\rReceiving: (Velocity (m/s): ");
     print_float(*((float *)&(response_ptr->data[4])));
@@ -39,25 +39,29 @@ int main(void){
     CANDATA_t message;
     message.ID = MOTOR_DRIVE;
     message.idx = 0;
-    float vel = 20000.0f;
-    float current = 1.0f;
+    float vel = 0.0f;
+    float current = 0.0f;
     
     
     OS_ERR err;
-    memcpy(&message.data[0], &vel, sizeof(vel));
-    memcpy(&message.data[4], &current, sizeof(current));
-
     uint8_t ms=0;
 
-    // Test ramp up to 15 mph
+    /*
+    // Test ramp up to 15 mph (CC)
+    vel = 20000.0f;
+    current = 1.0f;
+    memcpy(&message.data[0], &vel, sizeof(vel));
+    memcpy(&message.data[4], &current, sizeof(current));
+    ms = 0;
     while(*((float *)&(response.data[4])) < MAXVEL_MPS){
         send_motor_data(message, &response);
         printf("(%d ms)\n\r", DELAY_TIME*(ms++));
         OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 
-    // Coast down to zero velocity
+    // Coast down to zero velocity (CC)
     current = 0.0f;
+    memcpy(&message.data[0], &vel, sizeof(vel));
     memcpy(&message.data[4], &current, sizeof(current));
     ms = 0;
     while(*((float *)&(response.data[4])) > 0.25){
@@ -65,6 +69,79 @@ int main(void){
         printf("(%d ms)\n\r", DELAY_TIME*(ms++));
         OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
     }
+    */
+    
+    
+    // Test ramp up to 15 mph (VC)
+    vel = 168.5512f;
+    current = 1.0f;
+    memcpy(&message.data[0], &vel, sizeof(vel));
+    memcpy(&message.data[4], &current, sizeof(current));
+    ms = 0;
+    while(*((float *)&(response.data[4])) < MAXVEL_MPS){
+        send_motor_data(message, &response);
+        printf("(%d ms)\n\r", DELAY_TIME*(ms++));
+        OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+
+    // Coast down to zero velocity (VC)
+    vel = 0.0f;
+    memcpy(&message.data[0], &vel, sizeof(vel));
+    memcpy(&message.data[4], &current, sizeof(current));
+    ms = 0;
+    while(*((float *)&(response.data[4])) > 0.25){
+        send_motor_data(message, &response);
+        printf("(%d ms)\n\r", DELAY_TIME*(ms++));
+        OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+
+    /*
+    // Test ramp up to -15 mph (CC)
+    vel = -20000.0f;
+    current = 1.0f;
+    memcpy(&message.data[0], &vel, sizeof(vel));
+    memcpy(&message.data[4], &current, sizeof(current));
+    ms = 0;
+    while(*((float *)&(response.data[4])) > -MAXVEL_MPS){
+        send_motor_data(message, &response);
+        printf("(%d ms)\n\r", DELAY_TIME*(ms++));
+        OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+
+    // Coast down to zero velocity (CC)
+    current = 0.0f;
+    memcpy(&message.data[0], &vel, sizeof(vel));
+    memcpy(&message.data[4], &current, sizeof(current));
+    ms = 0;
+    while(*((float *)&(response.data[4])) < -0.25){
+        send_motor_data(message, &response);
+        printf("(%d ms)\n\r", DELAY_TIME*(ms++));
+        OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+
+    // Test ramp up to -15 mph (VC)
+    vel = -168.5512f;
+    current = 1.0f;
+    memcpy(&message.data[0], &vel, sizeof(vel));
+    memcpy(&message.data[4], &current, sizeof(current));
+    ms = 0;
+    while(*((float *)&(response.data[4])) > -MAXVEL_MPS){
+        send_motor_data(message, &response);
+        printf("(%d ms)\n\r", DELAY_TIME*(ms++));
+        OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+
+    // Coast down to zero velocity (VC)
+    vel = 0.0f;
+    memcpy(&message.data[0], &vel, sizeof(vel));
+    memcpy(&message.data[4], &current, sizeof(current));
+    ms = 0;
+    while(*((float *)&(response.data[4])) < -0.25){
+        send_motor_data(message, &response);
+        printf("(%d ms)\n\r", DELAY_TIME*(ms++));
+        OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+    */
 
     return 0;
 }
