@@ -99,11 +99,6 @@ extern CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
  */
 extern OS_Q CANBus_MsgQ;
 
-/**
- * Semaphores
- */
-extern OS_SEM FaultState_Sem4;
-
 
 /**
  * Global Variables
@@ -158,11 +153,26 @@ extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
 
 /**
+ * Fault Exception Struct
+*/
+typedef struct{
+    uint8_t prio;
+    const char* message; 
+    void* callback;
+} exception_t;
+
+/**
  * @brief   Assert Error if OS function call fails
  * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err); 
+
+/**
+ * @brief   Assert Error if non OS function call fails
+ * @param   err non OS Error that occurred
+ */
+void _assertExceptionError(exception_t); 
 
 #if DEBUG == 1
 #define assertOSError(OS_err_loc,err) \

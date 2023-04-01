@@ -9,6 +9,7 @@
 #include "Minions.h"
 #include "Pedals.h"
 
+
 /**
  * TCBs
  */
@@ -35,24 +36,22 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 
 
 /**
- * Semaphores
- */
-OS_SEM FaultState_Sem4;
-
-/**
  * Global Variables
  */
-fault_bitmap_t FaultBitmap = FAULT_NONE;
-os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
+//fault_bitmap_t FaultBitmap = FAULT_NONE;
+//os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
+extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
-        FaultBitmap |= FAULT_OS;
-        OSErrLocBitmap |= OS_err_loc;
+        BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
+        
+        BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
+        BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
+        while(1){;} //nonrecoverable
 
-        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-        EnterFaultState();
     }
 }
+
