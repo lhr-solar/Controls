@@ -149,6 +149,7 @@ typedef enum{
     FAULT_TRITIUM = 0x04,      // for errors sent from the tritium
     FAULT_READBPS = 0x08,    // for unsuccessfully reading from BPS CAN
     FAULT_DISPLAY = 0x10,    // for display faults
+    FAULT_BPS = 0x20,       // for if BPS trips
 } fault_bitmap_t;
 
 /**

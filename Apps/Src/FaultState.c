@@ -7,6 +7,7 @@
 #include "Minions.h"
 #include "UpdateDisplay.h"
 #include "ReadTritium.h"
+#include "CANbus.h"
 
 #define RESTART_THRESHOLD 3
 
@@ -62,6 +63,7 @@ void EnterFaultState(void) {
             } else {
                 hall_fault_cnt++;
                 MotorController_Restart(); //re-initialize motor
+                FaultBitmap &= ~FAULT_TRITIUM; // Clearing the FAULT_TRITIUM error bit on FaultBitmap
                 return;
             }
         }
@@ -93,8 +95,15 @@ void EnterFaultState(void) {
 
          */
     }
+    else if(FaultBitmap & FAULT_BPS){ // BPS has been tripped
+        nonrecoverableFaultHandler();
+        return;
+    }
     else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
         readBPS_ContactorHandler();
+        
+        // Reset FaultBitmap since this is a recoverable fault
+        FaultBitmap &= ~FAULT_READBPS; // Clear the Read BPS fault from FaultBitmap
         return;
     }
     else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
@@ -107,6 +116,7 @@ void EnterFaultState(void) {
         } else {
             disp_fault_cnt++;
             Display_Reset();
+            FaultBitmap &= ~FAULT_DISPLAY; // Clear the display fault bit in FaultBitmap
             return;
         }
     }

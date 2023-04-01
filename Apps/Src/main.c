@@ -5,6 +5,7 @@
 #include "Tasks.h"
 #include "stm32f4xx.h"
 #include "CANbus.h"
+#include "CANConfig.h"
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
@@ -73,8 +74,8 @@ void Task_Init(void *p_arg){
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
     OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     BSP_UART_Init(UART_2);
-    CANbus_Init(CARCAN);
-    CANbus_Init(MOTORCAN);
+    CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS);
+    CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
     Minion_Init();
