@@ -121,7 +121,8 @@ extern uint32_t StateOfCharge;
  * Stores error data to indicate which part of the code
  * an error is coming from.
  */
-typedef enum{
+typedef enum
+{
     OS_NONE_LOC = 0x000,
     OS_ARRAY_LOC = 0x001,
     OS_READ_CAN_LOC = 0x002,
@@ -134,7 +135,8 @@ typedef enum{
     OS_MAIN_LOC = 0x200,
     OS_CANDRIVER_LOC = 0x400,
     OS_MOTOR_CONNECTION_LOC = 0x800,
-    OS_DISPLAY_LOC = 0x1000
+    OS_DISPLAY_LOC = 0x1000,
+    OS_RTOS_WRAPPER_LOC = 0x2000
 } os_error_loc_t;
 
 /**
