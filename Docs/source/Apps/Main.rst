@@ -22,4 +22,6 @@ The init task is contain within ``main.c`` in the apps folder, which also contai
 *   Creates the init task
 *   Re-enables interrupts and starts the RTOS
 
+The init task also manages the state of the motor contactor, conditioned upon the ignition switch.
+
 There's a body-less while loop after this last call just in case, but the RTOS starts running and won't return control back to the main function.

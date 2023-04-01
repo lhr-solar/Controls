@@ -4,6 +4,7 @@
 #include "UpdateDisplay.h"
 #include "Contactors.h"
 #include "FaultState.h"
+#include "Minions.h"
 #include "os_cfg_app.h"
 
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
@@ -71,6 +72,12 @@ static void updateSaturation(int8_t chargeMessage){
 // Turns off contactors by setting fault bitmap and signaling fault state
 static inline void chargingDisable(void) {
     OS_ERR err;
+    // mark regen as disabled
+    chargeEnable = false;
+
+    //kill contactors 
+    Contactors_Set(ARRAY_CONTACTOR, false, true);
+    Contactors_Set(ARRAY_PRECHARGE, false, true);
     
     // mark regen as disabled
     chargeEnable = false;
@@ -124,16 +131,13 @@ static inline void chargingEnable(void) {
  * 
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
-
+    Minion_Error_t Merr;
     if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        
-        if(Contactors_Set(ARRAY_CONTACTOR, ON, false) != ERROR){ // Only update display if we successfully turn on the array
-            UpdateDisplay_SetArray(true);
-        }
-       
+        Contactors_Set(ARRAY_CONTACTOR, (Minion_Read_Pin(IGN_1, &Merr)), false); //turn on array contactor if the ign switch lets us
+        UpdateDisplay_SetArray(true);
     }
-        // done restarting the array
-        restartingArray = false;
+    // done restarting the array
+    restartingArray = false;
 
 };
 

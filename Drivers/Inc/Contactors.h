@@ -36,28 +36,15 @@ void Contactors_Init();
  *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
  * @return  The contactor's state (ON/OFF)
  */ 
-State Contactors_Get(contactor_t contactor);
+bool Contactors_Get(contactor_t contactor);
 
 /**
  * @brief   Sets the state of a specified contactor
  * @param   contactor the contactor (MOTOR/ARRAY)
- * @param   state the state to set (ON/OFF)
+ * @param   state the state to set (ON/OFF) (true/false)
  * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, State state, bool blocking);
-
-/**
- * @brief   Enable the specified contactor
- *          Contactor will turn on if enabled and state is on
- * @return  None
- */ 
-void Contactors_Enable(contactor_t contactor);
-
-/**
- * @brief   Disable the specified contactor
- * @return  None
- */ 
-void Contactors_Disable(contactor_t contactor);
+ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
 
 #endif

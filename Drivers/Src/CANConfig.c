@@ -8,7 +8,7 @@
 #define IDX true
 
 /**
- * @brief Lookup table to simplify user-defined packet structs. Contains fields that are always the same for every message of a given ID.
+ * @brief Lookup table to simplify user-defined packet structs. Contains metadata fields that are always the same for every message of a given ID.
  *        Indexed by CANId_t values. Any changes or additions must be made in parallel with changes made to the CANID_t enum in CANbus.h
  */
 const CANLUT_T CANLUT[NUM_CAN_IDS] = {

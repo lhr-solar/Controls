@@ -1,4 +1,5 @@
 $bin?=@Objects/controls-leader.elf
+<<<<<<< HEAD
 $BPS_bin?=@Objects/car-sim.elf
 $platform=@Simulator/stm32f413.repl
 
@@ -7,11 +8,18 @@ macro show_dispUart
     showAnalyzer sysbus.usart3
 """
 
+=======
+$bps_bin?=@Objects/car-sim.elf
+$motor_bin?=@Objects/motor-sim.elf
+$platform=@Simulator/stm32f413.repl
+
+>>>>>>> beta_test_0
 macro reset
 """
     sysbus LoadELF $bin
 """
 
+<<<<<<< HEAD
 macro show_printUartldr
 """
     emulation CreateServerSocketTerminal 49152 "uart-con" false
@@ -24,11 +32,35 @@ macro show_printUartbps
 """
 
 macro show_dispUart
+=======
+macro show_uart_leader
+"""
+    emulation CreateServerSocketTerminal 49152 "ldr-uart-con" false
+    connector Connect sysbus.usart2 ldr-uart-con
+"""
+
+macro show_uart_display
+>>>>>>> beta_test_0
 """
     emulation CreateServerSocketTerminal 49153 "disp-uart-con" false
     connector Connect sysbus.usart3 disp-uart-con
 """
 
+<<<<<<< HEAD
+=======
+macro show_uart_motor
+"""
+    emulation CreateServerSocketTerminal 49154 "motor-uart-con" false
+    connector Connect sysbus.usart2 motor-uart-con
+"""
+
+macro show_uart_bps
+"""
+    emulation CreateServerSocketTerminal 49155 "bps-uart-con" false
+    connector Connect sysbus.usart2 bps-uart-con
+"""
+
+>>>>>>> beta_test_0
 set periphWriteHook """
 print "START WRITE HOOK" 
 print 'Periph: %s'%self
@@ -59,20 +91,48 @@ emulation CreateCANHub "carCan"
 emulation CreateCANHub "motorCan"
 
 mach create "ctrl-leader"
+<<<<<<< HEAD
 machine LoadPlatformDescription $platform
 sysbus LoadELF $bin
 logLevel 3
 runMacro $show_printUartldr
 machine StartGdbServer 3333 true
+=======
+mach set "ctrl-leader"
+machine LoadPlatformDescription $platform
+sysbus LoadELF $bin
+logLevel 3
+runMacro $show_uart_leader
+runMacro $show_uart_display
+machine StartGdbServer 3333
+>>>>>>> beta_test_0
 connector Connect sysbus.can1 carCan
 connector Connect sysbus.can3 motorCan
 
 mach create "bps-sim"
 mach set "bps-sim"
 machine LoadPlatformDescription $platform
+<<<<<<< HEAD
 sysbus LoadELF $BPS_bin
 logLevel 3
 runMacro $show_printUartbps
 connector Connect sysbus.can1 carCan
 
+=======
+sysbus LoadELF $bps_bin
+logLevel 3
+runMacro $show_uart_bps
+machine StartGdbServer 3334
+connector Connect sysbus.can1 carCan
+
+mach create "motor-sim"
+mach set "motor-sim"
+machine LoadPlatformDescription $platform
+sysbus LoadELF $motor_bin
+logLevel 3
+runMacro $show_uart_motor
+machine StartGdbServer 3335
+connector Connect sysbus.can3 motorCan
+
+>>>>>>> beta_test_0
 mach set "ctrl-leader"
