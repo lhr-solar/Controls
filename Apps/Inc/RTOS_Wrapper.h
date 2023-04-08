@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2022 UT Longhorn Racing Solar */
+/* Copyright (c) 2018-2023 UT Longhorn Racing Solar */
 /*RTOS_ library includes all the wrapper functions for a functioning RTOS - needed for cleaner code and portability
  */
 #ifndef RTOS_H
@@ -8,6 +8,10 @@
 #include <stdint.h>
 
 // Currently using Micrium
+#define MICRIUM
+// #define FREE_RTOS
+
+#ifdef MICRIUM
 typedef OS_MUTEX RTOS_MUTEX;
 typedef OS_SEM RTOS_SEM;
 typedef OS_OPT RTOS_OPT;
@@ -18,9 +22,14 @@ typedef CPU_TS RTCPU_TS;
 typedef OS_SEM_CTR RTOS_SEM_CTR;
 typedef OS_TICK RTOS_TICK;
 
-// Custom typedefs for RTOS_TaskCreate function currently using micirium
 typedef OS_TCB RTOS_TCB;
 typedef CPU_STK RTOS_CPU_STK;
+#endif
+
+#ifdef FREE_RTOS
+
+#endif
+
 
 /**
  * @brief Pends a RTOS_Semaphore.
