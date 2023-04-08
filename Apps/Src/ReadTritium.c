@@ -9,6 +9,7 @@
 //status limit flag masks
 #define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
 #define MAX_CAN_LEN 8
+#define RESTART_THRESHOLD 3			// Number of times to try restart hall sensor
 
 
 uint16_t Motor_FaultBitmap = T_NONE;
@@ -37,8 +38,26 @@ tritium_error_code_t MotorController_getTritiumError(void){
 static void assertTritiumError(uint16_t motor_err){    
 	OS_ERR err;
 	if(motor_err != T_NONE){
-		
+		if(motor_err != T_HALL_SENSOR_ERR){
+			exception_t notHallError = {1, "this is not hall sensor error", NULL};
+			_assertError(notHallError);
+		}else{
+			exception_t hallErrorPrio2 = {2, "hall sensor error prio 2", callback_hallError};
+			_assertError(hallErrorPrio2);
+		}
 	}
+}
+
+static void callback_hallError(void){
+        static uint8_t hall_fault_cnt = 0; //trip counter 
+        if(hall_fault_cnt > RESTART_THRESHOLD){ //try to restart the motor a few times and then fail out 
+            exception_t hallErrorPrio1 = {1, "hall sensor error prio 2", NULL};
+			_assertError(hallErrorPrio1);
+        } else { 
+            hall_fault_cnt++; 
+            MotorController_Restart(); //re-initialize motor 
+            return; 
+        } 
 }
 
 
