@@ -1,5 +1,3 @@
-// Inspired by Roie and Nathaniel's RTOS Lab 1
-// commands will be added latter
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -65,7 +63,7 @@ char *help = {
 	"	Commands and their params are as follows:\n\r"
 };
 
-bool isWhiteSpace(char character){
+static inline bool isWhiteSpace(char character){
 	switch (character) {
 		case 0x09:
 		case 0x0A:
@@ -76,11 +74,11 @@ bool isWhiteSpace(char character){
 	}
 }
 
-bool isNull(char character){
+static inline bool isNull(char character){
 	return character == '\0';
 }
 
-bool executeCommand(char *input) {
+static bool executeCommand(char *input) {
 	// The first word in the input should be a valid command
 	char *command = strtok_r(input, " ", &save);
 	// Iterate through all valid commands and check if the input matches
@@ -116,10 +114,10 @@ void Task_CommandLine(void* p_arg) {
     }
 }
 
-// Below are the function implementations for all of the available commands
+// Function Implementations
 // ------------------------------------------------------------------------
 
-static bool cmd_help(void) {
+static inline bool cmd_help(void) {
 	printf(help);
 	return true;
 }
@@ -155,8 +153,11 @@ static bool cmd_CANbus_Send(void){
 		return false;
 	}
 
-	CANbus_Send(msg, blocking, bus);
-	printf("msg sent on %s (%s)\n\r", "can", blockInput);
+	if(CANbus_Send(msg, blocking, bus)){
+		printf("msg sent on %s (%s)\n\r", "can", blockInput);
+	}else{
+		printf("msg sent failed\n\r");
+	}
 	return true;
 }
 
@@ -259,8 +260,11 @@ static bool cmd_Contactors_Set(void){
 		return false;
 	}
 
-	Contactors_Set(contactor, state, blocking);
-	printf("%s set to %s (%s)\n\r", contactorInput, stateInput, blockingInput);
+	if(Contactors_Set(contactor, state, blocking)){
+		printf("%s set to %s (%s)\n\r", contactorInput, stateInput, blockingInput);
+	}else{
+		printf("set failed\n\r");
+	}
 	return true;
 }
 
@@ -320,16 +324,16 @@ static bool cmd_Minion_Read_Input(void){
 		pin = REGEN_SW;
 	}
 	else if(strcmp(pinInput, "for_sw") == 0){
-		pin = REGEN_SW;
+		pin = FOR_SW;
 	}
 	else if(strcmp(pinInput, "rev_sw") == 0){
-		pin = REGEN_SW;
+		pin = REV_SW;
 	}
 	else if(strcmp(pinInput, "cruz_en") == 0){
-		pin = REGEN_SW;
+		pin = CRUZ_EN;
 	}
 	else if(strcmp(pinInput, "cruz_st") == 0){
-		pin = REGEN_SW;
+		pin = CRUZ_ST;
 	}
 	// else if(strcmp(pinInput, "brakelight") == 0){	// uncomment when fix implemented
 	// 	pin = REGEN_SW;
@@ -347,7 +351,7 @@ static bool cmd_Minion_Write_Output(void){
 	char *pinInput = strtok_r(NULL, " ", &save);
 	MinionPin_t pin;
 	if(strcmp(pinInput, "brakelight") == 0){	// uncomment when fix implemented
-		pin = REGEN_SW;
+		pin = BRAKELIGHT;
 	}
 	else{
 		return false;
@@ -372,7 +376,7 @@ static bool cmd_Minion_Write_Output(void){
 
 static bool cmd_Pedals_Read(void){
 	char *pedalInput = strtok_r(NULL, " ", &save);
-	contactor_t pedal;
+	pedal_t pedal;
 	if(strcmp(pedalInput, "accel") == 0){
 		pedal = ACCELERATOR;
 	}
