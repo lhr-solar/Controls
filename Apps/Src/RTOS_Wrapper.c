@@ -107,27 +107,18 @@ void RTOS_MutexPost(RTOS_MUTEX *mutex, RTOS_OPT options)
 }
 
 /**
- * @brief: Creates a Second-Based Time Delay.
- * @param dly Defines how many seconds to delay for.
+ * @brief: Creates a Millisecond/second/minutes/hour-Based Time Delay.
+ * @param milli Defines how many milliseconds to delay for.
+ * @param seconds Defines how many seconds to delay for.
+ * @param minutes Defines how many minutes to delay for.
+ * @param hours Defines how many hours to delay for.
+ * @note if a (hours + minutes + seconds + milli) value is passed that is less time than the resolution of 1 tick, this code will error out
  * @return none
  */
-void RTOS_DelaySecs(uint16_t dly)
+void RTOS_DelayHMSM(CPU_INT16U hours, CPU_INT16U minutes, CPU_INT16U seconds, CPU_INT32U milli)
 {
     RTOS_ERR err;
-    OSTimeDlyHMSM(0, 0, (CPU_INT16U)dly, 0, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    assertOSError(OS_RTOS_WRAPPER_LOC, err);
-}
-
-/**
- * @brief: Creates a Millisecond-Based Time Delay.
- * @param dly Defines how many milliseconds to delay for.
- * @note if a dly value is passed that is less time than the resolution of 1 tick, this code will error out
- * @return none
- */
-void RTOS_DelayMs(uint16_t dly)
-{
-    RTOS_ERR err;
-    OSTimeDlyHMSM(0, 0, 0, (CPU_INT32U)dly, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+    OSTimeDlyHMSM((CPU_INT16U)hours, (CPU_INT16U)minutes, (CPU_INT16U)seconds, (CPU_INT32U)milli, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
 }
 
@@ -141,4 +132,36 @@ void RTOS_DelayTick(RTOS_TICK dly)
     RTOS_ERR err;
     OSTimeDly(dly, OS_OPT_TIME_DLY, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
+}
+
+/**
+ * @brief: Creates a Tick-Based Time Delay.
+ * @param dly Defines how many ticks to delay for.
+ * @return none
+ */
+void RTOS_TimerCreate(RTOS_TMR p_tmr, char *p_name, RTOS_TICK dly, RTOS_TICK period, RTOS_TMR_CALLBACK_PTR P_callback, void *p_callback_arg)
+{
+    RTOS_ERR err;
+    OSTmrCreate(
+        &p_tmr,
+        p_name,
+        dly,
+        period,
+        OS_OPT_TMR_PERIODIC,
+        P_callback,
+        p_callback_arg,
+        &err);
+    assertOSError(OS_READ_CAN_LOC, err);
+}
+
+/**
+ * @brief: Creates a Tick-Based Time Delay.
+ * @param dly Defines how many ticks to delay for.
+ * @return none
+ */
+void RTOS_TimerStart(RTOS_TMR p_tmr)
+{
+    RTOS_ERR err;
+    OSTmrStart(&p_tmr, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
 }

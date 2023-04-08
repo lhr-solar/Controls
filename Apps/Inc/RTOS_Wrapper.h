@@ -21,7 +21,8 @@ typedef OS_TCB RTOS_TCB;
 typedef CPU_TS RTCPU_TS;
 typedef OS_SEM_CTR RTOS_SEM_CTR;
 typedef OS_TICK RTOS_TICK;
-
+typedef OS_TMR RTOS_TMR;
+typedef OS_TMR_CALLBACK_PTR RTOS_TMR_CALLBACK_PTR;
 typedef OS_TCB RTOS_TCB;
 typedef CPU_STK RTOS_CPU_STK;
 #endif
@@ -92,18 +93,15 @@ void RTOS_TaskCreate(
     uint64_t stk_size);
 
 /**
- * @brief Creates a Second-based Time Delay.
- * @param dly Defines how many seconds to delay for.
+ * @brief: Creates a Millisecond/second/minutes/hour-Based Time Delay.
+ * @param milli Defines how many milliseconds to delay for.
+ * @param seconds Defines how many seconds to delay for.
+ * @param minutes Defines how many minutes to delay for.
+ * @param hours Defines how many hours to delay for.
+ * @note if a (hours + minutes + seconds + milli) value is passed that is less time than the resolution of 1 tick, this code will error out
  * @return none
  */
-void RTOS_DelaySecs(uint16_t dly);
-
-/**
- * @brief Creates a Millisecond-based Time Delay.
- * @param dly Defines how many milliseconds to delay for.
- * @return none
- */
-void RTOS_DelayMs(uint16_t dly);
+void RTOS_DelayHMSM(CPU_INT16U hours, CPU_INT16U minutes, CPU_INT16U seconds, CPU_INT32U milli);
 
 /**
  * @brief Creates a semaphore with the initially specified count
@@ -120,5 +118,19 @@ void RTOS_SemCreate(RTOS_SEM *sem, char *name, uint32_t count);
  * @return none
  */
 void RTOS_DelayTick(RTOS_TICK dly);
+
+/**
+ * @brief: Creates a Tick-Based Time Delay.
+ * @param dly Defines how many ticks to delay for.
+ * @return none
+ */
+void RTOS_TimerCreate(RTOS_TMR p_tmr, char *p_name, RTOS_TICK dly, RTOS_TICK period, RTOS_TMR_CALLBACK_PTR P_callback, void *p_callback_arg);
+
+/**
+ * @brief: Creates a Tick-Based Time Delay.
+ * @param dly Defines how many ticks to delay for.
+ * @return none
+ */
+void RTOS_TimerStart(RTOS_TMR p_tmr);
 
 #endif
