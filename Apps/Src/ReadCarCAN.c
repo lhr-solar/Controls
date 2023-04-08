@@ -65,26 +65,24 @@ static void updateSaturation(int8_t chargeMessage){
 }
 
 // helper function to disable charging
-// Turns off contactors by setting fault bitmap and signaling fault state
+// Turns off contactors by signaling fault state
 static inline void chargingDisable(void) {
     OS_ERR err;
     // mark regen as disabled
     chargeEnable = false;
 
-    //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, false, true);
-    Contactors_Set(ARRAY_PRECHARGE, false, true);
-    
-    // mark regen as disabled
-    chargeEnable = false;
+    // kill contactors 
+    exception_t readBPSError = {2, "read BPS error", callback_readBPSError};
+    _assertError(readBPSError);
+}
 
-    // Set fault bitmap 
-    FaultBitmap |= FAULT_READBPS;
+static void callback_readBPSError(void){
+    // Kill contactors 
+    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
 
-    // Signal fault state to kill contactors at its earliest convenience
-    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
+    // Turn off the array contactor display light
+    UpdateDisplay_SetArray(false);
 }
 
 // helper function to call if charging should be enabled
@@ -143,10 +141,6 @@ static void arrayRestart(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 void canWatchTimerCallback (void *p_tmr, void *p_arg){
-
-    // mark regen as disabled
-    chargeEnable= false;
-
     chargingDisable();
 }
 

@@ -25,6 +25,9 @@
 #define FIFO_NAME disp_fifo
 #include "fifo.h"
 
+// For fault handling
+#define RESTART_THRESHOLD 3
+
 disp_fifo_t msg_queue;
 
 static OS_SEM DisplayQ_Sem4;    // counting semaphore for queue message availability
@@ -74,11 +77,23 @@ static void assertUpdateDisplayError(UpdateDisplayError_t err){
 	OS_ERR os_err;
 
 	if(err != UPDATEDISPLAY_ERR_NONE){
-		FaultBitmap |= FAULT_DISPLAY;
-
-		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
-		assertOSError(OS_DISPLAY_LOC, os_err);
+		exception_t displayError = {2, "display error", &callback_displayError};
+		_assertError(displayError);
 	}
+}
+
+/**
+ * @brief Error handler callback function. Gets called by fault state if err is present. 
+ */
+static void callback_displayError(void){
+	static uint8_t disp_fault_cnt = 0; // If faults > three times total, Display_Fault is called
+        if(disp_fault_cnt>RESTART_THRESHOLD){ 
+            Display_Fault(OSErrLocBitmap, FaultBitmap); 
+        } else { 
+            disp_fault_cnt++; 
+            Display_Reset(); 
+            return; 
+        }  
 }
 
 UpdateDisplayError_t UpdateDisplay_Init(){

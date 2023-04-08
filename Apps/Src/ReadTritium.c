@@ -37,9 +37,7 @@ tritium_error_code_t MotorController_getTritiumError(void){
 static void assertTritiumError(uint16_t motor_err){    
 	OS_ERR err;
 	if(motor_err != T_NONE){
-		FaultBitmap |= FAULT_TRITIUM;
-		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-		assertOSError(0, err);
+		
 	}
 }
 

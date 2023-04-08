@@ -8,8 +8,6 @@
 #include "UpdateDisplay.h"
 #include "ReadTritium.h"
 
-#define RESTART_THRESHOLD 3
-
 static bool fromThread = false; //whether fault was tripped from thread
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
@@ -52,14 +50,6 @@ static void nonrecoverableFaultHandler(){
     while(1){;} //nonrecoverable
 }
 
-static void readBPS_ContactorHandler(void){
-    // Kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
-
-    // Turn off the array contactor display light
-    UpdateDisplay_SetArray(false);
-}
 
 void EnterFaultState(void) {
 
