@@ -4,7 +4,7 @@
 #include <string.h>
 #include "BSP_UART.h"
 
-#define DELAY_TIME 100
+#define DELAY_TIME 300
 #define MAXVEL_MPS 6.7056f // 15 mph in m/s
 
 static void print_float(float f){

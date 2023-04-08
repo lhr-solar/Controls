@@ -22,7 +22,7 @@ static uint8_t cycle_ctr = 0;
 #define MAX_VELOCITY 20000.0f // rpm
 #define MAX_CURRENT 50 // in Amps
 #define WHEEL_RADIUS 0.2667f // In m
-#define TORQUE_SLOPE 50.0f // in kgfcm/A
+#define TORQUE_SLOPE 75.0f // in kgfcm/A
 
 
 // VELOCITY CONTROL MODE MACROS
@@ -89,14 +89,15 @@ float CurrentToMotorForce(float current, float setpointCurrent){ // Simulate giv
 float MotorForceToVelocity(float motorForce){ 
     //drag calculations
     float totalAccel = 0.0f;
+
     float predictedVel = velocityMPS + (((float)motorForce / CAR_MASS_KG)*(MS_TIME_DELAY_MILSEC) / (1000)); //in m/s
 
-    float deceleration = (0.5 * DRAG_COEFFICIENT * FRONTAL_SURFACE_AREA * AIR_DENSITY * (velocityMPS*velocityMPS)) / CAR_MASS_KG;
+    float deceleration = (0.5 * DRAG_COEFFICIENT * FRONTAL_SURFACE_AREA * AIR_DENSITY * (velocityMPS*velocityMPS));
     
     if (predictedVel <= 0){
-        totalAccel = ((float)motorForce / CAR_MASS_KG + deceleration); //in m/s^2
+        totalAccel = ((float)(motorForce + deceleration) / CAR_MASS_KG); //in m/s^2
     } else if (predictedVel > 0){
-        totalAccel = ((float)motorForce / CAR_MASS_KG - deceleration); //in m/s^2
+        totalAccel = ((float)(motorForce - deceleration) / CAR_MASS_KG); //in m/s^2b 
     }
 
     return velocityMPS + ((totalAccel * MS_TIME_DELAY_MILSEC) / (1000)); // Multiply by 1000 to go from m/ms to m/s
