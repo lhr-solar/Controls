@@ -64,18 +64,6 @@ static void updateSaturation(int8_t chargeMessage){
     chargeMsgSaturation = newSaturation;
 }
 
-// helper function to disable charging
-// Turns off contactors by signaling fault state
-static inline void chargingDisable(void) {
-    OS_ERR err;
-    // mark regen as disabled
-    chargeEnable = false;
-
-    // kill contactors 
-    exception_t readBPSError = {2, "read BPS error", callback_readBPSError};
-    _assertError(readBPSError);
-}
-
 static void callback_readBPSError(void){
     // Kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
@@ -83,6 +71,17 @@ static void callback_readBPSError(void){
 
     // Turn off the array contactor display light
     UpdateDisplay_SetArray(false);
+}
+
+// helper function to disable charging
+// Turns off contactors by signaling fault state
+static inline void chargingDisable(void) {
+    // mark regen as disabled
+    chargeEnable = false;
+
+    // kill contactors 
+    exception_t readBPSError = {2, "read BPS error", callback_readBPSError};
+    _assertError(readBPSError);
 }
 
 // helper function to call if charging should be enabled

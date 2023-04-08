@@ -14,6 +14,7 @@
 #include "Display.h"
 #include "bsp.h"   // for writing to UART
 #include "Tasks.h" // for os and fault error codes
+#include "FaultState.h"
 
 #define DISP_OUT UART_3
 #define MAX_MSG_LEN 32
@@ -22,6 +23,9 @@
 #define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
 // Operational commands have no attribute and no operator, just a command and >= 0 arguments
 #define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
+
+#define RESTART_THRESHOLD 3 // number of times to restart before fault
+
 
 static const char *TERMINATOR = "\xff\xff\xff";
 
@@ -114,13 +118,20 @@ DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode)
 	return DISPLAY_ERR_NONE;
 }
 
+static void callback_displayError(void){
+	static uint8_t disp_fault_cnt = 0; // If faults > three times total, Display_Fault is called
+        if(disp_fault_cnt>RESTART_THRESHOLD){ 
+            Display_Fault(OSErrLocBitmap, FaultBitmap); 
+        } else { 
+            disp_fault_cnt++; 
+            Display_Reset(); 
+            return; 
+        }  
+}
+
 void assertDisplayError(DisplayError_t err){
-	OS_ERR os_err;
-
 	if (err != DISPLAY_ERR_NONE){
-		FaultBitmap |= FAULT_DISPLAY;
-
-		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
-		assertOSError(OS_DISPLAY_LOC, os_err);
+		exception_t displayError = {2, "display error", &callback_displayError};
+		_assertError(displayError);
 	}
 }

@@ -13,6 +13,7 @@
 */
 #include "UpdateDisplay.h"
 #include "Minions.h"
+#include "FaultState.h"
 #include <math.h>
 
 /**
@@ -71,21 +72,9 @@ const char* compStrings[15]= {
 };
 
 /**
- * @brief Error handler for any UpdateDisplay errors. Call this after any display application function.
- */
-static void assertUpdateDisplayError(UpdateDisplayError_t err){
-	OS_ERR os_err;
-
-	if(err != UPDATEDISPLAY_ERR_NONE){
-		exception_t displayError = {2, "display error", &callback_displayError};
-		_assertError(displayError);
-	}
-}
-
-/**
  * @brief Error handler callback function. Gets called by fault state if err is present. 
  */
-static void callback_displayError(void){
+static void callback_updateDisplayError(void){
 	static uint8_t disp_fault_cnt = 0; // If faults > three times total, Display_Fault is called
         if(disp_fault_cnt>RESTART_THRESHOLD){ 
             Display_Fault(OSErrLocBitmap, FaultBitmap); 
@@ -95,6 +84,17 @@ static void callback_displayError(void){
             return; 
         }  
 }
+
+/**
+ * @brief Error handler for any UpdateDisplay errors. Call this after any display application function.
+ */
+static void assertUpdateDisplayError(UpdateDisplayError_t err){
+	if(err != UPDATEDISPLAY_ERR_NONE){
+		exception_t updateDisplayError = {2, "update display error", &callback_updateDisplayError};
+		_assertError(updateDisplayError);
+	}
+}
+
 
 UpdateDisplayError_t UpdateDisplay_Init(){
 	OS_ERR err;

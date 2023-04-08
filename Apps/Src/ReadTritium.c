@@ -4,6 +4,7 @@
 #include "CAN_Queue.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "FaultState.h"
 #include <string.h>
 
 //status limit flag masks
@@ -30,23 +31,6 @@ tritium_error_code_t MotorController_getTritiumError(void){
 	return T_NONE;
 }
 
-/**
- * @brief   Assert Error if Tritium sends error. When Fault Bitmap is set,
- *          and semaphore is posted, Fault state will run.
- * @param   motor_err Bitmap which has motor error codes
- */
-static void assertTritiumError(uint16_t motor_err){    
-	OS_ERR err;
-	if(motor_err != T_NONE){
-		if(motor_err != T_HALL_SENSOR_ERR){
-			exception_t notHallError = {1, "this is not hall sensor error", NULL};
-			_assertError(notHallError);
-		}else{
-			exception_t hallErrorPrio2 = {2, "hall sensor error prio 2", callback_hallError};
-			_assertError(hallErrorPrio2);
-		}
-	}
-}
 
 static void callback_hallError(void){
         static uint8_t hall_fault_cnt = 0; //trip counter 
@@ -59,6 +43,25 @@ static void callback_hallError(void){
             return; 
         } 
 }
+
+/**
+ * @brief   Assert Error if Tritium sends error. When Fault Bitmap is set,
+ *          and semaphore is posted, Fault state will run.
+ * @param   motor_err Bitmap which has motor error codes
+ */
+static void assertTritiumError(uint16_t motor_err){    
+	if(motor_err != T_NONE){
+		if(motor_err != T_HALL_SENSOR_ERR){
+			exception_t notHallError = {1, "this is not hall sensor error", NULL};
+			_assertError(notHallError);
+		}else{
+			exception_t hallErrorPrio2 = {2, "hall sensor error prio 2", callback_hallError};
+			_assertError(hallErrorPrio2);
+		}
+	}
+}
+
+
 
 
 /* OBJECTIVES:

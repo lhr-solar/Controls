@@ -38,8 +38,8 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 /**
  * Global Variables
  */
-//fault_bitmap_t FaultBitmap = FAULT_NONE;
-//os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
+fault_bitmap_t FaultBitmap = FAULT_NONE;
+os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 void _assertOSError(uint16_t OS_err_loc, OS_ERR err)

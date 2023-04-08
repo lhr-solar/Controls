@@ -8,18 +8,17 @@
 #include "UpdateDisplay.h"
 #include "ReadTritium.h"
 
-static bool fromThread = false; //whether fault was tripped from thread
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
  * Semaphores
  */
-extern OS_SEM FaultState_Sem4;
+OS_SEM FaultState_Sem4;
 
 /**
  * Mutex
  */
-extern OS_MUTEX FaultState_Mutex;
+OS_MUTEX FaultState_Mutex;
 
 // current exception is initialized
 exception_t currException = {-1, NULL, NULL};
@@ -54,7 +53,9 @@ static void nonrecoverableFaultHandler(){
 void EnterFaultState(void) {
 
     printf("%s", currException.message);
-    if(!(currException.callback)){(*(currException.callback));} // Custom callback
+    if(!(currException.callback)){
+        currException.callback();
+        } // Custom callback
 
     switch (currException.prio)
     {
@@ -75,9 +76,6 @@ void EnterFaultState(void) {
 void Task_FaultState(void *p_arg) {
     OS_ERR err;
     CPU_TS ts;
-
-    FaultBitmap = FAULT_NONE;
-    OSErrLocBitmap = OS_NONE_LOC;
 
     OSMutexCreate(&FaultState_Mutex, "Fault state mutex", &err);
     OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
