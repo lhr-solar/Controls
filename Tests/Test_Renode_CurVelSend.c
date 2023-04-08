@@ -46,7 +46,7 @@ int main(void){
     OS_ERR err;
     uint8_t ms=0;
 
-    /*
+    ///*
     // Test ramp up to 15 mph (CC)
     vel = 20000.0f;
     current = 1.0f;
@@ -69,7 +69,7 @@ int main(void){
         printf("(%d ms)\n\r", DELAY_TIME*(ms++));
         OSTimeDlyHMSM(0, 0, 0, DELAY_TIME, OS_OPT_TIME_HMSM_STRICT, &err);
     }
-    */
+    //*/
     
     
     // Test ramp up to 15 mph (VC)

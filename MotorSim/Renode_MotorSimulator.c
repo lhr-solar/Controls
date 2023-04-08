@@ -6,17 +6,11 @@
 #include "BSP_UART.h"
 
 // Global variables
-static float setpointVelocity = 0.0f; 
 static float velocityRPM = 0.0f;
 static float velocityMPS = 0.0f;
-static float setpointCurrent = 0.0f;
-static float current = 0.0f; 
-static float total_accel = 0.0f;
-static CANDATA_t oldCD;
-static CANDATA_t currCD; // CANmsg we will be sending
-static CANDATA_t newCD;
+
+static CANDATA_t prevMsg;
 static uint8_t cycle_ctr = 0;
-static float motor_force = 0.00f;
 
 
 // MOTOR FORCE TO VELOCITY MACROS
@@ -45,25 +39,24 @@ static float Rate;
 static float PreviousError = 0;
 
 
-
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
 
 //function to convert from RPM to M/S
-float RevPerMinToMetersPerSec(float velRPM){
+float RevPerMinToMetersPerSec(float velocityRPM){
     //converting the velocity from RPM to M/S
-    return ((velRPM * (2 * M_PI * WHEEL_RADIUS)) / 60); 
+    return ((velocityRPM * (2 * M_PI * WHEEL_RADIUS)) / 60); 
 }
 
 //Function to convert from M/S to RPM
-float MetersPerSecToRevPerMin(float velMPS){
+float MetersPerSecToRevPerMin(float velocityMPS){
     //converting the velocity from M/S to RPM
-    return ((velMPS * 60) / (2 * M_PI * WHEEL_RADIUS)); 
+    return ((velocityMPS * 60) / (2 * M_PI * WHEEL_RADIUS)); 
 }
 
 //Function returns calculated current, calculated via PID
-float Velocity_PID_Output() { 
+float Velocity_PID_Output(float setpointVelocity) { 
     Error = RevPerMinToMetersPerSec(setpointVelocity) - velocityMPS;
     
     ErrorSum = ErrorSum + Error;
@@ -86,37 +79,37 @@ float Velocity_PID_Output() {
     // TODO: Tweak the PID constants such that the output is a float from -1.0 to 1.0 
 }
 
-float CurrentToMotorForce(){ // Simulate giving the motor a current and returning a force
+float CurrentToMotorForce(float current, float setpointCurrent){ // Simulate giving the motor a current and returning a force
     
     // FORCE = Current(%) * (CurrentSetpoint * Max Current (A)) * Slope (kfgcm/A) * 9.8 / 100 / Wheel Radius (m)
     return (current * (setpointCurrent * MAX_CURRENT) * TORQUE_SLOPE * 9.8 / 100) / WHEEL_RADIUS;
 
 }
 
-float MotorForceToVelocity(){ 
+float MotorForceToVelocity(float motorForce){ 
     //drag calculations
-
-    float predictedVel = velocityMPS + (((float)motor_force / CAR_MASS_KG)*(MS_TIME_DELAY_MILSEC) / (1000)); //in m/s
+    float totalAccel = 0.0f;
+    float predictedVel = velocityMPS + (((float)motorForce / CAR_MASS_KG)*(MS_TIME_DELAY_MILSEC) / (1000)); //in m/s
 
     float deceleration = (0.5 * DRAG_COEFFICIENT * FRONTAL_SURFACE_AREA * AIR_DENSITY * (velocityMPS*velocityMPS)) / CAR_MASS_KG;
     
     if (predictedVel <= 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG + deceleration); //in m/s^2
+        totalAccel = ((float)motorForce / CAR_MASS_KG + deceleration); //in m/s^2
     } else if (predictedVel > 0){
-        total_accel = ((float)motor_force / CAR_MASS_KG - deceleration); //in m/s^2
+        totalAccel = ((float)motorForce / CAR_MASS_KG - deceleration); //in m/s^2
     }
 
-    return velocityMPS + ((total_accel * MS_TIME_DELAY_MILSEC) / (1000)); // Multiply by 1000 to go from m/ms to m/s
+    return velocityMPS + ((totalAccel * MS_TIME_DELAY_MILSEC) / (1000)); // Multiply by 1000 to go from m/ms to m/s
 }
 
-void SendVelocityCANData(){
-    currCD.ID = MOTOR_DRIVE;
-    currCD.idx = 0;
+void SendVelocityCANData(CANDATA_t outMsg){
+    outMsg.ID = MOTOR_DRIVE;
+    outMsg.idx = 0;
 
-    memcpy(&currCD.data[0], &velocityRPM, sizeof(velocityRPM));
-    memcpy(&currCD.data[4], &velocityMPS, sizeof(velocityMPS));
+    memcpy(&outMsg.data[0], &velocityRPM, sizeof(velocityRPM));
+    memcpy(&outMsg.data[4], &velocityMPS, sizeof(velocityMPS));
 
-    CANbus_Send(currCD, CAN_BLOCKING, MOTORCAN);
+    CANbus_Send(outMsg, CAN_BLOCKING, MOTORCAN);
 }
 
 void Task1(void *arg)
@@ -128,34 +121,41 @@ void Task1(void *arg)
     {
         OS_ERR err;
 
-        ErrorStatus error = CANbus_Read(&newCD, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newCD 
-        if (error == ERROR) // If there is no new value to read, use the old CAN data
-        {
-            newCD = oldCD;
+        float setpointVelocity; 
+        float setpointCurrent;
+        float current; 
+        float motorForce;
+        
+        CANDATA_t newMsg;
+        CANDATA_t outMsg; // CANmsg we will be sending
+
+        ErrorStatus error = CANbus_Read(&newMsg, CAN_NON_BLOCKING, MOTORCAN); // returns data value into newMsg 
+        if (error == ERROR){ // If there is no new value to read, use the old CAN data
+            newMsg = prevMsg;
         }
 
         // Parsing Measurements
-        memcpy(&setpointVelocity, &newCD.data[0], sizeof setpointVelocity); // in RPM 
-        memcpy(&setpointCurrent, &newCD.data[4], sizeof setpointCurrent); // Percent from 0.0 to 1.0
+        memcpy(&setpointVelocity, &newMsg.data[0], sizeof setpointVelocity); // in RPM 
+        memcpy(&setpointCurrent, &newMsg.data[4], sizeof setpointCurrent); // Percent from 0.0 to 1.0
         
         if (abs(setpointVelocity) == MAX_VELOCITY){  // CURRENT CONTROLLED MODE
 
             current = (setpointVelocity < 0) ? -1.0f : 1.0f; // Calculated Current = 1 or -1
 
-            motor_force = CurrentToMotorForce();
+            motorForce = CurrentToMotorForce(current, setpointCurrent);
 
-            velocityMPS = MotorForceToVelocity();
+            velocityMPS = MotorForceToVelocity(motorForce);
 
             velocityRPM = MetersPerSecToRevPerMin(velocityMPS);
 
         } 
         else { // VELOCITY CONTROLLED MODE
             
-            current = Velocity_PID_Output();
+            current = Velocity_PID_Output(setpointVelocity);
 
-            motor_force = CurrentToMotorForce(); 
+            motorForce = CurrentToMotorForce(current, setpointCurrent); 
 
-            velocityMPS = MotorForceToVelocity();
+            velocityMPS = MotorForceToVelocity(motorForce);
 
             velocityRPM = MetersPerSecToRevPerMin(velocityMPS);
 
@@ -164,12 +164,12 @@ void Task1(void *arg)
 
         ++cycle_ctr;
         if (cycle_ctr == 3)
-        { // send currCD to read canbus every 300 ms
+        { // send outMsg to read canbus every 300 ms
             cycle_ctr = 0;
-            // Return velocity as part of currCD
-            SendVelocityCANData();
+            // Return velocity as part of outMsg
+            SendVelocityCANData(outMsg);
         }
-        oldCD = newCD; // Update old CAN data to match most recent values received
+        prevMsg = newMsg; // Update old CAN data to match most recent values received
         OSTimeDlyHMSM(0, 0, 0, MS_TIME_DELAY_MILSEC, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
     }
