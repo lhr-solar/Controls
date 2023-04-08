@@ -42,129 +42,43 @@ void _assertError(exception_t exception){
     assertOSError(OS_SEND_CAN_LOC, err);
 }
         
+static void nonrecoverableFaultHandler(){
+    // Turn additional brakelight on to indicate critical error
+    BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
 
-static void ArrayMotorKill(void) {
+    // Array motor kill
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
     while(1){;} //nonrecoverable
 }
 
-static void nonrecoverableFaultHandler(){
-    //turn additional brakelight on to indicate critical error
-    BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
-    ArrayMotorKill();
-}
-
 static void readBPS_ContactorHandler(void){
-    //kill contactors 
+    // Kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
     Contactors_Set(ARRAY_PRECHARGE, OFF, true);
 
-    // turn off the array contactor display light
+    // Turn off the array contactor display light
     UpdateDisplay_SetArray(false);
 }
 
 void EnterFaultState(void) {
 
     printf("%s", currException.message);
-    if(!(currException.callback)){(*(currException.callback));} // custom callback
+    if(!(currException.callback)){(*(currException.callback));} // Custom callback
 
     switch (currException.prio)
     {
     case 0:
+        // Things could always be worst
+    case 1:
         nonrecoverableFaultHandler();
         break;
-    case 1:
-        /* code */
-        break;
     case 2:
-        /* code */
-        break;
-    case 3:
-        /* code */
+        // Priority level 2 only calls callback
         break;
     default:
         break;
     }
-    
-    // if(FaultBitmap & FAULT_OS){
-    //     nonrecoverableFaultHandler();
-    // }
-    // else if(FaultBitmap & FAULT_TRITIUM){ //This gets tripped by the ReadTritium thread
-    //     tritium_error_code_t TritiumError = MotorController_getTritiumError(); //get error code to segregate based on fault type
-    
-    //     if(TritiumError & T_HARDWARE_OVER_CURRENT_ERR){ //Tritium signaled too much current
-    //         nonrecoverableFaultHandler();
-    //     }
-        
-    //     if(TritiumError & T_SOFTWARE_OVER_CURRENT_ERR){
-    //         nonrecoverableFaultHandler();
-    //     }
-
-    //     if(TritiumError & T_DC_BUS_OVERVOLT_ERR){ //DC bus overvoltage
-    //         nonrecoverableFaultHandler();
-    //     }
-        
-    //     if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
-    //         // Note: separate tripcnt from T_INIT_FAIL
-    //         static uint8_t hall_fault_cnt = 0; //trip counter
-    //         if(hall_fault_cnt > RESTART_THRESHOLD){ //try to restart the motor a few times and then fail out
-    //             nonrecoverableFaultHandler();
-    //         } else {
-    //             hall_fault_cnt++;
-    //             MotorController_Restart(); //re-initialize motor
-    //             return;
-    //         }
-    //     }
-
-    //     if(TritiumError & T_CONFIG_READ_ERR){ //Config read error
-    //         nonrecoverableFaultHandler();
-    //     }
-            
-    //     if(TritiumError & T_DESAT_FAULT_ERR){ //Desaturation fault error
-    //         nonrecoverableFaultHandler();
-    //     }
-
-    //     if(TritiumError & T_MOTOR_OVER_SPEED_ERR){ //Motor over speed error
-    //         nonrecoverableFaultHandler();
-    //     }
-
-    //     if(TritiumError & T_INIT_FAIL){ //motorcontroller fails to restart or initialize
-    //         nonrecoverableFaultHandler();
-    //     }
-
-    //     return;
-
-    //     /**
-    //      * FAULTS NOT HANDLED :
-    //      * Watchdog Last Reset Error - Not using any hardware watchdogs. 
-    //      * 
-    //      * Under Voltage Lockout Error - Not really much we can do if we're not giving the controller enough voltage,
-    //      * and if we miss drive messages as a result, it will shut itself off.
-
-    //      */
-    // }
-    // else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
-    //     readBPS_ContactorHandler();
-    //     return;
-    // }
-    // else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
-    //     nonrecoverableFaultHandler();
-    // }
-    // else if(FaultBitmap & FAULT_DISPLAY){
-    //     static uint8_t disp_fault_cnt = 0;
-    //     if(disp_fault_cnt>3){
-    //         Display_Fault(OSErrLocBitmap, FaultBitmap);
-    //     } else {
-    //         disp_fault_cnt++;
-    //         Display_Reset();
-    //         return;
-    //     }
-    // }
-    // if(fromThread){//no recovering if fault state was entered outside of the fault thread
-    //     return;
-    // }
-    // while(1){;} 
     
 }
 
