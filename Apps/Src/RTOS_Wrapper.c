@@ -20,9 +20,15 @@
     void
     RTOS_TaskCreate(RTOS_TCB *p_tcb, char *p_name, void *p_task, void *p_arg, uint8_t prio, RTOS_CPU_STK *p_stk_base, uint64_t stk_size)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSTaskCreate(p_tcb, p_name, p_task, p_arg, prio, p_stk_base, stk_size, stk_size, 0, 10, (void *)0, OS_OPT_TASK_STK_CHK | OS_OPT_TASK_SAVE_FP, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
+    #endif
+
+    #ifdef FREE_RTOS
+
+    #endif
 }
 
 /**
@@ -34,9 +40,15 @@
  */
 void RTOS_SemCreate(RTOS_SEM *sem, char *name, uint32_t count)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSSemCreate(sem, name, count, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
+    #endif
+
+    #ifdef FREE_RTOS
+
+    #endif
 }
 
 /**
@@ -47,10 +59,16 @@ void RTOS_SemCreate(RTOS_SEM *sem, char *name, uint32_t count)
  */
 RTOS_SEM_CTR RTOS_SemPend(RTOS_SEM *sem, RTOS_OPT opt)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     RTOS_SEM_CTR count = OSSemPend(sem, 0, opt, 0, &err); // we don't need timestamp
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
     return count;
+    #endif
+
+    #ifdef FREE_RTOS
+
+    #endif
 }
 
 /**
@@ -61,10 +79,16 @@ RTOS_SEM_CTR RTOS_SemPend(RTOS_SEM *sem, RTOS_OPT opt)
  */
 RTOS_SEM_CTR RTOS_SemPost(RTOS_SEM *sem4, RTOS_OPT opt)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     RTOS_SEM_CTR counter = OSSemPost(sem4, opt, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
     return counter;
+    #endif
+
+    #ifdef FREE_RTOS
+
+    #endif
 }
 
 /**
@@ -75,35 +99,53 @@ RTOS_SEM_CTR RTOS_SemPost(RTOS_SEM *sem4, RTOS_OPT opt)
  */
 void RTOS_MutexCreate(RTOS_MUTEX *mut, char *name)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSMutexCreate(mut, name, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
+    #endif
+
+    #ifdef FREE_RTOS
+    mut* = xSemaphoreCreateMutex(void);
+    #endif
 }
 
 /**
  * @brief   Waits for Mutex, assigns timestamp and any error to err and ticks
  * @param   *mutex - pointer to mutex
- * @param   options - determines what the mutex will do, ie: block or not block
+ * @param   options - determines what the mutex will do, ie: block or not block (havent implemented for FREE_RTOS but it explains how to do it)
  * @return  none
  */
 void RTOS_MutexPend(RTOS_MUTEX *mutex, RTOS_OPT opt)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSMutexPend(mutex, 0, opt, (void *)0, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
+    #endif
+
+    #ifdef FREE_RTOS
+    xSemaphoreTake( mutex*, 0); //wrong and unfinished
+#endif
 }
 
 /**
  * @brief   Posts the specified Mutex. (For future reference, Post is the same as Give)
  * @param   *mutex - pointer to the specified RTOS Mutex object
- * @param   options - a parameter which determines what kind of Post MutexPost performs
+ * @param   options - a parameter which determines what kind of Post MutexPost performs (havent implemented for FREE_RTOS but it explains how to do it)
  * @return  none
  */
 void RTOS_MutexPost(RTOS_MUTEX *mutex, RTOS_OPT options)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSMutexPost(mutex, options, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
+    #endif
+
+    #ifdef FREE_RTOS
+    xSemaphoreGive(mutex *); // wrong and unfinished
+#endif
 }
 
 /**
@@ -117,9 +159,15 @@ void RTOS_MutexPost(RTOS_MUTEX *mutex, RTOS_OPT options)
  */
 void RTOS_DelayHMSM(CPU_INT16U hours, CPU_INT16U minutes, CPU_INT16U seconds, CPU_INT32U milli)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSTimeDlyHMSM((CPU_INT16U)hours, (CPU_INT16U)minutes, (CPU_INT16U)seconds, (CPU_INT32U)milli, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
+    #endif
+
+    #ifdef FREE_RTOS
+
+    #endif
 }
 
 /**
@@ -129,18 +177,31 @@ void RTOS_DelayHMSM(CPU_INT16U hours, CPU_INT16U minutes, CPU_INT16U seconds, CP
  */
 void RTOS_DelayTick(RTOS_TICK dly)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSTimeDly(dly, OS_OPT_TIME_DLY, &err);
     assertOSError(OS_RTOS_WRAPPER_LOC, err);
+    #endif
+
+    #ifdef FREE_RTOS
+
+    #endif
 }
 
 /**
  * @brief: Creates a Tick-Based Time Delay.
+ * @param p_tmr is the pointer to the timer.
+ * @param p_name is name of the timer as a char string.
  * @param dly Defines how many ticks to delay for.
+ * @param period Defines how many ticks to set the period to.
+ * @param P_callback is the pointer to the function to be called when timer finishes.
+ * @param p_callback_arg i dont know.
+ * @param timerID i have no clue: FREE_RTOS describes it as "an identifier to the timer," but the FREE_RTOS create timer function already returns the timer handler(timer create intitalizes the timer rather than intitalizing and feeding it in as a paramater)
  * @return none
  */
-void RTOS_TimerCreate(RTOS_TMR p_tmr, char *p_name, RTOS_TICK dly, RTOS_TICK period, RTOS_TMR_CALLBACK_PTR P_callback, void *p_callback_arg)
+void RTOS_TimerCreate(RTOS_TMR p_tmr, char *p_name, RTOS_TICK dly, RTOS_TICK period, RTOS_TMR_CALLBACK_PTR P_callback, void *p_callback_arg, void *const timerID)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSTmrCreate(
         &p_tmr,
@@ -152,16 +213,37 @@ void RTOS_TimerCreate(RTOS_TMR p_tmr, char *p_name, RTOS_TICK dly, RTOS_TICK per
         p_callback_arg,
         &err);
     assertOSError(OS_READ_CAN_LOC, err);
+    #endif
+    
+#ifdef FREE_RTOS
+    RTOS_ERR err;
+    p_tmr = xTimerCreate(
+        (char *)p_name,
+        (RTOS_TICK)period,
+        (UBaseType_t)pdFALSE,
+        (void *const)timerID,
+        (RTOS_TMR_CALLBACK_PTR)P_callback);
+    assertOSError(OS_READ_CAN_LOC, err);
+#endif
 }
 
 /**
  * @brief: Creates a Tick-Based Time Delay.
- * @param dly Defines how many ticks to delay for.
+ * @param p_tmr specifies which timer handler to start.
  * @return none
  */
 void RTOS_TimerStart(RTOS_TMR p_tmr)
 {
+    #ifdef MICRIUM
     RTOS_ERR err;
     OSTmrStart(&p_tmr, &err);
     assertOSError(OS_READ_CAN_LOC, err);
+    #endif
+
+    #ifdef FREE_RTOS
+    BaseType_t WasQueueSuccessful;
+    WasQueueSuccessful = xTimerStart(
+        (RTOS_TMR)p_tmr,
+        (RTOS_TICK)0); // blocking function: blocks start for __ ticks
+    #endif
 }

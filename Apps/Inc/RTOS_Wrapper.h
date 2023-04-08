@@ -28,18 +28,21 @@ typedef CPU_STK RTOS_CPU_STK;
 #endif
 
 #ifdef FREE_RTOS
-
+typedef TickType_t RTOS_TICK;
+typedef TimerCallbackFunction_t RTOS_TMR_CALLBACK_PTR;
+typedef TimerHandle_t RTOS_TMR;
+typedef SemaphoreHandle_t RTOS_MUTEX;
 #endif
 
-
-/**
- * @brief Pends a RTOS_Semaphore.
- * @param *sem - pointer to a sempaphore to pend
- * @param tick - time in clock ticks to timeout for
- * @param opt - pend option
- * @return the semaphore count, or 0 if not available
- */
-RTOS_SEM_CTR RTOS_SemPend(RTOS_SEM *sem, RTOS_OPT opt);
+    /**
+     * @brief Pends a RTOS_Semaphore.
+     * @param *sem - pointer to a sempaphore to pend
+     * @param tick - time in clock ticks to timeout for
+     * @param opt - pend option
+     * @return the semaphore count, or 0 if not available
+     */
+    RTOS_SEM_CTR
+    RTOS_SemPend(RTOS_SEM *sem, RTOS_OPT opt);
 
 /**
  * @brief Posts a semaphore
@@ -121,14 +124,20 @@ void RTOS_DelayTick(RTOS_TICK dly);
 
 /**
  * @brief: Creates a Tick-Based Time Delay.
+ * @param p_tmr is the pointer to the timer.
+ * @param p_name is name of the timer as a char string.
  * @param dly Defines how many ticks to delay for.
+ * @param period Defines how many ticks to set the period to.
+ * @param P_callback is the pointer to the function to be called when timer finishes.
+ * @param p_callback_arg i dont know.
+ * @param timerID i have no clue: FREE_RTOS describes it as "an identifier to the timer," but the FREE_RTOS create timer function already returns the timer handler(timer create intitalizes the timer rather than intitalizing and feeding it in as a paramater)
  * @return none
  */
-void RTOS_TimerCreate(RTOS_TMR p_tmr, char *p_name, RTOS_TICK dly, RTOS_TICK period, RTOS_TMR_CALLBACK_PTR P_callback, void *p_callback_arg);
+void RTOS_TimerCreate(RTOS_TMR p_tmr, char *p_name, RTOS_TICK dly, RTOS_TICK period, RTOS_TMR_CALLBACK_PTR P_callback, void *p_callback_arg, void *const timerID);
 
 /**
  * @brief: Creates a Tick-Based Time Delay.
- * @param dly Defines how many ticks to delay for.
+ * @param p_tmr specifies which timer handler to start.
  * @return none
  */
 void RTOS_TimerStart(RTOS_TMR p_tmr);
