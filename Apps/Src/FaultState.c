@@ -11,6 +11,11 @@
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
+ * Macros for initializing the exception
+*/
+#define NEW_EXCEPTION(exception_name) exception_t exception_name = {.prio=-1,.message=NULL,.callback=NULL}
+
+/**
  * Semaphores
  */
 OS_SEM FaultState_Sem4;
@@ -21,7 +26,7 @@ OS_SEM FaultState_Sem4;
 OS_MUTEX FaultState_Mutex;
 
 // current exception is initialized
-exception_t currException = {-1, NULL, NULL};
+NEW_EXCEPTION(currException);
 
 void _assertError(exception_t exception){
     OS_ERR err;
@@ -31,9 +36,6 @@ void _assertError(exception_t exception){
     assertOSError(OS_SEND_CAN_LOC, err);  // TODO: need location?
 
     currException = exception;
-
-    OSMutexPost(&FaultState_Mutex, OS_OPT_POST_NONE, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);  // TODO: need location?
 
     OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
     assertOSError(OS_SEND_CAN_LOC, err);
@@ -53,7 +55,7 @@ static void nonrecoverableFaultHandler(){
 void EnterFaultState(void) {
 
     printf("%s", currException.message);
-    if(!(currException.callback)){
+    if(currException.callback != NULL){
         currException.callback();
         } // Custom callback
 
@@ -85,6 +87,8 @@ void Task_FaultState(void *p_arg) {
         OSSemPend(&FaultState_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
         //fromThread = true;
         EnterFaultState();
+        OSMutexPost(&FaultState_Mutex, OS_OPT_POST_NONE, &err);
+        assertOSError(OS_SEND_CAN_LOC, err);  // We've finished handling the error and can post the mutex now // TODO: need location?
         //fromThread = false;
         OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
     }
