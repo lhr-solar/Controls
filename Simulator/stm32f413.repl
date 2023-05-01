@@ -60,7 +60,16 @@ timer9: Timers.STM32_Timer @ sysbus <0x40014000, +0x400>
     -> nvic@24
 
 exti: IRQControllers.EXTI @ sysbus 0x40013C00
+    numberOfOutputLines: 24
     [0-9, 13] -> nvic@[6-10, 23, 40, 1, 41, 42, 3]
+    
+nvicInput23: Miscellaneous.CombinedInput @ none
+    numberOfInputs: 5
+    -> nvic@23
+
+nvicInput40: Miscellaneous.CombinedInput @ none
+    numberOfInputs: 6
+    -> nvic@40
 
 syscfg: Miscellaneous.STM32_SYSCFG @ sysbus 0x40013800
     [0-15] -> exti@[0-15]
@@ -148,7 +157,7 @@ spi2i2s2: SPI.STM32SPI @ sysbus 0x40003800
 
 i2s2ext: SPI.STM32SPI @ sysbus 0x40003400
 
-iwdg: Timers.STM32F4_IndependentWatchdog @ sysbus 0x40003000
+iwdg: Timers.STM32_IndependentWatchdog @ sysbus 0x40003000
     frequency: 32000
     // windowOption: false
     // defaultPrescaler: 0x4

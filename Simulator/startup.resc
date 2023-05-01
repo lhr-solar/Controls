@@ -32,6 +32,44 @@ macro show_uart_bps
     connector Connect sysbus.usart2 bps-uart-con
 """
 
+macro create_bps
+"""
+    mach create "bps-sim"
+    mach set "bps-sim"
+    machine LoadPlatformDescription $platform
+    sysbus LoadELF $bps_bin
+    logLevel 3
+    runMacro $show_uart_bps
+    machine StartGdbServer 3334
+    connector Connect sysbus.can1 carCan
+"""
+
+macro create_leader
+"""
+    mach create "ctrl-leader"
+    mach set "ctrl-leader"
+    machine LoadPlatformDescription $platform
+    sysbus LoadELF $bin
+    logLevel 3
+    runMacro $show_uart_leader
+    runMacro $show_uart_display
+    machine StartGdbServer 3333
+    connector Connect sysbus.can1 carCan
+    connector Connect sysbus.can3 motorCan
+"""
+
+macro create_motor
+"""
+    mach create "motor-sim"
+    mach set "motor-sim"
+    machine LoadPlatformDescription $platform
+    sysbus LoadELF $motor_bin
+    logLevel 3
+    runMacro $show_uart_motor
+    machine StartGdbServer 3335
+    connector Connect sysbus.can3 motorCan
+"""
+
 set periphWriteHook """
 print "START WRITE HOOK" 
 print 'Periph: %s'%self
@@ -60,34 +98,10 @@ elif(hex(offset) == "0x18cL"):
 
 emulation CreateCANHub "carCan"
 emulation CreateCANHub "motorCan"
+emulation SetGlobalAdvanceImmediately true
 
-mach create "ctrl-leader"
-mach set "ctrl-leader"
-machine LoadPlatformDescription $platform
-sysbus LoadELF $bin
-logLevel 3
-runMacro $show_uart_leader
-runMacro $show_uart_display
-machine StartGdbServer 3333
-connector Connect sysbus.can1 carCan
-connector Connect sysbus.can3 motorCan
-
-mach create "bps-sim"
-mach set "bps-sim"
-machine LoadPlatformDescription $platform
-sysbus LoadELF $bps_bin
-logLevel 3
-runMacro $show_uart_bps
-machine StartGdbServer 3334
-connector Connect sysbus.can1 carCan
-
-mach create "motor-sim"
-mach set "motor-sim"
-machine LoadPlatformDescription $platform
-sysbus LoadELF $motor_bin
-logLevel 3
-runMacro $show_uart_motor
-machine StartGdbServer 3335
-connector Connect sysbus.can3 motorCan
+runMacro $create_leader
+runMacro $create_bps
+runMacro $create_motor
 
 mach set "ctrl-leader"
