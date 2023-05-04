@@ -9,7 +9,6 @@
 #include "common.h"
 #include "config.h"
 #include "CarState.h"
-#include "MotorController.h"
 
 
 int main(){

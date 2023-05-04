@@ -16,6 +16,10 @@ typedef struct _msg
 #define FIFO_NAME msg_queue
 #include "fifo.h"
 
+#define NUM_FILTER_REGS 4   // Number of 16 bit registers for ids in one CAN_FilterInit struct
+
+//return error if someone tries to call from motor can
+
 static msg_queue_t gRxQueue[2];
 
 // Required for receiving CAN messages
@@ -26,8 +30,8 @@ static CanRxMsg gRxMessage[2];
 static callback_t gRxEvent[2];
 static callback_t gTxEnd[2];
 
-void BSP_CAN1_Init();
-void BSP_CAN3_Init();
+void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
+void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
 
 /**
  * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
@@ -36,7 +40,7 @@ void BSP_CAN3_Init();
  * @return  None
  */
 
-void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd) {
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize) {
 
     // Configure event handles
     gRxEvent[bus] = rxEvent;
@@ -44,16 +48,15 @@ void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd) {
 
     if (bus == CAN_1)
     {
-        BSP_CAN1_Init();
+        BSP_CAN1_Init(idWhitelist, idWhitelistSize);
     }
     else
     {
-        BSP_CAN3_Init();
+        BSP_CAN3_Init(idWhitelist, idWhitelistSize);
     }
 }
 
-void BSP_CAN1_Init() {
-
+void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
@@ -102,17 +105,61 @@ void BSP_CAN1_Init() {
     CAN_InitStruct.CAN_Prescaler = 16;
     CAN_Init(CAN1, &CAN_InitStruct);
 
-    /* CAN filter init */
-    CAN_FilterInitStruct.CAN_FilterNumber = 0;
-    CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
-    CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
-    CAN_FilterInitStruct.CAN_FilterIdHigh = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterIdLow = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
-    CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-    CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+    /* CAN filter init 
+     * Initializes hardware filter banks to be used for filtering CAN IDs (whitelist)
+     */
+    if(idWhitelist == NULL){
+        // No filtering. All IDs can pass through.
+        CAN_FilterInitStruct.CAN_FilterNumber = 0;
+        CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
+        CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
+        CAN_FilterInitStruct.CAN_FilterIdHigh = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterIdLow = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
+        CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+        CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+    } else{
+        // Filter CAN IDs
+        // So far, if we shift whatever id we need by 5, it works
+        // If whitelist is passed but no valid ID exists inside of it, filter nothing i.e. no ID gets through
+        // MAXIMUM CAN ID ALLOWED IS 2047
+
+        CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList; //list mode
+        CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_16bit;
+        CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
+        CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+        uint16_t validIDCounter = 0;
+
+        uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
+        for(uint8_t i = 0; i < idWhitelistSize; i++){
+            if (idWhitelist[i] == 0){ //zero ID check
+                continue;
+            }
+                
+            CAN_FilterInitStruct.CAN_FilterNumber = i / NUM_FILTER_REGS; //determines filter number based on CAN ID
+            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i] << 5;
+            validIDCounter++;
+
+            if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
+                CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+            }
+            else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
+                for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
+                    *(FilterStructPtr + j) = 0x0000;
+
+                CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+            }
+            else if(validIDCounter > 112){ //All filter banks are to be filled and there is no point in filtering
+                for(uint8_t filter = 0; filter < 28; filter++){//Therefore, let all IDs through (no filtering)
+                    CAN_FilterInitStruct.CAN_FilterNumber = filter;
+                    CAN_FilterInitStruct.CAN_FilterActivation = DISABLE;
+                    CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+                } 
+            }
+        }
+    }
 
     /* Transmit Structure preparation */
     gTxMessage[0].ExtId = 0x5;
@@ -148,7 +195,7 @@ void BSP_CAN1_Init() {
     }
 }
 
-void BSP_CAN3_Init()
+void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
@@ -198,17 +245,44 @@ void BSP_CAN3_Init()
     CAN_InitStruct.CAN_Prescaler = 16;
     CAN_Init(CAN3, &CAN_InitStruct);
 
-    /* CAN filter init */
-    CAN_FilterInitStruct.CAN_FilterNumber = 0;
-    CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
-    CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
-    CAN_FilterInitStruct.CAN_FilterIdHigh = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterIdLow = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
-    CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
-    CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-    CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
+    /* CAN filter init 
+     * Initializes hardware filter banks to be used for filtering CAN IDs (whitelist)
+     */
+    if(idWhitelist == NULL){
+        // No filtering. All IDs can pass through.
+        CAN_FilterInitStruct.CAN_FilterNumber = 0;
+        CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
+        CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
+        CAN_FilterInitStruct.CAN_FilterIdHigh = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterIdLow = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterMaskIdHigh = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
+        CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
+        CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+        CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
+    } else{
+        // Filter CAN IDs
+        CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList; //list mode
+        CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_16bit;
+        CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
+        CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+        
+        uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
+        for(uint8_t i = 0; i < idWhitelistSize; i++){
+            CAN_FilterInitStruct.CAN_FilterNumber = i / NUM_FILTER_REGS; //determines filter number based on CAN ID
+            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i];
+
+            if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
+                CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
+            }
+            else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
+                for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
+                    *(FilterStructPtr + j) = 0x0000;
+
+                CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
+            }
+        }
+    }
 
     // CAN_SlaveStartBank(CAN1, 0);
 

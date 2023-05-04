@@ -12,9 +12,9 @@
 #define SAT_BUF_LENGTH 5
 
 /**
- * @brief Returns whether regen braking is enabled or not
- * @return  Whether regen braking is enabled or not
+ * @brief Returns whether regen braking / charging is enabled or not
+ * @return  Whether regen braking / charging is enabled or not
 */
-bool RegenEnable_Get();
+bool ChargeEnable_Get();
 
 #endif

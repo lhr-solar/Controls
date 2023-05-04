@@ -2,12 +2,12 @@
 #include "config.h"
 #include "os.h"
 #include "Tasks.h"
+#include "CANConfig.h"
 
 static OS_SEM CANMail_Sem4[NUM_CAN];       // sem4 to count how many sending hardware mailboxes we have left (start at 3)
 static OS_SEM CANBus_RecieveSem4[NUM_CAN]; // sem4 to count how many msgs in our recieving queue
 static OS_MUTEX CANbus_TxMutex[NUM_CAN];   // mutex to lock tx line
 static OS_MUTEX CANbus_RxMutex[NUM_CAN];   // mutex to lock Rx line
-
 
 /**
  * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly outside this driver.
@@ -47,19 +47,39 @@ void CANbus_RxHandler_3(){
 }
 
 /**
- * @brief   Initializes the CAN system for a given bus. Must be called independently for each bus.
- * @param   bus
+ * @brief Checks each CAN ID. If an ID is not in CANLUT, set that ID to NULL
+ * @param wlist The whitelist containing the IDs to be checked
+ * @param size The size of the whitelist of IDs
+ * @return Returns the whitelist to be 
+*/
+static CANId_t* whitelist_validator(CANId_t* wlist, uint8_t size){
+    for(int i = 0; i < size; i++){
+        CANId_t curr = wlist[i];
+        if(curr >= NUM_CAN_IDS) {
+            wlist[i] = 0;
+        } else if (CANLUT[curr].size == 0 ) {
+            wlist[i] = 0;
+        }
+    }
+    return wlist;
+}
+/**
+ * @brief   Initializes the CAN system for a given bus
+ * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
+ * @param   idWhitelist A list of CAN IDs that we want to receive. If NULL, we will receive all messages.
+ * @param   idWhitelistSize The size of the whitelist.
+ * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
  */
-ErrorStatus CANbus_Init(CAN_t bus)
+ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize)
 {
     // initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
     // initialize tx
     OS_ERR err;
-    
+    idWhitelist = whitelist_validator(idWhitelist, idWhitelistSize);
     if(bus==CAN_1){
-        BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1);
+        BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1, (uint16_t*)idWhitelist, idWhitelistSize);
     } else if (bus==CAN_3){
-        BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3);
+        BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3, (uint16_t*)idWhitelist, idWhitelistSize);
     } else {
         return ERROR;
     }
@@ -86,7 +106,7 @@ ErrorStatus CANbus_Init(CAN_t bus)
  * @param   blocking: Whether or not this should be a blocking call
  * @return  ERROR if data wasn't sent, SUCCESS if it was sent.
  */
-ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
+ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
 {
     CPU_TS timestamp;
     OS_ERR err;
@@ -173,7 +193,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,CAN_blocking_t blocking, CAN_t bus)
  * @returns              ERROR if read failed, SUCCESS otherwise
  */
 
-ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, CAN_blocking_t blocking, CAN_t bus)
+ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
 {
     CPU_TS timestamp;
     OS_ERR err;
