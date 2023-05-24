@@ -21,7 +21,7 @@
 #define TASK_FAULT_STATE_PRIO               1
 #define TASK_INIT_PRIO                      2
 #define TASK_READ_TRITIUM_PRIO              3
-#define TASK_UPDATE_VELOCITY_PRIO           4
+#define TASK_SEND_TRITIUM_PRIO              4
 #define TASK_READ_CAR_CAN_PRIO              5
 #define TASK_UPDATE_DISPLAY_PRIO            6
 #define TASK_SEND_CAR_CAN_PRIO              8
@@ -35,7 +35,7 @@
 
 #define TASK_FAULT_STATE_STACK_SIZE         DEFAULT_STACK_SIZE
 #define TASK_INIT_STACK_SIZE                DEFAULT_STACK_SIZE
-#define TASK_UPDATE_VELOCITY_STACK_SIZE     DEFAULT_STACK_SIZE
+#define TASK_SEND_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_READ_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_UPDATE_DISPLAY_STACK_SIZE      DEFAULT_STACK_SIZE
 #define TASK_READ_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
@@ -51,7 +51,7 @@ void Task_FaultState(void* p_arg);
 
 void Task_Init(void* p_arg);
 
-void Task_UpdateVelocity(void* p_arg);
+void Task_SendTritium(void* p_arg);
 
 void Task_ReadCarCAN(void* p_arg);
 
@@ -72,7 +72,7 @@ void Task_Telemetry(void* p_arg);
  */
 extern OS_TCB FaultState_TCB;
 extern OS_TCB Init_TCB;
-extern OS_TCB UpdateVelocity_TCB;
+extern OS_TCB SendTritium_TCB;
 extern OS_TCB ReadCarCAN_TCB;
 extern OS_TCB UpdateDisplay_TCB;
 extern OS_TCB ReadTritium_TCB;
@@ -86,7 +86,7 @@ extern OS_TCB Telemetry_TCB;
  */
 extern CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
 extern CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
-extern CPU_STK UpdateVelocity_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
+extern CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
 extern CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
 extern CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
@@ -149,6 +149,7 @@ typedef enum{
     FAULT_TRITIUM = 0x04,      // for errors sent from the tritium
     FAULT_READBPS = 0x08,    // for unsuccessfully reading from BPS CAN
     FAULT_DISPLAY = 0x10,    // for display faults
+    FAULT_BPS = 0x20,       // for if BPS trips
 } fault_bitmap_t;
 
 /**
