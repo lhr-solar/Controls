@@ -33,15 +33,13 @@ Keep the docs clear and readible. Reach out to more experienced team members wit
    :maxdepth: 2
    :caption: Apps
 
-   Apps/BlinkLights
    Apps/FaultState
    Apps/Main
    Apps/ReadCarCAN
-   Apps/ReadSwitches
    Apps/ReadTritium
    Apps/SendCarCAN
    Apps/UpdateDisplay
-   Apps/UpdateVelocity
+   Apps/SendTritium
    Apps/ExtraFiles
 
 
