@@ -10,14 +10,13 @@
 #include <errno.h> 
 #include "Tasks.h"
 
-#define FAULT_BITMAP_NUM 6
-#define OS_LOC_NUM 14
-
+// global variables
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
 extern State RegenEnable;
 extern bool UpdateVel_ToggleCruise;
-// extern disp_fifo_t msg_queue;
+extern uint16_t SupplementalVoltage;
+extern uint32_t StateOfCharge;
 
 static const char *MINIONPIN_STRING[] = {
     FOREACH_MinionPin(GENERATE_STRING)
@@ -28,6 +27,9 @@ static const char *CONTACTOR_STRING[] = {
 };
 
 // Need to keep this in sync with Task.h
+/*----------------------------------------------*/
+#define FAULT_BITMAP_NUM 6
+#define OS_LOC_NUM 14
 static const char *OS_LOC_STRING[] = { 
     "OS_NONE_LOC", 
     "OS_ARRAY_LOC", 
@@ -45,7 +47,6 @@ static const char *OS_LOC_STRING[] = {
     "OS_DISPLAY_LOC"
 };
 
-// Need to keep this in sync with Task.h
 static const char *FAULT_BITMAP_STRING[] = { 
     "FAULT_NONE", 
     "FAULT_OS", 
@@ -54,72 +55,73 @@ static const char *FAULT_BITMAP_STRING[] = {
     "FAULT_READBPS",
     "FAULT_DISPLAY"
 };
+/*----------------------------------------------*/
 
 void Task_DebugDump(void* p_arg) {
     OS_ERR err;
     Minion_Error_t mErr;
 
-    // Get pedal information
-    int8_t accelPedal = Pedals_Read(ACCELERATOR);
-    printf("ACCELERATOR: %d\n", accelPedal);
+    while(1){
 
-    int8_t brakePedal = Pedals_Read(BRAKE);
-    printf("BRAKE: %d\n", brakePedal);
+        // Get pedal information
+        int8_t accelPedal = Pedals_Read(ACCELERATOR);
+        printf("ACCELERATOR: %d\n\r", accelPedal);
 
-    // Get minion information
-    for(MinionPin_t pin = 0; pin < MINIONPIN_NUM-1; pin++){ // Plan to change MINIONPIN_NUM-1 -> MINIONPIN_NUM after Minion function is fixed
-        bool pinState = Minion_Read_Input(pin, &mErr);
-        printf("%s: %d\n", MINIONPIN_STRING[pin], pinState);
-    }
+        int8_t brakePedal = Pedals_Read(BRAKE);
+        printf("BRAKE: %d\n\r", brakePedal);
 
-    // Get contactor info
-    for(contactor_t contactor = 0; contactor < CONTACTOR_NUM; contactor++){
-        bool contactorState = Contactors_Get(contactor) == ON ? true : false;
-        printf("%s: %d\n", CONTACTOR_STRING[contactor], contactorState);
-    } 
+        // Get minion information
+        for(MinionPin_t pin = 0; pin < MINIONPIN_NUM-1; pin++){ // Plan to change MINIONPIN_NUM-1 -> MINIONPIN_NUM after Minion function is fixed
+            bool pinState = Minion_Read_Input(pin, &mErr);
+            printf("%s: %s\n\r", MINIONPIN_STRING[pin], pinState == true ? "true" : "false");
+        }
 
-    // fault bitmap
-    printf("Fault Bitmap: ");
-    if(FaultBitmap == 0){
-        printf("%s\n", FAULT_BITMAP_STRING[0]);
-    }
-    else{
-        for(int i = 0; i < FAULT_BITMAP_NUM; i++){
-            uint32_t result = (FaultBitmap & 1 << i) >> i;
-            if(result){
-                printf("%s ", FAULT_BITMAP_STRING[i]);
+        // Get contactor info
+        for(contactor_t contactor = 0; contactor < CONTACTOR_NUM; contactor++){
+            bool contactorState = Contactors_Get(contactor) == ON ? true : false;
+            printf("%s: %s\n\r", CONTACTOR_STRING[contactor], contactorState == true ? "true" : "false");
+        } 
+
+        // fault bitmap
+        printf("Fault Bitmap: ");
+        if(FaultBitmap == FAULT_NONE){
+            printf("%s", FAULT_BITMAP_STRING[0]);
+        }else{
+            for(int i = 0; i < FAULT_BITMAP_NUM; i++){
+                if(FaultBitmap & (1 << i)){
+                    printf("%s ", FAULT_BITMAP_STRING[i]);
+                }
             }
         }
-    }
-    printf("\n");
+        printf("\n\r");
 
-    // os loc bitmap
-    printf("Os Loc Bitmap: ");
-    if(OSErrLocBitmap == 0){
-        printf("%s\n", OS_LOC_STRING[0]);
-    }
-    else{
-        for(int i = 0; i < OS_LOC_NUM; i++){
-            uint32_t result = (OSErrLocBitmap & 1 << i) >> i;
-            if(result){
-                printf("%s ", OS_LOC_STRING[i]);
+        // os loc bitmap
+        printf("OS Lock Bitmap: ");
+        if(OSErrLocBitmap == OS_NONE_LOC){
+            printf("%s", OS_LOC_STRING[0]);
+        }
+        else{
+            for(int i = 0; i < OS_LOC_NUM; i++){
+                if(OSErrLocBitmap & (1 << i)){
+                    printf("%s ", OS_LOC_STRING[i]);
+                }
             }
         }
-    }
-    printf("\n");
+        printf("\n\r");
 
-    // regen enable
-    // printf("RegenEnable: %s\n", RegenEnable == ON ? "On" : "Off");
+        // update velocity toggle cruise
+        printf("UpdateVel_ToggleCruise: %s\n\r", UpdateVel_ToggleCruise == true ? "True" : "False");
 
-    // update velocity toggle cruise
-    printf("UpdateVel_ToggleCruise: %s\n", UpdateVel_ToggleCruise == true ? "True" : "False");
+        // supplemental voltage
+        printf("Supplemental Voltage: %d\n\r", SupplementalVoltage);
 
-    // // display fifo
-    // printf("msg_queue: %d", msg_queue);
+        // state of charge
+        printf("State of Charge: %d\n\r", StateOfCharge);
 
-    // Delay of 5 seconds
-    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    if (err != OS_ERR_NONE){
-        assertOSError(OS_NONE_LOC, err);
+        // Delay of 5 seconds
+        OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        if (err != OS_ERR_NONE){
+            assertOSError(OS_NONE_LOC, err);
+        }
     }
 }

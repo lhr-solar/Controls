@@ -61,6 +61,21 @@ char *help = {
 	"	For help, enter [help]\n\r"
 	"	Format is: cmd [param, ...]\n\r"
 	"	Commands and their params are as follows:\n\r"
+	"	CANbus_Send (non)blocking motor/car 'string' - Sends a CAN\n\r"
+	"message with the string data as is on the determined line\n\r"
+	"	CANbux_Read (non)blocking motor/car - Reads a CAN message\n\r"
+	"on the detemined line\n\r"
+	"	Contactors_Get array_c/array_p/motor_c - Gets the status of\n\r"
+	"determined contactor\n\r"
+	"	Contactors_Set array_c/array_p/motor_c on/off (non)blocking -\n\r"
+	"Sets the determined contactor\n\r"
+	"	Contactors_Enable  array_c/array_p/motor_c - Enables the determined\n\r"
+	"contactor\n\r"
+	"	Contactors_Disable  array_c/array_p/motor_c - Disables the determined\n\r"
+	"contactor\n\r"
+	"	Minion_Read_Input 'input' - Reads the current status of the input\n\r"
+	"	Minion_Write_Output `output` on/off - Sets the current state of the output\n\r"
+	"	Pedals_Read accel/brake - Reads the current status of the peda\n\r"
 };
 
 static inline bool isWhiteSpace(char character){
@@ -122,6 +137,8 @@ static inline bool cmd_help(void) {
 	return true;
 }
 
+/* This has not been tested and not sure if this implementation is correct (not sure
+if we want to just transmit string data from serial) */
 static bool cmd_CANbus_Send(void){
 	char *data = strtok_r(NULL, " ", &save);
 	CANDATA_t msg = {.ID=0x0582, .idx=0};		// this would change in the future (don't assume char as data)
@@ -350,7 +367,7 @@ static bool cmd_Minion_Write_Output(void){
 	Minion_Error_t err;
 	char *pinInput = strtok_r(NULL, " ", &save);
 	MinionPin_t pin;
-	if(strcmp(pinInput, "brakelight") == 0){	// uncomment when fix implemented
+	if(strcmp(pinInput, "brakelight") == 0){
 		pin = BRAKELIGHT;
 	}
 	else{
@@ -359,7 +376,7 @@ static bool cmd_Minion_Write_Output(void){
 
 	char *stateInput = strtok_r(NULL, " ", &save);
 	bool state;
-	if(strcmp(stateInput, "on") == 0){	// uncomment when fix implemented
+	if(strcmp(stateInput, "on") == 0){
 		state = true;
 	}
 	else if(strcmp(stateInput, "off") == 0){

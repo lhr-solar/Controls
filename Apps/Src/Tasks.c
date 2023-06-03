@@ -24,6 +24,7 @@ OS_TCB Telemetry_TCB;
 OS_TCB BlinkLight_TCB;
 OS_TCB IgnCont_TCB;
 OS_TCB DebugDump_TCB;
+OS_TCB CommandLine_TCB;
 
 /**
  * Stacks
@@ -39,6 +40,7 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
 CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
 CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
+CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 /**
  * Semaphores

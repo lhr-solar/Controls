@@ -29,6 +29,7 @@
 #define TASK_BLINK_LIGHT_PRIO               9
 #define TASK_IGN_CONT_PRIO                  7
 #define TASK_DEBUG_DUMP_PRIO                10
+#define TASK_COMMAND_LINE_PRIO              10
 
 /**
  * Stack Sizes
@@ -47,6 +48,7 @@
 #define TASK_BLINK_LIGHT_STACK_SIZE         DEFAULT_STACK_SIZE
 #define TASK_IGN_CONT_STACK_SIZE            DEFAULT_STACK_SIZE
 #define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
+#define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
 
 
 /**
@@ -72,9 +74,9 @@ void Task_BlinkLight(void* p_arg);
 
 void Task_Contactor_Ignition(void* p_arg);
 
-void Task_CommandLine(void* p_arg);
-
 void Task_DebugDump(void *p_arg);
+
+void Task_CommandLine(void* p_arg);
 
 /**
  * TCBs
@@ -90,6 +92,7 @@ extern OS_TCB Telemetry_TCB;
 extern OS_TCB BlinkLight_TCB;
 extern OS_TCB IgnCont_TCB;
 extern OS_TCB DebugDump_TCB;
+extern OS_TCB CommandLine_TCB;
 
 
 /**
@@ -106,6 +109,7 @@ extern CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 extern CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
 extern CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
 extern CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
+extern CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 /**
  * Queues
@@ -162,9 +166,8 @@ typedef enum{
     FAULT_UNREACH = 0x02,    // for unreachable conditions
     FAULT_TRITIUM = 0x04,      // for errors sent from the tritium
     FAULT_READBPS = 0x08,    // for unsuccessfully reading from BPS CAN
-    FAULT_DISPLAY = 0x10    // for display faults
+    FAULT_DISPLAY = 0x10,    // for display faults
 } fault_bitmap_t;
-
 
 /**
  * Error variables

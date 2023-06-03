@@ -257,8 +257,8 @@ void USART2_IRQHandler(void) {
             char junk;
             // Delete the last entry!
             removeSuccess = rxfifo_popback(&usbRxFifo, &junk); 
-            // try to get backspace to work
-            USART_SendData(UART_2, 0x7F);
+
+            USART_SendData(UART_2, 0x7F);   // TODO: Not sure if the backspace works. Need to test
         }
         if(removeSuccess) {
             USART2->DR = data;
