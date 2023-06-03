@@ -1,6 +1,8 @@
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
 
+#include "getter.h"
+
 #define MOTOR_MSG_PERIOD 500
 #define FSM_PERIOD 250
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
@@ -49,5 +51,18 @@ extern TritiumState_t state;
 extern float velocityObserved;
 extern float cruiseVelSetpoint;
 #endif
+
+// Getters
+GETTER_H(bool, cruiseEnable)
+GETTER_H(bool, cruiseSet)
+GETTER_H(bool, onePedalEnable)
+GETTER_H(bool, regenEnable)
+GETTER_H(uint8_t, brakePedalPercent)
+GETTER_H(uint8_t, accelPedalPercent)
+GETTER_H(Gear_t, gear)
+GETTER_H(float, currentSetpoint)
+GETTER_H(float, velocitySetpoint)
+GETTER_H(float, cruiseVelSetpoint)
+GETTER_H(float, velocityObserved)
 
 #endif

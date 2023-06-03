@@ -9,11 +9,11 @@
 #include "common.h"
 #include <errno.h> 
 #include "Tasks.h"
+#include "SendTritium.h"
 
 // global variables
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
-extern State RegenEnable;
 extern bool UpdateVel_ToggleCruise;
 extern uint16_t SupplementalVoltage;
 extern uint32_t StateOfCharge;
@@ -81,6 +81,20 @@ void Task_DebugDump(void* p_arg) {
             bool contactorState = Contactors_Get(contactor) == ON ? true : false;
             printf("%s: %s\n\r", CONTACTOR_STRING[contactor], contactorState == true ? "true" : "false");
         } 
+
+        // Send Tritium variables
+        printf("Cruise Enable: %s\n\r", get_cruiseEnable() ? "true" : "false");
+        printf("Cruise Set: %s\n\r", get_cruiseSet() ? "true" : "false");
+        printf("One Pedal Enable: %s\n\r", get_onePedalEnable() ? "true" : "false");
+        printf("Regen Enable: %s\n\r", get_regenEnable() ? "true" : "false");
+        printf("Pedal Brake Percent: %d\n\r", get_brakePedalPercent());
+        printf("Pedal Accel Percent: %d\n\r", get_accelPedalPercent());
+        // printf("Pedal Accel Percent: %s\n\r", get_accelPedalPercent()); // Gear
+        // printf("Current Setpoint: %f", get_currentSetpoint());   // float print not working?
+        // printf("Current Setpoint: %f", get_currentSetpoint());
+        // printf("Current Setpoint: %f", get_currentSetpoint());
+        // printf("Current Setpoint: %f", get_currentSetpoint());
+
 
         // fault bitmap
         printf("Fault Bitmap: ");

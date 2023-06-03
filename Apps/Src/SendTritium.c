@@ -24,6 +24,7 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "getter.h"
 
 // Macros
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
@@ -86,6 +87,19 @@ static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
 
 #endif
+
+// Getters
+GETTER(bool, cruiseEnable)
+GETTER(bool, cruiseSet)
+GETTER(bool, onePedalEnable)
+GETTER(bool, regenEnable)
+GETTER(uint8_t, brakePedalPercent)
+GETTER(uint8_t, accelPedalPercent)
+GETTER(Gear_t, gear)
+GETTER(float, currentSetpoint)
+GETTER(float, velocitySetpoint)
+GETTER(float, cruiseVelSetpoint)
+GETTER(float, velocityObserved)
 
 // Handler & Decider Declarations
 static void ForwardDriveHandler(void);
