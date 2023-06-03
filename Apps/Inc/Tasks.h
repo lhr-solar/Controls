@@ -66,10 +66,6 @@ void Task_SendCarCAN(void* p_arg);
 
 void Task_Telemetry(void* p_arg);
 
-
-
-
-
 void Task_DebugDump(void *p_arg);
 
 void Task_CommandLine(void* p_arg);

@@ -28,10 +28,6 @@ static bool cmd_Contactors_Get(void);
 
 static bool cmd_Contactors_Set(void);
 
-static bool cmd_Contactors_Enable(void);
-
-static bool cmd_Contactors_Disable(void);
-
 static bool cmd_Minion_Read_Input(void);
 
 static bool cmd_Minion_Write_Output(void);
@@ -45,8 +41,6 @@ const struct Command cmdline_commands[] = {
 	{.name = "CANbus_Read", .action = cmd_CANbus_Read},
 	{.name = "Contactors_Get", .action = cmd_Contactors_Get},
 	{.name = "Contactors_Set", .action = cmd_Contactors_Set},
-	{.name = "Contactors_Enable", .action = cmd_Contactors_Enable},
-	{.name = "Contactors_Disable", .action = cmd_Contactors_Disable},
 	{.name = "Minion_Read_Input", .action = cmd_Minion_Read_Input},
 	{.name = "Minion_Write_Output", .action = cmd_Minion_Write_Output},
 	{.name = "Pedals_Read", .action = cmd_Pedals_Read},
@@ -147,7 +141,7 @@ static bool cmd_CANbus_Send(void){
 	}
 
 	char *blockInput = strtok_r(NULL, " ", &save);
-	CAN_blocking_t blocking;
+	bool blocking;
 	if(strcmp(blockInput, "blocking") == 0){
 		blocking = CAN_BLOCKING;
 	}
@@ -182,7 +176,7 @@ static bool cmd_CANbus_Read(void){
 	CANDATA_t msg;
 
 	char *blockInput = strtok_r(NULL, " ", &save);
-	CAN_blocking_t blocking;
+	bool blocking;
 	if(strcmp(blockInput, "blocking") == 0){
 		blocking = CAN_BLOCKING;
 	}
@@ -285,48 +279,6 @@ static bool cmd_Contactors_Set(void){
 	return true;
 }
 
-static bool cmd_Contactors_Enable(void){
-	char *contactorInput = strtok_r(NULL, " ", &save);
-	contactor_t contactor;
-	if(strcmp(contactorInput, "array_c") == 0){
-		contactor = ARRAY_CONTACTOR;
-	}
-	else if(strcmp(contactorInput, "array_p") == 0){
-		contactor = ARRAY_PRECHARGE;
-	}
-	else if(strcmp(contactorInput, "motor_c") == 0){
-		contactor = MOTOR_CONTACTOR;
-	}
-	else{
-		return false;
-	}
-
-	Contactors_Enable(contactor);
-	printf("%s enabled\n\r", contactorInput);
-	return true;
-}
-
-static bool cmd_Contactors_Disable(void){
-	char *contactorInput = strtok_r(NULL, " ", &save);
-	contactor_t contactor;
-	if(strcmp(contactorInput, "array_c") == 0){
-		contactor = ARRAY_CONTACTOR;
-	}
-	else if(strcmp(contactorInput, "array_p") == 0){
-		contactor = ARRAY_PRECHARGE;
-	}
-	else if(strcmp(contactorInput, "motor_c") == 0){
-		contactor = MOTOR_CONTACTOR;
-	}
-	else{
-		return false;
-	}
-
-	Contactors_Disable(contactor);
-	printf("%s disabled\n\r", contactorInput);
-	return true;
-}
-
 static bool cmd_Minion_Read_Input(void){
 	Minion_Error_t err;
 	char *pinInput = strtok_r(NULL, " ", &save);
@@ -359,7 +311,7 @@ static bool cmd_Minion_Read_Input(void){
 		return false;
 	}
 
-	printf("%s is %s\n\r", pinInput, Minion_Read_Input(pin, &err) ? "on" : "off");
+	printf("%s is %s\n\r", pinInput, Minion_Read_Pin(pin, &err) ? "on" : "off");
 	return true;
 }
 

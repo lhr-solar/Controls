@@ -38,7 +38,6 @@ static const char *OS_LOC_STRING[] = {
     "OS_SEND_CAN_LOC",
     "OS_SEND_TRITIUM_LOC",
     "OS_UPDATE_VEL_LOC",
-    "OS_BLINK_LIGHTS_LOC",
     "OS_CONTACTOR_LOC",
     "OS_MINIONS_LOC",
     "OS_MAIN_LOC",
@@ -53,7 +52,8 @@ static const char *FAULT_BITMAP_STRING[] = {
     "FAULT_UNREACH", 
     "FAULT_TRITIUM",
     "FAULT_READBPS",
-    "FAULT_DISPLAY"
+    "FAULT_DISPLAY",
+    "FAULT_BPS"
 };
 /*----------------------------------------------*/
 
@@ -72,7 +72,7 @@ void Task_DebugDump(void* p_arg) {
 
         // Get minion information
         for(MinionPin_t pin = 0; pin < MINIONPIN_NUM-1; pin++){ // Plan to change MINIONPIN_NUM-1 -> MINIONPIN_NUM after Minion function is fixed
-            bool pinState = Minion_Read_Input(pin, &mErr);
+            bool pinState = Minion_Read_Pin(pin, &mErr);
             printf("%s: %s\n\r", MINIONPIN_STRING[pin], pinState == true ? "true" : "false");
         }
 
@@ -116,7 +116,7 @@ void Task_DebugDump(void* p_arg) {
         printf("Supplemental Voltage: %d\n\r", SupplementalVoltage);
 
         // state of charge
-        printf("State of Charge: %d\n\r", StateOfCharge);
+        printf("State of Charge: %ld\n\r", StateOfCharge);
 
         // Delay of 5 seconds
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);

@@ -6,6 +6,8 @@
 #include "Minions.h"
 #include "Pedals.h"
 
+/* Test does not use OS. This is just to test the logic */
+
 int main(void){
     BSP_UART_Init(UART_2);
     CANbus_Init(CAN_1);
