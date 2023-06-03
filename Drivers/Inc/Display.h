@@ -52,25 +52,6 @@ typedef enum{
 } Page_t;
 
 /**
- * For display elements with three states
- */
-typedef enum{
-	STATE_0	=0,
-	STATE_1	=1,
-	STATE_2	=2
-} TriState_t;
-
-// For cruise control and regen
-#define DISABLED STATE_0
-#define ENABLED STATE_1	// Able to be used
-#define ACTIVE STATE_2	// Actively being used right now
-
-// For gear changes
-#define NEUTRAL STATE_0
-#define FORWARD STATE_1
-#define REVERSE STATE_2
-
-/**
  * Argument types
  */
 typedef enum{
@@ -115,8 +96,16 @@ DisplayError_t Display_Reset(void);
  * @brief Overwrites any processing commands and triggers the display fault screen
  * @param osErrCode the os error location (will be displayed in hex)
  * @param faultCode the generic fault code (will be displayed in hex)
- * @returns bool: false for ERROR, true for SUCCESS
+ * @returns DisplayError_t
  */
 DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+
+/**
+ * @brief Overwrites any processing commands and triggers the evacuation screen
+ * @param SOC_percent the state of charge of the battery in percent
+ * @param supp_mv the voltage of the battery in millivolts
+ * @returns DisplayError_t
+*/
+DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
 
 #endif

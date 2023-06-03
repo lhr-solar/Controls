@@ -15,7 +15,6 @@
 #include "Tasks.h"
 // #include "Display.h"
 // #include "bsp.h"
-// #include "MotorController.h"
 // #include "Contactors.h"
 #include "Display.h"
 
@@ -77,7 +76,7 @@ void delay(void)
 
 int main()
 {
-	Display_Error_t err;
+	DisplayError_t err;
 
 	err = Display_Init();
 	assertDisplayError(err);

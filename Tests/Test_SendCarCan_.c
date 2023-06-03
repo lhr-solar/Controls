@@ -1,10 +1,10 @@
 #include "os.h"
 #include "Tasks.h"
+#include "Minions.h"
 #include <bsp.h>
 #include "config.h"
 #include "common.h"
-#include "CANbus.h"
-#include "CAN_Queue.h"
+#include "Contactors.h" 
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
@@ -13,24 +13,24 @@ void Task1(void *arg)
 {   
     CPU_Init();
     
-    CANbus_Init();
-    CAN_Queue_Init();
-    // BSP_UART_Init(UART_2);
-
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+    BSP_UART_Init(UART_2);
+    Minion_Init();
+    Contactors_Init();
 
     OS_ERR err;
 
-    // Initialize SendCarCAN
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+
+    // Initialize IgnitionContactor
     OSTaskCreate(
-        (OS_TCB*)&SendCarCAN_TCB,
-        (CPU_CHAR*)"SendCarCAN",
-        (OS_TASK_PTR)Task_SendCarCAN,
+        (OS_TCB*)&IgnCont_TCB,
+        (CPU_CHAR*)"IgnitionContactor",
+        (OS_TASK_PTR)Task_Contactor_Ignition,
         (void*)NULL,
-        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
-        (CPU_STK*)SendCarCAN_Stk,
+        (OS_PRIO)TASK_IGN_CONT_PRIO,
+        (CPU_STK*)IgnCont_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (CPU_STK_SIZE)TASK_IGN_CONT_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
@@ -38,11 +38,13 @@ void Task1(void *arg)
         (OS_ERR*)&err
     );
     assertOSError(OS_MAIN_LOC, err);
-    
+
     while (1){
-        // Use a logic analyzer to see if the CAN message gets sent again
+        printf("Array Contactor: %d, Motor Contactor: %d\n\r", Contactors_Get(ARRAY_CONTACTOR), Contactors_Get(MOTOR_CONTACTOR));
+
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
     }
-}
+};
 
 int main()
 {

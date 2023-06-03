@@ -4,7 +4,6 @@
 #include "Tasks.h"
 #include "Display.h"
 // #include "bsp.h"
-// #include "MotorController.h"
 // #include "Contactors.h"
 #include "UpdateDisplay.h"
 #include "FaultState.h"
@@ -67,7 +66,7 @@ void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
 
 void Task1(void *arg)
 {   
-    Display_Error_t error;
+    DisplayError_t error;
 
     CPU_Init();
     error = Display_Init();

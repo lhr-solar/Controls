@@ -7,7 +7,6 @@
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
-#include "MotorController.h"
 #include "Pedals.h"
 
 /**
@@ -15,14 +14,12 @@
  */
 OS_TCB FaultState_TCB;
 OS_TCB Init_TCB;
-OS_TCB UpdateVelocity_TCB;
+OS_TCB SendTritium_TCB;
 OS_TCB ReadCarCAN_TCB;
 OS_TCB UpdateDisplay_TCB;
 OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB Telemetry_TCB;
-OS_TCB BlinkLight_TCB;
-OS_TCB IgnCont_TCB;
 OS_TCB DebugDump_TCB;
 OS_TCB CommandLine_TCB;
 
@@ -31,14 +28,12 @@ OS_TCB CommandLine_TCB;
  */
 CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
 CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
-CPU_STK UpdateVelocity_Stk[TASK_UPDATE_VELOCITY_STACK_SIZE];
+CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
 CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
 CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
-CPU_STK BlinkLight_Stk[TASK_BLINK_LIGHT_STACK_SIZE];
-CPU_STK IgnCont_Stk[TASK_IGN_CONT_STACK_SIZE];
 CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 

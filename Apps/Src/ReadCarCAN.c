@@ -3,9 +3,8 @@
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
-#include "Minions.h"
-#include "CAN_Queue.h"
 #include "FaultState.h"
+#include "Minions.h"
 #include "os_cfg_app.h"
 
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
@@ -28,22 +27,26 @@ static bool restartingArray = false;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
-static bool regenEnable = false;
+static bool chargeEnable = false;
 
 // Saturation buffer variables
 static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
 static int chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
 
+// SOC and Supp V
+static uint8_t SOC = 0;
+static uint32_t SBPV = 0;
+
 
 // Handler to turn array back on
 static void arrayRestart(void *p_tmr, void *p_arg); 
 
 
-// Getter function for regenEnable
-bool RegenEnable_Get() 
+// Getter function for chargeEnable
+bool ChargeEnable_Get() 
 {
-    return regenEnable;
+    return chargeEnable;
 }
 
 
@@ -65,17 +68,26 @@ static void updateSaturation(int8_t chargeMessage){
     chargeMsgSaturation = newSaturation;
 }
 
-// helper function to call if charging should be disabled
+// helper function to disable charging
+// Turns off contactors by setting fault bitmap and signaling fault state
 static inline void chargingDisable(void) {
+    OS_ERR err;
     // mark regen as disabled
-    regenEnable = false;
+    chargeEnable = false;
 
     //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
+    Contactors_Set(ARRAY_CONTACTOR, false, true);
+    Contactors_Set(ARRAY_PRECHARGE, false, true);
     
-    // turn off the array contactor light
-    UpdateDisplay_SetArray(false);
+    // mark regen as disabled
+    chargeEnable = false;
+
+    // Set fault bitmap 
+    FaultBitmap |= FAULT_READBPS;
+
+    // Signal fault state to kill contactors at its earliest convenience
+    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+    assertOSError(OS_READ_CAN_LOC,err);
 
 }
 
@@ -85,7 +97,7 @@ static inline void chargingEnable(void) {
     CPU_TS ts;
 
     // mark regen as enabled
-    regenEnable = true;
+    chargeEnable = true;
 
     // check if we need to run the precharge sequence to turn on the array
     bool shouldRestartArray = false;
@@ -119,13 +131,13 @@ static inline void chargingEnable(void) {
  * 
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
-
-    if(regenEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        Contactors_Set(ARRAY_CONTACTOR, ON, false);
+    Minion_Error_t Merr;
+    if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
+        Contactors_Set(ARRAY_CONTACTOR, (Minion_Read_Pin(IGN_1, &Merr)), false); //turn on array contactor if the ign switch lets us
         UpdateDisplay_SetArray(true);
     }
-        // done restarting the array
-        restartingArray = false;
+    // done restarting the array
+    restartingArray = false;
 
 };
 
@@ -135,19 +147,8 @@ static void arrayRestart(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 void canWatchTimerCallback (void *p_tmr, void *p_arg){
-    OS_ERR err;
 
-    // mark regen as disabled
-    regenEnable = false;
-    
-    // Set fault bitmaps 
-    FaultBitmap |= FAULT_READBPS;
-    OSErrLocBitmap |= OS_READ_CAN_LOC;
-
-    // Signal fault state to kill contactors at its earliest convenience
-    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
+    chargingDisable();
 }
 
 
@@ -198,12 +199,25 @@ void Task_ReadCarCAN(void *p_arg)
     {
         
         //Get any message that BPS Sent us
-        ErrorStatus status = CANbus_Read(&dataBuf,CAN_BLOCKING,CARCAN);  
+        ErrorStatus status = CANbus_Read(&dataBuf,true,CARCAN);  
         if(status != SUCCESS) {
             continue;
         }
 
         switch(dataBuf.ID){ //we got a message
+            case BPS_TRIP: {
+                // BPS has a fault and we need to enter fault state (probably)
+                if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
+                    OS_ERR err;
+
+                    Display_Evac(SOC, SBPV);    // Display evacuation message
+
+                    // Set fault bitmap and assert the error
+                    FaultBitmap |= FAULT_BPS;
+                    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+                    assertOSError(OS_READ_CAN_LOC, err);
+                }
+            }
             case CHARGE_ENABLE: { 
 
                 // Restart CAN Watchdog timer
@@ -211,7 +225,7 @@ void Task_ReadCarCAN(void *p_arg)
                 assertOSError(OS_READ_CAN_LOC, err);
 
 
-                if(dataBuf.data[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off RegenEnable and turn array off
+                if(dataBuf.data[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off chargeEnable and turn array off
                     chargingDisable();
                     updateSaturation(-1); // Update saturation and buffer
 
@@ -228,11 +242,12 @@ void Task_ReadCarCAN(void *p_arg)
                 break;
             }
             case SUPPLEMENTAL_VOLTAGE: {
-                UpdateDisplay_SetSBPV(*(uint16_t *) &dataBuf.data); // Receive value in mV
+                SBPV = (*(uint16_t *) &dataBuf.data);
+                UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
-                uint8_t SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
+                SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }

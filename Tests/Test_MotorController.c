@@ -7,7 +7,6 @@
  */ 
 #include "common.h"
 #include "config.h"
-#include "MotorController.h"
 #include "os.h"
 #include "Tasks.h"
 #include "CANbus.h"

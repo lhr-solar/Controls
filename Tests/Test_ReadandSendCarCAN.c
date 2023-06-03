@@ -1,7 +1,6 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
-#include "MotorController.h"
 #include "CAN_Queue.h"
 #include "Contactors.h"
 #include "Minions.h"

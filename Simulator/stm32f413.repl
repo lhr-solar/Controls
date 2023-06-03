@@ -71,7 +71,7 @@ spi4i2s4: SPI.STM32SPI @ sysbus 0x40013400
 spi1i2s1: SPI.STM32SPI @ sysbus 0x40013000
     -> nvic@35
 
-adc: Analog.STM32_ADC @ sysbus <0x40012000, 0x400123FF>
+adc: Analog.STM32_ADC @ sysbus 0x40012000
     IRQ -> nvic@18
 
 uart10: UART.STM32_UART @ sysbus <0x40011C00, 0x40011FFF>
