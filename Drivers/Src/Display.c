@@ -132,6 +132,6 @@ static void callback_displayError(void){
 void assertDisplayError(DisplayError_t err){
 	if (err != DISPLAY_ERR_NONE){
 		exception_t displayError = {2, "display error", &callback_displayError};
-		_assertError(displayError);
+		assertExceptionError(displayError);
 	}
 }

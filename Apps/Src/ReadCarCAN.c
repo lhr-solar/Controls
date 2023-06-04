@@ -64,6 +64,7 @@ static void updateSaturation(int8_t chargeMessage){
     chargeMsgSaturation = newSaturation;
 }
 
+// exception struct callback for charging disable, kills contactors and turns of display
 static void callback_readBPSError(void){
     // Kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
@@ -80,8 +81,8 @@ static inline void chargingDisable(void) {
     chargeEnable = false;
 
     // kill contactors 
-    exception_t readBPSError = {2, "read BPS error", callback_readBPSError};
-    _assertError(readBPSError);
+    exception_t readBPSError = {.prio=2, .message="read BPS error", .callback=callback_readBPSError};
+    assertExceptionError(readBPSError);
 }
 
 // helper function to call if charging should be enabled

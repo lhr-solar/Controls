@@ -91,7 +91,7 @@ static void callback_updateDisplayError(void){
 static void assertUpdateDisplayError(UpdateDisplayError_t err){
 	if(err != UPDATEDISPLAY_ERR_NONE){
 		exception_t updateDisplayError = {2, "update display error", &callback_updateDisplayError};
-		_assertError(updateDisplayError);
+		assertExceptionError(updateDisplayError);
 	}
 }
 

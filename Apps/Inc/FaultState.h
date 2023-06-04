@@ -5,7 +5,12 @@
 
 void EnterFaultState(void);
 
-void _assertError(exception_t exception);
+/**
+ * @brief   Assert Error if non OS function call fails
+ * @param   exception non OS Error that occurred
+ */
+void assertExceptionError(exception_t exception);
+
 
 
 #endif

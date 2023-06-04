@@ -28,17 +28,21 @@ OS_MUTEX FaultState_Mutex;
 // current exception is initialized
 NEW_EXCEPTION(currException);
 
-void _assertError(exception_t exception){
+/**
+ * @brief   Assert Error if non OS function call fails
+ * @param   exception non OS Error that occurred
+ */
+void assertExceptionError(exception_t exception){
     OS_ERR err;
     CPU_TS ticks;
 
     OSMutexPend(&FaultState_Mutex, 0, OS_OPT_POST_NONE, &ticks, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);  // TODO: need location?
+    assertOSError(OS_FAULT_STATE_LOC, err); 
 
     currException = exception;
 
     OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(OS_FAULT_STATE_LOC, err);
 }
         
 static void nonrecoverableFaultHandler(){
@@ -62,7 +66,8 @@ void EnterFaultState(void) {
     switch (currException.prio)
     {
     case 0:
-        // Things could always be worst
+        // Things could always be worse
+        // (Reserved for future cases of greater severity)
     case 1:
         nonrecoverableFaultHandler();
         break;
@@ -85,11 +90,9 @@ void Task_FaultState(void *p_arg) {
     // Block until fault is signaled by an assert
     while(1){
         OSSemPend(&FaultState_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-        //fromThread = true;
         EnterFaultState();
         OSMutexPost(&FaultState_Mutex, OS_OPT_POST_NONE, &err);
-        assertOSError(OS_SEND_CAN_LOC, err);  // We've finished handling the error and can post the mutex now // TODO: need location?
-        //fromThread = false;
+        assertOSError(OS_FAULT_STATE_LOC, err);  // We've finished handling the error and can post the mutex now
         OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }

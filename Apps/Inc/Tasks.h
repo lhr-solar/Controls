@@ -129,7 +129,8 @@ typedef enum{
     OS_MAIN_LOC = 0x200,
     OS_CANDRIVER_LOC = 0x400,
     OS_MOTOR_CONNECTION_LOC = 0x800,
-    OS_DISPLAY_LOC = 0x1000
+    OS_DISPLAY_LOC = 0x1000,
+    OS_FAULT_STATE_LOC = 0x2000
 } os_error_loc_t;
 
 /**
@@ -154,11 +155,14 @@ extern os_error_loc_t OSErrLocBitmap;
 
 /**
  * Fault Exception Struct
+ * Created by different tasks and passed to fault thread by asserting errors
+ * Priority: 1 for nonrecoverable fault, 2 for callback only
+ * Callback function will run first regardless of priority
 */
 typedef struct{
     uint8_t prio;
     const char* message; 
-    volatile void (*callback)();
+    volatile void (*callback)(void);
 } exception_t;
 
 /**
@@ -167,12 +171,6 @@ typedef struct{
  * @param   err OS Error that occurred
  */
 void _assertOSError(uint16_t OS_err_loc, OS_ERR err); 
-
-/**
- * @brief   Assert Error if non OS function call fails
- * @param   err non OS Error that occurred
- */
-void _assertExceptionError(exception_t); 
 
 #if DEBUG == 1
 #define assertOSError(OS_err_loc,err) \
