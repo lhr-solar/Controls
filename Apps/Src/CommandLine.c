@@ -57,7 +57,7 @@ char *help = {
 	"	Commands and their params are as follows:\n\r"
 	"	CANbus_Send (non)blocking motor/car 'string' - Sends a CAN\n\r"
 	"message with the string data as is on the determined line\n\r"
-	"	CANbux_Read (non)blocking motor/car - Reads a CAN message\n\r"
+	"	CANbus_Read (non)blocking motor/car - Reads a CAN message\n\r"
 	"on the detemined line\n\r"
 	"	Contactors_Get array_c/array_p/motor_c - Gets the status of\n\r"
 	"determined contactor\n\r"
@@ -69,7 +69,7 @@ char *help = {
 	"contactor\n\r"
 	"	Minion_Read_Input 'input' - Reads the current status of the input\n\r"
 	"	Minion_Write_Output `output` on/off - Sets the current state of the output\n\r"
-	"	Pedals_Read accel/brake - Reads the current status of the peda\n\r"
+	"	Pedals_Read accel/brake - Reads the current status of the pedal\n\r"
 };
 
 static inline bool isWhiteSpace(char character){
@@ -116,7 +116,7 @@ void Task_CommandLine(void* p_arg) {
 		}
 	}
 
-	// Delay of 1 seconds
+    // Delay of 1 seconds
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     if (err != OS_ERR_NONE){
         assertOSError(OS_NONE_LOC, err);
