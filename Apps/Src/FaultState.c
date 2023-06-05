@@ -1,3 +1,13 @@
+/** 
+ * @copyright Copyright (c) 202X UT Longhorn Racing Solar
+ * @file FaultState.c
+ * @brief 
+ * 
+ * This contains 
+ * 
+ * @author 
+*/
+
 #include "FaultState.h"
 #include "Display.h"
 #include "Contactors.h"
@@ -7,7 +17,6 @@
 #include "Minions.h"
 #include "UpdateDisplay.h"
 #include "ReadTritium.h"
-
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
