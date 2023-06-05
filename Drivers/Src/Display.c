@@ -118,6 +118,26 @@ DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode)
 	return DISPLAY_ERR_NONE;
 }
 
+DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
+
+	char evacPage[7] = "page 3";
+	BSP_UART_Write(DISP_OUT, evacPage, strlen(evacPage));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+
+	char soc[13];
+	sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
+	BSP_UART_Write(DISP_OUT, soc, strlen(soc));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+
+	char supp[18];
+	sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
+	BSP_UART_Write(DISP_OUT, supp, strlen(supp));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+
+	return DISPLAY_ERR_NONE;
+}
+
 static void callback_displayError(void){
 	static uint8_t disp_fault_cnt = 0; // If faults > three times total, Display_Fault is called
         if(disp_fault_cnt>RESTART_THRESHOLD){ 

@@ -7,6 +7,7 @@
 #include "Minions.h"
 #include "Minions.h"
 #include "os_cfg_app.h"
+#include "Display.h"
 
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
 #define SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
@@ -82,7 +83,6 @@ static void callback_disableContactors(void){
 // helper function to disable charging
 // Turns off contactors by signaling fault state
 static inline void chargingDisable(void) {
-    OS_ERR err;
     // mark regen as disabled
     chargeEnable = false;
 
@@ -207,7 +207,6 @@ void Task_ReadCarCAN(void *p_arg)
             case BPS_TRIP: {
                 // BPS has a fault and we need to enter fault state (probably)
                 if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
-                    OS_ERR err;
 
                     Display_Evac(SOC, SBPV);    // Display evacuation message
 
