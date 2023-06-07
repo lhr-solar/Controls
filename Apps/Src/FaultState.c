@@ -102,6 +102,5 @@ void Task_FaultState(void *p_arg) {
         EnterFaultState();
         OSMutexPost(&FaultState_Mutex, OS_OPT_POST_NONE, &err);
         assertOSError(OS_FAULT_STATE_LOC, err);  // We've finished handling the error and can post the mutex now
-        OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
