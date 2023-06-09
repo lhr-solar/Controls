@@ -9,8 +9,8 @@ static OS_MUTEX OutputMutex; //Mutex to lock GPIO writes to input pins
 
 //should be in sync with pin enum
 const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
-    {GPIO_Pin_0, PORTA, INPUT},
     {GPIO_Pin_1, PORTA, INPUT},
+    {GPIO_Pin_0, PORTA, INPUT},
     {GPIO_Pin_4, PORTA, INPUT},
     {GPIO_Pin_5, PORTA, INPUT},
     {GPIO_Pin_6, PORTA, INPUT},
