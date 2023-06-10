@@ -24,13 +24,13 @@ void Task1(void *arg) {
 
     for (;;) {
         Minion_Write_Output(BRAKELIGHT, brake_on, &mErr);
-        ign1     = Minion_Read_Pin(IGN_1,    &mErr);
-        ign2     = Minion_Read_Pin(IGN_2,    &mErr);
-        regen_sw = Minion_Read_Pin(REGEN_SW, &mErr);
-        for_sw   = Minion_Read_Pin(FOR_SW,   &mErr);
-        rev_sw   = Minion_Read_Pin(REV_SW,   &mErr);
-        cruz_en  = Minion_Read_Pin(CRUZ_EN,  &mErr);
-        cruz_st  = Minion_Read_Pin(CRUZ_ST,  &mErr);
+        ign1     = !Minion_Read_Pin(IGN_1,    &mErr);
+        ign2     = !Minion_Read_Pin(IGN_2,    &mErr);
+        regen_sw =  Minion_Read_Pin(REGEN_SW, &mErr);
+        for_sw   =  Minion_Read_Pin(FOR_SW,   &mErr);
+        rev_sw   =  Minion_Read_Pin(REV_SW,   &mErr);
+        cruz_en  =  Minion_Read_Pin(CRUZ_EN,  &mErr);
+        cruz_st  =  Minion_Read_Pin(CRUZ_ST,  &mErr);
         printf(
             "--------------------\r\nign1: %s\r\nign2: %s\r\n"\
             "regen_sw: %s\r\nfor_sw: %s\r\nrev_sw: %s\r\n"\
