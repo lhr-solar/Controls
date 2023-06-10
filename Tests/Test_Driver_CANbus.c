@@ -12,6 +12,9 @@ static CPU_STK Task1_Stk[128];
 
 static void assert(bool);
 
+CANDATA_t dataBuf, resultBuf;
+uint64_t data = 0xdeadbeef12345678;
+
 /*
  * NOTE: This test must be run with car CAN in loopback mode
  * TODO: automate this, either with arguments to BSP or #define
@@ -24,9 +27,6 @@ void Task1(void *p_arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
     CANbus_Init(CARCAN, carCANFilterList, NUM_CARCAN_FILTERS);
-
-    CANDATA_t dataBuf, resultBuf;
-    uint64_t data = 0xdeadbeef12345678;
 
     dataBuf.ID = CHARGE_ENABLE; // First, send a value that we want to be able to receive
     memcpy(&dataBuf.data, &data, sizeof data);

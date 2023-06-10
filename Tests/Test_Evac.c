@@ -23,6 +23,7 @@ void Task1(){
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(CARCAN, carCANFilterList, CARCAN_FILTER_SIZE);
+    Contactors_Init();
     Display_Init();
     UpdateDisplay_Init();
 
@@ -33,7 +34,7 @@ void Task1(){
         OSTimeDlyHMSM(0, 0, 0, 250, OS_OPT_TIME_HMSM_STRICT, &err);
     }
     data.ID = BPS_TRIP;
-    data.data[0] = 0;
+    data.data[0] = 1;
     CANbus_Send(data, true, CARCAN);
     OSTimeDlyHMSM(1, 0, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     while (1);
