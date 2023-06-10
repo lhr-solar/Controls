@@ -34,11 +34,59 @@
 /*** Task components ***/
 static OS_TCB ManagerTaskTCB;
 static OS_TCB ExceptionTaskTCB;
+static OS_TCB OSErrorTaskTCB;
 static CPU_STK ManagerTaskStk;
 static CPU_STK ExceptionTaskStk;
+static CPU_STK OSErrorTaskStk;
 
 // To do:
 // Change all task initializations to be consistent in constant usage if both options work
+// Use a semaphore instead of doing a full blind wait
+// Make a different OS Error function
+
+
+// Callback function for ExceptionTask test exceptions
+void exceptionCallback(void) {
+    printf("\n\rException callback successfully executed.");
+}
+
+
+// Creates an exception of priority 1 and 2 to test
+// test_callbacks: the callback function to use for the exceptions
+void ExceptionTask(void* test_callbacks) {
+
+
+    if (test_callbacks == NULL) {
+        printf("\n\r Testing exceptions without callback functions");
+    } else {
+        printf("\n\r Testing exceptions with callback functions");
+    }
+    // Throw a priority 2 exception
+    exception_t prio2Exception = {.prio = 2, .message = "\n\rprio2 exception message", .callback = test_callbacks};
+    assertExceptionError(prio2Exception);
+    printf("\n\rPrio 2 test exception with callback has been thrown");
+    
+    // Throw a priority 1 exception
+    exception_t prio1Exception = {.prio = 1, .message = "\n\rprio1 exception message", .callback = test_callbacks};
+    assertExceptionError(prio1Exception);
+    printf("\n\rTest failed: Prio 1 exception did not immediately result in an unrecoverable fault");
+
+    while(1){};
+}
+
+// Test the assertOSError function by pending on a mutex that wasn't created
+void OSErrorTask(void* arg) {
+    OS_ERR err;
+    OS_MUTEX testMut;
+    CPU_TS ts;
+    OSMutexPend(&testMut, 0, OS_OPT_PEND_NON_BLOCKING, &ts, &err);
+    assertOSError(OS_MAIN_LOC, err);
+    printf("assertOSError test failed: assertion did not immediately result in an unrecoverable fault");
+    while(1){};
+}   
+
+
+// Task creation functions
 
 // Initializes FaultState
 void createFaultState(void) {
@@ -139,7 +187,7 @@ void createExceptionTask(void * callback_function) {
      OSTaskCreate(
         (OS_TCB *)&ExceptionTaskTCB,
         (CPU_CHAR *)"ExceptionTask",
-        (OS_TASK_PTR)ExceptionTaskStk,
+        (OS_TASK_PTR)ExceptionTask,
         (void *)callback_function,
         (OS_PRIO)7,
         (CPU_STK *)ExceptionTaskStk,
@@ -155,43 +203,31 @@ void createExceptionTask(void * callback_function) {
 
 }
 
-// Callback function for ExceptionTask test exceptions
-void exceptionCallback(void) {
-    printf("\n\rException callback successfully executed.");
-}
-
-
-// Creates an exception of priority 1 and 2 to test
-// test_callbacks: the callback function to use for the exceptions
-void ExceptionTask(void* test_callbacks) {
-
-
-    if (test_callbacks == NULL) {
-        printf("\n\r Testing exceptions without callback functions");
-    } else {
-        printf("\n\r Testing exceptions with callback functions");
-    }
-    // Throw a priority 2 exception
-    exception_t prio2Exception = {.prio = 2, .message = "\n\rprio2 exception message", .callback = test_callbacks};
-    assertExceptionError(prio2Exception);
-    printf("\n\rPrio 2 test exception with callback has been thrown");
-    
-    // Throw a priority 1 exception
-    exception_t prio1Exception = {.prio = 1, .message = "\n\rprio1 exception message", .callback = test_callbacks};
-    assertExceptionError(prio1Exception);
-    printf("\n\rTest failed: Prio 1 exception did not immediately result in an unrecoverable fault");
-
-}
-
-// Test the assertOSError function by pending on a mutex that wasn't created
-void OSErrorTask(void* arg) {
+// Creates a task to test the assertOSError function
+void createOSErrorTask(void) {
     OS_ERR err;
-    OS_MUTEX testMut;
-    CPU_TS ts;
-    OSMutexPend(&testMut, 0, OS_OPT_PEND_NON_BLOCKING, &ts, &err);
-    assertOSError(OS_MAIN_LOC, err);
-    printf("assertOSError test failed: assertion did not immediately result in an unrecoverable fault");
-}   
+     
+     OSTaskCreate(
+        (OS_TCB *)&OSErrorTaskTCB,
+        (CPU_CHAR *)"assertOSError Task",
+        (OS_TASK_PTR)OSErrorTask,
+        (void *)NULL,
+        (OS_PRIO)7,
+        (CPU_STK *)OSErrorTaskStk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void *)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR *)&err
+    );
+    assertOSError(OS_MAIN_LOC,err); 
+
+}
+
+
+
 
 
 // A high-priority task that manages other tasks and runs the tests
@@ -199,23 +235,47 @@ void ManagerTask(void* arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
+    BSP_UART_Init(UART_2);
 
+    while (1) {
     // Test the exceptions mechanism by creating and throwing exceptions of priorities 1 and 2
     // Both with and without callback functions
     printf("=========== Testing exception priorities 1 and 2 ===========");
    
     createExceptionTask(NULL); // Test level 1 & 2 exceptions without callbacks
     assertOSError(OS_MAIN_LOC, err);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the task to finish
+    assertOSError(OS_MAIN_LOC, err);
     OSTaskDel(&ExceptionTaskTCB, &err);
     assertOSError(OS_MAIN_LOC, err);
 
     createExceptionTask(exceptionCallback); // Test level 1 & 2 exceptions with callbacks
+    assertOSError(OS_MAIN_LOC, err);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
     assertOSError(OS_MAIN_LOC, err);
     OSTaskDel(&ExceptionTaskTCB, &err);
     assertOSError(OS_MAIN_LOC, err);
 
     // Test the assertOSError function using the OSErrorTask
     printf("=========== Testing OS assert ===========");
+
+    createOSErrorTask();
+    assertOSError(OS_MAIN_LOC, err);
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+    assertOSError(OS_MAIN_LOC, err);
+
+    // Test individual tasks error assertions
+    // printf("=========== Testing ReadTritium ===========");
+
+    // createFaultState();
+    // assertOSError(OS_MAIN_LOC, err);
+    // createReadTritium();
+    // assertOSError(OS_MAIN_LOC, err);
+    }
+
+
+
+
 
 
 
