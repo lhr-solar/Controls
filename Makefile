@@ -31,19 +31,19 @@ leader:
 ifeq ($(TEST_LEADER), none)
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=none
 else
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=Tests/Test_$(TEST_LEADER)
+	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=Tests/Leader/Test_$(TEST_LEADER)
 endif
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
 
 motor-sim:
 ifneq ($(TEST_MOTOR), none)
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(MOTORSIM) TEST=MotorSim/Test_$(TEST_MOTOR)
+	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(MOTORSIM) TEST=Tests/MotorSim/Test_$(TEST_MOTOR)
 	@echo "${BLUE}Compiled for motor sim! Jolly Good!${NC}"
 endif
 
 car-sim:
 ifneq ($(TEST_CAR), none)
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(CARSIM) TEST=CarSim/Test_$(TEST_CAR)
+	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(CARSIM) TEST=Tests/CarSim/Test_$(TEST_CAR)
 	@echo "${BLUE}Compiled for car sim! Jolly Good!${NC}"
 endif
 

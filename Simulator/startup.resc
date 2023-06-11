@@ -1,7 +1,7 @@
-$bin?=@Objects/controls-leader.elf
-$car_bin?=@Objects/car-sim.elf
-$motor_bin?=@Objects/motor-sim.elf
-$platform=@Simulator/stm32f413.repl
+$bin?=$ORIGIN/../Objects/controls-leader.elf
+$car_bin?=$ORIGIN/../Objects/car-sim.elf
+$motor_bin?=$ORIGIN/../Objects/motor-sim.elf
+$platform=$ORIGIN/stm32f413.repl
 
 macro reset
 """
