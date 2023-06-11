@@ -21,6 +21,7 @@ static CPU_STK Task1_Stk[128];
 void Task1(void *p_arg){
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+    printf("\n\rIn Task1");
     OS_ERR err;
     CANDATA_t dataBuf = {0};
     CANbus_Init(MOTORCAN, NULL, 0);

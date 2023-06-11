@@ -79,17 +79,17 @@ void ExceptionTask(void* test_callbacks) {
     if (test_callbacks == NULL) {
         printf("\n\r Testing exceptions without callback functions");
     } else {
-        printf("\n\r Testing exceptions with callback functions");
+        //printf("\n\r Testing exceptions with callback functions");
     }
     // Throw a priority 2 exception
     exception_t prio2Exception = {.prio = 2, .message = "\n\rprio2 exception message", .callback = test_callbacks};
     assertExceptionError(prio2Exception);
-    printf("\n\rPrio 2 test exception with callback has been thrown");
+    //printf("\n\rPrio 2 test exception with callback has been thrown");
     
     // Throw a priority 1 exception
     exception_t prio1Exception = {.prio = 1, .message = "\n\rprio1 exception message", .callback = test_callbacks};
     assertExceptionError(prio1Exception);
-    printf("\n\rTest failed: Prio 1 exception did not immediately result in an unrecoverable fault");
+    //printf("\n\rTest failed: Prio 1 exception did not immediately result in an unrecoverable fault");
 
     while(1){};
 }
@@ -101,7 +101,7 @@ void OSErrorTask(void* arg) {
     CPU_TS ts;
     OSMutexPend(&testMut, 0, OS_OPT_PEND_NON_BLOCKING, &ts, &err);
     assertOSError(OS_MAIN_LOC, err);
-    printf("assertOSError test failed: assertion did not immediately result in an unrecoverable fault");
+    //printf("assertOSError test failed: assertion did not immediately result in an unrecoverable fault");
     while(1){};
 }   
 
@@ -252,13 +252,13 @@ void createOSErrorTask(void) {
 
 // A high-priority task that manages other tasks and runs the tests
 void Task_ManagerTask(void* arg) {
-    BSP_UART_Init(UART_2);
-    printf("\n\rIn manager task");
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
+    printf("%d", __LINE__);
     CANbus_Init(MOTORCAN, NULL, 0);
     ErrorStatus errorCode;
+    printf("\n\rIn manager task");
  
 
 
@@ -282,7 +282,7 @@ void Task_ManagerTask(void* arg) {
         checkOSError(err); 
 
         // Test the assertOSError function using the OSErrorTask
-        printf("=========== Testing OS assert ===========");
+        //printf("=========== Testing OS assert ===========");
 
         createOSErrorTask();
         checkOSError(err); 
@@ -290,7 +290,7 @@ void Task_ManagerTask(void* arg) {
         checkOSError(err); 
 
         // Test individual tasks error assertions
-        printf("=========== Testing ReadTritium ===========");
+        //printf("=========== Testing ReadTritium ===========");
 
         CANDATA_t canMessage = {0};
         canMessage.ID = READY_ID;
@@ -336,6 +336,10 @@ void Task_ManagerTask(void* arg) {
         printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
         printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
         printf("\n\rArray contactor: %d", Contactors_Get(ARRAY_CONTACTOR));
+
+
+        printf("=========== Test UpdateDisplay ===========");
+        
 
 
 
@@ -395,5 +399,12 @@ int main(void) {
         printf("\n\rLet's try a time delay too");
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         
+    }
+}
+
+void HardFault_Handler(void) {
+    while(1){
+        volatile int x = 0;
+        x += 1;
     }
 }
