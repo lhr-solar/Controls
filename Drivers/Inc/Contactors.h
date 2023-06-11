@@ -23,7 +23,7 @@
 
 typedef enum contactor_ENUM {
     FOREACH_contactor(GENERATE_ENUM)
-    CONTACTOR_NUM,
+    NUM_CONTACTORS,
 }contactor_t;
 
 

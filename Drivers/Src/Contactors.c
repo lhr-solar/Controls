@@ -44,7 +44,7 @@ void Contactors_Init() {
                   1);
 
     // start disabled
-    for (int contactor = 0; contactor < CONTACTOR_NUM; ++contactor) {
+    for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
         setContactor(contactor, OFF);
     }
 

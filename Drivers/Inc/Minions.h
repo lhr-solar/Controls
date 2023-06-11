@@ -20,7 +20,7 @@
 
 typedef enum MINIONPIN_ENUM {
     FOREACH_MinionPin(GENERATE_ENUM)
-    MINIONPIN_NUM,
+    NUM_MINIONPINS,
 }MinionPin_t;
 
 

@@ -6,7 +6,7 @@
 #include "Contactors.h"
 
 //should be in sync with pin enum
-const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
+const PinInfo_t PINS_LOOKARR[NUM_MINIONPINS] = {
     {GPIO_Pin_0, PORTA, INPUT},
     {GPIO_Pin_1, PORTA, INPUT},
     {GPIO_Pin_4, PORTA, INPUT},
@@ -19,7 +19,7 @@ const PinInfo_t PINS_LOOKARR[MINIONPIN_NUM] = {
 
 void Minion_Init(void){
 
-    for(uint8_t i = 0; i < MINIONPIN_NUM; i++){
+    for(uint8_t i = 0; i < NUM_MINIONPINS; i++){
         BSP_GPIO_Init(PINS_LOOKARR[i].port, PINS_LOOKARR[i].pinMask, PINS_LOOKARR[i].direction);
     }
 }

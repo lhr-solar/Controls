@@ -137,7 +137,7 @@ static bool cmd_CANbus_Send(void){
 	char *data = strtok_r(NULL, " ", &save);
 	CANDATA_t msg = {.ID=0x0582, .idx=0};		// this would change in the future (don't assume char as data)
 	for(int i = 0; i < 8 && i < strlen(data); i++){
-		msg.data[i] = data[0];
+		msg.data[i] = data[i];
 	}
 
 	char *blockInput = strtok_r(NULL, " ", &save);
@@ -248,12 +248,12 @@ static bool cmd_Contactors_Set(void){
 	}
 
 	char *stateInput = strtok_r(NULL, " ", &save);
-	State state;
+	bool state;
 	if(strcmp(stateInput, "on") == 0){
-		state = ON;
+		state = true;
 	}
 	else if(strcmp(stateInput, "off") == 0){
-		state = OFF;
+		state = false;
 	}
 	else{
 		return false;

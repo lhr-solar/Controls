@@ -14,9 +14,9 @@
 // global variables
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
-extern bool UpdateVel_ToggleCruise;
-extern uint16_t SupplementalVoltage;
-extern uint32_t StateOfCharge;
+// extern bool UpdateVel_ToggleCruise; // In Tasks.h but not beind defined?
+// extern uint16_t SupplementalVoltage; // In Tasks.h but not beind defined?
+// extern uint32_t StateOfCharge;   // In Tasks.h but not beind defined?
 
 static const char *MINIONPIN_STRING[] = {
     FOREACH_MinionPin(GENERATE_STRING)
@@ -57,6 +57,15 @@ static const char *FAULT_BITMAP_STRING[] = {
 };
 /*----------------------------------------------*/
 
+static void print_f(char * str, float f) {
+    printf(str);
+
+    int n = (int) f;
+    f -= n;
+    f *= (10 << 2);
+    printf("%d.%d\n\r", n, (int) f);
+}
+
 void Task_DebugDump(void* p_arg) {
     OS_ERR err;
     Minion_Error_t mErr;
@@ -71,13 +80,13 @@ void Task_DebugDump(void* p_arg) {
         printf("BRAKE: %d\n\r", brakePedal);
 
         // Get minion information
-        for(MinionPin_t pin = 0; pin < MINIONPIN_NUM-1; pin++){ // Plan to change MINIONPIN_NUM-1 -> MINIONPIN_NUM after Minion function is fixed
+        for(MinionPin_t pin = 0; pin < NUM_MINIONPINS-1; pin++){ // Plan to change NUM_MINIONPINS-1 -> NUM_MINIONPINS after Minion function is fixed
             bool pinState = Minion_Read_Pin(pin, &mErr);
             printf("%s: %s\n\r", MINIONPIN_STRING[pin], pinState == true ? "true" : "false");
         }
 
         // Get contactor info
-        for(contactor_t contactor = 0; contactor < CONTACTOR_NUM; contactor++){
+        for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
             bool contactorState = Contactors_Get(contactor) == ON ? true : false;
             printf("%s: %s\n\r", CONTACTOR_STRING[contactor], contactorState == true ? "true" : "false");
         } 
@@ -90,10 +99,7 @@ void Task_DebugDump(void* p_arg) {
         printf("Pedal Brake Percent: %d\n\r", get_brakePedalPercent());
         printf("Pedal Accel Percent: %d\n\r", get_accelPedalPercent());
         // printf("Pedal Accel Percent: %s\n\r", get_accelPedalPercent()); // Gear
-        // printf("Current Setpoint: %f", get_currentSetpoint());   // float print not working?
-        // printf("Current Setpoint: %f", get_currentSetpoint());
-        // printf("Current Setpoint: %f", get_currentSetpoint());
-        // printf("Current Setpoint: %f", get_currentSetpoint());
+        print_f("Current Setpoint: ", get_currentSetpoint());
 
 
         // fault bitmap
@@ -123,14 +129,14 @@ void Task_DebugDump(void* p_arg) {
         }
         printf("\n\r");
 
-        // update velocity toggle cruise
-        printf("UpdateVel_ToggleCruise: %s\n\r", UpdateVel_ToggleCruise == true ? "True" : "False");
+        // // update velocity toggle cruise
+        // printf("UpdateVel_ToggleCruise: %s\n\r", UpdateVel_ToggleCruise == true ? "True" : "False");
 
-        // supplemental voltage
-        printf("Supplemental Voltage: %d\n\r", SupplementalVoltage);
+        // // supplemental voltage
+        // printf("Supplemental Voltage: %d\n\r", SupplementalVoltage);
 
-        // state of charge
-        printf("State of Charge: %ld\n\r", StateOfCharge);
+        // // state of charge
+        // printf("State of Charge: %ld\n\r", StateOfCharge);
 
         // Delay of 5 seconds
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
