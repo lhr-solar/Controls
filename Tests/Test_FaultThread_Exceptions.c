@@ -31,6 +31,7 @@
 #include "CANbus.h"
 #include "ReadTritium.h"
 #include "Contactors.h"
+#include "ReadCarCAN.h"
 
 
 
@@ -327,7 +328,7 @@ void Task_ManagerTask(void* arg) {
             if (errorCode != SUCCESS) {
                 continue;
             }
-            canMsgData = *((uint16_t *)canMessage.data[0]);
+            canMsgData = *((uint16_t *)&canMessage.data[0]);
         } while (canMsgData != 0x4444);
 
         // By now, the BPS Trip message should have been sent
@@ -336,7 +337,7 @@ void Task_ManagerTask(void* arg) {
         printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
         printf("\n\rArray contactor: %d", Contactors_Get(ARRAY_CONTACTOR));
 
-        
+
 
 
 
