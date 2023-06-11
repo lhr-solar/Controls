@@ -28,21 +28,37 @@
 #include "BSP_UART.h"
 #include "FaultState.h"
 #include "Tasks.h"
+#include "CANbus.h"
 
 
 
 /*** Task components ***/
-static OS_TCB ManagerTaskTCB;
+static OS_TCB ManagerTask_TCB;
 static OS_TCB ExceptionTaskTCB;
 static OS_TCB OSErrorTaskTCB;
-static CPU_STK ManagerTaskStk;
+static CPU_STK ManagerTask_Stk;
 static CPU_STK ExceptionTaskStk;
 static CPU_STK OSErrorTaskStk;
+
+/*** Constants ***/
+#define READY_ID 0x123
+
 
 // To do:
 // Change all task initializations to be consistent in constant usage if both options work
 // Use a semaphore instead of doing a full blind wait
 // Make a different OS Error function
+// change bool to semaphore?
+
+// Assertion function for OS errors
+void checkOSError(OS_ERR err) {
+    if (err != OS_ERR_NONE) {
+        printf("OS error code %d\n", err);
+    } else {
+        printf("\n\rNo error yet");
+    }
+}
+    
 
 
 // Callback function for ExceptionTask test exceptions
@@ -107,7 +123,7 @@ void createFaultState(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC,err); 
+    checkOSError(err); 
 
 }
 
@@ -130,7 +146,7 @@ void createReadTritium(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err);
 }
 
 // Initializes ReadCarCAN
@@ -152,7 +168,7 @@ void createReadCarCAN(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC,err);
+    checkOSError(err);
 
 }
 
@@ -175,7 +191,7 @@ void createUpdateDisplay(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err
     );
-    assertOSError(OS_MAIN_LOC,err); 
+    checkOSError(err); 
 
 }
 
@@ -199,7 +215,7 @@ void createExceptionTask(void * callback_function) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err
     );
-    assertOSError(OS_MAIN_LOC,err); 
+    checkOSError(err); 
 
 }
 
@@ -222,7 +238,7 @@ void createOSErrorTask(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err
     );
-    assertOSError(OS_MAIN_LOC,err); 
+    checkOSError(err); 
 
 }
 
@@ -231,11 +247,14 @@ void createOSErrorTask(void) {
 
 
 // A high-priority task that manages other tasks and runs the tests
-void ManagerTask(void* arg) {
+void Task_ManagerTask(void* arg) {
+    printf("\n\rIn manager task");
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OS_ERR err;
-    BSP_UART_Init(UART_2);
+    CANbus_Init(MOTORCAN, NULL, 0);
+ 
+
 
     while (1) {
     // Test the exceptions mechanism by creating and throwing exceptions of priorities 1 and 2
@@ -243,34 +262,47 @@ void ManagerTask(void* arg) {
     printf("=========== Testing exception priorities 1 and 2 ===========");
    
     createExceptionTask(NULL); // Test level 1 & 2 exceptions without callbacks
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err); 
     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the task to finish
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err); 
     OSTaskDel(&ExceptionTaskTCB, &err);
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err); 
 
     createExceptionTask(exceptionCallback); // Test level 1 & 2 exceptions with callbacks
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err); 
     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err); 
     OSTaskDel(&ExceptionTaskTCB, &err);
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err); 
 
     // Test the assertOSError function using the OSErrorTask
     printf("=========== Testing OS assert ===========");
 
     createOSErrorTask();
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err); 
     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-    assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err); 
 
     // Test individual tasks error assertions
-    // printf("=========== Testing ReadTritium ===========");
+    printf("=========== Testing ReadTritium ===========");
 
-    // createFaultState();
-    // assertOSError(OS_MAIN_LOC, err);
-    // createReadTritium();
-    // assertOSError(OS_MAIN_LOC, err);
+    CANDATA_t canMessage = {0};
+
+    createFaultState();
+    checkOSError(err); 
+    createReadTritium();
+    checkOSError(err); 
+    // Send a message to the motor to tell it to start sending stuff
+    canMessage.ID = READY_ID;
+    canMessage.idx = 0;
+    *(uint16_t*)(&canMessage.data) =  0x4444;
+    CANbus_Send(canMessage, CAN_BLOCKING, MOTORCAN);
+    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for ReadTritium to finish
+    OSTaskDel(&ReadTritium_TCB, &err);
+
+
+
+
     }
 
 
@@ -284,19 +316,22 @@ void ManagerTask(void* arg) {
 
 }
 
-int main() {
+int main(void) {
     OS_ERR err;
     OSInit(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    //assertOSError(OS_MAIN_LOC, err);
+    printf("\n\rThing before BSP UART Init");
+    BSP_UART_Init(UART_2);
+    printf("\n\rThing after bsp uart init");
 
     // Create the task manager thread
     OSTaskCreate(
-        (OS_TCB*)&ManagerTaskTCB,
+        (OS_TCB*)&ManagerTask_TCB,
         (CPU_CHAR*)"Manager Task",
-        (OS_TASK_PTR)ManagerTask,
+        (OS_TASK_PTR)Task_ManagerTask,
         (void*)NULL,
         (OS_PRIO)1,
-        (CPU_STK*)ManagerTaskStk,
+        (CPU_STK*)ManagerTask_Stk,
         (CPU_STK_SIZE)128/10,
         (CPU_STK_SIZE)128,
         (OS_MSG_QTY)0,
@@ -305,11 +340,16 @@ int main() {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC,err);
+    checkOSError(err);
 
     OSStart(&err);
+    checkOSError(err);
 
     while(1) {
+        printf("\n\rInside main while loop wheeeee");
+        for (int i = 0; i < 99999; i++){}
+        printf("\n\rLet's try a time delay too");
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         
     }
 }
