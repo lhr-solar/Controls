@@ -116,7 +116,7 @@ void Task_DebugDump(void* p_arg) {
         printf("\n\r");
 
         // os loc bitmap
-        printf("OS Lock Bitmap: ");
+        printf("OS Location Bitmap: ");
         if(OSErrLocBitmap == OS_NONE_LOC){
             printf("%s", OS_LOC_STRING[0]);
         }

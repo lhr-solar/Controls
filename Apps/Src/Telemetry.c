@@ -7,18 +7,6 @@
 #include "common.h"
 
 
-/**
- * @file SendCarCAN.c
- * @brief Implements the SendCarCAN Task
- * 
- * Creates a datatype to house the data to be read by telemetry
- * 
- * Gathers the information of the pedals, lights, switches, and contactors 
- * to be read by telemetry
- * 
- */
-
-
 // Make sure updated to the CarData_t and carMSGID are reflected in the CAN Bus IDs excel sheet
 
 /**
