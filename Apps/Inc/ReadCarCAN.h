@@ -3,9 +3,9 @@
 #ifndef __READ_CAR_CAN_H
 #define __READ_CAR_CAN_H
 
-#include "os.h"
-#include "common.h"
 #include "Tasks.h"
+#include "common.h"
+#include "os.h"
 
 #include "CANbus.h"
 
@@ -14,7 +14,7 @@
 /**
  * @brief Returns whether regen braking / charging is enabled or not
  * @return  Whether regen braking / charging is enabled or not
-*/
+ */
 bool ChargeEnable_Get();
 
 #endif
