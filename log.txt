@@ -1,0 +1,648 @@
+make -C BSP -C STM32F413 tidy
+make[1]: Entering directory '/home/ishdeshpa/LHR/Controls/BSP/STM32F413'
+clang-tidy --config-file=../../.clang-tidy ../../Drivers/Src/CANbus.c ../../Drivers/Src/CANConfig.c ../../Drivers/Src/Contactors.c ../../Drivers/Src/Display.c ../../Drivers/Src/Minions.c ../../Drivers/Src/Pedals.c ../../Apps/Src/CAN_Queue.c ../../Apps/Src/FaultState.c ../../Apps/Src/PedalToPercent.c ../../Apps/Src/ReadCarCAN.c ../../Apps/Src/ReadTritium.c ../../Apps/Src/SendCarCAN.c ../../Apps/Src/SendTritium.c ../../Apps/Src/Tasks.c ../../Apps/Src/Telemetry.c ../../Apps/Src/UpdateDisplay.c ../../Apps/Inc/CAN_Queue.h ../../Apps/Inc/common.h ../../Apps/Inc/FaultState.h ../../Apps/Inc/fifo.h ../../Apps/Inc/MedianFilter.h ../../Apps/Inc/ReadCarCAN.h ../../Apps/Inc/ReadTritium.h ../../Apps/Inc/SendTritium.h ../../Apps/Inc/Tasks.h ../../Apps/Inc/UpdateDisplay.h ../../Drivers/Inc/CANbus.h ../../Drivers/Inc/CANConfig.h ../../Drivers/Inc/Contactors.h ../../Drivers/Inc/Display.h ../../Drivers/Inc/GPIOExpander.h ../../Drivers/Inc/Minions.h ../../Drivers/Inc/Pedals.h  -- -DSTM32F413_423xx -DUSE_STDPERIPH_DRIVER -D__FPU_PRESENT -I../../Apps/Inc -I../../Drivers/Inc -I../../Config/Inc -I../../BSP/Inc -I../../CMSIS/Device/ST/STM32F4xx/Include -I../../CMSIS/Include -I../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/ -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ -I../../RTOS/uCOS-III-STM32F4/uC-LIB/ -Og -g -Wall -Werror -fdata-sections -ffunction-sections -MMD -MP -MF"tidy"	
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:89:5: warning: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+    memset(&fifo, 0, sizeof(fifo));
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:89:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+    memset(&fifo, 0, sizeof(fifo));
+    ^~~~~~
+../../CMSIS/Include/core_cm4.h:1520:17: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  reg_value  =  SCB->AIRCR;                                                   /* read old register configuration    */
+                ^
+../../CMSIS/Include/core_cm4.h:1463:30: note: expanded from macro 'SCB'
+#define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1525:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  SCB->AIRCR =  reg_value;
+  ^
+../../CMSIS/Include/core_cm4.h:1463:30: note: expanded from macro 'SCB'
+#define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1537:23: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  return ((uint32_t)((SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) >> SCB_AIRCR_PRIGROUP_Pos));
+                      ^
+../../CMSIS/Include/core_cm4.h:1463:30: note: expanded from macro 'SCB'
+#define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1549:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  NVIC->ISER[(((uint32_t)(int32_t)IRQn) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
+  ^
+../../CMSIS/Include/core_cm4.h:1465:30: note: expanded from macro 'NVIC'
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct          */
+                             ^
+../../CMSIS/Include/core_cm4.h:1561:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  NVIC->ICER[(((uint32_t)(int32_t)IRQn) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
+  ^
+../../CMSIS/Include/core_cm4.h:1465:30: note: expanded from macro 'NVIC'
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct          */
+                             ^
+../../CMSIS/Include/core_cm4.h:1577:23: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  return((uint32_t)(((NVIC->ISPR[(((uint32_t)(int32_t)IRQn) >> 5UL)] & (1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL))) != 0UL) ? 1UL : 0UL));
+                      ^
+../../CMSIS/Include/core_cm4.h:1465:30: note: expanded from macro 'NVIC'
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct          */
+                             ^
+../../CMSIS/Include/core_cm4.h:1589:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  NVIC->ISPR[(((uint32_t)(int32_t)IRQn) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
+  ^
+../../CMSIS/Include/core_cm4.h:1465:30: note: expanded from macro 'NVIC'
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct          */
+                             ^
+../../CMSIS/Include/core_cm4.h:1601:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  NVIC->ICPR[(((uint32_t)(int32_t)IRQn) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
+  ^
+../../CMSIS/Include/core_cm4.h:1465:30: note: expanded from macro 'NVIC'
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct          */
+                             ^
+../../CMSIS/Include/core_cm4.h:1616:23: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  return((uint32_t)(((NVIC->IABR[(((uint32_t)(int32_t)IRQn) >> 5UL)] & (1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL))) != 0UL) ? 1UL : 0UL));
+                      ^
+../../CMSIS/Include/core_cm4.h:1465:30: note: expanded from macro 'NVIC'
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct          */
+                             ^
+../../CMSIS/Include/core_cm4.h:1632:5: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+    SCB->SHP[(((uint32_t)(int32_t)IRQn) & 0xFUL)-4UL] = (uint8_t)((priority << (8 - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
+    ^
+../../CMSIS/Include/core_cm4.h:1463:30: note: expanded from macro 'SCB'
+#define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1635:5: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+    NVIC->IP[((uint32_t)(int32_t)IRQn)]               = (uint8_t)((priority << (8 - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
+    ^
+../../CMSIS/Include/core_cm4.h:1465:30: note: expanded from macro 'NVIC'
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct          */
+                             ^
+../../CMSIS/Include/core_cm4.h:1655:23: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+    return(((uint32_t)SCB->SHP[(((uint32_t)(int32_t)IRQn) & 0xFUL)-4UL] >> (8 - __NVIC_PRIO_BITS)));
+                      ^
+../../CMSIS/Include/core_cm4.h:1463:30: note: expanded from macro 'SCB'
+#define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1658:23: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+    return(((uint32_t)NVIC->IP[((uint32_t)(int32_t)IRQn)]               >> (8 - __NVIC_PRIO_BITS)));
+                      ^
+../../CMSIS/Include/core_cm4.h:1465:30: note: expanded from macro 'NVIC'
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct          */
+                             ^
+../../CMSIS/Include/core_cm4.h:1725:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  SCB->AIRCR  = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos)    |
+  ^
+../../CMSIS/Include/core_cm4.h:1463:30: note: expanded from macro 'SCB'
+#define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1726:29: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+                           (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
+                            ^
+../../CMSIS/Include/core_cm4.h:1463:30: note: expanded from macro 'SCB'
+#define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1764:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  SysTick->LOAD  = (uint32_t)(ticks - 1UL);                         /* set reload register */
+  ^
+../../CMSIS/Include/core_cm4.h:1464:30: note: expanded from macro 'SysTick'
+#define SysTick             ((SysTick_Type   *)     SysTick_BASE  )   /*!< SysTick configuration struct       */
+                             ^
+../../CMSIS/Include/core_cm4.h:1766:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Value */
+  ^
+../../CMSIS/Include/core_cm4.h:1464:30: note: expanded from macro 'SysTick'
+#define SysTick             ((SysTick_Type   *)     SysTick_BASE  )   /*!< SysTick configuration struct       */
+                             ^
+../../CMSIS/Include/core_cm4.h:1767:3: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
+  ^
+../../CMSIS/Include/core_cm4.h:1464:30: note: expanded from macro 'SysTick'
+#define SysTick             ((SysTick_Type   *)     SysTick_BASE  )   /*!< SysTick configuration struct       */
+                             ^
+../../CMSIS/Include/core_cm4.h:1802:9: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+  if (((ITM->TCR & ITM_TCR_ITMENA_Msk) != 0UL) &&      /* ITM enabled */
+        ^
+../../CMSIS/Include/core_cm4.h:1466:30: note: expanded from macro 'ITM'
+#define ITM                 ((ITM_Type       *)     ITM_BASE      )   /*!< ITM configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1803:9: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+      ((ITM->TER & 1UL               ) != 0UL)   )     /* ITM Port #0 enabled */
+        ^
+../../CMSIS/Include/core_cm4.h:1466:30: note: expanded from macro 'ITM'
+#define ITM                 ((ITM_Type       *)     ITM_BASE      )   /*!< ITM configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1805:12: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+    while (ITM->PORT[0].u32 == 0UL) { __NOP(); }
+           ^
+../../CMSIS/Include/core_cm4.h:1466:30: note: expanded from macro 'ITM'
+#define ITM                 ((ITM_Type       *)     ITM_BASE      )   /*!< ITM configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1806:5: warning: integer to pointer cast pessimizes optimization opportunities [performance-no-int-to-ptr]
+    ITM->PORT[0].u8 = (uint8_t)ch;
+    ^
+../../CMSIS/Include/core_cm4.h:1466:30: note: expanded from macro 'ITM'
+#define ITM                 ((ITM_Type       *)     ITM_BASE      )   /*!< ITM configuration struct           */
+                             ^
+../../CMSIS/Include/core_cm4.h:1820:11: warning: variable name 'ch' is too short, expected at least 3 characters [readability-identifier-length]
+  int32_t ch = -1;                           /* no character available */
+          ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:617:83: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint8_t __LDREXB(volatile uint8_t *addr)
+                                                                                  ^
+                                                                const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:640:85: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint16_t __LDREXH(volatile uint16_t *addr)
+                                                                                    ^
+                                                                 const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:663:85: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint32_t __LDREXW(volatile uint32_t *addr)
+                                                                                    ^
+                                                                 const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:681:99: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint32_t __STREXB(uint8_t value, volatile uint8_t *addr)
+                                                                                                  ^
+                                                                                const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:699:101: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint32_t __STREXH(uint16_t value, volatile uint16_t *addr)
+                                                                                                    ^
+                                                                                 const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:717:101: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint32_t __STREXW(uint32_t value, volatile uint32_t *addr)
+                                                                                                    ^
+                                                                                 const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:793:82: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint8_t __LDRBT(volatile uint8_t *addr)
+                                                                                 ^
+                                                               const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:816:84: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint16_t __LDRHT(volatile uint16_t *addr)
+                                                                                   ^
+                                                                const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:839:83: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE uint32_t __LDRT(volatile uint32_t *addr)
+                                                                                  ^
+                                                               const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:855:94: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE void __STRBT(uint8_t value, volatile uint8_t *addr)
+                                                                                             ^
+                                                                           const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:868:96: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE void __STRHT(uint16_t value, volatile uint16_t *addr)
+                                                                                               ^
+                                                                            const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../CMSIS/Include/core_cmInstr.h:881:95: warning: pointer parameter 'addr' can be pointer to const [readability-non-const-parameter]
+__attribute__((always_inline)) __STATIC_INLINE void __STRT(uint32_t value, volatile uint32_t *addr)
+                                                                                              ^
+                                                                           const 
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:790:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsAlpha   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:792:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsAlphaNum(CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:794:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsLower   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:796:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsUpper   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:798:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsDig     (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:800:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsDigOct  (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:802:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsDigHex  (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:804:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsBlank   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:806:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsSpace   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:808:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsPrint   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:810:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsGraph   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:812:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsPunct   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:814:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_BOOLEAN  ASCII_IsCtrl    (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:817:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_CHAR     ASCII_ToLower   (CPU_CHAR  c);
+                                        ^
+../../RTOS/uCOS-III-STM32F4/uC-LIB/lib_ascii.h:819:41: warning: parameter name 'c' is too short, expected at least 2 characters [readability-identifier-length]
+CPU_CHAR     ASCII_ToUpper   (CPU_CHAR  c);
+                                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:104:5: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+    memcpy(sorted, channel, MF_DEPTH * sizeof(MF_TYPE));
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:104:5: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+    memcpy(sorted, channel, MF_DEPTH * sizeof(MF_TYPE));
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:155:37: warning: pointer parameter 'channels' can be pointer to const [readability-non-const-parameter]
+PUT (MF_TYPE_NAME *filter, MF_TYPE *channels) {
+                                    ^
+                           const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:176:5: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+    memcpy(dest, filter->filtered, sizeof(MF_TYPE) * MF_CHANNELS);
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:176:5: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+    memcpy(dest, filter->filtered, sizeof(MF_TYPE) * MF_CHANNELS);
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:38:8: error: unknown type name 'bool' [clang-diagnostic-error]
+extern bool cruiseEnable;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:39:8: error: unknown type name 'bool' [clang-diagnostic-error]
+extern bool cruiseSet;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:40:8: error: unknown type name 'bool' [clang-diagnostic-error]
+extern bool onePedalEnable;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:41:8: error: unknown type name 'bool' [clang-diagnostic-error]
+extern bool regenEnable;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:43:8: error: unknown type name 'uint8_t' [clang-diagnostic-error]
+extern uint8_t brakePedalPercent;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:44:8: error: unknown type name 'uint8_t' [clang-diagnostic-error]
+extern uint8_t accelPedalPercent;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:89:5: warning: implicitly declaring library function 'memset' with type 'void *(void *, int, unsigned long)' [clang-diagnostic-implicit-function-declaration]
+    memset(&fifo, 0, sizeof(fifo));
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:89:5: note: include the header <string.h> or explicitly provide a declaration for 'memset'
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:102:16: error: use of undeclared identifier 'NULL' [clang-diagnostic-error]
+    if(fifo != NULL) {
+               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:6:1: warning: duplicate include [readability-duplicate-include]
+#include "Contactors.h"
+^~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:39:6: warning: function 'EnterFaultState' has cognitive complexity of 31 (threshold 25) [readability-function-cognitive-complexity]
+void EnterFaultState(void) {
+     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:40:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+    if(FaultBitmap & FAULT_OS){
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:43:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_TRITIUM){ //This gets tripped by the ReadTritium thread
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:46:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_HARDWARE_OVER_CURRENT_ERR){ //Tritium signaled too much current
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:50:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_SOFTWARE_OVER_CURRENT_ERR){
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:54:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_DC_BUS_OVERVOLT_ERR){ //DC bus overvoltage
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:58:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:61:13: note: +3, including nesting penalty of 2, nesting level increased to 3
+            if(hall_fault_cnt > RESTART_THRESHOLD){ //try to restart the motor a few times and then fail out
+            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:63:15: note: +1, nesting level increased to 3
+            } else {
+              ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:71:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_CONFIG_READ_ERR){ //Config read error
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:75:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_DESAT_FAULT_ERR){ //Desaturation fault error
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:79:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_MOTOR_OVER_SPEED_ERR){ //Motor over speed error
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:83:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_INIT_FAIL){ //motorcontroller fails to restart or initialize
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:98:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_BPS){ // BPS has been tripped
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:102:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:109:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:112:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_DISPLAY){
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:114:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(disp_fault_cnt>3){
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:116:11: note: +1, nesting level increased to 2
+        } else {
+          ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:123:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+    if(fromThread){//no recovering if fault state was entered outside of the fault thread
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:126:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+    while(1){;} 
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:131:12: warning: variable name 'ts' is too short, expected at least 3 characters [readability-identifier-length]
+    CPU_TS ts;
+           ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:97:12: warning: variable name 'ts' is too short, expected at least 3 characters [readability-identifier-length]
+    CPU_TS ts;
+           ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:85:21: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                    memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+                    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:85:21: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+                    memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+                    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:86:21: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                    memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+                    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:86:21: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+                    memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+                    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:148:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "FORWARD_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:148:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "FORWARD_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:151:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "NEUTRAL_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:151:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "NEUTRAL_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:154:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "REVERSE_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:154:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "REVERSE_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:157:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "RECORD_VELOCITY");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:157:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "RECORD_VELOCITY");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:160:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "POWERED_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:160:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "POWERED_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:163:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "COASTING_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:163:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "COASTING_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:166:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "BRAKE_STATE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:166:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "BRAKE_STATE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:169:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "ONEPEDAL");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:169:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "ONEPEDAL");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:172:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "ACCELERATE_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:172:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "ACCELERATE_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:175:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "UNKNOWN");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:175:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "UNKNOWN");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:178:5: warning: redundant return statement at the end of a function with a void return type [readability-redundant-control-flow]
+    return;
+    ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:181:31: warning: parameter name 'f' is too short, expected at least 2 characters [readability-identifier-length]
+static void print_float(float f) {
+                              ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:182:9: warning: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length]
+    int n = (int) f;
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:288:25: warning: statement should be inside braces [readability-braces-around-statements]
+    if(in_min >= in_max) in_max = in_min;   // The minimum of the input range should never be greater than the maximum of the input range
+                        ^
+                         {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:616:33: warning: statement should be inside braces [readability-braces-around-statements]
+        if(gear == FORWARD_GEAR) state = FSM[FORWARD_DRIVE];
+                                ^
+                                 {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:617:62: warning: statement should be inside braces [readability-braces-around-statements]
+        else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR) state = FSM[NEUTRAL_DRIVE];
+                                                             ^
+                                                              {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:259:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:264:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastPercent = percent;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:276:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:281:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastMv = mv;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:294:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastMphTenths = mphTenths;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:307:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentAccel = percent;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:320:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:333:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:345:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:350:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastGear = gear;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:362:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:367:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:378:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:383:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:154:9: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memcpy(txdata, &CanData.idx, 1);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:154:9: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+        memcpy(txdata, &CanData.idx, 1);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:155:9: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memcpy(&(txdata[sizeof(CanData.idx)]), &CanData.data, msginfo.size);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:155:9: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+        memcpy(&(txdata[sizeof(CanData.idx)]), &CanData.data, msginfo.size);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:157:9: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memcpy(txdata, &CanData.data, msginfo.size);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:157:9: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+        memcpy(txdata, &CanData.data, msginfo.size);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:239:14: warning: variable name 'id' is too short, expected at least 3 characters [readability-identifier-length]
+    uint32_t id;
+             ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:266:9: warning: Call to function 'memmove' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memmove_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memmove( // Can't use memcpy, as memory regions overlap
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:266:9: note: Call to function 'memmove' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memmove_s' in case of C11
+        memmove( // Can't use memcpy, as memory regions overlap
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:33:16: warning: function 'Display_Send' has cognitive complexity of 28 (threshold 25) [readability-function-cognitive-complexity]
+DisplayError_t Display_Send(DisplayCmd_t cmd){
+               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:35:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+        if (isAssignCmd(cmd)){
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:35:6: note: +1
+        if (isAssignCmd(cmd)){
+            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:22:87: note: expanded from macro 'isAssignCmd'
+#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
+                                                                                      ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:36:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+                if (cmd.argTypes[0] == INT_ARG){
+                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:39:3: note: +1, nesting level increased to 2
+                else{
+                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:40:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+                        if (cmd.args[0].str == NULL){return DISPLAY_ERR_PARSE;}
+                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:49:7: note: +1, nesting level increased to 1
+        else if (isOpCmd(cmd)){
+             ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:49:11: note: +1
+        else if (isOpCmd(cmd)){
+                 ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:24:38: note: expanded from macro 'isOpCmd'
+#define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
+                                     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:52:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+                if (cmd.numArgs > MAX_ARGS){return DISPLAY_ERR_OTHER;}
+                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:53:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+                if (cmd.numArgs >= 1){ // If there are arguments
+                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:54:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+                        for (int i = 0; i < cmd.numArgs; i++){
+                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:56:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+                                if (cmd.argTypes[i] == INT_ARG){
+                                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:59:5: note: +1, nesting level increased to 4
+                                else{
+                                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:65:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+                                if (i < cmd.numArgs - 1){ // delimiter
+                                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:72:2: note: +1, nesting level increased to 1
+        else{ // Error parsing command struct
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:76:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+        if (cmd.numArgs >= 1){ // If there are arguments
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:37:4: warning: Call to function 'sprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                        sprintf(msgArgs, "%d", (int)cmd.args[0].num);
+                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:37:4: note: Call to function 'sprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+                        sprintf(msgArgs, "%d", (int)cmd.args[0].num);
+                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:41:4: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                        sprintf(msgArgs, "%s", cmd.args[0].str);
+                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:41:4: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+                        sprintf(msgArgs, "%s", cmd.args[0].str);
+                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:57:6: warning: Call to function 'sprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                                        sprintf(arg, "%d", (int)cmd.args[i].num);
+                                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:57:6: note: Call to function 'sprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+                                        sprintf(arg, "%d", (int)cmd.args[i].num);
+                                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:60:6: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                                        sprintf(arg, "%s", cmd.args[i].str);
+                                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:60:6: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+                                        sprintf(arg, "%s", cmd.args[i].str);
+                                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:63:5: warning: Call to function 'strcat' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcat'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+                                strcat(msgArgs, arg);
+                                ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:63:5: note: Call to function 'strcat' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcat'. CWE-119
+                                strcat(msgArgs, arg);
+                                ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:66:6: warning: Call to function 'strcat' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcat'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+                                        strcat(msgArgs, ",");
+                                        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:66:6: note: Call to function 'strcat' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcat'. CWE-119
+                                        strcat(msgArgs, ",");
+                                        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:105:2: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:105:2: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+        sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:110:2: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:110:2: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+        sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:125:2: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:125:2: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+        sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:130:2: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:130:2: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+        sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Pedals.c:42:35: warning: statement should be inside braces [readability-braces-around-statements]
+    if (pedal >= NUMBER_OF_PEDALS) return 0;
+                                  ^
+                                   {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Pedals.c:43:66: warning: implicit conversion from enumeration type 'pedal_t' to different enumeration type 'ADC_t' [clang-diagnostic-enum-conversion]
+    int16_t millivoltsPedal = (int16_t) BSP_ADC_Get_Millivoltage(pedal);
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~ ^~~~~
+make[1]: Leaving directory '/home/ishdeshpa/LHR/Controls/BSP/STM32F413'

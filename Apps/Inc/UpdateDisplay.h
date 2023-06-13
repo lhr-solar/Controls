@@ -1,48 +1,51 @@
-/**
+/** 
  * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
  * @file UpdateDisplay.h
  * @brief Function prototypes for the display application.
- *
+ * 
  * This contains function prototypes relevant to the UpdateDisplay
  * application. Call assertUpdateDisplayError after calling any of the
  * functions in this application.
- *
+ * 
  * @author Ishan Deshpande (IshDeshpa)
  * @author Roie Gal (Cam0Cow)
  * @author Nathaniel Delgado (NathanielDelgado)
- */
+*/
 
 #ifndef __UPDATE_DISPLAY_H
 #define __UPDATE_DISPLAY_H
 
-#include "Tasks.h"
-#include "common.h"
 #include "os.h"
+#include "common.h"
+#include "Tasks.h"
 
-#include "Contactors.h"
 #include "Display.h"
+#include "Contactors.h"
 
 /**
  * Error types
  */
-typedef enum {
-	UPDATEDISPLAY_ERR_NONE = 0,
-	UPDATEDISPLAY_ERR_FIFO_PUT = -1, // Error putting command in fifo
-	UPDATEDISPLAY_ERR_FIFO_POP = -2, // Error popping command from fifo
-	UPDATEDISPLAY_ERR_PARSE_COMP =
-		-3, // Error parsing component/val in SetComponent
-	UPDATEDISPLAY_ERR_NO_CHANGE = -4, // No change in component value
+typedef enum{
+	UPDATEDISPLAY_ERR_NONE			= 0,
+	UPDATEDISPLAY_ERR_FIFO_PUT		=-1,	// Error putting command in fifo
+	UPDATEDISPLAY_ERR_FIFO_POP		=-2,	// Error popping command from fifo
+	UPDATEDISPLAY_ERR_PARSE_COMP	=-3,	// Error parsing component/val in SetComponent
+	UPDATEDISPLAY_ERR_NO_CHANGE	=-4,		// No change in component value
 } UpdateDisplayError_t;
 
 /**
  * For display elements with three states
  */
-typedef enum { STATE_0 = 0, STATE_1 = 1, STATE_2 = 2 } TriState_t;
+typedef enum{
+	STATE_0	=0,
+	STATE_1	=1,
+	STATE_2	=2
+} TriState_t;
 
 // For cruise control and regen
 #define DISP_DISABLED STATE_0
-#define DISP_ENABLED STATE_1 // Able to be used
-#define DISP_ACTIVE STATE_2	 // Actively being used right now
+#define DISP_ENABLED STATE_1	// Able to be used
+#define DISP_ACTIVE STATE_2	// Actively being used right now
 
 // For gear changes
 #define DISP_NEUTRAL STATE_0
@@ -79,8 +82,7 @@ UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv);
 
 /**
  * @brief Sets the velocity of the vehicle on the display
- * @param mphTenths velocity of the vehicle in tenths of mph (1 digit of
- * precision)
+ * @param mphTenths velocity of the vehicle in tenths of mph (1 digit of precision)
  * @returns UpdateDisplayError_t
  */
 UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);

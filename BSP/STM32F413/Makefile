@@ -173,6 +173,26 @@ $(BUILD_DIR):
 	mkdir $@		
 
 #######################################
+# tidy
+#######################################
+TIDYSOURCES = $(filter-out $(addsuffix /%,../../RTOS ../../BSP/STM32F413 ../../CMSIS), $(C_SOURCES)) \
+$(wildcard ../../Apps/Inc/*.h) \
+$(wildcard ../../Drivers/Inc/*.h) \
+
+ifneq ($(LINT), none)
+TIDYSOURCES := $(shell find $(TIDYSOURCES) -regex .*/$(LINT))
+endif
+
+TIDYFLAGS = --config-file=../../.clang-tidy
+TIDYCFLAGS = $(filter-out $(CPU) $(FLOAT-ABI) $(MCU),$(CFLAGS))	# Filter out arguments not accepted by clang-tidy
+
+tidy:
+	clang-tidy $(TIDYFLAGS) $(TIDYSOURCES) -- $(TIDYCFLAGS)
+
+fix:
+	clang-tidy $(TIDYFLAGS) $(TIDYSOURCES) --fix -- $(TIDYCFLAGS)
+
+#######################################
 # clean up
 #######################################
 clean:

@@ -14,6 +14,9 @@ TEST_LEADER = none
 TEST_MOTOR = none
 TEST_CAR = none
 
+LINT = none
+export LINT
+
 DEBUG = 0
 export DEBUG
 
@@ -48,6 +51,9 @@ ifneq ($(TEST_CAR), none)
 endif
 
 stm32f413: leader
+
+tidy:
+	$(MAKE) -C BSP -C STM32F413 tidy
 
 flash:
 	$(MAKE) -C BSP -C STM32F413 flash

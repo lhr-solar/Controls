@@ -1,13 +1,13 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "Tasks.h"
+#include "FaultState.h"
+#include "os.h"
 #include "CANbus.h"
 #include "Contactors.h"
 #include "Display.h"
-#include "FaultState.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "os.h"
 
 /**
  * TCBs
@@ -33,6 +33,7 @@ CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 
+
 /**
  * Semaphores
  */
@@ -44,12 +45,14 @@ OS_SEM FaultState_Sem4;
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err) {
-	if (err != OS_ERR_NONE) {
-		FaultBitmap |= FAULT_OS;
-		OSErrLocBitmap |= OS_err_loc;
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
+{
+    if (err != OS_ERR_NONE)
+    {
+        FaultBitmap |= FAULT_OS;
+        OSErrLocBitmap |= OS_err_loc;
 
-		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-		EnterFaultState();
-	}
+        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+        EnterFaultState();
+    }
 }
