@@ -286,6 +286,8 @@ void Task_ManagerTask(void* arg) {
         checkOSError(err); 
         OSTaskDel(&ExceptionTaskTCB, &err);
         checkOSError(err); 
+        OSTaskDel(&FaultState_TCB, &err);
+        checkOSError(err); 
         
         // Test level 1 & 2 exceptions with callbacks
         createExceptionTask(exceptionCallback); 
@@ -296,6 +298,8 @@ void Task_ManagerTask(void* arg) {
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         checkOSError(err); 
         OSTaskDel(&ExceptionTaskTCB, &err);
+        checkOSError(err); 
+        OSTaskDel(&FaultState_TCB, &err);
         checkOSError(err); 
 
         // Test the assertOSError function using the OSErrorTask
@@ -361,7 +365,8 @@ void Task_ManagerTask(void* arg) {
 
 
         printf("\n\r=========== Test UpdateDisplay ===========");
-        
+        // Might be able to test if we UpdateDisplay_Init() and then make the task
+        // UpdateDisplay and Display error functions do actually do the same thing, so one of them should be deleted.
 
     }
 
@@ -374,7 +379,7 @@ int main(void) {
 
     OSInit(&err);
 
-    //assertOSError(OS_MAIN_LOC, err);
+    checkOSError(err);
     
     
     // Create the task manager thread
