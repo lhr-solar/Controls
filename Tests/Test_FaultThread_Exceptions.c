@@ -45,7 +45,11 @@ static CPU_STK ExceptionTaskStk[DEFAULT_STACK_SIZE];
 static CPU_STK OSErrorTaskStk[DEFAULT_STACK_SIZE];
 
 /*** Constants ***/
-#define READY_ID 0x123
+#define READY_MSG 0x4444
+
+
+/*** Globals ***/
+OS_SEM Ready_Sema4;
 
 
 // To do:
@@ -59,8 +63,6 @@ static CPU_STK OSErrorTaskStk[DEFAULT_STACK_SIZE];
 void checkOSError(OS_ERR err) {
     if (err != OS_ERR_NONE) {
         printf("OS error code %d\n", err);
-    } else {
-        printf("\n\rNo error yet");
     }
 }
     
@@ -75,22 +77,24 @@ void exceptionCallback(void) {
 // Creates an exception of priority 1 and 2 to test
 // test_callbacks: the callback function to use for the exceptions
 void ExceptionTask(void* test_callbacks) {
-
+    OS_ERR err;
 
     if (test_callbacks == NULL) {
         printf("\n\r Testing exceptions without callback functions");
     } else {
-        //printf("\n\r Testing exceptions with callback functions");
+        printf("\n\r Testing exceptions with callback functions");
     }
     // Throw a priority 2 exception
+    printf("\n\rThrowing priority level 2 exception");
     exception_t prio2Exception = {.prio = 2, .message = "\n\rprio2 exception message", .callback = test_callbacks};
     assertExceptionError(prio2Exception);
-    //printf("\n\rPrio 2 test exception with callback has been thrown");
     
     // Throw a priority 1 exception
+    printf("\n\rThrowing priority level 1 exception");
     exception_t prio1Exception = {.prio = 1, .message = "\n\rprio1 exception message", .callback = test_callbacks};
+    OSSemPost(&Ready_Sema4, OS_OPT_POST_1, &err); // Alert manager task that the test is almost finished
     assertExceptionError(prio1Exception);
-    //printf("\n\rTest failed: Prio 1 exception did not immediately result in an unrecoverable fault");
+    printf("\n\rTest failed: Prio 1 exception did not immediately result in an unrecoverable fault");
 
     while(1){};
 }
@@ -100,9 +104,11 @@ void OSErrorTask(void* arg) {
     OS_ERR err;
     OS_MUTEX testMut;
     CPU_TS ts;
+    printf("\n\rasserting an OS error");
     OSMutexPend(&testMut, 0, OS_OPT_PEND_NON_BLOCKING, &ts, &err);
+    OSSemPost(&Ready_Sema4, OS_OPT_POST_1, &err);
     assertOSError(OS_MAIN_LOC, err);
-    //printf("assertOSError test failed: assertion did not immediately result in an unrecoverable fault");
+    printf("\n\rassertOSError test failed: assertion did not immediately result in an unrecoverable fault");
     while(1){};
 }   
 
@@ -254,94 +260,107 @@ void createOSErrorTask(void) {
 // A high-priority task that manages other tasks and runs the tests
 void Task_ManagerTask(void* arg) {
     OS_ERR err;
+    CPU_TS ts;
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-
-    printf("%d", __LINE__);
     CANbus_Init(MOTORCAN, NULL, 0);
-    // ErrorStatus errorCode;
-    printf("\n\rIn manager task");
+    CANbus_Init(CARCAN, NULL, 0);
+    OSSemCreate(&Ready_Sema4, "Ready Flag Semaphore", 0, &err);
+    ErrorStatus errorCode;
+    
     
 
     while (1) {
-        OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
         // Test the exceptions mechanism by creating and throwing exceptions of priorities 1 and 2
         // Both with and without callback functions
-        // printf("=========== Testing exception priorities 1 and 2 ===========");
+        printf("\n\r=========== Testing exception priorities 1 and 2 ===========");
     
-        // createExceptionTask(NULL); // Test level 1 & 2 exceptions without callbacks
-        // checkOSError(err); 
-        // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the task to finish
-        // checkOSError(err); 
-        // OSTaskDel(&ExceptionTaskTCB, &err);
-        // checkOSError(err); 
+        // Test level 1 & 2 exceptions without callbacks
+        createExceptionTask(NULL); 
+        checkOSError(err); 
+        createFaultState();
+        checkOSError(err); 
+        OSSemPend(&Ready_Sema4, 0, OS_OPT_PEND_BLOCKING, &ts, &err); // Wait for task to finish
+        checkOSError(err); 
+        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); // extra time for the task finished
+        checkOSError(err); 
+        OSTaskDel(&ExceptionTaskTCB, &err);
+        checkOSError(err); 
+        
+        // Test level 1 & 2 exceptions with callbacks
+        createExceptionTask(exceptionCallback); 
+        checkOSError(err); 
+        createFaultState();
+        checkOSError(err); 
+        OSSemPend(&Ready_Sema4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        checkOSError(err); 
+        OSTaskDel(&ExceptionTaskTCB, &err);
+        checkOSError(err); 
 
-        // createExceptionTask(exceptionCallback); // Test level 1 & 2 exceptions with callbacks
-        // checkOSError(err); 
-        // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        // checkOSError(err); 
-        // OSTaskDel(&ExceptionTaskTCB, &err);
-        // checkOSError(err); 
+        // Test the assertOSError function using the OSErrorTask
+        printf("\n\r=========== Testing OS assert ===========");
 
-        // // Test the assertOSError function using the OSErrorTask
-        // //printf("=========== Testing OS assert ===========");
+        createOSErrorTask();
+        checkOSError(err); 
+        createFaultState();
+        checkOSError(err); 
+        OSSemPend(&Ready_Sema4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
+        checkOSError(err);
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+        checkOSError(err); 
+        OSTaskDel(&ExceptionTaskTCB, &err);
 
-        // createOSErrorTask();
-        // checkOSError(err); 
-        // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        // checkOSError(err); 
+        // Test individual tasks error assertions
+        printf("\n\r=========== Testing ReadTritium ===========");
 
-        // // Test individual tasks error assertions
-        // //printf("=========== Testing ReadTritium ===========");
+        CANDATA_t canMessage = {0};
+        canMessage.ID = CARDATA;
+        canMessage.idx = 0;
+        *(uint16_t*)(&canMessage.data) = READY_MSG;
 
-        // CANDATA_t canMessage = {0};
-        // canMessage.ID = READY_ID;
-        // canMessage.idx = 0;
-        // *(uint16_t*)(&canMessage.data) =  0x4444;
+        for (int i = 0; i < NUM_TRITIUM_ERRORS + 2; i++) {
+            createFaultState();
+            checkOSError(err); 
+            createReadTritium();
+            checkOSError(err); 
+            // Send a message to the motor to tell it to start sending stuff
 
-        // for (int i = 0; i < NUM_TRITIUM_ERRORS + 2; i++) {
-        //     createFaultState();
-        //     checkOSError(err); 
-        //     createReadTritium();
-        //     checkOSError(err); 
-        //     // Send a message to the motor to tell it to start sending stuff
+            CANbus_Send(canMessage, CAN_BLOCKING, MOTORCAN);
+            OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for ReadTritium to finish
+            OSTaskDel(&ReadTritium_TCB, &err);
+            OSTaskDel(&FaultState_TCB, &err);
 
-        //     CANbus_Send(canMessage, CAN_BLOCKING, MOTORCAN);
-        //     OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for ReadTritium to finish
-        //     OSTaskDel(&ReadTritium_TCB, &err);
-        //     OSTaskDel(&FaultState_TCB, &err);
-
-        // }
-
-
-        // printf("=========== Testing ReadCarCAN ===========");
-        // createFaultState();
-        // checkOSError(err);
-        // createReadCarCAN();
-        // checkOSError(err);
-        // CANbus_Send(canMessage, CAN_BLOCKING, CARCAN);
-        // uint16_t canMsgData = 0;
-
-        // do {
-        //     printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-        //     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        //     checkOSError(err);
-        //     errorCode = CANbus_Read(&canMessage, CAN_BLOCKING, CARCAN);
-        //     if (errorCode != SUCCESS) {
-        //         continue;
-        //     }
-        //     canMsgData = *((uint16_t *)&canMessage.data[0]);
-        // } while (canMsgData != 0x4444);
-
-        // // By now, the BPS Trip message should have been sent
-        // OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err); // Give ReadCarCAN time to turn off contactors
-        // printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
-        // printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
-        // printf("\n\rArray contactor: %d", Contactors_Get(ARRAY_CONTACTOR));
+        }
 
 
-        // printf("=========== Test UpdateDisplay ===========");
+        printf("\n\r=========== Testing ReadCarCAN ===========");
+        createFaultState();
+        checkOSError(err);
+        createReadCarCAN();
+        checkOSError(err);
+        CANbus_Send(canMessage, CAN_BLOCKING, CARCAN);
+        uint16_t canMsgData = 0;
+
+        do {
+            printf("\n\rChargeEnable: %d", ChargeEnable_Get());
+            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+            checkOSError(err);
+            errorCode = CANbus_Read(&canMessage, CAN_BLOCKING, CARCAN);
+            if (errorCode != SUCCESS) {
+                continue;
+            }
+            canMsgData = *((uint16_t *)&canMessage.data[0]);
+        } while (canMsgData != 0x4444);
+
+        // By now, the BPS Trip message should have been sent
+        OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Give ReadCarCAN time to turn off contactors
+        printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
+        printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
+        printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+
+
+        printf("\n\r=========== Test UpdateDisplay ===========");
         
 
     }
@@ -349,12 +368,9 @@ void Task_ManagerTask(void* arg) {
 }
 
 int main(void) {
-    __disable_irq();
 
     OS_ERR err;
-    // printf("\n\rThing before BSP UART Init");
     BSP_UART_Init(UART_2);
-    printf("\n\rThing after bsp uart init");
 
     OSInit(&err);
 
@@ -376,9 +392,8 @@ int main(void) {
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
-    );
+    ); 
     
-    __enable_irq();
 
     checkOSError(err);
 
@@ -392,16 +407,4 @@ int main(void) {
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         
     }
-}
-
-void HardFault_Handler(void) {
-    __disable_irq();
-    __asm("bkpt");
-    while(1){}
-}
-
-void UsageFault_Handler(void) {
-    __disable_irq();
-    __asm("bkpt");
-    while(1){}
 }

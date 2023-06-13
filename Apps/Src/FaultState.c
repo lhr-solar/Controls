@@ -28,11 +28,7 @@ extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions
  * Semaphores
  */
 OS_SEM FaultState_Sem4;
-
-/**
- * Mutex
- */
-OS_MUTEX FaultState_Mutex;
+OS_SEM ExceptionProtection_Sem4;
 
 // current exception is initialized
 NEW_EXCEPTION(currException);
@@ -45,7 +41,7 @@ void assertExceptionError(exception_t exception){
     OS_ERR err;
     CPU_TS ticks;
 
-    OSMutexPend(&FaultState_Mutex, 0, OS_OPT_POST_NONE, &ticks, &err);
+    OSSemPend(&ExceptionProtection_Sem4, 0, OS_OPT_POST_NONE, &ticks, &err);
     assertOSError(OS_FAULT_STATE_LOC, err); 
 
     currException = exception;
@@ -70,7 +66,7 @@ void EnterFaultState(void) {
     printf("%s", currException.message);
     if(currException.callback != NULL){
         currException.callback();
-        } // Custom callback
+    } // Custom callback
 
     switch (currException.prio)
     {
@@ -93,14 +89,14 @@ void Task_FaultState(void *p_arg) {
     OS_ERR err;
     CPU_TS ts;
 
-    OSMutexCreate(&FaultState_Mutex, "Fault state mutex", &err);
+    OSSemCreate(&ExceptionProtection_Sem4, "Fault State Exception Protection Semaphore", 1, &err); // To ensure currException won't be replaced too soon
     OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
 
     // Block until fault is signaled by an assert
     while(1){
         OSSemPend(&FaultState_Sem4, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
         EnterFaultState();
-        OSMutexPost(&FaultState_Mutex, OS_OPT_POST_NONE, &err);
+        OSSemPost(&ExceptionProtection_Sem4, OS_OPT_POST_NONE, &err);
         assertOSError(OS_FAULT_STATE_LOC, err);  // We've finished handling the error and can post the mutex now
     }
 }

@@ -12,9 +12,11 @@
 #include "CANbus.h"
 #include "ReadTritium.h"
 
-static OS_TCB Task1_TCB;
-static CPU_STK Task1_Stk[128];
 #define STACK_SIZE 128
+
+static OS_TCB Task1_TCB;
+static CPU_STK Task1_Stk[STACK_SIZE];
+
 
 
 
@@ -38,12 +40,14 @@ void Task1(void *p_arg){
                 printf("CANbus Read error status: %d\n\r", status);
             } else {
                 data = dataBuf.data[0];
+                printf("\n\rWaiting for start. Read: %d", data);
             }
             OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         } while (data != 0x4444);
 
         uint16_t tritiumError = (0x01<<i)>>1;
         *((uint16_t*)(&canError.data[4])) = tritiumError;
+        printf("\n\rNow sending: %d", tritiumError);
 
          // Send error messages to the leader board
         if (tritiumError == T_HALL_SENSOR_ERR) { // Send the message extra times to allow for motor restart
@@ -68,7 +72,6 @@ int main(void){ //startup OS stuff, spawn test task
     if(err != OS_ERR_NONE){
         printf("OS error code %d\n",err);
     }
-    printf("I don't think this will print. Should move UART Init");
     BSP_UART_Init(UART_2);
    
 
