@@ -21,7 +21,7 @@
 typedef enum MINIONPIN_ENUM {
     FOREACH_MinionPin(GENERATE_ENUM)
     NUM_MINIONPINS,
-}MinionPin_t;
+} MinionPin_t;
 
 
 typedef enum{

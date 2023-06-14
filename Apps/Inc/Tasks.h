@@ -115,11 +115,6 @@ extern OS_SEM FaultState_Sem4;
  */
 
 
-//Put all global state variables here
-extern bool UpdateVel_ToggleCruise;
-extern uint16_t SupplementalVoltage;
-extern uint32_t StateOfCharge;
-
 /**
  * OS Error States
  * 

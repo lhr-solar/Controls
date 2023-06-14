@@ -10,13 +10,11 @@
 #include <errno.h> 
 #include "Tasks.h"
 #include "SendTritium.h"
+#include "common.h"
 
 // global variables
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
-// extern bool UpdateVel_ToggleCruise; // In Tasks.h but not beind defined?
-// extern uint16_t SupplementalVoltage; // In Tasks.h but not beind defined?
-// extern uint32_t StateOfCharge;   // In Tasks.h but not beind defined?
 
 static const char *MINIONPIN_STRING[] = {
     FOREACH_MinionPin(GENERATE_STRING)
@@ -24,6 +22,10 @@ static const char *MINIONPIN_STRING[] = {
 
 static const char *CONTACTOR_STRING[] = {
     FOREACH_contactor(GENERATE_STRING)
+};
+
+static const char *GEAR_STRING[] = {
+    FOREACH_Gear(GENERATE_STRING)
 };
 
 // Need to keep this in sync with Task.h
@@ -57,15 +59,6 @@ static const char *FAULT_BITMAP_STRING[] = {
 };
 /*----------------------------------------------*/
 
-static void print_f(char * str, float f) {
-    printf(str);
-
-    int n = (int) f;
-    f -= n;
-    f *= (10 << 2);
-    printf("%d.%d\n\r", n, (int) f);
-}
-
 void Task_DebugDump(void* p_arg) {
     OS_ERR err;
     Minion_Error_t mErr;
@@ -98,9 +91,8 @@ void Task_DebugDump(void* p_arg) {
         printf("Regen Enable: %s\n\r", get_regenEnable() ? "true" : "false");
         printf("Pedal Brake Percent: %d\n\r", get_brakePedalPercent());
         printf("Pedal Accel Percent: %d\n\r", get_accelPedalPercent());
-        // printf("Pedal Accel Percent: %s\n\r", get_accelPedalPercent()); // Gear
-        print_f("Current Setpoint: ", get_currentSetpoint());
-
+        printf("Current Gear: %s\n\r", GEAR_STRING[get_gear()]);
+        print_float("Current Setpoint: ", get_currentSetpoint());
 
         // fault bitmap
         printf("Fault Bitmap: ");
@@ -128,15 +120,6 @@ void Task_DebugDump(void* p_arg) {
             }
         }
         printf("\n\r");
-
-        // // update velocity toggle cruise
-        // printf("UpdateVel_ToggleCruise: %s\n\r", UpdateVel_ToggleCruise == true ? "True" : "False");
-
-        // // supplemental voltage
-        // printf("Supplemental Voltage: %d\n\r", SupplementalVoltage);
-
-        // // state of charge
-        // printf("State of Charge: %ld\n\r", StateOfCharge);
 
         // Delay of 5 seconds
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);

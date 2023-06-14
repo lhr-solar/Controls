@@ -83,10 +83,6 @@ static inline bool isWhiteSpace(char character){
 	}
 }
 
-static inline bool isNull(char character){
-	return character == '\0';
-}
-
 static bool executeCommand(char *input) {
 	// The first word in the input should be a valid command
 	char *command = strtok_r(input, " ", &save);

@@ -13,4 +13,6 @@
 
 typedef void (*callback_t)(void);
 
+void print_float(char * str, float f);
+
 #endif

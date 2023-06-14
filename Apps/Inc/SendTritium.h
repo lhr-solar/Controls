@@ -8,10 +8,17 @@
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
-typedef enum{
-	FORWARD_GEAR,
-	NEUTRAL_GEAR,
-	REVERSE_GEAR
+#define FOREACH_Gear(GEAR) \
+        GEAR(FORWARD_GEAR)   \
+        GEAR(NEUTRAL_GEAR)  \
+        GEAR(REVERSE_GEAR)   \
+
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+typedef enum GEAR_ENUM {
+    FOREACH_Gear(GENERATE_ENUM)
+    NUM_GEARS,
 } Gear_t;
 
 // State Names
