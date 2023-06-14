@@ -46,6 +46,7 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
+        printf("\n\rOS Error code %d", err);
         BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
         
         BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);

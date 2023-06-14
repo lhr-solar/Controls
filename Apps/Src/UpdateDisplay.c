@@ -71,30 +71,6 @@ const char* compStrings[15]= {
 	"faulterr"
 };
 
-/**
- * @brief Error handler callback function. Gets called by fault state if err is present. 
- */
-static void callback_updateDisplayError(void){
-	static uint8_t disp_fault_cnt = 0; // If faults > three times total, Display_Fault is called
-        if(disp_fault_cnt>RESTART_THRESHOLD){ 
-            Display_Fault(OSErrLocBitmap, FaultBitmap); 
-        } else { 
-            disp_fault_cnt++; 
-            Display_Reset(); 
-            return; 
-        }  
-}
-
-/**
- * @brief Error handler for any UpdateDisplay errors. Call this after any display application function.
- */
-static void assertUpdateDisplayError(UpdateDisplayError_t err){
-	if(err != UPDATEDISPLAY_ERR_NONE){
-		exception_t updateDisplayError = {2, "update display error", &callback_updateDisplayError};
-		assertExceptionError(updateDisplayError);
-	}
-}
-
 
 UpdateDisplayError_t UpdateDisplay_Init(){
 	OS_ERR err;
@@ -105,7 +81,7 @@ UpdateDisplayError_t UpdateDisplay_Init(){
 	assertOSError(OS_DISPLAY_LOC, err);
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetPage(INFO);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	return ret;
 }
 
@@ -133,7 +109,7 @@ static UpdateDisplayError_t UpdateDisplay_PopNext(){
     assertOSError(OS_SEND_CAN_LOC, err);
 
     if(!result){
-			assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
+			assertDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
 			return UPDATEDISPLAY_ERR_FIFO_POP;
 		}
 		
@@ -163,7 +139,7 @@ static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
 		assertOSError(OS_DISPLAY_LOC, err);
 	}
 	else{
-		assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);
+		assertDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);
 		return UPDATEDISPLAY_ERR_FIFO_PUT;
 	}
 
@@ -190,7 +166,7 @@ static UpdateDisplayError_t UpdateDisplay_Refresh(){
 	};
 
 	UpdateDisplayError_t ret = UpdateDisplay_PutNext(refreshCmd);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	return ret;
 }
 
@@ -219,7 +195,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 		};
 		
 		ret = UpdateDisplay_PutNext(visCmd);
-		assertUpdateDisplayError(ret);
+		assertDisplayError(ret);
 		return ret;
 	}
 	// For components that have a non-boolean value
@@ -236,11 +212,11 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 		};
 
 		ret = UpdateDisplay_PutNext(setCmd);
-		assertUpdateDisplayError(ret);
+		assertDisplayError(ret);
 		return UpdateDisplay_PutNext(setCmd);
 	}
 	else{
-		assertUpdateDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);
+		assertDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);
 		return UPDATEDISPLAY_ERR_PARSE_COMP;
 	}
 	return UPDATEDISPLAY_ERR_NONE;
@@ -270,11 +246,11 @@ UpdateDisplayError_t UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentag
 	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SOC, percent);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercent = percent;
 	return ret;
@@ -287,11 +263,11 @@ UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv){
 	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastMv = mv;
 	return ret;
@@ -304,7 +280,7 @@ UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(VELOCITY, mphTenths);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastMphTenths = mphTenths;
 	return ret;
@@ -317,7 +293,7 @@ UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
 	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ACCEL_METER, percent);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentAccel = percent;
 	return ret;
@@ -330,7 +306,7 @@ UpdateDisplayError_t UpdateDisplay_SetArray(bool state){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ARRAY, (state)?1:0);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
@@ -343,7 +319,7 @@ UpdateDisplayError_t UpdateDisplay_SetMotor(bool state){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(MOTOR, (state)?1:0);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
@@ -356,11 +332,11 @@ UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(GEAR, (uint32_t)gear);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastGear = gear;
 	return ret;
@@ -373,11 +349,11 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state);
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 	
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
@@ -393,7 +369,7 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
+	assertDisplayError(ret);
 
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
@@ -405,6 +381,6 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
 void Task_UpdateDisplay(void *p_arg) {
     while (1) {
 			UpdateDisplayError_t err = UpdateDisplay_PopNext();
-			assertUpdateDisplayError(err);
+			assertDisplayError(err);
     }
 }
