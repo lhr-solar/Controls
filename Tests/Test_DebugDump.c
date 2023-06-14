@@ -85,23 +85,23 @@ void Task_Init(void *p_arg){
     UpdateDisplay_Init();
 
     /* Commented due to it messing up the test */
-    // // Initialize FaultState
-    // OSTaskCreate(
-    //     (OS_TCB*)&FaultState_TCB,
-    //     (CPU_CHAR*)"FaultState",
-    //     (OS_TASK_PTR)Task_FaultState,
-    //     (void*)NULL,
-    //     (OS_PRIO)TASK_FAULT_STATE_PRIO,
-    //     (CPU_STK*)FaultState_Stk,
-    //     (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-    //     (CPU_STK_SIZE)TASK_FAULT_STATE_STACK_SIZE,
-    //     (OS_MSG_QTY)0,
-    //     (OS_TICK)0,
-    //     (void*)NULL,
-    //     (OS_OPT)(OS_OPT_TASK_STK_CLR),
-    //     (OS_ERR*)&err
-    // );
-    // assertOSError(OS_MAIN_LOC, err);
+    // Initialize FaultState
+    OSTaskCreate(
+        (OS_TCB*)&FaultState_TCB,
+        (CPU_CHAR*)"FaultState",
+        (OS_TASK_PTR)Task_FaultState,
+        (void*)NULL,
+        (OS_PRIO)TASK_FAULT_STATE_PRIO,
+        (CPU_STK*)FaultState_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_FAULT_STATE_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
 
     // Initialize SendTritium
     OSTaskCreate(
