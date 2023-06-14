@@ -12,7 +12,9 @@
 #include "CANbus.h"
 #include "ReadTritium.h"
 
+
 #define STACK_SIZE 128
+#define READY_MSG 0x4444
 
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[STACK_SIZE];
@@ -34,17 +36,18 @@ void Task1(void *p_arg){
 
 
     for (int i = 0; i < NUM_TRITIUM_ERRORS + 2; i++) {
-        do {
-            ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
-            if (status != SUCCESS) {
-                printf("CANbus Read error status: %d\n\r", status);
-            } else {
-                data = dataBuf.data[0];
-                printf("\n\rWaiting for start. Read: %d", data);
-            }
-            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        } while (data != 0x4444);
+         do {
+             ErrorStatus status = CANbus_Read(&dataBuf, false, MOTORCAN);
+             if (status != SUCCESS) {
+                 printf("CANbus Read error status: %d\n\r", status);
+             } else {
+                 data = dataBuf.data[0];
+                 printf("\n\rWaiting for start. Read: %d", data);
+             }
+             OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+         } while (data != READY_MSG);
 
+        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         uint16_t tritiumError = (0x01<<i)>>1;
         *((uint16_t*)(&canError.data[4])) = tritiumError;
         printf("\n\rNow sending: %d", tritiumError);
@@ -100,9 +103,6 @@ int main(void){ //startup OS stuff, spawn test task
     }
     return 0;
 }
-
-
- 
 
 
   
