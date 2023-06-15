@@ -1,3 +1,6 @@
+
+
+
 #include "Tasks.h"
 #include "CANbus.h"
 #include "BSP_UART.h"
@@ -9,18 +12,29 @@ static CPU_STK Task1_Stk[128];
 #define STACK_SIZE 128
 #define READY_MSG 0x4444
 
-#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
 
 void Task1(void *p_arg){
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     printf("\n\rAbout to init Canbus");
-    CANbus_Init(CARCAN, carCANFilterList, NUM_CARCAN_FILTERS);
-    printf("\n\rCanbus initted?");
+    CANbus_Init(CARCAN, NULL, 0);
+    printf("\n\rCanbus init-ed");
     OS_ERR err;
 
     CANDATA_t dataBuf; // A buffer in which we can store the messages we read
+    //uint16_t data = 0;
+
+    //  do {
+    //          ErrorStatus status = CANbus_Read(&dataBuf, false, MOTORCAN);
+    //          if (status != SUCCESS) {
+    //              printf("\n\rCANbus Read error status: %d\n\r", status);
+    //          } else {
+    //              data = *((uint16_t*)(&dataBuf.data[0]));
+    //              printf("\n\rWaiting for start. Read: %d", data);
+    //          }
+    //          OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+    //      } while (data != READY_MSG);
 
     CANDATA_t chargeMsg;
     chargeMsg.ID = CHARGE_ENABLE;
@@ -33,13 +47,15 @@ void Task1(void *p_arg){
     *(uint64_t*)(&tripBPSMsg.data) = 0;
     tripBPSMsg.idx = 0;
 
+    
+    while (1) {
 
     // Send five charge enable messages so the contactors get flipped on
     chargeMsg.data[0] = true;
     for(int i = 0; i<5; i++){
         CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
-        OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
         printf("\nSent enable chargeMsg %d", i);
+        OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 
     // Send five charge disable messages to test prio-2 disable contactor callback
@@ -47,11 +63,19 @@ void Task1(void *p_arg){
     chargeMsg.data[0] = false;
     for(int i = 0; i<5; i++){
         CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
-        OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
         printf("\nSent disable chargeMsg %d", i);
+        OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 
-    // Send a trip message of 1 ( rip)
+    // Send five more charge enable messages so the contactors get flipped on again
+    chargeMsg.data[0] = true;
+    for(int i = 0; i<5; i++){
+        CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
+        printf("\nSent enable chargeMsg %d", i);
+        OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+
+    // Send a trip message of 1 (trip)
     // Note: trip messages are not usually sent,
     // so any trip message (even 0) should be a concern.
     // Maybe we should handle them differently?
@@ -62,6 +86,7 @@ void Task1(void *p_arg){
     dataBuf.ID = CARDATA;
     *((uint16_t*)(&dataBuf.data[0])) = READY_MSG;
     CANbus_Send(dataBuf, CAN_NON_BLOCKING, CARCAN);
+    }
 
     while(1){};
     

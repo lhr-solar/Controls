@@ -33,6 +33,7 @@
 #include "Contactors.h"
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
+#include "CANConfig.h"
 
 
 
@@ -55,10 +56,9 @@ OS_SEM Ready_Sema4;
 
 // To do:
 // Change all task initializations to be consistent in constant usage if both options work
-// Use a semaphore instead of doing a full blind wait
-// Make a different OS Error function
 // change bool to semaphore?
 // Do we need to also turn off the motor_precharge contactor in fault state in case it's on?
+// Change ReadCarCAN Exception message so we can distinguish charging disable message vs missed msg
 
 // Assertion function for OS errors
 void checkOSError(OS_ERR err) {
@@ -267,20 +267,21 @@ void Task_ManagerTask(void* arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(MOTORCAN, NULL, 0);
     CANbus_Init(CARCAN, NULL, 0);
+    Contactors_Init();
     OSSemCreate(&Ready_Sema4, "Ready Flag Semaphore", 0, &err);
     ErrorStatus errorCode;
     
     /*** test */
  
 
-    CANDATA_t testmsg = {0};
-    testmsg.ID=MOTOR_STATUS;
-    testmsg.idx=0;
-    *((uint16_t*)(&testmsg.data[0])) = 4444;
+    // CANDATA_t testmsg = {0};
+    // testmsg.ID=MOTOR_STATUS;
+    // testmsg.idx=0;
+    // *((uint16_t*)(&testmsg.data[0])) = 4444;
     
-    while (1) {
-        CANbus_Send(testmsg, CAN_BLOCKING, MOTORCAN);
-    }
+    // while (1) {
+    //     CANbus_Send(testmsg, CAN_BLOCKING, MOTORCAN);
+    // }
 
     /****/
 
@@ -345,7 +346,7 @@ void Task_ManagerTask(void* arg) {
             // Send a message to the motor to tell it to start sending stuff
             printf("\n\rShould be testing Tritium error %d", i);
             CANbus_Send(canMessage, CAN_BLOCKING, MOTORCAN);
-            OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for ReadTritium to finish
+            OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for ReadTritium to finish
             OSTaskDel(&ReadTritium_TCB, &err);
             OSTaskDel(&FaultState_TCB, &err);
 
