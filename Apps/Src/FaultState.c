@@ -20,18 +20,13 @@
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
- * Macros for initializing the exception
-*/
-#define NEW_EXCEPTION(exception_name) exception_t exception_name = {.prio=-1,.message=NULL,.callback=NULL}
-
-/**
  * Semaphores
  */
 OS_SEM FaultState_Sem4;
 OS_SEM ExceptionProtection_Sem4;
 
 // current exception is initialized
-NEW_EXCEPTION(currException);
+exception_t currException = {.prio=-1,.message=NULL,.callback=NULL};
 
 /**
  * @brief   Assert Error if non OS function call fails
@@ -47,6 +42,7 @@ void assertExceptionError(exception_t exception){
     currException = exception;
 
     OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+    //printf("\n\rThis should happen after the exception is handled");
     assertOSError(OS_FAULT_STATE_LOC, err);
 }
         

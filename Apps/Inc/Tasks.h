@@ -163,7 +163,7 @@ extern os_error_loc_t OSErrLocBitmap;
 typedef struct{
     uint8_t prio;
     const char* message; 
-    volatile void (*callback)(void);
+    void (*callback)(void);
 } exception_t;
 
 /**
