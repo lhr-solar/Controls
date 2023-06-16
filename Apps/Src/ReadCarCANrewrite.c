@@ -170,11 +170,6 @@ void Task_ReadCarCAN(void *p_arg){
                     updateSaturation(-1);
                     // NOET: updatesat and charge enable statements are now paired. 
                 } else {
-                    // dat juicy part with dat juicy logic
-                    // check if ignition is on
-// check if saturation lets us (enough charge enable messages)
-// check charge enable at that exact time
-// change it
                     updateSaturation(1);
                     
                     if(Minion_Read_Pin(IGN_1, &Merr) == ON 
@@ -182,6 +177,7 @@ void Task_ReadCarCAN(void *p_arg){
                         && (Contactors_Get(ARRAY_CONTACTOR)==OFF) 
                         && OSTmrStateGet(&prechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING){
                             // could wrap this inside a mutex -- do we need it?
+                            assertOSError(OS_READ_CAN_LOC, Merr);
                             assertOSError(OS_READ_CAN_LOC, err);
                             OSTmrStart(&prechargeDlyTimer, &err);
                             assertOSError(OS_READ_CAN_LOC, err);
