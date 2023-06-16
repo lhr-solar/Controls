@@ -24,6 +24,7 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "CANConfig.h"
 
 // Macros
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
@@ -632,7 +633,9 @@ void Task_SendTritium(void *p_arg){
     prevState = FSM[NEUTRAL_DRIVE];
 
     #ifndef __TEST_SENDTRITIUM
-    CANbus_Init(MOTORCAN);
+    // The CANBus initialization shouldn't be in the task! ReadTritium is higher priority
+    // and will try to read it
+    //CANbus_Init(MOTORCAN, motorCANFilterList, sizeof(motorCANFilterList) / sizeof(CANId_t));
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
@@ -655,6 +658,7 @@ void Task_SendTritium(void *p_arg){
         dumpInfo();
         #else
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
+            velocitySetpoint = MAX_VELOCITY; // To ensure no regen takes place
             memcpy(&driveCmd.data[0], &currentSetpoint, sizeof(float));
             memcpy(&driveCmd.data[4], &velocitySetpoint, sizeof(float));
             CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
