@@ -40,18 +40,6 @@ bool ChargeEnable_Get(){
     return chargeEnable;
 }
 
-// exception struct callback for charging disable, kills contactor and turns off display
-static void callback_chargingDisable(void){ 
-    // mark regen as disabled and update saturation
-    updateSaturation(-1);
-
-    // Kill contactor
-    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-
-    // Turn off the array contactor display light
-    UpdateDisplay_SetArray(false);
-}
-
 /**
  * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
  * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
@@ -76,11 +64,29 @@ static void updateSaturation(int8_t chargeMessage){
     chargeMsgSaturation = newSaturation;
 }
 
+// exception struct callback for charging disable, kills contactor and turns off display
+static void callback_chargingDisable(void){ 
+    // mark regen as disabled and update saturation
+    updateSaturation(-1);
+
+    // Kill contactor
+    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+
+    // Turn off the array contactor display light
+    UpdateDisplay_SetArray(false);
+}
+
+// Nested function because same function needs to be executed
+// however the function declarations require different arguments
+static void chargingDisable(void *p_tmr, void *p_arg){
+    callback_chargingDisable();
+}
+
 /**
  * @brief Callback function for the precharge delay timer. Waits for precharge and then restarts the array.
 */
 Minion_Error_t Merr;
-static void arrayRestart(void){
+static void arrayRestart(void *p_tmr, void *p_arg){
     if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
         Contactors_Set(ARRAY_CONTACTOR, (Minion_Read_Pin(IGN_1, &Merr)), false); // Turn on array contactor if the ign switch lets us
         UpdateDisplay_SetArray(true);
@@ -101,7 +107,7 @@ void Task_ReadCarCAN(void *p_arg){
         0,
         CAN_WATCH_TMR_DLY_TMR_TS,
         OS_OPT_TMR_PERIODIC,
-        callback_chargingDisable, 
+        chargingDisable, 
         NULL,
         &err
     );
