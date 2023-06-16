@@ -5,9 +5,7 @@
 #include "Contactors.h"
 #include "FaultState.h"
 #include "Minions.h"
-#include "Minions.h"
 #include "os_cfg_app.h"
-#include "Display.h"
 
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
 #define SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
@@ -35,10 +33,6 @@ static bool chargeEnable = false;
 static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
 static int chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
-
-// SOC and Supp V
-static uint8_t SOC = 0;
-static uint32_t SBPV = 0;
 
 
 // Handler to turn array back on
@@ -70,8 +64,7 @@ static void updateSaturation(int8_t chargeMessage){
     chargeMsgSaturation = newSaturation;
 }
 
-// exception struct callback for charging disable, kills contactors and turns of display
-static void callback_disableContactors(void){
+static void callback_readBPSError(void){
     // Kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
     Contactors_Set(ARRAY_PRECHARGE, OFF, true);
@@ -87,8 +80,8 @@ static inline void chargingDisable(void) {
     chargeEnable = false;
 
     // kill contactors 
-    exception_t readBPSError = {.prio=2, .message="read BPS error", .callback=callback_disableContactors};
-    assertExceptionError(readBPSError);
+    exception_t readBPSError = {2, "read BPS error", callback_readBPSError};
+    assertError(readBPSError);
 }
 
 // helper function to call if charging should be enabled
@@ -204,18 +197,6 @@ void Task_ReadCarCAN(void *p_arg)
         }
 
         switch(dataBuf.ID){ //we got a message
-            case BPS_TRIP: {
-                // BPS has a fault and we need to enter fault state (probably)
-                if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
-
-                    Display_Evac(SOC, SBPV);    // Display evacuation message
-
-                    // Create an exception and assert the error
-                    // kill contactors and enter a nonrecoverable fault
-                    exception_t tripBPSError = {.prio=1, .message="BPS has been tripped", .callback=callback_disableContactors};
-                    assertExceptionError(tripBPSError);
-                }
-            }
             case CHARGE_ENABLE: { 
 
                 // Restart CAN Watchdog timer
@@ -240,12 +221,11 @@ void Task_ReadCarCAN(void *p_arg)
                 break;
             }
             case SUPPLEMENTAL_VOLTAGE: {
-                SBPV = (*(uint16_t *) &dataBuf.data);
-                UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
+                UpdateDisplay_SetSBPV(*(uint16_t *) &dataBuf.data); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
-                SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
+                uint8_t SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }
