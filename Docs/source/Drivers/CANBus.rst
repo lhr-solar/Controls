@@ -23,9 +23,11 @@ See ``CANbus.h`` and ``CANLUT.c`` for details.
 Implementation Details
 ======================
 
-The microcontroller's CAN hardware block includes three sending and three receiving mailboxes, which act as a small queue of CAN messages. The recieve mailboxes are constantly emptied (by the CAN recieve interrupt) 
-into a software queue in the BSP layer, in order to deepen the queue (we recieve a lot of messages). 
-When writing, the driver will write directly to the write mailboxes, as long as they aren't full, blocking otherwise. 
-When reading, the driver will read directly from a software queue in the BSP layer. It will return an error if the queue is empty.
-The driver will read from the software queue and write to those hardware mailboxes as long as they aren't empty or full, respectively, blocking otherwise. 
+The microcontroller's CAN hardware block includes three sending and three receiving mailboxes, which act as a small queue of CAN messages. 
+The driver will write directly to the write mailboxes as long as they aren't full, and will block otherwise. 
+
+The receive mailboxes are constantly emptied (by the CAN recieve interrupt) 
+into a software queue in the BSP layer in order to deepen the queue (we recieve a lot of messages).
+When reading, the driver will read directly from a software queue in the BSP layer. A non-blocking read will return an error if the queue is empty. A blocking read will block on a driver-layer semaphore, to be woken up when data is avilable.
+Everytime the BSP software queue is posted to, a receive interrupt signals to a driver-layer semaphore that a message has been received. This allows any waiting tasks to wake up and read the message. 
 This is done since tasks that read and write CAN messages don't usually have anything else to do while waiting, which makes blocking fairly efficient. 
