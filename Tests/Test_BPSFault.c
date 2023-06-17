@@ -3,6 +3,7 @@
 #include "CAN_Queue.h"
 #include "ReadCarCAN.h"
 #include "Display.h"
+#include "Contactors.h"
 #include "CANConfig.h"
 
 /*
@@ -11,7 +12,7 @@
 */
 
 static OS_TCB Task1_TCB;
-#define STACK_SIZE 128
+#define STACK_SIZE 256
 static CPU_STK Task1_Stk[STACK_SIZE];
 
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
@@ -24,8 +25,6 @@ void Task1(){
     CANbus_Init(CARCAN, carCANFilterList, CARCAN_FILTER_SIZE);
     Contactors_Init();
 
-    OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-
     // Send a BPS trip
     CANDATA_t data = {.ID = BPS_TRIP, .idx = 0, .data = {1}};
     CANbus_Send(data, true, CARCAN);
@@ -36,6 +35,7 @@ int main(){
     OS_ERR err;
     OSInit(&err);
     assertOSError(OS_MAIN_LOC, err);
+    TaskSwHook_Init();
 
     OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
     OSTaskCreate(
