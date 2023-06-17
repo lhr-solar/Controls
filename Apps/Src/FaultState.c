@@ -59,7 +59,7 @@ static void nonrecoverableFaultHandler(){
 
 void EnterFaultState(void) {
 
-    printf("%s", currException.message);
+    printf("\r\n%s\r\n", currException.message);
     if(currException.callback != NULL){
         currException.callback();
     } // Custom callback
