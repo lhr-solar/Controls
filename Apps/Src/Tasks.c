@@ -21,6 +21,8 @@ OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB Telemetry_TCB;
 
+OS_TCB *PrevTask;
+
 /**
  * Stacks
  */
@@ -55,4 +57,8 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
         OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
         EnterFaultState();
     }
+}
+
+void App_OS_TaskSwHook(void) {
+    PrevTask = OSTCBCurPtr;
 }
