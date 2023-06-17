@@ -1,59 +1,55 @@
-/**
- * Test file for setting contactor states
- * 
- * Run this test in conjunction with the simulator 
- * GUI. The user is prompted to specify the
- * contactor name and the state it should 
- * be set to. The input should be all caps and formatted
- * as such: CONTACTOR_NAME(MOTOR/ARRAY) STATE(ON/OFF)
- * Example inputs: "MOTOR ON", "ARRAY OFF"
- * The corresponding contactor will change state
- * in the GUI.
- */ 
-
-#include "common.h"
-#include "config.h"
+#include "Tasks.h"
 #include "Contactors.h"
 
-int main() {
-    Contactors_Init(MOTOR);
-    Contactors_Init(ARRAY);
-    char input[6];
-    char motor[] = "MOTOR";
-    char array[] = "ARRAY";
-    char on[] = "ON";
-    char off[] = "OFF";
-    char state[4];
-    State result;
-    while(1) {
-        printf("Enter the Contactor you wish to set followed by the state you would like to set it to\n");
-        scanf("%s %s", &input, &state);
-        if (strcmp(input, motor) == 0){
-            if (strcmp(state, on) == 0){
-                Contactors_Set(MOTOR, ON, true);
-                result = Contactors_Get(MOTOR);
-            }
-            else {
-                Contactors_Set(MOTOR, OFF, true);
-                result = Contactors_Get(MOTOR);
-            }
-        }
-        if (strcmp(input, array) == 0){
-            if (strcmp(state, on) == 0){
-                Contactors_Set(ARRAY, ON, true);
-                result = Contactors_Get(ARRAY);
-            }
-            else {
-                Contactors_Set(ARRAY, OFF, true);
-                result = Contactors_Get(ARRAY);
-            }
-        }
-        usleep(1000);
-        if(result == ON) {
-            printf("State confirmed: %s\n", on);
-        }
-        if(result == OFF) {
-            printf("State confirmed: %s\n", off);
-        }
-    } 
+static OS_TCB Task1_TCB;
+#define STACK_SIZE 128
+static CPU_STK Task1_Stk[STACK_SIZE];
+
+
+/*
+ * When running this test on the motor testbench, hardcode the SendTritium task
+ * to always send an unobtainable velocity. This ensures that no regen braking
+ * takes place
+ */
+
+void Task1(){
+    OS_ERR err;
+
+    CPU_Init();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+    BSP_UART_Init(UART_2);
+    Contactors_Init();
+
+    for (;;) {
+        bool set = Contactors_Get(ARRAY_CONTACTOR);
+        printf("Turning contactor %s\r\n", set ? "off" : "on");
+        Contactors_Set(ARRAY_CONTACTOR, !set, true);
+        OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+}
+
+int main(){
+    OS_ERR err;
+    OSInit(&err);
+    assertOSError(OS_MAIN_LOC, err);
+
+    OSTaskCreate(
+        (OS_TCB*)&Task1_TCB,
+        (CPU_CHAR*)"Task1",
+        (OS_TASK_PTR)Task1,
+        (void*)NULL,
+        (OS_PRIO)2,
+        (CPU_STK*)Task1_Stk,
+        (CPU_STK_SIZE)STACK_SIZE/10,
+        (CPU_STK_SIZE)STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
+    
+    OSStart(&err);
+    assertOSError(OS_MAIN_LOC, err);
 }
