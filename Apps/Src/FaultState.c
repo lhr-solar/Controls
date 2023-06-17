@@ -26,7 +26,7 @@ OS_SEM FaultState_Sem4;
 OS_SEM ExceptionProtection_Sem4;
 
 // current exception is initialized
-exception_t currException = {.prio=-1,.message=NULL,.callback=NULL};
+exception_t currException = {.prio=PRI_RECOV,.message=NULL,.callback=NULL};
 
 /**
  * @brief   Assert Error if non OS function call fails
@@ -66,13 +66,13 @@ void EnterFaultState(void) {
 
     switch (currException.prio)
     {
-    case 0:
+    case PRI_RESERVED:
         // Things could always be worse
         // (Reserved for future cases of greater severity)
-    case 1:
+    case PRI_NONRECOV:
         nonrecoverableFaultHandler();
         break;
-    case 2:
+    case PRI_RECOV:
         // Priority level 2 only calls callback
         break;
     default:

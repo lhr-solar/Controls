@@ -43,11 +43,11 @@ static void assertTritiumError(uint16_t motor_err){
 	static uint8_t hall_fault_cnt = 0; //trip counter 
 	if(motor_err != T_NONE){
 		if(motor_err != T_HALL_SENSOR_ERR){
-			exception_t notHallError = {1, "this is Tritium, not-hall-sensor error", NULL};
+			exception_t notHallError = {PRI_NONRECOV, "this is Tritium, not-hall-sensor error", NULL};
 			assertExceptionError(notHallError);
 		}else{
 			if(hall_fault_cnt > RESTART_THRESHOLD){ //try to restart the motor a few times and then fail out 
-            exception_t hallErrorPrio1 = {1, "hall sensor errors have exceeded restart threshold", NULL};
+            exception_t hallErrorPrio1 = {PRI_NONRECOV, "hall sensor errors have exceeded restart threshold", NULL};
 			assertExceptionError(hallErrorPrio1); // Fail out by entering nonrecoverable fault
         	} else {
             hall_fault_cnt++; 

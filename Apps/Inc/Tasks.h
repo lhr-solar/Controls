@@ -155,13 +155,24 @@ extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
 
 /**
+ * Fault Exception Enum
+ * For the "prio" field of a fault exception struct to determine handling mode
+ */
+typedef enum {
+    PRI_RESERVED = 0, // Currently unused, reserved prio of max severity for future use
+    PRI_NONRECOV = 1, // Kills contactors, turns on lights, and enters a nonrecoverable fault
+    PRI_RECOV = 2, // Returns to thread (no action besides message and callback)
+
+} exception_prio_t;
+
+/**
  * Fault Exception Struct
  * Created by different tasks and passed to fault thread by asserting errors
  * Priority: 1 for nonrecoverable fault, 2 for callback only
  * Callback function will run first regardless of priority
 */
 typedef struct{
-    uint8_t prio;
+    exception_prio_t prio;
     const char* message; 
     void (*callback)(void);
 } exception_t;

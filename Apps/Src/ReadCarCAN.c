@@ -87,7 +87,7 @@ static inline void chargingDisable(void) {
     chargeEnable = false;
 
     // kill contactors 
-    exception_t readBPSError = {.prio=2, .message="read BPS error", .callback=callback_disableContactors};
+    exception_t readBPSError = {.prio=PRI_RECOV, .message="read BPS error", .callback=callback_disableContactors};
     assertExceptionError(readBPSError);
 }
 
@@ -212,7 +212,7 @@ void Task_ReadCarCAN(void *p_arg)
 
                     // Create an exception and assert the error
                     // kill contactors and enter a nonrecoverable fault
-                    exception_t tripBPSError = {.prio=1, .message="BPS has been tripped", .callback=callback_disableContactors};
+                    exception_t tripBPSError = {.prio=PRI_NONRECOV, .message="BPS has been tripped", .callback=callback_disableContactors};
                     assertExceptionError(tripBPSError);
                 }
             }
