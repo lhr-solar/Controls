@@ -1,7 +1,7 @@
 [submodule "Embedded-Sharepoint"]
 	path = Embedded-Sharepoint
-	url = git@github.com:lhr-solar/Embedded-Sharepoint.git
+	url = https://github.com/lhr-solar/Embedded-Sharepoint.git
 	branch = BSP-layer
 [submodule "RTOS/uCOS-III-STM32F4"]
 	path = RTOS/uCOS-III-STM32F4
-	url = git@github.com:lhr-solar/uCOS-III-STM32F4.git
+	url = https://github.com/lhr-solar/uCOS-III-STM32F4.git
