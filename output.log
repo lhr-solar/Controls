@@ -1,0 +1,1147 @@
+make -C BSP -C STM32F413 tidy
+make[1]: Entering directory '/home/ishdeshpa/LHR/Controls/BSP/STM32F413'
+clang-tidy --config-file=../../.clang-tidy ../../Drivers/Src/CANbus.c ../../Drivers/Src/CANConfig.c ../../Drivers/Src/Contactors.c ../../Drivers/Src/Display.c ../../Drivers/Src/Minions.c ../../Drivers/Src/Pedals.c ../../Apps/Src/CAN_Queue.c ../../Apps/Src/FaultState.c ../../Apps/Src/PedalToPercent.c ../../Apps/Src/ReadCarCAN.c ../../Apps/Src/ReadTritium.c ../../Apps/Src/SendCarCAN.c ../../Apps/Src/SendTritium.c ../../Apps/Src/Tasks.c ../../Apps/Src/Telemetry.c ../../Apps/Src/UpdateDisplay.c ../../Apps/Inc/CAN_Queue.h ../../Apps/Inc/common.h ../../Apps/Inc/FaultState.h ../../Apps/Inc/fifo.h ../../Apps/Inc/MedianFilter.h ../../Apps/Inc/ReadCarCAN.h ../../Apps/Inc/ReadTritium.h ../../Apps/Inc/SendTritium.h ../../Apps/Inc/Tasks.h ../../Apps/Inc/UpdateDisplay.h ../../Drivers/Inc/CANbus.h ../../Drivers/Inc/CANConfig.h ../../Drivers/Inc/Contactors.h ../../Drivers/Inc/Display.h ../../Drivers/Inc/GPIOExpander.h ../../Drivers/Inc/Minions.h ../../Drivers/Inc/Pedals.h  -- -DSTM32F413_423xx -DUSE_STDPERIPH_DRIVER -D__FPU_PRESENT -I../../Apps/Inc -I../../Drivers/Inc -I../../Config/Inc -I../../BSP/Inc -I../../CMSIS/Device/ST/STM32F4xx/Include -I../../CMSIS/Include -I../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/ -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ -I../../RTOS/uCOS-III-STM32F4/uC-LIB/ -Og -g -Wall -Werror -fdata-sections -ffunction-sections -MMD -MP -MF"tidy"	
+../../Drivers/Inc/CANbus.h:106:13: warning: function 'CANbus_Read' has a definition with different parameter names [readability-inconsistent-declaration-parameter-name]
+ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
+            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:196:13: note: the definition seen here
+ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
+            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/CANbus.h:106:13: note: differing parameters are named here: ('data'), in definition: ('MsgContainer')
+ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
+            ^                      ~~~~
+                                   MsgContainer
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/FaultState.h:2:9: warning: declaration uses identifier '__FAULT_STATE_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __FAULT_STATE_H
+        ^~~~~~~~~~~~~~~
+        FAULT_STATE_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:104:5: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+    memcpy(sorted, channel, MF_DEPTH * sizeof(MF_TYPE));
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:104:5: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+    memcpy(sorted, channel, MF_DEPTH * sizeof(MF_TYPE));
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:155:37: warning: pointer parameter 'channels' can be pointer to const [readability-non-const-parameter]
+PUT (MF_TYPE_NAME *filter, MF_TYPE *channels) {
+                                    ^
+                           const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:176:5: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+    memcpy(dest, filter->filtered, sizeof(MF_TYPE) * MF_CHANNELS);
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/MedianFilter.h:176:5: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+    memcpy(dest, filter->filtered, sizeof(MF_TYPE) * MF_CHANNELS);
+    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/ReadCarCAN.h:4:9: warning: declaration uses identifier '__READ_CAR_CAN_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __READ_CAR_CAN_H
+        ^~~~~~~~~~~~~~~~
+        READ_CAR_CAN_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/ReadCarCAN.h:7:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "common.h"
+^        ~~~~~~~~~~
+         "Tasks.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/ReadTritium.h:4:9: warning: declaration uses identifier '__READ_TRITIUM_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __READ_TRITIUM_H
+        ^~~~~~~~~~~~~~~~
+        READ_TRITIUM_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/ReadTritium.h:7:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "common.h"
+^        ~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:2:9: warning: declaration uses identifier '__SENDTRITIUM_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __SENDTRITIUM_H
+        ^~~~~~~~~~~~~~~
+        SENDTRITIUM_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:7:55: warning: macro replacement list should be enclosed in parentheses [bugprone-macro-parentheses]
+#define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
+                                                      ^
+                                    (                              )
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:35:9: warning: declaration uses identifier '__TEST_SENDTRITIUM', which is a reserved identifier [bugprone-reserved-identifier]
+#define __TEST_SENDTRITIUM
+        ^~~~~~~~~~~~~~~~~~
+        TEST_SENDTRITIUM
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:38:8: error: unknown type name 'bool' [clang-diagnostic-error]
+extern bool cruiseEnable;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:38:13: warning: invalid case style for global variable 'cruiseEnable' [readability-identifier-naming]
+extern bool cruiseEnable;
+            ^~~~~~~~~~~~
+            Cruise_Enable
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:39:8: error: unknown type name 'bool' [clang-diagnostic-error]
+extern bool cruiseSet;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:39:13: warning: invalid case style for global variable 'cruiseSet' [readability-identifier-naming]
+extern bool cruiseSet;
+            ^~~~~~~~~
+            Cruise_Set
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:40:8: error: unknown type name 'bool' [clang-diagnostic-error]
+extern bool onePedalEnable;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:40:13: warning: invalid case style for global variable 'onePedalEnable' [readability-identifier-naming]
+extern bool onePedalEnable;
+            ^~~~~~~~~~~~~~
+            One_Pedal_Enable
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:41:8: error: unknown type name 'bool' [clang-diagnostic-error]
+extern bool regenEnable;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:41:13: warning: invalid case style for global variable 'regenEnable' [readability-identifier-naming]
+extern bool regenEnable;
+            ^~~~~~~~~~~
+            Regen_Enable
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:43:8: error: unknown type name 'uint8_t' [clang-diagnostic-error]
+extern uint8_t brakePedalPercent;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:43:16: warning: invalid case style for global variable 'brakePedalPercent' [readability-identifier-naming]
+extern uint8_t brakePedalPercent;
+               ^~~~~~~~~~~~~~~~~
+               Brake_Pedal_Percent
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:44:8: error: unknown type name 'uint8_t' [clang-diagnostic-error]
+extern uint8_t accelPedalPercent;
+       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:44:16: warning: invalid case style for global variable 'accelPedalPercent' [readability-identifier-naming]
+extern uint8_t accelPedalPercent;
+               ^~~~~~~~~~~~~~~~~
+               Accel_Pedal_Percent
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:46:15: warning: invalid case style for global variable 'gear' [readability-identifier-naming]
+extern Gear_t gear;
+              ^~~~
+              Gear
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:48:23: warning: invalid case style for global variable 'state' [readability-identifier-naming]
+extern TritiumState_t state;
+                      ^~~~~
+                      State
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:49:14: warning: invalid case style for global variable 'velocityObserved' [readability-identifier-naming]
+extern float velocityObserved;
+             ^~~~~~~~~~~~~~~~
+             Velocity_Observed
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/SendTritium.h:50:14: warning: invalid case style for global variable 'cruiseVelSetpoint' [readability-identifier-naming]
+extern float cruiseVelSetpoint;
+             ^~~~~~~~~~~~~~~~~
+             Cruise_Vel_Setpoint
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/Tasks.h:4:9: warning: declaration uses identifier '__TASKS_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __TASKS_H
+        ^~~~~~~~~
+        TASKS_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/Tasks.h:7:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "os.h"
+^        ~~~~~~
+         "config.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/Tasks.h:34:63: warning: macro replacement list should be enclosed in parentheses [bugprone-macro-parentheses]
+#define WATERMARK_STACK_LIMIT               DEFAULT_STACK_SIZE/2
+                                                              ^
+                                            (                   )
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/Tasks.h:166:6: warning: declaration uses identifier '_assertOSError', which is reserved in the global namespace; cannot be fixed because 'assertOSError' would conflict with a macro definition [bugprone-reserved-identifier]
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
+     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/Tasks.h:166:6: warning: invalid case style for global function '_assertOSError' [readability-identifier-naming]
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
+     ^~~~~~~~~~~~~~
+     Assert_Os_Error
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/Tasks.h:166:30: warning: invalid case style for parameter 'OS_err_loc' [readability-identifier-naming]
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
+                             ^~~~~~~~~~
+                             os_err_loc
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/UpdateDisplay.h:16:9: warning: declaration uses identifier '__UPDATE_DISPLAY_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __UPDATE_DISPLAY_H
+        ^~~~~~~~~~~~~~~~~~
+        UPDATE_DISPLAY_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/UpdateDisplay.h:19:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "common.h"
+^        ~~~~~~~~~~
+         "Tasks.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/UpdateDisplay.h:22:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "Display.h"
+^        ~~~~~~~~~~~
+         "Contactors.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/UpdateDisplay.h:88:57: warning: invalid case style for parameter 'mphTenths' [readability-identifier-naming]
+UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);
+                                                        ^~~~~~~~~
+                                                        mph_tenths
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/common.h:4:9: warning: declaration uses identifier '__COMMON_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __COMMON_H
+        ^~~~~~~~~~
+        COMMON_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/common.h:7:1: warning: #includes are not sorted properly [llvm-include-order]
+#include <stdint.h>
+^        ~~~~~~~~~~
+         <math.h>
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:34:9: warning: declaration uses identifier '__FIFO_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __FIFO_H
+        ^~~~~~~~
+        FIFO_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:89:5: warning: implicitly declaring library function 'memset' with type 'void *(void *, int, unsigned long)' [clang-diagnostic-implicit-function-declaration]
+    memset(&fifo, 0, sizeof(fifo));
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:89:5: note: include the header <string.h> or explicitly provide a declaration for 'memset'
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/fifo.h:102:16: error: use of undeclared identifier 'NULL' [clang-diagnostic-error]
+    if(fifo != NULL) {
+               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/CAN_Queue.c:7:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "os.h"
+^        ~~~~~~
+         "CANbus.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/CAN_Queue.c:17:19: warning: invalid case style for global variable 'canFifo' [readability-identifier-naming]
+static CAN_fifo_t canFifo;
+                  ^~~~~~~
+                  Can_Fifo
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/CAN_Queue.c:18:15: warning: invalid case style for global variable 'canFifo_Sem4' [readability-identifier-naming]
+static OS_SEM canFifo_Sem4;
+              ^~~~~~~~~~~~
+              Can_Fifo_Sem4
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/CAN_Queue.c:19:17: warning: invalid case style for global variable 'canFifo_Mutex' [readability-identifier-naming]
+static OS_MUTEX canFifo_Mutex;
+                ^~~~~~~~~~~~~
+                Can_Fifo_Mutex
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:2:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "Display.h"
+^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:6:1: warning: duplicate include [readability-duplicate-include]
+#include "Contactors.h"
+^~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:14:13: warning: invalid case style for global variable 'fromThread' [readability-identifier-naming]
+static bool fromThread = false; //whether fault was tripped from thread
+            ^~~~~~~~~~
+            From_Thread
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:18:13: warning: invalid case style for function 'ArrayMotorKill' [readability-identifier-naming]
+static void ArrayMotorKill(void) {
+            ^~~~~~~~~~~~~~
+            arrayMotorKill
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:30:13: warning: invalid case style for function 'readBPS_ContactorHandler' [readability-identifier-naming]
+static void readBPS_ContactorHandler(void){
+            ^~~~~~~~~~~~~~~~~~~~~~~~
+            readBpsContactorHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:39:6: warning: function 'EnterFaultState' has cognitive complexity of 31 (threshold 25) [readability-function-cognitive-complexity]
+void EnterFaultState(void) {
+     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:40:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+    if(FaultBitmap & FAULT_OS){
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:43:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_TRITIUM){ //This gets tripped by the ReadTritium thread
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:46:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_HARDWARE_OVER_CURRENT_ERR){ //Tritium signaled too much current
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:50:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_SOFTWARE_OVER_CURRENT_ERR){
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:54:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_DC_BUS_OVERVOLT_ERR){ //DC bus overvoltage
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:58:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_HALL_SENSOR_ERR){ //hall effect error
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:61:13: note: +3, including nesting penalty of 2, nesting level increased to 3
+            if(hall_fault_cnt > RESTART_THRESHOLD){ //try to restart the motor a few times and then fail out
+            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:63:15: note: +1, nesting level increased to 3
+            } else {
+              ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:71:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_CONFIG_READ_ERR){ //Config read error
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:75:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_DESAT_FAULT_ERR){ //Desaturation fault error
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:79:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_MOTOR_OVER_SPEED_ERR){ //Motor over speed error
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:83:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(TritiumError & T_INIT_FAIL){ //motorcontroller fails to restart or initialize
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:98:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_BPS){ // BPS has been tripped
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:102:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_READBPS){ // Missed BPS Charge enable message
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:109:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:112:10: note: +1, nesting level increased to 1
+    else if(FaultBitmap & FAULT_DISPLAY){
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:114:9: note: +2, including nesting penalty of 1, nesting level increased to 2
+        if(disp_fault_cnt>3){
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:116:11: note: +1, nesting level increased to 2
+        } else {
+          ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:123:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+    if(fromThread){//no recovering if fault state was entered outside of the fault thread
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:126:5: note: +1, including nesting penalty of 0, nesting level increased to 1
+    while(1){;} 
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:40:31: warning: repeated branch in conditional chain [bugprone-branch-clone]
+    if(FaultBitmap & FAULT_OS){
+                              ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:42:6: note: end of the original
+    }
+     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:109:41: note: clone 1 starts here
+    else if(FaultBitmap & FAULT_UNREACH){ //unreachable code
+                                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:44:30: warning: invalid case style for variable 'TritiumError' [readability-identifier-naming]
+        tritium_error_code_t TritiumError = MotorController_getTritiumError(); //get error code to segregate based on fault type
+                             ^~~~~~~~~~~~
+                             tritiumError
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:60:28: warning: invalid case style for variable 'hall_fault_cnt' [readability-identifier-naming]
+            static uint8_t hall_fault_cnt = 0; //trip counter
+                           ^~~~~~~~~~~~~~
+                           hallFaultCnt
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:113:24: warning: invalid case style for variable 'disp_fault_cnt' [readability-identifier-naming]
+        static uint8_t disp_fault_cnt = 0;
+                       ^~~~~~~~~~~~~~
+                       dispFaultCnt
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:129:28: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+void Task_FaultState(void *p_arg) {
+                           ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/FaultState.c:142:29: warning: 5 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
+                            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/PedalToPercent.c:5:13: warning: invalid case style for global variable 'pedalToPercent' [readability-identifier-naming]
+const float pedalToPercent[] = {
+            ^~~~~~~~~~~~~~
+            Pedal_To_Percent
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:4:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "UpdateDisplay.h"
+^        ~~~~~~~~~~~~~~~~~
+         "Contactors.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:19:15: warning: invalid case style for global variable 'canWatchTimer' [readability-identifier-naming]
+static OS_TMR canWatchTimer;
+              ^~~~~~~~~~~~~
+              Can_Watch_Timer
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:22:15: warning: invalid case style for global variable 'prechargeDlyTimer' [readability-identifier-naming]
+static OS_TMR prechargeDlyTimer;
+              ^~~~~~~~~~~~~~~~~
+              Precharge_Dly_Timer
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:25:17: warning: invalid case style for global variable 'arrayRestartMutex' [readability-identifier-naming]
+static OS_MUTEX arrayRestartMutex;
+                ^~~~~~~~~~~~~~~~~
+                Array_Restart_Mutex
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:26:13: warning: invalid case style for global variable 'restartingArray' [readability-identifier-naming]
+static bool restartingArray = false;
+            ^~~~~~~~~~~~~~~
+            Restarting_Array
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:30:13: warning: invalid case style for global variable 'chargeEnable' [readability-identifier-naming]
+static bool chargeEnable = false;
+            ^~~~~~~~~~~~
+            Charge_Enable
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:33:15: warning: invalid case style for global variable 'chargeMsgBuffer' [readability-identifier-naming]
+static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
+              ^~~~~~~~~~~~~~~
+              Charge_Msg_Buffer
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:34:12: warning: invalid case style for global variable 'chargeMsgSaturation' [readability-identifier-naming]
+static int chargeMsgSaturation = 0;
+           ^~~~~~~~~~~~~~~~~~~
+           Charge_Msg_Saturation
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:35:16: warning: invalid case style for global variable 'oldestMsgIdx' [readability-identifier-naming]
+static uint8_t oldestMsgIdx = 0;
+               ^~~~~~~~~~~~
+               Oldest_Msg_Idx
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:57:37: warning: invalid case style for parameter 'chargeMessage' [readability-identifier-naming]
+static void updateSaturation(int8_t chargeMessage){
+                                    ^~~~~~~~~~~~~
+                                    charge_message
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:133:32: warning: parameter 'p_tmr' is unused [misc-unused-parameters]
+static void arrayRestart(void *p_tmr, void *p_arg){
+                               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:133:45: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+static void arrayRestart(void *p_tmr, void *p_arg){
+                                            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:134:20: warning: invalid case style for variable 'Merr' [readability-identifier-naming]
+    Minion_Error_t Merr;
+                   ^~~~
+                   merr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:149:6: warning: invalid case style for global function 'canWatchTimerCallback' [readability-identifier-naming]
+void canWatchTimerCallback (void *p_tmr, void *p_arg){
+     ^~~~~~~~~~~~~~~~~~~~~
+     Can_Watch_Timer_Callback
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:149:35: warning: parameter 'p_tmr' is unused [misc-unused-parameters]
+void canWatchTimerCallback (void *p_tmr, void *p_arg){
+                                  ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:149:48: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+void canWatchTimerCallback (void *p_tmr, void *p_arg){
+                                               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:156:28: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+void Task_ReadCarCAN(void *p_arg)
+                           ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadCarCAN.c:250:53: warning: 100000 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+                SOC = (*(uint32_t*) &dataBuf.data)/(100000);  // Convert to integer percent
+                                                    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:68:29: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+void Task_ReadTritium(void *p_arg){
+                            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:85:21: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                    memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+                    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:85:21: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+                    memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+                    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:86:21: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                    memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+                    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:86:21: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+                    memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+                    ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:93:15: warning: invalid case style for variable 'Car_Velocity' [readability-identifier-naming]
+                                        uint32_t Car_Velocity = Motor_Velocity;
+                                                 ^~~~~~~~~~~~
+                                                 carVelocity
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:95:38: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+                                        Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
+                                                                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:95:45: warning: 3600 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+                                        Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
+                                                                               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:96:38: warning: 160934 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+                                        Car_Velocity = ((Car_Velocity / 160934) * 10); //Converting from m/h to mph, multiplying by 10 to make value "larger" for displaying
+                                                                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:96:48: warning: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+                                        Car_Velocity = ((Car_Velocity / 160934) * 10); //Converting from m/h to mph, multiplying by 10 to make value "larger" for displaying
+                                                                                  ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:111:26: warning: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+                OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+                                       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendCarCAN.c:2:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "CANbus.h"
+^        ~~~~~~~~~~
+         "CAN_Queue.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendCarCAN.c:20:28: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+void Task_SendCarCAN(void *p_arg){
+                           ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendCarCAN.c:30:32: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+                               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:21:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "ReadCarCAN.h"
+^        ~~~~~~~~~~~~~~
+         "CANbus.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:65:7: warning: invalid case style for global variable 'currentSetpoint' [readability-identifier-naming]
+float currentSetpoint = 0;
+      ^~~~~~~~~~~~~~~
+      Current_Setpoint
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:66:7: warning: invalid case style for global variable 'velocitySetpoint' [readability-identifier-naming]
+float velocitySetpoint = 0;
+      ^~~~~~~~~~~~~~~~
+      Velocity_Setpoint
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:91:13: warning: invalid case style for function 'ForwardDriveHandler' [readability-identifier-naming]
+static void ForwardDriveHandler(void);
+            ^~~~~~~~~~~~~~~~~~~
+            forwardDriveHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:92:13: warning: invalid case style for function 'ForwardDriveDecider' [readability-identifier-naming]
+static void ForwardDriveDecider(void);
+            ^~~~~~~~~~~~~~~~~~~
+            forwardDriveDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:93:13: warning: invalid case style for function 'NeutralDriveHandler' [readability-identifier-naming]
+static void NeutralDriveHandler(void);
+            ^~~~~~~~~~~~~~~~~~~
+            neutralDriveHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:94:13: warning: invalid case style for function 'NeutralDriveDecider' [readability-identifier-naming]
+static void NeutralDriveDecider(void);
+            ^~~~~~~~~~~~~~~~~~~
+            neutralDriveDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:95:13: warning: invalid case style for function 'ReverseDriveHandler' [readability-identifier-naming]
+static void ReverseDriveHandler(void);
+            ^~~~~~~~~~~~~~~~~~~
+            reverseDriveHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:96:13: warning: invalid case style for function 'ReverseDriveDecider' [readability-identifier-naming]
+static void ReverseDriveDecider(void);
+            ^~~~~~~~~~~~~~~~~~~
+            reverseDriveDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:97:13: warning: invalid case style for function 'RecordVelocityHandler' [readability-identifier-naming]
+static void RecordVelocityHandler(void);
+            ^~~~~~~~~~~~~~~~~~~~~
+            recordVelocityHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:98:13: warning: invalid case style for function 'RecordVelocityDecider' [readability-identifier-naming]
+static void RecordVelocityDecider(void);
+            ^~~~~~~~~~~~~~~~~~~~~
+            recordVelocityDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:99:13: warning: invalid case style for function 'PoweredCruiseHandler' [readability-identifier-naming]
+static void PoweredCruiseHandler(void);
+            ^~~~~~~~~~~~~~~~~~~~
+            poweredCruiseHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:100:13: warning: invalid case style for function 'PoweredCruiseDecider' [readability-identifier-naming]
+static void PoweredCruiseDecider(void);
+            ^~~~~~~~~~~~~~~~~~~~
+            poweredCruiseDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:101:13: warning: invalid case style for function 'CoastingCruiseHandler' [readability-identifier-naming]
+static void CoastingCruiseHandler(void);
+            ^~~~~~~~~~~~~~~~~~~~~
+            coastingCruiseHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:102:13: warning: invalid case style for function 'CoastingCruiseDecider' [readability-identifier-naming]
+static void CoastingCruiseDecider(void);
+            ^~~~~~~~~~~~~~~~~~~~~
+            coastingCruiseDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:103:13: warning: invalid case style for function 'BrakeHandler' [readability-identifier-naming]
+static void BrakeHandler(void);
+            ^~~~~~~~~~~~
+            brakeHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:104:13: warning: invalid case style for function 'BrakeDecider' [readability-identifier-naming]
+static void BrakeDecider(void);
+            ^~~~~~~~~~~~
+            brakeDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:105:13: warning: invalid case style for function 'OnePedalDriveHandler' [readability-identifier-naming]
+static void OnePedalDriveHandler(void);
+            ^~~~~~~~~~~~~~~~~~~~
+            onePedalDriveHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:106:13: warning: invalid case style for function 'OnePedalDriveDecider' [readability-identifier-naming]
+static void OnePedalDriveDecider(void);
+            ^~~~~~~~~~~~~~~~~~~~
+            onePedalDriveDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:107:13: warning: invalid case style for function 'AccelerateCruiseHandler' [readability-identifier-naming]
+static void AccelerateCruiseHandler(void);
+            ^~~~~~~~~~~~~~~~~~~~~~~
+            accelerateCruiseHandler
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:108:13: warning: invalid case style for function 'AccelerateCruiseDecider' [readability-identifier-naming]
+static void AccelerateCruiseDecider(void);
+            ^~~~~~~~~~~~~~~~~~~~~~~
+            accelerateCruiseDecider
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:123:23: warning: invalid case style for global variable 'prevState' [readability-identifier-naming]
+static TritiumState_t prevState; // Previous state
+                      ^~~~~~~~~
+                      Prev_State
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:133:20: warning: invalid case style for global variable 'pedalToPercent' [readability-identifier-naming]
+extern const float pedalToPercent[];
+                   ^~~~~~~~~~~~~~
+                   Pedal_To_Percent
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:135:18: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    if(percent > 100){
+                 ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:145:27: warning: invalid case style for parameter 'nameStr' [readability-identifier-naming]
+static void getName(char* nameStr, uint8_t stateNameNum){
+                          ^~~~~~~
+                          name_str
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:145:44: warning: invalid case style for parameter 'stateNameNum' [readability-identifier-naming]
+static void getName(char* nameStr, uint8_t stateNameNum){
+                                           ^~~~~~~~~~~~
+                                           state_name_num
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:148:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "FORWARD_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:148:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "FORWARD_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:151:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "NEUTRAL_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:151:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "NEUTRAL_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:154:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "REVERSE_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:154:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "REVERSE_DRIVE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:157:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "RECORD_VELOCITY");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:157:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "RECORD_VELOCITY");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:160:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "POWERED_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:160:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "POWERED_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:163:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "COASTING_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:163:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "COASTING_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:166:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "BRAKE_STATE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:166:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "BRAKE_STATE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:169:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "ONEPEDAL");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:169:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "ONEPEDAL");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:172:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "ACCELERATE_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:172:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "ACCELERATE_CRUISE");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:175:13: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+            strcpy(nameStr, "UNKNOWN");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:175:13: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+            strcpy(nameStr, "UNKNOWN");
+            ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:178:5: warning: redundant return statement at the end of a function with a void return type [readability-redundant-control-flow]
+    return;
+    ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:181:13: warning: invalid case style for function 'print_float' [readability-identifier-naming]
+static void print_float(float f) {
+            ^~~~~~~~~~~
+            printFloat
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:184:11: warning: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    f *= (10 << 2);
+          ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:190:20: warning: 20 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    char stateName[20];
+                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:288:25: warning: statement should be inside braces [readability-braces-around-statements]
+    if(in_min >= in_max) in_max = in_min;   // The minimum of the input range should never be greater than the maximum of the input range
+                        ^
+                         {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:293:7: warning: do not use 'else' after 'return' [readability-else-after-return]
+    } else if(input >= in_max){
+      ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:298:17: warning: invalid case style for variable 'offset_in' [readability-identifier-naming]
+        uint8_t offset_in = input - in_min;  // If input went from A -> B, it now goes from 0 -> B-A
+                ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:299:17: warning: invalid case style for variable 'in_range' [readability-identifier-naming]
+        uint8_t in_range = in_max - in_min;   // Input range
+                ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:300:17: warning: invalid case style for variable 'out_range' [readability-identifier-naming]
+        uint8_t out_range = out_max - out_min;    // Output range
+                ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:301:17: warning: invalid case style for variable 'offset_out' [readability-identifier-naming]
+        uint8_t offset_out = out_min;
+                ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:312:28: warning: 60 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
+                           ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:551:20: warning: invalid case style for variable 'minion_err' [readability-identifier-naming]
+    Minion_Error_t minion_err;
+                   ^~~~~~~~~~
+                   minionErr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:578:20: warning: invalid case style for variable 'minion_err' [readability-identifier-naming]
+    Minion_Error_t minion_err;
+                   ^~~~~~~~~~
+                   minionErr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:601:20: warning: invalid case style for variable 'minion_err' [readability-identifier-naming]
+    Minion_Error_t minion_err;
+                   ^~~~~~~~~~
+                   minionErr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:614:20: warning: invalid case style for variable 'minion_err' [readability-identifier-naming]
+    Minion_Error_t minion_err;
+                   ^~~~~~~~~~
+                   minionErr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:616:33: warning: statement should be inside braces [readability-braces-around-statements]
+        if(gear == FORWARD_GEAR) state = FSM[FORWARD_DRIVE];
+                                ^
+                                 {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:617:62: warning: statement should be inside braces [readability-braces-around-statements]
+        else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR) state = FSM[NEUTRAL_DRIVE];
+                                                             ^
+                                                              {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:627:29: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+void Task_SendTritium(void *p_arg){
+                            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Tasks.c:4:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "FaultState.h"
+^        ~~~~~~~~~~~~~~
+         "CANbus.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Tasks.c:48:30: warning: invalid case style for parameter 'OS_err_loc' [readability-identifier-naming]
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
+                             ^~~~~~~~~~
+                             os_err_loc
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Telemetry.c:2:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "CANbus.h"
+^        ~~~~~~~~~~
+         "CAN_Queue.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Telemetry.c:29:27: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+void Task_Telemetry(void *p_arg){
+                          ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Telemetry.c:32:24: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    for(int i = 4; i < 8; i++){
+                       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Telemetry.c:37:20: warning: invalid case style for variable 'Merr' [readability-identifier-naming]
+    Minion_Error_t Merr;
+                   ^~~~
+                   merr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Telemetry.c:62:32: warning: 500 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+                               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:28:13: warning: invalid case style for global variable 'msg_queue' [readability-identifier-naming]
+disp_fifo_t msg_queue;
+            ^~~~~~~~~
+            Msg_Queue
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:53:13: warning: invalid case style for global variable 'compStrings' [readability-identifier-naming]
+const char* compStrings[15]= {
+            ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:53:25: warning: 15 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+const char* compStrings[15]= {
+                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:74:9: warning: invalid case style for variable 'os_err' [readability-identifier-naming]
+        OS_ERR os_err;
+               ^~~~~~
+               osErr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:104:29: warning: invalid case style for function 'UpdateDisplay_PopNext' [readability-identifier-naming]
+static UpdateDisplayError_t UpdateDisplay_PopNext(){
+                            ^~~~~~~~~~~~~~~~~~~~~
+                            updateDisplayPopNext
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:134:29: warning: invalid case style for function 'UpdateDisplay_PutNext' [readability-identifier-naming]
+static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
+                            ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:164:29: warning: invalid case style for function 'UpdateDisplay_Refresh' [readability-identifier-naming]
+static UpdateDisplayError_t UpdateDisplay_Refresh(){
+                            ^~~~~~~~~~~~~~~~~~~~~
+                            updateDisplayRefresh
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:189:29: warning: invalid case style for function 'UpdateDisplay_SetComponent' [readability-identifier-naming]
+static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
+                            ^~~~~~~~~~~~~~~~~~~~~~~~~~
+                            updateDisplaySetComponent
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:211:2: warning: do not use 'else' after 'return' [readability-else-after-return]
+        else if(comp > MOTOR){
+        ^~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:259:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:264:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastPercent = percent;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:274:70: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
+                                                                            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:276:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:281:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastMv = mv;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:285:57: warning: invalid case style for parameter 'mphTenths' [readability-identifier-naming]
+UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
+                                                        ^~~~~~~~~
+                                                        mph_tenths
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:294:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastMphTenths = mphTenths;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:307:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentAccel = percent;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:320:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:333:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:345:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:350:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastGear = gear;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:362:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:367:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:378:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:383:35: warning: statement should be inside braces [readability-braces-around-statements]
+        if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:390:31: warning: parameter 'p_arg' is unused [misc-unused-parameters]
+void Task_UpdateDisplay(void *p_arg) {
+                              ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/CANConfig.h:13:17: warning: invalid case style for global variable 'carCANFilterList' [readability-identifier-naming]
+extern  CANId_t carCANFilterList[NUM_CARCAN_FILTERS];
+                ^~~~~~~~~~~~~~~~
+                Car_Can_Filter_List
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/CANConfig.h:14:17: warning: invalid case style for global variable 'motorCANFilterList' [readability-identifier-naming]
+extern  CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS];
+                ^~~~~~~~~~~~~~~~~~
+                Motor_Can_Filter_List
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/CANbus.h:67:15: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        uint8_t data[8]; 
+                     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/CANbus.h:88:45: warning: invalid case style for parameter 'idWhitelist' [readability-identifier-naming]
+ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize);
+                                            ^~~~~~~~~~~
+                                            id_whitelist
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/CANbus.h:88:66: warning: invalid case style for parameter 'idWhitelistSize' [readability-identifier-naming]
+ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize);
+                                                                 ^~~~~~~~~~~~~~~
+                                                                 id_whitelist_size
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/CANbus.h:97:35: warning: invalid case style for parameter 'CanData' [readability-identifier-naming]
+ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
+                                  ^~~~~~~
+                                  can_data
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Contactors.h:4:9: warning: declaration uses identifier '__CONTACTORS_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __CONTACTORS_H
+        ^~~~~~~~~~~~~~
+        CONTACTORS_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Contactors.h:7:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "config.h"
+^        ~~~~~~~~~~
+         "BSP_GPIO.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Display.h:16:9: warning: declaration uses identifier '__DISPLAY_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __DISPLAY_H
+        ^~~~~~~~~~~
+        DISPLAY_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Display.h:43:6: warning: invalid case style for global function 'assertDisplayError' [readability-identifier-naming]
+void assertDisplayError(DisplayError_t err);
+     ^~~~~~~~~~~~~~~~~~
+     Assert_Display_Error
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Display.h:101:45: warning: invalid case style for parameter 'osErrCode' [readability-identifier-naming]
+DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+                                            ^~~~~~~~~
+                                            os_err_code
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Display.h:101:71: warning: invalid case style for parameter 'faultCode' [readability-identifier-naming]
+DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+                                                                      ^~~~~~~~~
+                                                                      fault_code
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Display.h:109:37: warning: invalid case style for parameter 'SOC_percent' [readability-identifier-naming]
+DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
+                                    ^~~~~~~~~~~
+                                    soc_percent
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/GPIOExpander.h:5:9: warning: declaration uses identifier '__GPIOEXPANDER_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __GPIOEXPANDER_H
+        ^~~~~~~~~~~~~~~~
+        GPIOEXPANDER_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/GPIOExpander.h:9:16: warning: declaration uses identifier '_spi_message', which is reserved in the global namespace [bugprone-reserved-identifier]
+typedef struct _spi_message {
+               ^~~~~~~~~~~~
+               spi_message
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Minions.h:3:1: warning: #includes are not sorted properly [llvm-include-order]
+#include <stdbool.h>
+^        ~~~~~~~~~~~
+         "BSP_GPIO.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Minions.h:58:72: warning: invalid case style for parameter 'mErr' [readability-identifier-naming]
+bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr);
+                                                                       ^~~~
+                                                                       m_err
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/Pedals.h:8:9: warning: declaration uses identifier '__PEDALS_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __PEDALS_H
+        ^~~~~~~~~~
+        PEDALS_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:2:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "config.h"
+^        ~~~~~~~~~~
+         "CANConfig.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:55:17: warning: invalid case style for function 'whitelist_validator' [readability-identifier-naming]
+static CANId_t* whitelist_validator(CANId_t* wlist, uint8_t size){
+                ^~~~~~~~~~~~~~~~~~~
+                whitelistValidator
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:58:33: warning: repeated branch in conditional chain [bugprone-branch-clone]
+        if(curr >= NUM_CAN_IDS) {
+                                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:60:10: note: end of the original
+        } else if (CANLUT[curr].size == 0 ) {
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:60:45: note: clone 1 starts here
+        } else if (CANLUT[curr].size == 0 ) {
+                                            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:73:45: warning: invalid case style for parameter 'idWhitelist' [readability-identifier-naming]
+ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize)
+                                            ^~~~~~~~~~~
+                                            id_whitelist
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:73:66: warning: invalid case style for parameter 'idWhitelistSize' [readability-identifier-naming]
+ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize)
+                                                                 ^~~~~~~~~~~~~~~
+                                                                 id_whitelist_size
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:109:35: warning: invalid case style for parameter 'CanData' [readability-identifier-naming]
+ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
+                                  ^~~~~~~
+                                  can_data
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:152:20: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    uint8_t txdata[8];
+                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:154:9: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memcpy(txdata, &CanData.idx, 1);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:154:9: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+        memcpy(txdata, &CanData.idx, 1);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:155:9: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memcpy(&(txdata[sizeof(CanData.idx)]), &CanData.data, msginfo.size);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:155:9: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+        memcpy(&(txdata[sizeof(CanData.idx)]), &CanData.data, msginfo.size);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:157:9: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memcpy(txdata, &CanData.data, msginfo.size);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:157:9: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+        memcpy(txdata, &CanData.data, msginfo.size);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:196:36: warning: invalid case style for parameter 'MsgContainer' [readability-identifier-naming]
+ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
+                                   ^~~~~~~~~~~~
+                                   msg_container
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:266:9: warning: Call to function 'memmove' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memmove_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memmove( // Can't use memcpy, as memory regions overlap
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:266:9: note: Call to function 'memmove' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memmove_s' in case of C11
+        memmove( // Can't use memcpy, as memory regions overlap
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/CANbus.c:269:13: warning: 7 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+            7 // max size of data (8) - size of idx byte (1)
+            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Contactors.c:5:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "stm32f4xx_gpio.h"
+^        ~~~~~~~~~~~~~~~~~~
+         "Tasks.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Contactors.c:9:17: warning: invalid case style for global variable 'contactorsMutex' [readability-identifier-naming]
+static OS_MUTEX contactorsMutex;
+                ^~~~~~~~~~~~~~~
+                Contactors_Mutex
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:15:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "bsp.h"   // for writing to UART
+^        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         "Tasks.h" // for os and fault error codes
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:22:27: warning: macro argument should be enclosed in parentheses [bugprone-macro-parentheses]
+#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
+                          ^
+                          (  )
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:22:52: warning: macro argument should be enclosed in parentheses [bugprone-macro-parentheses]
+#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
+                                                   ^
+                                                   (  )
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:22:70: warning: macro argument should be enclosed in parentheses [bugprone-macro-parentheses]
+#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
+                                                                     ^
+                                                                     (  )
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:22:90: warning: macro argument should be enclosed in parentheses [bugprone-macro-parentheses]
+#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
+                                                                                         ^
+                                                                                         (  )
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:24:23: warning: macro argument should be enclosed in parentheses [bugprone-macro-parentheses]
+#define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
+                      ^
+                      (  )
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:24:41: warning: macro argument should be enclosed in parentheses [bugprone-macro-parentheses]
+#define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
+                                        ^
+                                        (  )
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:33:16: warning: function 'Display_Send' has cognitive complexity of 28 (threshold 25) [readability-function-cognitive-complexity]
+DisplayError_t Display_Send(DisplayCmd_t cmd){
+               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:35:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+        if (isAssignCmd(cmd)){
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:35:6: note: +1
+        if (isAssignCmd(cmd)){
+            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:22:87: note: expanded from macro 'isAssignCmd'
+#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
+                                                                                      ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:36:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+                if (cmd.argTypes[0] == INT_ARG){
+                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:39:3: note: +1, nesting level increased to 2
+                else{
+                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:40:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+                        if (cmd.args[0].str == NULL){return DISPLAY_ERR_PARSE;}
+                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:49:7: note: +1, nesting level increased to 1
+        else if (isOpCmd(cmd)){
+             ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:49:11: note: +1
+        else if (isOpCmd(cmd)){
+                 ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:24:38: note: expanded from macro 'isOpCmd'
+#define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
+                                     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:52:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+                if (cmd.numArgs > MAX_ARGS){return DISPLAY_ERR_OTHER;}
+                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:53:3: note: +2, including nesting penalty of 1, nesting level increased to 2
+                if (cmd.numArgs >= 1){ // If there are arguments
+                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:54:4: note: +3, including nesting penalty of 2, nesting level increased to 3
+                        for (int i = 0; i < cmd.numArgs; i++){
+                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:56:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+                                if (cmd.argTypes[i] == INT_ARG){
+                                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:59:5: note: +1, nesting level increased to 4
+                                else{
+                                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:65:5: note: +4, including nesting penalty of 3, nesting level increased to 4
+                                if (i < cmd.numArgs - 1){ // delimiter
+                                ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:72:2: note: +1, nesting level increased to 1
+        else{ // Error parsing command struct
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:76:2: note: +1, including nesting penalty of 0, nesting level increased to 1
+        if (cmd.numArgs >= 1){ // If there are arguments
+        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:37:4: warning: the value returned by this function should be used [cert-err33-c]
+                        sprintf(msgArgs, "%d", (int)cmd.args[0].num);
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:37:4: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:37:4: warning: Call to function 'sprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                        sprintf(msgArgs, "%d", (int)cmd.args[0].num);
+                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:37:4: note: Call to function 'sprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+                        sprintf(msgArgs, "%d", (int)cmd.args[0].num);
+                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:41:4: warning: the value returned by this function should be used [cert-err33-c]
+                        sprintf(msgArgs, "%s", cmd.args[0].str);
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:41:4: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:41:4: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                        sprintf(msgArgs, "%s", cmd.args[0].str);
+                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:41:4: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+                        sprintf(msgArgs, "%s", cmd.args[0].str);
+                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:57:6: warning: the value returned by this function should be used [cert-err33-c]
+                                        sprintf(arg, "%d", (int)cmd.args[i].num);
+                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:57:6: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:57:6: warning: Call to function 'sprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                                        sprintf(arg, "%d", (int)cmd.args[i].num);
+                                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:57:6: note: Call to function 'sprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+                                        sprintf(arg, "%d", (int)cmd.args[i].num);
+                                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:60:6: warning: the value returned by this function should be used [cert-err33-c]
+                                        sprintf(arg, "%s", cmd.args[i].str);
+                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:60:6: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:60:6: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+                                        sprintf(arg, "%s", cmd.args[i].str);
+                                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:60:6: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+                                        sprintf(arg, "%s", cmd.args[i].str);
+                                        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:63:5: warning: Call to function 'strcat' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcat'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+                                strcat(msgArgs, arg);
+                                ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:63:5: note: Call to function 'strcat' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcat'. CWE-119
+                                strcat(msgArgs, arg);
+                                ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:66:6: warning: Call to function 'strcat' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcat'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+                                        strcat(msgArgs, ",");
+                                        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:66:6: note: Call to function 'strcat' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcat'. CWE-119
+                                        strcat(msgArgs, ",");
+                                        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:97:45: warning: invalid case style for parameter 'osErrCode' [readability-identifier-naming]
+DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+                                            ^~~~~~~~~
+                                            os_err_code
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:97:71: warning: invalid case style for parameter 'faultCode' [readability-identifier-naming]
+DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+                                                                      ^~~~~~~~~
+                                                                      fault_code
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:100:17: warning: 7 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        char faultPage[7] = "page 2";
+                       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:104:17: warning: 17 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        char setOSCode[17];
+                       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:105:2: warning: the value returned by this function should be used [cert-err33-c]
+        sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:105:2: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:105:2: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:105:2: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+        sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:109:20: warning: 18 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        char setFaultCode[18];
+                          ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:110:2: warning: the value returned by this function should be used [cert-err33-c]
+        sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:110:2: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:110:2: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:110:2: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+        sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:117:37: warning: invalid case style for parameter 'SOC_percent' [readability-identifier-naming]
+DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
+                                    ^~~~~~~~~~~
+                                    soc_percent
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:120:16: warning: 7 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        char evacPage[7] = "page 3";
+                      ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:124:11: warning: 13 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        char soc[13];
+                 ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:125:2: warning: the value returned by this function should be used [cert-err33-c]
+        sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:125:2: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:125:2: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:125:2: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+        sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:129:12: warning: 18 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        char supp[18];
+                  ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:130:2: warning: the value returned by this function should be used [cert-err33-c]
+        sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:130:2: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:130:2: warning: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:130:2: note: Call to function 'sprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sprintf_s' in case of C11
+        sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
+        ^~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Display.c:138:9: warning: invalid case style for variable 'os_err' [readability-identifier-naming]
+        OS_ERR os_err;
+               ^~~~~~
+               osErr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Minions.c:2:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "os.h"
+^        ~~~~~~
+         "BSP_GPIO.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Minions.c:24:24: warning: loop variable has narrower type 'uint8_t' (aka 'unsigned char') than iteration's upper bound 'int' [bugprone-too-small-loop-variable]
+    for(uint8_t i = 0; i < MINIONPIN_NUM; i++){
+                       ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Minions.c:32:55: warning: parameter 'err' is unused [misc-unused-parameters]
+bool Minion_Read_Pin(MinionPin_t pin, Minion_Error_t* err){
+                                                      ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Minions.c:35:6: warning: do not use 'else' after 'return' [readability-else-after-return]
+    }else{
+     ^~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Minions.c:41:72: warning: invalid case style for parameter 'mErr' [readability-identifier-naming]
+bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
+                                                                       ^~~~
+                                                                       m_err
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Pedals.c:42:35: warning: statement should be inside braces [readability-braces-around-statements]
+    if (pedal >= NUMBER_OF_PEDALS) return 0;
+                                  ^
+                                   {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Pedals.c:43:66: warning: implicit conversion from enumeration type 'pedal_t' to different enumeration type 'ADC_t' [clang-diagnostic-enum-conversion]
+    int16_t millivoltsPedal = (int16_t) BSP_ADC_Get_Millivoltage(pedal);
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~ ^~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Pedals.c:48:83: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        percentage = (int8_t) ( (int32_t) (millivoltsPedal - LowerBound[pedal]) * 100 /
+                                                                                  ^
+make[1]: Leaving directory '/home/ishdeshpa/LHR/Controls/BSP/STM32F413'

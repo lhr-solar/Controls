@@ -1,38 +1,105 @@
 ---
-Checks:          '-*,clang-diagnostic-*,clang-analyzer-*,modernize-*,performance-*,portability-*,readability-*,-readability-inconsistent-declaration-parameter-name,-readability-magic-numbers,-readability-avoid-const-params-in-decls,-modernize-macro-to-enum,-readability-uppercase-literal-suffix,-readability-else-after-return'
+Checks: 'bugprone-assert-side-effect,
+bugprone-assignment-in-if-condition,
+bugprone-bool-pointer-implicit-conversion,
+bugprone-branch-clone,
+bugprone-dynamic-static-initializers,
+bugprone-incorrect-roundings,
+bugprone-integer-division,
+bugprone-macro-parentheses,
+bugprone-macro-repeated-side-effects,
+bugprone-misplaced-widening-cast,
+bugprone-multiple-statement-macro,
+bugprone-non-zero-enum-to-bool-conversion,
+bugprone-redundant-branch-condition,
+bugprone-reserved-identifier,
+bugprone-signed-char-misuse,
+bugprone-sizeof-expression,
+bugprone-suspicious-enum-usage,
+bugprone-suspicious-include,
+bugprone-suspicious-missing-comma,
+bugprone-suspicious-semicolon,
+bugprone-suspicious-string-compare,
+bugprone-swapped-arguments,
+bugprone-terminating-continue,
+bugprone-too-small-loop-variable,
+bugprone-undefined-memory-manipulation,
+bugprone-unsafe-functions,
+clang-analyzer-core.CallAndMessage,
+clang-analyzer-core.DivideZero,
+clang-analyzer-core.NonNullParamChecker,
+clang-analyzer-core.NullDereference,
+clang-analyzer-core.StackAddressEscape,
+clang-analyzer-core.UndefinedBinaryOperatorResult,
+clang-analyzer-core.VLASize,
+clang-analyzer-core.ArraySubscript,
+clang-analyzer-core.uninitialized.Assign,
+clang-analyzer-core.uninitialized.Branch,
+clang-analyzer-core.uninitialized.CapturedBlockVariable,
+clang-analyzer-core.uninitialized.UndefReturn,
+clang-analyzer-deadcode.DeadStores,
+llvm-include-order,
+misc-confusable-identifiers,
+misc-definitions-in-headers,
+misc-include-cleaner,
+misc-misleading-bidirectional,
+misc-misleading-identifier,
+misc-misplaced-const,
+misc-no-recursion,
+misc-redundant-expression,
+misc-static-assert,
+misc-unused-parameters,
+readability-avoid-unconditional-preprocessor-if,
+readability-braces-around-statements,
+readability-const-return-type,
+readability-delete-null-pointer,
+readability-duplicate-include,
+readability-else-after-return,
+readability-function-cognitive-complexity,
+readability-function-size,
+readability-identifier-naming,
+readability-implicit-bool-conversion,
+readability-inconsistent-declaration-parameter-name,
+readability-isolate-declaration,
+readability-magic-numbers,
+readability-misleading-indentation,
+readability-misplaced-array-index,
+readability-named-parameter,
+readability-non-const-parameter,
+readability-redundant-control-flow,
+readability-redundant-declaration,
+readability-redundant-function-ptr-dereference,
+readability-redundant-preprocessor,
+readability-suspicious-call-argument,
+cert-env33-c,
+cert-err33-c,
+cert-err34-c,
+cert-flp30-c'
+
 WarningsAsErrors: true
 HeaderFilterRegex: '^((?!/RTOS/).)*$'
-AnalyzeTemporaryDtors: false
 FormatStyle:     file
 CheckOptions:
-  - key:             cert-dcl16-c.NewSuffixes
-    value:           'L;LL;LU;LLU'
-  - key:             cert-oop54-cpp.WarnOnlyIfThisHasSuspiciousField
-    value:           '0'
-  - key:             cppcoreguidelines-explicit-virtual-functions.IgnoreDestructors
-    value:           '1'
-  - key:             cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
-    value:           '1'
-  - key:             google-readability-braces-around-statements.ShortStatementLines
-    value:           '1'
-  - key:             google-readability-function-size.StatementThreshold
-    value:           '800'
-  - key:             google-readability-namespace-comments.ShortNamespaceLines
-    value:           '10'
-  - key:             google-readability-namespace-comments.SpacesBeforeComments
-    value:           '2'
-  - key:             modernize-loop-convert.MaxCopySize
-    value:           '16'
-  - key:             modernize-loop-convert.MinConfidence
-    value:           reasonable
-  - key:             modernize-loop-convert.NamingStyle
-    value:           CamelCase
-  - key:             modernize-pass-by-value.IncludeStyle
-    value:           llvm
-  - key:             modernize-replace-auto-ptr.IncludeStyle
-    value:           llvm
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-  - key:             readability-identifier-length.MinimumParameterNameLength
-    value:           '2'
+  - key:             bugprone-assert-side-effect.AssertMacros
+    value:           assert
+  - key:             readability-identifier-naming.FunctionIgnoredRegexp
+    value:           "(CAN*|BPS*)"
+  - key:             readability-identifier-naming.EnumCase
+    value:           Camel_Snake_Case
+  - key:             readability-identifier-naming.FunctionCase
+    value:           camelBack
+  - key:             readability-identifier-naming.GlobalFunctionCase
+    value:           Camel_Snake_Case
+  - key:             readability-identifier-naming.ParameterCase
+    value:           lower_case
+  - key:             readability-identifier-naming.UnionCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.VariableCase
+    value:           camelBack
+  - key:             readability-identifier-naming.GlobalVariableCase
+    value:           Camel_Snake_Case
+  - key:             TypedefSuffix
+    value:           _t
+  - key:             readability-identifier-naming.IgnoreMainLikeFunctions
+    value:           1
 ...
