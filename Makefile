@@ -10,7 +10,11 @@ DARKGRAY=\033[1;30m
 YELLOW=\033[0;33m
 NC=\033[0m # No Color
 
-TEST_LEADER = none
+ifdef TEST
+	TEST_LEADER = $(TEST)
+else
+	TEST_LEADER = none
+endif
 TEST_MOTOR = none
 TEST_CAR = none
 

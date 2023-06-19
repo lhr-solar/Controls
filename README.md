@@ -22,6 +22,7 @@ The system can be built and deployed from a terminal.
     - C/C++
     - ARM
     - cortex-debug
+6. Add ```source /path/to/Controls/Scripts/load_env_vars.sh``` to the end of your ~/.bashrc file in order to load the necessary environment variables on shell startup.
 
 ## Building
 When calling any of the following commands, make sure you are in the Controls folder.
