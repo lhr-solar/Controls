@@ -82,24 +82,30 @@ FormatStyle:     file
 CheckOptions:
   - key:             bugprone-assert-side-effect.AssertMacros
     value:           assert
-  - key:             readability-identifier-naming.FunctionIgnoredRegexp
-    value:           "(CAN*|BPS*)"
   - key:             readability-identifier-naming.EnumCase
     value:           Camel_Snake_Case
   - key:             readability-identifier-naming.FunctionCase
     value:           camelBack
+  - key:             readability-identifier-naming.FunctionIgnoredRegexp
+    value:           "(CAN.*|OS.*)"
   - key:             readability-identifier-naming.GlobalFunctionCase
     value:           Camel_Snake_Case
   - key:             readability-identifier-naming.ParameterCase
     value:           lower_case
+  - key:             readability-identifier-naming.ParameterIgnoredRegexp
+    value:           "(CAN.*|BPS.*|OS.*)"
   - key:             readability-identifier-naming.UnionCase
     value:           aNy_CasE
   - key:             readability-identifier-naming.VariableCase
     value:           camelBack
+  - key:             readability-identifier-naming.VariableIgnoredRegexp
+    value:           "(CAN.*|BPS.*|OS.*)"
   - key:             readability-identifier-naming.GlobalVariableCase
     value:           Camel_Snake_Case
   - key:             TypedefSuffix
     value:           _t
   - key:             readability-identifier-naming.IgnoreMainLikeFunctions
     value:           1
+  - key:             readability-magic-numbers.IgnoredIntegerValues
+    value:           0;1;2;3;4;100
 ...

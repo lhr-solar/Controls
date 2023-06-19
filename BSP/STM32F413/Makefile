@@ -175,9 +175,11 @@ $(BUILD_DIR):
 #######################################
 # tidy
 #######################################
-TIDYSOURCES = $(filter-out $(addsuffix /%,../../RTOS ../../BSP/STM32F413 ../../CMSIS), $(C_SOURCES)) \
+TIDYSOURCES = $(filter-out $(addsuffix /%,../../RTOS ../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver ../../CMSIS), $(C_SOURCES)) \
 $(wildcard ../../Apps/Inc/*.h) \
 $(wildcard ../../Drivers/Inc/*.h) \
+$(wildcard ../../Config/Inc/*.h)	\
+$(wildcard ../../BSP/Inc/*.h)	\
 
 ifneq ($(LINT), none)
 TIDYSOURCES := $(shell find $(TIDYSOURCES) -regex .*/$(LINT))

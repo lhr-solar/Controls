@@ -1,6 +1,26 @@
 make -C BSP -C STM32F413 tidy
 make[1]: Entering directory '/home/ishdeshpa/LHR/Controls/BSP/STM32F413'
-clang-tidy --config-file=../../.clang-tidy ../../Drivers/Src/CANbus.c ../../Drivers/Src/CANConfig.c ../../Drivers/Src/Contactors.c ../../Drivers/Src/Display.c ../../Drivers/Src/Minions.c ../../Drivers/Src/Pedals.c ../../Apps/Src/CAN_Queue.c ../../Apps/Src/FaultState.c ../../Apps/Src/PedalToPercent.c ../../Apps/Src/ReadCarCAN.c ../../Apps/Src/ReadTritium.c ../../Apps/Src/SendCarCAN.c ../../Apps/Src/SendTritium.c ../../Apps/Src/Tasks.c ../../Apps/Src/Telemetry.c ../../Apps/Src/UpdateDisplay.c ../../Apps/Inc/CAN_Queue.h ../../Apps/Inc/common.h ../../Apps/Inc/FaultState.h ../../Apps/Inc/fifo.h ../../Apps/Inc/MedianFilter.h ../../Apps/Inc/ReadCarCAN.h ../../Apps/Inc/ReadTritium.h ../../Apps/Inc/SendTritium.h ../../Apps/Inc/Tasks.h ../../Apps/Inc/UpdateDisplay.h ../../Drivers/Inc/CANbus.h ../../Drivers/Inc/CANConfig.h ../../Drivers/Inc/Contactors.h ../../Drivers/Inc/Display.h ../../Drivers/Inc/GPIOExpander.h ../../Drivers/Inc/Minions.h ../../Drivers/Inc/Pedals.h  -- -DSTM32F413_423xx -DUSE_STDPERIPH_DRIVER -D__FPU_PRESENT -I../../Apps/Inc -I../../Drivers/Inc -I../../Config/Inc -I../../BSP/Inc -I../../CMSIS/Device/ST/STM32F4xx/Include -I../../CMSIS/Include -I../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/ -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ -I../../RTOS/uCOS-III-STM32F4/uC-LIB/ -Og -g -Wall -Werror -fdata-sections -ffunction-sections -MMD -MP -MF"tidy"	
+clang-tidy --config-file=../../.clang-tidy ../../Drivers/Src/CANbus.c ../../Drivers/Src/CANConfig.c ../../Drivers/Src/Contactors.c ../../Drivers/Src/Display.c ../../Drivers/Src/Minions.c ../../Drivers/Src/Pedals.c ../../BSP/STM32F413/Src/BSP_ADC.c ../../BSP/STM32F413/Src/BSP_CAN.c ../../BSP/STM32F413/Src/BSP_GPIO.c ../../BSP/STM32F413/Src/BSP_SPI.c ../../BSP/STM32F413/Src/BSP_Switches.c ../../BSP/STM32F413/Src/BSP_UART.c ../../BSP/STM32F413/Src/retarget.c ../../BSP/STM32F413/Src/system_stm32f4xx.c ../../Apps/Src/CAN_Queue.c ../../Apps/Src/FaultState.c ../../Apps/Src/PedalToPercent.c ../../Apps/Src/ReadCarCAN.c ../../Apps/Src/ReadTritium.c ../../Apps/Src/SendCarCAN.c ../../Apps/Src/SendTritium.c ../../Apps/Src/Tasks.c ../../Apps/Src/Telemetry.c ../../Apps/Src/UpdateDisplay.c ../../Apps/Inc/CAN_Queue.h ../../Apps/Inc/common.h ../../Apps/Inc/FaultState.h ../../Apps/Inc/fifo.h ../../Apps/Inc/MedianFilter.h ../../Apps/Inc/ReadCarCAN.h ../../Apps/Inc/ReadTritium.h ../../Apps/Inc/SendTritium.h ../../Apps/Inc/Tasks.h ../../Apps/Inc/UpdateDisplay.h ../../Drivers/Inc/CANbus.h ../../Drivers/Inc/CANConfig.h ../../Drivers/Inc/Contactors.h ../../Drivers/Inc/Display.h ../../Drivers/Inc/GPIOExpander.h ../../Drivers/Inc/Minions.h ../../Drivers/Inc/Pedals.h ../../Config/Inc/config.h ../../Config/Inc/stm32f4xx_conf.h ../../BSP/Inc/BSP_ADC.h ../../BSP/Inc/BSP_CAN.h ../../BSP/Inc/BSP_GPIO.h ../../BSP/Inc/bsp.h ../../BSP/Inc/BSP_OS.h ../../BSP/Inc/BSP_SPI.h ../../BSP/Inc/BSP_UART.h  -- -DSTM32F413_423xx -DUSE_STDPERIPH_DRIVER -D__FPU_PRESENT -I../../Apps/Inc -I../../Drivers/Inc -I../../Config/Inc -I../../BSP/Inc -I../../CMSIS/Device/ST/STM32F4xx/Include -I../../CMSIS/Include -I../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/ -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ -I../../RTOS/uCOS-III-STM32F4/uC-LIB/ -Og -g -Wall -Werror -fdata-sections -ffunction-sections -MMD -MP -MF"tidy"	
+../../BSP/Inc/BSP_UART.h:28:10: warning: function 'BSP_UART_Read' has a definition with different parameter names [readability-inconsistent-declaration-parameter-name]
+uint32_t BSP_UART_Read(UART_t uart, char *str);
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:164:10: note: the definition seen here
+uint32_t BSP_UART_Read(UART_t usart, char *str) {
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_UART.h:28:10: note: differing parameters are named here: ('uart'), in definition: ('usart')
+uint32_t BSP_UART_Read(UART_t uart, char *str);
+         ^                    ~~~~
+                              usart
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_UART.h:39:10: warning: function 'BSP_UART_Write' has a definition with different parameter names [readability-inconsistent-declaration-parameter-name]
+uint32_t BSP_UART_Write(UART_t uart ,char *str, uint32_t len);
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:203:10: note: the definition seen here
+uint32_t BSP_UART_Write(UART_t usart, char *str, uint32_t len) {
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_UART.h:39:10: note: differing parameters are named here: ('uart'), in definition: ('usart')
+uint32_t BSP_UART_Write(UART_t uart ,char *str, uint32_t len);
+         ^                     ~~~~
+                               usart
 ../../Drivers/Inc/CANbus.h:106:13: warning: function 'CANbus_Read' has a definition with different parameter names [readability-inconsistent-declaration-parameter-name]
 ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
             ^
@@ -135,10 +155,6 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be cha
 void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
      ^~~~~~~~~~~~~~
      Assert_Os_Error
-/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/Tasks.h:166:30: warning: invalid case style for parameter 'OS_err_loc' [readability-identifier-naming]
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
-                             ^~~~~~~~~~
-                             os_err_loc
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Inc/UpdateDisplay.h:16:9: warning: declaration uses identifier '__UPDATE_DISPLAY_H', which is a reserved identifier [bugprone-reserved-identifier]
 #define __UPDATE_DISPLAY_H
         ^~~~~~~~~~~~~~~~~~
@@ -388,9 +404,6 @@ void Task_ReadTritium(void *p_arg){
                                         uint32_t Car_Velocity = Motor_Velocity;
                                                  ^~~~~~~~~~~~
                                                  carVelocity
-/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:95:38: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
-                                        Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
-                                                                        ^
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/ReadTritium.c:95:45: warning: 3600 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
                                         Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
                                                                                ^
@@ -410,9 +423,6 @@ void Task_ReadTritium(void *p_arg){
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendCarCAN.c:20:28: warning: parameter 'p_arg' is unused [misc-unused-parameters]
 void Task_SendCarCAN(void *p_arg){
                            ^
-/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendCarCAN.c:30:32: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
-        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
-                               ^
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:21:1: warning: #includes are not sorted properly [llvm-include-order]
 #include "ReadCarCAN.h"
 ^        ~~~~~~~~~~~~~~
@@ -505,9 +515,6 @@ static TritiumState_t prevState; // Previous state
 extern const float pedalToPercent[];
                    ^~~~~~~~~~~~~~
                    Pedal_To_Percent
-/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:135:18: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
-    if(percent > 100){
-                 ^
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/SendTritium.c:145:27: warning: invalid case style for parameter 'nameStr' [readability-identifier-naming]
 static void getName(char* nameStr, uint8_t stateNameNum){
                           ^~~~~~~
@@ -646,10 +653,6 @@ void Task_SendTritium(void *p_arg){
 #include "FaultState.h"
 ^        ~~~~~~~~~~~~~~
          "CANbus.h"
-/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Tasks.c:48:30: warning: invalid case style for parameter 'OS_err_loc' [readability-identifier-naming]
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
-                             ^~~~~~~~~~
-                             os_err_loc
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/Telemetry.c:2:1: warning: #includes are not sorted properly [llvm-include-order]
 #include "CANbus.h"
 ^        ~~~~~~~~~~
@@ -709,9 +712,6 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
         if(ret == UPDATEDISPLAY_ERR_NONE) lastPercent = percent;
                                          ^
                                           {
-/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:274:70: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
-        UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
-                                                                            ^
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:276:35: warning: statement should be inside braces [readability-braces-around-statements]
         if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
                                          ^
@@ -767,6 +767,678 @@ UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Apps/Src/UpdateDisplay.c:390:31: warning: parameter 'p_arg' is unused [misc-unused-parameters]
 void Task_UpdateDisplay(void *p_arg) {
                               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_ADC.h:9:9: warning: declaration uses identifier '__BSP_ADC_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __BSP_ADC_H
+        ^~~~~~~~~~~
+        BSP_ADC_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_ADC.h:37:33: warning: invalid case style for parameter 'hardwareDevice' [readability-identifier-naming]
+int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
+                                ^~~~~~~~~~~~~~
+                                hardware_device
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_ADC.h:44:40: warning: invalid case style for parameter 'hardwareDevice' [readability-identifier-naming]
+int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
+                                       ^~~~~~~~~~~~~~
+                                       hardware_device
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_CAN.h:9:9: warning: declaration uses identifier '__BSP_CAN_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __BSP_CAN_H
+        ^~~~~~~~~~~
+        BSP_CAN_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_CAN.h:26:41: warning: invalid case style for parameter 'rxEvent' [readability-identifier-naming]
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize);
+                                        ^~~~~~~
+                                        rx_event
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_CAN.h:26:61: warning: invalid case style for parameter 'txEnd' [readability-identifier-naming]
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize);
+                                                            ^~~~~
+                                                            tx_end
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_CAN.h:26:78: warning: invalid case style for parameter 'idWhitelist' [readability-identifier-naming]
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize);
+                                                                             ^~~~~~~~~~~
+                                                                             id_whitelist
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_CAN.h:26:99: warning: invalid case style for parameter 'idWhitelistSize' [readability-identifier-naming]
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize);
+                                                                                                  ^~~~~~~~~~~~~~~
+                                                                                                  id_whitelist_size
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_CAN.h:37:64: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t len);
+                                                               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_GPIO.h:9:9: warning: declaration uses identifier '__BSP_GPIO_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __BSP_GPIO_H
+        ^~~~~~~~~~~~
+        BSP_GPIO_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_OS.h:6:5: error: unknown type name 'callback_t' [clang-diagnostic-error]
+    callback_t pend;
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_OS.h:7:5: error: unknown type name 'callback_t' [clang-diagnostic-error]
+    callback_t post;
+    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_SPI.h:9:9: warning: declaration uses identifier '__BSP_SPI_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __BSP_SPI_H
+        ^~~~~~~~~~~
+        BSP_SPI_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_SPI.h:33:29: warning: invalid case style for parameter 'txBuf' [readability-identifier-naming]
+void BSP_SPI_Write(uint8_t* txBuf, uint8_t txLen);
+                            ^~~~~
+                            tx_buf
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_SPI.h:33:44: warning: invalid case style for parameter 'txLen' [readability-identifier-naming]
+void BSP_SPI_Write(uint8_t* txBuf, uint8_t txLen);
+                                           ^~~~~
+                                           tx_len
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_SPI.h:42:28: warning: invalid case style for parameter 'rxBuf' [readability-identifier-naming]
+void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen);
+                           ^~~~~
+                           rx_buf
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_SPI.h:42:43: warning: invalid case style for parameter 'rxLen' [readability-identifier-naming]
+void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen);
+                                          ^~~~~
+                                          rx_len
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/BSP_UART.h:9:9: warning: declaration uses identifier '__BSP_UART_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __BSP_UART_H
+        ^~~~~~~~~~~~
+        BSP_UART_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/bsp.h:4:9: warning: declaration uses identifier '__BSP_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __BSP_H
+        ^~~~~~~
+        BSP_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/Inc/bsp.h:8:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "BSP_UART.h"
+^        ~~~~~~~~~~~~
+         "BSP_GPIO.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:8:13: warning: invalid case style for function 'ADC_InitDMA' [readability-identifier-naming]
+static void ADC_InitDMA(void) {
+            ^~~~~~~~~~~
+            adcInitDma
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:13:18: warning: invalid case style for variable 'DMA_InitStruct' [readability-identifier-naming]
+        DMA_InitTypeDef DMA_InitStruct;
+                        ^~~~~~~~~~~~~~
+                        dmaInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:16:42: warning: cast to smaller integer type 'uint32_t' (aka 'unsigned int') from 'volatile uint32_t *' (aka 'volatile unsigned int *') [clang-diagnostic-pointer-to-int-cast]
+        DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)&(ADC1->DR);
+                                                ^~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:17:39: warning: cast to smaller integer type 'uint32_t' (aka 'unsigned int') from 'volatile uint16_t (*)[2]' (aka 'volatile unsigned short (*)[2]') [clang-diagnostic-pointer-to-int-cast]
+        DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &ADCresults;
+                                             ^~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:48:19: warning: invalid case style for variable 'GPIO_InitStruct' [readability-identifier-naming]
+        GPIO_InitTypeDef GPIO_InitStruct;
+                         ^~~~~~~~~~~~~~~
+                         gpioInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:55:24: warning: invalid case style for variable 'ADC_CommonStruct' [readability-identifier-naming]
+        ADC_CommonInitTypeDef ADC_CommonStruct;
+                              ^~~~~~~~~~~~~~~~
+                              adcCommonStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:63:18: warning: invalid case style for variable 'ADC_InitStruct' [readability-identifier-naming]
+        ADC_InitTypeDef ADC_InitStruct; // Initialization structure
+                        ^~~~~~~~~~~~~~
+                        adcInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:95:33: warning: invalid case style for parameter 'hardwareDevice' [readability-identifier-naming]
+int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice) {
+                                ^~~~~~~~~~~~~~
+                                hardware_device
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_ADC.c:108:40: warning: invalid case style for parameter 'hardwareDevice' [readability-identifier-naming]
+int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice) {
+                                       ^~~~~~~~~~~~~~
+                                       hardware_device
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:3:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "stm32f4xx.h"
+^        ~~~~~~~~~~~~~
+         "os.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:7:16: warning: declaration uses identifier '_msg', which is reserved in the global namespace [bugprone-reserved-identifier]
+typedef struct _msg
+               ^~~~
+               msg
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:10:18: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    uint8_t data[8];
+                 ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:23:20: warning: invalid case style for global variable 'gRxQueue' [readability-identifier-naming]
+static msg_queue_t gRxQueue[2];
+                   ^~~~~~~~
+                   G_Rx_Queue
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:26:17: warning: invalid case style for global variable 'gTxMessage' [readability-identifier-naming]
+static CanTxMsg gTxMessage[2];
+                ^~~~~~~~~~
+                G_Tx_Message
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:27:17: warning: invalid case style for global variable 'gRxMessage' [readability-identifier-naming]
+static CanRxMsg gRxMessage[2];
+                ^~~~~~~~~~
+                G_Rx_Message
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:30:19: warning: invalid case style for global variable 'gRxEvent' [readability-identifier-naming]
+static callback_t gRxEvent[2];
+                  ^~~~~~~~
+                  G_Rx_Event
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:31:19: warning: invalid case style for global variable 'gTxEnd' [readability-identifier-naming]
+static callback_t gTxEnd[2];
+                  ^~~~~~
+                  G_Tx_End
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:33:30: warning: invalid case style for parameter 'idWhitelist' [readability-identifier-naming]
+void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
+                             ^~~~~~~~~~~
+                             id_whitelist
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:33:51: warning: invalid case style for parameter 'idWhitelistSize' [readability-identifier-naming]
+void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
+                                                  ^~~~~~~~~~~~~~~
+                                                  id_whitelist_size
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:34:30: warning: invalid case style for parameter 'idWhitelist' [readability-identifier-naming]
+void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
+                             ^~~~~~~~~~~
+                             id_whitelist
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:34:51: warning: invalid case style for parameter 'idWhitelistSize' [readability-identifier-naming]
+void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
+                                                  ^~~~~~~~~~~~~~~
+                                                  id_whitelist_size
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:43:41: warning: invalid case style for parameter 'rxEvent' [readability-identifier-naming]
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+                                        ^~~~~~~
+                                        rx_event
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:43:61: warning: invalid case style for parameter 'txEnd' [readability-identifier-naming]
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+                                                            ^~~~~
+                                                            tx_end
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:43:78: warning: invalid case style for parameter 'idWhitelist' [readability-identifier-naming]
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+                                                                             ^~~~~~~~~~~
+                                                                             id_whitelist
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:43:99: warning: invalid case style for parameter 'idWhitelistSize' [readability-identifier-naming]
+void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+                                                                                                  ^~~~~~~~~~~~~~~
+                                                                                                  id_whitelist_size
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:59:30: warning: invalid case style for parameter 'idWhitelist' [readability-identifier-naming]
+void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+                             ^~~~~~~~~~~
+                             id_whitelist
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:59:30: warning: pointer parameter 'idWhitelist' can be pointer to const [readability-non-const-parameter]
+void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+                             ^
+                   const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:59:51: warning: invalid case style for parameter 'idWhitelistSize' [readability-identifier-naming]
+void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+                                                  ^~~~~~~~~~~~~~~
+                                                  id_whitelist_size
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:60:22: warning: invalid case style for variable 'GPIO_InitStruct' [readability-identifier-naming]
+    GPIO_InitTypeDef GPIO_InitStruct;
+                     ^~~~~~~~~~~~~~~
+                     gpioInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:62:22: warning: invalid case style for variable 'NVIC_InitStruct' [readability-identifier-naming]
+    NVIC_InitTypeDef NVIC_InitStruct;
+                     ^~~~~~~~~~~~~~~
+                     nvicInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:105:36: warning: 16 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    CAN_InitStruct.CAN_Prescaler = 16;
+                                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:135:19: warning: invalid case style for variable 'FilterStructPtr' [readability-identifier-naming]
+        uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
+                  ^~~~~~~~~~~~~~~
+                  filterStructPtr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:142:74: warning: 5 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i] << 5;
+                                                                         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:149:86: warning: statement should be inside braces [readability-braces-around-statements]
+                for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
+                                                                                     ^
+                                                                                      {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:154:38: warning: 112 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+            else if(validIDCounter > 112){ //All filter banks are to be filled and there is no point in filtering
+                                     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:155:50: warning: 28 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+                for(uint8_t filter = 0; filter < 28; filter++){//Therefore, let all IDs through (no filtering)
+                                                 ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:165:27: warning: 0x5 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    gTxMessage[0].ExtId = 0x5;
+                          ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:198:30: warning: invalid case style for parameter 'idWhitelist' [readability-identifier-naming]
+void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
+                             ^~~~~~~~~~~
+                             id_whitelist
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:198:30: warning: pointer parameter 'idWhitelist' can be pointer to const [readability-non-const-parameter]
+void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
+                             ^
+                   const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:198:51: warning: invalid case style for parameter 'idWhitelistSize' [readability-identifier-naming]
+void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
+                                                  ^~~~~~~~~~~~~~~
+                                                  id_whitelist_size
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:200:22: warning: invalid case style for variable 'GPIO_InitStruct' [readability-identifier-naming]
+    GPIO_InitTypeDef GPIO_InitStruct;
+                     ^~~~~~~~~~~~~~~
+                     gpioInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:202:22: warning: invalid case style for variable 'NVIC_InitStruct' [readability-identifier-naming]
+    NVIC_InitTypeDef NVIC_InitStruct;
+                     ^~~~~~~~~~~~~~~
+                     nvicInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:245:36: warning: 16 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    CAN_InitStruct.CAN_Prescaler = 16;
+                                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:270:19: warning: invalid case style for variable 'FilterStructPtr' [readability-identifier-naming]
+        uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
+                  ^~~~~~~~~~~~~~~
+                  filterStructPtr
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:279:86: warning: statement should be inside braces [readability-braces-around-statements]
+                for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
+                                                                                     ^
+                                                                                      {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:290:27: warning: 0x5 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    gTxMessage[1].ExtId = 0x5;
+                          ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:331:59: warning: pointer parameter 'data' can be pointer to const [readability-non-const-parameter]
+ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t length)
+                                                          ^
+                                                  const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:331:64: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t length)
+                                                               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:370:25: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    for (int i = 0; i < 8; i++)
+                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:393:9: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memcpy(&rxMsg.data[0], gRxMessage[1].Data, 8);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:393:9: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+        memcpy(&rxMsg.data[0], gRxMessage[1].Data, 8);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:393:52: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        memcpy(&rxMsg.data[0], gRxMessage[1].Data, 8);
+                                                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:429:9: warning: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+        memcpy(&rxMsg.data[0], gRxMessage[0].Data, 8);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:429:9: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+        memcpy(&rxMsg.data[0], gRxMessage[0].Data, 8);
+        ^~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_CAN.c:429:52: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        memcpy(&rxMsg.data[0], gRxMessage[0].Data, 8);
+                                                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_GPIO.c:6:22: warning: invalid case style for function 'GPIO_GetPort' [readability-identifier-naming]
+static GPIO_TypeDef* GPIO_GetPort(port_t port){
+                     ^~~~~~~~~~~~
+                     gpioGetPort
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_GPIO.c:7:23: warning: invalid case style for variable 'gpio_mapping' [readability-identifier-naming]
+        const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
+                            ^~~~~~~~~~~~
+                            gpioMapping
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_GPIO.c:23:19: warning: invalid case style for variable 'GPIO_InitStruct' [readability-identifier-naming]
+        GPIO_InitTypeDef GPIO_InitStruct;
+                         ^~~~~~~~~~~~~~~
+                         gpioInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_GPIO.c:48:16: warning: invalid case style for variable 'gpio_port' [readability-identifier-naming]
+        GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+                      ^~~~~~~~~
+                      gpioPort
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_GPIO.c:62:16: warning: invalid case style for variable 'gpio_port' [readability-identifier-naming]
+        GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+                      ^~~~~~~~~
+                      gpioPort
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_GPIO.c:76:16: warning: invalid case style for variable 'gpio_port' [readability-identifier-naming]
+        GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+                      ^~~~~~~~~
+                      gpioPort
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_GPIO.c:92:16: warning: invalid case style for variable 'gpio_port' [readability-identifier-naming]
+        GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+                      ^~~~~~~~~
+                      gpioPort
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_GPIO.c:107:16: warning: invalid case style for variable 'gpio_port' [readability-identifier-naming]
+        GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+                      ^~~~~~~~~
+                      gpioPort
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:4:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "stm32f4xx.h"
+^        ~~~~~~~~~~~~~
+         "os.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:25:17: warning: invalid case style for global variable 'spiTxFifo' [readability-identifier-naming]
+static txfifo_t spiTxFifo;
+                ^~~~~~~~~
+                Spi_Tx_Fifo
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:26:17: warning: invalid case style for global variable 'spiRxFifo' [readability-identifier-naming]
+static rxfifo_t spiRxFifo;
+                ^~~~~~~~~
+                Spi_Rx_Fifo
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:30:13: warning: invalid case style for function 'spi_post' [readability-identifier-naming]
+static void spi_post(void) {
+            ^~~~~~~~
+            spiPost
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:36:13: warning: invalid case style for function 'spi_pend' [readability-identifier-naming]
+static void spi_pend(void) {
+            ^~~~~~~~
+            spiPend
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:44:20: warning: invalid case style for function 'SPI_Wait' [readability-identifier-naming]
+static inline void SPI_Wait(void) {
+                   ^~~~~~~~
+                   spiWait
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:45:80: warning: statement should be inside braces [readability-braces-around-statements]
+        while((SPI1->SR & (SPI_SR_TXE | SPI_SR_RXNE)) == 0 || (SPI1->SR & SPI_SR_BSY));
+                                                                                      ^
+                                                                                       {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:49:20: warning: invalid case style for function 'SPI_WaitTx' [readability-identifier-naming]
+static inline void SPI_WaitTx(void) {
+                   ^~~~~~~~~~
+                   spiWaitTx
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:59:16: warning: invalid case style for function 'SPI_WriteRead' [readability-identifier-naming]
+static uint8_t SPI_WriteRead(uint8_t txData){
+               ^~~~~~~~~~~~~
+               spiWriteRead
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:59:38: warning: invalid case style for parameter 'txData' [readability-identifier-naming]
+static uint8_t SPI_WriteRead(uint8_t txData){
+                                     ^~~~~~
+                                     tx_data
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:64:21: warning: 0x00FF is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        bus->DR = txData & 0x00FF;
+                           ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:66:19: warning: 0x00FF is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        return bus->DR & 0x00FF;
+                         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:82:22: warning: invalid case style for variable 'GPIO_InitStruct' [readability-identifier-naming]
+    GPIO_InitTypeDef GPIO_InitStruct;
+                     ^~~~~~~~~~~~~~~
+                     gpioInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:83:18: warning: invalid case style for variable 'SPI_InitStruct' [readability-identifier-naming]
+        SPI_InitTypeDef SPI_InitStruct;
+                        ^~~~~~~~~~~~~~
+                        spiInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:136:19: warning: invalid case style for variable 'NVIC_InitStruct' [readability-identifier-naming]
+        NVIC_InitTypeDef NVIC_InitStruct;
+                         ^~~~~~~~~~~~~~~
+                         nvicInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:155:29: warning: invalid case style for parameter 'txBuf' [readability-identifier-naming]
+void BSP_SPI_Write(uint8_t *txBuf, uint8_t txLen) {
+                            ^~~~~
+                            tx_buf
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:155:44: warning: invalid case style for parameter 'txLen' [readability-identifier-naming]
+void BSP_SPI_Write(uint8_t *txBuf, uint8_t txLen) {
+                                           ^~~~~
+                                           tx_len
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:157:13: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        if(txLen < 8) { 
+                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:187:28: warning: invalid case style for parameter 'rxBuf' [readability-identifier-naming]
+void BSP_SPI_Read(uint8_t *rxBuf, uint8_t rxLen) {
+                           ^~~~~
+                           rx_buf
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:187:43: warning: invalid case style for parameter 'rxLen' [readability-identifier-naming]
+void BSP_SPI_Read(uint8_t *rxBuf, uint8_t rxLen) {
+                                          ^~~~~
+                                          rx_len
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:190:13: warning: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        if(rxLen < 8) {
+                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_SPI.c:197:3: warning: multiple declarations in a single statement reduces readability [readability-isolate-declaration]
+                size_t i = 0, r = 0;
+                ^~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:4:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "stm32f4xx.h"
+^        ~~~~~~~~~~~~~
+         "os.h"
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:16:17: warning: invalid case style for global variable 'usbTxFifo' [readability-identifier-naming]
+static txfifo_t usbTxFifo;
+                ^~~~~~~~~
+                Usb_Tx_Fifo
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:17:17: warning: invalid case style for global variable 'displayTxFifo' [readability-identifier-naming]
+static txfifo_t displayTxFifo;
+                ^~~~~~~~~~~~~
+                Display_Tx_Fifo
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:23:17: warning: invalid case style for global variable 'usbRxFifo' [readability-identifier-naming]
+static rxfifo_t usbRxFifo;
+                ^~~~~~~~~
+                Usb_Rx_Fifo
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:24:17: warning: invalid case style for global variable 'displayRxFifo' [readability-identifier-naming]
+static rxfifo_t displayRxFifo;
+                ^~~~~~~~~~~~~
+                Display_Rx_Fifo
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:26:13: warning: invalid case style for global variable 'usbLineReceived' [readability-identifier-naming]
+static bool usbLineReceived = false;
+            ^~~~~~~~~~~~~~~
+            Usb_Line_Received
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:27:13: warning: invalid case style for global variable 'displayLineReceived' [readability-identifier-naming]
+static bool displayLineReceived = false;
+            ^~~~~~~~~~~~~~~~~~~
+            Display_Line_Received
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:29:19: warning: invalid case style for global variable 'usbRxCallback' [readability-identifier-naming]
+static callback_t usbRxCallback = NULL;
+                  ^~~~~~~~~~~~~
+                  Usb_Rx_Callback
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:30:19: warning: invalid case style for global variable 'usbTxCallback' [readability-identifier-naming]
+static callback_t usbTxCallback = NULL;
+                  ^~~~~~~~~~~~~
+                  Usb_Tx_Callback
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:31:19: warning: invalid case style for global variable 'displayRxCallback' [readability-identifier-naming]
+static callback_t displayRxCallback = NULL;
+                  ^~~~~~~~~~~~~~~~~
+                  Display_Rx_Callback
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:32:19: warning: invalid case style for global variable 'displayTxCallback' [readability-identifier-naming]
+static callback_t displayTxCallback = NULL;
+                  ^~~~~~~~~~~~~~~~~
+                  Display_Tx_Callback
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:34:18: warning: invalid case style for global variable 'rx_fifos' [readability-identifier-naming]
+static rxfifo_t *rx_fifos[NUM_UART]     = {&usbRxFifo, &displayRxFifo};
+                 ^~~~~~~~
+                 Rx_Fifos
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:35:18: warning: invalid case style for global variable 'tx_fifos' [readability-identifier-naming]
+static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &displayTxFifo};
+                 ^~~~~~~~
+                 Tx_Fifos
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:36:18: warning: invalid case style for global variable 'lineRecvd' [readability-identifier-naming]
+static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceived};
+                 ^~~~~~~~~
+                 Line_Recvd
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:37:23: warning: invalid case style for global variable 'handles' [readability-identifier-naming]
+static USART_TypeDef *handles[NUM_UART] = {USART2, USART3};
+                      ^~~~~~~
+                      Handles
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:39:13: warning: invalid case style for function 'USART_DISPLAY_Init' [readability-identifier-naming]
+static void USART_DISPLAY_Init() {
+            ^~~~~~~~~~~~~~~~~~
+            usartDisplayInit
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:43:22: warning: invalid case style for variable 'GPIO_InitStruct' [readability-identifier-naming]
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+                     ^~~~~~~~~~~~~~~
+                     gpioInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:44:23: warning: invalid case style for variable 'UART_InitStruct' [readability-identifier-naming]
+    USART_InitTypeDef UART_InitStruct = {0};
+                      ^~~~~~~~~~~~~~~
+                      uartInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:65:38: warning: 115200 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    UART_InitStruct.USART_BaudRate = 115200;
+                                     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:78:22: warning: invalid case style for variable 'NVIC_InitStructure' [readability-identifier-naming]
+    NVIC_InitTypeDef NVIC_InitStructure;
+                     ^~~~~~~~~~~~~~~~~~
+                     nvicInitStructure
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:86:13: warning: invalid case style for function 'USART_USB_Init' [readability-identifier-naming]
+static void USART_USB_Init() {
+            ^~~~~~~~~~~~~~
+            usartUsbInit
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:90:22: warning: invalid case style for variable 'GPIO_InitStruct' [readability-identifier-naming]
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+                     ^~~~~~~~~~~~~~~
+                     gpioInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:91:23: warning: invalid case style for variable 'UART_InitStruct' [readability-identifier-naming]
+    USART_InitTypeDef UART_InitStruct = {0};
+                      ^~~~~~~~~~~~~~~
+                      uartInitStruct
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:109:38: warning: 115200 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    UART_InitStruct.USART_BaudRate = 115200;
+                                     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:120:22: warning: invalid case style for variable 'NVIC_InitStructure' [readability-identifier-naming]
+    NVIC_InitTypeDef NVIC_InitStructure;
+                     ^~~~~~~~~~~~~~~~~~
+                     nvicInitStructure
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:127:5: warning: the value returned by this function should be used [cert-err33-c]
+    setvbuf(stdout, NULL, _IONBF, 0);
+    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:127:5: note: cast the expression to void to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:133:13: warning: invalid case style for function 'BSP_UART_Init_Internal' [readability-identifier-naming]
+static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback, UART_t uart) {
+            ^~~~~~~~~~~~~~~~~~~~~~
+            bspUartInitInternal
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:133:47: warning: invalid case style for parameter 'rxCallback' [readability-identifier-naming]
+static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback, UART_t uart) {
+                                              ^~~~~~~~~~
+                                              rx_callback
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:133:70: warning: invalid case style for parameter 'txCallback' [readability-identifier-naming]
+static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback, UART_t uart) {
+                                                                     ^~~~~~~~~~
+                                                                     tx_callback
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:168:11: warning: invalid case style for variable 'line_recvd' [readability-identifier-naming]
+    bool *line_recvd = lineRecvd[usart];
+          ^~~~~~~~~~
+          lineRecvd
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:170:24: warning: invalid case style for variable 'usart_handle' [readability-identifier-naming]
+        USART_TypeDef *usart_handle = handles[usart];
+                       ^~~~~~~~~~~~
+                       usartHandle
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:172:53: warning: implicit conversion from enumeration type 'FlagStatus' to different enumeration type 'FunctionalState' [clang-diagnostic-enum-conversion]
+        USART_ITConfig(usart_handle, USART_IT_RXNE, RESET);
+        ~~~~~~~~~~~~~~                              ^~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:185:53: warning: implicit conversion from enumeration type 'FlagStatus' to different enumeration type 'FunctionalState' [clang-diagnostic-enum-conversion]
+        USART_ITConfig(usart_handle, USART_IT_RXNE, SET);
+        ~~~~~~~~~~~~~~                              ^~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:206:20: warning: invalid case style for variable 'usart_handle' [readability-identifier-naming]
+    USART_TypeDef *usart_handle = handles[usart];
+                   ^~~~~~~~~~~~
+                   usartHandle
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:208:47: warning: implicit conversion from enumeration type 'FlagStatus' to different enumeration type 'FunctionalState' [clang-diagnostic-enum-conversion]
+    USART_ITConfig(usart_handle, USART_IT_TC, RESET);
+    ~~~~~~~~~~~~~~                            ^~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:215:55: warning: implicit conversion from enumeration type 'FlagStatus' to different enumeration type 'FunctionalState' [clang-diagnostic-enum-conversion]
+            USART_ITConfig(usart_handle, USART_IT_TC, SET);
+            ~~~~~~~~~~~~~~                            ^~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:217:40: warning: statement should be inside braces [readability-braces-around-statements]
+            while(txfifo_is_full(fifo));
+                                       ^
+                                        {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:219:55: warning: implicit conversion from enumeration type 'FlagStatus' to different enumeration type 'FunctionalState' [clang-diagnostic-enum-conversion]
+            USART_ITConfig(usart_handle, USART_IT_TC, RESET);
+            ~~~~~~~~~~~~~~                            ^~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:225:47: warning: implicit conversion from enumeration type 'FlagStatus' to different enumeration type 'FunctionalState' [clang-diagnostic-enum-conversion]
+    USART_ITConfig(usart_handle, USART_IT_TC, SET);
+    ~~~~~~~~~~~~~~                            ^~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:241:38: warning: statement should be inside braces [readability-braces-around-statements]
+            if(usbRxCallback != NULL)
+                                     ^
+                                      {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:247:43: warning: statement should be inside braces [readability-braces-around-statements]
+        if(data != '\b' && data != '\177') rxfifo_put(&usbRxFifo, data);
+                                          ^
+                                           {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:263:49: warning: implicit conversion from enumeration type 'FlagStatus' to different enumeration type 'FunctionalState' [clang-diagnostic-enum-conversion]
+            USART_ITConfig(USART2, USART_IT_TC, RESET); // Turn off the interrupt
+            ~~~~~~~~~~~~~~                      ^~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:264:38: warning: statement should be inside braces [readability-braces-around-statements]
+            if(usbTxCallback != NULL)
+                                     ^
+                                      {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:268:57: warning: potentially unintended semicolon [bugprone-suspicious-semicolon]
+    if(USART_GetITStatus(USART2, USART_IT_ORE) != RESET);
+                                                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:268:57: warning: if statement has empty body [clang-diagnostic-empty-body]
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:268:57: note: put the semicolon on a separate line to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:268:57: warning: statement should be inside braces [readability-braces-around-statements]
+    if(USART_GetITStatus(USART2, USART_IT_ORE) != RESET);
+                                                        ^
+                                                         {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:286:42: warning: statement should be inside braces [readability-braces-around-statements]
+            if(displayRxCallback != NULL)
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:292:43: warning: statement should be inside braces [readability-braces-around-statements]
+        if(data != '\b' && data != '\177') rxfifo_put(&displayRxFifo, data);
+                                          ^
+                                           {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:308:49: warning: implicit conversion from enumeration type 'FlagStatus' to different enumeration type 'FunctionalState' [clang-diagnostic-enum-conversion]
+            USART_ITConfig(USART3, USART_IT_TC, RESET);
+            ~~~~~~~~~~~~~~                      ^~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:309:42: warning: statement should be inside braces [readability-braces-around-statements]
+            if(displayTxCallback != NULL)
+                                         ^
+                                          {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:313:57: warning: potentially unintended semicolon [bugprone-suspicious-semicolon]
+    if(USART_GetITStatus(USART3, USART_IT_ORE) != RESET);
+                                                        ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:313:57: warning: if statement has empty body [clang-diagnostic-empty-body]
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:313:57: note: put the semicolon on a separate line to silence this warning
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/BSP_UART.c:313:57: warning: statement should be inside braces [readability-braces-around-statements]
+    if(USART_GetITStatus(USART3, USART_IT_ORE) != RESET);
+                                                        ^
+                                                         {
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:10:5: warning: declaration uses identifier '_write', which is reserved in the global namespace [bugprone-reserved-identifier]
+int _write(int fd, char *buffer, unsigned int len) {
+    ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:10:5: warning: invalid case style for global function '_write' [readability-identifier-naming]
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:10:16: warning: parameter 'fd' is unused [misc-unused-parameters]
+int _write(int fd, char *buffer, unsigned int len) {
+               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:17:5: warning: declaration uses identifier '_read', which is reserved in the global namespace [bugprone-reserved-identifier]
+int _read(int const fd, char *buffer, unsigned const len) {
+    ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:17:5: warning: invalid case style for global function '_read' [readability-identifier-naming]
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:17:21: warning: parameter 'fd' is unused [misc-unused-parameters]
+int _read(int const fd, char *buffer, unsigned const len) {
+                    ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:17:31: warning: pointer parameter 'buffer' can be pointer to const [readability-non-const-parameter]
+int _read(int const fd, char *buffer, unsigned const len) {
+                              ^
+                        const 
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:17:54: warning: parameter 'len' is unused [misc-unused-parameters]
+int _read(int const fd, char *buffer, unsigned const len) {
+                                                     ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:24:5: warning: declaration uses identifier '_close', which is reserved in the global namespace [bugprone-reserved-identifier]
+int _close(int file)
+    ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:24:5: warning: invalid case style for global function '_close' [readability-identifier-naming]
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:24:16: warning: parameter 'file' is unused [misc-unused-parameters]
+int _close(int file)
+               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:29:5: warning: declaration uses identifier '_lseek', which is reserved in the global namespace [bugprone-reserved-identifier]
+int _lseek(int file, int ptr, int dir)
+    ^
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:29:5: warning: invalid case style for global function '_lseek' [readability-identifier-naming]
+note: this fix will not be applied because it overlaps with another fix
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:29:16: warning: parameter 'file' is unused [misc-unused-parameters]
+int _lseek(int file, int ptr, int dir)
+               ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:29:26: warning: parameter 'ptr' is unused [misc-unused-parameters]
+int _lseek(int file, int ptr, int dir)
+                         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/retarget.c:29:35: warning: parameter 'dir' is unused [misc-unused-parameters]
+int _lseek(int file, int ptr, int dir)
+                                  ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/system_stm32f4xx.c:136:28: warning: 16000000 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+uint32_t SystemCoreClock = 16000000;
+                           ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/system_stm32f4xx.c:223:3: warning: multiple declarations in a single statement reduces readability [readability-isolate-declaration]
+  uint32_t tmp = 0, pllvco = 0, pllp = 2, pllsource = 0, pllm = 2;
+  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/system_stm32f4xx.c:236:10: warning: 0x08 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+    case 0x08:  /* PLL used as system clock source */
+         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/system_stm32f4xx.c:241:58: warning: 22 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+      pllsource = (RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC) >> 22;
+                                                         ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/system_stm32f4xx.c:247:77: warning: 6 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        pllvco = (HSE_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);
+                                                                            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/system_stm32f4xx.c:252:77: warning: 6 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+        pllvco = (HSI_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);
+                                                                            ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../BSP/STM32F413/Src/system_stm32f4xx.c:255:52: warning: 16 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
+      pllp = (((RCC->PLLCFGR & RCC_PLLCFGR_PLLP) >>16) + 1 ) *2;
+                                                   ^
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Config/Inc/config.h:9:9: warning: declaration uses identifier '__CONFIG_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __CONFIG_H
+        ^~~~~~~~~~
+        CONFIG_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Config/Inc/stm32f4xx_conf.h:30:9: warning: declaration uses identifier '__STM32F4xx_CONF_H', which is a reserved identifier [bugprone-reserved-identifier]
+#define __STM32F4xx_CONF_H
+        ^~~~~~~~~~~~~~~~~~
+        STM32F4xx_CONF_H
+/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Config/Inc/stm32f4xx_conf.h:35:1: warning: #includes are not sorted properly [llvm-include-order]
+#include "stm32f4xx_can.h"
+^        ~~~~~~~~~~~~~~~~~
+         "misc.h" /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Inc/CANConfig.h:13:17: warning: invalid case style for global variable 'carCANFilterList' [readability-identifier-naming]
 extern  CANId_t carCANFilterList[NUM_CARCAN_FILTERS];
                 ^~~~~~~~~~~~~~~~
@@ -1141,7 +1813,4 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
 /home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Pedals.c:43:66: warning: implicit conversion from enumeration type 'pedal_t' to different enumeration type 'ADC_t' [clang-diagnostic-enum-conversion]
     int16_t millivoltsPedal = (int16_t) BSP_ADC_Get_Millivoltage(pedal);
                                         ~~~~~~~~~~~~~~~~~~~~~~~~ ^~~~~
-/home/ishdeshpa/LHR/Controls/BSP/STM32F413/../../Drivers/Src/Pedals.c:48:83: warning: 100 is a magic number; consider replacing it with a named constant [readability-magic-numbers]
-        percentage = (int8_t) ( (int32_t) (millivoltsPedal - LowerBound[pedal]) * 100 /
-                                                                                  ^
 make[1]: Leaving directory '/home/ishdeshpa/LHR/Controls/BSP/STM32F413'
