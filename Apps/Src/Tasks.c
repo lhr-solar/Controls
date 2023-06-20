@@ -62,3 +62,8 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 void App_OS_TaskSwHook(void) {
     PrevTask = OSTCBCurPtr;
 }
+
+void TaskSwHook_Init(void) {
+    PrevTask = NULL;
+    OS_AppTaskSwHookPtr = App_OS_TaskSwHook;
+}
