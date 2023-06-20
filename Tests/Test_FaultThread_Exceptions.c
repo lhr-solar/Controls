@@ -1,24 +1,17 @@
 /**
- * Test file for fault state exceptions
  * 
- * This file tests fault state 
- * to ensure thrown exceptions are handled correctly
- * 
- * CHANGE THISXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
- * <Run this test in conjunction with the simulator 
- * GUI. The user is prompted to specify the
- * contactor name and the state it should 
- * be set to. The input should be all caps and formatted
- * as such: CONTACTOR_NAME(MOTOR/ARRAY) STATE(ON/OFF)
- * Example inputs: "MOTOR ON", "ARRAY OFF"
- * The corresponding contactor will change state
- * in the GUI.>
- * 
+ * This file tests the fault state exception struct mechanism
+ * to ensure thrown exceptions are handled correctly.
+ * It does this by testing the assertion functions for each priority option
+ * and creating and faulting tasks using the car and bps sim on Renode
+ *
+ * This test is run in conjunction with Test_motor_FaultThread_Exceptions
+ * and Test_car_FaultThread_Exceptions on Renode
  * 
  * @file 
- * @author Nathaniel Delgado (nathaniel.delgado@utexas.edu)
+ * @author Madeleine Lee (madeleinercflee@utexas.edu)
  * @brief Tests the fault state exception mechanism
- * @version idk
+ * @version 
  * @date 2023-6-08
  *
  * @copyright Copyright (c) 2022 Longhorn Racing Solar
@@ -54,12 +47,6 @@ static CPU_STK OSErrorTaskStk[DEFAULT_STACK_SIZE];
 OS_SEM Ready_Sema4;
 
 
-// To do:
-// Change all task initializations to be consistent in constant usage if both options work
-// change bool to semaphore?
-// Do we need to also turn off the motor_precharge contactor in fault state in case it's on?
-// Change ReadCarCAN Exception message so we can distinguish charging disable message vs missed msg
-
 // Assertion function for OS errors
 void checkOSError(OS_ERR err) {
     if (err != OS_ERR_NONE) {
@@ -87,12 +74,12 @@ void ExceptionTask(void* test_callbacks) {
     }
     // Throw a priority 2 exception
     printf("\n\rThrowing priority level 2 exception");
-    exception_t prio2Exception = {.prio = 2, .message = "\n\rprio2 exception message", .callback = test_callbacks};
+    exception_t prio2Exception = {.prio = PRI_RECOV, .message = "\n\rprio2 exception message", .callback = test_callbacks};
     assertExceptionError(prio2Exception);
     
     // Throw a priority 1 exception
     printf("\n\rThrowing priority level 1 exception");
-    exception_t prio1Exception = {.prio = 1, .message = "\n\rprio1 exception message", .callback = test_callbacks};
+    exception_t prio1Exception = {.prio = PRI_NONRECOV, .message = "\n\rprio1 exception message", .callback = test_callbacks};
     OSSemPost(&Ready_Sema4, OS_OPT_POST_1, &err); // Alert manager task that the test is almost finished
     assertExceptionError(prio1Exception);
     printf("\n\rTest failed: Prio 1 exception did not immediately result in an unrecoverable fault");
@@ -269,7 +256,7 @@ void Task_ManagerTask(void* arg) {
     CANbus_Init(CARCAN, NULL, 0);
     Contactors_Init();
     OSSemCreate(&Ready_Sema4, "Ready Flag Semaphore", 0, &err);
-    ErrorStatus errorCode;
+    //ErrorStatus errorCode;
     
     /*** test */
  
@@ -288,6 +275,8 @@ void Task_ManagerTask(void* arg) {
     while (1) {
         // Test the exceptions mechanism by creating and throwing exceptions of priorities 1 and 2
         // Both with and without callback functions
+        // Successful if exception message and callback message (if applicable) are printed
+        // and the fail message is not printed (tasks are stopped when they assert an error)
         printf("\n\r=========== Testing exception priorities 1 and 2 ===========");
     
         // Test level 1 & 2 exceptions without callbacks
@@ -318,6 +307,9 @@ void Task_ManagerTask(void* arg) {
         checkOSError(err); 
 
         // Test the assertOSError function using the OSErrorTask
+        // Creates an OS error by pending on a mutex that isn't created
+        // Successful if it prints the OS Error code
+        // and doesn't print the fail message (task is stopped by asserting an error)
         printf("\n\r=========== Testing OS assert ===========");
 
         createOSErrorTask();
@@ -332,7 +324,8 @@ void Task_ManagerTask(void* arg) {
         checkOSError(err); 
         OSTaskDel(&FaultState_TCB, &err);
 
-        // Test individual tasks error assertions
+        // Test exceptions in ReadTritium by creating the tasks
+        // and sending faults using the motor sim on Renode
         printf("\n\r=========== Testing ReadTritium ===========");
 
         CANDATA_t canMessage = {0};
@@ -352,30 +345,29 @@ void Task_ManagerTask(void* arg) {
 
         }
 
+        // Tests exceptions in ReadCarCAN by creating the tasks
+        // and sending messages using the bps sim on Renode
         printf("\n\r=========== Testing ReadCarCAN ===========");
         createFaultState();
         checkOSError(err);
         createReadCarCAN();
         checkOSError(err);
         CANbus_Send(canMessage, CAN_BLOCKING, CARCAN);
-        uint16_t canMsgData = 0;
+        //uint16_t canMsgData = 0;
 
-        do {
+        for (int i = 0; i < 20; i++) {
             printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-            checkOSError(err);
-            errorCode = CANbus_Read(&canMessage, CAN_BLOCKING, CARCAN);
-            if (errorCode != SUCCESS) {
-                continue;
-            }
-            canMsgData = *((uint16_t *)&canMessage.data[0]);
-        } while (canMsgData != READY_MSG);
+            //OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
+            //int x = 0;
+            //for (int i = 0; i < 9999999; i++){x+=1;}
+        }
 
         // By now, the BPS Trip message should have been sent
-        OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Give ReadCarCAN time to turn off contactors
+        //OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Give ReadCarCAN time to turn off contactors
         printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
         printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
         printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+
 
         printf("\n\r=========== Test UpdateDisplay ===========");
         // Might be able to test if we UpdateDisplay_Init() and then make the task

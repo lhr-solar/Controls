@@ -1,9 +1,19 @@
 /**
- * XXXXXThis is meant to test the ReadCarCAN module in the controls system, by "pretending" to be BPS.
+ * This is meant to test exception handling in the ReadCarCAN module by pretending to be BPS.
  * 
- * XXXXXThis testfile is intended to be compiled and run on Renode as the supplementary machine to send CAN messages to the main machine.
- * It is designed to send messages on CAN1 (CARCAN) to test ReadCarCAN's fault handling
- * Specifically, it sends the BPS trip message so we can check that this message sends the car to Fault State
+ * This testfile is intended to be compiled and run on Renode as the supplementary machine to send CAN messages to the main machine.
+ * It is designed to send messages on CAN1 (CARCAN) to test ReadCarCAN and FaultState's fault handling
+ * Specifically, it tests the exceptions for disabling charging and handling the BPS trip message
+ * 
+ * Run this test in conjuction with Test_FaultThread_Exceptions
+ * 
+ * @file
+ * @author Madeleine Lee (madeleinercflee@utexas.edu)
+ * @brief Supplemental testfile for testing the fault state exception mechanism
+ * @version
+ * @date 2023-6-08
+ * 
+ * @copyright Copyright (c) 2022 Longhorn Racing Solar
  * 
 */
 

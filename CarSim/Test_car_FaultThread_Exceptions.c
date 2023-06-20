@@ -1,4 +1,22 @@
-
+/**
+ * This is meant to test exception handling in the ReadTritium module by pretending to be the motor
+ * 
+ * This testfile is intended to be compiled and run on Renode as the supplementary machine 
+ * to send Tritium error messages to the main machine.
+ * It is designed to send messages on CAN3 (MOTORCAN) to test ReadTritium and FaultState's error handling.
+ * Specifically, it goes through each Tritium error and sends it to the leaderboard.
+ * 
+ * Run this test in conjuction with Test_FaultThread_Exceptions
+ * 
+ * @file 
+ * @author Madeleine Lee (madeleinercflee@utexas.edu)
+ * @brief Tests the fault state exception mechanism
+ * @version 
+ * @date 2023-6-08
+ *
+ * @copyright Copyright (c) 2022 Longhorn Racing Solar
+ *
+*/
 
 
 #include "Tasks.h"
