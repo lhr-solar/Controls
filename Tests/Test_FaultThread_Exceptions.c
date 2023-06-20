@@ -352,7 +352,6 @@ void Task_ManagerTask(void* arg) {
 
         }
 
-
         printf("\n\r=========== Testing ReadCarCAN ===========");
         createFaultState();
         checkOSError(err);
@@ -370,14 +369,13 @@ void Task_ManagerTask(void* arg) {
                 continue;
             }
             canMsgData = *((uint16_t *)&canMessage.data[0]);
-        } while (canMsgData != 0x4444);
+        } while (canMsgData != READY_MSG);
 
         // By now, the BPS Trip message should have been sent
         OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Give ReadCarCAN time to turn off contactors
         printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
         printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
         printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
-
 
         printf("\n\r=========== Test UpdateDisplay ===========");
         // Might be able to test if we UpdateDisplay_Init() and then make the task
