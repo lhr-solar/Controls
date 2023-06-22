@@ -5,8 +5,9 @@
  * It does this by testing the assertion functions for each priority option
  * and creating and faulting tasks using the car and bps sim on Renode
  *
- * This test is run in conjunction with Test_motor_FaultThread_Exceptions
- * and Test_car_FaultThread_Exceptions on Renode
+ * This test is run in LoopBack mode with all messages sent and received by the LeaderBoard.
+ * However, it can be run in conjunction with motor-sim and car-sim
+ * ( which don't do anything) when simulated to appease Renode
  * 
  * @file 
  * @author Madeleine Lee (madeleinercflee@utexas.edu)
@@ -37,16 +38,11 @@
 static OS_TCB ManagerTask_TCB;
 static OS_TCB ExceptionTaskTCB;
 static OS_TCB OSErrorTaskTCB;
-//static OS_TCB BPSSim_TCB;
-//static OS_TCB MotorSim_TCB;
 
 
 static CPU_STK ManagerTask_Stk[DEFAULT_STACK_SIZE];
 static CPU_STK ExceptionTaskStk[DEFAULT_STACK_SIZE];
 static CPU_STK OSErrorTaskStk[DEFAULT_STACK_SIZE];
-//static CPU_STK BPSSim_Stk[STACK_SIZE];
-//static CPU_STK MotorSim_Stk[STACK_SIZE];
-
 
 
 
@@ -109,126 +105,6 @@ void OSErrorTask(void* arg) {
     printf("\n\rassertOSError test failed: assertion did not immediately result in an unrecoverable fault");
     while(1){};
 }   
-
-
-/* void MotorSim(void *p_arg){
-    printf("\n\rIn MotorSim");
-    OS_ERR err;
-    //CANDATA_t dataBuf = {0};
-    //uint16_t data = 0;
-
-    CANDATA_t canError = {0};
-    canError.ID=MOTOR_STATUS;
-
-
-    for (int i = 0; i < NUM_TRITIUM_ERRORS + 2; i++) {
-         
-
-        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        uint16_t tritiumError = (0x01<<i)>>1;
-        *((uint16_t*)(&canError.data[4])) = tritiumError;
-        printf("\n\rNow sending: %d", tritiumError);
-
-         // Send error messages to the leader board
-        if (tritiumError == T_HALL_SENSOR_ERR) { // Send the message extra times to allow for motor restart
-            CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
-            OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-            CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
-            OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        }
-
-        CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
-        OSSemPost(&TestReady_Sema4, OS_OPT_POST_1, &err); // Alert manager task that the test is almost finished
-   
-        
-    }
-
-
-
-}
- */
-
-  
-
-/* 
-
-void BPSSim(void *p_arg){
-
-    OS_ERR err;
-
-    //CANDATA_t dataBuf; // A buffer in which we can store the messages we read
-    //uint16_t data = 0;
-
-    //  do {
-    //          ErrorStatus status = CANbus_Read(&dataBuf, false, MOTORCAN);
-    //          if (status != SUCCESS) {
-    //              printf("\n\rCANbus Read error status: %d\n\r", status);
-    //          } else {
-    //              data = *((uint16_t*)(&dataBuf.data[0]));
-    //              printf("\n\rWaiting for start. Read: %d", data);
-    //          }
-    //          OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-    //      } while (data != READY_MSG);
-
-    CANDATA_t chargeMsg;
-    chargeMsg.ID = CHARGE_ENABLE;
-    *(uint64_t*)(&chargeMsg.data) = 0;
-    chargeMsg.idx = 0;
-
-    // Message for BPS Fault
-    CANDATA_t tripBPSMsg;
-    tripBPSMsg.ID = BPS_TRIP;
-    *(uint64_t*)(&tripBPSMsg.data) = 0;
-    tripBPSMsg.idx = 0;
-
-    
-
-
-    // Send five charge enable messages so the contactors get flipped on
-    chargeMsg.data[0] = true;
-    for(int i = 0; i<3; i++){
-        CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
-        printf("\nSent enable chargeMsg %d", i);
-        OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
-    }
-
-    // Send five charge disable messages to test prio-2 disable contactor callback
-    // Fault state should turn off contactors but not enter a nonrecoverable fault
-    chargeMsg.data[0] = false;
-    for(int i = 0; i<3; i++){
-        CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
-        printf("\nSent disable chargeMsg %d", i);
-        OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
-    }
-
-    // Send five more charge enable messages so the contactors get flipped on again
-    chargeMsg.data[0] = true;
-    for(int i = 0; i<3; i++){
-        CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
-        printf("\nSent enable chargeMsg %d", i);
-        OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
-    }
-
-    // Send a trip message of 1 (trip)
-    // Note: trip messages are not usually sent,
-    // so any trip message (even 0) should be a concern.
-    // Maybe we should handle them differently?
-    *(uint64_t*)(&tripBPSMsg.data) = 1;
-    CANbus_Send(tripBPSMsg, CAN_BLOCKING, CARCAN);
-    printf("\nSent trip message %d", tripBPSMsg.data[0]);
-
-    //dataBuf.ID = CARDATA;
-    *((uint16_t*)(&dataBuf.data[0])) = READY_MSG;
-    //CANbus_Send(dataBuf, CAN_NON_BLOCKING, CARCAN);
-
-
-    while(1){};
-}
-     */
-
-
-
-
 
 
 
@@ -372,60 +248,6 @@ void createOSErrorTask(void) {
 
 }
 
-/* // The bps-sim task moved here as BPSSim for Loopback mode testing
-void createBPSSimTask(void) {
-    OS_ERR err;
-
-        OSTaskCreate(
-        (OS_TCB*)&BPSSim_TCB,
-        (CPU_CHAR*)"bps-sim",
-        (OS_TASK_PTR)BPSSim,
-        (void*)NULL,
-        (OS_PRIO)4, // May need to change this
-        (CPU_STK*)BPSSim_Stk,
-        (CPU_STK_SIZE)STACK_SIZE/10,
-        (CPU_STK_SIZE)STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)NULL,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
-        (OS_ERR*)&err
-    );
-    checkOSError(err); 
-
-    
-    if (err != OS_ERR_NONE) {
-        printf("bps sim error code %d\n\r", err);
-    }
-} */
-
-/* 
-void createMotorSimTask(void){
-    OS_ERR err;
-
-    OSTaskCreate(
-        (OS_TCB*)&MotorSim_TCB,
-        (CPU_CHAR*)"Task1",
-        (OS_TASK_PTR)MotorSim,
-        (void*)NULL,
-        (OS_PRIO)4, // May need to change this
-        (CPU_STK*)MotorSim_Stk,
-        (CPU_STK_SIZE)STACK_SIZE/10,
-        (CPU_STK_SIZE)STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)NULL,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
-        (OS_ERR*)&err
-    );
-
-    if (err != OS_ERR_NONE) {
-        printf("Task error code %d\n", err);
-    }
-}
-
- */
-
 
 
 // A high-priority task that manages other tasks and runs the tests
@@ -440,19 +262,7 @@ void Task_ManagerTask(void* arg) {
     OSSemCreate(&TestReady_Sema4, "Ready Flag Semaphore", 0, &err);
     //ErrorStatus errorCode;
     
-    /*** test */
- 
-
-    // CANDATA_t testmsg = {0};
-    // testmsg.ID=MOTOR_STATUS;
-    // testmsg.idx=0;
-    // *((uint16_t*)(&testmsg.data[0])) = 4444;
     
-    // while (1) {
-    //     CANbus_Send(testmsg, CAN_BLOCKING, MOTORCAN);
-    // }
-
-    /****/
 
     while (1) {
         // Test the exceptions mechanism by creating and throwing exceptions of priorities 1 and 2
@@ -506,12 +316,9 @@ void Task_ManagerTask(void* arg) {
         checkOSError(err); 
         OSTaskDel(&FaultState_TCB, &err);
 
-        // Test exceptions in ReadTritium by creating the tasks
-        // and sending faults using the motor sim on Renode
+        // Test exceptions in ReadTritium by creating the tasks and sending faults
+        // TODO: Change ReadTrititum so that we can print out the error code and not just a default message
         printf("\n\n\r=========== Testing ReadTritium ===========");
-
-        //CANDATA_t dataBuf = {0};
-        //uint16_t data = 0;
 
         CANDATA_t canError = {0};
         canError.ID=MOTOR_STATUS;
@@ -528,12 +335,10 @@ void Task_ManagerTask(void* arg) {
             OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for ReadTritium to finish
             printf("\n\rShould be testing Tritium error %d", i);
              if (tritiumError == T_HALL_SENSOR_ERR) { // Send the message extra times to allow for motor restart
-                CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
-                printf("\n\rShould be testing Tritium error %d", i);
-                OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-                CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
-                printf("\n\rShould be testing Tritium error %d", i);
-                OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+                for (int i = 0; i < 4; i++) { // Faults if greater than restart threshold (3). Maybe we should change it to equal to threshold?
+                    CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
+                    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+                }  
             }
             
             OSTaskDel(&ReadTritium_TCB, &err);
@@ -541,78 +346,86 @@ void Task_ManagerTask(void* arg) {
             OSTaskDel(&FaultState_TCB, &err);
             checkOSError(err);
 
-        }
+        } 
 
-        // Tests exceptions in ReadCarCAN by creating the tasks
-        // and sending messages using the bps sim on Renode
-        printf("\n\r=========== Testing ReadCarCAN ===========");
+        // Tests exceptions in ReadCarCAN by creating the tasks and sending messages
+        // Causes a weird issue where the last things that were printed are
+        // reprinted sixteen times all at once with some odd changes
+        // if the messages are sent enough times
+        // ex: 3 enable, 3 disable, 2 delay, 5 enable works
+        // but 5 enable ... doesn't
+        // I think the issue may occur if you let the test loop around
+        // enough, though.
+        printf("\n\n\r=========== Testing ReadCarCAN ===========");
         createFaultState();
         checkOSError(err);
         createReadCarCAN();
-        //createBPSSimTask();
         checkOSError(err);
-        //CANbus_Send(canMessage, CAN_BLOCKING, CARCAN);
-        //uint16_t canMsgData = 0;
+        
+        // Message for charging enable/disable
+        CANDATA_t chargeMsg;
+        chargeMsg.ID = CHARGE_ENABLE;
+        *(uint64_t*)(&chargeMsg.data) = 0;
+        chargeMsg.idx = 0;
+
+        // Message for BPS Fault
+        CANDATA_t tripBPSMsg;
+        tripBPSMsg.ID = BPS_TRIP;
+        *(uint64_t*)(&tripBPSMsg.data) = 0;
+        tripBPSMsg.idx = 0;
 
         
-    CANDATA_t chargeMsg;
-    chargeMsg.ID = CHARGE_ENABLE;
-    *(uint64_t*)(&chargeMsg.data) = 0;
-    chargeMsg.idx = 0;
-
-    // Message for BPS Fault
-    CANDATA_t tripBPSMsg;
-    tripBPSMsg.ID = BPS_TRIP;
-    *(uint64_t*)(&tripBPSMsg.data) = 0;
-    tripBPSMsg.idx = 0;
-
-    
 
 
-    // Send five charge enable messages so the contactors get flipped on
-    chargeMsg.data[0] = true;
-    for(int i = 0; i<3; i++){
-        CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
-        printf("\nSent enable chargeMsg %d", i);
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-    }
+        // Send charge enable messages
+        chargeMsg.data[0] = true;
+        for(int i = 0; i<3; i++){
+            CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
+            printf("\nSent enable chargeMsg %d", i);
+            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+            printf("\n\rChargeEnable: %d", ChargeEnable_Get());
+        }
 
-    // Send five charge disable messages to test prio-2 disable contactor callback
-    // Fault state should turn off contactors but not enter a nonrecoverable fault
-    chargeMsg.data[0] = false;
-    for(int i = 0; i<3; i++){
-        CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
-        printf("\nSent disable chargeMsg %d", i);
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-    }
-    
-    for(int i = 0; i<2; i++){
-        printf("\nDelay %d", i);
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-    }
+        // Send five charge disable messages to test prio-2 disable contactor callback
+        // Fault state should turn off contactors but not enter a nonrecoverable fault
+        chargeMsg.data[0] = false;
+        for(int i = 0; i<3; i++){
+            CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
+            printf("\nSent disable chargeMsg %d", i);
+            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+            printf("\n\rChargeEnable: %d", ChargeEnable_Get());
+        }
 
-    // Send five more charge enable messages so the contactors get flipped on again
-    chargeMsg.data[0] = true;
-    for(int i = 0; i<5; i++){
-        CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
-        printf("\nSent enable chargeMsg %d", i);
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-        printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-    }
-    printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
-    printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
-    printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+        // Pause the delivery of messages to trigger the canWatchTimer
+        //TODO: Can't tell that anything is happening here at the moment 
+        for(int i = 0; i<2; i++){
+            printf("\nDelay %d", i);
+            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+            printf("\n\rChargeEnable: %d", ChargeEnable_Get());
+        } 
 
-    // Send a trip message of 1 (trip)
-    // Note: trip messages are not usually sent,
-    // so any trip message (even 0) should be a concern.
-    // Maybe we should handle them differently?
-    *(uint64_t*)(&tripBPSMsg.data) = 1;
-    CANbus_Send(tripBPSMsg, CAN_BLOCKING, CARCAN);
-    printf("\nSent trip message %d", tripBPSMsg.data[0]);
+        // Send five more charge enable messages so the contactors get flipped on again
+        chargeMsg.data[0] = true;
+        for(int i = 0; i < 5; i++){
+            CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
+            printf("\nSent enable chargeMsg %d", i);
+            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+            printf("\n\rChargeEnable: %d", ChargeEnable_Get());
+        }
+        //TODO: Would these ever be on? Since there's no minion board we may not be able to check
+        printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
+        printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
+        printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+
+        // Send a trip message of 1 (trip)
+        // TODO: trip messages are not usually sent,
+        // so any trip message (even 0) should be a concern.
+        // Need to change things to handle them differently (might be in ignition fix PR already)
+        *(uint64_t*)(&tripBPSMsg.data) = 1;
+        CANbus_Send(tripBPSMsg, CAN_BLOCKING, CARCAN);
+        printf("\nSent trip message %d", tripBPSMsg.data[0]);
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+
 
         // By now, the BPS Trip message should have been sent
         //OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Give ReadCarCAN time to turn off contactors
@@ -628,20 +441,33 @@ void Task_ManagerTask(void* arg) {
         printf("\n\n\r=========== Test UpdateDisplay ===========");
         // Might be able to test if we UpdateDisplay_Init() and then make the task
         // UpdateDisplay and Display error functions do actually do the same thing, so one of them should be deleted.
-        //UpdateDisplay_Init();
         // Call update display put next to overflow the queue (actual issue)
        
-        // Updating display without updateDisplayInit()
+       // Note: currently gets stuck, so you may want to comment this section out to test ReadCarCAN
+
         createUpdateDisplay();
         createFaultState();
-        OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         checkOSError(err);
         OSTaskDel(&UpdateDisplay_TCB, &err);
         checkOSError(err);
         OSTaskDel(&FaultState_TCB, &err);
         checkOSError(err);
 
-        // overflow the queue
+        UpdateDisplay_Init();
+        createUpdateDisplay();
+        createFaultState();
+        for (int i = 0; i < 10; i++) {
+            UpdateDisplay_SetPage(0); //update display put next is static so I'll try this instead
+            // It doesn't seem to work, though.
+            // I appear to be getting stuck in txfifo_is_full instead
+        }
+        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        checkOSError(err);
+        OSTaskDel(&UpdateDisplay_TCB, &err);
+        checkOSError(err);
+        OSTaskDel(&FaultState_TCB, &err);
+        checkOSError(err);
 
 
     }
@@ -674,8 +500,6 @@ int main(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     ); 
-    
-
     checkOSError(err);
 
     OSStart(&err);

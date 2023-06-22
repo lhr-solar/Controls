@@ -51,6 +51,7 @@ static void assertTritiumError(uint16_t motor_err){
 			assertExceptionError(hallErrorPrio1); // Fail out by entering nonrecoverable fault
         	} else {
             hall_fault_cnt++; 
+			printf("\n\rRestarting motor");
             MotorController_Restart(); //re-initialize motor 
             return; 
         	} 
