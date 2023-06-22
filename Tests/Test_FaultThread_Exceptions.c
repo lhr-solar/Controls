@@ -529,8 +529,10 @@ void Task_ManagerTask(void* arg) {
             printf("\n\rShould be testing Tritium error %d", i);
              if (tritiumError == T_HALL_SENSOR_ERR) { // Send the message extra times to allow for motor restart
                 CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
+                printf("\n\rShould be testing Tritium error %d", i);
                 OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
                 CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
+                printf("\n\rShould be testing Tritium error %d", i);
                 OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
             }
             
@@ -585,10 +587,16 @@ void Task_ManagerTask(void* arg) {
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         printf("\n\rChargeEnable: %d", ChargeEnable_Get());
     }
+    
+    for(int i = 0; i<2; i++){
+        printf("\nDelay %d", i);
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+        printf("\n\rChargeEnable: %d", ChargeEnable_Get());
+    }
 
     // Send five more charge enable messages so the contactors get flipped on again
     chargeMsg.data[0] = true;
-    for(int i = 0; i<3; i++){
+    for(int i = 0; i<5; i++){
         CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
         printf("\nSent enable chargeMsg %d", i);
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
@@ -605,11 +613,6 @@ void Task_ManagerTask(void* arg) {
     *(uint64_t*)(&tripBPSMsg.data) = 1;
     CANbus_Send(tripBPSMsg, CAN_BLOCKING, CARCAN);
     printf("\nSent trip message %d", tripBPSMsg.data[0]);
-        for (int i = 0; i < 20; i++) {
-            
-            //int x = 0;
-            //for (int i = 0; i < 9999999; i++){x+=1;}
-        }
 
         // By now, the BPS Trip message should have been sent
         //OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Give ReadCarCAN time to turn off contactors
@@ -628,6 +631,7 @@ void Task_ManagerTask(void* arg) {
         //UpdateDisplay_Init();
         // Call update display put next to overflow the queue (actual issue)
        
+        // Updating display without updateDisplayInit()
         createUpdateDisplay();
         createFaultState();
         OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err);
@@ -636,6 +640,8 @@ void Task_ManagerTask(void* arg) {
         checkOSError(err);
         OSTaskDel(&FaultState_TCB, &err);
         checkOSError(err);
+
+        // overflow the queue
 
 
     }
