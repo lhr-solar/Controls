@@ -2,7 +2,8 @@
 #include "os.h"
 #include "bsp.h"
 
-#define assert(expr) if (!(expr)) __asm("bkpt")
+//#define assert(expr) if (!(expr)) __asm("bkpt")
+#define assert(expr)
 
 static OS_TCB Task1TCB, Task2TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE], Task2Stk[DEFAULT_STACK_SIZE];

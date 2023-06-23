@@ -79,8 +79,6 @@ extern OS_TCB ReadTritium_TCB;
 extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB Telemetry_TCB;
 
-extern OS_TCB *PrevTask;
-
 
 /**
  * Stacks
@@ -158,6 +156,20 @@ typedef enum{
     FAULT_DISPLAY = 0x10,    // for display faults
     FAULT_BPS = 0x20,       // for if BPS trips
 } fault_bitmap_t;
+
+/**
+ * Task trace
+ * 
+ * Stores the last 8 tasks that were run
+ * The most recent task is at tasks[index], the one before at tasks[index-1],
+ * wrapping back around at the beginnning
+ */
+typedef struct {
+    OS_TCB *tasks[8];
+    uint32_t index;
+} task_trace_t;
+
+extern task_trace_t PrevTasks;
 
 /**
  * Error variables

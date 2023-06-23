@@ -21,7 +21,7 @@ OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB Telemetry_TCB;
 
-OS_TCB *PrevTask;
+task_trace_t PrevTasks;
 
 /**
  * Stacks
@@ -60,10 +60,14 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 }
 
 void App_OS_TaskSwHook(void) {
-    PrevTask = OSTCBCurPtr;
+    OS_TCB *cur = OSTCBCurPtr;
+    if (cur == &OSTickTaskTCB) return; // Ignore the tick task, since it happens a lot
+    if (cur == PrevTasks.tasks[PrevTasks.index]) return; // Don't record the same task again
+    PrevTasks.index = (PrevTasks.index + 1) & 7;
+    PrevTasks.tasks[PrevTasks.index] = cur;
 }
 
 void TaskSwHook_Init(void) {
-    PrevTask = NULL;
+    PrevTasks.index = 0xffffffff; // List starts out empty
     OS_AppTaskSwHookPtr = App_OS_TaskSwHook;
 }
