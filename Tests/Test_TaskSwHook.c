@@ -2,8 +2,22 @@
 #include "os.h"
 #include "bsp.h"
 
-//#define assert(expr) if (!(expr)) __asm("bkpt")
-#define assert(expr)
+static char *getTCBName(OS_TCB *tcb) {
+    return tcb ? tcb->NamePtr : "No Task";
+}
+
+void dumpTrace(void) {
+    int idx = PrevTasks.index;
+    printf("Task trace: [");
+    for (int i=0; i<8; i++) {
+        if (!PrevTasks.tasks[idx]) break;
+        printf("%s, ", getTCBName(PrevTasks.tasks[idx]));
+        idx = (idx + 7) & 7; // decrement idx, wrapping around at 0
+    }
+    printf("]\n\r");
+}
+
+#define expect(str) printf("Previous expected: %s, previous actual: %s\n\r", (str), getTCBName(PrevTasks.tasks[PrevTasks.index]))
 
 static OS_TCB Task1TCB, Task2TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE], Task2Stk[DEFAULT_STACK_SIZE];
@@ -14,16 +28,29 @@ void Task1(void *p_arg) {
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+    BSP_UART_Init(UART_2);
 
-    assert(PrevTask == NULL); // PrevTask should be null
+    expect("No Task");
+    dumpTrace();
+    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+    expect("Task 2");
+    dumpTrace();
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-    assert(PrevTask == &Task2TCB);
+    expect("Task 2");
+    dumpTrace();
     while (1);
 
 }
 
 void Task2(void *p_arg) {
-    assert(PrevTask == &Task1TCB);
+    (void) p_arg;
+    OS_ERR err;
+
+    expect("Task 1");
+    dumpTrace();
+    OSTimeDlyHMSM(0, 0, 0, 600, OS_OPT_TIME_HMSM_STRICT, &err);
+    expect("Task 1");
+    dumpTrace();
     while (1);
 }
 

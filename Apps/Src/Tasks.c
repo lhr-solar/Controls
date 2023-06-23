@@ -59,15 +59,28 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
     }
 }
 
+/**
+ * @brief Hook that's called every context switch
+ * 
+ * This function will append the task being switched out to the task trace if and only if:
+ *      1. It's not a task created automatically by the RTOS
+ *      2. It's not the previously recorded task (a long running task interrupted by the
+ *         tick task will only show up once)
+ * This function will overwrite tasks that have been in the trace for a while, keeping only
+ * the 8 most recent tasks
+ */
 void App_OS_TaskSwHook(void) {
     OS_TCB *cur = OSTCBCurPtr;
-    if (cur == &OSTickTaskTCB) return; // Ignore the tick task, since it happens a lot
+    if (cur == &OSTickTaskTCB) return; // Ignore the tick task
+    if (cur == &OSIdleTaskTCB) return; // Ignore the idle task
+    if (cur == &OSTmrTaskTCB ) return; // Ignore the timer task
+    if (cur == &OSStatTaskTCB) return; // Ignore the stat task
     if (cur == PrevTasks.tasks[PrevTasks.index]) return; // Don't record the same task again
     PrevTasks.index = (PrevTasks.index + 1) & 7;
     PrevTasks.tasks[PrevTasks.index] = cur;
 }
 
 void TaskSwHook_Init(void) {
-    PrevTasks.index = 0xffffffff; // List starts out empty
+    PrevTasks.index = 7; // List starts out empty
     OS_AppTaskSwHookPtr = App_OS_TaskSwHook;
 }

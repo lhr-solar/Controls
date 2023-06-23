@@ -80,6 +80,7 @@ extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB Telemetry_TCB;
 
 
+
 /**
  * Stacks
  */
@@ -105,7 +106,7 @@ extern OS_SEM FaultState_Sem4;
 
 /**
  * @brief Initialize the task switch hook
- * PrevTask will point to last RTOS task
+ * Registers the hook with the RTOS
  */
 void TaskSwHook_Init(void);
 
