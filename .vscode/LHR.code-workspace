@@ -1,0 +1,298 @@
+{
+	"folders": [
+        {
+            "path": "../"
+        },
+        {
+            "path": "../../Embedded-Sharepoint"
+        },
+        {
+            "path": "../../BPS"
+        }
+    ],
+    "settings": {
+        "liveServer.settings.multiRootWorkspaceName": "Controls",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+            "bash": {
+                "path": "bash",
+                "icon": "terminal-bash",
+                "args": ["-i"]
+            },   
+        }
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Build Controls",
+                "type": "process",
+                "command": "make",
+                "args": [
+                    "${input:target}",
+                    "TEST=${input:test}"
+                ],
+                "presentation": {
+                    "echo": false,
+                    "reveal": "always",
+                    "panel": "dedicated",
+                    "focus": true,
+                    "clear": true,
+                    "group": "build"
+                },
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Build & Run Test(s)",
+                "type": "shell",
+                "command": "${workspaceFolder:Controls}/Scripts/run_test.sh",
+                "args": [
+                    "${input:test}"
+                ],
+                "presentation": {
+                    "echo": false,
+                    "reveal": "always",
+                    "panel": "dedicated",
+                    "focus": true,
+                    "clear": true,
+                    "group": "build"
+                },
+                "group": {
+                    "kind": "test",
+                    "isDefault": true
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Start Renode",
+                "type": "shell",
+                "command": "${workspaceFolder:Controls}/Scripts/start_renode.sh",
+                "presentation": {
+                    "echo": false,
+                    "reveal": "always",
+                    "panel": "dedicated",
+                    "focus": true,
+                    "clear": true,
+                    "group": "renode"
+                },
+                "isBackground": true,
+                "problemMatcher": {
+                    "owner": "custom",
+                    "pattern": {
+                        "regexp": ".",
+                        "file": 1,
+                        "location": 2,
+                        "message": 3
+                    },
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "^.*",
+                        "endsPattern": "^\"Renode Simulator is now active\".*"
+                    }
+                }
+            },
+            {
+                "label": "Open UART2 Telnet",
+                "type": "shell",
+                "command": "echo \"Controls Leaderboard UART2\"; while ! nc -z localhost ${RENODE_UART2_TELNET}; do sleep 2; echo .; done; echo Connected && nc localhost ${RENODE_UART2_TELNET}",
+                "presentation": {
+                    "echo": false,
+                    "reveal": "always",
+                    "panel": "dedicated",
+                    "focus": true,
+                    "group": "renode"
+                },
+                "isBackground": true,
+                "problemMatcher": {
+                    "owner": "custom",
+                    "pattern": {
+                        "regexp": ".",
+                        "file": 1,
+                        "location": 2,
+                        "message": 3
+                    },
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".",
+                        "endsPattern": "."
+                    }
+                }
+            },
+            {
+                "label": "Start OpenOCD debugger",
+                "type": "shell",
+                "command": "openocd",
+                "presentation": {
+                    "echo": false,
+                    "reveal": "always",
+                    "panel": "dedicated",
+                    "focus": true,
+                    "group": "debug"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Open Terminal GDB",
+                "type": "shell",
+                "command": "arm-none-eabi-gdb ${workspaceFolder:Controls}/Objects/controls-leader.elf",
+                "presentation": {
+                    "echo": false,
+                    "reveal": "always",
+                    "panel": "dedicated",
+                    "focus": true,
+                    "group": "debug"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Start Renode Tools",
+                "dependsOn": [
+                    "Start Renode",
+                    "Open UART2 Telnet"
+                ],
+                "dependsOrder": "parallel",
+                "problemMatcher": []
+            },
+            {
+                "label": "Start Renode Tools & Terminal GDB",
+                "dependsOn": [
+                    "Start Renode Tools",
+                    "Open Terminal GDB"
+                ],
+                "dependsOrder": "parallel",
+                "problemMatcher": []
+            },
+            {
+                "label": "Start Hardware Tools",
+                "dependsOn": [
+                    "Start OpenOCD debugger",
+                    "Open Terminal GDB"
+                ],
+                "dependsOrder": "parallel",
+                "problemMatcher": []
+            },
+            {
+                "label": "Build Controls & Start OpenOCD",
+                "dependsOn": [
+                    "Build Controls",
+                    "Start OpenOCD debugger"
+                ],
+                "dependsOrder": "sequence",
+                "problemMatcher": []
+            },
+            {
+                "label": "Build Controls & Start Hardware Tools",
+                "dependsOn": [
+                    "Build Controls",
+                    "Start Hardware Tools"
+                ],
+                "dependsOrder": "sequence",
+                "problemMatcher": []
+            },
+            {
+                "label": "Build Controls & Start Renode Tools",
+                "dependsOn": [
+                    "Build Controls",
+                    "Start Renode Tools"
+                ],
+                "dependsOrder": "sequence",
+                "problemMatcher": []
+            }
+        ],
+        "inputs": [
+            {
+                "id": "target",
+                "type": "pickString",
+                "description": "Target to compile.",
+                "options": [
+                    "simulator",
+                    "leader",
+                    "flash",
+                    "clean"
+                ]
+            },
+            {
+                "id": "test",
+                "type": "promptString",
+                "description": "Test file to compile and run.",
+                "default": ""
+            }
+        ],
+    },
+    "launch": {
+        "version": "2.0.0",
+        "configurations": [
+            {
+                "name": "Renode Build & Debug Controls",
+                "type": "cppdbg",
+                "request": "launch",
+                "cwd": "${workspaceFolder:Controls}",
+                "program": "${workspaceFolder:Controls}/Objects/controls-leader.elf",
+                "preLaunchTask": "Build Controls & Start Renode Tools",
+                
+                "stopAtEntry": true,
+                "stopAtConnect": true,
+                
+                "customLaunchSetupCommands": [
+                    {"text": "target extended-remote :3333", "ignoreFailures": false},
+                    {"text": "file Objects/controls-leader.elf"}
+                ],
+
+                "MIMode": "gdb",
+                "miDebuggerPath": "arm-none-eabi-gdb",
+                "miDebuggerServerAddress": "localhost:3333",
+                "miDebuggerArgs": "--cd=${workspaceFolder:Controls}",
+                "hardwareBreakpoints": {"require": true},
+
+                "targetArchitecture": "arm64",
+                "logging": {
+                    "engineLogging": false,
+                    "traceResponse": false
+                 }
+            },
+            {
+                "name": "Hardware Build & Debug Controls",
+                "type": "cppdbg",
+                "request": "launch",
+                "cwd": "${workspaceFolder:Controls}",
+                "program": "${workspaceFolder:Controls}/Objects/controls-leader.elf",
+                "preLaunchTask": "Build Controls & Start OpenOCD",
+                
+                "stopAtEntry": true,
+                "stopAtConnect": true,
+                
+                "customLaunchSetupCommands": [
+                    {"text": "target extended-remote :3333", "ignoreFailures": false},
+                    {"text": "file Objects/controls-leader.elf"}
+                ],
+
+                "MIMode": "gdb",
+                "miDebuggerPath": "arm-none-eabi-gdb",
+                "miDebuggerServerAddress": "localhost:3333",
+                "miDebuggerArgs": "--cd=${workspaceFolder:Controls}",
+                "hardwareBreakpoints": {"require": true},
+
+                "targetArchitecture": "arm64",
+                "logging": {
+                    "engineLogging": false,
+                    "traceResponse": false
+                 }
+            }
+
+        ]
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-vscode.cpptools-extension-pack",    // For Controls C code
+            "GitHub.vscode-pull-request-github",    // For reviewing pull requests directly from VSCode
+            "xaver.clang-format",                   // For auto-formatting code on VSCode
+            "eamodio.gitlens",                      // For better github stuff
+            "ritwickdey.liveserver",                // For quick viewing test reports
+        ]
+    }
+
+}

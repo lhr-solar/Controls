@@ -32,15 +32,10 @@ $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/*.c) \
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/*.c) \
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-LIB/*.c)
 
-ifneq ($(TEST), none)
-TEST_FILE := $(TEST).c
-# This line adds everything in Apps/Src/*.c except for main.c
+# This line adds everything in Apps/Src/*.c except for main.c, then adds the test file
 C_SOURCES += \
 $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))	\
-$(wildcard ../../$(TEST_FILE))
-else
-C_SOURCES += $(wildcard ../../Apps/Src/*.c)
-endif
+$(wildcard ../../$(TEST))
 
 # ASM sources
 ASM_SOURCES =  \

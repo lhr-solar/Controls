@@ -13,9 +13,9 @@
                 "${workspaceFolder}/Config/Inc",
 
                 "${workspaceFolder}/BSP/STM32F413/Src",
+                "${workspaceFolder}/BSP/Inc",
                 "${workspaceFolder}/BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Src",
                 "${workspaceFolder}/BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc",
-                "${workspaceFolder}/BSP/Template/Src",
 
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uC-CPU",
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU",

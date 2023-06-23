@@ -10,25 +10,25 @@ macro reset
 
 macro show_uart_leader
 """
-    emulation CreateServerSocketTerminal 49152 "ldr-uart-con" false
+    emulation CreateServerSocketTerminal $uart2_telnet "ldr-uart-con" false
     connector Connect sysbus.usart2 ldr-uart-con
 """
 
 macro show_uart_display
 """
-    emulation CreateServerSocketTerminal 49153 "disp-uart-con" false
+    emulation CreateServerSocketTerminal $uart3_telnet "disp-uart-con" false
     connector Connect sysbus.usart3 disp-uart-con
 """
 
 macro show_uart_motor
 """
-    emulation CreateServerSocketTerminal 49154 "motor-uart-con" false
+    emulation CreateServerSocketTerminal $motorcan_socket "motor-uart-con" false
     connector Connect sysbus.usart2 motor-uart-con
 """
 
 macro show_uart_car
 """
-    emulation CreateServerSocketTerminal 49155 "car-uart-con" false
+    emulation CreateServerSocketTerminal $carcan_socket "car-uart-con" false
     connector Connect sysbus.usart2 car-uart-con
 """
 
@@ -79,3 +79,4 @@ runMacro $create_car
 runMacro $create_motor
 
 mach set "ctrl-leader"
+string Renode Simulator is now active

@@ -10,16 +10,32 @@ DARKGRAY=\033[1;30m
 YELLOW=\033[0;33m
 NC=\033[0m # No Color
 
-ifdef TEST
-	TEST_LEADER = $(TEST)
-else
-	TEST_LEADER = none
-endif
-TEST_MOTOR = none
-TEST_CAR = none
-
 DEBUG = 0
 export DEBUG
+
+# Note: ?= will define the variable only if it is not already set, which means the user can override any of
+# the TEST_LEADER, TEST_MOTOR, or TEST_CAR assignments with their own test files.
+
+# Check if test file exists for the leader.
+ifneq (,$(wildcard Tests/Leader/Test_$(TEST).c))
+	TEST_LEADER ?= Tests/Leader/Test_$(TEST).c
+else
+	TEST_LEADER ?= Apps/Src/main.c
+endif
+
+# Check if test file exists for Motor simulator.
+ifneq (,$(wildcard Tests/MotorSim/Test_$(TEST).c))
+	TEST_MOTOR ?= Tests/MotorSim/Test_$(TEST).c	
+else
+	TEST_MOTOR ?= Tests/MotorSim/Test_MotorSim.c
+endif
+
+# Check if test file exists for Car simulator.
+ifneq (,$(wildcard Tests/CarSim/Test_$(TEST).c))
+	TEST_CAR ?= Tests/CarSim/Test_$(TEST).c
+else
+	TEST_CAR ?= Tests/CarSim/Test_CarSim.c	
+endif
 
 LEADER = controls-leader
 MOTORSIM = motor-sim
@@ -29,27 +45,20 @@ all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
 
 simulator: leader motor-sim car-sim
+	@echo "${ORANGE}Test Files: $(TEST_LEADER)	$(TEST_MOTOR)	$(TEST_CAR)"
 	@echo "${BLUE}Compiled for simulator! Jolly Good!${NC}"
 
 leader:
-ifeq ($(TEST_LEADER), none)
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=none
-else
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=Tests/Leader/Test_$(TEST_LEADER)
-endif
+	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
 
 motor-sim:
-ifneq ($(TEST_MOTOR), none)
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(MOTORSIM) TEST=Tests/MotorSim/Test_$(TEST_MOTOR)
+	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(MOTORSIM) TEST=$(TEST_MOTOR)
 	@echo "${BLUE}Compiled for motor sim! Jolly Good!${NC}"
-endif
 
 car-sim:
-ifneq ($(TEST_CAR), none)
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(CARSIM) TEST=Tests/CarSim/Test_$(TEST_CAR)
+	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(CARSIM) TEST=$(TEST_CAR)
 	@echo "${BLUE}Compiled for car sim! Jolly Good!${NC}"
-endif
 
 stm32f413: leader
 
