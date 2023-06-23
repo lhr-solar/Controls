@@ -97,7 +97,13 @@ Minion_Error_t Merr;
 static void arrayRestart(void *p_tmr, void *p_arg){
     if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
         Contactors_Set(ARRAY_CONTACTOR, (Minion_Read_Pin(IGN_1, &Merr)), false); // Turn on array contactor if the ign switch lets us
-        UpdateDisplay_SetArray(true);
+
+        // Update display based on if array contactor is on/off
+        if(Contactors_Get(ARRAY_CONTACTOR) == ON){
+            UpdateDisplay_SetArray(true);
+        }else{
+            UpdateDisplay_SetArray(false);
+        }
     }
 };
 
@@ -143,6 +149,9 @@ void Task_ReadCarCAN(void *p_arg){
         if(Minion_Read_Pin(IGN_1, &Merr) == OFF){
             Contactors_Set(ARRAY_CONTACTOR, OFF, true);
             assertOSError(OS_MINIONS_LOC, err);
+
+            // Update Display
+            UpdateDisplay_SetArray(false);
         }
         
         // BPS sent a message
