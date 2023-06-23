@@ -11,6 +11,12 @@
 
 #define SAT_BUF_LENGTH 5
 
+#ifdef __TEST_READCARCAN
+extern int chargeMsgSaturation;
+extern uint8_t SOC;
+extern uint32_t SBPV; 
+#endif
+
 /**
  * @brief Returns whether regen braking / charging is enabled or not
  * @return  Whether regen braking / charging is enabled or not

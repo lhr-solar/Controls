@@ -1,5 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+#define __TEST_READCARCAN
+
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "FaultState.h"
@@ -7,6 +9,12 @@
 #include "Minions.h"
 #include "os.h"
 #include "os_cfg_app.h"
+
+#ifndef __TEST_READCARCAN
+#define RCC_SCOPE
+#else 
+#define RCC_SCOPE static
+#endif
 
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
 #define SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
@@ -24,16 +32,16 @@ static OS_TMR prechargeDlyTimer;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
-static bool chargeEnable = false;
+RCC_SCOPE bool chargeEnable = false;
 
 // Saturation buffer variables
 static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
-static int chargeMsgSaturation = 0;
+ int chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
 
 // SOC and Supp V
-static uint8_t SOC = 0;
-static uint32_t SBPV = 0;
+ uint8_t SOC = 0;
+ uint32_t SBPV = 0;
 
 // Getter function for chargeEnable
 bool ChargeEnable_Get(){
@@ -143,18 +151,17 @@ void Task_ReadCarCAN(void *p_arg){
             continue;
         }
 
+
         switch(dataBuf.ID){
-            case BPS_TRIP: {
+            case BPS_TRIP: { 
                 // BPS has a fault and we need to enter fault state (probably)
-                if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
+                Display_Evac(SOC, SBPV);    // Display evacuation message
 
-                    Display_Evac(SOC, SBPV);    // Display evacuation message
-
-                    // Create an exception and assert the error
-                    // kill contactors and enter a nonrecoverable fault
-                    exception_t tripBPSError = {.prio=1, .message="BPS has been tripped", .callback=NULL};
-                    assertExceptionError(tripBPSError);
-                }
+                // Create an exception and assert the error
+                // kill contactors and enter a nonrecoverable fault
+                exception_t tripBPSError = {.prio=1, .message="BPS has been tripped", .callback=NULL};
+                assertExceptionError(tripBPSError);
+                
             }
             case CHARGE_ENABLE:{
 
@@ -176,15 +183,22 @@ void Task_ReadCarCAN(void *p_arg){
                     if(Minion_Read_Pin(IGN_1, &Merr) == ON                                          // Ignition is ON
                         && chargeMsgSaturation >= SATURATION_THRESHOLD                              // Saturation Threshold has be met
                         && (Contactors_Get(ARRAY_CONTACTOR)==OFF)                                   // Array Contactor is OFF
-                        && OSTmrStateGet(&prechargeDlyTimer, &err) != OS_TMR_STATE_STOPPED){        // Precharge Delay is not runnning and is not executing one-shot 
+                        && OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_STOPPED){        // Precharge Delay is not runnning and is not executing one-shot 
 
+                            // NOTE: If both locations have errors, the error's location will always be minions in this case
                             assertOSError(OS_MINIONS_LOC, err);
                             assertOSError(OS_READ_CAN_LOC, err);
 
                             // Wait to make sure precharge is finished and then restart array
                             OSTmrStart(&prechargeDlyTimer, &err);
                             assertOSError(OS_READ_CAN_LOC, err);
+                    }else{
+                            // Assert OS Errors here in case the conditional isn't met or fails due to an OS error
+                            assertOSError(OS_MINIONS_LOC, err);
+                            assertOSError(OS_READ_CAN_LOC, err);
                     }
+
+                            
                     
                 }
                 break;

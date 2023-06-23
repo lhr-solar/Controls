@@ -11,9 +11,6 @@ static OS_TCB Task1_TCB;
 #define STACK_SIZE 128
 static CPU_STK Task1_Stk[STACK_SIZE];
 
-#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
-
-
 CANDATA_t bps_trip_msg = {
     BPS_TRIP, 		
 	0, 		
@@ -38,15 +35,11 @@ CANDATA_t state_of_charge_msg = {
 	0,
 };
 
-// Assertion function for OS errors
-void checkOSError(OS_ERR err) {
-    if (err != OS_ERR_NONE) {
-        printf("OS error code %d\n", err);
-    }
-}
+#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
 void Task1(){
     OS_ERR err;
+    CPU_TS ts;
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
@@ -76,18 +69,7 @@ void Task1(){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    
-    /**
-     * Things to test:
-     * Precharge
-     * Charge enable
-     * supplemental voltage
-     * state of charge
-     * 
-    */
-
     while(1){
-
         printf("\n\r=========== Testing Precharge ===========");
         for(int i = 0; i < 10; i++){
             CANbus_Send(charge_enable_msg, true, CARCAN);
@@ -146,10 +128,10 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    checkOSError(err);
+    assertOSError(OS_MAIN_LOC, err);
 
     OSStart(&err);
-    checkOSError(err);
+    assertOSError(OS_MAIN_LOC, err);
 
     while(1){};
 }
