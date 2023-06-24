@@ -98,7 +98,6 @@ static void chargingDisable(void *p_tmr, void *p_arg){
  * @brief Callback function for the precharge delay timer. Waits for precharge and then restarts the array.
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
-    Minion_Error_t Merr;
     if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
         Contactors_Set(ARRAY_CONTACTOR, arrayIgnitionStatus, false); // Turn on array contactor if the ign switch lets us
 

@@ -17,5 +17,5 @@ extern  CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS];
 /**
  * The lookup table containing the entries for all of our CAN messages. Located in CANLUT.c
  */
-extern const CANLUT_T CANLUT[NUM_CAN_IDS];
+extern const CANLUT_T CANLUT[MAX_CAN_ID];
 #endif
