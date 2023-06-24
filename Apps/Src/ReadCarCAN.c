@@ -27,7 +27,7 @@
 // CAN watchdog timer variable
 static OS_TMR canWatchTimer;
 
-// prechargeDlyTimer
+// Precharge delay timer variable
 static OS_TMR prechargeDlyTimer;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
@@ -36,12 +36,15 @@ RCC_SCOPE bool chargeEnable = false;
 
 // Saturation buffer variables
 static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
- int chargeMsgSaturation = 0;
+int chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
 
+// Array ignition (IGN_1) pin status
+static bool arrayIgnitionStatus = false;
+
 // SOC and Supp V
- uint8_t SOC = 0;
- uint32_t SBPV = 0;
+uint8_t SOC = 0;
+uint32_t SBPV = 0;
 
 // Getter function for chargeEnable
 bool ChargeEnable_Get(){
@@ -53,12 +56,7 @@ bool ChargeEnable_Get(){
  * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
 */
 static void updateSaturation(int8_t chargeMessage){
-    if(chargeMessage == 1){
-        chargeEnable = true;
-    }else{
-        chargeEnable = false;
-    }
-
+    
     // Replace oldest message with new charge message and update index for oldest message
     chargeMsgBuffer[oldestMsgIdx] = chargeMessage;
     oldestMsgIdx = (oldestMsgIdx + 1) % SAT_BUF_LENGTH;
@@ -70,6 +68,12 @@ static void updateSaturation(int8_t chargeMessage){
         newSaturation += chargeMsgBuffer[(oldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
     }
     chargeMsgSaturation = newSaturation;
+
+    if(chargeMessage == 0){
+        chargeEnable = false;
+    }else if(chargeMsgSaturation >= SATURATION_THRESHOLD){
+        chargeEnable = true;
+    }
 }
 
 // exception struct callback for charging disable, kills contactor and turns off display
@@ -93,10 +97,10 @@ static void chargingDisable(void *p_tmr, void *p_arg){
 /**
  * @brief Callback function for the precharge delay timer. Waits for precharge and then restarts the array.
 */
-Minion_Error_t Merr;
 static void arrayRestart(void *p_tmr, void *p_arg){
+    Minion_Error_t Merr;
     if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        Contactors_Set(ARRAY_CONTACTOR, (Minion_Read_Pin(IGN_1, &Merr)), false); // Turn on array contactor if the ign switch lets us
+        Contactors_Set(ARRAY_CONTACTOR, arrayIgnitionStatus, false); // Turn on array contactor if the ign switch lets us
 
         // Update display based on if array contactor is on/off
         if(Contactors_Get(ARRAY_CONTACTOR) == ON){
@@ -143,12 +147,14 @@ void Task_ReadCarCAN(void *p_arg){
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(OS_READ_CAN_LOC, err);
 
+    Minion_Error_t Merr;
     while(1){
 
+        arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
+
         // Array Contactor is turned off if Ignition 1 is off
-        if(Minion_Read_Pin(IGN_1, &Merr) == OFF){
+        if(arrayIgnitionStatus == false){
             Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-            assertOSError(OS_MINIONS_LOC, err);
 
             // Update Display
             UpdateDisplay_SetArray(false);
@@ -189,25 +195,22 @@ void Task_ReadCarCAN(void *p_arg){
                     // Enable regen and update saturation
                     updateSaturation(1);                               
                     
-                    if(Minion_Read_Pin(IGN_1, &Merr) == ON                                          // Ignition is ON
+                    if(arrayIgnitionStatus == true                                                  // Ignition is ON
                         && chargeMsgSaturation >= SATURATION_THRESHOLD                              // Saturation Threshold has be met
                         && (Contactors_Get(ARRAY_CONTACTOR)==OFF)                                   // Array Contactor is OFF
                         && OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_STOPPED){        // Precharge Delay is not runnning and is not executing one-shot 
 
-                            // NOTE: If both locations have errors, the error's location will always be minions in this case
-                            assertOSError(OS_MINIONS_LOC, err);
-                            assertOSError(OS_READ_CAN_LOC, err);
+                            // NOTE: An assert error for OSTmrStateGet isn't needed here because the 
+                            //       conditional should fail if there is an error. 
 
                             // Wait to make sure precharge is finished and then restart array
                             OSTmrStart(&prechargeDlyTimer, &err);
-                            assertOSError(OS_READ_CAN_LOC, err);
-                    }else{
-                            // Assert OS Errors here in case the conditional isn't met or fails due to an OS error
-                            assertOSError(OS_MINIONS_LOC, err);
-                            assertOSError(OS_READ_CAN_LOC, err);
                     }
-
-                            
+                    
+                    // Asserts error for OS timer start above if conditional was met
+                    // Asserts error for OS timer state get if conditional wasn't met 
+                    assertOSError(OS_READ_CAN_LOC, err);
+                    
                     
                 }
                 break;
