@@ -11,6 +11,8 @@
 
 #define SAT_BUF_LENGTH 5
 
+#define __TEST_READCARCAN
+
 #ifdef __TEST_READCARCAN
 extern int chargeMsgSaturation;
 extern uint8_t SOC;

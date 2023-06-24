@@ -116,6 +116,11 @@ static void arrayRestart(void *p_tmr, void *p_arg){
         }else{
             UpdateDisplay_SetArray(false);
         }
+
+        #ifdef __TEST_READCARCAN
+        printf("\r\nArray Contactor is turned on");
+        #endif
+
     }
 };
 
@@ -182,7 +187,7 @@ void Task_ReadCarCAN(void *p_arg){
 
                 // Create an exception and assert the error
                 // kill contactors and enter a nonrecoverable fault
-                exception_t tripBPSError = {.prio=1, .message="BPS has been tripped", .callback=NULL};
+                exception_t tripBPSError = {.prio=1, .message="\r\nBPS has been tripped", .callback=NULL};
                 assertExceptionError(tripBPSError);
                 
             }
@@ -195,7 +200,7 @@ void Task_ReadCarCAN(void *p_arg){
                 if(dataBuf.data[0] == 0){
 
                     // Disable regen and update saturation in callback function
-                    exception_t disableCharging = {.prio=2, .message="Charging needs to be disabled", .callback=callback_chargingDisable};
+                    exception_t disableCharging = {.prio=2, .message="\r\nCharging needs to be disabled", .callback=callback_chargingDisable};
                     assertExceptionError(disableCharging);
 
                 } else {

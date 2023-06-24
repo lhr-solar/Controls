@@ -11,42 +11,20 @@ static OS_TCB Task1_TCB;
 #define STACK_SIZE 128
 static CPU_STK Task1_Stk[STACK_SIZE];
 
+#define SATURATION_THRESHOLD_TEST (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
+
+
+CANDATA_t bps_trip_msg = {BPS_TRIP, 0, 1};
+CANDATA_t charge_enable_msg = {CHARGE_ENABLE, 0, 1};
+CANDATA_t charge_disable_msg = {CHARGE_ENABLE, 0, 0};
+CANDATA_t supp_voltage_msg = {SUPPLEMENTAL_VOLTAGE, 0, 6000};
+CANDATA_t state_of_charge_msg = {STATE_OF_CHARGE, 0, 100};
+
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
-
-
-CANDATA_t bps_trip_msg = {
-    BPS_TRIP, 		
-	0, 		
-	0,
-};
-
-CANDATA_t charge_enable_msg = {
-    CHARGE_ENABLE, 		
-	0, 		
-	0,
-};
-
-CANDATA_t supp_voltage_msg = {
-    SUPPLEMENTAL_VOLTAGE, 		
-	0, 		
-	0,
-};
-
-CANDATA_t state_of_charge_msg = {
-    STATE_OF_CHARGE, 		
-	0, 		
-	0,
-};
-
-// Assertion function for OS errors
-void checkOSError(OS_ERR err) {
-    if (err != OS_ERR_NONE) {
-        printf("OS error code %d\n", err);
-    }
-}
 
 void Task1(){
     OS_ERR err;
+    CPU_TS ts;
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
@@ -76,44 +54,70 @@ void Task1(){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    
-    /**
-     * Things to test:
-     * Precharge
-     * Charge enable
-     * supplemental voltage
-     * state of charge
-     * 
-    */
-
     while(1){
 
         printf("\n\r=========== Testing Precharge ===========");
-        for(int i = 0; i < 10; i++){
+
+        printf("\r\n"); 
+        printf("\r\nCharge Message Saturation:   %f", chargeMsgSaturation);
+        printf("\r\nShould be                :   %d", 0);
+        printf("\r\n"); 
+        printf("\r\nCharge Enable            :   %d", chargeEnable_Get());
+        printf("\r\nShould be                :   %d", 0);
+        printf("\r\n"); 
+
+        // This should print the message saturation until it reaches the threshold
+        while(chargeMsgSaturation <= 7.5){ // message saturation
             CANbus_Send(charge_enable_msg, true, CARCAN);
-            printf("\r\nCharge Enable            :   %d", chargeEnable_Get());
-            printf("\r\nCharge Enable should be  :   1");
             printf("\r\nCharge Message Saturation:   %f", chargeMsgSaturation);
-            printf("\r\nCharge Message Threshold :   %f", 7.5);
+            printf("\r\n"); 
         }
 
-        printf("\n\r=========== Testing Disable ===========");
-        for(int i = 0; i < 10; i++){
-            CANbus_Send(charge_enable_msg, true, CARCAN);
-            printf("\r\nCharge Enable            :   %d", chargeEnable_Get());
-            printf("\r\nCharge Enable should be  :   0");
-            printf("\r\nCharge Message Saturation:   %f", chargeMsgSaturation);
-            printf("\r\nCharge Message Threshold :   %f", 7.5);
-            // should print fault state error for charge disable
+        if(chargeMsgSaturation >= 7.5){
+            printf("\r\nThreshold has been reached\r\n");
         }
+
+        printf("\r\nCharge Enable            :   %d", chargeEnable_Get());
+        printf("\r\nShould be                :   %d", 1);
+
+        printf("\r\n"); 
+        printf("\r\n"); 
+        printf("\r\n"); 
+
+        printf("\n\r=========== Testing Disable ===========");
+        
+        printf("\r\n"); 
+
+        // charge message saturation should go down 
+        for(int i = 0; i < 10; i++){
+            CANbus_Send(charge_disable_msg, true, CARCAN);
+            printf("\r\nCharge Message Saturation:   %f", chargeMsgSaturation);
+            printf("\r\n"); 
+            printf("\r\nCharge Enable            :   %d", chargeEnable_Get());
+            printf("\r\nShould be                :   %d", 0);
+            printf("\r\n"); 
+            // should also print fault state error for charge disable
+        }
+            
+        printf("\r\n"); 
+        printf("\r\n"); 
+        printf("\r\n"); 
 
         printf("\n\r=========== Testing Supp Voltage ===========");
         CANbus_Send(supp_voltage_msg, true, CARCAN);
         print("\r\nSupplemental Voltage: %f", SBPV);
 
+        printf("\r\n"); 
+        printf("\r\n"); 
+        printf("\r\n"); 
+
         printf("\n\r=========== Testing State of Charge ===========");
         CANbus_Send(state_of_charge_msg, true, CARCAN);
         print("\r\nState of Charge: %f", SOC);
+
+        printf("\r\n"); 
+        printf("\r\n"); 
+        printf("\r\n"); 
 
         printf("\n\r=========== Testing BPS TRIP ===========");
         CANbus_Send(bps_trip_msg, true, CARCAN);
@@ -146,10 +150,10 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    checkOSError(err);
+    assertOSError(OS_MAIN_LOC, err);
 
     OSStart(&err);
-    checkOSError(err);
+    assertOSError(OS_MAIN_LOC, err);
 
     while(1){};
 }
