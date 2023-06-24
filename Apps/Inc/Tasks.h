@@ -27,7 +27,7 @@
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_TELEMETRY_PRIO                 9
 #define TASK_DEBUG_DUMP_PRIO                10
-#define TASK_COMMAND_LINE_PRIO              10
+#define TASK_COMMAND_LINE_PRIO              11
 
 /**
  * Stack Sizes

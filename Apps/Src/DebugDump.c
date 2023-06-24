@@ -10,7 +10,6 @@
 #include <errno.h> 
 #include "Tasks.h"
 #include "SendTritium.h"
-#include "common.h"
 
 // global variables
 extern fault_bitmap_t FaultBitmap;

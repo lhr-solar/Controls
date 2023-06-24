@@ -1,7 +1,7 @@
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
 
-#include "getter.h"
+#include "common.h"
 
 #define MOTOR_MSG_PERIOD 500
 #define FSM_PERIOD 250
@@ -12,9 +12,6 @@
         GEAR(FORWARD_GEAR)   \
         GEAR(NEUTRAL_GEAR)  \
         GEAR(REVERSE_GEAR)   \
-
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
 
 typedef enum GEAR_ENUM {
     FOREACH_Gear(GENERATE_ENUM)
@@ -59,17 +56,17 @@ extern float velocityObserved;
 extern float cruiseVelSetpoint;
 #endif
 
-// Getters
-GETTER_H(bool, cruiseEnable)
-GETTER_H(bool, cruiseSet)
-GETTER_H(bool, onePedalEnable)
-GETTER_H(bool, regenEnable)
-GETTER_H(uint8_t, brakePedalPercent)
-GETTER_H(uint8_t, accelPedalPercent)
-GETTER_H(Gear_t, gear)
-GETTER_H(float, currentSetpoint)
-GETTER_H(float, velocitySetpoint)
-GETTER_H(float, cruiseVelSetpoint)
-GETTER_H(float, velocityObserved)
+// Getter functions for local variables in SendTritium.c
+EXPOSE_GETTER(bool, cruiseEnable)
+EXPOSE_GETTER(bool, cruiseSet)
+EXPOSE_GETTER(bool, onePedalEnable)
+EXPOSE_GETTER(bool, regenEnable)
+EXPOSE_GETTER(uint8_t, brakePedalPercent)
+EXPOSE_GETTER(uint8_t, accelPedalPercent)
+EXPOSE_GETTER(Gear_t, gear)
+EXPOSE_GETTER(float, currentSetpoint)
+EXPOSE_GETTER(float, velocitySetpoint)
+EXPOSE_GETTER(float, cruiseVelSetpoint)
+EXPOSE_GETTER(float, velocityObserved)
 
 #endif

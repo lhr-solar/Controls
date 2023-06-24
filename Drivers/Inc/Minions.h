@@ -2,6 +2,7 @@
 #define MINION_H
 #include <stdbool.h>
 #include "BSP_GPIO.h"
+#include "common.h"
 
 // used to index into lookup table
 // if changed, PINS_LOOKARR should be changed in Minions.c
@@ -14,9 +15,6 @@
         PIN(CRUZ_EN)  \
         PIN(CRUZ_ST)  \
         PIN(BRAKELIGHT)  \
-
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
 
 typedef enum MINIONPIN_ENUM {
     FOREACH_MinionPin(GENERATE_ENUM)

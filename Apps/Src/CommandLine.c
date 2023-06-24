@@ -86,8 +86,8 @@ static inline bool isWhiteSpace(char character){
 static bool executeCommand(char *input) {
 	// The first word in the input should be a valid command
 	char *command = strtok_r(input, " ", &save);
-	// Iterate through all valid commands and check if the input matches
-	for (int i=0; cmdline_commands[i].name; i++) {
+	// Iterate through all valid commands and check if the input matches (exits if the action is NULL (acts as a sentinal))
+	for (int i=0; cmdline_commands[i].action; i++) {
 		if (!strcmp(command, cmdline_commands[i].name)) {
 			return cmdline_commands[i].action(); // Execute the command
 		}
@@ -223,7 +223,7 @@ static bool cmd_Contactors_Get(void){
 		return false;
 	}
 
-	printf("%s state: %s\n", contactorInput, Contactors_Get(contactor) == ON ? "on" : "off");
+	printf("%s state: %s\n\r", contactorInput, Contactors_Get(contactor) == ON ? "on" : "off");
 	return true;
 }
 

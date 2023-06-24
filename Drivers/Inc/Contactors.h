@@ -18,9 +18,6 @@
         contactor(ARRAY_PRECHARGE)  \
         contactor(MOTOR_CONTACTOR)   \
 
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
-
 typedef enum contactor_ENUM {
     FOREACH_contactor(GENERATE_ENUM)
     NUM_CONTACTORS,

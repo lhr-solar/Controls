@@ -24,7 +24,6 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
-#include "getter.h"
 #include "common.h"
 
 // Macros
@@ -89,7 +88,7 @@ static bool cruiseEnablePrevious = false;
 
 #endif
 
-// Getters
+// Getter functions for local variables in SendTritium.c
 GETTER(bool, cruiseEnable)
 GETTER(bool, cruiseSet)
 GETTER(bool, onePedalEnable)
