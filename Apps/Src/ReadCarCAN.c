@@ -76,7 +76,10 @@ static void updateSaturation(int8_t chargeMessage){
     }
 }
 
-// exception struct callback for charging disable, kills contactor and turns off display
+/**
+ * @brief exception struct callback for charging disable, kills contactor and turns off display
+ * @param None
+*/
 static void callback_chargingDisable(void){ 
     // mark regen as disabled and update saturation
     updateSaturation(-1);
@@ -88,14 +91,20 @@ static void callback_chargingDisable(void){
     UpdateDisplay_SetArray(false);
 }
 
-// Nested function because same function needs to be executed
-// however the function declarations require different arguments
+
+/**
+ * @brief Nested function as the same function needs to be executed however requires different parameters
+ * @param p_tmr pointer to the timer that calls this function, passed by timer
+ * @param p_arg pointer to the argument passed by timer
+*/
 static void chargingDisable(void *p_tmr, void *p_arg){
     callback_chargingDisable();
 }
 
 /**
  * @brief Callback function for the precharge delay timer. Waits for precharge and then restarts the array.
+ * @param p_tmr pointer to the timer that calls this function, passed by timer
+ * @param p_arg pointer to the argument passed by timer
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
     if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
@@ -121,9 +130,9 @@ void Task_ReadCarCAN(void *p_arg){
     OSTmrCreate(
         &canWatchTimer,
         "CAN Watch Timer",
-        0,
         CAN_WATCH_TMR_DLY_TMR_TS,
-        OS_OPT_TMR_PERIODIC,
+        0,
+        OS_OPT_TMR_ONE_SHOT,
         chargingDisable, 
         NULL,
         &err
