@@ -35,21 +35,24 @@ tritium_error_code_t MotorController_getTritiumError(void){
 
 /**
  * @brief   Assert Error if Tritium sends error. 
- * When asserted, Fault state's exception will be set and the fault thread will run
- * Asserts an error that either restarts the hall sensor or enters a nonrecoverable fault
+ * When asserted, a new task will be spawned to handle the fault
+ * Creates either a low-priority task that restarts the hall sensor 
+ * or a high priority task that enters a nonrecoverable fault
  * @param   motor_err Bitmap which has motor error codes
  */
 static void assertTritiumError(uint16_t motor_err){    
 	static uint8_t hall_fault_cnt = 0; //trip counter 
 	if(motor_err != T_NONE){
 		if(motor_err != T_HALL_SENSOR_ERR){
-			exception_t notHallError = {PRI_NONRECOV, "this is Tritium, not-hall-sensor error", NULL};
-			assertExceptionError(notHallError);
+			//create a high priority task that will run the given callback
+			//exception_t notHallError = {PRI_NONRECOV, "this is Tritium, not-hall-sensor error", NULL};
+			//assertExceptionError(notHallError);
 		}else{
 			if(hall_fault_cnt > RESTART_THRESHOLD){ //try to restart the motor a few times and then fail out 
-            exception_t hallErrorPrio1 = {PRI_NONRECOV, "hall sensor errors have exceeded restart threshold", NULL};
-			assertExceptionError(hallErrorPrio1); // Fail out by entering nonrecoverable fault
-        	} else {
+            // create a high priority task that will run a different message/callback
+			//exception_t hallErrorPrio1 = {PRI_NONRECOV, "hall sensor errors have exceeded restart threshold", NULL};
+			//assertExceptionError(hallErrorPrio1); // Fail out by entering nonrecoverable fault
+        	} else { // Try resetarting the motor
             hall_fault_cnt++; 
 			printf("\n\rRestarting motor");
             MotorController_Restart(); //re-initialize motor 

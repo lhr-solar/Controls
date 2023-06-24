@@ -19,11 +19,13 @@
  * Priority Definitions
  */
 #define TASK_FAULT_STATE_PRIO               1
+#define TASK_FAULT_HIGHPRIO_PRIO            1   
 #define TASK_INIT_PRIO                      2
-#define TASK_READ_TRITIUM_PRIO              3
-#define TASK_SEND_TRITIUM_PRIO              4
-#define TASK_READ_CAR_CAN_PRIO              5
-#define TASK_UPDATE_DISPLAY_PRIO            6
+#define TASK_FAULT_LOWPRIO_PRIO             3
+#define TASK_READ_TRITIUM_PRIO              4
+#define TASK_SEND_TRITIUM_PRIO              5
+#define TASK_READ_CAR_CAN_PRIO              6
+#define TASK_UPDATE_DISPLAY_PRIO            7
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_TELEMETRY_PRIO                 9
 
@@ -67,10 +69,12 @@ void Task_Telemetry(void* p_arg);
 
 
 
+
+
 /**
  * TCBs
  */
-extern OS_TCB FaultState_TCB;
+extern OS_TCB FaultState_TCB; // To be deleted
 extern OS_TCB Init_TCB;
 extern OS_TCB SendTritium_TCB;
 extern OS_TCB ReadCarCAN_TCB;
@@ -84,7 +88,7 @@ extern OS_TCB Telemetry_TCB;
 /**
  * Stacks
  */
-extern CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
+extern CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE]; // To be deleted
 extern CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 extern CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
 extern CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
@@ -130,7 +134,10 @@ typedef enum{
     OS_CANDRIVER_LOC = 0x400,
     OS_MOTOR_CONNECTION_LOC = 0x800,
     OS_DISPLAY_LOC = 0x1000,
-    OS_FAULT_STATE_LOC = 0x2000
+    OS_FAULT_STATE_LOC = 0x2000, // to be deleted
+    OS_FAULT_HIGHPRIO_LOC = 0x2000,
+    OS_FAULT_LOWPRIO_LOC = 0x4000
+
 } os_error_loc_t;
 
 /**

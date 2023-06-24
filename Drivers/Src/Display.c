@@ -149,9 +149,14 @@ static void callback_displayError(void){
         }  
 }
 
+/**
+ * @brief Spawns a low-priority fault handler task if there is an error
+ * @param err the display error to check
+*/
 void assertDisplayError(DisplayError_t err){
 	if (err != DISPLAY_ERR_NONE){
-		exception_t displayError = {PRI_RECOV, "display error", &callback_displayError};
-		assertExceptionError(displayError);
+		// Create a new low priority task that will run the given callback
+		//exception_t displayError = {PRI_RECOV, "display error", &callback_displayError};
+		//assertExceptionError(displayError);
 	}
 }

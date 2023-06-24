@@ -13,7 +13,7 @@
 /**
  * TCBs
  */
-OS_TCB FaultState_TCB;
+OS_TCB FaultState_TCB; // To be deleted
 OS_TCB Init_TCB;
 OS_TCB SendTritium_TCB;
 OS_TCB ReadCarCAN_TCB;
@@ -25,7 +25,7 @@ OS_TCB Telemetry_TCB;
 /**
  * Stacks
  */
-CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
+CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE]; // To be deleted
 CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
 CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
