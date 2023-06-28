@@ -8,6 +8,15 @@
 #define CARCAN CAN_1 //convenience aliases for the CANBuses
 #define MOTORCAN CAN_3
 
+/** @defgroup FooGroup
+ *
+ * This module does yada yada yada
+ *
+ */
+
+/** @addtogroup FooGroup */
+/*@{*/
+
 /**
  * This enum is used to signify the ID of the message you want to send. 
  * It is used internally to index our lookup table (CANLUT.C) and get message-specific fields.
@@ -106,3 +115,5 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
 ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
 
 #endif
+
+/*@}*/

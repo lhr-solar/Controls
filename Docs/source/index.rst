@@ -65,3 +65,7 @@ Keep the docs clear and readible. Reach out to more experienced team members wit
    BSP/GPIO
    BSP/SPI
    BSP/UART
+
+.. doxygengroup:: FooGroup
+   :project: doxygen
+   :path: "/doxygen/xml/group__FooGroup.xml"

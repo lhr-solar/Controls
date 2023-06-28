@@ -9,6 +9,11 @@ static OS_SEM CANBus_RecieveSem4[NUM_CAN]; // sem4 to count how many msgs in our
 static OS_MUTEX CANbus_TxMutex[NUM_CAN];   // mutex to lock tx line
 static OS_MUTEX CANbus_RxMutex[NUM_CAN];   // mutex to lock Rx line
 
+/** @ingroup FooGroup 
+ * @{
+*/
+
+
 /**
  * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly outside this driver.
  * @param bus The CAN bus to operate on. Should be CARCAN or MOTORCAN.
@@ -271,3 +276,5 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
     }
     return status;
 }
+/*@}*/
+
