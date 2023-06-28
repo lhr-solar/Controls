@@ -12,7 +12,7 @@ void dumpTrace(void) {
     for (int i=0; i<8; i++) {
         if (!PrevTasks.tasks[idx]) break;
         printf("%s, ", getTCBName(PrevTasks.tasks[idx]));
-        idx = (idx + 7) & 7; // decrement idx, wrapping around at 0
+        idx = (idx + TASK_TRACE_LENGTH - 1) % TASK_TRACE_LENGTH; // decrement idx, wrapping around at 0
     }
     printf("]\n\r");
 }

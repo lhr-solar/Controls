@@ -161,12 +161,14 @@ typedef enum{
 /**
  * Task trace
  * 
- * Stores the last 8 tasks that were run
+ * Stores the last TASK_TRACE_LENGTH tasks that were run
  * The most recent task is at tasks[index], the one before at tasks[index-1],
  * wrapping back around at the beginnning
+ * 
  */
+#define TASK_TRACE_LENGTH 8
 typedef struct {
-    OS_TCB *tasks[8];
+    OS_TCB *tasks[TASK_TRACE_LENGTH];
     uint32_t index;
 } task_trace_t;
 

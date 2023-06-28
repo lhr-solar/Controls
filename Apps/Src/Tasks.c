@@ -71,16 +71,18 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
  */
 void App_OS_TaskSwHook(void) {
     OS_TCB *cur = OSTCBCurPtr;
+    uint32_t idx = PrevTasks.index;
     if (cur == &OSTickTaskTCB) return; // Ignore the tick task
     if (cur == &OSIdleTaskTCB) return; // Ignore the idle task
     if (cur == &OSTmrTaskTCB ) return; // Ignore the timer task
     if (cur == &OSStatTaskTCB) return; // Ignore the stat task
-    if (cur == PrevTasks.tasks[PrevTasks.index]) return; // Don't record the same task again
-    PrevTasks.index = (PrevTasks.index + 1) & 7;
-    PrevTasks.tasks[PrevTasks.index] = cur;
+    if (cur == PrevTasks.tasks[idx]) return; // Don't record the same task again
+    if (++idx == TASK_TRACE_LENGTH) idx = 0;
+    PrevTasks.tasks[idx] = cur;
+    PrevTasks.index = idx;
 }
 
 void TaskSwHook_Init(void) {
-    PrevTasks.index = 7; // List starts out empty
+    PrevTasks.index = TASK_TRACE_LENGTH - 1; // List starts out empty
     OS_AppTaskSwHookPtr = App_OS_TaskSwHook;
 }
