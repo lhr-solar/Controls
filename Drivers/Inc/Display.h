@@ -39,6 +39,9 @@ typedef enum{
 
 /**
  * @brief Error handler for any display errors. Call this after any display driver function.
+ * Restarts the display if there is an error 
+ * or displays fault if it has reached the threshold for restart attempts
+ * @param err the display error code to check
  */
 void assertDisplayError(DisplayError_t err);
 

@@ -14,7 +14,6 @@
 #include "Display.h"
 #include "bsp.h"   // for writing to UART
 #include "Tasks.h" // for os and fault error codes
-#include "FaultState.h"
 
 #define DISP_OUT UART_3
 #define MAX_MSG_LEN 32
@@ -28,6 +27,7 @@
 
 
 static const char *TERMINATOR = "\xff\xff\xff";
+
 
 DisplayError_t Display_Init(){
 	BSP_UART_Init(DISP_OUT);
@@ -138,25 +138,14 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 	return DISPLAY_ERR_NONE;
 }
 
-static void callback_displayError(void){
-	static uint8_t disp_fault_cnt = 0; // If faults > three times total, Display_Fault is called
-        if(disp_fault_cnt>RESTART_THRESHOLD){ 
-            Display_Fault(OSErrLocBitmap, FaultBitmap); 
-        } else { 
-            disp_fault_cnt++; 
-            Display_Reset(); 
-            return; 
-        }  
-}
-
-/**
- * @brief Spawns a low-priority fault handler task if there is an error
- * @param err the display error to check
-*/
 void assertDisplayError(DisplayError_t err){
+	static uint8_t disp_fault_cnt = 0; // Keep track of the number of times the display has faulted
 	if (err != DISPLAY_ERR_NONE){
-		// Create a new low priority task that will run the given callback
-		//exception_t displayError = {PRI_RECOV, "display error", &callback_displayError};
-		//assertExceptionError(displayError);
+		disp_fault_cnt++;
+		if (disp_fault_cnt > RESTART_THRESHOLD){ // Fault if we've reached the limit on restart attempts
+			Display_Fault(OS_DISPLAY_LOC, err);
+		} else { // Otherwise try resetting the display
+			Display_Reset();
+		}
 	}
 }
