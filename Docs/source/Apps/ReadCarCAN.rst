@@ -20,3 +20,7 @@ Implementation Details
 The Read Car CAN task uses timer callbacks to make sure message timings remain appropriate. More specifically, there is a timer that waits for the precharge contactor to be opened and closed by BPS before restarting the array, and another timer that ensures a charge enable message is received from BPS at least every half second. If no such message is received, the timer signals the fault state task to unblock and enter fault state, classifying it as one of the :ref:`recoverable`, and opening the contactors controlled by the system.
 
 In order to avoid charging in unsafe conditions, a saturation buffer is used to require that charge enable messages are sufficiently consistent. See `ReadCarCAN.c` for more details, as this is subject to change.
+
+.. doxygengroup:: ReadCarCAN
+   :project: doxygen
+   :path: "/doxygen/xml/group__ReadCarCAN.xml"

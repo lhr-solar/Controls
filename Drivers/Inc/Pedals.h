@@ -4,11 +4,19 @@
  * Header file for the Pedals driver
  */
 
+/** @defgroup Pedals */
+/** @ingroup Pedals 
+ * @{ */
+
 #ifndef __PEDALS_H
 #define __PEDALS_H
 
 #include "BSP_ADC.h"
 
+/**
+ * @brief Stuff
+ * 
+ */
 typedef enum 
 {
     ACCELERATOR, 
@@ -32,3 +40,5 @@ int8_t Pedals_Read(pedal_t pedal);
 
 
 #endif
+
+/*@}*/

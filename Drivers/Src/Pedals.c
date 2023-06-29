@@ -4,6 +4,9 @@
  * pedal has been pressed
  */
 
+/** @ingroup Pedals 
+ * @{ */
+
 #include "Pedals.h"
 
 // Constants used to tune the pedals
@@ -52,3 +55,4 @@ int8_t Pedals_Read(pedal_t pedal){
     return percentage;
 }
 
+/*@}*/

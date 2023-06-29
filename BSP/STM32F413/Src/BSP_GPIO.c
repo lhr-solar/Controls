@@ -1,5 +1,8 @@
 /* Copyright (c) 2021 UT Longhorn Racing Solar */
 
+/** @ingroup BSP_GPIO 
+ * @{ */
+
 #include "BSP_GPIO.h"
 #include "Tasks.h"
 
@@ -108,3 +111,5 @@ uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin){
 
 	return GPIO_ReadOutputDataBit(gpio_port, pin);	
 }
+
+/*@}*/

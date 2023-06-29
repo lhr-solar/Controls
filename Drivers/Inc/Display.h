@@ -12,6 +12,10 @@
  * @author Nathaniel Delgado (NathanielDelgado)
 */
 
+/** @defgroup Display */
+/** @ingroup Display 
+ * @{ */
+
 #ifndef __DISPLAY_H
 #define __DISPLAY_H
 
@@ -109,3 +113,5 @@ DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode)
 DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
 
 #endif
+
+/*@}*/

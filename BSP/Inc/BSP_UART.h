@@ -1,5 +1,9 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/** @defgroup BSP_UART */
+/** @ingroup BSP_UART 
+ * @{ */
+
 /**
  * Header file for the library to interact
  * with the UART line
@@ -39,3 +43,5 @@ uint32_t BSP_UART_Read(UART_t uart, char *str);
 uint32_t BSP_UART_Write(UART_t uart ,char *str, uint32_t len);
 
 #endif
+
+/*@}*/

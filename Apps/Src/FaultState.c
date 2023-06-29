@@ -9,6 +9,9 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 
+/** @ingroup FaultState 
+ * @{ */
+
 #define RESTART_THRESHOLD 3
 
 static bool fromThread = false; //whether fault was tripped from thread
@@ -142,3 +145,5 @@ void Task_FaultState(void *p_arg) {
         OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
+
+/*@}*/

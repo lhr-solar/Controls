@@ -1,5 +1,8 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/** @ingroup BSP_ADC 
+ * @{ */
+
 #include "BSP_ADC.h"
 #include "stm32f4xx.h"
 
@@ -113,3 +116,6 @@ int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice) {
     // Convert to millivoltage
     return (ADC_RANGE_MILLIVOLTS * data) >> ADC_PRECISION_BITS;
 }
+
+/*@}*/
+

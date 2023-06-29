@@ -1,5 +1,9 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/** @defgroup CANBus */
+/** @ingroup CANBus 
+ * @{ */
+
 #ifndef CAN_H__
 #define CAN_H__
 
@@ -7,15 +11,6 @@
 
 #define CARCAN CAN_1 //convenience aliases for the CANBuses
 #define MOTORCAN CAN_3
-
-/** @defgroup FooGroup
- *
- * This module does yada yada yada
- *
- */
-
-/** @addtogroup FooGroup */
-/*@{*/
 
 /**
  * This enum is used to signify the ID of the message you want to send. 

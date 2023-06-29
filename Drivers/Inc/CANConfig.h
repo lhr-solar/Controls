@@ -2,7 +2,9 @@
 #define CAN_CONFIG
 #include "CANbus.h"
 
-
+/** @defgroup CANConfig */
+/** @ingroup CANConfig 
+ * @{ */
 
 
 /**
@@ -19,3 +21,5 @@ extern  CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS];
  */
 extern const CANLUT_T CANLUT[NUM_CAN_IDS];
 #endif
+
+/*@}*/

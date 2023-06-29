@@ -1,5 +1,9 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/** @defgroup BSP_ADC */
+/** @ingroup BSP_ADC 
+ * @{ */
+
 /**
  * Header file for the library to interact
  * with the Analog to Digital Converter (ADC)
@@ -44,3 +48,5 @@ int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
 int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
 
 #endif
+
+/*@}*/

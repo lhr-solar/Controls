@@ -1,6 +1,10 @@
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
 
+/** @defgroup SendTritium */
+/** @ingroup SendTritium 
+ * @{ */
+
 #define MOTOR_MSG_PERIOD 500
 #define FSM_PERIOD 250
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
@@ -51,3 +55,5 @@ extern float cruiseVelSetpoint;
 #endif
 
 #endif
+
+/*@}*/

@@ -12,6 +12,10 @@
  * @author Nathaniel Delgado (NathanielDelgado)
 */
 
+/** @defgroup UpdateDisplay */
+/** @ingroup UpdateDisplay 
+ * @{ */
+
 #ifndef __UPDATE_DISPLAY_H
 #define __UPDATE_DISPLAY_H
 
@@ -130,3 +134,5 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 
 #endif
+
+/*@}*/

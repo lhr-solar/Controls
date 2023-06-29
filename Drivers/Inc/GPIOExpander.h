@@ -1,5 +1,6 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/* Deprecated */
 
 #ifndef __GPIOEXPANDER_H
 #define __GPIOEXPANDER_H

@@ -3,6 +3,10 @@
 #include "CAN_Queue.h"
 #include "common.h"
 
+/** @defgroup SendCarCAN */
+/** @ingroup SendCarCAN 
+ * @{ */
+
 /**
  * @file SendCarCAN.c
  * @brief Implements the SendCarCAN Task
@@ -16,6 +20,8 @@
  * sends pedal, switch, light, and contactor information to be read by telemetry
  * 
  * @param p_arg 
+ * 
+ * @ingroup SendCarCAN 
  */
 void Task_SendCarCAN(void *p_arg){
     CANDATA_t motorMsg;
@@ -33,3 +39,5 @@ void Task_SendCarCAN(void *p_arg){
         }
     }
 }
+
+/*@}*/

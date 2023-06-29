@@ -1,5 +1,9 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/** @defgroup Tasks */
+/** @ingroup Tasks 
+ * @{ */
+
 #ifndef __TASKS_H
 #define __TASKS_H
 
@@ -176,3 +180,5 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be cha
 #endif
 
 #endif
+
+/*@}*/

@@ -17,6 +17,9 @@
  * @author Ishan Deshpande (IshDeshpa, ishdeshpa@utexas.edu)
  */
 
+/** @ingroup SendTritium 
+ * @{ */
+
 #include "Pedals.h"
 #include "ReadCarCAN.h"
 #include "Minions.h"
@@ -673,3 +676,5 @@ void Task_SendTritium(void *p_arg){
         }
     }
 }
+
+/*@}*/

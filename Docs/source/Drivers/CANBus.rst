@@ -31,3 +31,7 @@ into a software queue in the BSP layer in order to deepen the queue (we recieve 
 When reading, the driver will read directly from a software queue in the BSP layer. A non-blocking read will return an error if the queue is empty. A blocking read will block on a driver-layer semaphore, to be woken up when data is avilable.
 Everytime the BSP software queue is posted to, a receive interrupt signals to a driver-layer semaphore that a message has been received. This allows any waiting tasks to wake up and read the message. 
 This is done since tasks that read and write CAN messages don't usually have anything else to do while waiting, which makes blocking fairly efficient. 
+
+.. doxygengroup:: CANBus
+   :project: doxygen
+   :path: "/doxygen/xml/group__CANBus.xml"

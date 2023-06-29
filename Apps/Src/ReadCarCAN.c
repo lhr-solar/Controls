@@ -1,5 +1,9 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/** @ingroup ReadCarCAN 
+ * @{ */
+
+
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
@@ -257,5 +261,4 @@ void Task_ReadCarCAN(void *p_arg)
     }
 }
 
-
-
+/*@}*/

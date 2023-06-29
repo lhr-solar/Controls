@@ -5,6 +5,9 @@
 #include "Tasks.h"
 #include "Contactors.h"
 
+/** @ingroup Minions 
+ * @{ */
+
 static OS_MUTEX OutputMutex; //Mutex to lock GPIO writes to input pins
 
 //should be in sync with pin enum
@@ -53,3 +56,5 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
     *mErr = MINION_ERR_WROTE_INPUT;
     return false;
 }
+
+/*@}*/

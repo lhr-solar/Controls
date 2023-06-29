@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include "BSP_GPIO.h"
 
+/** @defgroup Minions */
+/** @ingroup Minions 
+ * @{ */
 
 typedef enum{
     MINION_ERR_NONE = 0,
@@ -59,3 +62,5 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr);
 
 
 #endif 
+
+/*@}*/

@@ -1,5 +1,8 @@
 /* Copyright (c) 2021 UT Longhorn Racing Solar */
 
+/** @ingroup ReadTritium 
+ * @{ */
+
 #include "ReadTritium.h"
 #include "CAN_Queue.h"
 #include "CANbus.h"
@@ -127,3 +130,5 @@ float Motor_RPM_Get(){ //getter function for motor RPM
 float Motor_Velocity_Get(){ //getter function for motor velocity
 	return Motor_Velocity;
 }
+
+/*@}*/

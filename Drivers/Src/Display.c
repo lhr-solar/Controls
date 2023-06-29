@@ -11,6 +11,9 @@
  * @author Nathaniel Delgado (NathanielDelgado)
  */
 
+/** @ingroup Display 
+ * @{ */
+
 #include "Display.h"
 #include "bsp.h"   // for writing to UART
 #include "Tasks.h" // for os and fault error codes
@@ -144,3 +147,5 @@ void assertDisplayError(DisplayError_t err){
 		assertOSError(OS_DISPLAY_LOC, os_err);
 	}
 }
+
+/*@}*/

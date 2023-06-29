@@ -11,6 +11,10 @@
  * @author Roie Gal (Cam0Cow)
  * @author Nathaniel Delgado (NathanielDelgado)
 */
+
+/** @ingroup UpdateDisplay 
+ * @{ */
+
 #include "UpdateDisplay.h"
 #include "Minions.h"
 #include <math.h>
@@ -393,3 +397,5 @@ void Task_UpdateDisplay(void *p_arg) {
 			assertUpdateDisplayError(err);
     }
 }
+
+/*@}*/

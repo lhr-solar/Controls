@@ -8,6 +8,10 @@
 #include "BSP_GPIO.h"
 #include "stm32f4xx_gpio.h"
 
+/** @defgroup Contactors */
+/** @ingroup Contactors 
+ * @{ */
+
 #define CONTACTORS_PORT         PORTC
 #define ARRAY_PRECHARGE_PIN GPIO_Pin_10
 #define ARRAY_CONTACTOR_PIN GPIO_Pin_11
@@ -48,3 +52,5 @@ bool Contactors_Get(contactor_t contactor);
 ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
 
 #endif
+
+/*@}*/

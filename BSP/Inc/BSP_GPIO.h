@@ -1,5 +1,9 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
+/** @defgroup BSP_GPIO */
+/** @ingroup BSP_GPIO 
+ * @{ */
+
 /**
  * Header file for the library to interact
  * with the GPIO ports
@@ -67,3 +71,5 @@ void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state);
 uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin);
 
 #endif
+
+/*@}*/
