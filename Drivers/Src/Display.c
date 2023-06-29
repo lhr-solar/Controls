@@ -27,6 +27,7 @@
 
 
 static const char *TERMINATOR = "\xff\xff\xff";
+static DisplayError_t currError = DISPLAY_ERR_NONE; // Holds the current display error so we can inspect it
 
 
 DisplayError_t Display_Init(){
@@ -98,7 +99,7 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Error(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+DisplayError_t Display_Error(os_error_loc_t osErrCode, uint8_t faultCode){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
 	char faultPage[7] = "page 2";
@@ -140,6 +141,7 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 
 void assertDisplayError(DisplayError_t err){
 	static uint8_t disp_error_cnt = 0; // Keep track of the number of times the display has an error
+	currError = err;
 	if (err != DISPLAY_ERR_NONE){
 		disp_error_cnt++;
 		if (disp_error_cnt > RESTART_THRESHOLD){ // Show error screen if we've reached the limit on restart attempts
