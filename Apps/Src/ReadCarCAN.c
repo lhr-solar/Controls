@@ -40,10 +40,47 @@ static uint8_t oldestMsgIdx = 0;
 static uint8_t SOC = 0;
 static uint32_t SBPV = 0;
 
+// Error type enum with all possible ReadCarCAN errors for error assertion and display
+typedef enum{
+    RCC_ERR_NONE,
+    RCC_ERR_CHARGE_DISABLE_MSG,
+    RCC_ERR_MISSED_BPS_MSG,
+    RCC_ERR_BPS_TRIP
+} readCarCAN_error_t;
 
-// Handler to turn array back on
-static void arrayRestart(void *p_tmr, void *p_arg); 
+// Error code variable
+static readCarCAN_error_t readCarCANError;
 
+/**
+ * @brief Error assertion function to check and handle errors in ReadCarCAN
+ * @param errorCode the variable to check for errors
+ */
+static void assertReadCarCANError(readCarCAN_error_t errorCode) {
+    OS_ERR err;
+    
+    // Check the type of error in a switch case
+    switch (errorCode) {
+        case RCC_ERR_BPS_TRIP:
+            OSSchedLock(&err);
+
+            arrayMotorKill(); // Disable all contactors
+
+            Display_Evac(SOC, SBPV); // Display the evacuation screen instead of the fault screen
+
+            while(1){;} // Enter a nonrecoverable loop
+
+            break;
+
+        case RCC_ERR_MISSED_BPS_MSG:
+            OSSchedLock(&err); // Want to handle this asap
+
+            
+            
+
+    }
+
+
+}
 
 // Getter function for chargeEnable
 bool ChargeEnable_Get() 
