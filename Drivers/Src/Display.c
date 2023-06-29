@@ -27,7 +27,7 @@
 
 
 static const char *TERMINATOR = "\xff\xff\xff";
-static DisplayError_t currError = DISPLAY_ERR_NONE; // Holds the current display error so we can inspect it
+static DisplayError_t displayError = DISPLAY_ERR_NONE; // Holds the current display error so we can inspect it
 
 
 DisplayError_t Display_Init(){
@@ -141,7 +141,7 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 
 void assertDisplayError(DisplayError_t err){
 	static uint8_t disp_error_cnt = 0; // Keep track of the number of times the display has an error
-	currError = err;
+	displayError = err;
 	if (err != DISPLAY_ERR_NONE){
 		disp_error_cnt++;
 		if (disp_error_cnt > RESTART_THRESHOLD){ // Show error screen if we've reached the limit on restart attempts
@@ -149,6 +149,6 @@ void assertDisplayError(DisplayError_t err){
 		} else { // Otherwise try resetting the display
 			Display_Reset();
 		}
-		currError = DISPLAY_ERR_NONE; // Clear the error after handling it
+		displayError = DISPLAY_ERR_NONE; // Clear the error after handling it
 	}
 }
