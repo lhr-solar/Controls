@@ -133,7 +133,7 @@ int main()
 	// Test the fault screen
 	os_error_loc_t osErrCode = 0x0420;
 	fault_bitmap_t faultCode = 0x69;
-	err = Display_Fault(osErrCode, faultCode);
+	err = Display_Error(osErrCode, faultCode);
 	//assertDisplayError(err);
 
 	while (1)
