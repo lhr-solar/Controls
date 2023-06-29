@@ -98,7 +98,7 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+DisplayError_t Display_Error(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
 	char faultPage[7] = "page 2";
@@ -139,11 +139,11 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 }
 
 void assertDisplayError(DisplayError_t err){
-	static uint8_t disp_fault_cnt = 0; // Keep track of the number of times the display has faulted
+	static uint8_t disp_error_cnt = 0; // Keep track of the number of times the display has an error
 	if (err != DISPLAY_ERR_NONE){
-		disp_fault_cnt++;
-		if (disp_fault_cnt > RESTART_THRESHOLD){ // Fault if we've reached the limit on restart attempts
-			Display_Fault(OS_DISPLAY_LOC, err);
+		disp_error_cnt++;
+		if (disp_error_cnt > RESTART_THRESHOLD){ // Show error screen if we've reached the limit on restart attempts
+			Display_Error(OS_DISPLAY_LOC, err);
 		} else { // Otherwise try resetting the display
 			Display_Reset();
 		}
