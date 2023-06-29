@@ -51,42 +51,13 @@ typedef enum{
 // Error code variable
 static readCarCAN_error_t readCarCANError;
 
-/**
- * @brief Error assertion function to check and handle errors in ReadCarCAN
- * @param errorCode the variable to check for errors
- */
-static void assertReadCarCANError(readCarCAN_error_t errorCode) {
-    OS_ERR err;
-    
-    // Check the type of error in a switch case
-    switch (errorCode) {
-        case RCC_ERR_BPS_TRIP:
-            OSSchedLock(&err);
 
-            arrayMotorKill(); // Disable all contactors
-
-            Display_Evac(SOC, SBPV); // Display the evacuation screen instead of the fault screen
-
-            while(1){;} // Enter a nonrecoverable loop
-
-            break;
-
-        case RCC_ERR_MISSED_BPS_MSG:
-            OSSchedLock(&err); // Want to handle this asap
-
-            
-            
-
-    }
-
-
-}
-
-// Getter function for chargeEnable
+// Public getter function for chargeEnable
 bool ChargeEnable_Get() 
 {
     return chargeEnable;
 }
+
 
 
 /**
@@ -108,24 +79,30 @@ static void updateSaturation(int8_t chargeMessage){
 }
 
 // exception struct callback for charging disable, kills contactors and turns of display
+//TODO: rename this
 static void callback_disableContactors(void){
     // Kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
+    Contactors_Set(ARRAY_CONTACTOR, OFF, true); // TODO: Change this to a GPIO write because WE DON'T CARE ABOUT PENDING ON YOUR STUPID SEMAPHORES
+    Contactors_Set(ARRAY_PRECHARGE, OFF, true); // TODO: Add chargeEnable = false?
+    // Using a GPIO write instead of Contactors_Set for speed, and to avoid blocking calls in timer callbacks
+    // This also eliminates the possibility of a deadlock in case Task_Init has the contactorsMutex for the motor contactor
+    // I don't think skipping the function or pend is an issue because the array contactor is only turned on in array restart,
+    // and if charging is disabled then it won't turn them back on.
+
+    // Being interrupted after checking chargeEnable isn't possible because arrayRestart happens in a timer callback,
+    // which is performed with the scheduler locked.
 
     // Turn off the array contactor display light
     UpdateDisplay_SetArray(false);
 }
 
 // helper function to disable charging
-// Turns off contactors by signaling fault state
-static inline void chargingDisable(void) {
+static void chargingDisable(void) {
     // mark regen as disabled
     chargeEnable = false;
 
     // kill contactors 
-    exception_t readBPSError = {.prio=PRI_RECOV, .message="read BPS error", .callback=callback_disableContactors};
-    assertExceptionError(readBPSError);
+    callback_disableContactors();
 }
 
 // helper function to call if charging should be enabled
@@ -188,6 +165,41 @@ void canWatchTimerCallback (void *p_tmr, void *p_arg){
 }
 
 
+/**
+ * @brief Error assertion function to check and handle errors in ReadCarCAN
+ * @param errorCode the variable to check for errors
+ */
+static void assertReadCarCANError(readCarCAN_error_t errorCode) {
+    OS_ERR err;
+
+    readCarCANError = errorCode; // Allows us to inspect what error we encountered
+    
+    // Check the type of error in a switch case
+    switch (errorCode) {
+        case RCC_ERR_BPS_TRIP:
+            OSSchedLock(&err);
+            arrayMotorKill(); // Disable all contactors
+            Display_Evac(SOC, SBPV); // Display the evacuation screen instead of the fault screen
+            while(1){;} // Enter a nonrecoverable loop
+            break;
+
+        case RCC_ERR_MISSED_BPS_MSG:
+        case RCC_ERR_CHARGE_DISABLE_MSG: //TODO: is there any difference in how we should andle the missed BPS message vs charging disable? If not, we can let this case falll through.
+            OSSchedLock(&err); // Want to handle this first without interruptions
+            chargingDisable(); // Mark chargeEnable as false, turn off contactors, and change display light
+            //TODO: make sure this takes care of everything we need to do for a missed BPS message.
+            OSSchedUnlock(&err); 
+            break;
+        
+        default:
+            break;         
+            
+    }
+
+    readCarCANError = RCC_ERR_NONE; // Clear the error once it has been handled
+
+}
+
 
 void Task_ReadCarCAN(void *p_arg)
 {
@@ -244,13 +256,9 @@ void Task_ReadCarCAN(void *p_arg)
             case BPS_TRIP: {
                 // BPS has a fault and we need to enter fault state (probably)
                 if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
-
-                    Display_Evac(SOC, SBPV);    // Display evacuation message
-
                     // Create an exception and assert the error
-                    // kill contactors and enter a nonrecoverable fault
-                    exception_t tripBPSError = {.prio=PRI_NONRECOV, .message="BPS has been tripped", .callback=callback_disableContactors};
-                    assertExceptionError(tripBPSError);
+                    // Display evacuation message, kill contactors, and enter a nonrecoverable fault
+                    assertReadCarCANError(RCC_ERR_BPS_TRIP);
                 }
             }
             case CHARGE_ENABLE: { 
