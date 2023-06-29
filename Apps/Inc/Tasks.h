@@ -184,6 +184,18 @@ typedef struct{
     void (*callback)(void);
 } exception_t;
 
+
+/**
+ * @brief Used by error assertion functions to handle and signal a critical error
+ * Kills contactors, turns on brakelights, displays the fault screen with error code,
+ * and enters an infinite while loop
+ * TODO: add paramaters to display fault screen
+ * @param ERR_LOC Location code to display the name of the task, currently uses the OS_ERR_LOC enum
+ * @param Err_Code The enum value for the task's specific error code
+*/
+void nonrecoverableErrorHandler();
+
+
 /**
  * @brief   Assert Error if OS function call fails
  * @param   OS_err_loc Where OS error occured (driver level)

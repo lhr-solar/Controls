@@ -149,5 +149,6 @@ void assertDisplayError(DisplayError_t err){
 		} else { // Otherwise try resetting the display
 			Display_Reset();
 		}
+		currError = DISPLAY_ERR_NONE; // Clear the error after handling it
 	}
 }

@@ -34,32 +34,39 @@ tritium_error_code_t MotorController_getTritiumError(void){
 
 
 /**
- * @brief   Assert Error if Tritium sends error. 
- * When asserted, a new task will be spawned to handle the fault
- * Creates either a low-priority task that restarts the hall sensor 
- * or a high priority task that enters a nonrecoverable fault
- * @param   motor_err Bitmap which has motor error codes
+ * @brief   Assert Error if Tritium sends error by passing in Motor_FaultBitmap
+ * Can result in restarting the motor (first few hall sensor errors)
+ * or locking the scheduler and entering a nonrecoverable fault
+ * @param   motor_err Bitmap with motor error codes to check
  */
-static void assertTritiumError(uint16_t motor_err){    
+static void assertTritiumError(uint16_t motor_err){   
+	OS_ERR err; 
 	static uint8_t hall_fault_cnt = 0; //trip counter 
-	if(motor_err != T_NONE){
+
+	// TODO: decide how to use Motor_FaultBitmap (should we set it here or assume it's already set?)
+
+	if(motor_err != T_NONE){ // We need to handle an error
+
 		if(motor_err != T_HALL_SENSOR_ERR){
-			//create a high priority task that will run the given callback
-			//exception_t notHallError = {PRI_NONRECOV, "this is Tritium, not-hall-sensor error", NULL};
-			//assertExceptionError(notHallError);
+			OSSchedLock(&err); // This is a high-priority error, and we won't unlock the scheduler because it's also nonrecoverable.
+			nonrecoverableErrorHandler(); // Kill contactors, display fault message, and infinite loop
+
 		}else{
-			if(hall_fault_cnt > RESTART_THRESHOLD){ //try to restart the motor a few times and then fail out 
-            // create a high priority task that will run a different message/callback
-			//exception_t hallErrorPrio1 = {PRI_NONRECOV, "hall sensor errors have exceeded restart threshold", NULL};
-			//assertExceptionError(hallErrorPrio1); // Fail out by entering nonrecoverable fault
-        	} else { // Try resetarting the motor
-            hall_fault_cnt++; 
-			printf("\n\rRestarting motor");
-            MotorController_Restart(); //re-initialize motor 
-            return; 
+			hall_fault_cnt++; 
+
+			//try to restart the motor a few times and then fail out
+			if(hall_fault_cnt > RESTART_THRESHOLD){  
+            	// enter nonrecoverable fault? TODO: check this
+				OSSchedLock(&err); // Treat this like another high-prio error
+				assertOSError(OS_READ_TRITIUM_LOC, err);
+				nonrecoverableErrorHandler(); 
+        	
+			} else { // Try restarting the motor
+				MotorController_Restart();
         	} 
 		}
 	}
+	Motor_FaultBitmap = T_NONE; // Clear the error
 }
 
 

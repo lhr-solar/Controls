@@ -42,6 +42,10 @@ fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
+/**
+ * Error assertion-related functions
+*/
+
 void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 {
     if (err != OS_ERR_NONE)
@@ -54,5 +58,19 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
         while(1){;} //nonrecoverable
 
     }
+}
+//TODO: add parameters for displaying the fault screen
+void nonrecoverableErrorHandler(){
+    // Array motor kill
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
+
+    // Turn additional brakelight on to indicate critical error
+    BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
+
+    // TODO: Display fault screen 
+
+
+    while(1){;} //nonrecoverable
 }
 
