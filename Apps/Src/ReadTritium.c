@@ -13,7 +13,7 @@
 #define RESTART_THRESHOLD 3			// Number of times to try restarting the hall sensor
 
 
-uint16_t Motor_FaultBitmap = T_NONE;
+tritium_error_code_t Motor_FaultBitmap = T_NONE;
 static float Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
 static float Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
 
@@ -39,7 +39,7 @@ tritium_error_code_t MotorController_getTritiumError(void){
  * or locking the scheduler and entering a nonrecoverable fault
  * @param   motor_err Bitmap with motor error codes to check
  */
-static void assertTritiumError(uint16_t motor_err){   
+static void assertTritiumError(tritium_error_code_t motor_err){   
 	OS_ERR err; 
 	static uint8_t hall_fault_cnt = 0; //trip counter 
 
@@ -49,7 +49,7 @@ static void assertTritiumError(uint16_t motor_err){
 
 		if(motor_err != T_HALL_SENSOR_ERR){
 			OSSchedLock(&err); // This is a high-priority error, and we won't unlock the scheduler because it's also nonrecoverable.
-			nonrecoverableErrorHandler(); // Kill contactors, display fault message, and infinite loop
+			nonrecoverableErrorHandler(OS_READ_TRITIUM_LOC, motor_err); // Kill contactors, display fault message, and infinite loop
 
 		}else{
 			hall_fault_cnt++; 
@@ -59,7 +59,7 @@ static void assertTritiumError(uint16_t motor_err){
             	// enter nonrecoverable fault? TODO: check this
 				OSSchedLock(&err); // Treat this like another high-prio error
 				assertOSError(OS_READ_TRITIUM_LOC, err);
-				nonrecoverableErrorHandler(); 
+				nonrecoverableErrorHandler(OS_READ_TRITIUM_LOC, motor_err); 
         	
 			} else { // Try restarting the motor
 				MotorController_Restart();

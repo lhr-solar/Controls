@@ -190,10 +190,10 @@ typedef struct{
  * Kills contactors, turns on brakelights, displays the fault screen with error code,
  * and enters an infinite while loop
  * TODO: add paramaters to display fault screen
- * @param ERR_LOC Location code to display the name of the task, currently uses the OS_ERR_LOC enum
- * @param Err_Code The enum value for the task's specific error code
+ * @param osLocCode Location code to display the name of the task, currently uses the OS_ERR_LOC enum
+ * @param faultCode The enum value for the task's specific error code
 */
-void nonrecoverableErrorHandler();
+void nonrecoverableErrorHandler(os_error_loc_t osLocCode, uint8_t faultCode);
 
 
 /**

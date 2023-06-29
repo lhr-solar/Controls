@@ -59,8 +59,8 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 
     }
 }
-//TODO: add parameters for displaying the fault screen
-void nonrecoverableErrorHandler(){
+
+void nonrecoverableErrorHandler(os_error_loc_t osLocCode, uint8_t faultCode){
     // Array motor kill
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
@@ -68,8 +68,8 @@ void nonrecoverableErrorHandler(){
     // Turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
 
-    // TODO: Display fault screen 
-
+    // Display the fault screen with the error location and code
+    Display_Error(osLocCode, faultCode);
 
     while(1){;} //nonrecoverable
 }
