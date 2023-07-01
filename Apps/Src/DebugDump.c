@@ -74,13 +74,14 @@ void Task_DebugDump(void* p_arg) {
         // Get minion information
         for(MinionPin_t pin = 0; pin < NUM_MINIONPINS-1; pin++){ // Plan to change NUM_MINIONPINS-1 -> NUM_MINIONPINS after Minion function is fixed
             bool pinState = Minion_Read_Pin(pin, &mErr);
-            printf("%s: %s\n\r", MINIONPIN_STRING[pin], pinState == true ? "true" : "false");
+            // Ignition pins are negative logic, special-case them
+            printf("%s: %s\n\r", MINIONPIN_STRING[pin], pinState ^ (pin == IGN_1 || pin == IGN_2) ? "on" : "off");
         }
 
         // Get contactor info
         for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
             bool contactorState = Contactors_Get(contactor) == ON ? true : false;
-            printf("%s: %s\n\r", CONTACTOR_STRING[contactor], contactorState == true ? "true" : "false");
+            printf("%s: %s\n\r", CONTACTOR_STRING[contactor], contactorState ? "on" : "off");
         } 
 
         // Send Tritium variables
