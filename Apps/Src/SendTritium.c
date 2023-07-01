@@ -659,8 +659,8 @@ void Task_SendTritium(void *p_arg){
         #else
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
             velocitySetpoint = MAX_VELOCITY; // To ensure no regen takes place
-            memcpy(&driveCmd.data[0], &currentSetpoint, sizeof(float));
-            memcpy(&driveCmd.data[4], &velocitySetpoint, sizeof(float));
+            memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
+            memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
             CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
             motorMsgCounter = 0;
         }else{
