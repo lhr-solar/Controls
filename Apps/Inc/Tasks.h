@@ -186,7 +186,7 @@ typedef struct{
 
 /**
  * @brief For use in error handling: turns off array and motor contactor, turns on additional brakelight
- * to signal a ciritical error happened
+ * to signal a ciritical error happened. Separated from nonrecoverable fault handler 
 */
 void arrayMotorKill();
 
@@ -200,6 +200,15 @@ void arrayMotorKill();
 */
 void nonrecoverableErrorHandler(os_error_loc_t osLocCode, uint8_t faultCode);
 
+/**
+ * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
+ * and jumping to the error's specified callback function
+ * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
+ * @param errorLoc the task from which the error originated. TODO: should be taken out when last task pointer is integrated
+ * @param faultCode the value for what specific error happened
+ * @param errorCallback a callback function to a handler for that specific error
+*/
+void assertTaskError(bool lockSched, os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback);
 
 /**
  * @brief   Assert Error if OS function call fails

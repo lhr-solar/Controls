@@ -60,6 +60,31 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
     }
 }
 
+/**
+ * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
+ * and jumping to the error's specified callback function
+ * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
+ * @param errorLoc the task from which the error originated. TODO: should be taken out when last task pointer is integrated
+ * @param faultCode the value for what specific error happened
+ * @param errorCallback a callback function to a handler for that specific error
+*/
+void assertTaskError(bool lockSched, os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback) {
+    OS_ERR err;
+
+    if (lockSched) {
+        OSSchedLock(&err);
+        assertOSError(OS_MAIN_LOC, err); //TODO: should this be a different location?
+    }
+
+    Display_Error(errorLoc, faultCode);
+    errorCallback();
+
+    if (lockSched) {
+        OSSchedUnlock(&err);
+        assertOSError(OS_MAIN_LOC, err);
+    }
+}
+
 void arrayMotorKill() {
     // Array motor kill
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
