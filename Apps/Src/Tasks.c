@@ -20,6 +20,8 @@ OS_TCB UpdateDisplay_TCB;
 OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB Telemetry_TCB;
+OS_TCB DebugDump_TCB;
+OS_TCB CommandLine_TCB;
 
 /**
  * Stacks
@@ -32,7 +34,8 @@ CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
-
+CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
+CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 /**
  * Semaphores

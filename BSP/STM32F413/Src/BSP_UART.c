@@ -119,7 +119,7 @@ static void USART_USB_Init() {
     // Enable NVIC
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -166,24 +166,27 @@ uint32_t BSP_UART_Read(UART_t usart, char *str) {
     uint32_t recvd = 0;
 
     bool *line_recvd = lineRecvd[usart];
-    if(*line_recvd) {
-        USART_TypeDef *usart_handle = handles[usart];
-
-        USART_ITConfig(usart_handle, USART_IT_RXNE, RESET);
-        
-        rxfifo_t *fifo = rx_fifos[usart];
-        
-        rxfifo_peek(fifo, &data);
-        while(!rxfifo_is_empty(fifo) && data != '\r') {
-            recvd += rxfifo_get(fifo, (char*)str++);
-            rxfifo_peek(fifo, &data);
-        }
-
-        rxfifo_get(fifo, &data);
-        *str = 0;
-        *line_recvd = false;
-        USART_ITConfig(usart_handle, USART_IT_RXNE, SET);
+    
+    while(*line_recvd == false){
+        BSP_UART_Write(usart, "", 0);   // needs to be in. Otherwise, usbLineRecieved will not update
     }
+
+    USART_TypeDef *usart_handle = handles[usart];
+
+    USART_ITConfig(usart_handle, USART_IT_RXNE, RESET);
+    
+    rxfifo_t *fifo = rx_fifos[usart];
+    
+    rxfifo_peek(fifo, &data);
+    while(!rxfifo_is_empty(fifo) && data != '\r') {
+        recvd += rxfifo_get(fifo, (char*)str++);
+        rxfifo_peek(fifo, &data);
+    }
+
+    rxfifo_get(fifo, &data);
+    *str = 0;
+    *line_recvd = false;
+    USART_ITConfig(usart_handle, USART_IT_RXNE, SET);
 
     return recvd;
 }
@@ -233,10 +236,10 @@ void USART2_IRQHandler(void) {
     OSIntEnter();
     CPU_CRITICAL_EXIT();
 
-    if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
+    if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE) != RESET) {
         uint8_t data = USART2->DR;
         bool removeSuccess = 1;
-        if(data == '\r'){
+        if(data == '\r' || data == '\n'){
             usbLineReceived = true;
             if(usbRxCallback != NULL)
                 usbRxCallback();
@@ -244,14 +247,18 @@ void USART2_IRQHandler(void) {
         // Check if it was a backspace.
         // '\b' for minicmom
         // '\177' for putty
-        if(data != '\b' && data != '\177') rxfifo_put(&usbRxFifo, data);
+        else if(data != '\b' && data != '\177') {
+            rxfifo_put(&usbRxFifo, data);
+        }
         // Sweet, just a "regular" key. Put it into the fifo
         // Doesn't matter if it fails. If it fails, then the data gets thrown away
         // and the easiest solution for this is to increase RX_SIZE
         else {
             char junk;
             // Delete the last entry!
-            removeSuccess = rxfifo_popback(&usbRxFifo, &junk);
+            removeSuccess = rxfifo_popback(&usbRxFifo, &junk); 
+
+            USART_SendData(UART_2, 0x7F);   // TODO: Not sure if the backspace works. Need to test
         }
         if(removeSuccess) {
             USART2->DR = data;
