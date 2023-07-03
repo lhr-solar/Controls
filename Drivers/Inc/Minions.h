@@ -4,7 +4,7 @@
 #include "BSP_GPIO.h"
 
 /** @defgroup Minions */
-/** @ingroup Minions 
+/** @addtogroup Minions 
  * @{ */
 
 typedef enum{

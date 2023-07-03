@@ -2,7 +2,7 @@
 #define __FAULT_STATE_H
 
 /** @defgroup FaultState */
-/** @ingroup FaultState 
+/** @addtogroup FaultState 
  * @{ */
 
 void EnterFaultState(void);

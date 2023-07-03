@@ -4,7 +4,7 @@
 #include "common.h"
 
 /** @defgroup SendCarCAN */
-/** @ingroup SendCarCAN 
+/** @addtogroup SendCarCAN 
  * @{ */
 
 /**
@@ -21,7 +21,7 @@
  * 
  * @param p_arg 
  * 
- * @ingroup SendCarCAN 
+ * @addtogroup SendCarCAN 
  */
 void Task_SendCarCAN(void *p_arg){
     CANDATA_t motorMsg;

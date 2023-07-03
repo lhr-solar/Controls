@@ -1,6 +1,6 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-/** @ingroup BSP_CAN 
+/** @addtogroup BSP_CAN 
  * @{ */
 
 #include "BSP_CAN.h"

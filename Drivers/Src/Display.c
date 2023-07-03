@@ -11,7 +11,7 @@
  * @author Nathaniel Delgado (NathanielDelgado)
  */
 
-/** @ingroup Display 
+/** @addtogroup Display 
  * @{ */
 
 #include "Display.h"

@@ -4,7 +4,7 @@
  * pedal has been pressed
  */
 
-/** @ingroup Pedals 
+/** @addtogroup Pedals 
  * @{ */
 
 #include "Pedals.h"

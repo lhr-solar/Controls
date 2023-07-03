@@ -1,7 +1,7 @@
 /* Copyright (c) 2021 UT Longhorn Racing Solar */
 
 /** @defgroup ReadTritium */
-/** @ingroup ReadTritium 
+/** @addtogroup ReadTritium 
  * @{ */
 
 #ifndef __READ_TRITIUM_H

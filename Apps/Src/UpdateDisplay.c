@@ -12,7 +12,7 @@
  * @author Nathaniel Delgado (NathanielDelgado)
 */
 
-/** @ingroup UpdateDisplay 
+/** @addtogroup UpdateDisplay 
  * @{ */
 
 #include "UpdateDisplay.h"

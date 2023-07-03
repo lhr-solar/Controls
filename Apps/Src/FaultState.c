@@ -9,7 +9,7 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 
-/** @ingroup FaultState 
+/** @addtogroup FaultState 
  * @{ */
 
 #define RESTART_THRESHOLD 3

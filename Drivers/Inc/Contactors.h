@@ -9,7 +9,7 @@
 #include "stm32f4xx_gpio.h"
 
 /** @defgroup Contactors */
-/** @ingroup Contactors 
+/** @addtogroup Contactors 
  * @{ */
 
 #define CONTACTORS_PORT         PORTC

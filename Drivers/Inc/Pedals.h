@@ -5,7 +5,7 @@
  */
 
 /** @defgroup Pedals */
-/** @ingroup Pedals 
+/** @addtogroup Pedals 
  * @{ */
 
 #ifndef __PEDALS_H

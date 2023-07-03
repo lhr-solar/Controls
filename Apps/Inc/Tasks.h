@@ -1,7 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 /** @defgroup Tasks */
-/** @ingroup Tasks 
+/** @addtogroup Tasks 
  * @{ */
 
 #ifndef __TASKS_H

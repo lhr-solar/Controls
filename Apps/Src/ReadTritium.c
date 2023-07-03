@@ -1,6 +1,6 @@
 /* Copyright (c) 2021 UT Longhorn Racing Solar */
 
-/** @ingroup ReadTritium 
+/** @addtogroup ReadTritium 
  * @{ */
 
 #include "ReadTritium.h"

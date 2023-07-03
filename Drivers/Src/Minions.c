@@ -5,7 +5,7 @@
 #include "Tasks.h"
 #include "Contactors.h"
 
-/** @ingroup Minions 
+/** @addtogroup Minions 
  * @{ */
 
 static OS_MUTEX OutputMutex; //Mutex to lock GPIO writes to input pins

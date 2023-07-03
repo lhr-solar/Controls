@@ -4,7 +4,7 @@
 #include "Tasks.h"
 #include "CANConfig.h"
 
-/** @ingroup FooGroup 
+/** @addtogroup FooGroup 
  * @{
 */
 

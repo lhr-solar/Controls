@@ -13,7 +13,7 @@
 */
 
 /** @defgroup Display */
-/** @ingroup Display 
+/** @addtogroup Display 
  * @{ */
 
 #ifndef __DISPLAY_H

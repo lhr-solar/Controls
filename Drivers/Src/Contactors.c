@@ -1,6 +1,6 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-/** @ingroup Contactors 
+/** @addtogroup Contactors 
  * @{ */
 
 #include "Contactors.h"

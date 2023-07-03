@@ -1,5 +1,5 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
-/** @ingroup CAN_Queue 
+/** @addtogroup CAN_Queue 
  * @{ */
 
 #include "CAN_Queue.h"

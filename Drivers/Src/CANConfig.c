@@ -1,6 +1,6 @@
 #include "CANConfig.h"
 
-/** @ingroup CANConfig 
+/** @addtogroup CANConfig 
  * @{ */
 
 #define BYTE 1

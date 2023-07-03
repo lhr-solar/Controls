@@ -3,7 +3,7 @@
 #include "CANbus.h"
 
 /** @defgroup CANConfig */
-/** @ingroup CANConfig 
+/** @addtogroup CANConfig 
  * @{ */
 
 

@@ -2,7 +2,7 @@
 /** @defgroup CAN_Queue 
  * Queue that holds all CAN messages that Task_CANBusConsumer needs to send.
 */
-/** @ingroup CAN_Queue 
+/** @addtogroup CAN_Queue 
  * @{ */
 
 #ifndef CAN_QUEUE_H

@@ -1,7 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 /** @defgroup CANBus */
-/** @ingroup CANBus 
+/** @addtogroup CANBus 
  * @{ */
 
 #ifndef CAN_H__
