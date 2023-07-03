@@ -17,6 +17,9 @@ tritium_error_code_t Motor_FaultBitmap = T_NONE;
 static float Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
 static float Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
 
+// Function prototypes
+static void assertTritiumError(tritium_error_code_t motor_err);
+
 /**
  * @brief Returns highest priority tritium error code
  * 
@@ -32,37 +35,6 @@ tritium_error_code_t MotorController_getTritiumError(void){
 }
 
 
-/**
- * @brief   Assert Error if Tritium sends error by passing in and checking Motor_FaultBitmap
- * and asserting the error with its handler callback if one exists.
- *  Can result in restarting the motor (first few hall sensor errors)
- * or locking the scheduler and entering a nonrecoverable fault for most other errors
- * @param   motor_err Bitmap with motor error codes to check
- */
-static void assertTritiumError(tritium_error_code_t motor_err){   
-	OS_ERR err; 
-	static uint8_t hall_fault_cnt = 0; //trip counter 
-
-
-	if(motor_err != T_NONE){ // We need to handle an error
-
-		if(motor_err != T_HALL_SENSOR_ERR){
-			 // Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
-			assertTaskError(OS_READ_TRITIUM_LOC, motor_err, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
-		}else{
-			hall_fault_cnt++; 
-
-			//try to restart the motor a few times and then fail out
-			if(hall_fault_cnt > RESTART_THRESHOLD){  
-				// Assert another nonrecoverable error, but this time motor_err will have a different error code
-				assertTaskError(OS_READ_TRITIUM_LOC, motor_err, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
-			} else { // Try restarting the motor
-				// Assert a recoverable error that will run the motor restart callback function
-				assertTaskError(OS_READ_TRITIUM_LOC, motor_err, handler_Tritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV);
-        	} 
-		}
-	}
-}
 
 
 
@@ -160,4 +132,35 @@ float Motor_Velocity_Get(){ //getter function for motor velocity
 // A callback function to be run by the main assertTaskError function for hall sensor errors
 static void handler_Tritium_HallError() {
 	MotorController_Restart(); // Try restarting the motor
+}
+
+
+/**
+ * @brief   Assert Error if Tritium sends error by passing in and checking Motor_FaultBitmap
+ * and asserting the error with its handler callback if one exists.
+ *  Can result in restarting the motor (first few hall sensor errors)
+ * or locking the scheduler and entering a nonrecoverable fault for most other errors
+ * @param   motor_err Bitmap with motor error codes to check
+ */
+static void assertTritiumError(tritium_error_code_t motor_err){   
+	static uint8_t hall_fault_cnt = 0; //trip counter 
+
+	if(motor_err != T_NONE){ // We need to handle an error
+		if(motor_err != T_HALL_SENSOR_ERR){
+			 // Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
+			assertTaskError(OS_READ_TRITIUM_LOC, motor_err, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+		
+		}else{
+			hall_fault_cnt++; 
+			
+			//try to restart the motor a few times and then fail out
+			if(hall_fault_cnt > RESTART_THRESHOLD){  
+				// Assert another nonrecoverable error, but this time motor_err will have a different error code
+				assertTaskError(OS_READ_TRITIUM_LOC, motor_err, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+			} else { // Try restarting the motor
+				// Assert a recoverable error that will run the motor restart callback function
+				assertTaskError(OS_READ_TRITIUM_LOC, motor_err, handler_Tritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV);
+        	} 
+		}
+	}
 }

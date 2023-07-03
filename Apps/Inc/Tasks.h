@@ -185,16 +185,16 @@ typedef struct{
 */
 
 // Whether or not to lock the scheduler when asserting a task error
-enum {
+typedef enum {
     OPT_LOCK_SCHED = false,
     OPT_NO_LOCK_SCHED = true
-};
+} error_lock_sched_opt_t;
 
 // Whether or not a task error is recoverable
-enum {
+typedef enum {
     OPT_RECOV,
     OPT_NONRECOV
-};
+} error_recov_opt_t;
 
 /**
  * @brief For use in error handling: turns off array and motor contactor, turns on additional brakelight
@@ -221,7 +221,7 @@ void nonrecoverableErrorHandler(os_error_loc_t osLocCode, uint8_t faultCode);
  * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable if true, kills the motor, displays the fault screen, and enters an infinite while loop
 */
-void assertTaskError(os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback, bool lockSched, bool nonrecoverable);
+void assertTaskError(os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback, error_lock_sched_opt_t lockSched, error_recov_opt_t nonrecoverable);
 
 /**
  * @brief   Assert Error if OS function call fails

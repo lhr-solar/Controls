@@ -40,7 +40,7 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
  */
 fault_bitmap_t FaultBitmap = FAULT_NONE; // Used for faultstate handling, otherwise not used. TODO: Should be deleted?
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
-uint8_t currError = NULL; // Error code from the enum of the task in OSSErrLocBitmap
+uint8_t currError = (int) NULL; // Error code from the enum of the task in OSSErrLocBitmap
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 
@@ -70,10 +70,10 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
  * @param faultCode the value for what specific error happened
  * @param errorCallback a callback function to a handler for that specific error
 */
-void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t errorCallback, bool lockSched, bool nonrecoverable) {
+void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t errorCallback, error_lock_sched_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
-    if (lockSched = OPT_LOCK_SCHED) { // We want this error to be handled immediately without other tasks being able to interrupt
+    if (lockSched == OPT_LOCK_SCHED) { // We want this error to be handled immediately without other tasks being able to interrupt
         OSSchedLock(&err);
         assertOSError(OS_TASKS_LOC, err);
     }
@@ -98,7 +98,7 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
         while(1){;}
     }
 
-    if (lockSched = OPT_LOCK_SCHED) { // Only happens on recoverable errors
+    if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
         OSSchedUnlock(&err); 
         assertOSError(OS_TASKS_LOC, err);
     }
