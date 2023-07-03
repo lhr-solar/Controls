@@ -31,6 +31,7 @@ typedef enum{
 	UPDATEDISPLAY_ERR_FIFO_POP		=-2,	// Error popping command from fifo
 	UPDATEDISPLAY_ERR_PARSE_COMP	=-3,	// Error parsing component/val in SetComponent
 	UPDATEDISPLAY_ERR_NO_CHANGE	=-4,		// No change in component value
+	UPDATEDISPLAY_ERR_DRIVER =-5
 } UpdateDisplayError_t;
 
 /**
