@@ -73,7 +73,7 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t errorCallback, bool lockSched, bool nonrecoverable) {
     OS_ERR err;
 
-    if (lockSched) { // We want this error to be handled immediately without other tasks being able to interrupt
+    if (lockSched = OPT_LOCK_SCHED) { // We want this error to be handled immediately without other tasks being able to interrupt
         OSSchedLock(&err);
         assertOSError(OS_TASKS_LOC, err);
     }
@@ -82,7 +82,7 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
     OSErrLocBitmap = errorLoc; 
     currError = errorCode;
 
-    if (nonrecoverable) {
+    if (nonrecoverable == OPT_NONRECOV) {
         arrayMotorKill(); // Apart from while loop because killing the motor is more important
         Display_Error(errorLoc, errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
@@ -94,11 +94,11 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
     }
     
 
-    if (nonrecoverable) { // enter an infinite while loop
+    if (nonrecoverable == OPT_NONRECOV) { // enter an infinite while loop
         while(1){;}
     }
 
-    if (lockSched) { // Only happens on recoverable errors
+    if (lockSched = OPT_LOCK_SCHED) { // Only happens on recoverable errors
         OSSchedUnlock(&err); 
         assertOSError(OS_TASKS_LOC, err);
     }

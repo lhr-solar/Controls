@@ -181,6 +181,22 @@ typedef struct{
 } exception_t;
 
 /**
+ * Error-handling option enums
+*/
+
+// Whether or not to lock the scheduler when asserting a task error
+enum {
+    OPT_LOCK_SCHED = false,
+    OPT_NO_LOCK_SCHED = true
+};
+
+// Whether or not a task error is recoverable
+enum {
+    OPT_RECOV,
+    OPT_NONRECOV
+};
+
+/**
  * @brief For use in error handling: turns off array and motor contactor, turns on additional brakelight
  * to signal a ciritical error happened. Separated from nonrecoverable fault handler 
 */
