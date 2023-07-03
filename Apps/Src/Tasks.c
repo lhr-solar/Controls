@@ -38,9 +38,11 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 /**
  * Global Variables
  */
-fault_bitmap_t FaultBitmap = FAULT_NONE;
+fault_bitmap_t FaultBitmap = FAULT_NONE; // Used for faultstate handling, otherwise not used. TODO: Should be deleted?
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
+uint8_t currError = NULL; // Error code from the enum of the task in OSSErrLocBitmap
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
+
 
 /**
  * Error assertion-related functions
@@ -68,20 +70,37 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
  * @param faultCode the value for what specific error happened
  * @param errorCallback a callback function to a handler for that specific error
 */
-void assertTaskError(bool lockSched, os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback) {
+void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t errorCallback, bool lockSched, bool nonrecoverable) {
     OS_ERR err;
 
-    if (lockSched) {
+    if (lockSched) { // We want this error to be handled immediately without other tasks being able to interrupt
         OSSchedLock(&err);
-        assertOSError(OS_MAIN_LOC, err); //TODO: should this be a different location?
+        assertOSError(OS_TASKS_LOC, err);
     }
 
-    Display_Error(errorLoc, faultCode);
-    errorCallback();
+    // Set the error variables to store data
+    OSErrLocBitmap = errorLoc; 
+    currError = errorCode;
 
-    if (lockSched) {
-        OSSchedUnlock(&err);
-        assertOSError(OS_MAIN_LOC, err);
+    if (nonrecoverable) {
+        arrayMotorKill(); // Apart from while loop because killing the motor is more important
+        Display_Error(errorLoc, errorCode); // Needs to happen before callback so that tasks can change the screen
+        // (ex: readCarCAN and evac screen for BPS trip)
+    }
+
+
+    if (errorCallback != NULL) {
+        errorCallback(); // Run a handler for this error that was specified in another task file
+    }
+    
+
+    if (nonrecoverable) { // enter an infinite while loop
+        while(1){;}
+    }
+
+    if (lockSched) { // Only happens on recoverable errors
+        OSSchedUnlock(&err); 
+        assertOSError(OS_TASKS_LOC, err);
     }
 }
 
@@ -94,7 +113,10 @@ void arrayMotorKill() {
     BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
 }
 
-void nonrecoverableErrorHandler(os_error_loc_t osLocCode, uint8_t faultCode){
+/**
+ * TODO: delete?
+*/
+void nonrecoverableErrorHandler(os_error_loc_t osLocCode, uint8_t faultCode){ 
     // Turn off contactors, turn on brakelight as a signal
     arrayMotorKill();
 

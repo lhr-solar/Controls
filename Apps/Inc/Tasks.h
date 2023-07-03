@@ -44,8 +44,6 @@
 #define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_TELEMETRY_STACK_SIZE           DEFAULT_STACK_SIZE
 
-
-
 /**
  * Task Prototypes
  */
@@ -135,9 +133,7 @@ typedef enum{
     OS_MOTOR_CONNECTION_LOC = 0x800,
     OS_DISPLAY_LOC = 0x1000,
     OS_FAULT_STATE_LOC = 0x2000, // to be deleted
-    OS_FAULT_HIGHPRIO_LOC = 0x2000,
-    OS_FAULT_LOWPRIO_LOC = 0x4000
-
+    OS_TASKS_LOC = 0x2000,
 } os_error_loc_t;
 
 /**
@@ -203,12 +199,13 @@ void nonrecoverableErrorHandler(os_error_loc_t osLocCode, uint8_t faultCode);
 /**
  * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
  * and jumping to the error's specified callback function
- * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
  * @param errorLoc the task from which the error originated. TODO: should be taken out when last task pointer is integrated
  * @param faultCode the value for what specific error happened
  * @param errorCallback a callback function to a handler for that specific error
+ * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
+ * @param nonrecoverable if true, kills the motor, displays the fault screen, and enters an infinite while loop
 */
-void assertTaskError(bool lockSched, os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback);
+void assertTaskError(os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback, bool lockSched, bool nonrecoverable);
 
 /**
  * @brief   Assert Error if OS function call fails
