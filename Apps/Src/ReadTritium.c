@@ -145,6 +145,8 @@ static void handler_Tritium_HallError() {
 static void assertTritiumError(tritium_error_code_t motor_err){   
 	static uint8_t hall_fault_cnt = 0; //trip counter 
 
+	Error_ReadTritium = motor_err;
+
 	if(motor_err != T_NONE){ // We need to handle an error
 		if(motor_err != T_HALL_SENSOR_ERR){
 			 // Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
@@ -163,4 +165,6 @@ static void assertTritiumError(tritium_error_code_t motor_err){
         	} 
 		}
 	}
+
+	Error_ReadTritium = T_NONE; // Clear the error after handling it
 }

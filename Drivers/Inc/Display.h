@@ -23,7 +23,7 @@
 /**
  * Error types
  */
-typedef enum{
+typedef enum{ // Currently only ERR_NONE and ERR_PARSE are used
 	DISPLAY_ERR_NONE      = 0,
 	DISPLAY_ERR_PARSE     =-1,	// Error parsing command struct passed to Display_Send
 	DISPLAY_ERR_INV_INSTR =-2,	// Invalid instruction passed to nextion (0x00)
@@ -37,13 +37,6 @@ typedef enum{
 	DISPLAY_ERR_OTHER     =-10  // Other nextion display error
 } DisplayError_t;
 
-/**
- * @brief Error handler for any display errors. Call this after any display driver function.
- * Restarts the display if there is an error 
- * or displays fault if it has reached the threshold for restart attempts
- * @param err the display error code to check
- */
-void assertDisplayError(DisplayError_t err);
 
 /**
  * All three pages on the HMI 

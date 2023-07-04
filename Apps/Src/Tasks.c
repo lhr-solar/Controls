@@ -40,7 +40,9 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
  */
 fault_bitmap_t FaultBitmap = FAULT_NONE; // Used for faultstate handling, otherwise not used. TODO: Should be deleted?
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
-uint8_t currError = (int) NULL; // Error code from the enum of the task in OSSErrLocBitmap
+error_code_t Error_ReadTritium = NULL;  // Variables to store error codes, stored and cleared in task error assert functions
+error_code_t Error_ReadCarCAN = NULL;
+error_code_t Error_UpdateDisplay = NULL;
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 
@@ -78,9 +80,8 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
         assertOSError(OS_TASKS_LOC, err);
     }
 
-    // Set the error variables to store data
+    // Set the error variables to store data //TODO: delete? 
     OSErrLocBitmap = errorLoc; 
-    currError = errorCode;
 
     if (nonrecoverable == OPT_NONRECOV) {
         arrayMotorKill(); // Apart from while loop because killing the motor is more important

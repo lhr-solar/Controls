@@ -45,6 +45,11 @@
 #define TASK_TELEMETRY_STACK_SIZE           DEFAULT_STACK_SIZE
 
 /**
+ * Task error variable type
+*/
+#define error_code_t uint8_t
+
+/**
  * Task Prototypes
  */
 void Task_FaultState(void* p_arg);
@@ -152,10 +157,24 @@ typedef enum{
 } fault_bitmap_t;
 
 /**
+ * Error handler task enum
+*/
+typedef enum {
+    TASK_READ_TRITIUM = 0,
+    TASK_READ_CAR_CAN = 1,
+    TASK_UPDATE_DISPLAY = 2
+} error_task_t;
+
+/**
  * Error variables
  */
 extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
+
+// Store error codes, set in task error assertion functions
+extern error_code_t Error_ReadTritium; 
+extern error_code_t Error_ReadCarCAN;
+extern error_code_t Error_UpdateDisplay;
 
 /**
  * Fault Exception Enum

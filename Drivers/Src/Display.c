@@ -139,16 +139,4 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 	return DISPLAY_ERR_NONE;
 }
 
-void assertDisplayError(DisplayError_t err){
-	static uint8_t disp_error_cnt = 0; // Keep track of the number of times the display has an error
-	displayError = err;
-	if (err != DISPLAY_ERR_NONE){
-		disp_error_cnt++;
-		if (disp_error_cnt > RESTART_THRESHOLD){ // Show error screen if we've reached the limit on restart attempts
-			Display_Error(OS_DISPLAY_LOC, err);
-		} else { // Otherwise try resetting the display
-			Display_Reset();
-		}
-		displayError = DISPLAY_ERR_NONE; // Clear the error after handling it
-	}
-}
+

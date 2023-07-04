@@ -113,7 +113,8 @@ static UpdateDisplayError_t UpdateDisplay_PopNext(){
 			return UPDATEDISPLAY_ERR_FIFO_POP;
 		}
 		
-		assertDisplayError(Display_Send(cmd));
+		// Assert a display driver error code if the send fails, else assert that there's no error
+		assertDisplayError(Display_Send(cmd) ? UPDATEDISPLAY_ERR_DRIVER : UPDATEDISPLAY_ERR_NONE);
 		return UPDATEDISPLAY_ERR_NONE;
 }
 
@@ -383,4 +384,53 @@ void Task_UpdateDisplay(void *p_arg) {
 			UpdateDisplayError_t err = UpdateDisplay_PopNext();
 			assertDisplayError(err);
     }
+}
+
+
+/**
+ * Error handler functions
+ * Passed as callback functions to the main assertTaskError function by assertTritiumError
+*/
+
+/**
+ * @brief A handler callback function run by the main assertTaskError function
+ * if we haven't reached the restart limit and want to restart the display
+ */ 
+static void handler_UpdateDisplay_Restart() {
+	Display_Restart(); // Try resetting the display
+}
+
+/**
+ * @brief A handler callback function run by the main assertTaskError function
+ * if we have reached the restart limit and want to show the error screen
+ */ 
+static void handler_UpdateDisplay_ShowError() {
+	Display_Error(OS_DISPLAY_LOC, Error_UpdateDisplay); // Try resetting the display
+}
+
+
+/**
+ * @brief Check for a display error and assert one if it exists.
+ * Sotres the error code, calls the main assertion function 
+ * and runs a handler to restart or display the error.
+ * @param   err variable with display error codes
+ */static void assertDisplayError(DisplayError_t err){
+	static uint8_t disp_error_cnt = 0; // Keep track of the number of times the display has an error
+
+	Error_UpdateDisplay = err; // Store the error code for inspection
+
+	if (err != DISPLAY_ERR_NONE){
+		disp_error_cnt++;
+
+		if (disp_error_cnt > RESTART_THRESHOLD){ 
+			// Use error assertion to show error screen if at restart attempt limit
+			assertTaskError(OS_DISPLAY_LOC, err, handler_UpdateDisplay_ShowError,
+			OPT_NO_LOCK_SCHED, OPT_RECOV);
+		} else { // Otherwise try resetting the display using the restart callback
+			assertTaskError(OS_DISPLAY_LOC, err, handler_UpdateDisplay_Restart,
+			OPT_NO_LOCK_SCHED, OPT_RECOV);
+		}
+
+		Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
+	}
 }
