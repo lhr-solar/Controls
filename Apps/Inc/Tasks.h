@@ -160,7 +160,7 @@ typedef enum {
 
 /**
  * @brief For use in error handling: turns off array and motor contactor, turns on additional brakelight
- * to signal a ciritical error happened. Separated from nonrecoverable fault handler 
+ * to signal a ciritical error happened.
 */
 void arrayMotorKill();
 

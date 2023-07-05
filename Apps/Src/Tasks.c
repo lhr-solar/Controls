@@ -104,6 +104,10 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
     }
 }
 
+/**
+ * @brief For use in error handling: turns off array and motor contactor, turns on additional brakelight
+ * to signal a ciritical error happened.
+*/
 void arrayMotorKill() {
     // Array motor kill
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);

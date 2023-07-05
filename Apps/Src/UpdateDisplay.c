@@ -26,7 +26,7 @@
 #include "fifo.h"
 
 // For fault handling
-#define RESTART_THRESHOLD 3
+#define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
 
 disp_fifo_t msg_queue;
 
@@ -37,7 +37,8 @@ static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/re
 /**
  * Function prototypes
 */
-static void assertDisplayError(DisplayError_t err);
+// check for and assert errors in UpdateDisplay
+static void assertDisplayError(DisplayError_t err); 
 
 
 /**
@@ -395,20 +396,20 @@ void Task_UpdateDisplay(void *p_arg) {
 
 /**
  * Error handler functions
- * Passed as callback functions to the main assertTaskError function by assertTritiumError
+ * Passed as callback functions to the main assertTaskError function by assertDisplayError
 */
 
 /**
  * @brief A handler callback function run by the main assertTaskError function
- * if we haven't reached the restart limit and want to restart the display
+ * used if we haven't reached the restart limit and encounter an error
  */ 
 static void handler_UpdateDisplay_Restart() {
-	Display_Reset(); // Try resetting the display
+	Display_Reset(); // Try resetting to fix the display error
 }
 
 /**
- * @brief A handler callback function run by the main assertTaskError function
- * if we have reached the restart limit and want to show the error screen
+ * @brief A handler callback function run by the main assertTaskErrorfunction
+ * to show the error screen if we have reached the restart limit
  */ 
 static void handler_UpdateDisplay_ShowError() {
 	Display_Error(OS_DISPLAY_LOC, Error_UpdateDisplay); // Try resetting the display
@@ -416,12 +417,12 @@ static void handler_UpdateDisplay_ShowError() {
 
 
 /**
- * @brief Check for a display error and assert one if it exists.
+ * @brief Check for a display error and assert it if it exists.
  * Sotres the error code, calls the main assertion function 
- * and runs a handler to restart or display the error.
+ * and runs a callback function as a handler to restart the display or show the error.
  * @param   err variable with display error codes
  */static void assertDisplayError(DisplayError_t err){
-	static uint8_t disp_error_cnt = 0; // Keep track of the number of times the display has an error
+	static uint8_t disp_error_cnt = 0; // Track the number of display errors, doesn't ever reset
 
 	Error_UpdateDisplay = err; // Store the error code for inspection
 
@@ -429,7 +430,7 @@ static void handler_UpdateDisplay_ShowError() {
 		disp_error_cnt++;
 
 		if (disp_error_cnt > RESTART_THRESHOLD){ 
-			// Use error assertion to show error screen if at restart attempt limit
+			// Show error screen if restart attempt limit has been reached
 			assertTaskError(OS_DISPLAY_LOC, err, handler_UpdateDisplay_ShowError,
 			OPT_NO_LOCK_SCHED, OPT_RECOV);
 		} else { // Otherwise try resetting the display using the restart callback

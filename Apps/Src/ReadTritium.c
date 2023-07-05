@@ -128,23 +128,26 @@ float Motor_Velocity_Get(){ //getter function for motor velocity
  * Passed as callback functions to the main assertTaskError function by assertTritiumError
 */
 
-// A callback function to be run by the main assertTaskError function for hall sensor errors
+/**
+ * @brief A callback function to be run by the main assertTaskError function for hall sensor errors
+ * restart the motor if the number of hall errors is still less than the RESTART_THRESHOLD.
+ */ 
 static void handler_Tritium_HallError() {
-	MotorController_Restart(); // Try restarting the motor
+	MotorController_Restart(); 
 }
 
 
 /**
  * @brief   Assert Error if Tritium sends error by passing in and checking Motor_FaultBitmap
  * and asserting the error with its handler callback if one exists.
- *  Can result in restarting the motor (first few hall sensor errors)
- * or locking the scheduler and entering a nonrecoverable fault for most other errors
+ *  Can result in restarting the motor (while < RESTART_THRESHOLD hall sensor errors)
+ * or locking the scheduler and entering a nonrecoverable fault (other errors)
  * @param   motor_err Bitmap with motor error codes to check
  */
 static void assertTritiumError(tritium_error_code_t motor_err){   
-	static uint8_t hall_fault_cnt = 0; //trip counter 
+	static uint8_t hall_fault_cnt = 0; //trip counter, doesn't ever reset
 
-	Error_ReadTritium = motor_err;
+	Error_ReadTritium = motor_err; // Store error code for inspection info
 
 	if(motor_err != T_NONE){ // We need to handle an error
 		if(motor_err != T_HALL_SENSOR_ERR){
