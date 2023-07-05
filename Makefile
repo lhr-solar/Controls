@@ -74,4 +74,4 @@ clean:
 	rm -fR Objects
 	rm -f *.out
 	rm -fr Docs/doxygen
-	$(MAKE) -C Docs clean
+	rm -fr Docs/build
