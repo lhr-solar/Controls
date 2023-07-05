@@ -4,7 +4,6 @@
 #include "CAN_Queue.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
-#include "FaultState.h"
 #include <string.h>
 
 //status limit flag masks

@@ -1,19 +1,20 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "Tasks.h"
-#include "FaultState.h"
 #include "os.h"
 #include "CANbus.h"
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
+#include "ReadTritium.h" // For ReadTritium error enum
+#include "ReadCarCAN.h" // For ReadCarCAN error enum
+#include "UpdateDisplay.h" // For update display error enum
 
 
 /**
  * TCBs
  */
-OS_TCB FaultState_TCB; // To be deleted
 OS_TCB Init_TCB;
 OS_TCB SendTritium_TCB;
 OS_TCB ReadCarCAN_TCB;
@@ -25,7 +26,6 @@ OS_TCB Telemetry_TCB;
 /**
  * Stacks
  */
-CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE]; // To be deleted
 CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
 CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
 CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
@@ -38,11 +38,10 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 /**
  * Global Variables
  */
-fault_bitmap_t FaultBitmap = FAULT_NONE; // Used for faultstate handling, otherwise not used. TODO: Should be deleted?
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
-error_code_t Error_ReadTritium = NULL;  // Variables to store error codes, stored and cleared in task error assert functions
-error_code_t Error_ReadCarCAN = NULL;
-error_code_t Error_UpdateDisplay = NULL;
+error_code_t Error_ReadTritium = T_NONE;  // Variables to store error codes, stored and cleared in task error assert functions
+//error_code_t Error_ReadCarCAN = RCC_ERR_NONE;
+error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 
@@ -113,17 +112,3 @@ void arrayMotorKill() {
     // Turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
 }
-
-/**
- * TODO: delete?
-*/
-void nonrecoverableErrorHandler(os_error_loc_t osLocCode, uint8_t faultCode){ 
-    // Turn off contactors, turn on brakelight as a signal
-    arrayMotorKill();
-
-    // Display the fault screen with the error location and code
-    Display_Error(osLocCode, faultCode);
-
-    while(1){;} //nonrecoverable
-}
-
