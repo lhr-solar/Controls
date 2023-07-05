@@ -4,7 +4,7 @@
  * @brief Function prototypes for the display driver.
  * 
  * This contains function prototypes relevant to sending/receiving messages
- * to/from our Nextion HMI. Call assertDisplayError after calling any of the
+ * to/from our Nextion HMI. Call assertUpdateDisplayError after calling any of the
  * functions in this application.
  * 
  * @author Ishan Deshpande (IshDeshpa)

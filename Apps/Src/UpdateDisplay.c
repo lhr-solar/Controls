@@ -38,7 +38,7 @@ static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/re
  * Function prototypes
 */
 // check for and assert errors in UpdateDisplay
-static void assertDisplayError(DisplayError_t err); 
+static void assertUpdateDisplayError(DisplayError_t err); 
 
 
 /**
@@ -88,7 +88,7 @@ UpdateDisplayError_t UpdateDisplay_Init(){
 	assertOSError(OS_DISPLAY_LOC, err);
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetPage(INFO);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	return ret;
 }
 
@@ -116,12 +116,12 @@ static UpdateDisplayError_t UpdateDisplay_PopNext(){
     assertOSError(OS_SEND_CAN_LOC, err);
 
     if(!result){
-			assertDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
+			assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
 			return UPDATEDISPLAY_ERR_FIFO_POP;
 		}
 		
 		// Assert a display driver error code if the send fails, else assert that there's no error
-		assertDisplayError(Display_Send(cmd) ? UPDATEDISPLAY_ERR_DRIVER : UPDATEDISPLAY_ERR_NONE);
+		assertUpdateDisplayError(Display_Send(cmd) ? UPDATEDISPLAY_ERR_DRIVER : UPDATEDISPLAY_ERR_NONE);
 		return UPDATEDISPLAY_ERR_NONE;
 }
 
@@ -147,7 +147,7 @@ static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
 		assertOSError(OS_DISPLAY_LOC, err);
 	}
 	else{
-		assertDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);
+		assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);
 		return UPDATEDISPLAY_ERR_FIFO_PUT;
 	}
 
@@ -174,7 +174,7 @@ static UpdateDisplayError_t UpdateDisplay_Refresh(){
 	};
 
 	UpdateDisplayError_t ret = UpdateDisplay_PutNext(refreshCmd);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	return ret;
 }
 
@@ -203,7 +203,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 		};
 		
 		ret = UpdateDisplay_PutNext(visCmd);
-		assertDisplayError(ret);
+		assertUpdateDisplayError(ret);
 		return ret;
 	}
 	// For components that have a non-boolean value
@@ -220,11 +220,11 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 		};
 
 		ret = UpdateDisplay_PutNext(setCmd);
-		assertDisplayError(ret);
+		assertUpdateDisplayError(ret);
 		return UpdateDisplay_PutNext(setCmd);
 	}
 	else{
-		assertDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);
+		assertUpdateDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);
 		return UPDATEDISPLAY_ERR_PARSE_COMP;
 	}
 	return UPDATEDISPLAY_ERR_NONE;
@@ -254,11 +254,11 @@ UpdateDisplayError_t UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentag
 	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SOC, percent);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercent = percent;
 	return ret;
@@ -271,11 +271,11 @@ UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv){
 	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastMv = mv;
 	return ret;
@@ -288,7 +288,7 @@ UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(VELOCITY, mphTenths);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastMphTenths = mphTenths;
 	return ret;
@@ -301,7 +301,7 @@ UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
 	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ACCEL_METER, percent);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentAccel = percent;
 	return ret;
@@ -314,7 +314,7 @@ UpdateDisplayError_t UpdateDisplay_SetArray(bool state){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ARRAY, (state)?1:0);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
@@ -327,7 +327,7 @@ UpdateDisplayError_t UpdateDisplay_SetMotor(bool state){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(MOTOR, (state)?1:0);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
@@ -340,11 +340,11 @@ UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(GEAR, (uint32_t)gear);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastGear = gear;
 	return ret;
@@ -357,11 +357,11 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state){
 	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state);
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 	
 	ret = UpdateDisplay_Refresh();
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
@@ -377,7 +377,7 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertDisplayError(ret);
+	assertUpdateDisplayError(ret);
 
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
@@ -389,14 +389,14 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
 void Task_UpdateDisplay(void *p_arg) {
     while (1) {
 			UpdateDisplayError_t err = UpdateDisplay_PopNext();
-			assertDisplayError(err);
+			assertUpdateDisplayError(err);
     }
 }
 
 
 /**
  * Error handler functions
- * Passed as callback functions to the main assertTaskError function by assertDisplayError
+ * Passed as callback functions to the main assertTaskError function by assertUpdateDisplayError
 */
 
 /**
@@ -421,7 +421,7 @@ static void handler_UpdateDisplay_ShowError() {
  * Sotres the error code, calls the main assertion function 
  * and runs a callback function as a handler to restart the display or show the error.
  * @param   err variable with display error codes
- */static void assertDisplayError(DisplayError_t err){
+ */static void assertUpdateDisplayError(DisplayError_t err){
 	static uint8_t disp_error_cnt = 0; // Track the number of display errors, doesn't ever reset
 
 	Error_UpdateDisplay = err; // Store the error code for inspection

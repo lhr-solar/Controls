@@ -4,7 +4,7 @@
  * @brief Function prototypes for the display application.
  * 
  * This contains function prototypes relevant to the UpdateDisplay
- * application. Call assertDisplayError after calling any of the
+ * application. Call assertUpdateDisplayError after calling any of the
  * functions in this application.
  * 
  * @author Ishan Deshpande (IshDeshpa)
