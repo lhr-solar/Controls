@@ -15,6 +15,7 @@ jobs:
       run: |
         sudo apt -y update
         sudo apt -y install gcc-arm-none-eabi
+        sudo apt -y install python3-sphinx
     - name: Initialize Submodules
       run: git submodule update --init --recursive
     - name: clean
