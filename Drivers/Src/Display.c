@@ -27,7 +27,6 @@
 
 
 static const char *TERMINATOR = "\xff\xff\xff";
-static DisplayError_t displayError = DISPLAY_ERR_NONE; // Holds the current display error so we can inspect it
 
 
 DisplayError_t Display_Init(){

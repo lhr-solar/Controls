@@ -34,6 +34,13 @@ disp_fifo_t msg_queue;
 static OS_SEM DisplayQ_Sem4;    // counting semaphore for queue message availability
 static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/reading to queue
 
+
+/**
+ * Function prototypes
+*/
+static void assertDisplayError(DisplayError_t err);
+
+
 /**
  * Enum and corresponding array for easy component selection.
  */
@@ -397,7 +404,7 @@ void Task_UpdateDisplay(void *p_arg) {
  * if we haven't reached the restart limit and want to restart the display
  */ 
 static void handler_UpdateDisplay_Restart() {
-	Display_Restart(); // Try resetting the display
+	Display_Reset(); // Try resetting the display
 }
 
 /**
