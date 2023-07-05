@@ -358,7 +358,6 @@ void Task_ManagerTask(void* arg) {
                 UpdateDisplay_Init();
                 createUpdateDisplay();
                 
-                OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err);
                 for (int i = 0; i < 10; i++) {
                     UpdateDisplay_SetCruiseState(1 + i); 
                 }
