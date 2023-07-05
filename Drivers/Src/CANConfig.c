@@ -1,3 +1,11 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file CANConfig.c
+ * @brief 
+ * 
+ * @addtogroup CANConfig
+ * @{
+ */
 #include "CANConfig.h"
 
 /** @addtogroup CANConfig 
@@ -49,4 +57,5 @@ CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
 };
 CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {};
 
-/*@}*/
+
+/* @} */

@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file GPIOExpander.h
+ * @brief 
+ * 
+ * @defgroup GPIOExpander
+ * @addtogroup GPIOExpander
+ * @{
+ */
 
 /* Deprecated */
 
@@ -42,3 +50,5 @@ typedef struct _spi_message {
 #define SPI_OLATB       0x15
 
 #endif
+
+/* @} */

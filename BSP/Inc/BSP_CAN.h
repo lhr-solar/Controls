@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file BSP_CAN.h
+ * @brief 
+ * 
+ * @defgroup BSP_CAN
+ * @addtogroup BSP_CAN
+ * @{
+ */
 
 /** @defgroup BSP_CAN */
 /** @addtogroup BSP_CAN 
@@ -52,4 +60,5 @@ ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data);
 
 #endif
 
-/*@}*/
+
+/* @} */

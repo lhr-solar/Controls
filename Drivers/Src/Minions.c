@@ -1,3 +1,11 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Minions.c
+ * @brief 
+ * 
+ * @addtogroup Minions
+ * @{
+ */
 #include "Minions.h"
 #include "os.h"
 #include "BSP_GPIO.h"
@@ -57,4 +65,5 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
     return false;
 }
 
-/*@}*/
+
+/* @} */

@@ -1,11 +1,16 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file SendCarCAN.c
+ * @brief 
+ * 
+ * @addtogroup SendCarCAN
+ * @{
+ */
+
 #include "Tasks.h"
 #include "CANbus.h"
 #include "CAN_Queue.h"
 #include "common.h"
-
-/** @defgroup SendCarCAN */
-/** @addtogroup SendCarCAN 
- * @{ */
 
 /**
  * @file SendCarCAN.c
@@ -40,4 +45,4 @@ void Task_SendCarCAN(void *p_arg){
     }
 }
 
-/*@}*/
+/* @} */

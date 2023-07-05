@@ -1,7 +1,11 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
-/** @addtogroup ReadCarCAN 
- * @{ */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file ReadCarCAN.c
+ * @brief 
+ * 
+ * @addtogroup ReadCarCAN
+ * @{
+ */
 
 
 #include "ReadCarCAN.h"
@@ -261,4 +265,4 @@ void Task_ReadCarCAN(void *p_arg)
     }
 }
 
-/*@}*/
+/* @} */

@@ -1,4 +1,11 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file main.c
+ * @brief 
+ * 
+ * @addtogroup main
+ * @{
+ */
 
 #include "common.h"
 #include "config.h"
@@ -200,3 +207,4 @@ void Task_Init(void *p_arg){
         OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }
 }
+/* @} */

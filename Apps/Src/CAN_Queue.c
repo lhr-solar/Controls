@@ -1,4 +1,11 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file CAN_Queue.c
+ * @brief 
+ * 
+ * @addtogroup CAN_Queue
+ * @{
+ */
 /** @addtogroup CAN_Queue 
  * @{ */
 
@@ -65,4 +72,4 @@ ErrorStatus CAN_Queue_Pend(CANDATA_t *message) {
     return result ? SUCCESS : ERROR;
 }
 
-/*@}*/
+/* @} */

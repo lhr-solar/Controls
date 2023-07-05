@@ -1,3 +1,12 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Minions.h
+ * @brief 
+ * 
+ * @defgroup Minions
+ * @addtogroup Minions
+ * @{
+ */
 #ifndef MINION_H
 #define MINION_H
 #include <stdbool.h>
@@ -63,4 +72,5 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr);
 
 #endif 
 
-/*@}*/
+
+/* @} */

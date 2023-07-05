@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file BSP_ADC.h
+ * @brief 
+ * 
+ * @defgroup BSP_ADC
+ * @addtogroup BSP_ADC
+ * @{
+ */
 
 /** @defgroup BSP_ADC */
 /** @addtogroup BSP_ADC 
@@ -49,4 +57,5 @@ int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
 
 #endif
 
-/*@}*/
+
+/* @} */

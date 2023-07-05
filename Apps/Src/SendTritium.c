@@ -1,6 +1,5 @@
 /**
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
- * 
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendTritium.c
  * @brief Function implementations for the SendTritium application.
  * 
@@ -12,9 +11,10 @@
  * If the macro __TEST_SENDTRITIUM is defined prior to including SendTritium.h, relevant
  * variables will be exposed as externs for unit testing.
  * 
- * @author Nathaniel Delgado (NathanielDelgado)
- * @author Diya Rajon (diyarajon)
- * @author Ishan Deshpande (IshDeshpa, ishdeshpa@utexas.edu)
+ * 
+ * 
+ * @addtogroup SendTritium
+ * @{
  */
 
 /**    
@@ -678,7 +678,4 @@ void Task_SendTritium(void *p_arg){
         }
     }
 }
-
-/**    
- * @} 
- */
+/* @} */

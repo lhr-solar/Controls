@@ -1,8 +1,12 @@
-/* Copyright (c) 2021 UT Longhorn Racing Solar */
-
-/** @defgroup ReadTritium */
-/** @addtogroup ReadTritium 
- * @{ */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file ReadTritium.h
+ * @brief 
+ * 
+ * @defgroup ReadTritium
+ * @addtogroup ReadTritium
+ * @{
+ */
 
 #ifndef __READ_TRITIUM_H
 #define __READ_TRITIUM_H
@@ -44,4 +48,5 @@ void MotorController_Restart();
 
 #endif
 
-/*@}*/
+
+/* @} */

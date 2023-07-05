@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file BSP_UART.h
+ * @brief 
+ * 
+ * @defgroup BSP_UART
+ * @addtogroup BSP_UART
+ * @{
+ */
 
 /** @defgroup BSP_UART */
 /** @addtogroup BSP_UART 
@@ -44,4 +52,5 @@ uint32_t BSP_UART_Write(UART_t uart ,char *str, uint32_t len);
 
 #endif
 
-/*@}*/
+
+/* @} */

@@ -1,3 +1,11 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Telemetry.c
+ * @brief 
+ * 
+ * @addtogroup Telemetry
+ * @{
+ */
 #include "Tasks.h"
 #include "CANbus.h"
 #include "CAN_Queue.h"
@@ -65,3 +73,4 @@ void Task_Telemetry(void *p_arg){
         }
     }
 }
+/* @} */

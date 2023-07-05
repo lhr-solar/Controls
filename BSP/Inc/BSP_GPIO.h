@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file BSP_GPIO.h
+ * @brief 
+ * 
+ * @defgroup BSP_GPIO
+ * @addtogroup BSP_GPIO
+ * @{
+ */
 
 /** @defgroup BSP_GPIO */
 /** @addtogroup BSP_GPIO 
@@ -72,4 +80,5 @@ uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin);
 
 #endif
 
-/*@}*/
+
+/* @} */

@@ -1,3 +1,12 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file CANConfig.h
+ * @brief 
+ * 
+ * @defgroup CANConfig
+ * @addtogroup CANConfig
+ * @{
+ */
 #ifndef CAN_CONFIG
 #define CAN_CONFIG
 #include "CANbus.h"
@@ -22,4 +31,5 @@ extern  CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS];
 extern const CANLUT_T CANLUT[NUM_CAN_IDS];
 #endif
 
-/*@}*/
+
+/* @} */

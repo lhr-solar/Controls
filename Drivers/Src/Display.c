@@ -1,14 +1,13 @@
 /**
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Display.c
  * @brief Function implementations for the display driver.
  *
  * This contains functions relevant to sending/receiving messages
  * to/from our Nextion display.
- *
- * @author Ishan Deshpande (IshDeshpa)
- * @author Roie Gal (Cam0Cow)
- * @author Nathaniel Delgado (NathanielDelgado)
+ * 
+ * @addtogroup Display
+ * @{
  */
 
 /** @addtogroup Display 
@@ -148,4 +147,5 @@ void assertDisplayError(DisplayError_t err){
 	}
 }
 
-/*@}*/
+
+/* @} */

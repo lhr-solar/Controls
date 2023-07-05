@@ -1,4 +1,11 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Tasks.c
+ * @brief 
+ * 
+ * @addtogroup Tasks
+ * @{
+ */
 
 
 #include "Tasks.h"
@@ -57,3 +64,4 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
         EnterFaultState();
     }
 }
+/* @} */

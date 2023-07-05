@@ -1,7 +1,11 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
-/** @addtogroup Contactors 
- * @{ */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Contactors.h
+ * @brief 
+ * 
+ * @addtogroup Contactors
+ * @{
+ */
 
 #include "Contactors.h"
 #include "stm32f4xx_gpio.h"
@@ -115,4 +119,4 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     return result;
 }
 
-/*@}*/
+/* @} */

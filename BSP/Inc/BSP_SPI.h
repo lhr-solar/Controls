@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file BSP_SPI.h
+ * @brief 
+ * 
+ * @defgroup BSP_SPI
+ * @addtogroup BSP_SPI
+ * @{
+ */
 
 /** @defgroup BSP_SPI */
 /** @addtogroup BSP_SPI 
@@ -47,4 +55,5 @@ void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen);
 
 #endif
 
-/*@}*/
+
+/* @} */

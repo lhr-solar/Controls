@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Pedals.h
+ * @brief 
+ * 
+ * @defgroup Pedals
+ * @addtogroup Pedals
+ * @{
+ */
 
 /**
  * Header file for the Pedals driver
@@ -41,4 +49,5 @@ int8_t Pedals_Read(pedal_t pedal);
 
 #endif
 
-/*@}*/
+
+/* @} */
