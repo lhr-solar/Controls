@@ -2,12 +2,16 @@
  * 
  * This file tests the fault state exception struct mechanism
  * to ensure thrown exceptions are handled correctly.
- * It does this by testing the assertion functions for each priority option
- * and creating and faulting tasks using the car and bps sim on Renode
+ * It does this by creating and faulting tasks 
+ * to see if they stop working when an exception is thrown.
+ * 
+ * Choose the task to test using TEST_OPTION.
+ * If testing ReadTritium non-Hall, choose the tritium error using READTRITIUM_OPTION.
+ * Once the task enters an infinite loop, it won't ever exit and you'll need to restart the test.
  *
  * This test is run in LoopBack mode with all messages sent and received by the LeaderBoard.
  * However, it can be run in conjunction with motor-sim and car-sim
- * ( which don't do anything) when simulated to appease Renode
+ * (which don't do anything) when simulated to appease Renode.
  * 
  * @file 
  * @author Madeleine Lee (madeleinercflee@utexas.edu)
@@ -348,29 +352,21 @@ void Task_ManagerTask(void* arg) {
                 // UpdateDisplay and Display error functions do actually do the same thing, so one of them should be deleted.
                 // Call update display put next to overflow the queue (actual issue)
             
-            // Note: currently gets stuck, so you may want to comment this section out to test ReadCarCAN
 
-                createUpdateDisplay();
-                OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);   
-                OSTaskDel(&UpdateDisplay_TCB, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);   
     
-
+                Display_Init();
                 UpdateDisplay_Init();
                 createUpdateDisplay();
-                OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+                
+                OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err);
                 for (int i = 0; i < 10; i++) {
-                    UpdateDisplay_SetCruiseState(0); 
+                    UpdateDisplay_SetCruiseState(1 + i); 
                 }
                 OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
                 checkOSError(err);
                 printf("\n\rAt line %d", __LINE__);   
                 OSTaskDel(&UpdateDisplay_TCB, &err);
                 checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
                 break;
         }
     
