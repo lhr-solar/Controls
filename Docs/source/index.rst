@@ -37,7 +37,6 @@ Keep the docs clear and readible. Reach out to more experienced team members wit
    Apps/Main
    Apps/ReadCarCAN
    Apps/ReadTritium
-   Apps/SendCarCAN
    Apps/UpdateDisplay
    Apps/SendTritium
    Apps/ExtraFiles

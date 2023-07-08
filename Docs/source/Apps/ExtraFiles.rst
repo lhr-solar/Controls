@@ -10,7 +10,7 @@ Some files in the Apps folder don't contain any task code, but instead contain h
 CAN Queue
 =========
 
-Multiple tasks need to send messages over the car CAN bus. Sending is rather slow, so a queue is employed to absorbed the bursty nature of sending CAN messages. This way, multiple tasks can just post can messages to the queue, and another task (SendCarCAN) takes care to consume and send them to the CAN bus.
+Multiple tasks need to send messages over the car CAN bus. Sending is rather slow, so a queue is employed to absorbed the bursty nature of sending CAN messages. This way, multiple tasks can just post can messages to the queue, and another task (Telemetry) takes care to consume and send them to the CAN bus.
 
 The public interface of the file includes:
 
@@ -18,7 +18,7 @@ The public interface of the file includes:
 
 ``ErrorStatus CAN_Queue_Post(CANDATA_t message)`` — Used by tasks that want to post CAN messages. The messages are held in a FIFO queue.
 
-``ErrorStatus CAN_Queue_Pend(CANDATA_t *message)`` — Used by SendCarCAN to consume the queue. This function blocks the caller until the queue contains at least one message, at which point it will return message and remove it from the queue.
+``ErrorStatus CAN_Queue_Pend(CANDATA_t *message)`` — Used by Telemetry to consume the queue. This function blocks the caller until the queue contains at least one message, at which point it will return message and remove it from the queue.
 
 ================
 Pedal to Percent

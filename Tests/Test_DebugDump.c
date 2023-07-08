@@ -175,24 +175,6 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Initialize SendCarCAN
-    OSTaskCreate(
-        (OS_TCB*)&SendCarCAN_TCB,
-        (CPU_CHAR*)"SendCarCAN",
-        (OS_TASK_PTR)Task_SendCarCAN,
-        (void*)NULL,
-        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
-        (CPU_STK*)SendCarCAN_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
     // Initialize DebugDump
     OSTaskCreate(
         (OS_TCB*)&DebugDump_TCB,

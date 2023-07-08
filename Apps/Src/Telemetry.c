@@ -10,7 +10,8 @@
 // Make sure updated to the CarData_t and carMSGID are reflected in the CAN Bus IDs excel sheet
 
 /**
- * @brief Sends pedal, switch, light, and contactor information to be read by telemetry
+ * @brief Sends pedal, switch, light, and contactor information, as well as the 
+ * feedback from the motor controller to be read by telemetry
  * 
  * @param p_arg 
  */
@@ -21,10 +22,15 @@ void Task_Telemetry(void *p_arg){
         carMsg.data[i] = 0;
     }
     OS_ERR err;
-
+    CANDATA_t motorMsg;
     Minion_Error_t Merr;
 
     while (1) {
+
+        // Send motor msg
+        CAN_Queue_Pend(&motorMsg);
+        CANbus_Send(motorMsg, true, CARCAN);
+
         // Get pedal information
         carMsg.data[0] = Pedals_Read(ACCELERATOR);
         carMsg.data[1] = Pedals_Read(BRAKE);

@@ -16,7 +16,7 @@ void Task1(void *arg)
 {   
     CPU_Init();
     
-    CANbus_Init(CARCAN);
+    CANbus_Init(CARCAN, NULL, 0);
     CAN_Queue_Init();
     // BSP_UART_Init(UART_2);
     Pedals_Init();
@@ -50,6 +50,16 @@ void Task1(void *arg)
     State contactorState = OFF;
 
     CANDATA_t msg;
+    msg.ID = MOTOR_STATUS;
+    msg.idx = 0;
+    msg.data[0] = 0x12;
+    msg.data[1] = 0x34;
+    msg.data[2] = 0x56;
+    msg.data[3] = 0x78;
+    msg.data[4] = 0x9A;
+    msg.data[5] = 0xBC;
+    msg.data[6] = 0xDE;
+    msg.data[7] = 0xF0;
     
     while (1){
         // Switches can be modified through hardware
@@ -62,6 +72,12 @@ void Task1(void *arg)
         contactorState = contactorState == OFF ? ON : OFF;
         Contactors_Set(MOTOR_CONTACTOR, contactorState, true);
         Contactors_Set(ARRAY_CONTACTOR, contactorState, true);
+
+        (msg.ID)++;
+        if(msg.ID > 0x24F){
+            msg.ID = MOTOR_STATUS;
+        }
+        CAN_Queue_Post(msg);
 
         CANbus_Read(&msg, CAN_BLOCKING, CARCAN);
 

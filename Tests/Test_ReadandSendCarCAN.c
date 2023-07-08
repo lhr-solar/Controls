@@ -88,23 +88,6 @@ int main(void) {
         (OS_ERR*)&err
     );
 
-    //spawn can send task
-    OSTaskCreate(
-        (OS_TCB*)&SendCarCAN_TCB,
-        (CPU_CHAR*)"SendCarCan",
-        (OS_TASK_PTR)Task_SendCarCAN,
-        (void*)NULL,
-        (OS_PRIO)3,
-        (CPU_STK*)SendCarCAN_Stk,
-        (CPU_STK_SIZE)DEFAULT_STACK_SIZE/10,
-        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)NULL,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
-        (OS_ERR*)&err
-    );
-
     // Task not created
     if (err != OS_ERR_NONE) {
         printf("Task error code %d\n", err);

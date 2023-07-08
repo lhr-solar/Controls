@@ -62,8 +62,6 @@ void Task_UpdateDisplay(void* p_arg);
 
 void Task_ReadTritium(void* p_arg);
 
-void Task_SendCarCAN(void* p_arg);
-
 void Task_Telemetry(void* p_arg);
 
 void Task_DebugDump(void *p_arg);
@@ -79,7 +77,6 @@ extern OS_TCB SendTritium_TCB;
 extern OS_TCB ReadCarCAN_TCB;
 extern OS_TCB UpdateDisplay_TCB;
 extern OS_TCB ReadTritium_TCB;
-extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB Telemetry_TCB;
 extern OS_TCB DebugDump_TCB;
 extern OS_TCB CommandLine_TCB;
@@ -94,7 +91,6 @@ extern CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
 extern CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
 extern CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
-extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 extern CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 extern CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 extern CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];

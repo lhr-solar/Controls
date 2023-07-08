@@ -51,7 +51,7 @@ Objective 1:
 	- if error
 		- assertOSError
 - determine information important to telementry
-	- SendCarCAN
+	- Telemetry
 - determine information important for storage
 	- acquire mutex on Storage Array
 	- Store information in Storage Array (based on index) 
