@@ -38,7 +38,7 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 /**
  * Global Variables
  */
-os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
+os_error_loc_t OSErrLocBitmap = OS_NONE_LOC; // Store the location of the current error
 error_code_t Error_ReadTritium = T_NONE;  // Variables to store error codes, stored and cleared in task error assert functions
 //error_code_t Error_ReadCarCAN = RCC_ERR_NONE;
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
@@ -65,11 +65,13 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
 
 /**
  * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
- * and jumping to the error's specified callback function
+ * and jumping to the error's specified callback function. 
+ * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
+ * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
+ * @param faultCode the enum for the specific error that happened
+ * @param errorCallback a callback function to a handler for that specific error, 
  * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
- * @param errorLoc the task from which the error originated. TODO: should be taken out when last task pointer is integrated
- * @param faultCode the value for what specific error happened
- * @param errorCallback a callback function to a handler for that specific error
+ * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
 void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t errorCallback, error_lock_sched_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
@@ -79,7 +81,7 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
         assertOSError(OS_TASKS_LOC, err);
     }
 
-    // Set the error variables to store data //TODO: delete? 
+    // Set the location error variable
     OSErrLocBitmap = errorLoc; 
 
     if (nonrecoverable == OPT_NONRECOV) {
@@ -102,11 +104,13 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
         OSSchedUnlock(&err); 
         assertOSError(OS_TASKS_LOC, err);
     }
+
+    OSErrLocBitmap = OS_NONE_LOC; // Clear the location error variable once handled
 }
 
 /**
- * @brief For use in error handling: turns off array and motor contactor, turns on additional brakelight
- * to signal a ciritical error happened.
+ * @brief For use in error handling: turns off array and motor contactor
+ * and turns on additional brakelight to signal that a critical error happened.
 */
 void arrayMotorKill() {
     // Array motor kill

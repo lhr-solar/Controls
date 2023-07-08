@@ -137,7 +137,7 @@ typedef enum{
  */
 extern os_error_loc_t OSErrLocBitmap;
 
-// Store error codes, set in task error assertion functions
+// Store error codes that are set in task error assertion functions
 extern error_code_t Error_ReadTritium; 
 extern error_code_t Error_ReadCarCAN;
 extern error_code_t Error_UpdateDisplay;
@@ -146,32 +146,33 @@ extern error_code_t Error_UpdateDisplay;
  * Error-handling option enums
 */
 
-// Whether or not to lock the scheduler when asserting a task error
+// Scheduler lock parameter option for asserting a task error
 typedef enum {
     OPT_LOCK_SCHED = false,
     OPT_NO_LOCK_SCHED = true
 } error_lock_sched_opt_t;
 
-// Whether or not a task error is recoverable
+// Recoverable/nonrecoverable parameter option for asserting a task error
 typedef enum {
     OPT_RECOV,
     OPT_NONRECOV
 } error_recov_opt_t;
 
 /**
- * @brief For use in error handling: turns off array and motor contactor, turns on additional brakelight
- * to signal a ciritical error happened.
+ * @brief For use in error handling: turns off array and motor contactor
+ * and turns on additional brakelight to signal that a critical error happened.
 */
 void arrayMotorKill();
 
 /**
  * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
- * and jumping to the error's specified callback function
- * @param errorLoc the task from which the error originated. TODO: should be taken out when last task pointer is integrated
- * @param faultCode the value for what specific error happened
- * @param errorCallback a callback function to a handler for that specific error
+ * and jumping to the error's specified callback function. 
+ * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
+ * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
+ * @param faultCode the enum for the specific error that happened
+ * @param errorCallback a callback function to a handler for that specific error, 
  * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
- * @param nonrecoverable if true, kills the motor, displays the fault screen, and enters an infinite while loop
+ * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
 void assertTaskError(os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback, error_lock_sched_opt_t lockSched, error_recov_opt_t nonrecoverable);
 

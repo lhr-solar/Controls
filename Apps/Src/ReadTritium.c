@@ -9,10 +9,10 @@
 //status limit flag masks
 #define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
 #define MAX_CAN_LEN 8
-#define RESTART_THRESHOLD 3			// Number of times to try restarting the hall sensor
+#define RESTART_THRESHOLD 3	// Number of times to restart before asserting a nonrecoverable error
 
 
-tritium_error_code_t Motor_FaultBitmap = T_NONE;
+tritium_error_code_t Motor_FaultBitmap = T_NONE; //initialized to no error, changed when the motor asserts an error
 static float Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
 static float Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
 
@@ -138,10 +138,10 @@ static void handler_Tritium_HallError() {
 
 
 /**
- * @brief   Assert Error if Tritium sends error by passing in and checking Motor_FaultBitmap
+ * @brief   Assert a Tritium error by checking Motor_FaultBitmap
  * and asserting the error with its handler callback if one exists.
- *  Can result in restarting the motor (while < RESTART_THRESHOLD hall sensor errors)
- * or locking the scheduler and entering a nonrecoverable fault (other errors)
+ *  Can result in restarting the motor (while < RESTART_THRESHOLD number of hall sensor errors)
+ * or locking the scheduler and entering a nonrecoverable fault (all other cases)
  * @param   motor_err Bitmap with motor error codes to check
  */
 static void assertTritiumError(tritium_error_code_t motor_err){   
@@ -159,7 +159,7 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 			
 			//try to restart the motor a few times and then fail out
 			if(hall_fault_cnt > RESTART_THRESHOLD){  
-				// Assert another nonrecoverable error, but this time motor_err will have a different error code
+				// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
 				assertTaskError(OS_READ_TRITIUM_LOC, motor_err, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 			} else { // Try restarting the motor
 				// Assert a recoverable error that will run the motor restart callback function

@@ -418,7 +418,7 @@ static void handler_UpdateDisplay_ShowError() {
 
 /**
  * @brief Check for a display error and assert it if it exists.
- * Sotres the error code, calls the main assertion function 
+ * Stores the error code, calls the main assertion function 
  * and runs a callback function as a handler to restart the display or show the error.
  * @param   err variable with display error codes
  */static void assertUpdateDisplayError(DisplayError_t err){
