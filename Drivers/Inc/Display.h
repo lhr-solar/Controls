@@ -4,7 +4,7 @@
  * @brief Function prototypes for the display driver.
  * 
  * This contains function prototypes relevant to sending/receiving messages
- * to/from our Nextion HMI. Call assertDisplayError after calling any of the
+ * to/from our Nextion HMI. Call assertUpdateDisplayError after calling any of the
  * functions in this application.
  * 
  * @author Ishan Deshpande (IshDeshpa)
@@ -23,7 +23,7 @@
 /**
  * Error types
  */
-typedef enum{
+typedef enum{ // Currently only ERR_NONE and ERR_PARSE are used
 	DISPLAY_ERR_NONE      = 0,
 	DISPLAY_ERR_PARSE     =-1,	// Error parsing command struct passed to Display_Send
 	DISPLAY_ERR_INV_INSTR =-2,	// Invalid instruction passed to nextion (0x00)
@@ -37,10 +37,6 @@ typedef enum{
 	DISPLAY_ERR_OTHER     =-10  // Other nextion display error
 } DisplayError_t;
 
-/**
- * @brief Error handler for any display errors. Call this after any display driver function.
- */
-void assertDisplayError(DisplayError_t err);
 
 /**
  * All three pages on the HMI 
@@ -98,7 +94,7 @@ DisplayError_t Display_Reset(void);
  * @param faultCode the generic fault code (will be displayed in hex)
  * @returns DisplayError_t
  */
-DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+DisplayError_t Display_Error(os_error_loc_t osErrCode, uint8_t faultCode);
 
 /**
  * @brief Overwrites any processing commands and triggers the evacuation screen

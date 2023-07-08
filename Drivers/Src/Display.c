@@ -14,7 +14,6 @@
 #include "Display.h"
 #include "bsp.h"   // for writing to UART
 #include "Tasks.h" // for os and fault error codes
-#include "FaultState.h"
 
 #define DISP_OUT UART_3
 #define MAX_MSG_LEN 32
@@ -28,6 +27,7 @@
 
 
 static const char *TERMINATOR = "\xff\xff\xff";
+
 
 DisplayError_t Display_Init(){
 	BSP_UART_Init(DISP_OUT);
@@ -98,7 +98,7 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+DisplayError_t Display_Error(os_error_loc_t osErrCode, uint8_t faultCode){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
 	char faultPage[7] = "page 2";
@@ -138,20 +138,4 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 	return DISPLAY_ERR_NONE;
 }
 
-static void callback_displayError(void){
-	static uint8_t disp_fault_cnt = 0; // If faults > three times total, Display_Fault is called
-        if(disp_fault_cnt>RESTART_THRESHOLD){ 
-            Display_Fault(OSErrLocBitmap, FaultBitmap); 
-        } else { 
-            disp_fault_cnt++; 
-            Display_Reset(); 
-            return; 
-        }  
-}
 
-void assertDisplayError(DisplayError_t err){
-	if (err != DISPLAY_ERR_NONE){
-		exception_t displayError = {2, "display error", &callback_displayError};
-		assertExceptionError(displayError);
-	}
-}
