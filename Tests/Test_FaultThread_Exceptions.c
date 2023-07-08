@@ -24,7 +24,6 @@
  */
 
 #include "BSP_UART.h"
-#include "FaultState.h"
 #include "Tasks.h"
 #include "CANbus.h"
 #include "ReadTritium.h"
@@ -37,7 +36,7 @@ enum { // Test menu enum
     TEST_GENERAL,
     TEST_OS_ASSERT,
     TEST_READTRITIUM_HALL,
-    TEST_READTRITIUM_NONHALL, // Maybe break this into others?
+    TEST_READTRITIUM_NONHALL,
     TEST_READCARCAN,
     TEST_UPDATEDISPLAY
 };
@@ -45,7 +44,7 @@ enum { // Test menu enum
 /*** Constants ***/
 #define TEST_OPTION TEST_UPDATEDISPLAY // Decide what to test based on test menu enum
 #define READTRITIUM_OPTION 3 // The enum value for the tritium error we want to test (reference error enum)
-// Choose from 0 - 11
+// Choose from 0 - 11 if running TEST_READTRITIUM_NONHALL
 
 
 /*** Task components ***/
@@ -84,42 +83,58 @@ void exceptionCallback(void) {
     printf("\n\rException callback successfully executed.");
 }
 
-
-// Creates an exception of priority 1 and 2 to test
-// test_callbacks: the callback function to use for the exceptions
-void ExceptionTask(void* test_callbacks) {
+/**
+ * @brief Creates and throws recoverable and nonrecoverable errors
+ * with or without callback handlers to test the general assertion mechanism
+ * @param test_callbacks the callback function to run during error handling
+*/
+void ExceptionTask(callback_t test_callbacks) {
+    OS_ERR err;
 
     if (test_callbacks == NULL) {
         printf("\n\n\rTesting exceptions without callback functions");
     } else {
         printf("\n\n\rTesting exceptions with callback functions");
     }
-    // Throw a 
-    printf("\n\n\rThrowing priority level 2 exception");
-    exception_t prio2Exception = {.prio = PRI_RECOV, .message = "\n\rprio2 exception message", .callback = test_callbacks};
-    assertExceptionError(prio2Exception);
     
-    // Throw a priority 1 exception
-    printf("\n\n\rThrowing priority level 1 exception");
-    exception_t prio1Exception = {.prio = PRI_NONRECOV, .message = "\n\rprio1 exception message", .callback = test_callbacks};
-    assertExceptionError(prio1Exception);
-    printf("\n\rTest failed: Prio 1 exception did not immediately result in an unrecoverable fault");
-
-    while(1){};
+    // Throw two recoverable errors
+    printf("\n\n\rAsserting recoverable errors");
+    // Throw an arbitrary recoverable error w/o locking the scheduler
+    assertTaskError(OS_MAIN_LOC, 0x01, test_callbacks, OPT_NO_LOCK_SCHED, OPT_RECOV); 
+    // Throw an arbitrary recoverable error w/ locked scheduler
+    assertTaskError(OS_TASKS_LOC, 0x02, test_callbacks, OPT_LOCK_SCHED, OPT_RECOV); 
+    
+    // Throw a nonrecoverable error
+    printf("\n\n\rAsserting a nonrecoverable error");
+    assertTaskError(OS_SEND_CAN_LOC, 0x03, test_callbacks, OPT_LOCK_SCHED, OPT_NONRECOV);
+    printf("\n\rTest failed: locked nonrecoverable error did not immediately result in an unrecoverable fault");
+    
+    OSTaskDel(NULL, &err); // Self-delete task once finished
+    checkOSError(err);
 }
 
 // Test the assertOSError function by pending on a mutex that wasn't created
 void OSErrorTask(void* arg) {
+    OS_ERR err;
     OS_ERR test_err;
     OS_MUTEX testMut;
     CPU_TS ts;
+
     printf("\n\rasserting an OS error");
     OSMutexPend(&testMut, 0, OS_OPT_PEND_NON_BLOCKING, &ts, &test_err);
     assertOSError(OS_MAIN_LOC, test_err);
     printf("\n\rassertOSError test failed: assertion did not immediately result in an unrecoverable fault");
-    while(1){};
+    
+    OSTaskDel(NULL, &err); // Self-delete task once finished
+    checkOSError(err);
 }   
 
+// Helper function to see the state of the contactors
+static void print_Contactors() {
+    printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));
+    printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
+    printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+}
 
 
 
@@ -131,7 +146,6 @@ void Task_ManagerTask(void* arg) {
     CANbus_Init(MOTORCAN, NULL, 0);
     CANbus_Init(CARCAN, NULL, 0);
     Contactors_Init();
-    //ErrorStatus errorCode;
     CANDATA_t canError;
     uint16_t tritiumError;
     
@@ -139,37 +153,22 @@ void Task_ManagerTask(void* arg) {
     while (1) {
         switch (TEST_OPTION) {
             case TEST_GENERAL:
-                // Test the exceptions mechanism by creating and throwing exceptions of priorities 1 and 2
+                // Test the exceptions mechanism by creating and asserting recoverable and nonrecoverable errors
                 // Both with and without callback functions
                 // Successful if exception message and callback message (if applicable) are printed
                 // and the fail message is not printed (tasks are stopped when they assert an error)
-                printf("\n\n\r=========== Testing exception priorities 1 and 2 ===========");
+                printf("\n\n\r=========== Testing general task error assertion  ===========");
             
                 // Test level 1 & 2 exceptions without callbacks
-                createExceptionTask(NULL);  
-                printf("\n\rAt line %d", __LINE__);    
+                createExceptionTask(NULL);   
                 OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); // extra time for the task finished
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
-                OSTaskDel(&ExceptionTaskTCB, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
-                OSTaskDel(&FaultState_TCB, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
+                checkOSError(err);  
                 
                 // Test level 1 & 2 exceptions with callbacks
                 createExceptionTask(exceptionCallback); 
                 checkOSError(err);
                 OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
-                OSTaskDel(&ExceptionTaskTCB, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
-                OSTaskDel(&FaultState_TCB, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
+                checkOSError(err);  
 
                 break;
 
@@ -182,15 +181,8 @@ void Task_ManagerTask(void* arg) {
                 printf("\n\n\r=========== Testing OS assert ===========");
 
                 createOSErrorTask();
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);   
                 OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
                 checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
-                OSTaskDel(&OSErrorTaskTCB, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);    
-                OSTaskDel(&FaultState_TCB, &err);
 
                 break;
 
@@ -252,13 +244,6 @@ void Task_ManagerTask(void* arg) {
             case TEST_READCARCAN:
 
                 // Tests exceptions in ReadCarCAN by creating the tasks and sending messages
-                // Causes a weird issue where the last things that were printed are
-                // reprinted sixteen times all at once with some odd changes
-                // if the messages are sent enough times
-                // ex: 3 enable, 3 disable, 2 delay, 5 enable works
-                // but 5 enable ... doesn't
-                // I think the issue may occur if you let the test loop around
-                // enough, though.
                 printf("\n\n\r=========== Testing ReadCarCAN ===========");  
                 createReadCarCAN();
                 checkOSError(err);
@@ -283,17 +268,17 @@ void Task_ManagerTask(void* arg) {
 
                 // Send charge enable messages
                 chargeMsg.data[0] = true;
-                for(int i = 0; i<3; i++){
+                for(int i = 0; i<5; i++){
                     CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
                     printf("\n\rSent enable chargeMsg %d", i);
                     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
                     printf("\n\rChargeEnable: %d", ChargeEnable_Get());
                 }
 
-                // Send five charge disable messages to test prio-2 disable contactor callback
+                // Send charge disable messages to test prio-2 disable contactor callback
                 // Fault state should turn off contactors but not enter a nonrecoverable fault
                 chargeMsg.data[0] = false;
-                for(int i = 0; i<3; i++){
+                for(int i = 0; i<5; i++){
                     CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
                     printf("\n\rSent disable chargeMsg %d", i);
                     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
@@ -301,7 +286,6 @@ void Task_ManagerTask(void* arg) {
                 }
 
                 // Pause the delivery of messages to trigger the canWatchTimer
-                //TODO: Can't tell that anything is happening here at the moment 
                 for(int i = 0; i<5; i++){
                     printf("\n\rDelay %d", i);
                     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
@@ -316,40 +300,34 @@ void Task_ManagerTask(void* arg) {
                     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
                     printf("\n\rChargeEnable: %d", ChargeEnable_Get());
                 }
-                //TODO: Would these ever be on? Since there's no minion board we may not be able to check
-                printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
-                printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
-                printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+                
+                // Check the contactors
+                print_Contactors();
+
+                Contactors_Set(ARRAY_CONTACTOR, ON, true);
+                Contactors_Set(MOTOR_CONTACTOR, ON, true);
+                Contactors_Set(ARRAY_PRECHARGE, ON, true); // Although BPS has control of the precharge contactor
+
+                print_Contactors(); // See the state of the contactors before we send the trip message
 
                 // Send a trip message of 1 (trip)
-                // TODO: trip messages are not usually sent,
-                // so any trip message (even 0) should be a concern.
-                // Need to change things to handle them differently (might be in ignition fix PR already)
                 *(uint64_t*)(&tripBPSMsg.data) = 1;
                 CANbus_Send(tripBPSMsg, CAN_BLOCKING, CARCAN);
                 printf("\n\rSent trip message %d", tripBPSMsg.data[0]);
                 OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
 
 
-                // By now, the BPS Trip message should have been sent
-                //OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Give ReadCarCAN time to turn off contactors
-                printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));// Check the contactors
-                printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
-                printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+                // By now, the BPS Trip message should have been sent and the contactors should be off
+                print_Contactors();
 
                 OSTaskDel(&ReadCarCAN_TCB, &err);
                 checkOSError(err);
                 printf("\n\rAt line %d", __LINE__);   
-                OSTaskDel(&FaultState_TCB, &err);
-                checkOSError(err);
-                printf("\n\rAt line %d", __LINE__);  
                 break;
 
 
             case TEST_UPDATEDISPLAY: 
                 printf("\n\n\r=========== Test UpdateDisplay ===========");
-                // Might be able to test if we UpdateDisplay_Init() and then make the task
-                // UpdateDisplay and Display error functions do actually do the same thing, so one of them should be deleted.
                 // Call update display put next to overflow the queue (actual issue)
             
 
@@ -377,30 +355,6 @@ void Task_ManagerTask(void* arg) {
 
 
 // Task creation functions
-
-// Initializes FaultState
-void createFaultState(void) {
-    OS_ERR err;
-    
-    OSTaskCreate( // Create fault task
-        (OS_TCB*)&FaultState_TCB,
-        (CPU_CHAR*)"Fault State",
-        (OS_TASK_PTR)&Task_FaultState,
-        (void*)NULL,
-        (OS_PRIO)2,
-        (CPU_STK*)FaultState_Stk,
-        (CPU_STK_SIZE)128/10,
-        (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)0,
-        (OS_TICK)NULL,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    checkOSError(err);
-        printf("\n\rAt line %d", __LINE__);    
-
-}
 
 // Initializes ReadTritium
 void createReadTritium(void) {
