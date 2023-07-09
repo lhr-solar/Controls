@@ -20,9 +20,19 @@ extern uint32_t SBPV;
 #endif
 
 /**
+ * Error types
+ */
+typedef enum{
+	READCARCAN_ERR_NONE			    = 0,
+	READCARCAN_ERR_CHARGE_DISABLE   =-1,	// Received a charge disable msg
+	READCARCAN_ERR_MISSED_MSG		=-2,	// Didn't receive a BPS charge msg in time
+	READCARCAN_ERR_BPS_TRIP		    =-3		// Received a BPS trip msg (0 or 1)
+} ReadCarCAN_error_code_t;
+
+/**
  * @brief Returns whether regen braking / charging is enabled or not
  * @return  Whether regen braking / charging is enabled or not
 */
-bool ChargeEnable_Get();
+bool ChargeEnable_Get(void);
 
 #endif

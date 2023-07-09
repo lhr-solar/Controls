@@ -4,7 +4,6 @@
 
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
-#include "FaultState.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "os.h"
@@ -46,8 +45,11 @@ static bool arrayIgnitionStatus = false;
 uint8_t SOC = 0;
 uint32_t SBPV = 0;
 
+// Error assertion function prototype
+static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
+
 // Getter function for chargeEnable
-bool ChargeEnable_Get(){
+bool ChargeEnable_Get(void){
     return chargeEnable;
 }
 
@@ -77,28 +79,12 @@ static void updateSaturation(int8_t chargeMessage){
 }
 
 /**
- * @brief exception struct callback for charging disable, kills contactor and turns off display
- * @param None
-*/
-static void callback_chargingDisable(void){ 
-    // mark regen as disabled and update saturation
-    updateSaturation(-1);
-
-    // Kill contactor
-    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-
-    // Turn off the array contactor display light
-    UpdateDisplay_SetArray(false);
-}
-
-
-/**
- * @brief Nested function as the same function needs to be executed however requires different parameters
+ * @brief Nested function as the same function needs to be executed however the timer requires different parameters
  * @param p_tmr pointer to the timer that calls this function, passed by timer
  * @param p_arg pointer to the argument passed by timer
 */
-static void chargingDisable(void *p_tmr, void *p_arg){
-    callback_chargingDisable();
+static void assertChargingDisable(void *p_tmr, void *p_arg){
+    assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
 
 /**
@@ -138,7 +124,7 @@ void Task_ReadCarCAN(void *p_arg){
         CAN_WATCH_TMR_DLY_TMR_TS,
         0,
         OS_OPT_TMR_ONE_SHOT,
-        chargingDisable, 
+        assertChargingDisable, 
         NULL,
         &err
     );
@@ -181,14 +167,10 @@ void Task_ReadCarCAN(void *p_arg){
 
 
         switch(dataBuf.ID){
-            case BPS_TRIP: { 
-                // BPS has a fault and we need to enter fault state (probably)
-                Display_Evac(SOC, SBPV);    // Display evacuation message
-
-                // Create an exception and assert the error
-                // kill contactors and enter a nonrecoverable fault
-                exception_t tripBPSError = {.prio=1, .message="\r\nBPS has been tripped", .callback=NULL};
-                assertExceptionError(tripBPSError);
+            case BPS_TRIP: { // BPS has a fault and we need to enter fault state (probably)
+                
+                // Assert the error to kill contactors, display evacuation message, and enter a nonrecoverable fault
+                assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
                 
             }
             case CHARGE_ENABLE:{
@@ -199,9 +181,8 @@ void Task_ReadCarCAN(void *p_arg){
 
                 if(dataBuf.data[0] == 0){
 
-                    // Disable regen and update saturation in callback function
-                    exception_t disableCharging = {.prio=2, .message="\r\nCharging needs to be disabled", .callback=callback_chargingDisable};
-                    assertExceptionError(disableCharging);
+                    // Assert error to disable regen and update saturation in callback function
+                    assertReadCarCANError(READCARCAN_ERR_CHARGE_DISABLE);
 
                 } else {
 
@@ -244,4 +225,76 @@ void Task_ReadCarCAN(void *p_arg){
         
     }
     
+}
+
+/**
+ * Error handler functions
+ * Passed as callback functions to the main assertTaskError function by assertReadCarCANError
+*/
+
+/**
+ * @brief error handler callback for disabling charging, 
+ * kills contactor and turns off display
+ */ 
+static void handler_ReadCarCAN_chargeDisable(void) {
+
+    // mark regen as disabled and update saturation
+    updateSaturation(-1);
+
+    // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, false);
+
+    // Check that the contactor was successfully turned off
+    bool ret = (bool)Contactors_Get(ARRAY_CONTACTOR);
+
+    if(ret == false) { // Array contactor was turned off
+
+        // Turn off the array contactor display light
+        UpdateDisplay_SetArray(false);
+
+    } else { // Contactor failed to turn off; display the evac screen and infinite loop
+         Display_Evac(SOC, SBPV);
+         while(1){;}
+    }
+  
+}
+
+/**
+ * @brief error handler function to display the evac screen if we get a BPS trip message.
+ * Callbacks happen after displaying the fault, so this screen won't get overwritten
+ */ 
+static void handler_ReadCarCAN_BPSTrip(void) {
+	 Display_Evac(SOC, SBPV);   // Display evacuation screen
+}
+
+
+/**
+ * @brief error assertion function for ReadCarCAN, used to disable charging and handle BPS trip messages
+ * Stores the error code and calls assertTaskError with the appropriate parameters and callback handler
+ * @param  rcc_err error code to specify the issue encountered
+ */
+static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err){   
+	Error_ReadCarCAN = rcc_err; // Store error code for inspection
+
+    switch (rcc_err) {
+            case READCARCAN_ERR_NONE: 
+                break;
+
+            case READCARCAN_ERR_CHARGE_DISABLE: // Received a charge disable msg and need to turn off array contactor
+                assertTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_CHARGE_DISABLE, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
+                break;
+
+            case READCARCAN_ERR_MISSED_MSG: // Missed message- treat as charging disable message
+                assertTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_MISSED_MSG, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
+                break;
+
+            case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop
+                assertTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_BPS_TRIP, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
+                break;
+            
+            default:
+                break;
+	}
+
+	Error_ReadCarCAN = READCARCAN_ERR_NONE; // Clear the error after handling it
 }

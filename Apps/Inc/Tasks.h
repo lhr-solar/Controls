@@ -165,8 +165,8 @@ typedef enum {
 void arrayMotorKill();
 
 /**
- * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
- * and jumping to the error's specified callback function. 
+ * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 
+ * displaying a fault screen (if nonrecoverable), jumping to a callback function, and entering an infinite loop. 
  * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
  * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
  * @param faultCode the enum for the specific error that happened

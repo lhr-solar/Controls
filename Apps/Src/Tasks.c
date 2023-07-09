@@ -39,9 +39,12 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
  * Global Variables
  */
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC; // Store the location of the current error
-error_code_t Error_ReadTritium = T_NONE;  // Variables to store error codes, stored and cleared in task error assert functions
-//error_code_t Error_ReadCarCAN = RCC_ERR_NONE;
+
+// Variables to store error codes, stored and cleared in task error assert functions
+error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
+error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; 
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
+
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 
