@@ -15,7 +15,7 @@
  * 
  * @param p_arg 
  */
-void Task_Telemetry(void *p_arg){
+void Task_SendCarCAN(void *p_arg){
     CANDATA_t carMsg;
     carMsg.ID = CARDATA;  // ID is wrong
     for(int i = 4; i < 8; i++){
