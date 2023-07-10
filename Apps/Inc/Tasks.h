@@ -159,7 +159,7 @@ typedef enum {
 } error_recov_opt_t;
 
 /**
- * @brief For use in error handling: turns off array and motor contactor
+ * @brief For use in error handling: turns off array, array precharge, and motor contactor
  * and turns on additional brakelight to signal that a critical error happened.
 */
 void arrayMotorKill();
