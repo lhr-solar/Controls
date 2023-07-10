@@ -39,7 +39,11 @@ int chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
 
 // Array ignition (IGN_1) pin status
+#ifdef __TEST_READCARCAN
+static bool arrayIgnitionStatus = true; // Can't test logic if ignition is always off
+#else
 static bool arrayIgnitionStatus = false;
+#endif
 
 // SOC and Supp V
 uint8_t SOC = 0;
@@ -146,10 +150,15 @@ void Task_ReadCarCAN(void *p_arg){
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(OS_READ_CAN_LOC, err);
 
-    Minion_Error_t Merr;
+    #ifndef __TEST_READCARCAN
+    Minion_Error_t Merr; // Not used when testing since ignition won't be changed
+    #endif
+
     while(1){
 
-        arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
+        #ifndef __TEST_READCARCAN
+        arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr); // Don't check ignition if just testing
+        #endif
 
         // Array Contactor is turned off if Ignition 1 is off
         if(arrayIgnitionStatus == false){
