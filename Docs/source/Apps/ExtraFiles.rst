@@ -30,4 +30,4 @@ This file contains an array for converting a pedal percentage (the index into th
 Tasks
 =====
 
-This file contains the storage for all general tasks related objects, including stacks, TCBs, mutexes, semaphores; as well as global variables such as ``RegenEnable`` and ``StateOfCharge``. All task files include ``Tasks.h`` and thus have access to them.
+This file contains the storage for all general tasks related objects, including stacks, TCBs, mutexes, and semaphores. All task files include ``Tasks.h`` and thus have access to them.

@@ -2,6 +2,24 @@
 #define MINION_H
 #include <stdbool.h>
 #include "BSP_GPIO.h"
+#include "common.h"
+
+// used to index into lookup table
+// if changed, PINS_LOOKARR should be changed in Minions.c
+#define FOREACH_MinionPin(PIN) \
+        PIN(IGN_1)   \
+        PIN(IGN_2)  \
+        PIN(REGEN_SW)   \
+        PIN(FOR_SW)  \
+        PIN(REV_SW)  \
+        PIN(CRUZ_EN)  \
+        PIN(CRUZ_ST)  \
+        PIN(BRAKELIGHT)  \
+
+typedef enum MINIONPIN_ENUM {
+    FOREACH_MinionPin(GENERATE_ENUM)
+    NUM_MINIONPINS,
+} MinionPin_t;
 
 
 typedef enum{
@@ -9,22 +27,6 @@ typedef enum{
     MINION_ERR_WROTE_INPUT,
 } Minion_Error_t;
 
-//used to index into lookup table
-//if changed, PINS_LOOKARR should be changed in Minions.c
-typedef enum{
-    //inputs
-    IGN_1,
-    IGN_2,
-    REGEN_SW,
-    FOR_SW,
-    REV_SW,
-    CRUZ_EN,
-    CRUZ_ST,
-    //output
-    BRAKELIGHT, 
-    //num of pins
-    MINIONPIN_NUM,
-} MinionPin_t; 
 
 typedef struct PinInfo{
     uint16_t pinMask;
