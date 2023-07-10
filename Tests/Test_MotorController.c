@@ -10,7 +10,6 @@
 #include "os.h"
 #include "Tasks.h"
 #include "CANbus.h"
-#include "CAN_Queue.h"
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[128];
@@ -27,7 +26,6 @@ void Task1(void* arg){
 
     MotorController_Init(1.0f);
     CANbus_Init();
-    CAN_Queue_Init();
     float unatttainable_Velocity;
     float desiredCurrent; 
     float currentSetPoint;

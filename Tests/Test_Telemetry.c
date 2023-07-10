@@ -7,7 +7,7 @@
 #include "Minions.h"
 #include "Contactors.h"
 #include "CANbus.h"
-#include "CAN_Queue.h"
+#include "SendCarCAN.h"
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
@@ -17,7 +17,7 @@ void Task1(void *arg)
     CPU_Init();
     
     CANbus_Init(CARCAN, NULL, 0);
-    CAN_Queue_Init();
+    SendCarCAN_Init();
     // BSP_UART_Init(UART_2);
     Pedals_Init();
     Minion_Init();
@@ -77,7 +77,7 @@ void Task1(void *arg)
         if(msg.ID > 0x24F){
             msg.ID = MOTOR_STATUS;
         }
-        CAN_Queue_Post(msg);
+        SendCarCAN_Put(msg);
 
         CANbus_Read(&msg, CAN_BLOCKING, CARCAN);
 

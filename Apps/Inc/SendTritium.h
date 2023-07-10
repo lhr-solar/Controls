@@ -9,9 +9,9 @@
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
 #define FOREACH_Gear(GEAR) \
-        GEAR(FORWARD_GEAR)   \
-        GEAR(NEUTRAL_GEAR)  \
-        GEAR(REVERSE_GEAR)   \
+        GEAR(FORWARD_GEAR),   \
+        GEAR(NEUTRAL_GEAR),  \
+        GEAR(REVERSE_GEAR),   \
 
 typedef enum GEAR_ENUM {
     FOREACH_Gear(GENERATE_ENUM)

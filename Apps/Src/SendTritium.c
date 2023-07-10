@@ -22,6 +22,7 @@
 #include "Minions.h"
 #include "SendTritium.h"
 #include "ReadTritium.h"
+#include "SendCarCAN.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
 #include "common.h"
@@ -315,8 +316,21 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
  * @param velocity_mps velocity in meters per second
  * @returns rpm
 */
-inline static float mpsToRpm(float velocity_mps){
+static inline float mpsToRpm(float velocity_mps){
     return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
+}
+
+/**
+ * @brief Put the CONTROL_MODE message onto the CarCAN bus, detailing
+ * the current mode of control.
+*/
+static void putControlModeCAN(){
+    CANDATA_t message;
+    memset(&message, 0, sizeof(message));
+    message.ID = CONTROL_MODE;
+    message.data[0] = state.name;
+
+    SendCarCAN_Put(message);
 }
 
 // State Handlers & Deciders
@@ -671,7 +685,7 @@ void Task_SendTritium(void *p_arg){
         }
         #endif
 
-        
+        putControlModeCAN();        
 
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);

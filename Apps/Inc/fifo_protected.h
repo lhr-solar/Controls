@@ -30,11 +30,13 @@
 
 // The header guard only guard the import,
 // since this file can be imported multiple times 
-#ifndef __FIFO_H
-#define __FIFO_H
+#ifndef __FIFO_TS_H
+#define __FIFO_TS_H
 #include <stdbool.h>
 #include <string.h>
 #include "common.h"
+#include "os.h"
+#include "Tasks.h"
 #endif
 
 // The type of the fifo
@@ -52,30 +54,30 @@
 #define FIFO_NAME new_fifo
 #endif
 
-// Utility definitions
-#define _CONCAT(A, B) A ## B
-#define CONCAT(A, B) _CONCAT(A, B)
-
 // Type names
 #define FIFO_STRUCT_NAME CONCAT(FIFO_NAME, _s)
-#define FIFO_TYPE_NAME CONCAT(FIFO_NAME, _t)
+#define FIFO_TYPE_NAME   CONCAT(FIFO_NAME, _t)
+#define FIFO_SEM4_NAME   CONCAT(FIFO_NAME, _sem4)
+#define FIFO_MUTEX_NAME  CONCAT(FIFO_NAME, _mutex)
 
 // The actual structure
 typedef struct FIFO_STRUCT_NAME {
-    FIFO_TYPE buffer[FIFO_SIZE];
+    FIFO_TYPE buffer[FIFO_SIZE];    
     int put;
     int get;
+    OS_SEM FIFO_SEM4_NAME;
+    OS_MUTEX FIFO_MUTEX_NAME;
 } FIFO_TYPE_NAME;
 
 // Define some names for our functions
-#define IS_EMPTY CONCAT(FIFO_NAME, _is_empty)
-#define IS_FULL  CONCAT(FIFO_NAME, _is_full)
-#define GET      CONCAT(FIFO_NAME, _get)
-#define PUT      CONCAT(FIFO_NAME, _put)
-#define NEW      CONCAT(FIFO_NAME, _new)
-#define PEEK     CONCAT(FIFO_NAME, _peek)
-#define POPBACK  CONCAT(FIFO_NAME, _popback)
-#define RENEW    CONCAT(FIFO_NAME, _renew)
+#define IS_EMPTY    CONCAT(FIFO_NAME, _is_empty)
+#define IS_FULL     CONCAT(FIFO_NAME, _is_full)
+#define GET         CONCAT(FIFO_NAME, _get)
+#define PUT         CONCAT(FIFO_NAME, _put)
+#define NEW         CONCAT(FIFO_NAME, _new)
+#define PEEK        CONCAT(FIFO_NAME, _peek)
+#define POPBACK     CONCAT(FIFO_NAME, _popback)
+#define RENEW       CONCAT(FIFO_NAME, _renew)
 
 /**
  * @brief Initialize a new fifo
@@ -87,8 +89,20 @@ typedef struct FIFO_STRUCT_NAME {
  */
 static inline FIFO_TYPE_NAME __attribute__((unused))
 NEW () {
+    OS_ERR err;
+    
     FIFO_TYPE_NAME fifo;
     memset(&fifo, 0, sizeof(fifo));
+    
+    OSMutexCreate(&(fifo.FIFO_MUTEX_NAME), (CPU_CHAR *)XSTR((FIFO_MUTEX_NAME)), &err);
+    assertOSError(OS_NONE_LOC, err);
+
+    OSSemCreate(&(fifo.FIFO_SEM4_NAME),
+                XSTR((FIFO_SEM4_NAME)),
+                0,
+                &err);
+    assertOSError(OS_NONE_LOC, err);
+
     return fifo;
 }
 
@@ -101,9 +115,38 @@ NEW () {
  */
 static inline void __attribute__((unused))
 RENEW (FIFO_TYPE_NAME * fifo) {
+    OS_ERR err;
+    CPU_TS ticks;
+
+    // Create mutex and semaphore if not already created
+    OSMutexCreate(&(fifo->FIFO_MUTEX_NAME), XSTR((FIFO_MUTEX_NAME)), &err);
+    
+    // Don't error out if the mutex already exists, just move on.
+    if(err != OS_ERR_OBJ_CREATED)
+        assertOSError(OS_NONE_LOC, err);
+
+    OSSemCreate(&(fifo->FIFO_SEM4_NAME),
+                XSTR((FIFO_SEM4_NAME)),
+                0,
+                &err);
+    
+    // Don't error out if the semaphore already exists, just move on.
+    if(err != OS_ERR_OBJ_CREATED)
+        assertOSError(OS_NONE_LOC, err);
+    
+    // Renew
+    OSSemSet(&(fifo->FIFO_SEM4_NAME), 0, &err);
+    assertOSError(OS_NONE_LOC, err);
+
+    OSMutexPend(&(fifo->FIFO_MUTEX_NAME), 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+    assertOSError(OS_NONE_LOC, err);
+    
     if(fifo != NULL) {
         fifo->get = fifo->put;
     }
+
+    OSMutexPost(&(fifo->FIFO_MUTEX_NAME), OS_OPT_POST_NONE, &err);
+    assertOSError(OS_NONE_LOC, err);
 }
 
 /**
@@ -149,13 +192,26 @@ IS_FULL (FIFO_TYPE_NAME *fifo) {
  */
 static bool __attribute__((unused))
 GET (FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
+    OS_ERR err;
+    CPU_TS ticks;
+    bool success = false;
+    
+    OSSemPend(&(fifo->FIFO_SEM4_NAME), 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+    assertOSError(OS_NONE_LOC, err);
+
+    OSMutexPend(&(fifo->FIFO_MUTEX_NAME), 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+    assertOSError(OS_NONE_LOC, err);
+    
     if(!IS_EMPTY(fifo)) {
         *elem = fifo->buffer[fifo->get];
         fifo->get = (fifo->get + 1) % FIFO_SIZE;
-        return true;
+        success = true;
     }
+    
+    OSMutexPost(&(fifo->FIFO_MUTEX_NAME), OS_OPT_POST_NONE, &err);
+    assertOSError(OS_NONE_LOC, err);
 
-    return false;
+    return success;
 }
 
 /**
@@ -171,13 +227,29 @@ GET (FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
  */
 static bool __attribute__((unused))
 PUT (FIFO_TYPE_NAME *fifo, FIFO_TYPE elem) {
+    OS_ERR err;
+    CPU_TS ticks;
+
+    bool success = false;
+
+    OSMutexPend(&(fifo->FIFO_MUTEX_NAME), 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+    assertOSError(OS_NONE_LOC, err);
+    
     if(!IS_FULL(fifo)) {
         fifo->buffer[fifo->put] = elem;
         fifo->put = (fifo->put + 1) % FIFO_SIZE;
-        return true;
+        success = true;
     }
 
-    return false;
+    OSMutexPost(&(fifo->FIFO_MUTEX_NAME), OS_OPT_POST_NONE, &err);
+    assertOSError(OS_NONE_LOC, err);
+
+    if(success){
+        OSSemPost(&(fifo->FIFO_SEM4_NAME), OS_OPT_POST_1, &err);
+        assertOSError(OS_NONE_LOC, err);
+    }
+
+    return success;
 }
 
 /**
@@ -193,12 +265,23 @@ PUT (FIFO_TYPE_NAME *fifo, FIFO_TYPE elem) {
  */
 static bool __attribute__((unused))
 PEEK (FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
+    OS_ERR err;
+    CPU_TS ticks;
+
+    bool success = false;
+
+    OSMutexPend(&(fifo->FIFO_MUTEX_NAME), 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+    assertOSError(OS_NONE_LOC, err);
+
     if(!IS_EMPTY(fifo)) {
         *elem = fifo->buffer[fifo->get];
-        return true;
+        success = true;
     }
 
-    return false;
+    OSMutexPost(&(fifo->FIFO_MUTEX_NAME), OS_OPT_POST_NONE, &err);
+    assertOSError(OS_NONE_LOC, err);
+
+    return success;
 }
 
 /**
@@ -214,13 +297,27 @@ PEEK (FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
  */
 static bool __attribute__((unused))
 POPBACK (FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
+    OS_ERR err;
+    CPU_TS ticks;
+
+    bool success = false;
+
+    OSSemPend(&(fifo->FIFO_SEM4_NAME), 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+    assertOSError(OS_NONE_LOC, err);
+    
+    OSMutexPend(&(fifo->FIFO_MUTEX_NAME), 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+    assertOSError(OS_NONE_LOC, err);
+
     if(!IS_EMPTY(fifo)) {
         fifo->put = (fifo->put + FIFO_SIZE - 1) % FIFO_SIZE;
         *elem = fifo->buffer[fifo->put];
-        return true;
+        success = true;
     }
 
-    return false;
+    OSMutexPost(&(fifo->FIFO_MUTEX_NAME), OS_OPT_POST_NONE, &err);
+    assertOSError(OS_NONE_LOC, err);
+
+    return success;
 }
 
 #undef IS_EMPTY
@@ -230,10 +327,11 @@ POPBACK (FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
 #undef FIFO_NAME
 #undef FIFO_TYPE_NAME
 #undef FIFO_STRUCT_NAME
+#undef FIFO_SEM4_NAME
+#undef FIFO_MUTEX_NAME
 #undef GET
 #undef PUT
 #undef NEW
 #undef PEEK
 #undef POPBACK
-#undef CONCAT
-#undef _CONCAT
+#undef INIT

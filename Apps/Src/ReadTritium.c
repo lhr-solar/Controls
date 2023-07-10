@@ -1,7 +1,6 @@
 /* Copyright (c) 2021 UT Longhorn Racing Solar */
 
 #include "ReadTritium.h"
-#include "CAN_Queue.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
 #include <string.h>

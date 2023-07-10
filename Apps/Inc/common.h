@@ -12,8 +12,8 @@
 #include <math.h>
 
 /* Used for generating ENUMS */
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
+#define GENERATE_ENUM(ENUM) ENUM
+#define GENERATE_STRING(STRING) #STRING
 
 /**
  * Used for creating getter functions (returns the value based on given inputs) 
@@ -27,6 +27,12 @@
 
 #define EXPOSE_GETTER(type, name) \
     type get_##name(void); \
+
+// Macro to String Helpers
+#define _CONCAT(A, B) A ## B
+#define CONCAT(A, B) _CONCAT(A, B)
+#define XSTR(STRING) GENERATE_STRING(STRING)
+#define INDIRECT(VAL) VAL
 
 typedef void (*callback_t)(void);
 

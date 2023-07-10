@@ -8,7 +8,6 @@
 #include "CANbus.h"
 #include "Contactors.h"
 #include "ReadCarCAN.h"
-#include "CAN_Queue.h"
 #include "Minions.h"
 #include "BSP_UART.h"
 #include "Display.h"

@@ -1,7 +1,6 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
-#include "CAN_Queue.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "BSP_UART.h"
@@ -21,8 +20,6 @@ void Task_EnableContactors(void *p_arg) {
     Contactors_Init();
     Contactors_Enable(ARRAY_CONTACTOR);
     Contactors_Enable(ARRAY_PRECHARGE);
-
-    CAN_Queue_Init();
 
     Minions_Init();
 
