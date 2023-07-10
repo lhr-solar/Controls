@@ -88,7 +88,10 @@ static void updateSaturation(int8_t chargeMessage){
  * @param p_arg pointer to the argument passed by timer
 */
 static void assertMissedBPSMsg(void *p_tmr, void *p_arg){
+    OS_ERR err;
     assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+    OSTmrStart(&canWatchTimer, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
 }
 
 /**
@@ -127,7 +130,7 @@ void Task_ReadCarCAN(void *p_arg){
         "CAN Watch Timer",
         CAN_WATCH_TMR_DLY_TMR_TS,
         0,
-        OS_OPT_TMR_PERIODIC,
+        OS_OPT_TMR_ONE_SHOT,
         assertMissedBPSMsg, 
         NULL,
         &err
