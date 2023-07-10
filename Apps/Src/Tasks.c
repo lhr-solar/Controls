@@ -105,7 +105,11 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
 
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
         OSSchedUnlock(&err); 
-        assertOSError(OS_TASKS_LOC, err);
+        // Don't err out if scheduler is still locked because of a timer callback
+        if (err != OS_ERR_SCHED_LOCKED && OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
+           assertOSError(OS_TASKS_LOC, err); 
+        }
+        
     }
 
     OSErrLocBitmap = OS_NONE_LOC; // Clear the location error variable once handled
