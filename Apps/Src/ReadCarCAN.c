@@ -75,7 +75,7 @@ static void updateSaturation(int8_t chargeMessage){
     }
     chargeMsgSaturation = newSaturation;
 
-    if(chargeMessage == 0){
+    if(chargeMessage == -1){
         chargeEnable = false;
     }else if(chargeMsgSaturation >= SATURATION_THRESHOLD){
         chargeEnable = true;
