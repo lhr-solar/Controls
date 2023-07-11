@@ -125,7 +125,7 @@ void Task_ReadCarCAN(void *p_arg){
     OSTmrCreate(
         &canWatchTimer,
         "CAN Watch Timer",
-        CAN_WATCH_TMR_DLY_TMR_TS, // Delay of 0 doesn't trigger correctly, though the manual says it should
+        CAN_WATCH_TMR_DLY_TMR_TS, // Initial delay equal to the period since 0 doesn't seem to work
         CAN_WATCH_TMR_DLY_TMR_TS, 
         OS_OPT_TMR_PERIODIC,
         assertMissedBPSMsg, 
@@ -201,7 +201,8 @@ void Task_ReadCarCAN(void *p_arg){
                     if(arrayIgnitionStatus == true                                                  // Ignition is ON
                         && chargeMsgSaturation >= SATURATION_THRESHOLD                              // Saturation Threshold has be met
                         && (Contactors_Get(ARRAY_CONTACTOR)==OFF)                                   // Array Contactor is OFF
-                        && OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_STOPPED){        // Precharge Delay is not runnning and is not executing one-shot 
+                        && ((OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_STOPPED)       // Precharge Delay is not running
+                        || (OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_COMPLETED))){   // or has already completed
 
                             // NOTE: An assert error for OSTmrStateGet isn't needed here because the 
                             //       conditional should fail if there is an error. 
@@ -273,7 +274,8 @@ static void handler_ReadCarCAN_chargeDisable(void) {
  * Callbacks happen after displaying the fault, so this screen won't get overwritten
  */ 
 static void handler_ReadCarCAN_BPSTrip(void) {
-	 Display_Evac(SOC, SBPV);   // Display evacuation screen
+    chargeEnable = false; // Not really necesssary but makes inspection less confusing
+	Display_Evac(SOC, SBPV);   // Display evacuation screen
 }
 
 
