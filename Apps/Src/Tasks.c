@@ -39,9 +39,12 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
  * Global Variables
  */
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC; // Store the location of the current error
-error_code_t Error_ReadTritium = T_NONE;  // Variables to store error codes, stored and cleared in task error assert functions
-//error_code_t Error_ReadCarCAN = RCC_ERR_NONE;
+
+// Variables to store error codes, stored and cleared in task error assert functions
+error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
+error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; 
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
+
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
 
 
@@ -102,7 +105,11 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t erro
 
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
         OSSchedUnlock(&err); 
-        assertOSError(OS_TASKS_LOC, err);
+        // Don't err out if scheduler is still locked because of a timer callback
+        if (err != OS_ERR_SCHED_LOCKED && OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
+           assertOSError(OS_TASKS_LOC, err); 
+        }
+        
     }
 
     OSErrLocBitmap = OS_NONE_LOC; // Clear the location error variable once handled
@@ -116,6 +123,7 @@ void arrayMotorKill() {
     // Array motor kill
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
 
     // Turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
