@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CONTROLS_REPO=$(dirname $(dirname $(realpath "$BASH_SOURCE")))
+export CONTROLS_REPO=$(git -C $BASH_SOURCE rev-parse --show-toplevel)
 export RENODE_TEST=/usr/share/renode_portable/renode-test
 export RENODE_UART2_TELNET=49152
 export RENODE_UART3_TELNET=49153
