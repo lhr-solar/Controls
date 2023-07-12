@@ -1,5 +1,5 @@
 *** Settings ***
-Resource        Robot_Resource.resource
+Resource        ../Inc/Robot_Resource.resource
 Suite Setup     Setup
 Suite Teardown  Teardown
 Test Setup      Reset Emulation
