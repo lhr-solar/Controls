@@ -8,15 +8,11 @@ TARGET = controls-leader
 # building variables
 ######################################
 # optimization
-<<<<<<< HEAD
-OPT = -Og -g
-=======
 ifeq ($(DEBUG), 0)
 OPT = -O3
 else
 OPT = -Og
 endif
->>>>>>> c66808e (tooling changes)
 
 #######################################
 # paths
