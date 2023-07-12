@@ -1,6 +1,4 @@
 #!/bin/bash
-source ${HOME}/.bashrc
-
 echo ${CONTROLS_REPO}
 
 if [[ $# -eq 0 ]]; then
@@ -15,7 +13,7 @@ mkdir -p ${CONTROLS_REPO}/Tests/Results/$1
 
 cd ${CONTROLS_REPO}
 
-make simulator TEST=$1 -s || { echo 'Compilation failed!' ; exit 1; }
+make simulator TEST=$1 DEBUG=1 -s || { echo 'Compilation failed!' ; exit 1; }
 
 # Check if a corresponding Robot test file exists
 echo "Running $1"

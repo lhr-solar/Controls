@@ -30,7 +30,8 @@
                 "command": "make",
                 "args": [
                     "${input:target}",
-                    "TEST=${input:test}"
+                    "TEST=${input:test}",
+                    "DEBUG=${input:debug}"
                 ],
                 "presentation": {
                     "echo": false,
@@ -77,7 +78,7 @@
                     "panel": "dedicated",
                     "focus": true,
                     "clear": true,
-                    "group": "renode"
+                    "group": "debug"
                 },
                 "isBackground": true,
                 "problemMatcher": {
@@ -104,7 +105,7 @@
                     "reveal": "always",
                     "panel": "dedicated",
                     "focus": true,
-                    "group": "renode"
+                    "group": "debug"
                 },
                 "isBackground": true,
                 "problemMatcher": {
@@ -220,6 +221,16 @@
                 "type": "promptString",
                 "description": "Test file to compile and run.",
                 "default": ""
+            },
+            {
+                "id": "debug",
+                "type": "pickString",
+                "description": "Debug ",
+                "options": [
+                    "1",
+                    "0"
+                ],
+                "default": "1"
             }
         ],
     },

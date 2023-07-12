@@ -10,4 +10,4 @@ fi
         \$uart3_telnet=${RENODE_UART3_TELNET}; \
         \$motorcan_socket=${RENODE_MOTORCAN_SOCKET}; \
         \$carcan_socket=${RENODE_CARCAN_SOCKET}; \
-        include @Simulator/startup.resc") || echo "Please install version 1.13.3 of Renode simulator."
+        include @Renode/startup.resc") || echo "Please install version 1.13.3 of Renode simulator."

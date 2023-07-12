@@ -10,7 +10,7 @@ DARKGRAY=\033[1;30m
 YELLOW=\033[0;33m
 NC=\033[0m # No Color
 
-DEBUG = 0
+DEBUG = 1
 export DEBUG
 
 # Note: ?= will define the variable only if it is not already set, which means the user can override any of

@@ -8,7 +8,15 @@ TARGET = controls-leader
 # building variables
 ######################################
 # optimization
+<<<<<<< HEAD
 OPT = -Og -g
+=======
+ifeq ($(DEBUG), 0)
+OPT = -O3
+else
+OPT = -Og
+endif
+>>>>>>> c66808e (tooling changes)
 
 #######################################
 # paths
@@ -106,8 +114,8 @@ C_INCLUDES =  \
 -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ \
 -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ \
 -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ \
--I../../RTOS/uCOS-III-STM32F4/uC-LIB/
-
+-I../../RTOS/uCOS-III-STM32F4/uC-LIB/ \
+-I../../Tests/Inc/ \
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
