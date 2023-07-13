@@ -76,7 +76,7 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
  * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t errorCallback, error_lock_sched_opt_t lockSched, error_recov_opt_t nonrecoverable) {
+void assertTaskError(os_error_loc_t errorLoc, uint8_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
     if (lockSched == OPT_LOCK_SCHED) { // We want this error to be handled immediately without other tasks being able to interrupt
