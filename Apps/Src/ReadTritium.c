@@ -132,7 +132,7 @@ float Motor_Velocity_Get(){ //getter function for motor velocity
  * @brief A callback function to be run by the main assertTaskError function for hall sensor errors
  * restart the motor if the number of hall errors is still less than the RESTART_THRESHOLD.
  */ 
-static void handler_Tritium_HallError(void) {
+static inline void handler_Tritium_HallError(void) {
 	MotorController_Restart(); 
 }
 
