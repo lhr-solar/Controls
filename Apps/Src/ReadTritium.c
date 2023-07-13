@@ -156,10 +156,8 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 		return;
 	}
 
-	hall_fault_cnt++; 
-
 	//try to restart the motor a few times and then fail out
-	if(hall_fault_cnt > RESTART_THRESHOLD){  
+	if(++hall_fault_cnt > RESTART_THRESHOLD){  
 		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
 		assertTaskError(OS_READ_TRITIUM_LOC, motor_err, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
