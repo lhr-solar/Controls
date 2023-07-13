@@ -181,7 +181,7 @@ void assertTaskError(os_error_loc_t errorLoc, uint8_t faultCode, callback_t erro
  * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err); 
+void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err); 
 
 #if DEBUG == 1
 #define assertOSError(OS_err_loc,err) \

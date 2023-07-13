@@ -52,7 +52,7 @@ extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions
  * Error assertion-related functions
 */
 
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
+void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
