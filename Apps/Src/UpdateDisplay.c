@@ -424,17 +424,17 @@ static void handler_UpdateDisplay_ShowError() {
  */static void assertUpdateDisplayError(DisplayError_t err){
 	static uint8_t disp_error_cnt = 0; // Track the number of display errors, doesn't ever reset
 
-	Error_UpdateDisplay = err; // Store the error code for inspection
+	Error_UpdateDisplay = (error_code_t)err; // Store the error code for inspection
 
 	if (err != DISPLAY_ERR_NONE){
 		disp_error_cnt++;
 
 		if (disp_error_cnt > RESTART_THRESHOLD){ 
 			// Show error screen if restart attempt limit has been reached
-			assertTaskError(OS_DISPLAY_LOC, err, handler_UpdateDisplay_ShowError,
+			assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_ShowError,
 			OPT_NO_LOCK_SCHED, OPT_RECOV);
 		} else { // Otherwise try resetting the display using the restart callback
-			assertTaskError(OS_DISPLAY_LOC, err, handler_UpdateDisplay_Restart,
+			assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,
 			OPT_NO_LOCK_SCHED, OPT_RECOV);
 		}
 
