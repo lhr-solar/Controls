@@ -43,7 +43,7 @@
 /**
  * Task error variable type
 */
-#define error_code_t uint8_t
+typedef int16_t error_code_t;
 
 /**
  * Task Prototypes
@@ -150,7 +150,7 @@ extern error_code_t Error_UpdateDisplay;
 typedef enum {
     OPT_LOCK_SCHED = false,
     OPT_NO_LOCK_SCHED = true
-} error_lock_sched_opt_t;
+} error_scheduler_lock_opt_t;
 
 // Recoverable/nonrecoverable parameter option for asserting a task error
 typedef enum {
@@ -169,19 +169,19 @@ void arrayMotorKill();
  * displaying a fault screen (if nonrecoverable), jumping to a callback function, and entering an infinite loop. 
  * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
  * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
- * @param faultCode the enum for the specific error that happened
+ * @param errorCode the enum for the specific error that happened
  * @param errorCallback a callback function to a handler for that specific error, 
  * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void assertTaskError(os_error_loc_t errorLoc, uint8_t faultCode, callback_t errorCallback, error_lock_sched_opt_t lockSched, error_recov_opt_t nonrecoverable);
+void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
 
 /**
  * @brief   Assert Error if OS function call fails
  * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err); 
+void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err); 
 
 #if DEBUG == 1
 #define assertOSError(OS_err_loc,err) \
