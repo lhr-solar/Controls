@@ -1,3 +1,22 @@
+/**
+ * 
+ * This file tests ignition and charge enable interactions.
+ * 
+ *
+ * This test is run in LoopBack mode with all messages sent and received by the LeaderBoard.
+ * However, it can be run in conjunction with motor-sim and car-sim
+ * (which don't do anything) when simulated to appease Renode.
+ * 
+ * @file 
+ * @author Diya Rajon (drajon@utexas.edu)
+ * @brief Tests read car can structure
+ * @version 2
+ * @date 2023-7-14
+ *
+ * @copyright Copyright (c) 2022 Longhorn Racing Solar
+ *
+ */
+
 #include "Tasks.h"
 #include "CANbus.h"
 #include "CAN_Queue.h"
@@ -13,26 +32,25 @@ static CPU_STK Task1_Stk[STACK_SIZE];
 
 #define SATURATION_THRESHOLD_TEST (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
+uint8_t supp_voltage_can_data = 0;
+uint32_t state_of_charge_can_data = 0;
 
-CANDATA_t bps_trip_msg = {BPS_TRIP, 0, 1};
-CANDATA_t charge_enable_msg = {CHARGE_ENABLE, 0, 1};
-CANDATA_t charge_disable_msg = {CHARGE_ENABLE, 0, 0};
-CANDATA_t supp_voltage_msg = {SUPPLEMENTAL_VOLTAGE, 0, 6000};
-CANDATA_t state_of_charge_msg = {STATE_OF_CHARGE, 0, 100};
+CANDATA_t bps_trip_msg = {.ID=BPS_TRIP, .idx=0, .data={1}};
+CANDATA_t charge_enable_msg = {.ID=CHARGE_ENABLE, .idx=0, .data={1}};
+CANDATA_t charge_disable_msg = {.ID=CHARGE_ENABLE, .idx=0, .data={0}};
+CANDATA_t supp_voltage_msg = {.ID=SUPPLEMENTAL_VOLTAGE, .idx=0, .data={0}};
+CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={100}};
 
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
 void Task1(){
     OS_ERR err;
-    CPU_TS ts;
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     Contactors_Init();
-    Contactors_Enable(ARRAY_CONTACTOR);
-    Contactors_Enable(MOTOR_CONTACTOR);
-    Contactors_Enable(ARRAY_PRECHARGE);
-    CANbus_Init(CARCAN, &carCANFilterList, CARCAN_FILTER_SIZE);
+    Contactors_Init();
+    CANbus_Init(CARCAN, NULL, 0);
     Display_Init();
     UpdateDisplay_Init();
     BSP_UART_Init(UART_2);
@@ -59,25 +77,33 @@ void Task1(){
         printf("\n\r=========== Testing Precharge ===========");
 
         printf("\r\n"); 
-        printf("\r\nCharge Message Saturation:   %f", chargeMsgSaturation);
+        printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
         printf("\r\nShould be                :   %d", 0);
-        printf("\r\n"); 
-        printf("\r\nCharge Enable            :   %d", chargeEnable_Get());
+        printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
         printf("\r\nShould be                :   %d", 0);
         printf("\r\n"); 
 
         // This should print the message saturation until it reaches the threshold
-        while(chargeMsgSaturation <= 7.5){ // message saturation
-            CANbus_Send(charge_enable_msg, true, CARCAN);
-            printf("\r\nCharge Message Saturation:   %f", chargeMsgSaturation);
+        for(int i = 0; i < 10; i++){ // message saturation
+            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);
+            printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
+            printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
             printf("\r\n"); 
         }
 
         if(chargeMsgSaturation >= 7.5){
             printf("\r\nThreshold has been reached\r\n");
+        }else{
+            printf("\r\nThreshold was not reached\r\n");
         }
 
-        printf("\r\nCharge Enable            :   %d", chargeEnable_Get());
+        if(ChargeEnable_Get() == 1){
+            printf("\r\nCharging has been enabled\r\n");
+        }else{
+            printf("\r\nCharge was not enabled\r\n");
+        }
+
+        printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
         printf("\r\nShould be                :   %d", 1);
 
         printf("\r\n"); 
@@ -90,10 +116,9 @@ void Task1(){
 
         // charge message saturation should go down 
         for(int i = 0; i < 10; i++){
-            CANbus_Send(charge_disable_msg, true, CARCAN);
-            printf("\r\nCharge Message Saturation:   %f", chargeMsgSaturation);
-            printf("\r\n"); 
-            printf("\r\nCharge Enable            :   %d", chargeEnable_Get());
+            CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN);
+            printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
+            printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
             printf("\r\nShould be                :   %d", 0);
             printf("\r\n"); 
             // should also print fault state error for charge disable
@@ -104,24 +129,35 @@ void Task1(){
         printf("\r\n"); 
 
         printf("\n\r=========== Testing Supp Voltage ===========");
-        CANbus_Send(supp_voltage_msg, true, CARCAN);
-        print("\r\nSupplemental Voltage: %f", SBPV);
-
+        for(int i = 0; i < 3; i++){
+            supp_voltage_can_data += 10;
+            supp_voltage_msg.data[0] = supp_voltage_can_data;
+            CANbus_Send(supp_voltage_msg, CAN_BLOCKING, CARCAN);
+            printf("\r\nSupplemental Voltage: %ld", SBPV);
+        }
+        
         printf("\r\n"); 
         printf("\r\n"); 
         printf("\r\n"); 
 
         printf("\n\r=========== Testing State of Charge ===========");
-        CANbus_Send(state_of_charge_msg, true, CARCAN);
-        print("\r\nState of Charge: %f", SOC);
+        for(int i = 0; i < 3; i++){
+          //  state_of_charge_can_data += 100000;
+        //    state_of_charge_msg.data[0] = state_of_charge_can_data;
+            CANbus_Send(state_of_charge_msg, CAN_BLOCKING, CARCAN);
+            printf("\r\nState of Charge: %d", SOC);
+        }
 
         printf("\r\n"); 
         printf("\r\n"); 
         printf("\r\n"); 
 
         printf("\n\r=========== Testing BPS TRIP ===========");
-        CANbus_Send(bps_trip_msg, true, CARCAN);
+        printf("\n\rNote: Test will end after this following message.\n\r"); 
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+        CANbus_Send(bps_trip_msg, CAN_BLOCKING, CARCAN);
         // should print the fault state BPS trip message
+        printf("BPS Trip was unsucessful"); 
         
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);

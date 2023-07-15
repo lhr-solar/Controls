@@ -1,6 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #define __TEST_READCARCAN
+// Uncomment the #define above when testing Renode or on hardware. Also uncomment #define in the h file
 
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
@@ -214,8 +215,7 @@ void Task_ReadCarCAN(void *p_arg){
                     // Asserts error for OS timer start above if conditional was met
                     // Asserts error for OS timer state get if conditional wasn't met 
                     assertOSError(OS_READ_CAN_LOC, err);
-                    
-                    
+
                 }
                 break;
             }
@@ -266,6 +266,10 @@ static void handler_ReadCarCAN_chargeDisable(void) {
          Display_Evac(SOC, SBPV);
          while(1){;}
     }
+
+    #ifdef __TEST_READCARCAN
+    printf("\r!!! Charge Disable Fault handler reached !!!\n\n\r");
+    #endif
   
 }
 
@@ -276,6 +280,10 @@ static void handler_ReadCarCAN_chargeDisable(void) {
 static void handler_ReadCarCAN_BPSTrip(void) {
     chargeEnable = false; // Not really necesssary but makes inspection less confusing
 	Display_Evac(SOC, SBPV);   // Display evacuation screen
+
+    #ifdef __TEST_READCARCAN
+    printf("\r!!! BPS Trip Fault handler reached !!!\n\n\r");
+    #endif
 }
 
 
