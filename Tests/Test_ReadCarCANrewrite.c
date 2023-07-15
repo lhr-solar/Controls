@@ -75,16 +75,14 @@ void Task1(){
 
     while(1){
 
-      //  Minion_Write_Output(IGN_1, ON, &mErr);
-   //     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
         if(Contactors_Get(ARRAY_CONTACTOR) == ON){
                 printf("\r\nArray is ON\r\n");
             }else{
                 printf("\r\nArray is OFF\n");
             }
-
         
         printf("\n\r=========== Testing Precharge ===========");
+        printf("\n\r=========== Expected output: Array contactor ON when threshold is reached ===========");
         for(int i = 0; i < 10; i++){ // message saturation
             Minion_Write_Output(IGN_1, ON, &mErr);
             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);
@@ -100,10 +98,10 @@ void Task1(){
             }else{
                 printf("\r\nArray is OFF\n");
             }
-            printf("\r\n"); 
         }
 
-        printf("\n\r=========== Testing with ignition off but threshold reached ===========");
+        printf("\n\r=========== Testing ignition off with max threshold       ===========");
+        printf("\n\r=========== Expected output: Array contactor always OFF   ===========");
         for(int i = 0; i < 10; i++){ // message saturation
             Minion_Write_Output(IGN_1, OFF, &mErr);
             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);
@@ -119,7 +117,6 @@ void Task1(){
             }else{
                 printf("\r\nArray is OFF\n");
             }
-            printf("\r\n"); 
         }
 
 
