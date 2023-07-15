@@ -41,7 +41,7 @@ static uint8_t oldestMsgIdx = 0;
 
 // Array ignition (IGN_1) pin status
 #ifdef __TEST_READCARCAN
-static bool arrayIgnitionStatus = true; // Can't test logic if ignition is always off
+static bool arrayIgnitionStatus = false; // Can't test logic if ignition is always off
 #else
 static bool arrayIgnitionStatus = false;
 #endif
@@ -88,7 +88,7 @@ static void updateSaturation(int8_t chargeMessage){
  * @param p_tmr pointer to the timer that calls this function, passed by timer
  * @param p_arg pointer to the argument passed by timer
 */
-static void assertMissedBPSMsg(void *p_tmr, void *p_arg){
+static void callbackCANWatchdog(void *p_tmr, void *p_arg){
     assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
 
@@ -100,18 +100,6 @@ static void assertMissedBPSMsg(void *p_tmr, void *p_arg){
 static void arrayRestart(void *p_tmr, void *p_arg){
     if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
         Contactors_Set(ARRAY_CONTACTOR, arrayIgnitionStatus, false); // Turn on array contactor if the ign switch lets us
-
-        // Update display based on if array contactor is on/off
-        if(Contactors_Get(ARRAY_CONTACTOR) == ON){
-            UpdateDisplay_SetArray(true);
-        }else{
-            UpdateDisplay_SetArray(false);
-        }
-
-        #ifdef __TEST_READCARCAN
-        printf("\r\nArray Contactor is turned on");
-        #endif
-
     }
 };
 
@@ -129,7 +117,7 @@ void Task_ReadCarCAN(void *p_arg){
         CAN_WATCH_TMR_DLY_TMR_TS, // Initial delay equal to the period since 0 doesn't seem to work
         CAN_WATCH_TMR_DLY_TMR_TS, 
         OS_OPT_TMR_PERIODIC,
-        assertMissedBPSMsg, 
+        callbackCANWatchdog, 
         NULL,
         &err
     );
@@ -155,11 +143,14 @@ void Task_ReadCarCAN(void *p_arg){
     Minion_Error_t Merr; // Not used when testing since ignition won't be changed
     #endif
 
+  Minion_Error_t Merr;
     while(1){
+      
 
-        #ifndef __TEST_READCARCAN
+        //#ifndef __TEST_READCARCAN
         arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr); // Don't check ignition if just testing
-        #endif
+        //#endif
+
 
         // Array Contactor is turned off if Ignition 1 is off
         if(arrayIgnitionStatus == false){
@@ -177,7 +168,7 @@ void Task_ReadCarCAN(void *p_arg){
 
 
         switch(dataBuf.ID){
-            case BPS_TRIP: { // BPS has a fault and we need to enter fault state (probably)
+            case BPS_TRIP: { // BPS has a fault and we need to enter fault state
                 
                 // Assert the error to kill contactors, display evacuation message, and enter a nonrecoverable fault
                 assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
@@ -185,7 +176,7 @@ void Task_ReadCarCAN(void *p_arg){
             }
             case CHARGE_ENABLE:{
 
-                // Restart CAN Watchdog timer
+                // Acknowledge CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
                 assertOSError(OS_READ_CAN_LOC, err);
 
@@ -204,11 +195,10 @@ void Task_ReadCarCAN(void *p_arg){
                         && (Contactors_Get(ARRAY_CONTACTOR)==OFF)                                   // Array Contactor is OFF
                         && ((OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_STOPPED)       // Precharge Delay is not running
                         || (OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_COMPLETED))){   // or has already completed
-
-                            // NOTE: An assert error for OSTmrStateGet isn't needed here because the 
-                            //       conditional should fail if there is an error. 
-
+                            
+                            Contactors_Set(ARRAY_CONTACTOR, ON, true);
                             // Wait to make sure precharge is finished and then restart array
+                            assertOSError(OS_READ_CAN_LOC, err);
                             OSTmrStart(&prechargeDlyTimer, &err);
                     }
                     
@@ -266,10 +256,6 @@ static void handler_ReadCarCAN_chargeDisable(void) {
          Display_Evac(SOC, SBPV);
          while(1){;}
     }
-
-    #ifdef __TEST_READCARCAN
-    printf("\r!!! Charge Disable Fault handler reached !!!\n\n\r");
-    #endif
   
 }
 
@@ -280,10 +266,6 @@ static void handler_ReadCarCAN_chargeDisable(void) {
 static void handler_ReadCarCAN_BPSTrip(void) {
     chargeEnable = false; // Not really necesssary but makes inspection less confusing
 	Display_Evac(SOC, SBPV);   // Display evacuation screen
-
-    #ifdef __TEST_READCARCAN
-    printf("\r!!! BPS Trip Fault handler reached !!!\n\n\r");
-    #endif
 }
 
 
