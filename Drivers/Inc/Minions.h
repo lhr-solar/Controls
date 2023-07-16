@@ -42,7 +42,7 @@ typedef struct {
  * @brief Initializes digital I/O
  * 
  */
-void Minion_init(void);
+void Minion_Init(void);
 
 /**
  * @brief Reads the status of a pin
@@ -51,7 +51,7 @@ void Minion_init(void);
  * @return true is high
  * @return false is low
  */
-bool Minion_read(pin_t pin);
+bool Minion_Read(pin_t pin);
 
 /**
  * @brief Updates the status of a pin
@@ -61,7 +61,7 @@ bool Minion_read(pin_t pin);
  * @return true is fail (wrote to an input)
  * @return false is success (wrote to an output)
  */
-bool Minion_write(pin_t pin, bool status);
+bool Minion_Write(pin_t pin, bool status);
 
 #endif 
 

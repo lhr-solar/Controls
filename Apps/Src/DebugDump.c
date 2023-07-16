@@ -72,7 +72,7 @@ void Task_DebugDump(void* p_arg) {
 
         // Get minion information
         for(pin_t pin = 0; pin < NUM_PINS; pin++){
-            bool pinState = Minion_read(pin);
+            bool pinState = Minion_Read(pin);
             // Ignition pins are negative logic, special-case them
             printf("%s: %s\n\r", MINIONPIN_STRING[pin], pinState ^ (pin == IGN_1 || pin == IGN_2) ? "on" : "off");
         }

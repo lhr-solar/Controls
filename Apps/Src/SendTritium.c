@@ -224,18 +224,18 @@ static void readInputs(){
     regenEnable = ChargeEnable_Get();
 
     // Update buttons
-    if(Minion_read(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
+    if(Minion_Read(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
     else if(onePedalCounter > 0){onePedalCounter--;}
 
-    if(Minion_read(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
+    if(Minion_Read(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
     else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
 
-    if(Minion_read(CRUZ_ST, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
+    if(Minion_Read(CRUZ_ST, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
     else if(cruiseSetCounter > 0){cruiseSetCounter--;}
     
     // Update gears
-    bool forwardSwitch = Minion_read(FOR_SW, &err);
-    bool reverseSwitch = Minion_read(REV_SW, &err);
+    bool forwardSwitch = Minion_Read(FOR_SW, &err);
+    bool reverseSwitch = Minion_Read(REV_SW, &err);
     bool forwardGear = (forwardSwitch && !reverseSwitch);
     bool reverseGear = (!forwardSwitch && reverseSwitch);
     bool neutralGear = (!forwardSwitch && !reverseSwitch);
@@ -558,19 +558,19 @@ static void OnePedalDriveHandler(){
         // Regen brake: Map 0 -> brake to 100 -> 0
         velocitySetpoint = 0;
         currentSetpoint = percentToFloat(map(accelPedalPercent, PEDAL_MIN, ONEPEDAL_BRAKE_THRESHOLD, CURRENT_SP_MAX, CURRENT_SP_MIN));
-        Minion_write(BRAKELIGHT, true);
+        Minion_Write(BRAKELIGHT, true);
         UpdateDisplay_SetRegenState(DISP_ACTIVE);
     }else if(ONEPEDAL_BRAKE_THRESHOLD < accelPedalPercent && accelPedalPercent <= ONEPEDAL_NEUTRAL_THRESHOLD){
         // Neutral: coast
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = 0;
-        Minion_write(BRAKELIGHT, false);
+        Minion_Write(BRAKELIGHT, false);
         UpdateDisplay_SetRegenState(DISP_ENABLED);
     }else if(ONEPEDAL_NEUTRAL_THRESHOLD < accelPedalPercent){
         // Accelerate: Map neutral -> 100 to 0 -> 100
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = percentToFloat(map(accelPedalPercent, ONEPEDAL_NEUTRAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
-        Minion_write(BRAKELIGHT, false);
+        Minion_Write(BRAKELIGHT, false);
         UpdateDisplay_SetRegenState(DISP_ENABLED);
     }
 }
@@ -584,10 +584,10 @@ static void OnePedalDriveDecider(){
         state = FSM[BRAKE_STATE];
     }else if(cruiseSet && cruiseEnable && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
-        Minion_write(BRAKELIGHT, false);
+        Minion_Write(BRAKELIGHT, false);
     }else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR){
         state = FSM[NEUTRAL_DRIVE];
-        Minion_write(BRAKELIGHT, false);
+        Minion_Write(BRAKELIGHT, false);
     }
 }
 
@@ -606,7 +606,7 @@ static void BrakeHandler(){
     currentSetpoint = 0;
     cruiseEnable = false;
     onePedalEnable = false;
-    Minion_write(BRAKELIGHT, true);
+    Minion_Write(BRAKELIGHT, true);
 }
 
 /**
@@ -617,7 +617,7 @@ static void BrakeDecider(){
     if(brakePedalPercent < BRAKE_PEDAL_THRESHOLD){
         if(gear == FORWARD_GEAR) state = FSM[FORWARD_DRIVE];
         else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR) state = FSM[NEUTRAL_DRIVE];
-        Minion_write(BRAKELIGHT, false);
+        Minion_Write(BRAKELIGHT, false);
     }
 }
 

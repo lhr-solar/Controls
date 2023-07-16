@@ -13,7 +13,7 @@ void Task1(void *arg)
     CPU_Init();
     
     BSP_UART_Init(UART_2);
-    Minion_init();
+    Minion_Init();
     bool lightState=false;
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
@@ -39,14 +39,14 @@ void Task1(void *arg)
     //     BSP_UART_Write(UART_2, str, size);
         
     //     lightState=!lightState;
-    //     Minion_write(BRAKELIGHT, lightState);
+    //     Minion_Write(BRAKELIGHT, lightState);
 
     //     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);           
     // }
 
     //tests the edge cases
-    bool output = Minion_write(REV_SW, lightState);
-    bool input = Minion_read(BRAKELIGHT);
+    bool output = Minion_Write(REV_SW, lightState);
+    bool input = Minion_Read(BRAKELIGHT);
 
     printf("This should print 0: %d", input);
     printf("This should print 0: %d", output);

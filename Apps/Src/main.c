@@ -79,7 +79,7 @@ void Task_Init(void *p_arg){
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    Minion_init();
+    Minion_Init();
     CAN_Queue_Init();
 
     // Initialize applications
@@ -195,7 +195,7 @@ void Task_Init(void *p_arg){
 
 
     while(1){
-        Contactors_Set(MOTOR_CONTACTOR, Minion_read(IGN_2), true); //turn on the contactor if the ign switch lets us
+        Contactors_Set(MOTOR_CONTACTOR, Minion_Read(IGN_2), true); //turn on the contactor if the ign switch lets us
         assertOSError(OS_MINIONS_LOC, err);
         OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }
