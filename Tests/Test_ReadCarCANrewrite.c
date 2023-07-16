@@ -43,6 +43,31 @@ static CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={100}
 
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
+static void print_array_status(){
+    if (Contactors_Get(ARRAY_CONTACTOR) == ON){
+        printf("\r\nArray is ON\r\n");
+    }
+    else{
+        printf("\r\nArray is OFF\n");
+    }
+}
+
+static void print_threshold_status(){
+    if (chargeMsgSaturation >= 7.5){
+        printf("\r\nThreshold has been reached\n");
+    }
+    else{
+        printf("\r\nThreshold was not reached\n");
+    }
+}
+
+static void info_dump(){
+    printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
+    printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
+    print_threshold_status();
+    print_array_status();
+}
+
 void Task1(){
     OS_ERR err;
 
@@ -74,133 +99,38 @@ void Task1(){
     Minion_Error_t mErr;
 
     while(1){
-
-        if(Contactors_Get(ARRAY_CONTACTOR) == ON){
-                printf("\r\nArray is ON\r\n");
-            }else{
-                printf("\r\nArray is OFF\n");
-            }
         
-        printf("\n\r=========== Testing Precharge ===========");
-        printf("\n\r=========== Expected output: Array contactor ON when threshold is reached ===========");
-        for(int i = 0; i < 10; i++){ // message saturation
-            Minion_Write_Output(IGN_1, ON, &mErr);
-            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);
-            printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
-            printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
-            if(chargeMsgSaturation >= 7.5){
-                printf("\r\nThreshold has been reached\r\n");
-            }else{
-                printf("\r\nThreshold was not reached\r\n");
-            }
-            if(Contactors_Get(ARRAY_CONTACTOR) == ON){
-                printf("\r\nArray is ON\r\n");
-            }else{
-                printf("\r\nArray is OFF\n");
-            }
+        printf("\n\r=========== Testing: Ignition ON ===========");
+        printf("\n\r=========== Expected: output: Array contactor ON when threshold is reached ===========");
+        for(int i = 0; i < 10; i++){ 
+            Minion_Write_Output(IGN_1, ON, &mErr);                      // Ignition ON
+            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+            info_dump();
         }
 
-        printf("\n\r=========== Testing ignition off with max threshold       ===========");
-        printf("\n\r=========== Expected output: Array contactor always OFF   ===========");
-        for(int i = 0; i < 10; i++){ // message saturation
-            Minion_Write_Output(IGN_1, OFF, &mErr);
-            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);
-            printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
-            printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
-            if(chargeMsgSaturation >= 7.5){
-                printf("\r\nThreshold has been reached\r\n");
-            }else{
-                printf("\r\nThreshold was not reached\r\n");
-            }
-            if(Contactors_Get(ARRAY_CONTACTOR) == ON){
-                printf("\r\nArray is ON\r\n");
-            }else{
-                printf("\r\nArray is OFF\n");
-            }
+        printf("\n\r=========== Testing Ignition OFF ===========");
+        printf("\n\r=========== Expected output: Array contactor always OFF ===========");
+        for(int i = 0; i < 10; i++){ 
+            Minion_Write_Output(IGN_1, OFF, &mErr);                     // Ignition OFF
+            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge enable messages
+            info_dump();
         }
-
-
         
 
-        printf("\n\r=========== Testing Precharge ===========");
-
-        printf("\r\n"); 
-        printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
-        printf("\r\nShould be                :   %d", 0);
-        printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
-        printf("\r\nShould be                :   %d", 0);
-        printf("\r\n"); 
-
-        // This should print the message saturation until it reaches the threshold
-        for(int i = 0; i < 10; i++){ // message saturation
-            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);
-            printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
-            printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
-            if(Contactors_Get(ARRAY_CONTACTOR) == ON){
-                printf("\r\nArray is ON\r\n");
-            }else{
-                printf("\r\nArray is OFF\n");
-            }
-            printf("\r\n"); 
-
+        printf("\n\r=========== Testing: Threshold Increase ===========");
+        printf("\n\r=========== Expected output: Threshold increases ===========");
+        for(int i = 0; chargeMsgSaturation <= SATURATION_THRESHOLD_TEST; i++){  // prints until max saturation is reached
+            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);               // Charge enable messages
+            info_dump();
         }
 
-        printf("\n\r=========== Testing Disable ===========");
-        for(int i = 0; i < 10; i++){ // message saturation
-            CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN);
-            printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
-            printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
-            if(Contactors_Get(ARRAY_CONTACTOR) == ON){
-                printf("\r\nArray is ON\r\n");
-            }else{
-                printf("\r\nArray is OFF\n");
-            }
-            printf("\r\n"); 
-
-        }
-
-        if(chargeMsgSaturation >= 7.5){
-            printf("\r\nThreshold has been reached\r\n");
-        }else{
-            printf("\r\nThreshold was not reached\r\n");
-        }
-
-        if(ChargeEnable_Get() == 1){
-            printf("\r\nCharging has been enabled\r\n");
-        }else{
-            printf("\r\nCharge was not enabled\r\n");
-        }
-
-        printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
-        printf("\r\nShould be                :   %d", 1);
-
-        printf("\r\n"); 
-        printf("\r\n"); 
-        printf("\r\n"); 
-
-        printf("\n\r=========== Testing Disable ===========");
-        
-        printf("\r\n"); 
-
-        // charge message saturation should go down 
-        for(int i = 0; i < 10; i++){
-            CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN);
-            printf("\r\nCharge Message Saturation:   %d", chargeMsgSaturation);
-            printf("\r\nCharge Enable            :   %d", ChargeEnable_Get());
-            printf("\r\nShould be                :   %d", 0);
-            if(Contactors_Get(ARRAY_CONTACTOR) == ON){
-                printf("\r\nArray is ON\r\n");
-            }else{
-                printf("\r\nArray is OFF\n");
-            }
-            printf("\r\n"); 
-            // should also print fault state error for charge disable
+        printf("\n\r=========== Testing: Threshold ===========");
+        printf("\n\r=========== Expected output: Threshold goes down ===========");
+        for(int i = 0; chargeMsgSaturation >= -1*SATURATION_THRESHOLD_TEST; i++){    // prints until max negative saturation is reached
+            CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN);                   // Charge disable messages
+            info_dump();
         }
             
-        printf("\r\n"); 
-        printf("\r\n"); 
-        printf("\r\n"); 
-
         printf("\n\r=========== Testing Supp Voltage ===========");
         for(int i = 0; i < 3; i++){
             supp_voltage_can_data += 10;
@@ -229,18 +159,10 @@ void Task1(){
         printf("\n\rNote: Test will end after this following message.\n\r"); 
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         CANbus_Send(bps_trip_msg, CAN_BLOCKING, CARCAN);
-        // should print the fault state BPS trip message
-        printf("BPS Trip was unsucessful"); 
+        printf("BPS Trip was unsucessful");     // Prints message if unsucesssful
         
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
-        
-
-
-
-
-
-
 
     }
 }
