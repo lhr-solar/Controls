@@ -14,7 +14,7 @@ void Task1(void *arg)
     CPU_Init();
     
     BSP_UART_Init(UART_2);
-    Minion_Init();
+    Minion_init();
     Contactors_Init();
 
     OS_ERR err;

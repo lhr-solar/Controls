@@ -119,7 +119,7 @@ void Task1(void *arg)
     BSP_UART_Init(UART_2);
     Pedals_Init();
     CANbus_Init(MOTORCAN);
-    Minion_Init();
+    Minion_init();
     UpdateDisplay_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
