@@ -184,6 +184,9 @@ void Task_ReadCarCAN(void *p_arg){
 
                     // Assert error to disable regen and update saturation in callback function
                     assertReadCarCANError(READCARCAN_ERR_CHARGE_DISABLE);
+                    
+                    // Turn off the array contactor display light
+                    UpdateDisplay_SetArray(false); // Can assume contactor turned off or else this won't be reached
 
                 } else {
 
@@ -247,12 +250,7 @@ static void handler_ReadCarCAN_chargeDisable(void) {
     // Check that the contactor was successfully turned off
     bool ret = (bool)Contactors_Get(ARRAY_CONTACTOR);
 
-    if(ret == false) { // Array contactor was turned off
-
-        // Turn off the array contactor display light
-        UpdateDisplay_SetArray(false);
-
-    } else { // Contactor failed to turn off; display the evac screen and infinite loop
+    if(ret != false) { // Contactor failed to turn off; display the evac screen and infinite loop
          Display_Evac(SOC, SBPV);
          while(1){;}
     }
@@ -275,7 +273,7 @@ static void handler_ReadCarCAN_BPSTrip(void) {
  * @param  rcc_err error code to specify the issue encountered
  */
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err){   
-	Error_ReadCarCAN = rcc_err; // Store error code for inspection
+	Error_ReadCarCAN = (error_code_t) rcc_err; // Store error code for inspection
 
     switch (rcc_err) {
             case READCARCAN_ERR_NONE: 
