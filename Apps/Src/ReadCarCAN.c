@@ -1,8 +1,5 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-#define __TEST_READCARCAN
-// Uncomment the #define above when testing Renode or on hardware. Also uncomment #define in the h file
-
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
