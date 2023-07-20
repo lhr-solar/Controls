@@ -10,8 +10,8 @@
 
 /** @addtogroup Minions @{ */
 
-#ifndef MINION_H
-#define MINION_H
+#ifndef MINIONS_H
+#define MINIONS_H
 #include "common.h"
 #include <stdbool.h>
 #include "BSP_GPIO.h"
@@ -42,7 +42,7 @@ typedef struct {
  * @brief Initializes digital I/O
  * 
  */
-void Minion_Init(void);
+void Minions_Init(void);
 
 /**
  * @brief Reads the status of a pin
@@ -51,7 +51,7 @@ void Minion_Init(void);
  * @return true is high
  * @return false is low
  */
-bool Minion_Read(pin_t pin);
+bool Minions_Read(pin_t pin);
 
 /**
  * @brief Updates the status of a pin
@@ -61,7 +61,7 @@ bool Minion_Read(pin_t pin);
  * @return true is fail (wrote to an input)
  * @return false is success (wrote to an output)
  */
-bool Minion_Write(pin_t pin, bool status);
+bool Minions_Write(pin_t pin, bool status);
 
 #endif 
 

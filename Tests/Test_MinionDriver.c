@@ -13,7 +13,7 @@ void Task1(void *arg)
     CPU_Init();
     
     BSP_UART_Init(UART_2);
-    Minion_Init();
+    Minions_Init();
     bool lightState=false;
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
@@ -26,27 +26,27 @@ void Task1(void *arg)
     // tests the reading and writing
     // while (1){
     //     char str[128];
-    //     bool regen = Minion_Read_Input(REGEN_SW);
-    //     bool forward = Minion_Read_Input(FOR_SW);
-    //     bool reverse = Minion_Read_Input(REV_SW);
-    //     bool enable = Minion_Read_Input(CRUZ_EN);
-    //     bool set = Minion_Read_Input(CRUZ_ST);
-    //     bool ign1 = Minion_Read_Input(IGN_1);
-    //     bool ign2 = Minion_Read_Input(IGN_2);
+    //     bool regen = Minions_Read_Input(REGEN_SW);
+    //     bool forward = Minions_Read_Input(FOR_SW);
+    //     bool reverse = Minions_Read_Input(REV_SW);
+    //     bool enable = Minions_Read_Input(CRUZ_EN);
+    //     bool set = Minions_Read_Input(CRUZ_ST);
+    //     bool ign1 = Minions_Read_Input(IGN_1);
+    //     bool ign2 = Minions_Read_Input(IGN_2);
 
 
     //     int size = sprintf(str, "regen = %d, forward = %d, reverse = %d, enable = %d, set = %d IGN1 = %d, IGN2 = %d \r", regen, forward,reverse,enable,set,ign1,ign2);
     //     BSP_UART_Write(UART_2, str, size);
         
     //     lightState=!lightState;
-    //     Minion_Write(BRAKELIGHT, lightState);
+    //     Minions_Write(BRAKELIGHT, lightState);
 
     //     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);           
     // }
 
     //tests the edge cases
-    bool output = Minion_Write(REV_SW, lightState);
-    bool input = Minion_Read(BRAKELIGHT);
+    bool output = Minions_Write(REV_SW, lightState);
+    bool input = Minions_Read(BRAKELIGHT);
 
     printf("This should print 0: %d", input);
     printf("This should print 0: %d", output);

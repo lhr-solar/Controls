@@ -20,7 +20,7 @@ void Task1(void *arg)
     CAN_Queue_Init();
     // BSP_UART_Init(UART_2);
     Pedals_Init();
-    Minion_Init();
+    Minions_Init();
     Contactors_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
@@ -55,7 +55,7 @@ void Task1(void *arg)
 
         // Check light
         lightState = !lightState;
-        Minion_Write(BRAKELIGHT, lightState);
+        Minions_Write(BRAKELIGHT, lightState);
 
         // Check contactors (HAVE NOTHING HOOKED UP TO CONTACTORS)
         contactorState = contactorState == OFF ? ON : OFF;

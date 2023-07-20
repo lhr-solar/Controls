@@ -16,13 +16,13 @@ const pinInfo_t PININFO_LUT[NUM_PINS] = {
     {GPIO_Pin_5, PORTB, OUTPUT}
 };
 
-void Minion_Init(void){
+void Minions_Init(void){
     for(uint8_t i = 0; i < NUM_PINS; i++){
         BSP_GPIO_Init(PININFO_LUT[i].port, PININFO_LUT[i].pinMask, PININFO_LUT[i].direction);
     }
 }
 
-bool Minion_Read(pin_t pin){
+bool Minions_Read(pin_t pin){
     if((PININFO_LUT[pin].direction == INPUT)){
         return (bool) BSP_GPIO_Read_Pin(PININFO_LUT[pin].port, PININFO_LUT[pin].pinMask);
     } else{
@@ -30,12 +30,12 @@ bool Minion_Read(pin_t pin){
     }
 }
 
-bool Minion_Write(pin_t pin, bool status){
+bool Minions_Write(pin_t pin, bool status){
     if(PININFO_LUT[pin].direction == OUTPUT){
         BSP_GPIO_Write_Pin(PININFO_LUT[pin].port, PININFO_LUT[pin].pinMask, status);
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 /** @} */
