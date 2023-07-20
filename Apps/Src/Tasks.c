@@ -22,6 +22,10 @@ OS_TCB UpdateDisplay_TCB;
 OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB Telemetry_TCB;
+OS_TCB DebugDump_TCB;
+OS_TCB CommandLine_TCB;
+
+task_trace_t PrevTasks;
 
 /**
  * Stacks
@@ -33,7 +37,8 @@ CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
-
+CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
+CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 /**
  * Global Variables
@@ -126,4 +131,32 @@ void arrayMotorKill() {
 
     // Turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
+}
+
+/**
+ * @brief Hook that's called every context switch
+ * 
+ * This function will append the task being switched out to the task trace if and only if:
+ *      1. It's not a task created automatically by the RTOS
+ *      2. It's not the previously recorded task (a long running task interrupted by the
+ *         tick task will only show up once)
+ * This function will overwrite tasks that have been in the trace for a while, keeping only
+ * the 8 most recent tasks
+ */
+void App_OS_TaskSwHook(void) {
+    OS_TCB *cur = OSTCBCurPtr;
+    uint32_t idx = PrevTasks.index;
+    if (cur == &OSTickTaskTCB) return; // Ignore the tick task
+    if (cur == &OSIdleTaskTCB) return; // Ignore the idle task
+    if (cur == &OSTmrTaskTCB ) return; // Ignore the timer task
+    if (cur == &OSStatTaskTCB) return; // Ignore the stat task
+    if (cur == PrevTasks.tasks[idx]) return; // Don't record the same task again
+    if (++idx == TASK_TRACE_LENGTH) idx = 0;
+    PrevTasks.tasks[idx] = cur;
+    PrevTasks.index = idx;
+}
+
+void TaskSwHook_Init(void) {
+    PrevTasks.index = TASK_TRACE_LENGTH - 1; // List starts out empty
+    OS_AppTaskSwHookPtr = App_OS_TaskSwHook;
 }

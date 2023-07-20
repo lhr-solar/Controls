@@ -24,6 +24,7 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "common.h"
 
 // Macros
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
@@ -86,6 +87,19 @@ static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
 
 #endif
+
+// Getter functions for local variables in SendTritium.c
+GETTER(bool, cruiseEnable)
+GETTER(bool, cruiseSet)
+GETTER(bool, onePedalEnable)
+GETTER(bool, regenEnable)
+GETTER(uint8_t, brakePedalPercent)
+GETTER(uint8_t, accelPedalPercent)
+GETTER(Gear_t, gear)
+GETTER(float, currentSetpoint)
+GETTER(float, velocitySetpoint)
+GETTER(float, cruiseVelSetpoint)
+GETTER(float, velocityObserved)
 
 // Handler & Decider Declarations
 static void ForwardDriveHandler(void);
@@ -178,13 +192,6 @@ static void getName(char* nameStr, uint8_t stateNameNum){
     return;
 }
 
-static void print_float(float f) {
-    int n = (int) f;
-    f -= n;
-    f *= (10 << 2);
-    printf("%d.%d\n\r", n, (int) f);
-}
-
 static void dumpInfo(){
     printf("-------------------\n\r");
     char stateName[20];
@@ -196,9 +203,9 @@ static void dumpInfo(){
     printf("brakePedalPercent: %d\n\r", brakePedalPercent);
     printf("accelPedalPercent: %d\n\r", accelPedalPercent);
     printf("gear: %d\n\r", (uint8_t)gear);
-    printf("currentSetpoint: "); print_float(currentSetpoint);
-    printf("velocitySetpoint: "); print_float(velocitySetpoint);
-    printf("velocityObserved: "); print_float(velocityObserved);
+    print_float("currentSetpoint: ", currentSetpoint);
+    print_float("velocitySetpoint: ", velocitySetpoint);
+    print_float("velocityObserved: ", velocityObserved);
     printf("-------------------\n\r");
 }
 #endif
