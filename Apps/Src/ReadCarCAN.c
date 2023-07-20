@@ -43,6 +43,9 @@ static bool arrayIgnitionStatus = false; // Can't test logic if ignition is alwa
 static bool arrayIgnitionStatus = false;
 #endif
 
+// Boolean to indicate precharge status
+bool prechargeComplete = false;
+
 // SOC and Supp V
 uint8_t SOC = 0;
 uint32_t SBPV = 0;
@@ -95,9 +98,26 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
-    if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        Contactors_Set(ARRAY_CONTACTOR, arrayIgnitionStatus, false); // Turn on array contactor if the ign switch lets us
+    prechargeComplete = true;
+};
+
+/**
+ * @brief Callback function for the precharge delay timer. Waits for precharge and then restarts the array.
+ * @param p_tmr pointer to the timer that calls this function, passed by timer
+ * @param p_arg pointer to the argument passed by timer
+*/
+static void ignitionStatusLogic(){
+   // Array Contactor is turned off if Ignition 1 is off
+        if(arrayIgnitionStatus == false){
+            Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+
+            // Update Display
+            UpdateDisplay_SetArray(false);
+        }
+        if(prechargeComplete == true){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
+        Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
     }
+    prechargeComplete = false;
 };
 
 void Task_ReadCarCAN(void *p_arg){
@@ -137,31 +157,26 @@ void Task_ReadCarCAN(void *p_arg){
     assertOSError(OS_READ_CAN_LOC, err);
 
     #ifndef __TEST_READCARCAN
-    Minion_Error_t Merr; // Not used when testing since ignition won't be changed
+  //  Minion_Error_t Merr; // Not used when testing since ignition won't be changed
     #endif
 
   Minion_Error_t Merr;
     while(1){
       
-
-        //#ifndef __TEST_READCARCAN
         arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr); // Don't check ignition if just testing
-        //#endif
 
-
-        // Array Contactor is turned off if Ignition 1 is off
-        if(arrayIgnitionStatus == false){
-            Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-
-            // Update Display
-            UpdateDisplay_SetArray(false);
-        }
         
+        
+
+ignitionStatusLogic();
+
         // BPS sent a message
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
         if(status != SUCCESS){
             continue;
         }
+
+
 
 
         switch(dataBuf.ID){

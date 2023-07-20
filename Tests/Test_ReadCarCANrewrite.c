@@ -86,7 +86,7 @@ void Task1(){
         
         printf("\n\r=========== Testing: Ignition ON with Charge Enable Messages ===========");
         printf("\n\r=========== Expected: output: Array contactor ON when threshold is reached ===========");
-        Minion_Write_Output(IGN_1, ON, &mErr);                      // Ignition ON
+        Minion_Write_Output(IGN_1, true, &mErr);                      // Ignition ON
         for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){ 
             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
             info_dump();
@@ -95,7 +95,7 @@ void Task1(){
         printf("\n\r");
         printf("\n\r=========== Testing: Ignition OFF with Charge Enable Messages ===========");
         printf("\n\r=========== Expected output: Array contactor always OFF ===========");
-        Minion_Write_Output(IGN_1, OFF, &mErr);                     // Ignition OFF
+        Minion_Write_Output(IGN_1, false, &mErr);                     // Ignition OFF
         for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){ 
             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge enable messages
             info_dump();
@@ -104,7 +104,7 @@ void Task1(){
         printf("\n\r");
         printf("\n\r=========== Testing: Ignition OFF with Charge Disable Messages ===========");
         printf("\n\r=========== Expected output: Threshold goes down, array contactor always OFF===========");
-        Minion_Write_Output(IGN_1, OFF, &mErr);                     // Ignition OFF
+        Minion_Write_Output(IGN_1, false, &mErr);                     // Ignition OFF
         for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){   
             CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN);                   // Charge disable messages
             info_dump();
@@ -113,7 +113,7 @@ void Task1(){
         printf("\n\r");
         printf("\n\r=========== Testing: Ignition ON with Charge Disable Messages ===========");
         printf("\n\r=========== Expected output: Threshold increases, array contactor always OFF ===========");
-        Minion_Write_Output(IGN_1, ON, &mErr);                     // Ignition OFF
+        Minion_Write_Output(IGN_1, true, &mErr);                     // Ignition OFF
         for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){  
             CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN);               // Charge enable messages
             info_dump();
