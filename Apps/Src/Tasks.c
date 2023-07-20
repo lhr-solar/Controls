@@ -42,11 +42,10 @@ os_error_loc_t OSErrLocBitmap = OS_NONE_LOC; // Store the location of the curren
 
 // Variables to store error codes, stored and cleared in task error assert functions
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
-error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; 
+error_code_t Error_ReadCarCAN = /*READCARCAN_ERR_NONE*/ 0; // TODO: change this back to the error 
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
-
 
 /**
  * Error assertion-related functions

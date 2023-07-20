@@ -3,7 +3,6 @@
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
-#include "FaultState.h"
 #include "Minions.h"
 #include "Minions.h"
 #include "os_cfg_app.h"
@@ -86,9 +85,8 @@ static inline void chargingDisable(void) {
     // mark regen as disabled
     chargeEnable = false;
 
-    // kill contactors 
-    exception_t readBPSError = {.prio=2, .message="read BPS error", .callback=callback_disableContactors};
-    assertExceptionError(readBPSError);
+    // kill contactors TODO: fill in error code
+    assertTaskError(OS_READ_CAN_LOC, 0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
 }
 
 // helper function to call if charging should be enabled
@@ -206,15 +204,12 @@ void Task_ReadCarCAN(void *p_arg)
         switch(dataBuf.ID){ //we got a message
             case BPS_TRIP: {
                 // BPS has a fault and we need to enter fault state (probably)
-                if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
 
-                    Display_Evac(SOC, SBPV);    // Display evacuation message
+                Display_Evac(SOC, SBPV);    // Display evacuation message
 
-                    // Create an exception and assert the error
-                    // kill contactors and enter a nonrecoverable fault
-                    exception_t tripBPSError = {.prio=1, .message="BPS has been tripped", .callback=callback_disableContactors};
-                    assertExceptionError(tripBPSError);
-                }
+                // kill contactors and enter a nonrecoverable fault
+                // TODO: change error code to real value
+                assertTaskError(OS_READ_CAN_LOC, 0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
             }
             case CHARGE_ENABLE: { 
 
