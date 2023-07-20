@@ -28,7 +28,7 @@ static bool cmd_Contactors_Get(void);
 
 static bool cmd_Contactors_Set(void);
 
-static bool cmd_Minions_Read_Input(void);
+static bool cmd_Minions_Read(void);
 
 static bool cmd_Minions_Write(void);
 
@@ -41,7 +41,7 @@ const struct Command cmdline_commands[] = {
 	{.name = "CANbus_Read", .action = cmd_CANbus_Read},
 	{.name = "Contactors_Get", .action = cmd_Contactors_Get},
 	{.name = "Contactors_Set", .action = cmd_Contactors_Set},
-	{.name = "Minions_Read_Input", .action = cmd_Minions_Read_Input},
+	{.name = "Minions_Read", .action = cmd_Minions_Read},
 	{.name = "Minions_Write", .action = cmd_Minions_Write},
 	{.name = "Pedals_Read", .action = cmd_Pedals_Read},
 	{.name = NULL, .action = NULL}
@@ -67,7 +67,7 @@ char *help = {
 	"contactor\n\r"
 	"	Contactors_Disable  array_c/array_p/motor_c - Disables the determined\n\r"
 	"contactor\n\r"
-	"	Minions_Read_Input 'input' - Reads the current status of the input\n\r"
+	"	Minions_Read 'input' - Reads the current status of the input\n\r"
 	"	Minions_Write `output` on/off - Sets the current state of the output\n\r"
 	"	Pedals_Read accel/brake - Reads the current status of the pedal\n\r"
 };
@@ -275,7 +275,7 @@ static bool cmd_Contactors_Set(void){
 	return true;
 }
 
-static bool cmd_Minions_Read_Input(void){
+static bool cmd_Minions_Read(void){
 	char *pinInput = strtok_r(NULL, " ", &save);
 	pin_t pin;
 	if(strcmp(pinInput, "ign_1") == 0){
