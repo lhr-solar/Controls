@@ -35,14 +35,20 @@ int8_t ChargeMsgSaturation_Get(void);
 
 /**
  * @brief Returns the value of charge message saturation
- * @return Value between -15 to 15
-*/
-bool PrechargeComplete_Get(void);
-
-/**
- * @brief Returns the value of charge message saturation
- * @return Value between -15 to 15
+ * @return Whether array ignition is ON/OFF
 */
 bool ArrayIgnitionStatus_Get(void);
+
+/**
+ * @brief Returns the value of state of charge
+ * @return Value between 1 to 100
+*/
+uint8_t SOC_Get(void);
+
+/**
+ * @brief Returns the value of supply voltage
+ * @return Voltage in mV
+*/
+uint32_t SBPV_Get(void);
 
 #endif

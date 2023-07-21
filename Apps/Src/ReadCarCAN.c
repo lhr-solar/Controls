@@ -47,28 +47,24 @@ static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 bool ChargeEnable_Get(void){
     return chargeEnable;
 }
-// Getter function for m charge message saturation
+
+// Getter function for charge message saturation
 int8_t ChargeMsgSaturation_Get(){ 
 	return chargeMsgSaturation;
 }
 
-// Getter function for prechargeComplete
-bool PrechargeComplete_Get(void){
-    return prechargeComplete;
-}
-
-// Getter function for prechargeComplete
+// Getter function for array ignition status
 bool ArrayIgnitionStatus_Get(void){
     return arrayIgnitionStatus;
 }
 
 // Getter function for SOC
-float SOC_Get(){ 
+uint8_t SOC_Get(){ 
 	return SOC;
 }
 
 // Getter function for SBPV
-float SBPV_Get(){ 
+uint32_t SBPV_Get(){ 
 	return SBPV;
 }
 
@@ -107,35 +103,36 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg){
 }
 
 /**
- * @brief Callback function for the precharge delay timer. Waits for precharge and then restarts the array.
+ * @brief Callback function for the precharge delay timer. Waits for precharge and then sets prechargeComplete to true.
  * @param p_tmr pointer to the timer that calls this function, passed by timer
  * @param p_arg pointer to the argument passed by timer
 */
-static void arrayRestart(void *p_tmr, void *p_arg){
+static void setPrechargeComplete(void *p_tmr, void *p_arg){
     prechargeComplete = true;
 };
 
 /**
- * @brief Callback function for the precharge delay timer. Waits for precharge and then restarts the array.
- * @param p_tmr pointer to the timer that calls this function, passed by timer
- * @param p_arg pointer to the argument passed by timer
+ * @brief Turns array contactor ON/OFF based on ignition and precharge status
+ * @param None
 */
-static void ignitionStatusLogic(){
-  Minion_Error_t Merr;
+static void updateArrayContactor(void){
+    Minion_Error_t Merr;
 
-    arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr); // Don't check ignition if just testing
-
-     if(prechargeComplete == true){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-         Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
-     }
-
-   // Array Contactor is turned off if Ignition 1 is off else
+    arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
+    
+    // Array Contactor is turned off if Ignition 1 is off else
     if(arrayIgnitionStatus == false){
-          Contactors_Set(ARRAY_CONTACTOR, OFF, true);
-            UpdateDisplay_SetArray(false);  // Update Display
-        }
+        Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+        UpdateDisplay_SetArray(false);
+    }
+    // If charge has been disabled during precharge, we don't want to turn on the array contactor immediately after
+    else if(prechargeComplete == true && chargeEnable == true){
+        Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
+        UpdateDisplay_SetArray(true);
+    }
         
-   prechargeComplete = false; // turn prechargeComplete off
+    prechargeComplete = false; // Set precharge complete variable to false if precharge happens again
+
 };
 
 void Task_ReadCarCAN(void *p_arg){
@@ -164,7 +161,7 @@ void Task_ReadCarCAN(void *p_arg){
         0,
         PRECHARGE_DLY_TMR_TS,
         OS_OPT_TMR_ONE_SHOT,
-        arrayRestart,
+        setPrechargeComplete,
         NULL,
         &err
     );
@@ -176,7 +173,8 @@ void Task_ReadCarCAN(void *p_arg){
 
     while(1){
       
-        ignitionStatusLogic();
+        updateArrayContactor(); // Sets array ignition (IGN_1) contactor ON/OFF
+
         // BPS sent a message
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
         if(status != SUCCESS){
@@ -212,15 +210,15 @@ void Task_ReadCarCAN(void *p_arg){
                     if(arrayIgnitionStatus == true                                                  // Ignition is ON
                         && chargeMsgSaturation >= SATURATION_THRESHOLD                              // Saturation Threshold has be met
                         && (Contactors_Get(ARRAY_CONTACTOR)==OFF)                                   // Array Contactor is OFF
-                        && (prechargeComplete == false)
-                        && (OSTmrStateGet(&prechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){   // or has already completed    
-                           // assertOSError(OS_READ_CAN_LOC, err);
+                        && (OSTmrStateGet(&prechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){      // and precharge is currenetly not happening    
+
+                            // Asserts error for OS timer start above if conditional was met
+                            assertOSError(OS_READ_CAN_LOC, err);
                             // Wait to make sure precharge is finished and then restart array
                             OSTmrStart(&prechargeDlyTimer, &err);
                     }
                     
-                    // Asserts error for OS timer start above if conditional was met
-                    // Asserts error for OS timer state get if conditional wasn't met 
+                    // Asserts error for OS timer state if conditional wasn't met
                     assertOSError(OS_READ_CAN_LOC, err);
 
                 }
