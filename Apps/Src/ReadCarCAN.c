@@ -112,9 +112,7 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
-    Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
     prechargeComplete = true;
-
 };
 
 /**

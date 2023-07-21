@@ -10,7 +10,7 @@
  * @file 
  * @author Diya Rajon (drajon@utexas.edu)
  * @brief Tests read car can structure
- * @version 2
+ * @version 
  * @date 2023-7-14
  *
  * @copyright Copyright (c) 2022 Longhorn Racing Solar
@@ -34,9 +34,6 @@ static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 #define SATURATION_THRESHOLD_TEST (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 #define ARBITRARY_LOOP_NUM 5
 
-//static uint8_t supp_voltage_can_data = 0;
-//static uint32_t state_of_charge_can_data = 0;
-
 // static CANDATA_t bps_trip_msg = {.ID=BPS_TRIP, .idx=0, .data={1}};
 // static CANDATA_t supp_voltage_msg = {.ID=SUPPLEMENTAL_VOLTAGE, .idx=0, .data={0}};
 // static CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={100}};
@@ -51,10 +48,19 @@ static void info_dump(){
     printf("\r\nCharge Message Saturation: %d", ChargeMsgSaturation_Get());
     printf("\r\nThreshold                : %s", ((ChargeMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
     printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));
-    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_CONTACTOR) == ON) ? "ON" : "OFF"));
-    
-    printf("\r\nPrecharge Complete       : %s", ((PrechargeComplete_Get() == true) ? "Yes" : "No"));
-    
+    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_CONTACTOR) == ON) ? "ON" : "OFF"));    
+}
+
+Minion_Error_t mErr;
+static void turnIgnitionON(){
+    printf("\n\r=========== Testing: Ignition ON with Charge Enable Messages ===========");
+        printf("\n\r=========== Expected output: One message with Array Contactor turned ON ===========");
+        Minion_Write_Output(IGN_1, true, &mErr);                      // Ignition ON
+        while(Contactors_Get(ARRAY_CONTACTOR) != ON){ 
+            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+            //printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_CONTACTOR) == ON) ? "ON" : "OFF"));
+        }
+    info_dump();
 }
 
 void Task1(){
@@ -85,55 +91,44 @@ void Task1(){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    Minion_Error_t mErr;
+    
 
     while(1){
         
-        printf("\n\r=========== Testing: Ignition ON with Charge Enable Messages ===========");
-        printf("\n\r=========== Expected: output: Array contactor ON when threshold is reached ===========");
-        Minion_Write_Output(IGN_1, true, &mErr);                      // Ignition ON
-        while(Contactors_Get(ARRAY_CONTACTOR) != ON){ 
-            
-            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
-           // printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_CONTACTOR) == ON) ? "ON" : "OFF"));
-
-        }
-        info_dump();
+        turnIgnitionON(); // Helper to turn ignition on
 
         printf("\n\r");
         printf("\n\r=========== Testing: Ignition OFF with Charge Enable Messages ===========");
         printf("\n\r=========== Expected output: Array contactor always OFF ===========");
-        Minion_Write_Output(IGN_1, false, &mErr);                     // Ignition OFF
+        Minion_Write_Output(IGN_1, false, &mErr); // Ignition OFF
         for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){ 
-            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge enable messages
+            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
             info_dump();
         }
+
+        turnIgnitionON(); // Helper to turn ignition on
         
         printf("\n\r");
         printf("\n\r=========== Testing: Ignition OFF with Charge Disable Messages ===========");
         printf("\n\r=========== Expected output: Threshold goes down, array contactor always OFF===========");
-        Minion_Write_Output(IGN_1, false, &mErr);                     // Ignition OFF
+        Minion_Write_Output(IGN_1, false, &mErr); // Ignition OFF
         for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){   
-            CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN);                   // Charge disable messages
+            CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
             info_dump();
         }
 
-        // printf("\n\r");
-        // printf("\n\r=========== Testing: Ignition ON with Charge Disable Messages ===========");
-        // printf("\n\r=========== Expected output: Threshold increases, array contactor always OFF ===========");
-        // Minion_Write_Output(IGN_1, true, &mErr);                     // Ignition OFF
-        // for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){  
-        //     CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN);               // Charge enable messages
-        //     info_dump();
-        // }
+        turnIgnitionON(); // Helper to turn ignition on
 
-        printf("\n\r=========== Testing: Ignition ON with Charge Enable Messages ===========");
-        printf("\n\r=========== Expected: output: Array contactor ON when threshold is reached ===========");
-        Minion_Write_Output(IGN_1, true, &mErr);                      // Ignition ON
-        for(int i = 0; i < ARBITRARY_LOOP_NUM*2; i++){ 
-            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+        printf("\n\r");
+        printf("\n\r=========== Testing: Ignition ON with Charge Disable Messages ===========");
+        printf("\n\r=========== Expected output: Threshold increases, array contactor always OFF ===========");
+        Minion_Write_Output(IGN_1, true, &mErr); // Ignition OFF
+        for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){  
+            CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
             info_dump();
         }
+
+        turnIgnitionON(); // Helper to turn ignition on
 
         printf("\n\n\rtest done\n\r");
 
