@@ -7,12 +7,6 @@
 #include "os.h"
 #include "os_cfg_app.h"
 
-#ifndef __TEST_READCARCAN
-#define RCC_SCOPE
-#else 
-#define RCC_SCOPE static
-#endif
-
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
 #define SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
@@ -29,26 +23,22 @@ static OS_TMR prechargeDlyTimer;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
-RCC_SCOPE bool chargeEnable = false;
+static bool chargeEnable = false;
 
 // Saturation buffer variables
 static int8_t chargeMsgBuffer[SAT_BUF_LENGTH];
-int chargeMsgSaturation = 0;
+static int8_t chargeMsgSaturation = 0;
 static uint8_t oldestMsgIdx = 0;
 
 // Array ignition (IGN_1) pin status
-#ifdef __TEST_READCARCAN
-static bool arrayIgnitionStatus = false; // Can't test logic if ignition is always off
-#else
 static bool arrayIgnitionStatus = false;
-#endif
 
 // Boolean to indicate precharge status
-bool prechargeComplete = false;
+static bool prechargeComplete = false;
 
 // SOC and Supp V
-uint8_t SOC = 0;
-uint32_t SBPV = 0;
+static uint8_t SOC = 0;
+static uint32_t SBPV = 0;
 
 // Error assertion function prototype
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
@@ -56,6 +46,30 @@ static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 // Getter function for chargeEnable
 bool ChargeEnable_Get(void){
     return chargeEnable;
+}
+// Getter function for m charge message saturation
+int8_t ChargeMsgSaturation_Get(){ 
+	return chargeMsgSaturation;
+}
+
+// Getter function for prechargeComplete
+bool PrechargeComplete_Get(void){
+    return prechargeComplete;
+}
+
+// Getter function for prechargeComplete
+bool ArrayIgnitionStatus_Get(void){
+    return arrayIgnitionStatus;
+}
+
+// Getter function for SOC
+float SOC_Get(){ 
+	return SOC;
+}
+
+// Getter function for SBPV
+float SBPV_Get(){ 
+	return SBPV;
 }
 
 /**
@@ -98,7 +112,9 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
+    Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
     prechargeComplete = true;
+
 };
 
 /**
@@ -107,17 +123,21 @@ static void arrayRestart(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 static void ignitionStatusLogic(){
-   // Array Contactor is turned off if Ignition 1 is off
-        if(arrayIgnitionStatus == false){
-            Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+  Minion_Error_t Merr;
 
-            // Update Display
-            UpdateDisplay_SetArray(false);
+    arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr); // Don't check ignition if just testing
+
+     if(prechargeComplete == true){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
+         Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
+     }
+
+   // Array Contactor is turned off if Ignition 1 is off else
+    if(arrayIgnitionStatus == false){
+          Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+            UpdateDisplay_SetArray(false);  // Update Display
         }
-        if(prechargeComplete == true){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
-    }
-    prechargeComplete = false;
+        
+   prechargeComplete = false; // turn prechargeComplete off
 };
 
 void Task_ReadCarCAN(void *p_arg){
@@ -143,8 +163,8 @@ void Task_ReadCarCAN(void *p_arg){
     OSTmrCreate(
         &prechargeDlyTimer,
         "Precharge Delay Timer",
-        PRECHARGE_DLY_TMR_TS,
         0,
+        PRECHARGE_DLY_TMR_TS,
         OS_OPT_TMR_ONE_SHOT,
         arrayRestart,
         NULL,
@@ -156,28 +176,14 @@ void Task_ReadCarCAN(void *p_arg){
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(OS_READ_CAN_LOC, err);
 
-    #ifndef __TEST_READCARCAN
-  //  Minion_Error_t Merr; // Not used when testing since ignition won't be changed
-    #endif
-
-  Minion_Error_t Merr;
     while(1){
       
-        arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr); // Don't check ignition if just testing
-
-        
-        
-
-ignitionStatusLogic();
-
+        ignitionStatusLogic();
         // BPS sent a message
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
         if(status != SUCCESS){
             continue;
         }
-
-
-
 
         switch(dataBuf.ID){
             case BPS_TRIP: { // BPS has a fault and we need to enter fault state
@@ -208,12 +214,10 @@ ignitionStatusLogic();
                     if(arrayIgnitionStatus == true                                                  // Ignition is ON
                         && chargeMsgSaturation >= SATURATION_THRESHOLD                              // Saturation Threshold has be met
                         && (Contactors_Get(ARRAY_CONTACTOR)==OFF)                                   // Array Contactor is OFF
-                        && ((OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_STOPPED)       // Precharge Delay is not running
-                        || (OSTmrStateGet(&prechargeDlyTimer, &err) == OS_TMR_STATE_COMPLETED))){   // or has already completed
-                            
-                            Contactors_Set(ARRAY_CONTACTOR, ON, true);
+                        && (prechargeComplete == false)
+                        && (OSTmrStateGet(&prechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){   // or has already completed    
+                           // assertOSError(OS_READ_CAN_LOC, err);
                             // Wait to make sure precharge is finished and then restart array
-                            assertOSError(OS_READ_CAN_LOC, err);
                             OSTmrStart(&prechargeDlyTimer, &err);
                     }
                     

@@ -9,8 +9,6 @@
 
 #include "CANbus.h"
 
-extern int chargeMsgSaturation;
-
 #define SAT_BUF_LENGTH 5
 
 /**
@@ -28,5 +26,23 @@ typedef enum{
  * @return  Whether regen braking / charging is enabled or not
 */
 bool ChargeEnable_Get(void);
+
+/**
+ * @brief Returns the value of charge message saturation
+ * @return Value between -15 to 15
+*/
+int8_t ChargeMsgSaturation_Get(void);
+
+/**
+ * @brief Returns the value of charge message saturation
+ * @return Value between -15 to 15
+*/
+bool PrechargeComplete_Get(void);
+
+/**
+ * @brief Returns the value of charge message saturation
+ * @return Value between -15 to 15
+*/
+bool ArrayIgnitionStatus_Get(void);
 
 #endif
