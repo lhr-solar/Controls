@@ -9,8 +9,8 @@
  * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
  * The logic is determined through a finite state machine implementation.
  * 
- * If the macro __TEST_SENDTRITIUM is defined prior to including SendTritium.h, relevant
- * variables will be exposed as externs for unit testing.
+ * If the macro DEBUG is defined prior to including SendTritium.h, relevant
+ * setters will be exposed for unit testing.
  * 
  * @author Nathaniel Delgado (NathanielDelgado)
  * @author Diya Rajon (diyarajon)
@@ -45,22 +45,16 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-#ifndef __TEST_SENDTRITIUM
-#define SCOPE static
-#else
-#define SCOPE 
-#endif
-
 // Inputs
-SCOPE bool cruiseEnable = false;
-SCOPE bool cruiseSet = false;
-SCOPE bool onePedalEnable = false;
-SCOPE bool regenEnable = false;
+static bool cruiseEnable = false;
+static bool cruiseSet = false;
+static bool onePedalEnable = false;
+static bool regenEnable = false;
 
-SCOPE uint8_t brakePedalPercent = 0;
-SCOPE uint8_t accelPedalPercent = 0;
+static uint8_t brakePedalPercent = 0;
+static uint8_t accelPedalPercent = 0;
 
-SCOPE Gear_t gear = NEUTRAL_GEAR;
+static Gear_t gear = NEUTRAL_GEAR;
 
 // Outputs
 float currentSetpoint = 0;
@@ -68,9 +62,8 @@ float velocitySetpoint = 0;
 float cruiseVelSetpoint = 0;
 
 // Current observed velocity
-SCOPE float velocityObserved = 0;
+static float velocityObserved = 0;
 
-#ifndef __TEST_SENDTRITIUM
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 
@@ -86,7 +79,9 @@ static bool onePedalPrevious = false;
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
 
-#endif
+// FSM
+static TritiumState_t prevState; // Previous state
+static TritiumState_t state; // Current state
 
 // Getter functions for local variables in SendTritium.c
 GETTER(bool, cruiseEnable)
@@ -96,10 +91,27 @@ GETTER(bool, regenEnable)
 GETTER(uint8_t, brakePedalPercent)
 GETTER(uint8_t, accelPedalPercent)
 GETTER(Gear_t, gear)
+GETTER(TritiumState_t, state)
+GETTER(float, velocityObserved)
+GETTER(float, cruiseVelSetpoint)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
-GETTER(float, cruiseVelSetpoint)
-GETTER(float, velocityObserved)
+
+// Setter functions for local variables in SendTritium.c
+#ifdef DEBUG
+SETTER(bool, cruiseEnable)
+SETTER(bool, cruiseSet)
+SETTER(bool, onePedalEnable)
+SETTER(bool, regenEnable)
+SETTER(uint8_t, brakePedalPercent)
+SETTER(uint8_t, accelPedalPercent)
+SETTER(Gear_t, gear)
+SETTER(TritiumState_t, state)
+SETTER(float, velocityObserved)
+SETTER(float, cruiseVelSetpoint)
+SETTER(float, currentSetpoint)
+SETTER(float, velocitySetpoint)
+#endif
 
 // Handler & Decider Declarations
 static void ForwardDriveHandler(void);
@@ -134,9 +146,6 @@ static const TritiumState_t FSM[9] = {
     {ACCELERATE_CRUISE, &AccelerateCruiseHandler, &AccelerateCruiseDecider}
 };
 
-static TritiumState_t prevState; // Previous state
-SCOPE TritiumState_t state; // Current state
-
 // Helper Functions
 
 /**
@@ -155,7 +164,7 @@ static float percentToFloat(uint8_t percent){
 /**
  * @brief Dumps info to UART during testing
 */
-#ifdef __TEST_SENDTRITIUM
+#ifdef DEBUG
 static void getName(char* nameStr, uint8_t stateNameNum){
     switch(stateNameNum){
         case FORWARD_DRIVE:
@@ -210,7 +219,6 @@ static void dumpInfo(){
 }
 #endif
 
-#ifndef __TEST_SENDTRITIUM
 /**
  * @brief Reads inputs from the system
 */
@@ -279,7 +287,6 @@ static void readInputs(){
     // Get observed velocity
     velocityObserved = Motor_RPM_Get();
 }
-#endif
 
 /**
  * @brief Linearly map range of integers to another range of integers. 
@@ -638,29 +645,25 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
-    #ifndef __TEST_SENDTRITIUM
-    CANbus_Init(MOTORCAN);
+    CANbus_Init(MOTORCAN, NULL, 0);
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
         .data={0.0f, 0.0f},
     };
-    #endif
 
     while(1){
         prevState = state;
 
         state.stateHandler();    // do what the current state does
-        #ifndef __TEST_SENDTRITIUM
         readInputs();   // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
-        #endif
         state.stateDecider();    // decide what the next state is
 
         // Drive
-        #ifdef __TEST_SENDTRITIUM
+        #ifdef DEBUG
         dumpInfo();
-        #else
+        #endif
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
             memcpy(&driveCmd.data[0], &currentSetpoint, sizeof(float));
             memcpy(&driveCmd.data[4], &velocitySetpoint, sizeof(float));
@@ -669,9 +672,6 @@ void Task_SendTritium(void *p_arg){
         }else{
             motorMsgCounter++;
         }
-        #endif
-
-        
 
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);

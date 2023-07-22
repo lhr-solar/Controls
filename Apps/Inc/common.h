@@ -28,6 +28,19 @@
 #define EXPOSE_GETTER(type, name) \
     type get_##name(void); \
 
+/**
+ * Used for creating setter functions (sets the value based on given inputs) 
+ * 
+ * SETTER is used for creating the function and EXPOSE_SETTER is used for creating the declaration in the header file
+ */
+#define SETTER(type, name) \
+    void set_##name(type val){ \
+        name = val; \
+    } \
+
+#define EXPOSE_SETTER(type, name) \
+    void set_##name(type val); \
+
 typedef void (*callback_t)(void);
 
 void print_float(char *str, float f);
