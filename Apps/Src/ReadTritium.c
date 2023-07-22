@@ -10,7 +10,7 @@
 #define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
 #define MAX_CAN_LEN 8
 #define RESTART_THRESHOLD 3	// Number of times to restart before asserting a nonrecoverable error
-#define MOTOR_TIMEOUT_SECS 1
+#define MOTOR_TIMEOUT_SECS 2
 #define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
 
 
