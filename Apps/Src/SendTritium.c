@@ -224,18 +224,18 @@ static void readInputs(){
     regenEnable = ChargeEnable_Get();
 
     // Update buttons
-    if(Minions_Read(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
+    if(Minions_Read(REGEN_SW) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
     else if(onePedalCounter > 0){onePedalCounter--;}
 
-    if(Minions_Read(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
+    if(Minions_Read(CRUZ_EN) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
     else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
 
-    if(Minions_Read(CRUZ_ST, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
+    if(Minions_Read(CRUZ_ST) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
     else if(cruiseSetCounter > 0){cruiseSetCounter--;}
     
     // Update gears
-    bool forwardSwitch = Minions_Read(FOR_SW, &err);
-    bool reverseSwitch = Minions_Read(REV_SW, &err);
+    bool forwardSwitch = Minions_Read(FOR_SW);
+    bool reverseSwitch = Minions_Read(REV_SW);
     bool forwardGear = (forwardSwitch && !reverseSwitch);
     bool reverseGear = (!forwardSwitch && reverseSwitch);
     bool neutralGear = (!forwardSwitch && !reverseSwitch);
