@@ -10,11 +10,15 @@
 #define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
 #define MAX_CAN_LEN 8
 #define RESTART_THRESHOLD 3	// Number of times to restart before asserting a nonrecoverable error
+#define MOTOR_TIMEOUT_SECS 1
+#define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
 
 
 tritium_error_code_t Motor_FaultBitmap = T_NONE; //initialized to no error, changed when the motor asserts an error
 static float Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
 static float Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
+
+static OS_TMR MotorWatchdog;
 
 // Function prototypes
 static void assertTritiumError(tritium_error_code_t motor_err);
@@ -24,7 +28,6 @@ static void assertTritiumError(tritium_error_code_t motor_err);
  * 
  */
 tritium_error_code_t MotorController_getTritiumError(void){
-    //TODO: implement for loop to parse this
 	for(int i = 0; i < NUM_TRITIUM_ERRORS; ++i){
 		if(Motor_FaultBitmap & (1<<i)){
 			return ((tritium_error_code_t)(1<<i));
@@ -34,7 +37,11 @@ tritium_error_code_t MotorController_getTritiumError(void){
 }
 
 
-
+// Callback for motor watchdog
+static void motorWatchdog(void *tmr, void *p_arg) {
+    // Attempt to restart 3 times, then fail
+    assertTritiumError(T_WATCHDOG_LAST_RESET_ERR);
+}
 
 
 
@@ -62,7 +69,12 @@ Objective 2:
 void Task_ReadTritium(void *p_arg){
 	OS_ERR err;
 	CANDATA_t dataBuf = {0};
-	
+
+	OSTmrCreate(&MotorWatchdog, "Motor watchdog", 0, 10, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
+	assertOSError(OS_READ_TRITIUM_LOC, err);
+	OSTmrStart(&MotorWatchdog, &err);
+	assertOSError(OS_READ_TRITIUM_LOC, err);
+
 	while (1){
 		ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
 
@@ -76,6 +88,8 @@ void Task_ReadTritium(void *p_arg){
 				}
 				
 				case VELOCITY:{
+                    OSTmrStart(&MotorWatchdog, &err); // Reset the watchdog
+                    assertOSError(OS_READ_TRITIUM_LOC, err);
                     memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
                     memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
 
@@ -98,19 +112,20 @@ void Task_ReadTritium(void *p_arg){
 				}
 
 			}
-
-
 		}
-
-		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-		assertOSError(OS_READ_TRITIUM_LOC, err);
 	}
 }
 
 void MotorController_Restart(void){
 	CANDATA_t resetmsg = {0};
 	resetmsg.ID = MOTOR_RESET;
-	CANbus_Send(resetmsg, true, MOTORCAN);
+
+	// Since this runs with the scheduler locked, we can risk pending
+	// on the CAN mailbox semaphore
+	ErrorStatus e;
+	do {
+		e = CANbus_Send(resetmsg, false, MOTORCAN);
+	} while (e == ERROR);
 }
 
 
@@ -132,7 +147,7 @@ float Motor_Velocity_Get(){ //getter function for motor velocity
  * @brief A callback function to be run by the main assertTaskError function for hall sensor errors
  * restart the motor if the number of hall errors is still less than the RESTART_THRESHOLD.
  */ 
-static inline void handler_Tritium_HallError(void) {
+static void handler_Tritium_HallError(void) {
 	MotorController_Restart(); 
 }
 
@@ -150,7 +165,7 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 	Error_ReadTritium = (error_code_t)motor_err; // Store error code for inspection info
 	if(motor_err == T_NONE) return; // No error, return
 	
-	if(motor_err != T_HALL_SENSOR_ERR){
+	if(motor_err != T_HALL_SENSOR_ERR && motor_err != T_WATCHDOG_LAST_RESET_ERR){
 		// Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
 		assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
