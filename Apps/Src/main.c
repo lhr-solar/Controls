@@ -25,6 +25,7 @@ int main(void) {
 
     OS_ERR err;
     OSInit(&err);
+    TaskSwHook_Init();
     OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
 
     assertOSError(OS_MAIN_LOC, err);

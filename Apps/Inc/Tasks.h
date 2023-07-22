@@ -109,6 +109,12 @@ extern OS_Q CANBus_MsgQ;
  */
 extern OS_SEM FaultState_Sem4;
 
+/**
+ * @brief Initialize the task switch hook
+ * Registers the hook with the RTOS
+ */
+void TaskSwHook_Init(void);
+
 
 /**
  * Global Variables
@@ -151,6 +157,22 @@ typedef enum{
     FAULT_DISPLAY = 0x10,    // for display faults
     FAULT_BPS = 0x20,       // for if BPS trips
 } fault_bitmap_t;
+
+/**
+ * Task trace
+ * 
+ * Stores the last TASK_TRACE_LENGTH tasks that were run
+ * The most recent task is at tasks[index], the one before at tasks[index-1],
+ * wrapping back around at the beginnning
+ * 
+ */
+#define TASK_TRACE_LENGTH 8
+typedef struct {
+    OS_TCB *tasks[TASK_TRACE_LENGTH];
+    uint32_t index;
+} task_trace_t;
+
+extern task_trace_t PrevTasks;
 
 /**
  * Error variables
