@@ -25,7 +25,6 @@ int main(void) {
 
     OS_ERR err;
     OSInit(&err);
-    TaskSwHook_Init();
     OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
 
     assertOSError(OS_MAIN_LOC, err);
@@ -85,6 +84,7 @@ void Task_Init(void *p_arg){
     // Initialize applications
     UpdateDisplay_Init();
 
+    /* Commented due to it messing up the test */
     // Initialize FaultState
     OSTaskCreate(
         (OS_TCB*)&FaultState_TCB,
@@ -193,6 +193,23 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
+    // Initialize DebugDump
+    OSTaskCreate(
+        (OS_TCB*)&DebugDump_TCB,
+        (CPU_CHAR*)"DebugDump",
+        (OS_TASK_PTR)Task_DebugDump,
+        (void*)NULL,
+        (OS_PRIO)TASK_DEBUG_DUMP_PRIO,
+        (CPU_STK*)DebugDump_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_DEBUG_DUMP_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
 
     while(1){
         Contactors_Set(MOTOR_CONTACTOR, Minions_Read(IGN_2), true); //turn on the contactor if the ign switch lets us

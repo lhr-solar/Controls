@@ -7,18 +7,6 @@
 #include "common.h"
 
 
-/**
- * @file SendCarCAN.c
- * @brief Implements the SendCarCAN Task
- * 
- * Creates a datatype to house the data to be read by telemetry
- * 
- * Gathers the information of the pedals, lights, switches, and contactors 
- * to be read by telemetry
- * 
- */
-
-
 // Make sure updated to the CarData_t and carMSGID are reflected in the CAN Bus IDs excel sheet
 
 /**
@@ -34,7 +22,6 @@ void Task_Telemetry(void *p_arg){
     }
     OS_ERR err;
 
-    Minion_Error_t Merr;
 
     while (1) {
         // Get pedal information
@@ -43,8 +30,8 @@ void Task_Telemetry(void *p_arg){
 
         // Get minion information
         carMsg.data[2] = 0;
-        for(MinionPin_t pin = 0; pin < MINIONPIN_NUM; pin++){
-            bool pinState = Minion_Read_Pin(pin, &Merr);
+        for(pin_t pin = 0; pin < NUM_PINS; pin++){
+            bool pinState = Minions_Read(pin);
             carMsg.data[2] |= pinState << pin;
         }
 

@@ -25,6 +25,7 @@
 #include "CANbus.h"
 #include "UpdateDisplay.h"
 #include "CANConfig.h"
+#include "common.h"
 
 // Macros
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
@@ -87,6 +88,19 @@ static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
 
 #endif
+
+// Getter functions for local variables in SendTritium.c
+GETTER(bool, cruiseEnable)
+GETTER(bool, cruiseSet)
+GETTER(bool, onePedalEnable)
+GETTER(bool, regenEnable)
+GETTER(uint8_t, brakePedalPercent)
+GETTER(uint8_t, accelPedalPercent)
+GETTER(Gear_t, gear)
+GETTER(float, currentSetpoint)
+GETTER(float, velocitySetpoint)
+GETTER(float, cruiseVelSetpoint)
+GETTER(float, velocityObserved)
 
 // Handler & Decider Declarations
 static void ForwardDriveHandler(void);
@@ -179,13 +193,6 @@ static void getName(char* nameStr, uint8_t stateNameNum){
     return;
 }
 
-static void print_float(float f) {
-    int n = (int) f;
-    f -= n;
-    f *= (10 << 2);
-    printf("%d.%d\n\r", n, (int) f);
-}
-
 static void dumpInfo(){
     printf("-------------------\n\r");
     char stateName[20];
@@ -197,9 +204,9 @@ static void dumpInfo(){
     printf("brakePedalPercent: %d\n\r", brakePedalPercent);
     printf("accelPedalPercent: %d\n\r", accelPedalPercent);
     printf("gear: %d\n\r", (uint8_t)gear);
-    printf("currentSetpoint: "); print_float(currentSetpoint);
-    printf("velocitySetpoint: "); print_float(velocitySetpoint);
-    printf("velocityObserved: "); print_float(velocityObserved);
+    print_float("currentSetpoint: ", currentSetpoint);
+    print_float("velocitySetpoint: ", velocitySetpoint);
+    print_float("velocityObserved: ", velocityObserved);
     printf("-------------------\n\r");
 }
 #endif
@@ -209,7 +216,6 @@ static void dumpInfo(){
  * @brief Reads inputs from the system
 */
 static void readInputs(){
-    Minion_Error_t err;
 
     // Update pedals
     brakePedalPercent = Pedals_Read(BRAKE);
@@ -219,18 +225,18 @@ static void readInputs(){
     regenEnable = ChargeEnable_Get();
 
     // Update buttons
-    if(Minion_Read_Pin(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
+    if(Minions_Read(REGEN_SW) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
     else if(onePedalCounter > 0){onePedalCounter--;}
 
-    if(Minion_Read_Pin(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
+    if(Minions_Read(CRUZ_EN) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
     else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
 
-    if(Minion_Read_Pin(CRUZ_ST, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
+    if(Minions_Read(CRUZ_ST) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
     else if(cruiseSetCounter > 0){cruiseSetCounter--;}
     
     // Update gears
-    bool forwardSwitch = Minion_Read_Pin(FOR_SW, &err);
-    bool reverseSwitch = Minion_Read_Pin(REV_SW, &err);
+    bool forwardSwitch = Minions_Read(FOR_SW);
+    bool reverseSwitch = Minions_Read(REV_SW);
     bool forwardGear = (forwardSwitch && !reverseSwitch);
     bool reverseGear = (!forwardSwitch && reverseSwitch);
     bool neutralGear = (!forwardSwitch && !reverseSwitch);
@@ -549,24 +555,23 @@ static void OnePedalDriveHandler(){
         UpdateDisplay_SetCruiseState(DISP_DISABLED);
         UpdateDisplay_SetGear(DISP_FORWARD);
     }
-    Minion_Error_t minion_err;
     if(accelPedalPercent <= ONEPEDAL_BRAKE_THRESHOLD){
         // Regen brake: Map 0 -> brake to 100 -> 0
         velocitySetpoint = 0;
         currentSetpoint = percentToFloat(map(accelPedalPercent, PEDAL_MIN, ONEPEDAL_BRAKE_THRESHOLD, CURRENT_SP_MAX, CURRENT_SP_MIN));
-        Minion_Write_Output(BRAKELIGHT, true, &minion_err);
+        Minions_Write(BRAKELIGHT, true);
         UpdateDisplay_SetRegenState(DISP_ACTIVE);
     }else if(ONEPEDAL_BRAKE_THRESHOLD < accelPedalPercent && accelPedalPercent <= ONEPEDAL_NEUTRAL_THRESHOLD){
         // Neutral: coast
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = 0;
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
         UpdateDisplay_SetRegenState(DISP_ENABLED);
     }else if(ONEPEDAL_NEUTRAL_THRESHOLD < accelPedalPercent){
         // Accelerate: Map neutral -> 100 to 0 -> 100
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = percentToFloat(map(accelPedalPercent, ONEPEDAL_NEUTRAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
         UpdateDisplay_SetRegenState(DISP_ENABLED);
     }
 }
@@ -576,15 +581,14 @@ static void OnePedalDriveHandler(){
  * drive state (brake, record velocity, neutral drive).
 */
 static void OnePedalDriveDecider(){
-    Minion_Error_t minion_err;
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
         state = FSM[BRAKE_STATE];
     }else if(cruiseSet && cruiseEnable && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
     }else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR){
         state = FSM[NEUTRAL_DRIVE];
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
     }
 }
 
@@ -599,12 +603,11 @@ static void BrakeHandler(){
         UpdateDisplay_SetRegenState(DISP_DISABLED);
         UpdateDisplay_SetGear(DISP_FORWARD);
     }
-    Minion_Error_t minion_err;
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = 0;
     cruiseEnable = false;
     onePedalEnable = false;
-    Minion_Write_Output(BRAKELIGHT, true, &minion_err);
+    Minions_Write(BRAKELIGHT, true);
 }
 
 /**
@@ -612,11 +615,10 @@ static void BrakeHandler(){
  * neutral drive).
 */
 static void BrakeDecider(){
-    Minion_Error_t minion_err;
     if(brakePedalPercent < BRAKE_PEDAL_THRESHOLD){
         if(gear == FORWARD_GEAR) state = FSM[FORWARD_DRIVE];
         else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR) state = FSM[NEUTRAL_DRIVE];
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
     }
 }
 
