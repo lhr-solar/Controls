@@ -4,6 +4,7 @@
 #include "CAN_Queue.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "os_cfg_app.h"
 #include <string.h>
 
 //status limit flag masks
@@ -70,13 +71,15 @@ void Task_ReadTritium(void *p_arg){
 	OS_ERR err;
 	CANDATA_t dataBuf = {0};
 
-	OSTmrCreate(&MotorWatchdog, "Motor watchdog", 0, 10, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
+	OSTmrCreate(&MotorWatchdog, "Motor watchdog", 0, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
 	assertOSError(OS_READ_TRITIUM_LOC, err);
 	OSTmrStart(&MotorWatchdog, &err);
 	assertOSError(OS_READ_TRITIUM_LOC, err);
 
 	while (1){
+		printf("Beginning of ReadTritium loop\n\r");
 		ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
+		printf("Successfully read CAN\n\r");
 
 		if (status == SUCCESS){
 			switch(dataBuf.ID){
