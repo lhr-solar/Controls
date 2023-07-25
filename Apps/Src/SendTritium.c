@@ -635,9 +635,6 @@ void Task_SendTritium(void *p_arg){
     prevState = FSM[NEUTRAL_DRIVE];
 
     #ifndef __TEST_SENDTRITIUM
-    // The CANBus initialization shouldn't be in the task! ReadTritium is higher priority
-    // and will try to read it
-    //CANbus_Init(MOTORCAN, motorCANFilterList, sizeof(motorCANFilterList) / sizeof(CANId_t));
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,

@@ -25,8 +25,6 @@ OS_TCB CommandLine_TCB;
 
 task_trace_t PrevTasks;
 
-task_trace_t PrevTasks;
-
 /**
  * Stacks
  */

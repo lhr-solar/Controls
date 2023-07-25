@@ -7,18 +7,11 @@
 #include "Minions.h"
 #include "UpdateDisplay.h"
 #include "CANConfig.h"
+#include "common.h"
 
 static OS_TCB Task1_TCB;
 #define STACK_SIZE 256
 static CPU_STK Task1_Stk[STACK_SIZE];
-
-void p_float(float f) {
-    bool neg = f < 0;
-    if (neg) f = -f;
-    int n = (int) f;
-    f -= n;
-    printf("%s%d.%d\n\r", neg ? "-" : "", n, (int) (f*100));
-}
 
 /*
  * When running this test on the motor testbench, hardcode the SendTritium task
@@ -33,13 +26,12 @@ void Task1(){
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     BSP_UART_Init(UART_2);
     Pedals_Init();
-    Minion_Init();
+    Minions_Init();
     Display_Init();
     UpdateDisplay_Init();
     CANbus_Init(MOTORCAN, motorCANFilterList, sizeof motorCANFilterList / sizeof(CANId_t));
     for (;;) {
-        printf("Motor velocity is currently ");
-        p_float(Motor_Velocity_Get());
+        print_float("Motor velocity is currently ", Motor_Velocity_Get());
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(OS_MAIN_LOC, err);
     }
