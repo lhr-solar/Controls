@@ -645,7 +645,6 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
-    CANbus_Init(MOTORCAN, NULL, 0);
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
