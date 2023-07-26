@@ -24,6 +24,7 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "CANConfig.h"
 #include "common.h"
 
 // Macros
@@ -634,7 +635,6 @@ void Task_SendTritium(void *p_arg){
     prevState = FSM[NEUTRAL_DRIVE];
 
     #ifndef __TEST_SENDTRITIUM
-    CANbus_Init(MOTORCAN);
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
@@ -657,8 +657,8 @@ void Task_SendTritium(void *p_arg){
         dumpInfo();
         #else
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
-            memcpy(&driveCmd.data[0], &currentSetpoint, sizeof(float));
-            memcpy(&driveCmd.data[4], &velocitySetpoint, sizeof(float));
+            memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
+            memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
             CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
             motorMsgCounter = 0;
         }else{
