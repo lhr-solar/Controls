@@ -1,3 +1,5 @@
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
 #include "Tasks.h"
 #include "CANbus.h"
 #include "CAN_Queue.h"
@@ -131,3 +133,4 @@ int main(){
     OSStart(&err);
     assertOSError(OS_MAIN_LOC, err);
 }
+

@@ -33,7 +33,7 @@ void Task1(void *p_arg) {
 
     assert(CANbus_Send(dataBuf, true, CARCAN) == SUCCESS);
     assert(CANbus_Read(&resultBuf, true, CARCAN) == SUCCESS);
-    assert(memcmp(&dataBuf, &resultBuf, sizeof dataBuf) == 0); // TODO: make sure that all 8 data bytes are copied
+    assert(memcmp(&dataBuf, &resultBuf, sizeof dataBuf) == 0);
 
     dataBuf.ID = ODOMETER_AMPHOURS; // Now, send a message that we shouldn't receive
     assert(CANbus_Send(dataBuf, true, CARCAN) == SUCCESS);
