@@ -10,13 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
     - name: Install tools
       run: |
         sudo apt -y update
         sudo apt -y install gcc-arm-none-eabi
-    - name: Initialize Submodules
-      run: git submodule update --init --recursive
+    - name: Checkout submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: true
     - name: clean
       run: make clean
     - name: make stm32f413
