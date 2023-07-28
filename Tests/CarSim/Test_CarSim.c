@@ -18,3 +18,9 @@ void Test_Setup(){
 void Test_Start(){
     while(1);
 }
+
+int main(){
+    Init();
+    while(1);
+    return 0;
+}

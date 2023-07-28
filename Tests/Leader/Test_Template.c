@@ -18,3 +18,9 @@ void Test_Start(void *arg){
     // Run all test functions here
     return;
 }
+
+int main(){
+    Init();
+    while(1);
+    return 0;
+}

@@ -23,3 +23,9 @@ void Test_Start(void *arg){
 
     }
 }
+
+int main(){
+    Init();
+    while(1);
+    return 0;
+}

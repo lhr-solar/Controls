@@ -71,9 +71,3 @@ void Test_Start_Task(){
     Test_Start();
     printf("End Test\n");
 }
-
-int main(){
-    Init();
-    while(1);
-    return 0;
-}
