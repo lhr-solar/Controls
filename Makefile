@@ -21,6 +21,16 @@ LEADER = controls-leader
 MOTORSIM = motor-sim
 CARSIM = car-sim
 
+# TODO: Remove BSP option once HAL is fully integrated
+# --------------------------------------------------------------
+BSP ?= StdPeriph
+BSP_PATH = BSP/STM32F413
+
+ifeq ($(BSP), HAL)
+	BSP_PATH := Embedded-Sharepoint/$(BSP_PATH)
+endif
+# ---------------------------------------------------------------
+
 all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
 
@@ -29,28 +39,28 @@ simulator: leader motor-sim car-sim
 
 leader:
 ifeq ($(TEST_LEADER), none)
-	$(MAKE) -C Embedded-Sharepoint/BSP/STM32F413 -j TARGET=$(LEADER) TEST=none
+	$(MAKE) -C $(BSP_PATH) -j TARGET=$(LEADER) TEST=none
 else
-	$(MAKE) -C Embedded-Sharepoint/BSP/STM32F413 -j TARGET=$(LEADER) TEST=Tests/Test_$(TEST_LEADER)
+	$(MAKE) -C $(BSP_PATH) -j TARGET=$(LEADER) TEST=Tests/Test_$(TEST_LEADER)
 endif
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
 
 motor-sim:
 ifneq ($(TEST_MOTOR), none)
-	$(MAKE) -C Embedded-Sharepoint/BSP/STM32F413 -j TARGET=$(MOTORSIM) TEST=MotorSim/Test_$(TEST_MOTOR)
+	$(MAKE) -C $(BSP_PATH) -j TARGET=$(MOTORSIM) TEST=MotorSim/Test_$(TEST_MOTOR)
 	@echo "${BLUE}Compiled for motor sim! Jolly Good!${NC}"
 endif
 
 car-sim:
 ifneq ($(TEST_CAR), none)
-	$(MAKE) -C Embedded-Sharepoint/BSP/STM32F413 -j TARGET=$(CARSIM) TEST=CarSim/Test_$(TEST_CAR)
+	$(MAKE) -C $(BSP_PATH) -j TARGET=$(CARSIM) TEST=CarSim/Test_$(TEST_CAR)
 	@echo "${BLUE}Compiled for car sim! Jolly Good!${NC}"
 endif
 
 stm32f413: leader
 
 flash:
-	$(MAKE) -C BSP -C STM32F413 flash
+	$(MAKE) -C $(BSP_PATH) flash
 
 help:
 	@echo "Format: ${ORANGE}make ${BLUE}<BSP type>${NC}${ORANGE}TEST=${PURPLE}<Test type>${NC}"
