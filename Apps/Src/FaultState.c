@@ -12,7 +12,7 @@
 #define RESTART_THRESHOLD 3
 
 static bool fromThread = false; //whether fault was tripped from thread
-extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
+extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
 
 static void ArrayMotorKill(void) {
@@ -23,7 +23,7 @@ static void ArrayMotorKill(void) {
 
 static void nonrecoverableFaultHandler(){
     //turn additional brakelight on to indicate critical error
-    BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
+    BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);
     ArrayMotorKill();
 }
 

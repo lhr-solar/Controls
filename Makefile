@@ -49,14 +49,17 @@ simulator: leader motor-sim car-sim
 	@echo "${BLUE}Compiled for simulator! Jolly Good!${NC}"
 
 leader:
+	@echo "${YELLOW}Compiling for leader...${NC}"
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
 
 motor-sim:
+	@echo "${YELLOW}Compiling for motor sim...${NC}"
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(MOTORSIM) TEST=$(TEST_MOTOR)
 	@echo "${BLUE}Compiled for motor sim! Jolly Good!${NC}"
 
 car-sim:
+	@echo "${YELLOW}Compiling for car sim...${NC}"
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(CARSIM) TEST=$(TEST_CAR)
 	@echo "${BLUE}Compiled for car sim! Jolly Good!${NC}"
 
