@@ -1,0 +1,7 @@
+run `openocd`
+
+run `gdb-multiarch Objects/control-leader.elf`
+
+> target extended-remote localhost:3333
+> type 'start'
+> type ctrl + x + a to have a better view of the code
