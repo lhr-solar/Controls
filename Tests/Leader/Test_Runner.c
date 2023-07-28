@@ -21,7 +21,20 @@ void __attribute__((unused)) Verify(bool blocking){
     }
 }
 
-void Init(){
+static inline void Init();
+static inline void Start();
+
+int main(){
+    Init();
+    Start();
+    
+    while(1);
+    
+    return 0;
+}
+
+#if TEST_USE_RTOS
+static inline void Init(){
     OS_ERR err;
     
     CPU_Init();
@@ -38,9 +51,20 @@ void Init(){
 
     // Enable interrupts
     __enable_irq();
+    assertOSError(OS_MAIN_LOC, err); // Uses printf so must be after UART init
 
-    assertOSError(OS_MAIN_LOC, err);
+    TaskSwHook_Init();
 
+    // Start SysTick
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+}
+
+static void Test_Start_Task(){
+    Test_Start();
+    printf("End Test\n");
+}
+
+static inline void Start(){
     // Spawn the test task
     OSTaskCreate(
         (OS_TCB *)&TestTCB,
@@ -57,17 +81,31 @@ void Init(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
     assertOSError(OS_MAIN_LOC, err);
-
-    TaskSwHook_Init();
-
+    
     // Start OS
     OSStart(&err);
     assertOSError(OS_MAIN_LOC, err);
 }
 
-void Test_Start_Task(){
-    // Start SysTick
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    Test_Start();
-    printf("End Test\n");
+#else
+static inline void Init(){
+    // Disable interrupts
+    __disable_irq();
+    
+    // Initialize needed drivers
+    BSP_UART_Init(UART_2);
+
+    // Specific test setup instructions
+    Test_Setup();
+
+    // Enable interrupts
+    __enable_irq();
+
+    return;
 }
+
+static inline void Start(){
+    Test_Start();
+}
+
+#endif

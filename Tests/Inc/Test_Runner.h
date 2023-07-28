@@ -1,6 +1,6 @@
 /**
  * @file Test_Runner.h
- * @brief Function definitions for Test Runner.
+ * @brief Function definitions for Test Runner. Please define TEST_USE_RTOS as 0 or 1 if including this file.
  */
 
 #include <assert.h>
@@ -8,11 +8,7 @@
 #include "config.h"
 #include "Tasks.h"
 
-void Init();
-
 void Test_Setup();
 void Test_Start();
-
-void Test_Start_Task();
 
 void __attribute__((unused)) Verify(bool blocking);

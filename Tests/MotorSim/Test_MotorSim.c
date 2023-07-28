@@ -1,8 +1,6 @@
 #include "BSP_CAN.h"
 #include <stdio.h>
 
-#include "Test_Runner.h"
-
 // Handlers
 static void RX_Handler(){
     uint32_t id;
@@ -14,18 +12,15 @@ static void RX_Handler(){
     printf("RX Data: 0x%08llx\n\r", data);
 }
 
-void Test_Setup(){
-    BSP_CAN_Init(CAN_3, (callback_t)RX_Handler, NULL, NULL, 0);
-}
-
-void Test_Start(void *arg){
-    while(1){
-
-    }
-}
-
 int main(){
-    Init();
+    // Disable interrupts
+    __disable_irq();
+    
+    // Initialize drivers
+    BSP_CAN_Init(CAN_3, (callback_t)RX_Handler, NULL, NULL, 0);
+    BSP_UART_Init(UART_2);
+    
+    // Enable interrupts
+    __enable_irq();
     while(1);
-    return 0;
 }

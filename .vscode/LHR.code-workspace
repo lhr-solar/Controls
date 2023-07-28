@@ -21,7 +21,7 @@
             },   
         },
         "files.associations": {
-            "test_resource.h": "c",
+            "Test_Runner.h": "c",
             "tasks.h": "c",
             "stm32f4xx.h": "c",
             "os.h": "c",
@@ -41,6 +41,7 @@
                 "args": [
                     "${input:target}",
                     "TEST=${input:test}",
+                    "USE_TEST_RUNNER=${input:use_test_runner}",
                     "DEBUG=${input:debug}"
                 ],
                 "presentation": {
