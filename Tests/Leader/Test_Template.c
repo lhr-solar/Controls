@@ -1,16 +1,20 @@
 // Import necessary headers
 
-#include "Test_Resource.h"
+#include "Test_Runner.h"
 
-// Test Functions (Each test function should test one aspect of test functionality)
+// Helpers
+
+// Test Functions (Each test function should test one aspect of code functionality)
 
 // Test Drivers
-static void Test_Setup(){
+void Test_Setup(){
     // Specific test setup
     return;
 }
 
-static void Test_Start(void *arg){
+void Test_Start(void *arg){
+    // Spawn necessary applications
+    
     // Run all test functions here
     return;
 }

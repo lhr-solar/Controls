@@ -11,7 +11,7 @@
         }
     ],
     "settings": {
-        "liveServer.settings.multiRootWorkspaceName": "Controls",
+        "liveServer.settings.multiRootWorkspaceName": "renode",
         "terminal.integrated.defaultProfile.linux": "bash",
         "terminal.integrated.profiles.linux": {
             "bash": {
@@ -19,6 +19,16 @@
                 "icon": "terminal-bash",
                 "args": ["-i"]
             },   
+        },
+        "files.associations": {
+            "test_resource.h": "c",
+            "tasks.h": "c",
+            "stm32f4xx.h": "c",
+            "os.h": "c",
+            "bsp.h": "c",
+            "bsp_gpio.h": "c",
+            "uart.h": "c",
+            "fifo.h": "c"
         }
     },
     "tasks": {
@@ -43,27 +53,6 @@
                 },
                 "group": {
                     "kind": "build",
-                    "isDefault": true
-                },
-                "problemMatcher": []
-            },
-            {
-                "label": "Build & Run Test(s)",
-                "type": "shell",
-                "command": "${workspaceFolder:Controls}/Scripts/run_test.sh",
-                "args": [
-                    "${input:test}"
-                ],
-                "presentation": {
-                    "echo": false,
-                    "reveal": "always",
-                    "panel": "dedicated",
-                    "focus": true,
-                    "clear": true,
-                    "group": "build"
-                },
-                "group": {
-                    "kind": "test",
                     "isDefault": true
                 },
                 "problemMatcher": []
@@ -155,7 +144,7 @@
                     "Start Renode",
                     "Open UART2 Telnet"
                 ],
-                "dependsOrder": "parallel",
+                "dependsOrder": "sequence",
                 "problemMatcher": []
             },
             {
@@ -164,7 +153,7 @@
                     "Start Renode Tools",
                     "Open Terminal GDB"
                 ],
-                "dependsOrder": "parallel",
+                "dependsOrder": "sequence",
                 "problemMatcher": []
             },
             {
@@ -173,7 +162,7 @@
                     "Start OpenOCD debugger",
                     "Open Terminal GDB"
                 ],
-                "dependsOrder": "parallel",
+                "dependsOrder": "sequence",
                 "problemMatcher": []
             },
             {
@@ -201,6 +190,15 @@
                     "Start Renode Tools"
                 ],
                 "dependsOrder": "sequence",
+                "problemMatcher": []
+            },
+            {
+                "label": "Kill Processes",
+                "type": "process",
+                "command": [
+                    "${command:workbench.action.tasks.terminate}",
+                    "${command:workbench.action.acceptSelectedQuickOpenItem}"
+                ],
                 "problemMatcher": []
             }
         ],
@@ -244,6 +242,7 @@
                 "cwd": "${workspaceFolder:Controls}",
                 "program": "${workspaceFolder:Controls}/Objects/controls-leader.elf",
                 "preLaunchTask": "Build Controls & Start Renode Tools",
+                "postDebugTask": "Kill Processes",
                 
                 "stopAtEntry": true,
                 "stopAtConnect": true,
@@ -272,6 +271,7 @@
                 "cwd": "${workspaceFolder:Controls}",
                 "program": "${workspaceFolder:Controls}/Objects/controls-leader.elf",
                 "preLaunchTask": "Build Controls & Start OpenOCD",
+                "postDebugTask": "Kill Processes",
                 
                 "stopAtEntry": true,
                 "stopAtConnect": true,

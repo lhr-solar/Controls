@@ -39,7 +39,12 @@ $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-LIB/*.c)
 # This line adds everything in Apps/Src/*.c except for main.c, then adds the test file
 C_SOURCES += \
 $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))	\
-$(wildcard ../../$(TEST))
+../../$(TEST)
+
+# This line adds the test runner if necessary
+ifeq (,$(findstring main.c,$(C_SOURCES)))
+	C_SOURCES += ../../Tests/Leader/Test_Runner.c
+endif
 
 # ASM sources
 ASM_SOURCES =  \

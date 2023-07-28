@@ -6,25 +6,21 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/Apps/Inc",
                 "${workspaceFolder}/Apps/Src",
-
                 "${workspaceFolder}/Drivers/Inc",
                 "${workspaceFolder}/Drivers/Src",
-
                 "${workspaceFolder}/Config/Inc",
-
                 "${workspaceFolder}/BSP/STM32F413/Src",
                 "${workspaceFolder}/BSP/Inc",
                 "${workspaceFolder}/BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Src",
                 "${workspaceFolder}/BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc",
-
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uC-CPU",
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU",
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uC-LIB",
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uCOS-III/Source",
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU",
-
                 "${workspaceFolder}/CMSIS/Include",
-                "${workspaceFolder}/CMSIS/Device/ST/STM32F4xx/Include"
+                "${workspaceFolder}/CMSIS/Device/ST/STM32F4xx/Include",
+                "${workspaceFolder}/Tests/Inc"
             ],
             "defines": [
                 "STM32F413_423xx",
