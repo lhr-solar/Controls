@@ -101,7 +101,7 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
     
 
     if (nonrecoverable == OPT_NONRECOV) { // enter an infinite while loop
-        while(1){;}
+        while(1);
     }
 
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
