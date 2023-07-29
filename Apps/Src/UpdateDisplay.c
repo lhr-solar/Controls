@@ -26,7 +26,7 @@
 #include "fifo.h"
 
 // For fault handling
-#define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
+#define DISPLAY_RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
 
 disp_fifo_t msg_queue;
 
@@ -426,18 +426,19 @@ static void handler_UpdateDisplay_ShowError() {
 
 	Error_UpdateDisplay = (error_code_t)err; // Store the error code for inspection
 
-	if (err != DISPLAY_ERR_NONE){
-		disp_error_cnt++;
+	if (err == DISPLAY_ERR_NONE) return; // No error, return
+    
+    disp_error_cnt++;
 
-		if (disp_error_cnt > RESTART_THRESHOLD){ 
-			// Show error screen if restart attempt limit has been reached
-			assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_ShowError,
-			OPT_NO_LOCK_SCHED, OPT_RECOV);
-		} else { // Otherwise try resetting the display using the restart callback
-			assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,
-			OPT_NO_LOCK_SCHED, OPT_RECOV);
-		}
+    if (disp_error_cnt > DISPLAY_RESTART_THRESHOLD){ 
+        // Show error screen if restart attempt limit has been reached
+        assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_ShowError,
+        OPT_NO_LOCK_SCHED, OPT_RECOV);
 
-		Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
-	}
+    } else { // Otherwise try resetting the display using the restart callback
+        assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,
+        OPT_NO_LOCK_SCHED, OPT_RECOV);
+    }
+
+    Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
 }

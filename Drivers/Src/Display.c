@@ -23,7 +23,6 @@
 // Operational commands have no attribute and no operator, just a command and >= 0 arguments
 #define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
 
-#define RESTART_THRESHOLD 3 // number of times to restart before fault
 
 
 static const char *TERMINATOR = "\xff\xff\xff";

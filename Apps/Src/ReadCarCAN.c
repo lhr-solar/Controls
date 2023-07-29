@@ -4,7 +4,6 @@
 #include "UpdateDisplay.h"
 #include "Contactors.h"
 #include "Minions.h"
-#include "Minions.h"
 #include "os_cfg_app.h"
 #include "Display.h"
 

@@ -60,11 +60,8 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
-        printf("\n\rOS Error code %d", err);
-        BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
-        
-        BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
-        BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
+        arrayMotorKill(); // Turn off contactors and turn on the brakelight to indicate an emergency
+        Display_Error(OS_err_loc, err); // Display the location and error code
         while(1){;} //nonrecoverable
 
     }

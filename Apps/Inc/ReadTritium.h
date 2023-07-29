@@ -7,7 +7,6 @@
 #include "common.h"
 #include "Tasks.h"
 #define MOTOR_STOPPED 0
-#define CAR_STOPPED 0
 
 /**
  * Motor Error States
@@ -36,6 +35,5 @@ tritium_error_code_t MotorController_getTritiumError(void);
 
 float Motor_RPM_Get();
 float Motor_Velocity_Get();
-void MotorController_Restart();
 
 #endif

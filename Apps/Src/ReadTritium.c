@@ -14,7 +14,7 @@
 
 tritium_error_code_t Motor_FaultBitmap = T_NONE; //initialized to no error, changed when the motor asserts an error
 static float Motor_RPM = MOTOR_STOPPED; //initialized to 0, motor would be "stopped" until a motor velocity is read
-static float Motor_Velocity = CAR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
+static float Motor_Velocity = MOTOR_STOPPED; //initialized to 0, car would be "stopped" until a car velocity is read
 
 // Function prototypes
 static void assertTritiumError(tritium_error_code_t motor_err);
@@ -107,7 +107,7 @@ void Task_ReadTritium(void *p_arg){
 	}
 }
 
-void MotorController_Restart(void){
+static void restartMotorController(void){
 	CANDATA_t resetmsg = {0};
 	resetmsg.ID = MOTOR_RESET;
 	CANbus_Send(resetmsg, true, MOTORCAN);
@@ -132,8 +132,8 @@ float Motor_Velocity_Get(){ //getter function for motor velocity
  * @brief A callback function to be run by the main assertTaskError function for hall sensor errors
  * restart the motor if the number of hall errors is still less than the RESTART_THRESHOLD.
  */ 
-static inline void handler_Tritium_HallError(void) {
-	MotorController_Restart(); 
+static inline void handler_ReadTritium_HallError(void) {
+	restartMotorController(); 
 }
 
 
@@ -156,7 +156,7 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 		return;
 	}
 
-	//try to restart the motor a few times and then fail out
+	// If it's a hall sensor error, try to restart the motor a few times and then fail out
 	if(++hall_fault_cnt > RESTART_THRESHOLD){  
 		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
 		assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
@@ -164,7 +164,7 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 	} 
 	// Try restarting the motor
 	// Assert a recoverable error that will run the motor restart callback function
-	assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, handler_Tritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV); 
+	assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV); 
 	
 	Error_ReadTritium = T_NONE; // Clear the error after handling it
 }
