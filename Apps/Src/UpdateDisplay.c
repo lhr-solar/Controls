@@ -427,7 +427,7 @@ static void handler_UpdateDisplay_ShowError() {
 
 	Error_UpdateDisplay = (error_code_t)err; // Store the error code for inspection
 
-	if (err == DISPLAY_ERR_NONE) return; // No error, return
+	if (err == UPDATEDISPLAY_ERR_NONE) return; // No error, return
     
     disp_error_cnt++;
 
