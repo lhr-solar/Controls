@@ -9,7 +9,7 @@
 //status limit flag masks
 #define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
 #define MAX_CAN_LEN 8
-#define RESTART_THRESHOLD 3	// Number of times to restart before asserting a nonrecoverable error
+#define MOTOR_RESTART_THRESHOLD 3	// Number of times to restart before asserting a nonrecoverable error
 
 
 tritium_error_code_t Motor_FaultBitmap = T_NONE; //initialized to no error, changed when the motor asserts an error
@@ -130,7 +130,7 @@ float Motor_Velocity_Get(){ //getter function for motor velocity
 
 /**
  * @brief A callback function to be run by the main assertTaskError function for hall sensor errors
- * restart the motor if the number of hall errors is still less than the RESTART_THRESHOLD.
+ * restart the motor if the number of hall errors is still less than the MOTOR_RESTART_THRESHOLD.
  */ 
 static inline void handler_ReadTritium_HallError(void) {
 	restartMotorController(); 
@@ -140,7 +140,7 @@ static inline void handler_ReadTritium_HallError(void) {
 /**
  * @brief   Assert a Tritium error by checking Motor_FaultBitmap
  * and asserting the error with its handler callback if one exists.
- *  Can result in restarting the motor (while < RESTART_THRESHOLD number of hall sensor errors)
+ *  Can result in restarting the motor (while < MOTOR_RESTART_THRESHOLD number of hall sensor errors)
  * or locking the scheduler and entering a nonrecoverable fault (all other cases)
  * @param   motor_err Bitmap with motor error codes to check
  */
@@ -157,7 +157,7 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 	}
 
 	// If it's a hall sensor error, try to restart the motor a few times and then fail out
-	if(++hall_fault_cnt > RESTART_THRESHOLD){  
+	if(++hall_fault_cnt > MOTOR_RESTART_THRESHOLD){  
 		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
 		assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;

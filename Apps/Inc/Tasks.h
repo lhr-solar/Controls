@@ -171,8 +171,8 @@ extern error_code_t Error_UpdateDisplay;
 
 // Scheduler lock parameter option for asserting a task error
 typedef enum {
-    OPT_LOCK_SCHED = false,
-    OPT_NO_LOCK_SCHED = true
+    OPT_NO_LOCK_SCHED,
+    OPT_LOCK_SCHED
 } error_scheduler_lock_opt_t;
 
 // Recoverable/nonrecoverable parameter option for asserting a task error
