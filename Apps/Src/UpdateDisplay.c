@@ -421,7 +421,8 @@ static void handler_UpdateDisplay_ShowError() {
  * Stores the error code, calls the main assertion function 
  * and runs a callback function as a handler to restart the display or show the error.
  * @param   err variable with display error codes
- */static void assertUpdateDisplayError(UpdateDisplayError_t err){
+ */
+ static void assertUpdateDisplayError(UpdateDisplayError_t err){
 	static uint8_t disp_error_cnt = 0; // Track the number of display errors, doesn't ever reset
 
 	Error_UpdateDisplay = (error_code_t)err; // Store the error code for inspection
