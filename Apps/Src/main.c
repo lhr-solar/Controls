@@ -174,10 +174,7 @@ void Task_Init(void *p_arg){
     assertOSError(OS_MAIN_LOC, err);
 
 
-    Minion_Error_t merr;
     while(1){
-        Contactors_Set(MOTOR_CONTACTOR, Minion_Read_Pin(IGN_2, &merr), true); //turn on the contactor if the ign switch lets us
-        assertOSError(OS_MINIONS_LOC, err);
-        OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        CPU_WaitForInt();
     }
 }

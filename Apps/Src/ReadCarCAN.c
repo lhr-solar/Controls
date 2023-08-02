@@ -118,22 +118,25 @@ static void setPrechargeComplete(void *p_tmr, void *p_arg){
 static void updateArrayContactor(void){
     Minion_Error_t Merr;
 
-    arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
+    arrayIgnitionStatus = !Minion_Read_Pin(IGN_1, &Merr); // Negative logic
     
     // Array Contactor is turned off if Ignition 1 is off else
-    if(arrayIgnitionStatus == false){
+    if(!arrayIgnitionStatus){
         Contactors_Set(ARRAY_CONTACTOR, OFF, true);
         UpdateDisplay_SetArray(false);
     }
     // If charge has been disabled during precharge, we don't want to turn on the array contactor immediately after
-    else if(prechargeComplete == true && chargeEnable == true){
+    else if(prechargeComplete && chargeEnable){
+        prechargeComplete = false; // Set precharge complete variable to false if precharge happens again
         Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
-        UpdateDisplay_SetArray(true);
+        UpdateDisplay_SetArray(Contactors_Get(ARRAY_CONTACTOR));
     }
-        
-    prechargeComplete = false; // Set precharge complete variable to false if precharge happens again
 
-};
+    // If Ignition 2 is on, motor contactor should be in the same state as array contactor
+    if (!Minion_Read_Pin(IGN_2, &Merr)) {
+        Contactors_Set(MOTOR_CONTACTOR, Contactors_Get(ARRAY_CONTACTOR), false);
+    }
+}
 
 void Task_ReadCarCAN(void *p_arg){
     OS_ERR err;
