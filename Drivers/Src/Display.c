@@ -97,7 +97,7 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Error(os_error_loc_t osErrCode, uint8_t faultCode){
+DisplayError_t Display_Error(os_error_loc_t osErrCode, error_code_t faultCode){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
 	char faultPage[7] = "page 2";
@@ -109,8 +109,8 @@ DisplayError_t Display_Error(os_error_loc_t osErrCode, uint8_t faultCode){
 	BSP_UART_Write(DISP_OUT, setOSCode, strlen(setOSCode));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
-	char setFaultCode[18];
-	sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+	char setFaultCode[20];
+	sprintf(setFaultCode, "%s\"%04x\"", "faulterr.txt=", (uint16_t)faultCode);
 	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 

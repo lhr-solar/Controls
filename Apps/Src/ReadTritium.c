@@ -140,30 +140,33 @@ static inline void handler_ReadTritium_HallError(void) {
 /**
  * @brief   Assert a Tritium error by checking Motor_FaultBitmap
  * and asserting the error with its handler callback if one exists.
- *  Can result in restarting the motor (while < MOTOR_RESTART_THRESHOLD number of hall sensor errors)
+ *  Can result in restarting the motor (for hall sensor errors while less than MOTOR_RESTART_THRESHOLD)
  * or locking the scheduler and entering a nonrecoverable fault (all other cases)
  * @param   motor_err Bitmap with motor error codes to check
  */
 static void assertTritiumError(tritium_error_code_t motor_err){   
 	static uint8_t hall_fault_cnt = 0; //trip counter, doesn't ever reset
 
-	Error_ReadTritium = (error_code_t)motor_err; // Store error code for inspection info
+	Error_ReadTritium = (error_code_t)motor_err; // Store error codes for inspection info
 	if(motor_err == T_NONE) return; // No error, return
-	
-	if(motor_err != T_HALL_SENSOR_ERR){
+                                                                                    // NOTE: If we had >1 recoverable errors,
+    // Hall sensor error is the only recoverable error, so any other error          // make sure a combination of them wouldn't 
+    // or combination of errors includes at least one that is nonrecoverable        // accidentally fall into this nonrecoverable bucket
+	if(motor_err != T_HALL_SENSOR_ERR){                                             
 		// Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
 		assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
 	}
 
-	// If it's a hall sensor error, try to restart the motor a few times and then fail out
-	if(++hall_fault_cnt > MOTOR_RESTART_THRESHOLD){  
+	// If it's purely a hall sensor error, try to restart the motor a few times and then fail out
+
+	if(++hall_fault_cnt > MOTOR_RESTART_THRESHOLD){  // Threshold has been exceeded
 		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
 		assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
 	} 
-	// Try restarting the motor
-	// Assert a recoverable error that will run the motor restart callback function
+
+	// Threshold hasn't been exceeded, so assert a recoverable error with the motor restart callback function
 	assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV); 
 	
 	Error_ReadTritium = T_NONE; // Clear the error after handling it

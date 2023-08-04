@@ -47,7 +47,7 @@
 /**
  * Task error variable type
 */
-typedef int16_t error_code_t;
+typedef uint16_t error_code_t;
 
 /**
  * Task Prototypes
