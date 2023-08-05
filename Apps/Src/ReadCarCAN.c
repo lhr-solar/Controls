@@ -122,19 +122,19 @@ static void updateArrayContactor(void){
     
     // Array Contactor is turned off if Ignition 1 is off else
     if(!arrayIgnitionStatus){
-        Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+        Contactors_Set(ARRAY_PRECHARGE, OFF, true);
         UpdateDisplay_SetArray(false);
     }
     // If charge has been disabled during precharge, we don't want to turn on the array contactor immediately after
     else if(prechargeComplete && chargeEnable){
         prechargeComplete = false; // Set precharge complete variable to false if precharge happens again
-        Contactors_Set(ARRAY_CONTACTOR, ON, false); // Turn on array contactor 
-        UpdateDisplay_SetArray(Contactors_Get(ARRAY_CONTACTOR));
+        Contactors_Set(ARRAY_PRECHARGE, ON, false); // Turn on array contactor 
+        UpdateDisplay_SetArray(Contactors_Get(ARRAY_PRECHARGE));
     }
 
     // If Ignition 2 is on, motor contactor should be in the same state as array contactor
     if (!Minion_Read_Pin(IGN_2, &Merr)) {
-        Contactors_Set(MOTOR_CONTACTOR, Contactors_Get(ARRAY_CONTACTOR), false);
+        Contactors_Set(MOTOR_CONTACTOR, Contactors_Get(ARRAY_PRECHARGE), false);
     }
 }
 
@@ -212,7 +212,7 @@ void Task_ReadCarCAN(void *p_arg){
                     
                     if(arrayIgnitionStatus == true                                                  // Ignition is ON
                         && chargeMsgSaturation >= SATURATION_THRESHOLD                              // Saturation Threshold has be met
-                        && (Contactors_Get(ARRAY_CONTACTOR)==OFF)                                   // Array Contactor is OFF
+                        && (Contactors_Get(ARRAY_PRECHARGE)==OFF)                                   // Array Contactor is OFF
                         && (OSTmrStateGet(&prechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){      // and precharge is currenetly not happening    
 
                             // Asserts error for OS timer start above if conditional was met
@@ -260,10 +260,10 @@ static void handler_ReadCarCAN_chargeDisable(void) {
     updateSaturation(-1);
 
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, false);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, false);
 
     // Check that the contactor was successfully turned off
-    bool ret = (bool)Contactors_Get(ARRAY_CONTACTOR);
+    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE);
 
     if(ret != false) { // Contactor failed to turn off; display the evac screen and infinite loop
          Display_Evac(SOC, SBPV);

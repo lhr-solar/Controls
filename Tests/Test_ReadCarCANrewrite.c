@@ -57,7 +57,7 @@ static void infoDump(){
     printf("\r\nCharge Message Saturation: %d", ChargeMsgSaturation_Get());
     printf("\r\nThreshold                : %s", ((ChargeMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
     printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));
-    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_CONTACTOR) == ON) ? "ON" : "OFF"));    
+    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_PRECHARGE) == ON) ? "ON" : "OFF"));    
 }
 
 Minion_Error_t mErr;
@@ -65,7 +65,7 @@ static void turnIgnitionON(){
     printf("\n\r=========== Testing: Ignition ON with Charge Enable Messages ===========");
         printf("\n\r=========== Expected output: One message with Array Contactor turned ON ===========");
         Minion_Write_Output(IGN_1, true, &mErr);                      // Ignition ON
-        while(Contactors_Get(ARRAY_CONTACTOR) != ON){ 
+        while(Contactors_Get(ARRAY_PRECHARGE) != ON){ 
             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
         }
     infoDump();
