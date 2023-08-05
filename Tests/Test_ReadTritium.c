@@ -14,7 +14,7 @@ void Task1(void *p_arg) {
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    CANbus_Init(MOTORCAN, motorCANFilterList, sizeof motorCANFilterList);
+    CANbus_Init(MOTORCAN, NULL, sizeof motorCANFilterList);
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
     BSP_UART_Init(UART_2);
     
@@ -40,11 +40,11 @@ void Task1(void *p_arg) {
     msg.idx = 0;
     memset(&msg.data, 0xa5, sizeof msg.data);
 
-    // Keep ReadTritium alive for 10 seconds
+    // Keep ReadTritium alive for 5 seconds
     for (int i=0; i<10; i++) {
         printf("Sending velocity message\n\r");
         CANbus_Send(msg, true, MOTORCAN);
-        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 
     printf("Not sending any messages\n\r");

@@ -11,7 +11,7 @@
 #define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
 #define MAX_CAN_LEN 8
 #define RESTART_THRESHOLD 3	// Number of times to restart before asserting a nonrecoverable error
-#define MOTOR_TIMEOUT_SECS 2
+#define MOTOR_TIMEOUT_SECS 1
 #define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
 
 
@@ -71,15 +71,14 @@ void Task_ReadTritium(void *p_arg){
 	OS_ERR err;
 	CANDATA_t dataBuf = {0};
 
-	OSTmrCreate(&MotorWatchdog, "Motor watchdog", 0, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
+	// Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
+	OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
 	assertOSError(OS_READ_TRITIUM_LOC, err);
 	OSTmrStart(&MotorWatchdog, &err);
 	assertOSError(OS_READ_TRITIUM_LOC, err);
 
 	while (1){
-		printf("Beginning of ReadTritium loop\n\r");
 		ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
-		printf("Successfully read CAN\n\r");
 
 		if (status == SUCCESS){
 			switch(dataBuf.ID){
