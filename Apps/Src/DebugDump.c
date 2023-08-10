@@ -16,7 +16,7 @@ extern fault_bitmap_t FaultBitmap;
 extern os_error_loc_t OSErrLocBitmap;
 
 static const char *MINIONPIN_STRING[] = {
-    FOREACH_MinionPin(GENERATE_STRING)
+    FOREACH_PIN(GENERATE_STRING)
 };
 
 static const char *CONTACTOR_STRING[] = {
@@ -60,7 +60,6 @@ static const char *FAULT_BITMAP_STRING[] = {
 
 void Task_DebugDump(void* p_arg) {
     OS_ERR err;
-    Minion_Error_t mErr;
 
     while(1){
 
@@ -72,8 +71,8 @@ void Task_DebugDump(void* p_arg) {
         printf("BRAKE: %d\n\r", brakePedal);
 
         // Get minion information
-        for(MinionPin_t pin = 0; pin < NUM_MINIONPINS-1; pin++){ // Plan to change NUM_MINIONPINS-1 -> NUM_MINIONPINS after Minion function is fixed
-            bool pinState = Minion_Read_Pin(pin, &mErr);
+        for(pin_t pin = 0; pin < NUM_PINS; pin++){
+            bool pinState = Minions_Read(pin);
             // Ignition pins are negative logic, special-case them
             printf("%s: %s\n\r", MINIONPIN_STRING[pin], pinState ^ (pin == IGN_1 || pin == IGN_2) ? "on" : "off");
         }
