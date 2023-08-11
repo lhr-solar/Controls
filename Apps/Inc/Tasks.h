@@ -182,10 +182,10 @@ typedef enum {
 } error_recov_opt_t;
 
 /**
- * @brief For use in error handling: turns off array, array precharge, and motor contactor
+ * @brief For use in error handling: opens array and motor precharge bypass contactor
  * and turns on additional brakelight to signal that a critical error happened.
 */
-void arrayMotorKill();
+void EmergencyContactorOpen();
 
 /**
  * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 

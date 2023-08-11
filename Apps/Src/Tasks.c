@@ -46,8 +46,8 @@ CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC; // Store the location of the current error
 
 // Variables to store error codes, stored and cleared in task error assert functions
-error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_ReadCarCAN = /*READCARCAN_ERR_NONE*/ 0; // TODO: change this back to the error 
+error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 
 extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
@@ -60,7 +60,7 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
-        arrayMotorKill(); // Turn off contactors and turn on the brakelight to indicate an emergency
+        EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
         Display_Error(OS_err_loc, err); // Display the location and error code
         while(1){;} //nonrecoverable
 
@@ -72,15 +72,15 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
  * and jumping to the error's specified callback function. 
  * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
  * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
- * @param faultCode the enum for the specific error that happened
+ * @param errorCode the enum for the specific error that happened
  * @param errorCallback a callback function to a handler for that specific error, 
- * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
+ * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately. Only applicable for recoverable errors- nonrecoverable errors will always lock
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
 void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
-    if (lockSched == OPT_LOCK_SCHED) { // We want this error to be handled immediately without other tasks being able to interrupt
+    if (lockSched == OPT_LOCK_SCHED || nonrecoverable == OPT_NONRECOV) { // Prevent other tasks from interrupting the handling of important (includes all nonrecoverable) errors
         OSSchedLock(&err);
         assertOSError(OS_TASKS_LOC, err);
     }
@@ -89,7 +89,7 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
     OSErrLocBitmap = errorLoc; 
 
     if (nonrecoverable == OPT_NONRECOV) {
-        arrayMotorKill(); // Apart from while loop because killing the motor is more important
+        EmergencyContactorOpen(); // Apart from while loop because killing the motor is more important
         Display_Error(errorLoc, errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
     }
@@ -100,8 +100,23 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
     }
     
 
-    if (nonrecoverable == OPT_NONRECOV) { // enter an infinite while loop
-        while(1);
+    if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
+        while(1) {
+
+            // Print the error that caused this fault
+            printf("\n\rCurrent Error Location: 0x%04x", OSErrLocBitmap);
+            printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
+
+            // Print the errors for each applications with error data
+            printf("\n\rAll application errors:\n\r");
+            printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
+            printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
+            printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
+
+            // Delay so that we're not constantly printing
+            for (int i = 0; i < 9999999; i++) {
+            }
+        }
     }
 
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
@@ -117,12 +132,11 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
 }
 
 /**
- * @brief For use in error handling: turns off array and motor contactor
+ * @brief For use in error handling: opens array and motor precharge bypass contactor
  * and turns on additional brakelight to signal that a critical error happened.
 */
-void arrayMotorKill() {
+void EmergencyContactorOpen() {
     // Array motor kill
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
 
