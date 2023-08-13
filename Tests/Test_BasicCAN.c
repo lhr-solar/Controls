@@ -27,9 +27,6 @@ void Task1(void *p_arg) {
         CANbus_Read(&out, true, CARCAN);
         printf("Read stuff\n\r");
     }
-
-    // Now let ReadTritium hit its timeout until it faults
-    OSTaskDel(NULL, &err);
 }
 
 int main(){

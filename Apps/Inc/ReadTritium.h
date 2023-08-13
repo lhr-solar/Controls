@@ -25,6 +25,7 @@ typedef enum{
     T_DESAT_FAULT_ERR = (1<<7), 
     T_MOTOR_OVER_SPEED_ERR = (1<<8), 
     T_INIT_FAIL = (1<<9), //motor controller fails to restart or initialize
+    T_MOTOR_WATCHDOG_TRIP = (1 << 15), // Defined by us, not by tritium
     T_NONE = 0x00,
 } tritium_error_code_t;
 #define NUM_TRITIUM_ERRORS 9 //9 errors, and 1 entry for no error
