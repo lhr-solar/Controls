@@ -12,7 +12,7 @@
 /**
  * Motor Error States
  * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits
- * 
+ * Defined in Wavesculptor 22 User's Manual
  */
 typedef enum{
     T_HARDWARE_OVER_CURRENT_ERR = (1<<0), 

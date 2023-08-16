@@ -161,7 +161,8 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 	Error_ReadTritium = (error_code_t)motor_err; // Store error code for inspection info
 	if(motor_err == T_NONE) return; // No error, return
 	
-	if(motor_err != T_HALL_SENSOR_ERR && motor_err != T_MOTOR_WATCHDOG_TRIP){
+    // If motor_err is hall sensor error or watchdog trip or both
+    if(~motor_err & (T_HALL_SENSOR_ERR | T_MOTOR_WATCHDOG_TRIP)){
 		// Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
 		assertTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
