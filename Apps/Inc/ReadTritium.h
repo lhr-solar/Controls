@@ -26,12 +26,6 @@ typedef enum{
     T_INIT_FAIL = (1<<9), //motor controller fails to restart or initialize
     T_NONE = 0x00,
 } tritium_error_code_t;
-#define NUM_TRITIUM_ERRORS 9 //9 errors, and 1 entry for no error
-
-/**
- * @brief Returns the current error status of the tritium controller
- */
-tritium_error_code_t MotorController_getTritiumError(void);
 
 float Motor_RPM_Get();
 float Motor_Velocity_Get();

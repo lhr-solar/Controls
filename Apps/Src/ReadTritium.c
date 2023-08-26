@@ -19,21 +19,6 @@ static float Motor_Velocity = MOTOR_STOPPED; //initialized to 0, car would be "s
 // Function prototypes
 static void assertTritiumError(tritium_error_code_t motor_err);
 
-/**
- * @brief Returns highest priority tritium error code
- * 
- */
-tritium_error_code_t MotorController_getTritiumError(void){
-    //TODO: implement for loop to parse this
-	for(int i = 0; i < NUM_TRITIUM_ERRORS; ++i){
-		if(Motor_FaultBitmap & (1<<i)){
-			return ((tritium_error_code_t)(1<<i));
-		}
-	}
-	return T_NONE;
-}
-
-
 
 
 
