@@ -43,7 +43,7 @@ enum { // Test menu enum
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_READCARCAN // Decide what to test based on test menu enum
+#define TEST_OPTION TEST_GENERAL // Decide what to test based on test menu enum
 #define READTRITIUM_OPTION T_MOTOR_OVER_SPEED_ERR // The enum for the tritium error we want to test (reference error enum)
 
 
@@ -107,7 +107,7 @@ void ExceptionTask(callback_t test_callbacks) {
     
     // Throw a nonrecoverable error
     printf("\n\n\rAsserting a nonrecoverable error");
-    assertTaskError(OS_SEND_CAN_LOC, 0x03, test_callbacks, OPT_LOCK_SCHED, OPT_NONRECOV);
+    assertTaskError(OS_SEND_CAN_LOC, 0x03, test_callbacks, OPT_NO_LOCK_SCHED, OPT_NONRECOV); //  Should still lock sched b/c nonrecoverable
     printf("\n\rTest failed: locked nonrecoverable error did not immediately result in an unrecoverable fault"); // Shouldn't print
     
     OSTaskDel(NULL, &err); // Self-delete task once finished, though we shouldn't get this far
