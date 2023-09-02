@@ -9,7 +9,6 @@
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
 
-
 static OS_MUTEX contactorsMutex;
 
 /**

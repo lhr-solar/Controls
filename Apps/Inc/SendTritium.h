@@ -10,16 +10,21 @@
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
 
+#include "common.h"
 
-#define MOTOR_MSG_PERIOD 500
-#define FSM_PERIOD 250
+#define MOTOR_MSG_PERIOD 100
+#define FSM_PERIOD 100
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
-typedef enum{
-	FORWARD_GEAR,
-	NEUTRAL_GEAR,
-	REVERSE_GEAR
+#define FOREACH_Gear(GEAR) \
+        GEAR(FORWARD_GEAR)   \
+        GEAR(NEUTRAL_GEAR)  \
+        GEAR(REVERSE_GEAR)   \
+
+typedef enum GEAR_ENUM {
+    FOREACH_Gear(GENERATE_ENUM)
+    NUM_GEARS,
 } Gear_t;
 
 // State Names
@@ -42,7 +47,7 @@ typedef struct TritiumState{
     void (*stateDecider)(void);
 } TritiumState_t;
 
-#define __TEST_SENDTRITIUM
+//#define __TEST_SENDTRITIUM
 #ifdef __TEST_SENDTRITIUM
 // Inputs
 extern bool cruiseEnable;
@@ -59,6 +64,19 @@ extern TritiumState_t state;
 extern float velocityObserved;
 extern float cruiseVelSetpoint;
 #endif
+
+// Getter functions for local variables in SendTritium.c
+EXPOSE_GETTER(bool, cruiseEnable)
+EXPOSE_GETTER(bool, cruiseSet)
+EXPOSE_GETTER(bool, onePedalEnable)
+EXPOSE_GETTER(bool, regenEnable)
+EXPOSE_GETTER(uint8_t, brakePedalPercent)
+EXPOSE_GETTER(uint8_t, accelPedalPercent)
+EXPOSE_GETTER(Gear_t, gear)
+EXPOSE_GETTER(float, currentSetpoint)
+EXPOSE_GETTER(float, velocitySetpoint)
+EXPOSE_GETTER(float, cruiseVelSetpoint)
+EXPOSE_GETTER(float, velocityObserved)
 
 #endif
 

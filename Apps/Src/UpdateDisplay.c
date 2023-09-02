@@ -71,7 +71,7 @@ const char* compStrings[15]= {
 static void assertUpdateDisplayError(UpdateDisplayError_t err){
 	OS_ERR os_err;
 
-	if(err != UPDATEDISPLAY_ERR_NONE){
+	if(err != UPDATEDISPLAY_ERR_NONE || err != UPDATEDISPLAY_ERR_NO_CHANGE){
 		FaultBitmap |= FAULT_DISPLAY;
 
 		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
@@ -134,7 +134,7 @@ static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
 	OS_ERR err;
 
 	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-  assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(OS_DISPLAY_LOC, err);
 	
 	bool success = disp_fifo_put(&msg_queue, cmd);
 
@@ -220,7 +220,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 
 		ret = UpdateDisplay_PutNext(setCmd);
 		assertUpdateDisplayError(ret);
-		return UpdateDisplay_PutNext(setCmd);
+		return ret;
 	}
 	else{
 		assertUpdateDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);

@@ -137,9 +137,8 @@ static inline void chargingEnable(void) {
  * 
 */
 static void arrayRestart(void *p_tmr, void *p_arg){
-    Minion_Error_t Merr;
     if(chargeEnable){    // If regen has been disabled during precharge, we don't want to turn on the main contactor immediately after
-        Contactors_Set(ARRAY_CONTACTOR, (Minion_Read_Pin(IGN_1, &Merr)), false); //turn on array contactor if the ign switch lets us
+        Contactors_Set(ARRAY_CONTACTOR, (Minions_Read(IGN_1)), false); //turn on array contactor if the ign switch lets us
         UpdateDisplay_SetArray(true);
     }
     // done restarting the array

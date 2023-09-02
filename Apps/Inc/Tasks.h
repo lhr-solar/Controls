@@ -35,6 +35,8 @@
 #define TASK_UPDATE_DISPLAY_PRIO            6
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_TELEMETRY_PRIO                 9
+#define TASK_DEBUG_DUMP_PRIO                10
+#define TASK_COMMAND_LINE_PRIO              11
 
 /**
  * Stack Sizes
@@ -50,7 +52,8 @@
 #define TASK_READ_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_TELEMETRY_STACK_SIZE           DEFAULT_STACK_SIZE
-
+#define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
+#define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
 
 
 /**
@@ -72,9 +75,9 @@ void Task_SendCarCAN(void* p_arg);
 
 void Task_Telemetry(void* p_arg);
 
+void Task_DebugDump(void *p_arg);
 
-
-
+void Task_CommandLine(void* p_arg);
 
 /**
  * TCBs
@@ -87,7 +90,8 @@ extern OS_TCB UpdateDisplay_TCB;
 extern OS_TCB ReadTritium_TCB;
 extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB Telemetry_TCB;
-
+extern OS_TCB DebugDump_TCB;
+extern OS_TCB CommandLine_TCB;
 
 
 /**
@@ -101,7 +105,8 @@ extern CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 extern CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
-
+extern CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
+extern CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 /**
  * Queues
@@ -113,16 +118,17 @@ extern OS_Q CANBus_MsgQ;
  */
 extern OS_SEM FaultState_Sem4;
 
+/**
+ * @brief Initialize the task switch hook
+ * Registers the hook with the RTOS
+ */
+void TaskSwHook_Init(void);
+
 
 /**
  * Global Variables
  */
 
-
-//Put all global state variables here
-extern bool UpdateVel_ToggleCruise;
-extern uint16_t SupplementalVoltage;
-extern uint32_t StateOfCharge;
 
 /**
  * OS Error States
@@ -160,6 +166,22 @@ typedef enum{
     FAULT_DISPLAY = 0x10,    // for display faults
     FAULT_BPS = 0x20,       // for if BPS trips
 } fault_bitmap_t;
+
+/**
+ * Task trace
+ * 
+ * Stores the last TASK_TRACE_LENGTH tasks that were run
+ * The most recent task is at tasks[index], the one before at tasks[index-1],
+ * wrapping back around at the beginnning
+ * 
+ */
+#define TASK_TRACE_LENGTH 8
+typedef struct {
+    OS_TCB *tasks[TASK_TRACE_LENGTH];
+    uint32_t index;
+} task_trace_t;
+
+extern task_trace_t PrevTasks;
 
 /**
  * Error variables

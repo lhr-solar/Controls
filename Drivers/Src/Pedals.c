@@ -50,5 +50,8 @@ int8_t Pedals_Read(pedal_t pedal){
          (UpperBound[pedal] - LowerBound[pedal]));
     }
 
+    if (percentage > 100) return 100;
+    if (percentage <   0) return   0;
+
     return percentage;
 }
