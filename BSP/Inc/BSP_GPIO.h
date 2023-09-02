@@ -1,20 +1,12 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file BSP_GPIO.h
- * @brief 
+ * @brief Header file for the library to interact
+ * with the GPIO ports
  * 
  * @defgroup BSP_GPIO
  * @addtogroup BSP_GPIO
  * @{
- */
-
-/** @defgroup BSP_GPIO */
-/** @addtogroup BSP_GPIO 
- * @{ */
-
-/**
- * Header file for the library to interact
- * with the GPIO ports
  */
 
 #ifndef __BSP_GPIO_H

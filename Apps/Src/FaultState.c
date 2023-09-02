@@ -3,9 +3,8 @@
  * @file FaultState.c
  * @brief 
  * 
- * @addtogroup FaultState
- * @{
  */
+
 #include "FaultState.h"
 #include "Display.h"
 #include "Contactors.h"
@@ -16,9 +15,6 @@
 #include "UpdateDisplay.h"
 #include "ReadTritium.h"
 #include "CANbus.h"
-
-/** @addtogroup FaultState 
- * @{ */
 
 #define RESTART_THRESHOLD 3
 
@@ -153,5 +149,3 @@ void Task_FaultState(void *p_arg) {
         OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
-
-/* @} */

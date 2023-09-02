@@ -8,10 +8,6 @@
  * @{
  */
 
-/** @defgroup CANBus */
-/** @addtogroup CANBus 
- * @{ */
-
 #ifndef CAN_H__
 #define CAN_H__
 

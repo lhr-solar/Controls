@@ -3,13 +3,8 @@
  * @file CANConfig.c
  * @brief 
  * 
- * @addtogroup CANConfig
- * @{
  */
 #include "CANConfig.h"
-
-/** @addtogroup CANConfig 
- * @{ */
 
 #define BYTE 1
 #define HALFWORD 2
@@ -56,6 +51,3 @@ CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
     CHARGE_ENABLE
 };
 CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {};
-
-
-/* @} */

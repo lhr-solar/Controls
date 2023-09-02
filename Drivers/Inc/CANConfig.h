@@ -11,11 +11,6 @@
 #define CAN_CONFIG
 #include "CANbus.h"
 
-/** @defgroup CANConfig */
-/** @addtogroup CANConfig 
- * @{ */
-
-
 /**
  * Filter Lists for CarCAN and MotorCAN
 */

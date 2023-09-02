@@ -6,12 +6,7 @@
  * This contains functions relevant to sending/receiving messages
  * to/from our Nextion display.
  * 
- * @addtogroup Display
- * @{
  */
-
-/** @addtogroup Display 
- * @{ */
 
 #include "Display.h"
 #include "bsp.h"   // for writing to UART
@@ -146,6 +141,3 @@ void assertDisplayError(DisplayError_t err){
 		assertOSError(OS_DISPLAY_LOC, os_err);
 	}
 }
-
-
-/* @} */

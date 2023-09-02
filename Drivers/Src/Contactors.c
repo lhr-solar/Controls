@@ -3,8 +3,6 @@
  * @file Contactors.h
  * @brief 
  * 
- * @addtogroup Contactors
- * @{
  */
 
 #include "Contactors.h"
@@ -118,5 +116,3 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
 
     return result;
 }
-
-/* @} */

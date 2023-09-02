@@ -1,22 +1,6 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Telemetry.c
- * @brief 
- * 
- * @addtogroup Telemetry
- * @{
- */
-#include "Tasks.h"
-#include "CANbus.h"
-#include "CAN_Queue.h"
-#include "Pedals.h"
-#include "Minions.h"
-#include "Contactors.h"
-#include "common.h"
-
-
-/**
- * @file SendCarCAN.c
  * @brief Implements the SendCarCAN Task
  * 
  * Creates a datatype to house the data to be read by telemetry
@@ -26,6 +10,13 @@
  * 
  */
 
+#include "Tasks.h"
+#include "CANbus.h"
+#include "CAN_Queue.h"
+#include "Pedals.h"
+#include "Minions.h"
+#include "Contactors.h"
+#include "common.h"
 
 // Make sure updated to the CarData_t and carMSGID are reflected in the CAN Bus IDs excel sheet
 
@@ -73,4 +64,3 @@ void Task_Telemetry(void *p_arg){
         }
     }
 }
-/* @} */

@@ -3,8 +3,6 @@
  * @file main.c
  * @brief 
  * 
- * @addtogroup main
- * @{
  */
 
 #include "common.h"
@@ -207,4 +205,3 @@ void Task_Init(void *p_arg){
         OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }
 }
-/* @} */

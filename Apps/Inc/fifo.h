@@ -7,6 +7,7 @@
  * @addtogroup fifo
  * @{
  */
+
 /*
  * This file implements a fifo.
  * 

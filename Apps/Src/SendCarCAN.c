@@ -1,10 +1,10 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendCarCAN.c
- * @brief 
+ * @brief Implements the SendCarCAN Task
  * 
- * @addtogroup SendCarCAN
- * @{
+ * Resends the feedback from the motor controller
+ * 
  */
 
 #include "Tasks.h"
@@ -13,20 +13,10 @@
 #include "common.h"
 
 /**
- * @file SendCarCAN.c
- * @brief Implements the SendCarCAN Task
- * 
- * Resends the feedback from the motor controller
- * 
- */
-
-/**
  * @brief Sends the feedback from the motor controller to be read by telemetry and 
  * sends pedal, switch, light, and contactor information to be read by telemetry
  * 
  * @param p_arg 
- * 
- * @addtogroup SendCarCAN 
  */
 void Task_SendCarCAN(void *p_arg){
     CANDATA_t motorMsg;
@@ -44,5 +34,3 @@ void Task_SendCarCAN(void *p_arg){
         }
     }
 }
-
-/* @} */

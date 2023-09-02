@@ -12,10 +12,6 @@
 #include <stdbool.h>
 #include "BSP_GPIO.h"
 
-/** @defgroup Minions */
-/** @addtogroup Minions 
- * @{ */
-
 typedef enum{
     MINION_ERR_NONE = 0,
     MINION_ERR_WROTE_INPUT,

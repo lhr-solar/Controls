@@ -3,11 +3,7 @@
  * @file CAN_Queue.c
  * @brief 
  * 
- * @addtogroup CAN_Queue
- * @{
  */
-/** @addtogroup CAN_Queue 
- * @{ */
 
 #include "CAN_Queue.h"
 #include "os.h"
@@ -71,5 +67,3 @@ ErrorStatus CAN_Queue_Pend(CANDATA_t *message) {
     assertOSError(OS_SEND_CAN_LOC, err);
     return result ? SUCCESS : ERROR;
 }
-
-/* @} */

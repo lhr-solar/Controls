@@ -1,8 +1,5 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-/** @addtogroup BSP_SPI 
- * @{ */
-
 #include "BSP_SPI.h"
 #include "stm32f4xx.h"
 #include "os.h"
@@ -252,5 +249,3 @@ void SPI1_IRQHandler(){
 	//make the kernel aware that the interrupt has ended
 	OSIntExit();
 }
-
-/*@}*/

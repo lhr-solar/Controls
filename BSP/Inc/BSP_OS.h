@@ -8,10 +8,6 @@
  * @{
  */
 
-/** @defgroup BSP_OS */
-/** @addtogroup BSP_OS 
- * @{ */
-
 #ifndef BSP_OS_H
 #define BSP_OS_H
 

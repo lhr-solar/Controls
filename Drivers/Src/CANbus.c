@@ -3,18 +3,12 @@
  * @file CANbus.c
  * @brief 
  * 
- * @addtogroup CANbus
- * @{
  */
 #include "CANbus.h"
 #include "config.h"
 #include "os.h"
 #include "Tasks.h"
 #include "CANConfig.h"
-
-/** @addtogroup FooGroup 
- * @{
-*/
 
 static OS_SEM CANMail_Sem4[NUM_CAN];       // sem4 to count how many sending hardware mailboxes we have left (start at 3)
 static OS_SEM CANBus_RecieveSem4[NUM_CAN]; // sem4 to count how many msgs in our recieving queue
@@ -264,6 +258,3 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
     }
     return status;
 }
-
-
-/* @} */

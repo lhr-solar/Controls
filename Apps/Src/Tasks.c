@@ -3,10 +3,7 @@
  * @file Tasks.c
  * @brief 
  * 
- * @addtogroup Tasks
- * @{
  */
-
 
 #include "Tasks.h"
 #include "FaultState.h"
@@ -64,4 +61,3 @@ void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
         EnterFaultState();
     }
 }
-/* @} */

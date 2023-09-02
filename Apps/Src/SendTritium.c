@@ -11,15 +11,6 @@
  * If the macro __TEST_SENDTRITIUM is defined prior to including SendTritium.h, relevant
  * variables will be exposed as externs for unit testing.
  * 
- * 
- * 
- * @addtogroup SendTritium
- * @{
- */
-
-/**    
- * @addtogroup SendTritium    
- * @{    
  */
 
 #include "Pedals.h"
@@ -678,4 +669,3 @@ void Task_SendTritium(void *p_arg){
         }
     }
 }
-/* @} */

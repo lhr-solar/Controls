@@ -13,10 +13,6 @@
  * @{
  */
 
-/** @defgroup UpdateDisplay */
-/** @addtogroup UpdateDisplay 
- * @{ */
-
 #ifndef __UPDATE_DISPLAY_H
 #define __UPDATE_DISPLAY_H
 

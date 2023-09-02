@@ -7,6 +7,7 @@
  * @addtogroup MedianFilter
  * @{
  */
+
 /*
  * This file implements a median filter.
  * 

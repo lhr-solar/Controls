@@ -1,8 +1,5 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-/** @addtogroup BSP_CAN 
- * @{ */
-
 #include "BSP_CAN.h"
 #include "stm32f4xx.h"
 #include "os.h"
@@ -480,5 +477,3 @@ void CAN1_TX_IRQHandler(void)
 
     OSIntExit(); // Signal to uC/OS
 }
-
-/*@}*/

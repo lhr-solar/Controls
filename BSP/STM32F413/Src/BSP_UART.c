@@ -1,8 +1,5 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-/** @addtogroup BSP_UART 
- * @{ */
-
 #include "BSP_UART.h"
 #include "stm32f4xx.h"
 #include "os.h"
@@ -317,5 +314,3 @@ void USART3_IRQHandler(void) {
 
     OSIntExit();
 }
-
-/*@}*/

@@ -3,8 +3,6 @@
  * @file ReadCarCAN.c
  * @brief 
  * 
- * @addtogroup ReadCarCAN
- * @{
  */
 
 
@@ -264,5 +262,3 @@ void Task_ReadCarCAN(void *p_arg)
         }
     }
 }
-
-/* @} */

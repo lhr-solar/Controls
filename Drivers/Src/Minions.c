@@ -3,8 +3,6 @@
  * @file Minions.c
  * @brief 
  * 
- * @addtogroup Minions
- * @{
  */
 #include "Minions.h"
 #include "os.h"
@@ -12,9 +10,6 @@
 #include <stdbool.h>
 #include "Tasks.h"
 #include "Contactors.h"
-
-/** @addtogroup Minions 
- * @{ */
 
 static OS_MUTEX OutputMutex; //Mutex to lock GPIO writes to input pins
 
@@ -64,6 +59,3 @@ bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr){
     *mErr = MINION_ERR_WROTE_INPUT;
     return false;
 }
-
-
-/* @} */

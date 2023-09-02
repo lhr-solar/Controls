@@ -1,20 +1,12 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file BSP_UART.h
- * @brief 
+ * @brief Header file for the library to interact
+ * with the UART line
  * 
  * @defgroup BSP_UART
  * @addtogroup BSP_UART
  * @{
- */
-
-/** @defgroup BSP_UART */
-/** @addtogroup BSP_UART 
- * @{ */
-
-/**
- * Header file for the library to interact
- * with the UART line
  */
 
 #ifndef __BSP_UART_H

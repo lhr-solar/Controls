@@ -7,13 +7,7 @@
  * components on our HMI design. The HMI has the ability to indicate 
  * relevant information about system status to the driver.
  * 
- * 
- * @addtogroup UpdateDisplay
- * @{
  */
-
-/** @addtogroup UpdateDisplay 
- * @{ */
 
 #include "UpdateDisplay.h"
 #include "Minions.h"
@@ -397,5 +391,3 @@ void Task_UpdateDisplay(void *p_arg) {
 			assertUpdateDisplayError(err);
     }
 }
-
-/* @} */

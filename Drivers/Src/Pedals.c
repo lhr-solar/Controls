@@ -3,12 +3,7 @@
  * @file Pedals.c
  * @brief 
  * 
- * @addtogroup Pedals
- * @{
  */
-
-/** @addtogroup Pedals 
- * @{ */
 
 #include "Pedals.h"
 
@@ -57,6 +52,3 @@ int8_t Pedals_Read(pedal_t pedal){
 
     return percentage;
 }
-
-
-/* @} */

@@ -3,10 +3,7 @@
  * @file PedalToPercent.c
  * @brief 
  * 
- * @addtogroup PedalToPercent
- * @{
  */
-
 
 /* Converts accelerator pedal percentage to a decimal */
 const float pedalToPercent[] = {
@@ -112,4 +109,3 @@ const float pedalToPercent[] = {
     0.99f,
     1.0f,
 };
-/* @} */

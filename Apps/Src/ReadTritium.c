@@ -3,8 +3,6 @@
  * @file ReadTritium.c
  * @brief 
  * 
- * @addtogroup ReadTritium
- * @{
  */
 
 #include "ReadTritium.h"
@@ -134,5 +132,3 @@ float Motor_RPM_Get(){ //getter function for motor RPM
 float Motor_Velocity_Get(){ //getter function for motor velocity
 	return Motor_Velocity;
 }
-
-/* @} */
