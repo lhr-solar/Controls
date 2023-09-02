@@ -1,3 +1,15 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Telemetry.c
+ * @brief Implements the SendCarCAN Task
+ * 
+ * Creates a datatype to house the data to be read by telemetry
+ * 
+ * Gathers the information of the pedals, lights, switches, and contactors 
+ * to be read by telemetry
+ * 
+ */
+
 #include "Tasks.h"
 #include "CANbus.h"
 #include "CAN_Queue.h"
@@ -5,7 +17,6 @@
 #include "Minions.h"
 #include "Contactors.h"
 #include "common.h"
-
 
 // Make sure updated to the CarData_t and carMSGID are reflected in the CAN Bus IDs excel sheet
 

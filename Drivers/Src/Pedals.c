@@ -1,7 +1,8 @@
 /**
- * C file that initializes the accelerator and brake pedals
- * and reads the position of the pedals to see how far the 
- * pedal has been pressed
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Pedals.c
+ * @brief 
+ * 
  */
 
 #include "Pedals.h"
@@ -54,4 +55,3 @@ int8_t Pedals_Read(pedal_t pedal){
 
     return percentage;
 }
-

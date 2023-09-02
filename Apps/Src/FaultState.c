@@ -1,3 +1,10 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file FaultState.c
+ * @brief 
+ * 
+ */
+
 #include "FaultState.h"
 #include "Display.h"
 #include "Contactors.h"

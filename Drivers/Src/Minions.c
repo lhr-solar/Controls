@@ -1,7 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
-/** @addtogroup Minions @{ */
-
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Minions.c
+ * @brief 
+ * 
+ */
 #include "Minions.h"
 
 /* Should be in sync with enum in Minions.h */
@@ -37,5 +39,3 @@ bool Minions_Write(pin_t pin, bool status){
     }
     return false;
 }
-
-/** @} */

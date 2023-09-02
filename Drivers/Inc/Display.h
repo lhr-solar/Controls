@@ -1,16 +1,16 @@
-/** 
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
- * @file Display.c
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Display.h
  * @brief Function prototypes for the display driver.
  * 
  * This contains function prototypes relevant to sending/receiving messages
  * to/from our Nextion HMI. Call assertDisplayError after calling any of the
  * functions in this application.
  * 
- * @author Ishan Deshpande (IshDeshpa)
- * @author Roie Gal (Cam0Cow)
- * @author Nathaniel Delgado (NathanielDelgado)
-*/
+ * @defgroup Display
+ * @addtogroup Display
+ * @{
+ */
 
 #ifndef __DISPLAY_H
 #define __DISPLAY_H
@@ -109,3 +109,6 @@ DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode)
 DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
 
 #endif
+
+
+/* @} */

@@ -1,4 +1,9 @@
-/* Copyright (c) 2021 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file ReadTritium.c
+ * @brief 
+ * 
+ */
 
 #include "ReadTritium.h"
 #include "CAN_Queue.h"
