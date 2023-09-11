@@ -65,6 +65,7 @@ float cruiseVelSetpoint = 0;
 // Current observed velocity
 static float velocityObserved = 0;
 
+#ifndef DEBUG
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 
@@ -79,6 +80,7 @@ static bool onePedalPrevious = false;
 
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
+#endif
 
 // FSM
 static TritiumState_t prevState; // Previous state
@@ -162,10 +164,10 @@ static float percentToFloat(uint8_t percent){
     return pedalToPercent[percent];
 }
 
+#ifdef DEBUG
 /**
  * @brief Dumps info to UART during testing
 */
-#ifdef DEBUG
 static void getName(char* nameStr, uint8_t stateNameNum){
     switch(stateNameNum){
         case FORWARD_DRIVE:
@@ -220,6 +222,7 @@ static void dumpInfo(){
 }
 #endif
 
+#ifndef DEBUG
 /**
  * @brief Reads inputs from the system
 */
@@ -287,6 +290,7 @@ static void readInputs(){
     // Get observed velocity
     velocityObserved = Motor_RPM_Get();
 }
+#endif
 
 /**
  * @brief Linearly map range of integers to another range of integers. 
@@ -315,15 +319,6 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
         uint8_t offset_out = out_min;
         return (offset_in * out_range)/in_range + offset_out;   // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
     }
-}
-
-/**
- * @brief Meters per second to rpm conversion
- * @param velocity_mps velocity in meters per second
- * @returns rpm
-*/
-inline static float mpsToRpm(float velocity_mps){
-    return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
 }
 
 // State Handlers & Deciders
@@ -641,24 +636,28 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
+    #ifndef DEBUG
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
         .data={0.0f, 0.0f},
     };
+    #endif
 
     while(1){
         prevState = state;
 
         state.stateHandler();    // do what the current state does
+        #ifndef DEBUG
         readInputs();   // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
+        #endif
         state.stateDecider();    // decide what the next state is
 
         // Drive
         #ifdef DEBUG
         dumpInfo();
-        #endif
+        #else
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
             memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
             memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
@@ -667,6 +666,7 @@ void Task_SendTritium(void *p_arg){
         }else{
             motorMsgCounter++;
         }
+        #endif
 
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);

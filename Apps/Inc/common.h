@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "config.h"
 
 /* Used for generating ENUMS */
 #define GENERATE_ENUM(ENUM) ENUM,
@@ -44,5 +45,14 @@
 typedef void (*callback_t)(void);
 
 void print_float(char *str, float f);
+
+/**
+ * @brief Meters per second to rpm conversion
+ * @param velocity_mps velocity in meters per second
+ * @returns rpm
+*/
+inline float mpsToRpm(float velocity_mps){
+    return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
+}
 
 #endif

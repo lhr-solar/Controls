@@ -67,27 +67,8 @@ machine LoadPlatformDescription $platform
 sysbus LoadELF $bin
 logLevel 3
 runMacro $show_uart_leader
-runMacro $show_uart_display
 machine StartGdbServer 3333
 connector Connect sysbus.can1 carCan
-connector Connect sysbus.can3 motorCan
-
-mach create "bps-sim"
-mach set "bps-sim"
-machine LoadPlatformDescription $platform
-sysbus LoadELF $bps_bin
-logLevel 3
-runMacro $show_uart_bps
-machine StartGdbServer 3334
-connector Connect sysbus.can1 carCan
-
-mach create "motor-sim"
-mach set "motor-sim"
-machine LoadPlatformDescription $platform
-sysbus LoadELF $motor_bin
-logLevel 3
-runMacro $show_uart_motor
-machine StartGdbServer 3335
 connector Connect sysbus.can3 motorCan
 
 mach set "ctrl-leader"
