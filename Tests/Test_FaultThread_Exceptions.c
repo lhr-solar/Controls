@@ -8,8 +8,6 @@
  * Choose the task to test using TEST_OPTION.
  * If testing ReadTritium non-Hall, choose the tritium error using READTRITIUM_OPTION.
  * Once the task enters an infinite loop, it won't ever exit and you'll need to restart the test.
- * Additionally, you'll need to use GDB to inspect the state of the system after a fault
- * since nothing else will be run or printed.
  *
  * This test is run in LoopBack mode with all messages sent and received by the LeaderBoard.
  * However, it can be run in conjunction with motor-sim and car-sim
@@ -43,8 +41,22 @@ enum { // Test menu enum
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_GENERAL // Decide what to test based on test menu enum
-#define READTRITIUM_OPTION T_MOTOR_OVER_SPEED_ERR // The enum for the tritium error we want to test (reference error enum)
+#define TEST_OPTION TEST_UPDATEDISPLAY // Decide what to test based on test menu enum
+#define READTRITIUM_OPTION T_HARDWARE_OVER_CURRENT_ERR // The enum for the tritium error we want to test (reference error enum)
+
+/* READTRITIUM_OPTION menu:
+    T_HARDWARE_OVER_CURRENT_ERR = (1<<0), 
+    T_SOFTWARE_OVER_CURRENT_ERR = (1<<1), 
+    T_DC_BUS_OVERVOLT_ERR = (1<<2), 
+    T_HALL_SENSOR_ERR = (1<<3), 
+    T_WATCHDOG_LAST_RESET_ERR = (1<<4), 
+    T_CONFIG_READ_ERR = (1<<5), 
+    T_UNDER_VOLTAGE_LOCKOUT_ERR = (1<<6), 
+    T_DESAT_FAULT_ERR = (1<<7), 
+    T_MOTOR_OVER_SPEED_ERR = (1<<8), 
+    T_INIT_FAIL = (1<<9),
+    T_NONE = 0x00,
+*/
 
 
 /*** Task components ***/
@@ -108,6 +120,7 @@ void ExceptionTask(callback_t test_callbacks) {
     // Throw a nonrecoverable error
     printf("\n\n\rAsserting a nonrecoverable error");
     assertTaskError(OS_SEND_CAN_LOC, 0x03, test_callbacks, OPT_NO_LOCK_SCHED, OPT_NONRECOV); //  Should still lock sched b/c nonrecoverable
+
     printf("\n\rTest failed: locked nonrecoverable error did not immediately result in an unrecoverable fault"); // Shouldn't print
     
     OSTaskDel(NULL, &err); // Self-delete task once finished, though we shouldn't get this far
@@ -134,7 +147,7 @@ void OSErrorTask(void* arg) {
 static void print_Contactors() {
     printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));
     printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
-    printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+    printf("\n\rArray contactor: %d", Contactors_Get(ARRAY_CONTACTOR));
 }
 
 
@@ -155,6 +168,10 @@ void Task_ManagerTask(void* arg) {
             // Successful if exception message and callback message are printed
             // and the fail message is not printed (tasks are stopped when they assert an error)
             printf("\n\n\r=========== Testing general task error assertion  ===========");
+
+            // Expected error info
+            // Current Error Location: 0x0008
+            // Current Error Code: 0x0003
         
             // Test level 1 & 2 exceptions with callbacks
             createExceptionTask(exceptionCallback); 
@@ -169,6 +186,8 @@ void Task_ManagerTask(void* arg) {
             // and doesn't print the fail message (task is stopped by asserting an error)
             printf("\n\n\r=========== Testing OS assert ===========");
 
+            //Expected output: infinite while loop with no prints
+
             createOSErrorTask();
             OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
             checkOSError(err);
@@ -179,6 +198,14 @@ void Task_ManagerTask(void* arg) {
             // Successful we enter a nonrecoverable fault and the fail message is not printed
             // Also if the motor is reset three times before the fault for a hall error
             printf("\n\n\r=========== Testing ReadTritium ===========");
+
+            // Expected error info
+            // Current Error Location: 0x004 (OS_READ_TRITIUM_LOC)
+            // Current Error Code: The value of READTRITIUM_OPTION
+
+            // Error_ReadCarCAN: 0x0000
+            // Error_ReadTritium: The value of READTRITIUM_OPTION
+            // Error_UpdateDisplay: 0x0000
 
             uint16_t tritiumError = READTRITIUM_OPTION;
             *((uint16_t*)(&canError.data[4])) = tritiumError;
@@ -301,9 +328,11 @@ void Task_ManagerTask(void* arg) {
 
 
         case TEST_UPDATEDISPLAY: 
-            // Call update display put next to overflow the queue (actual issue)
+            // Call update display put next to overflow the queue
             printf("\n\n\r=========== Test UpdateDisplay ===========");
             
+            // Expected output
+            // The display should fault, but the test will hit an infinite while loop and nothing will be printed
             createUpdateDisplay();
             
             for (int i = 0; i < 10; i++) {
@@ -316,7 +345,10 @@ void Task_ManagerTask(void* arg) {
             break;
     }
 
-    while(1){;}
+    while(1){
+        printf("Reached end of test.");
+        OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
 }
 
 
@@ -343,7 +375,8 @@ void createReadTritium(void) {
         (OS_ERR*)&err
     );
     checkOSError(err);
-    printf("\n\rCreated ReadTritium");   
+    printf("\n\rCreated ReadTritium");
+    createUpdateDisplay();   
 }
 
 // Initializes ReadCarCAN
