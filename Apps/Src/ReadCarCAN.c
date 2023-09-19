@@ -343,10 +343,10 @@ static void handler_ReadCarCAN_chargeDisable(void) {
     updateHVArraySaturation(-1);
 
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, false);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, false);
 
     // Check that the contactor was successfully turned off
-    bool ret = (bool)Contactors_Get(ARRAY_CONTACTOR);
+    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE);
 
     if(ret != false) { // Contactor failed to turn off; display the evac screen and infinite loop
          Display_Evac(SOC, SBPV);

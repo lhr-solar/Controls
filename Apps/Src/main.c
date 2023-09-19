@@ -173,8 +173,8 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
+
     while(1){
-        assertOSError(OS_MINIONS_LOC, err);
-        OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        CPU_WaitForInt();
     }
 }
