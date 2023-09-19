@@ -132,8 +132,8 @@ void OSErrorTask(void* arg) {
 
 // Helper function to see the state of the contactors
 static void print_Contactors() {
-    printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTACTOR));
-    printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_PRECHARGE));
+    printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_BYPASS_PRECHARGE_CONTACTOR));
+    printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR));
     printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
 }
 
@@ -281,8 +281,8 @@ void Task_ManagerTask(void* arg) {
 
             // Turn on contactors so we can see if they get turned off by the error assertion
             Contactors_Set(ARRAY_CONTACTOR, ON, true);
-            Contactors_Set(MOTOR_CONTACTOR, ON, true);
-            Contactors_Set(ARRAY_PRECHARGE, ON, true); // Although BPS has control of the precharge contactor
+            Contactors_Set(MOTOR_BYPASS_PRECHARGE_CONTACTOR, ON, true);
+            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Although BPS has control of the precharge contactor
 
             print_Contactors(); // See the state of the contactors before we send the trip message
 

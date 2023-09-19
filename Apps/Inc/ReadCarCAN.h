@@ -9,7 +9,7 @@
 
 #include "CANbus.h"
 
-#define SAT_BUF_LENGTH 5
+#define SAT_BUF_LENGTH 5 // need this to be in this file?
 
 /**
  * Error types

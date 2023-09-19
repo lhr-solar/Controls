@@ -13,8 +13,8 @@ typedef enum{
 //if changed, PINS_LOOKARR should be changed in Minions.c
 typedef enum{
     //inputs
-    IGN_1,          // Array ignition switch
-    IGN_2,          // Motor ignition switch
+    IGN_1,          // Array Bypass Contactor ignition switch
+    IGN_2,          // Motor Controller Bypass Conactor ignition switch
     REGEN_SW,
     FOR_SW,
     REV_SW,

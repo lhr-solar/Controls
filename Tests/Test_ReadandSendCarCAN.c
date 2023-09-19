@@ -20,7 +20,7 @@ void Task_EnableContactors(void *p_arg) {
     CANbus_Init();
     Contactors_Init();
     Contactors_Enable(ARRAY_CONTACTOR);
-    Contactors_Enable(ARRAY_PRECHARGE);
+    Contactors_Enable(ARRAY_BYPASS_PRECHARGE_CONTACTOR);
 
     CAN_Queue_Init();
 

@@ -20,8 +20,8 @@ void Task1(){
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     Contactors_Init();
     Contactors_Enable(ARRAY_CONTACTOR);
-    Contactors_Enable(MOTOR_CONTACTOR);
-    Contactors_Enable(ARRAY_PRECHARGE);
+    Contactors_Enable(MOTOR_BYPASS_PRECHARGE_CONTACTOR);
+    Contactors_Enable(ARRAY_BYPASS_PRECHARGE_CONTACTOR);
     CANbus_Init(CARCAN, &carCANFilterList, CARCAN_FILTER_SIZE);
     Display_Init();
     UpdateDisplay_Init();

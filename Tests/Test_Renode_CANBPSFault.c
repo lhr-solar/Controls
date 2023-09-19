@@ -28,7 +28,7 @@ void Task1(void *p_arg){
     // Enable contactors for ReadCarCAN to flip them
     Contactors_Init();
     Contactors_Enable(ARRAY_CONTACTOR);
-    Contactors_Enable(ARRAY_PRECHARGE);
+    Contactors_Enable(ARRAY_BYPASS_PRECHARGE_CONTACTOR);
 
     Display_Init();
     UpdateDisplay_Init();

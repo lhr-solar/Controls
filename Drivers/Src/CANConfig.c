@@ -13,8 +13,9 @@
  */
 const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[BPS_TRIP]						= {NOIDX, DOUBLE}, /**	   BPS_TRIP						   **/
-	[BPS_ALL_CLEAR]					= {NOIDX, DOUBLE}, /**     BPS_ALL_CLEAR				   **/
-	[BPS_CONTACTOR_STATE]			= {NOIDX, DOUBLE}, /**	   BPS_CONTACTOR_STATE			   **/
+	[BPS_CONTACTOR]			= {NOIDX, DOUBLE}, /**	   BPS_CONTACTOR		   **/
+	//[BPS_ALL_CLEAR]					= {NOIDX, DOUBLE}, /**     BPS_ALL_CLEAR				   **/
+	//[BPS_CONTACTOR_STATE]			= {NOIDX, DOUBLE}, /**	   BPS_CONTACTOR_STATE			   **/
 	[STATE_OF_CHARGE] 				= {NOIDX, DOUBLE}, /**     STATE_OF_CHARGE                 **/
 	[SUPPLEMENTAL_VOLTAGE] 			= {NOIDX, DOUBLE}, /**     SUPPLEMENTAL_VOLTAGE            **/
 	[CHARGE_ENABLE] 				= {NOIDX, DOUBLE}, /**     CHARGE_ENABLE                   **/
