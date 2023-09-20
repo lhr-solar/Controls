@@ -170,23 +170,24 @@ static void updatePrechargeContactors(void){
     // Array Contactor is turned off if Ignition 1 is off else
     if(motorControllerIgnitionStatus == false){
         Contactors_Set(MOTOR_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // need to confirm the GPIO pins.
-        UpdateDisplay_SetArray(false);
+        UpdateDisplay_SetMotor(false);
     }else if(arrayContactorIgnitionStatus == false){
-            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true);
-            UpdateDisplay_SetArray(false);
+        Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true);
+        UpdateDisplay_SetArray(false);
     }
-    // If charge has been disabled during precharge, we don't want to turn on the array contactor immediately after
     else if(arrayBypassPrechargeComplete == true && chargeEnable == true){
         Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, false); // Turn on array contactor 
         UpdateDisplay_SetArray(true);
+    }else if(motorControllerBypassPrechargeComplete == true && HVPlusMinusChargeMsgSaturation > MOTOR_SATURATION_THRESHOLD){
+        Contactors_Set(MOTOR_BYPASS_PRECHARGE_CONTACTOR, ON, false); // Turn on array contactor 
+        UpdateDisplay_SetMotor(true);
     }
         
     arrayBypassPrechargeComplete = false; // Set precharge complete variable to false if precharge happens again
 };
 
 /**
- * @brief Disables Array Precharge Bypass Contactor (APBC) by asserting an error. 
- *        Also updates display for APBC to be open.
+ * @brief Disables Array Precharge Bypass Contactor (APBC) by asserting an error. Also updates display for APBC to be open.
  * @param None
 */
 static void disableArrayPrechargeBypassContactor(void){
@@ -194,7 +195,6 @@ static void disableArrayPrechargeBypassContactor(void){
     assertReadCarCANError(READCARCAN_ERR_CHARGE_DISABLE);
     // Turn off the array contactor display light
     UpdateDisplay_SetArray(false); // Can assume contactor turned off or else this won't be reached
-
 }
 
 /**
@@ -204,10 +204,10 @@ static void disableArrayPrechargeBypassContactor(void){
 static void updateArrayPrechargeBypassContactor(void){
       
     OS_ERR err;
-    if(arrayContactorIgnitionStatus == true                                                  // Ignition is ON
-        && HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD                              // Saturation Threshold has be met
-        && (Contactors_Get(ARRAY_CONTACTOR)== OFF)                                   // Array Contactor is OFF
-        && (OSTmrStateGet(&arrayBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){      // and precharge is currenetly not happening  
+    if(arrayContactorIgnitionStatus == true                                                 // Ignition is ON
+        && HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD                         // Saturation Threshold has be met
+        && (Contactors_Get(ARRAY_CONTACTOR)== OFF)                                          // Array Contactor is OFF
+        && (OSTmrStateGet(&arrayBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){   // and precharge is currenetly not happening  
             // Asserts error for OS timer start above if conditional was met
             assertOSError(OS_READ_CAN_LOC, err);
             // Wait to make sure precharge is finished and then restart array
@@ -288,7 +288,7 @@ void Task_ReadCarCAN(void *p_arg){
                 OSTmrStart(&canWatchTimer, &err);
                 assertOSError(OS_READ_CAN_LOC, err);
 
-                switch (dataBuf.data[0] & 0b00000011){ // Masking to get last two bits
+                switch (dataBuf.data[0] & 0b11){ // Masking to get last two bits
                     case 0b00:{
                         disableArrayPrechargeBypassContactor();
                         break;

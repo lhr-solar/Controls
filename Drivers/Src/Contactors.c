@@ -1,6 +1,5 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-
 #include "Contactors.h"
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
