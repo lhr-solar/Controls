@@ -6,10 +6,13 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
-
 #include "CANbus.h"
 
-#define SAT_BUF_LENGTH 5 // need this to be in this file?
+#define SAT_BUF_LENGTH 5 
+
+// Precharge Delay times in seconds
+#define PRECHARGE_MOTOR_DELAY 7     // 7 Seconds, need to change
+#define PRECHARGE_ARRAY_DELAY 2     // 2 Seconds, need to change
 
 /**
  * Error types

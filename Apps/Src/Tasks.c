@@ -59,8 +59,8 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
         printf("\n\rOS Error code %d", err);
         BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
         
-        BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
-        BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
+        BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, OFF);
+        BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, OFF);
         while(1){;} //nonrecoverable
 
     }
@@ -121,9 +121,9 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
 */
 void arrayMotorKill() {
     // Array motor kill
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, OFF);
 
     // Turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);

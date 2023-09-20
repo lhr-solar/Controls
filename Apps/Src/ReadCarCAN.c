@@ -16,7 +16,9 @@
 // timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) //1000 for ms -> s conversion
-#define PRECHARGE_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
+
+#define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
+#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS (PRECHARGE_MOTOR_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
 
 // CAN watchdog timer variable
 static OS_TMR canWatchTimer;
@@ -239,7 +241,7 @@ void Task_ReadCarCAN(void *p_arg){
         &arrayBypassPrechargeDlyTimer,
         "Array Bypass Precharge Delay Timer",
         0,
-        PRECHARGE_DLY_TMR_TS,
+        ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS,
         OS_OPT_TMR_ONE_SHOT,
         setArrayBypassPrechargeComplete,
         NULL,
@@ -251,7 +253,7 @@ void Task_ReadCarCAN(void *p_arg){
         &motorControllerBypassPrechargeDlyTimer,
         "Motor Controller Bypass Precharge Delay Timer",
         0,
-        PRECHARGE_DLY_TMR_TS,
+        MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS,
         OS_OPT_TMR_ONE_SHOT,
         setMotorControllerBypassPrechargeComplete,
         NULL,
@@ -343,7 +345,7 @@ static void handler_ReadCarCAN_chargeDisable(void) {
     updateHVArraySaturation(-1);
 
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, false);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
 
     // Check that the contactor was successfully turned off
     bool ret = (bool)Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR);
