@@ -14,7 +14,7 @@ TEST_LEADER = none
 TEST_MOTOR = none
 TEST_CAR = none
 
-DEBUG = 1
+DEBUG = 0
 export DEBUG
 
 LEADER = controls-leader
