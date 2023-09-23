@@ -332,7 +332,7 @@ void Task_ManagerTask(void* arg) {
             printf("\n\n\r=========== Test UpdateDisplay ===========");
             
             // Expected output
-            // The display should fault, but the test will hit an infinite while loop and nothing will be printed
+            // The display should reset, and then the test will hit an infinite while loop.
             createUpdateDisplay();
             
             for (int i = 0; i < 10; i++) {
@@ -346,7 +346,7 @@ void Task_ManagerTask(void* arg) {
     }
 
     while(1){
-        printf("Reached end of test.");
+        printf("\n\rReached end of test.");
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 }
