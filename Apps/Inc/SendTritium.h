@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+// #define SENDTRITIUM_PRINT_MES
+
 #define MOTOR_MSG_PERIOD 100
 #define FSM_PERIOD 100
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
@@ -53,7 +55,7 @@ EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
 
 // Setter functions for local variables in SendTritium.c
-#ifdef DEBUG
+#ifdef SENDTRITIUM_EXPOSE_VARS
 EXPOSE_SETTER(bool, cruiseEnable)
 EXPOSE_SETTER(bool, cruiseSet)
 EXPOSE_SETTER(bool, onePedalEnable)

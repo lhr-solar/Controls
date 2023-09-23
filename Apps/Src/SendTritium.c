@@ -33,7 +33,7 @@
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f) // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
-#define BRAKE_PEDAL_THRESHOLD 5  // percent
+#define BRAKE_PEDAL_THRESHOLD 15  // percent
 #define ACCEL_PEDAL_THRESHOLD 10 // percent
 
 #define ONEPEDAL_BRAKE_THRESHOLD 25 // percent
@@ -65,9 +65,10 @@ float cruiseVelSetpoint = 0;
 // Current observed velocity
 static float velocityObserved = 0;
 
-#ifndef DEBUG
+#ifndef SENDTRITIUM_PRINT_MES
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
+#endif
 
 // Debouncing counters
 static uint8_t onePedalCounter = 0;
@@ -80,7 +81,6 @@ static bool onePedalPrevious = false;
 
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
-#endif
 
 // FSM
 static TritiumState_t prevState; // Previous state
@@ -101,7 +101,7 @@ GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
 
 // Setter functions for local variables in SendTritium.c
-#ifdef DEBUG
+#ifdef SENDTRITIUM_EXPOSE_VARS
 SETTER(bool, cruiseEnable)
 SETTER(bool, cruiseSet)
 SETTER(bool, onePedalEnable)
@@ -164,7 +164,7 @@ static float percentToFloat(uint8_t percent){
     return pedalToPercent[percent];
 }
 
-#ifdef DEBUG
+#ifdef SENDTRITIUM_PRINT_MES
 /**
  * @brief Dumps info to UART during testing
 */
@@ -222,7 +222,7 @@ static void dumpInfo(){
 }
 #endif
 
-#ifndef DEBUG
+#ifndef SENDTRITIUM_EXPOSE_VARS
 /**
  * @brief Reads inputs from the system
 */
@@ -636,7 +636,7 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
-    #ifndef DEBUG
+    #ifndef SENDTRITIUM_PRINT_MES
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
@@ -648,14 +648,14 @@ void Task_SendTritium(void *p_arg){
         prevState = state;
 
         state.stateHandler();    // do what the current state does
-        #ifndef DEBUG
+        #ifndef SENDTRITIUM_EXPOSE_VARS
         readInputs();   // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
         #endif
         state.stateDecider();    // decide what the next state is
 
         // Drive
-        #ifdef DEBUG
+        #ifdef SENDTRITIUM_PRINT_MES
         dumpInfo();
         #else
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){

@@ -11,12 +11,12 @@
 // Refine in testing
 static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
     400, // Accelerator lower bound
-    2800, // Brake lower bound
+    2100, // Brake lower bound
 };
 
 static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
     900, // Accelerator upper bound
-    3100, // Brake upper bound
+    3300, // Brake upper bound
 };
 
 /**
