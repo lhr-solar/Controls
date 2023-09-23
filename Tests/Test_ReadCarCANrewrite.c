@@ -85,11 +85,11 @@ static void turnIgnitionON(){
 
 // }
 
-// static void turnIgnitionToArrayON(){
-//     printf("\n\r=========== Turn Ignition to Array ===========");
-//     Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
-//     Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array ON
-// }
+static void turnIgnitionToArrayON(){
+    printf("\n\r=========== Turn Ignition to Array ===========");
+    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
+    Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array ON
+}
 
 // static void turnIgnitionOFF(){
 //     printf("\n\r=========== Turn Ignition to OFF ===========");
@@ -98,12 +98,12 @@ static void turnIgnitionON(){
 // }
 
 
-// static void sendArrayEnableMsg(){
-//     printf("\n\r=========== Array Enable Msg Sent ===========");
-//         while(Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
-//             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
-//         }
-// }
+static void sendArrayEnableMsg(){
+    printf("\n\r=========== Array Enable Msg Sent ===========");
+        while(Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
+            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+        }
+}
 
 // static void sendMotorControllerEnableMsg(){
 //     printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
@@ -163,11 +163,9 @@ void Task1(){
                 printf("\n\r");
                 printf("\n\r=========== Testing: Ignition OFF with Charge Enable Messages ===========");
                 printf("\n\r=========== Expected output: Array contactor always OFF ===========");
-                Minion_Write_Output(IGN_1, false, &mErr); // Ignition OFF
-                for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){ 
-                    CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
-                    infoDump(); 
-                }
+                turnIgnitionToArrayON();
+                sendArrayEnableMsg();
+                infoDump();
 
                 turnIgnitionON(); // Helper to turn ignition on
                 
@@ -179,11 +177,13 @@ void Task1(){
                 Minion_Write_Output(IGN_1, false, &mErr); // Ignition OFF
                 for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){   
                     CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
-                    infoDump();
+                    
                 }
 
-                turnIgnitionON(); // Helper to turn ignition on
+                infoDump();
+                
 
+                
                 // Test case for when ignition is ON but charge disable messages are read
                 // Info dumped shows that message threshold increases but contactor is consistently off
                 printf("\n\r");

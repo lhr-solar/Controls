@@ -178,7 +178,6 @@ static void updatePrechargeContactors(void){
             Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Turn on
             UpdateDisplay_SetArray(true);
             arrayBypassPrechargeComplete = false; 
-            printf("\r\nreached ARR END\r\n");
         }
         Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); 
         UpdateDisplay_SetMotor(false);
@@ -271,7 +270,6 @@ static void updateArrayPrechargeBypassContactor(void){
             // Asserts error for OS timer start above if conditional was met
             assertOSError(OS_READ_CAN_LOC, err);
             // Wait to make sure precharge is finished and then restart array
-            printf("\r\nreached 273\r\n");
             OSTmrStart(&arrayBypassPrechargeDlyTimer, &err);
     }
     // Asserts error for OS timer state if conditional wasn't met
@@ -358,7 +356,6 @@ void Task_ReadCarCAN(void *p_arg){
                         updateHVArraySaturation(1);
                         updateArrayPrechargeBypassContactor();
                         updateHVPlusMinusSaturation(-1);
-                        printf("\r\nreached ARR\r\n");
                         break;
                     }      
                     case 0b10:{ // Only HV +/1 recieved enable message
