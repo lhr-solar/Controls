@@ -48,8 +48,8 @@ static CANDATA_t supp_voltage_msg = {.ID=SUPPLEMENTAL_VOLTAGE, .idx=0, .data={10
 static CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={0}};
 static CANDATA_t charge_enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b01}};
 static CANDATA_t disable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b00}};
-static CANDATA_t all_clear_enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b10}};
-static CANDATA_t enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
+//static CANDATA_t all_clear_enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b10}};
+//static CANDATA_t enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
 
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
@@ -78,46 +78,46 @@ static void turnIgnitionON(){
 }
 
 
-static void turnIgnitionToMotorON(){
-    printf("\n\r=========== Turn Ignition to Motor ===========");
-    Minion_Write_Output(IGN_2, 1, &mErr);                      // Ignition motor ON
-    Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
+// static void turnIgnitionToMotorON(){
+//     printf("\n\r=========== Turn Ignition to Motor ===========");
+//     Minion_Write_Output(IGN_2, 1, &mErr);                      // Ignition motor ON
+//     Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
 
-}
+// }
 
-static void turnIgnitionToArrayON(){
-    printf("\n\r=========== Turn Ignition to Array ===========");
-    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
-    Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array ON
-}
+// static void turnIgnitionToArrayON(){
+//     printf("\n\r=========== Turn Ignition to Array ===========");
+//     Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
+//     Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array ON
+// }
 
-static void turnIgnitionOFF(){
-    printf("\n\r=========== Turn Ignition to OFF ===========");
-    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
-    Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
-}
+// static void turnIgnitionOFF(){
+//     printf("\n\r=========== Turn Ignition to OFF ===========");
+//     Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
+//     Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
+// }
 
 
-static void sendArrayEnableMsg(){
-    printf("\n\r=========== Array Enable Msg Sent ===========");
-        while(Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
-            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
-        }
-}
+// static void sendArrayEnableMsg(){
+//     printf("\n\r=========== Array Enable Msg Sent ===========");
+//         while(Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
+//             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+//         }
+// }
 
-static void sendMotorControllerEnableMsg(){
-    printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
-        while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
-            CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
-        }
-}
+// static void sendMotorControllerEnableMsg(){
+//     printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
+//         while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
+//             CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+//         }
+// }
 
-static void sendDisableMsg(){
-    printf("\n\r=========== Motor Controller Disable Msg Sent ===========");
-        while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
-            CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
-        }
-}
+// static void sendDisableMsg(){
+//     printf("\n\r=========== Motor Controller Disable Msg Sent ===========");
+//         while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
+//             CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+//         }
+// }
 
 
 void Task1(){
@@ -178,7 +178,7 @@ void Task1(){
                 printf("\n\r=========== Expected output: Threshold goes down, array contactor always OFF===========");
                 Minion_Write_Output(IGN_1, false, &mErr); // Ignition OFF
                 for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){   
-                    CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
+                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
                     infoDump();
                 }
 
@@ -191,7 +191,7 @@ void Task1(){
                 printf("\n\r=========== Expected output: Threshold increases, array contactor always OFF ===========");
                 Minion_Write_Output(IGN_1, true, &mErr); // Ignition OFF
                 for(int i = 0; i < ARBITRARY_LOOP_NUM; i++){  
-                    CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
+                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
                     infoDump();
                 }
 
@@ -231,7 +231,7 @@ void Task1(){
 
             case TEST_HARDWARE_CHARGE_DISABLE:
                 while(1){
-                    CANbus_Send(charge_disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
+                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
                     infoDump();
                 }
                 break;
