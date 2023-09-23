@@ -25,9 +25,6 @@
 #define FIFO_NAME disp_fifo
 #include "fifo.h"
 
-// For fault handling
-#define DISPLAY_RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
-
 disp_fifo_t msg_queue;
 
 static OS_SEM DisplayQ_Sem4;    // counting semaphore for queue message availability
@@ -386,42 +383,23 @@ void Task_UpdateDisplay(void *p_arg) {
  * used if we haven't reached the restart limit and encounter an error
  */ 
 static void handler_UpdateDisplay_Restart() {
-	Display_Reset(); // Try resetting to fix the display error
+    disp_fifo_renew(&msg_queue); // Clear the message queue
+    Display_Reset(); // Try resetting to fix the display error
 }
-
-/**
- * @brief A handler callback function run by the main assertTaskErrorfunction
- * to show the error screen if we have reached the restart limit
- */ 
-static void handler_UpdateDisplay_ShowError() {
-	Display_Error(OS_DISPLAY_LOC, Error_UpdateDisplay); // Try resetting the display
-}
-
 
 /**
  * @brief Check for a display error and assert it if it exists.
  * Stores the error code, calls the main assertion function 
- * and runs a callback function as a handler to restart the display or show the error.
+ * and runs a callback function as a handler to restart the display and clear the queue.
  * @param   err variable with display error codes
  */
  static void assertUpdateDisplayError(UpdateDisplayError_t err){
-	static uint8_t disp_error_cnt = 0; // Track the number of display errors, doesn't ever reset
-
 	Error_UpdateDisplay = (error_code_t)err; // Store the error code for inspection
 
 	if (err == UPDATEDISPLAY_ERR_NONE) return; // No error, return
-    
-    disp_error_cnt++;
 
-    if (disp_error_cnt > DISPLAY_RESTART_THRESHOLD){ 
-        // Show error screen if restart attempt limit has been reached
-        assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_ShowError,
-        OPT_NO_LOCK_SCHED, OPT_RECOV);
-
-    } else { // Otherwise try resetting the display using the restart callback
-        assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,
-        OPT_NO_LOCK_SCHED, OPT_RECOV);
-    }
+    // Otherwise try resetting the display using the restart callback
+    assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
 
     Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
 }
