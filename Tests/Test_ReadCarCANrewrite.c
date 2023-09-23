@@ -46,8 +46,10 @@ static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 static CANDATA_t bps_trip_msg = {.ID=BPS_TRIP, .idx=0, .data={1}};
 static CANDATA_t supp_voltage_msg = {.ID=SUPPLEMENTAL_VOLTAGE, .idx=0, .data={100}};
 static CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={0}};
-static CANDATA_t charge_enable_msg = {.ID=CHARGE_ENABLE, .idx=0, .data={1}};
-static CANDATA_t charge_disable_msg = {.ID=CHARGE_ENABLE, .idx=0, .data={0}};
+static CANDATA_t charge_enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b01}};
+static CANDATA_t disable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b00}};
+static CANDATA_t all_clear_enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b10}};
+static CANDATA_t enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
 
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
@@ -57,24 +59,72 @@ static void infoDump(){
     printf("\r\nCharge Message Saturation: %d", ChargeMsgSaturation_Get());
     printf("\r\nThreshold                : %s", ((ChargeMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
     printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));
-    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_PRECHARGE) == ON) ? "ON" : "OFF"));    
+    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) == ON) ? "ON" : "OFF"));    
+    printf("\r\nPrecharge Complete?      : %s", ((PreChargeComplete_Get()) ? "Yes" : "No"));    
+    printf("\r\nMotor Contactor          : %s", ((Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) == ON) ? "ON" : "OFF")); 
 }
 
 Minion_Error_t mErr;
 static void turnIgnitionON(){
     printf("\n\r=========== Testing: Ignition ON with Charge Enable Messages ===========");
         printf("\n\r=========== Expected output: One message with Array Contactor turned ON ===========");
-        Minion_Write_Output(IGN_1, true, &mErr);                      // Ignition ON
-        while(Contactors_Get(ARRAY_PRECHARGE) != ON){ 
+        Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition arr ON
+        Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
+        while(Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+            //infoDump();
         }
     infoDump();
 }
+
+
+static void turnIgnitionToMotorON(){
+    printf("\n\r=========== Turn Ignition to Motor ===========");
+    Minion_Write_Output(IGN_2, 1, &mErr);                      // Ignition motor ON
+    Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
+
+}
+
+static void turnIgnitionToArrayON(){
+    printf("\n\r=========== Turn Ignition to Array ===========");
+    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
+    Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array ON
+}
+
+static void turnIgnitionOFF(){
+    printf("\n\r=========== Turn Ignition to OFF ===========");
+    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
+    Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
+}
+
+
+static void sendArrayEnableMsg(){
+    printf("\n\r=========== Array Enable Msg Sent ===========");
+        while(Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
+            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+        }
+}
+
+static void sendMotorControllerEnableMsg(){
+    printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
+        while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
+            CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+        }
+}
+
+static void sendDisableMsg(){
+    printf("\n\r=========== Motor Controller Disable Msg Sent ===========");
+        while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != ON){ 
+            CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+        }
+}
+
 
 void Task1(){
     OS_ERR err;
 
     CPU_Init();
+    Minion_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     Contactors_Init();
     CANbus_Init(CARCAN, NULL, 0);
@@ -107,7 +157,6 @@ void Task1(){
             case TEST_RENODE:
 
                 turnIgnitionON(); // Helper to turn ignition on
-
 
                 // Test case for when ignition is OFF but charge enable messages are read
                 // Info dumped to show that message threshold is reached (and maxed out) but contactor is consistently off

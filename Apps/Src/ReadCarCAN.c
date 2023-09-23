@@ -6,6 +6,7 @@
 #include "Minions.h"
 #include "os.h"
 #include "os_cfg_app.h"
+#include "config.h"
 
 // Array saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
 #define ARRAY_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
@@ -44,8 +45,8 @@ static int8_t HVPlusMinusChargeMsgSaturation = 0;
 static uint8_t HVPlusMinusMotorOldestMsgIdx = 0;
 
 // Array ignition (IGN_1) pin status
-static bool arrayContactorIgnitionStatus = false;
-// Array ignition (IGN_1) pin status
+static bool arrayIgnitionStatus = false;
+// Array ignition (IGN_2) pin status
 static bool motorControllerIgnitionStatus = false;
 
 // Boolean to indicate precharge status
@@ -73,7 +74,12 @@ int8_t ChargeMsgSaturation_Get(){
 
 // Getter function for array ignition status
 bool ArrayIgnitionStatus_Get(void){
-    return arrayContactorIgnitionStatus;
+    return arrayIgnitionStatus;
+}
+
+// Getter function for array ignition status
+bool PreChargeComplete_Get(void){
+    return arrayBypassPrechargeComplete;
 }
 
 // Getter function for SOC
@@ -103,12 +109,6 @@ static void updateHVPlusMinusSaturation(int8_t chargeMessage){
         newSaturation += HVPlusMinusChargeMsgBuffer[(HVPlusMinusMotorOldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
     }
     HVPlusMinusChargeMsgSaturation = newSaturation;
-
-    if(chargeMessage == -1){
-        chargeEnable = false;
-    }else if(HVPlusMinusChargeMsgSaturation >= MOTOR_SATURATION_THRESHOLD){
-        chargeEnable = true;
-    }
 }
 
 /**
@@ -128,6 +128,12 @@ static void updateHVArraySaturation(int8_t chargeMessage){
         newSaturation += HVArrayChargeMsgBuffer[(HVArrayOldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
     }
     HVArrayChargeMsgSaturation = newSaturation;
+
+    if(chargeMessage == -1){
+        chargeEnable = false;
+    }else if(HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD){
+        chargeEnable = true;
+    }
 }
 
 /**
@@ -164,27 +170,81 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
 static void updatePrechargeContactors(void){
     Minion_Error_t Merr;
 
-    arrayContactorIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
+    arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
     motorControllerIgnitionStatus = Minion_Read_Pin(IGN_2, &Merr);
 
-    // Array Contactor is turned off if Ignition 1 is off else
-    if(motorControllerIgnitionStatus == false){
-        Contactors_Set(MOTOR_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // need to confirm the GPIO pins.
+    if(arrayIgnitionStatus == true && motorControllerIgnitionStatus == false){
+        if(arrayBypassPrechargeComplete == true && chargeEnable == true){
+            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Turn on
+            UpdateDisplay_SetArray(true);
+            arrayBypassPrechargeComplete = false; 
+            printf("\r\nreached ARR END\r\n");
+        }
+        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); 
         UpdateDisplay_SetMotor(false);
-    }else if(arrayContactorIgnitionStatus == false){
-        Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true);
+
+    }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == true){
+        if(arrayBypassPrechargeComplete == true && chargeEnable == true){
+            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Turn off
+            UpdateDisplay_SetArray(true);
+            arrayBypassPrechargeComplete = false; 
+        }
+
+        if(motorControllerBypassPrechargeComplete == true && HVPlusMinusChargeMsgSaturation >= MOTOR_SATURATION_THRESHOLD){
+            Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, ON, true);
+            UpdateDisplay_SetMotor(true);
+        }
+    }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == false){
+        Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // Turn off
         UpdateDisplay_SetArray(false);
+
+        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // Turn off
+        UpdateDisplay_SetMotor(false);
+    }else{
+        assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
     }
-    else if(arrayBypassPrechargeComplete == true && chargeEnable == true){
-        Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, false); // Turn on array contactor 
+    
+    // Set precharge complete variable to false if precharge happens again
+    
+    motorControllerBypassPrechargeComplete = false; 
+
+}
+
+/*
+    // IGNITION is set to Array AND Motor Controller -- not possible, so assert error
+    if(arrayIgnitionStatus == true && motorControllerIgnitionStatus == true){
+        assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+        return; // Return because both PBCs have been addressed
+
+    // IGNITION SET is not set to MC, so turn off MC BPC and update display.
+    }else if(motorControllerIgnitionStatus == false){
+        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); 
+        UpdateDisplay_SetMotor(false);
+
+        // If Ignition is not set to MC and is not set to array, then turn off array BPC
+        if(arrayIgnitionStatus == false){
+            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true);
+            UpdateDisplay_SetMotor(false);
+            return; // Return because both PBCs have been addressed
+        }
+
+    // IGNITION SET is set to Motor Controller
+    }else{
+        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); 
+        UpdateDisplay_SetMotor(false);
+    }
+
+    // If array BPC has completed precharge and charging is enabled, then turn on contactor. 
+    if(arrayBypassPrechargeComplete == true && chargeEnable == true){
+        Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Turn off
         UpdateDisplay_SetArray(true);
-    }else if(motorControllerBypassPrechargeComplete == true && HVPlusMinusChargeMsgSaturation > MOTOR_SATURATION_THRESHOLD){
-        Contactors_Set(MOTOR_BYPASS_PRECHARGE_CONTACTOR, ON, false); // Turn on array contactor 
-        UpdateDisplay_SetMotor(true);
     }
-        
-    arrayBypassPrechargeComplete = false; // Set precharge complete variable to false if precharge happens again
-};
+
+    // Set precharge complete variable to false if precharge happens again
+    arrayBypassPrechargeComplete = false; 
+    motorControllerBypassPrechargeComplete = false; 
+}
+*/
 
 /**
  * @brief Disables Array Precharge Bypass Contactor (APBC) by asserting an error. Also updates display for APBC to be open.
@@ -204,18 +264,19 @@ static void disableArrayPrechargeBypassContactor(void){
 static void updateArrayPrechargeBypassContactor(void){
       
     OS_ERR err;
-    if(arrayContactorIgnitionStatus == true                                                 // Ignition is ON
+    if(arrayIgnitionStatus == true                                                 // Ignition is ON
         && HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD                         // Saturation Threshold has be met
-        && (Contactors_Get(ARRAY_CONTACTOR)== OFF)                                          // Array Contactor is OFF
+        && (Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR)== OFF)                                          // Array Contactor is OFF
         && (OSTmrStateGet(&arrayBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){   // and precharge is currenetly not happening  
             // Asserts error for OS timer start above if conditional was met
             assertOSError(OS_READ_CAN_LOC, err);
             // Wait to make sure precharge is finished and then restart array
+            printf("\r\nreached 273\r\n");
             OSTmrStart(&arrayBypassPrechargeDlyTimer, &err);
     }
     // Asserts error for OS timer state if conditional wasn't met
     assertOSError(OS_READ_CAN_LOC, err);
-    }
+}
 
 void Task_ReadCarCAN(void *p_arg){
     OS_ERR err;
@@ -240,7 +301,7 @@ void Task_ReadCarCAN(void *p_arg){
     OSTmrCreate(
         &arrayBypassPrechargeDlyTimer,
         "Array Bypass Precharge Delay Timer",
-        0,
+        0, 
         ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS,
         OS_OPT_TMR_ONE_SHOT,
         setArrayBypassPrechargeComplete,
@@ -277,43 +338,49 @@ void Task_ReadCarCAN(void *p_arg){
 
         switch(dataBuf.ID){
             case BPS_TRIP: { // BPS has a fault and we need to enter fault state
-                
                 // Assert the error to kill contactors, display evacuation message, and enter a nonrecoverable fault
                 assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
-                
-            }
-            case BPS_CONTACTOR:{
+                }
 
+            case BPS_CONTACTOR:{
                 // Acknowledge CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
                 assertOSError(OS_READ_CAN_LOC, err);
 
                 switch (dataBuf.data[0] & 0b11){ // Masking to get last two bits
-                    case 0b00:{
+
+                    case 0b00:{ // HV+/- and HV Arr did not recieve enable message
                         disableArrayPrechargeBypassContactor();
+                        updateHVPlusMinusSaturation(-1);
                         break;
                     }
-                    case 0b01:{
+                    case 0b01:{ // Only HV Arr recieved enable message
+                        updateHVArraySaturation(1);
                         updateArrayPrechargeBypassContactor();
+                        updateHVPlusMinusSaturation(-1);
+                        printf("\r\nreached ARR\r\n");
                         break;
                     }      
-                    case 0b10:{
+                    case 0b10:{ // Only HV +/1 recieved enable message
                         disableArrayPrechargeBypassContactor();
                         updateHVPlusMinusSaturation(1);
                         break;
                     }
-                    case 0b11: {
+                    case 0b11: { // Both recieved enable message
+                        updateHVArraySaturation(1);
                         updateArrayPrechargeBypassContactor();
                         updateHVPlusMinusSaturation(1);
                         break;
                     }
-                    default: {  // does it break for good?
+                    default: {  
+                        // Should not be able to reach here.
                         break;
                     }
                 }
-
+                break;
             // End of BPS Contactor Status Updates
             }
+
             case SUPPLEMENTAL_VOLTAGE: {
                 SBPV = (*(uint16_t *) &dataBuf.data);
                 UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
@@ -324,9 +391,10 @@ void Task_ReadCarCAN(void *p_arg){
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }
-            default: 
-                break;
-        }   
+        default: {   // Unhandled CAN message IDs
+                break; 
+            }   
+        }
     }
 }
 

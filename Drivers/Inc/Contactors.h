@@ -17,7 +17,7 @@
 typedef enum {
     ARRAY_CONTACTOR = 0,                // BPS
     ARRAY_BYPASS_PRECHARGE_CONTACTOR,   // Controls
-    MOTOR_BYPASS_PRECHARGE_CONTACTOR,   // Controls
+    MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR,   // Controls
     NUM_CONTACTORS
 } contactor_t;
 

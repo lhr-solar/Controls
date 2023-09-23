@@ -23,7 +23,7 @@ static void setContactor(contactor_t contactor, bool state) {
         case ARRAY_BYPASS_PRECHARGE_CONTACTOR :
             BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, state);
             break;
-        case MOTOR_BYPASS_PRECHARGE_CONTACTOR :
+        case MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR :
             BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, state);
             break;
         default:
@@ -70,7 +70,7 @@ bool Contactors_Get(contactor_t contactor) {
         case ARRAY_BYPASS_PRECHARGE_CONTACTOR :
             state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN);
             break;
-        case MOTOR_BYPASS_PRECHARGE_CONTACTOR :
+        case MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR :
             state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN);
             break;
         default:

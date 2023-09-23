@@ -11,8 +11,8 @@
 #define SAT_BUF_LENGTH 5 
 
 // Precharge Delay times in seconds
-#define PRECHARGE_MOTOR_DELAY 7     // 7 Seconds, need to change
-#define PRECHARGE_ARRAY_DELAY 2     // 2 Seconds, need to change
+#define PRECHARGE_MOTOR_DELAY 1     // 7 Seconds, need to change
+#define PRECHARGE_ARRAY_DELAY 1     // 2 Seconds, need to change
 
 /**
  * Error types
@@ -53,5 +53,8 @@ uint8_t SOC_Get(void);
  * @return Voltage in mV
 */
 uint32_t SBPV_Get(void);
+
+// Getter function for array ignition status
+bool PreChargeComplete_Get(void);
 
 #endif

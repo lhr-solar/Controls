@@ -40,7 +40,7 @@ void Task1(void *arg)
     assertOSError(OS_MAIN_LOC, err);
 
     while (1){
-        printf("Array Contactor: %d, Motor Contactor: %d\n\r", Contactors_Get(ARRAY_CONTACTOR), Contactors_Get(MOTOR_BYPASS_PRECHARGE_CONTACTOR));
+        printf("Array Contactor: %d, Motor Contactor: %d\n\r", Contactors_Get(ARRAY_CONTACTOR), Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR));
 
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
     }
