@@ -13,10 +13,11 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Which feature is being tested?
-2. Which test is used?
-3. What is the hardware configuration?
-4. What combination of inputs cause the error?
-5. What does the error look like?
+2. Which requirements are being tested
+3. Which test is used?
+4. What is the hardware configuration?
+5. What combination of inputs cause the error?
+6. What does the error look like?
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.

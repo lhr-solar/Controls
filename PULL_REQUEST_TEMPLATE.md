@@ -10,9 +10,10 @@ There are exceptions with all guidelines. As long as your decisions are justifie
 - [ ] Software feature has test associated with it
 - [ ] Software feature has documentation for it updated
 - [ ] Test provides useful information and uses relevant data to accurately represent Controls 
+- [ ] Tested on hardware
 - NOTE: If test file already exists, use that one
 - [ ] If applicable, have you added the new feature to main.c
-- [ ] Did you Have Fun?
+- [ ] Did you have fun?
 
 ## Things to Consider 
 - [ ] Even if the above are checked, is this the best way of writing my code? 
