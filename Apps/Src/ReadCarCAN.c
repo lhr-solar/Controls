@@ -72,14 +72,24 @@ int8_t ChargeMsgSaturation_Get(){
 	return HVArrayChargeMsgSaturation;
 }
 
+// Getter function for charge message saturation
+int8_t PlusMinusMsgSaturation_Get(){ 
+	return HVPlusMinusChargeMsgSaturation;
+}
+
 // Getter function for array ignition status
 bool ArrayIgnitionStatus_Get(void){
     return arrayIgnitionStatus;
 }
 
 // Getter function for array ignition status
+bool MotorControllerIgnition_Get(void){
+    return motorControllerIgnitionStatus;
+}
+
+// Getter function for array ignition status
 bool PreChargeComplete_Get(void){
-    return arrayBypassPrechargeComplete;
+    return motorControllerBypassPrechargeComplete;
 }
 
 // Getter function for SOC
@@ -90,50 +100,6 @@ uint8_t SOC_Get(){
 // Getter function for SBPV
 uint32_t SBPV_Get(){ 
 	return SBPV;
-}
-
-/**
- * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
- * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
-*/
-static void updateHVPlusMinusSaturation(int8_t chargeMessage){
-    
-    // Replace oldest message with new charge message and update index for oldest message
-    HVPlusMinusChargeMsgBuffer[HVPlusMinusMotorOldestMsgIdx] = chargeMessage;
-    HVPlusMinusMotorOldestMsgIdx = (HVPlusMinusMotorOldestMsgIdx + 1) % SAT_BUF_LENGTH;
-
-    // Calculate the new saturation value by assigning weightings from 1 to buffer length
-    // in order of oldest to newest
-    int newSaturation = 0;
-    for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++){
-        newSaturation += HVPlusMinusChargeMsgBuffer[(HVPlusMinusMotorOldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
-    }
-    HVPlusMinusChargeMsgSaturation = newSaturation;
-}
-
-/**
- * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
- * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
-*/
-static void updateHVArraySaturation(int8_t chargeMessage){
-    
-    // Replace oldest message with new charge message and update index for oldest message
-    HVArrayChargeMsgBuffer[HVArrayOldestMsgIdx] = chargeMessage;
-    HVArrayOldestMsgIdx = (HVArrayOldestMsgIdx + 1) % SAT_BUF_LENGTH;
-
-    // Calculate the new saturation value by assigning weightings from 1 to buffer length
-    // in order of oldest to newest
-    int newSaturation = 0;
-    for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++){
-        newSaturation += HVArrayChargeMsgBuffer[(HVArrayOldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
-    }
-    HVArrayChargeMsgSaturation = newSaturation;
-
-    if(chargeMessage == -1){
-        chargeEnable = false;
-    }else if(HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD){
-        chargeEnable = true;
-    }
 }
 
 /**
@@ -189,9 +155,10 @@ static void updatePrechargeContactors(void){
             arrayBypassPrechargeComplete = false; 
         }
 
-        if(motorControllerBypassPrechargeComplete == true && HVPlusMinusChargeMsgSaturation >= MOTOR_SATURATION_THRESHOLD){
+        if(motorControllerBypassPrechargeComplete == true){
             Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, ON, true);
             UpdateDisplay_SetMotor(true);
+            motorControllerBypassPrechargeComplete = false; 
         }
     }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == false){
         Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // Turn off
@@ -204,9 +171,6 @@ static void updatePrechargeContactors(void){
     }
     
     // Set precharge complete variable to false if precharge happens again
-    
-    motorControllerBypassPrechargeComplete = false; 
-
 }
 
 /*
@@ -274,6 +238,69 @@ static void updateArrayPrechargeBypassContactor(void){
     }
     // Asserts error for OS timer state if conditional wasn't met
     assertOSError(OS_READ_CAN_LOC, err);
+}
+
+static void updateMotorControllerPrechargeBypassContactor(void){
+    OS_ERR err;
+    if(motorControllerIgnitionStatus == true
+        && HVPlusMinusChargeMsgSaturation >= MOTOR_SATURATION_THRESHOLD
+        &&(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR)== OFF)
+        && (OSTmrStateGet(&motorControllerBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){
+            assertOSError(OS_READ_CAN_LOC, err);
+            OSTmrStart(&motorControllerBypassPrechargeDlyTimer, &err);
+        }
+        // Asserts error for OS timer state if conditional wasn't met
+    assertOSError(OS_READ_CAN_LOC, err);
+}
+
+/**
+ * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
+ * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
+*/
+static void updateHVArraySaturation(int8_t chargeMessage){
+    
+    // Replace oldest message with new charge message and update index for oldest message
+    HVArrayChargeMsgBuffer[HVArrayOldestMsgIdx] = chargeMessage;
+    HVArrayOldestMsgIdx = (HVArrayOldestMsgIdx + 1) % SAT_BUF_LENGTH;
+
+    // Calculate the new saturation value by assigning weightings from 1 to buffer length
+    // in order of oldest to newest
+    int newSaturation = 0;
+    for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++){
+        newSaturation += HVArrayChargeMsgBuffer[(HVArrayOldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
+    }
+    HVArrayChargeMsgSaturation = newSaturation;
+
+    if(chargeMessage == -1){
+        chargeEnable = false;
+    }else if(HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD){
+        chargeEnable = true;
+        updateArrayPrechargeBypassContactor();
+    }
+
+}
+
+/**
+ * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
+ * @param chargeMessage whether bps message was charge enable (1) or disable (-1)
+*/
+static void updateHVPlusMinusSaturation(int8_t chargeMessage){
+    
+    // Replace oldest message with new charge message and update index for oldest message
+    HVPlusMinusChargeMsgBuffer[HVPlusMinusMotorOldestMsgIdx] = chargeMessage;
+    HVPlusMinusMotorOldestMsgIdx = (HVPlusMinusMotorOldestMsgIdx + 1) % SAT_BUF_LENGTH;
+
+    // Calculate the new saturation value by assigning weightings from 1 to buffer length
+    // in order of oldest to newest
+    int newSaturation = 0;
+    for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++){
+        newSaturation += HVPlusMinusChargeMsgBuffer[(HVPlusMinusMotorOldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
+    }
+    HVPlusMinusChargeMsgSaturation = newSaturation;
+
+    if(chargeMessage == 1){
+        updateMotorControllerPrechargeBypassContactor();
+    }
 }
 
 void Task_ReadCarCAN(void *p_arg){
@@ -354,7 +381,6 @@ void Task_ReadCarCAN(void *p_arg){
                     }
                     case 0b01:{ // Only HV Arr recieved enable message
                         updateHVArraySaturation(1);
-                        updateArrayPrechargeBypassContactor();
                         updateHVPlusMinusSaturation(-1);
                         break;
                     }      
@@ -365,7 +391,6 @@ void Task_ReadCarCAN(void *p_arg){
                     }
                     case 0b11: { // Both recieved enable message
                         updateHVArraySaturation(1);
-                        updateArrayPrechargeBypassContactor();
                         updateHVPlusMinusSaturation(1);
                         break;
                     }

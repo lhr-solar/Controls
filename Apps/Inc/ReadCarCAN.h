@@ -36,11 +36,21 @@ bool ChargeEnable_Get(void);
 */
 int8_t ChargeMsgSaturation_Get(void);
 
+
+int8_t PlusMinusMsgSaturation_Get(void);
+
 /**
  * @brief Returns the value of charge message saturation
  * @return Whether array ignition is ON/OFF
 */
 bool ArrayIgnitionStatus_Get(void);
+
+
+/**
+ * @brief Returns the value of charge message saturation
+ * @return Whether array ignition is ON/OFF
+*/
+bool MotorControllerIgnition_Get(void);
 
 /**
  * @brief Returns the value of state of charge
