@@ -31,8 +31,8 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
 	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
 	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
 	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
-	[CONTROL_MODE] 				    = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
-    [IO_STATE]                      = {NOIDX, BYTE  }, /**     CONTROL_MODE			           **/
+	[IO_STATE] 				        = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
+    [CONTROL_MODE]                  = {NOIDX, BYTE  }, /**     CONTROL_MODE			           **/
 };
 
 /**
@@ -43,6 +43,8 @@ CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
     BPS_TRIP, 
     STATE_OF_CHARGE,
     SUPPLEMENTAL_VOLTAGE,
-    CHARGE_ENABLE
+    CHARGE_ENABLE,
+    IO_STATE,
+    CONTROL_MODE
 };
 CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {};

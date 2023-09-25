@@ -79,11 +79,10 @@ void Task_Init(void *p_arg){
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    Minion_Init();
+    Minions_Init();
 
     // Initialize applications
     UpdateDisplay_Init();
-    SendCarCAN_Init();
 
     // Initialize FaultState
     OSTaskCreate(

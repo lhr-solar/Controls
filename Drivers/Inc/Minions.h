@@ -6,7 +6,7 @@
 
 // used to index into lookup table
 // if changed, PINS_LOOKARR should be changed in Minions.c
-#define FOREACH_MinionPin(PIN) \
+#define FOREACH_PIN(PIN) \
         PIN(IGN_1),   \
         PIN(IGN_2),  \
         PIN(REGEN_SW),   \

@@ -34,8 +34,12 @@
 #define XSTR(STRING) GENERATE_STRING(STRING)
 #define INDIRECT(VAL) VAL
 
+// Length of array
+#define LENOF(ARR) (sizeof(ARR)/sizeof(ARR[0]))
+
 typedef void (*callback_t)(void);
 
 void print_float(char *str, float f);
+void print_bin(char *str, uint32_t i);
 
 #endif
