@@ -14,6 +14,7 @@ There are exceptions with all guidelines. As long as your decisions are justifie
 - [ ] Tests have passed on hardware
 - NOTE: If test file already exists, use that one
 - [ ] If applicable, have you added the new feature to main.c
+- [ ] Tagged appropriate issue ticket on this PR
 - [ ] Did you have fun?
 
 ## Things to Consider 
