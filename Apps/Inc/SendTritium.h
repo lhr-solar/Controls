@@ -1,3 +1,12 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file SendTritium.h
+ * @brief 
+ * 
+ * @defgroup SendTritium
+ * @addtogroup SendTritium
+ * @{
+ */
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
 
@@ -71,3 +80,6 @@ EXPOSE_SETTER(float, velocitySetpoint)
 #endif
 
 #endif
+
+
+/* @} */
