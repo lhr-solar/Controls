@@ -148,8 +148,8 @@ spi2i2s2: SPI.STM32SPI @ sysbus 0x40003800
 
 i2s2ext: SPI.STM32SPI @ sysbus 0x40003400
 
-// iwdg: Timers.STM32F4_IndependentWatchdog @ sysbus 0x40003000
-    // frequency: 32000
+iwdg: Timers.STM32F4_IndependentWatchdog @ sysbus 0x40003000
+    frequency: 32000
     // windowOption: false
     // defaultPrescaler: 0x4
 
