@@ -18,6 +18,7 @@ Steps to reproduce the behavior:
 4. What is the hardware configuration?
 5. What combination of inputs cause the error?
 6. What does the error look like?
+7. Does this issue already exist?
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.

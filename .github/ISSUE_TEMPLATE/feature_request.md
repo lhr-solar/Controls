@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the problem this feature will solve**
-A clear and concise description of what the problem is.
+A clear and concise description of what the problem is. Please make sure the issue for this feature does not already exist.
 
 **Describe the proposed solution**
 A clear and concise description of what you want to happen.
