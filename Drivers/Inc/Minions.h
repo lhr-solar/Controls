@@ -1,8 +1,20 @@
-#ifndef MINION_H
-#define MINION_H
+/* Copyright (c) 2020 UT Longhorn Racing Solar */
+
+/**
+ * @defgroup Minions
+ * 
+ * This modules allows us to use GPIO more easily 
+ * for our application's purposes
+ * 
+ */
+
+/** @addtogroup Minions @{ */
+
+#ifndef MINIONS_H
+#define MINIONS_H
+#include "common.h"
 #include <stdbool.h>
 #include "BSP_GPIO.h"
-#include "common.h"
 
 // used to index into lookup table
 // if changed, PINS_LOOKARR should be changed in Minions.c
@@ -17,47 +29,41 @@
         PIN(BRAKELIGHT),  \
 
 typedef enum MINIONPIN_ENUM {
-    FOREACH_MinionPin(GENERATE_ENUM)
-    NUM_MINIONPINS,
-} MinionPin_t;
+    FOREACH_PIN(GENERATE_ENUM)
+    NUM_PINS,
+} pin_t;
 
-
-typedef enum{
-    MINION_ERR_NONE = 0,
-    MINION_ERR_WROTE_INPUT,
-} Minion_Error_t;
-
-
-typedef struct PinInfo{
+typedef struct {
     uint16_t pinMask;
     port_t port;
-    direction_t direction; //0 for input, 1 for output     
-} PinInfo_t;
-
-
-/**
- * @brief Initializes input switches, output pins, and output mutex
- * 
- */
-void Minion_Init(void);
+    direction_t direction;
+} pinInfo_t;
 
 /**
- * @brief Reads current state of specified input pin
+ * @brief Initializes digital I/O
  * 
- * @param pin specific pin to be read 
- * @return true
- * @return false *NOTE* If output pin is passed, will exit 
  */
-bool Minion_Read_Pin(MinionPin_t pin, Minion_Error_t* err);
+void Minions_Init(void);
 
 /**
- * @brief Writes given status to a specified output pin. Locks writing to all output pins
+ * @brief Reads the status of a pin
  * 
- * @param pin specific pin to be written to 
- * @param status state of pin (0 or 1)
- * @return false if pin is not an output pin, true if it is
+ * @param pin 
+ * @return true is high
+ * @return false is low
  */
-bool Minion_Write_Output(MinionPin_t pin, bool status, Minion_Error_t* mErr);
+bool Minions_Read(pin_t pin);
 
+/**
+ * @brief Updates the status of a pin
+ * 
+ * @param pin 
+ * @param status 
+ * @return true is fail (wrote to an input)
+ * @return false is success (wrote to an output)
+ */
+bool Minions_Write(pin_t pin, bool status);
 
 #endif 
+
+/** @} */

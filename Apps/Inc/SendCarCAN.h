@@ -1,6 +1,7 @@
 #ifndef __SENDCARCAN_H
 #define __SENDCARCAN_H
 
+#include "CANbus.h"
 
 /**
  * @brief Initialize SendCarCAN

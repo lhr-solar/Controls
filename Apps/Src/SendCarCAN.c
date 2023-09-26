@@ -110,9 +110,8 @@ static void putIOState(void *p_tmr, void *p_arg){
 
     // Get minion information
     message.data[2] = 0;
-    Minion_Error_t M_err;
-    for(MinionPin_t pin = 0; pin < NUM_MINIONPINS; pin++){
-        bool pinState = Minion_Read_Pin(pin, &M_err);
+    for(pin_t pin = 0; pin < NUM_PINS; pin++){
+        bool pinState = Minions_Read(pin);
         message.data[2] |= pinState << pin;
     }
     

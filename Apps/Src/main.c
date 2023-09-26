@@ -174,10 +174,27 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
+    // Initialize SendCarCAN
+    OSTaskCreate(
+        (OS_TCB*)&SendCarCAN_TCB,
+        (CPU_CHAR*)"SendCarCAN",
+        (OS_TASK_PTR)Task_SendCarCAN,
+        (void*)NULL,
+        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
+        (CPU_STK*)SendCarCAN_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
 
-    Minion_Error_t merr;
+    
     while(1){
-        Contactors_Set(MOTOR_CONTACTOR, Minion_Read_Pin(IGN_2, &merr), true); //turn on the contactor if the ign switch lets us
+        Contactors_Set(MOTOR_CONTACTOR, Minions_Read(IGN_2), true); //turn on the contactor if the ign switch lets us
         assertOSError(OS_MINIONS_LOC, err);
         OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }
