@@ -13,7 +13,7 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Which feature is being tested?
-2. Which requirements are being tested
+2. Which requirements are being tested?
 3. Which test is used?
 4. What is the hardware configuration?
 5. What combination of inputs cause the error?

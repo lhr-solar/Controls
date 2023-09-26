@@ -8,12 +8,14 @@ There are exceptions with all guidelines. As long as your decisions are justifie
 - [ ] Presented/discussed in some capacity with others on the Controls team
 - [ ] Code Build checks pass 
 - [ ] No merge conflicts 
-- [ ] Software feature has test associated with it
 - [ ] Software feature has documentation for it updated in both ReadTheDocs and the comments
-- [ ] Test provides useful information and uses relevant data to accurately represent Controls 
-- [ ] Tests have passed on hardware
-- NOTE: If test file already exists, use that one
-- [ ] If applicable, have you added the new feature to main.c
+- [ ] Software feature has documentation for it updated
+- Testing
+    - [ ] Software feature has test associated with it
+    - [ ] Test provides useful information and uses relevant data to accurately represent Controls 
+    - [ ] Tested on hardware
+    - NOTE: If test file already exists, use that one
+- [ ] If applicable, have you added the new feature to main.c?
 - [ ] Tagged appropriate issue ticket on this PR
 - [ ] Did you have fun?
 
