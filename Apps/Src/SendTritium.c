@@ -388,7 +388,7 @@ static void ReverseDriveHandler(){
         UpdateDisplay_SetGear(DISP_REVERSE);
     }
     velocitySetpoint = -MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX * 0.2)); // Limit max motor speed to 20% in reverse 
     cruiseEnable = false;
     onePedalEnable = false;
 }
@@ -626,7 +626,7 @@ static void BrakeDecider(){
 void Task_SendTritium(void *p_arg){
     OS_ERR err;
 
-    // Initialize current state to FORWARD_DRIVE
+    // Initialize current state to NEUTRAL_DRIVE
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
