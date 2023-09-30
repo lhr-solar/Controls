@@ -17,9 +17,11 @@
 
 
 uint16_t Motor_FaultBitmap = T_NONE;
-static float Motor_RPM = CAR_STOPPED;	//Car is stopped until velocity is read
+static float Motor_RPM = CAR_STOPPED;		//Car is stopped until velocity is read
 static float Motor_Velocity = CAR_STOPPED;	//^^^^
-static float BEMFq = CAR_STOPPED;	//^^^^
+static float Back_EMF = CAR_STOPPED;		//^^^^
+static float Bus_Current = CAR_STOPPED;		//^^^^
+static float Bus_Voltage = CAR_STOPPED;		//^^^^
 
 /**
  * @brief Returns highest priority tritium error code
@@ -88,12 +90,8 @@ void Task_ReadTritium(void *p_arg){
 				}
 				
 				case VELOCITY:{
-					// Forward (Acceleration)
                     memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
                     memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
-
-					// Backward (Regeneration)
-					memcpy(&BEMFq, &dataBuf.data[8], sizeof(float));
 
 					//Motor RPM is in bytes 0-3
 					Motor_RPM = *((float*)(&dataBuf.data[0]));
@@ -106,7 +104,24 @@ void Task_ReadTritium(void *p_arg){
 					Car_Velocity = ((Car_Velocity / 160934) * 10); //Converting from m/h to mph, multiplying by 10 to make value "larger" for displaying
 
 					UpdateDisplay_SetVelocity(Car_Velocity);
+				}
 
+				case MC_BUS:{
+					memcpy(&Bus_Voltage, &dataBuf.data[0], sizeof(float));
+					memcpy(&Bus_Current, &dataBuf.data[4], sizeof(float));
+
+					//Bus voltage is in bytes 0-4
+					Bus_Voltage = *((float*)(&dataBuf.data[0]));
+
+					//Bus Current is in bytes 0-4
+					Bus_Current = *((float*)(&dataBuf.data[4]));
+				}
+
+				case BACKEMF:{
+					memcpy(&Back_EMF, &dataBuf.data[0], sizeof(float));	// BEMFq (The peak of the phase to neutral motor voltage)
+
+					//BackEMF is in bytes 0-4
+					Back_EMF = *((float*)(&dataBuf.data[0]));
 				}
 
 				default:{
