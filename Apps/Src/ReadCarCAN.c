@@ -6,18 +6,15 @@
 #include "Minions.h"
 #include "os.h"
 #include "os_cfg_app.h"
-#include "config.h"
 
-// Array saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
+// Array and Motor saturation threshold is halfway between 0 and max saturation value 
+// (half of summation from one to the number of positions)
 #define ARRAY_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
-
-// Motor saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
 #define MOTOR_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
-// timer delay constants
+// Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) //1000 for ms -> s conversion
-
 #define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
 #define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS (PRECHARGE_MOTOR_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
 
@@ -34,35 +31,32 @@ static OS_TMR motorControllerBypassPrechargeDlyTimer;
 // Indicates whether or not regenerative braking / charging is enabled.
 static bool chargeEnable = false;
 
-// BPS Array saturation buffer variables
+// BPS HV Array saturation buffer variables
 static int8_t HVArrayChargeMsgBuffer[SAT_BUF_LENGTH];
 static int8_t HVArrayChargeMsgSaturation = 0;
 static uint8_t HVArrayOldestMsgIdx = 0;
 
-// BPS Motor saturation buffer variables
+// BPS HV Plus/Minus (associated with the Motor) saturation buffer variables
 static int8_t HVPlusMinusChargeMsgBuffer[SAT_BUF_LENGTH];
 static int8_t HVPlusMinusChargeMsgSaturation = 0;
 static uint8_t HVPlusMinusMotorOldestMsgIdx = 0;
 
-// Array ignition (IGN_1) pin status
+// Array ignition (IGN_1) and Motor Controller ignition (IGN_2) pin status
 static bool arrayIgnitionStatus = false;
-// Array ignition (IGN_2) pin status
 static bool motorControllerIgnitionStatus = false;
 
-// Boolean to indicate precharge status
+// Boolean to indicate precharge status for Array BPC and Motor Controller BPC
 static bool arrayBypassPrechargeComplete = false;
-
-// Boolean to indicate precharge status
 static bool motorControllerBypassPrechargeComplete = false;
 
-// SOC and Supp V
+// SOC and Supp V value intialization
 static uint8_t SOC = 0;
 static uint32_t SBPV = 0;
 
 // Error assertion function prototype
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
-// Getter function for chargeEnable
+// Getter function for charge enable
 bool ChargeEnable_Get(void){
     return chargeEnable;
 }
@@ -133,7 +127,7 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
  * @brief Turns array and motor controller precharge bypass contactor ON/OFF based on ignition and precharge status
  * @param None
 */
-static void updatePrechargeContactors(void){
+static void (void){
     Minion_Error_t Merr;
 
     arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
@@ -227,7 +221,7 @@ static void disableArrayPrechargeBypassContactor(void){
 static void updateArrayPrechargeBypassContactor(void){
       
     OS_ERR err;
-    if(arrayIgnitionStatus == true                                                 // Ignition is ON
+    if((arrayIgnitionStatus == true  || motorControllerIgnitionStatus == true  )                                             // Ignition is ON
         && HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD                         // Saturation Threshold has be met
         && (Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR)== OFF)                                          // Array Contactor is OFF
         && (OSTmrStateGet(&arrayBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){   // and precharge is currenetly not happening  
@@ -236,8 +230,6 @@ static void updateArrayPrechargeBypassContactor(void){
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&arrayBypassPrechargeDlyTimer, &err);
     }
-    // Asserts error for OS timer state if conditional wasn't met
-    assertOSError(OS_READ_CAN_LOC, err);
 }
 
 static void updateMotorControllerPrechargeBypassContactor(void){
@@ -249,8 +241,6 @@ static void updateMotorControllerPrechargeBypassContactor(void){
             assertOSError(OS_READ_CAN_LOC, err);
             OSTmrStart(&motorControllerBypassPrechargeDlyTimer, &err);
         }
-        // Asserts error for OS timer state if conditional wasn't met
-    assertOSError(OS_READ_CAN_LOC, err);
 }
 
 /**
