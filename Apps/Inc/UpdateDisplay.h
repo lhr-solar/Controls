@@ -96,6 +96,13 @@ UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);
 UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent);
 
 /**
+ * @brief Sets the regeneration slider value on the display
+ * @param percent pressure on regenerator in percent
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetRegen(uint8_t regPercent);
+
+/**
  * @brief Sets the array indicator state on the display
  * @param state array contactor on (true) or off (false)
  * @returns UpdateDisplayError_t

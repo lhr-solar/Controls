@@ -646,7 +646,7 @@ void Task_SendTritium(void *p_arg){
         state.stateHandler();    // do what the current state does
         #ifndef SENDTRITIUM_EXPOSE_VARS
         readInputs();   // read inputs from the system
-        UpdateDisplay_SetAccel(accelPedalPercent);
+        UpdateDisplay_SetRegenAccel(accelPedalPercent);
         #endif
         state.stateDecider();    // decide what the next state is
 

@@ -38,6 +38,7 @@ typedef enum{
 	// Non-boolean components
 	VELOCITY,
 	ACCEL_METER,
+	REGEN_METER,
 	SOC,
 	SUPP_BATT,
 	CRUISE_ST,
@@ -303,6 +304,19 @@ UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
 	assertUpdateDisplayError(ret);
 	
 	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentAccel = percent;
+	return ret;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetRegen(uint8_t regPercent){
+	static uint8_t lastPercentRegen = 0;
+	if(regPercent == lastPercentRegen){
+		return UPDATEDISPLAY_ERR_NO_CHANGE;
+	}
+
+	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_METER, regPercent);
+	assertUpdateDisplayError(ret);
+	
+	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentRegen = regPercent;
 	return ret;
 }
 

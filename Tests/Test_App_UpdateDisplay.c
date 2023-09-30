@@ -124,7 +124,7 @@ void Task1(void *arg)
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
 
-    testPercentageComp(&UpdateDisplay_SetAccel);
+    testPercentageComp(&UpdateDisplay_SetRegenAccel);
 
     error = Display_Fault(OSErrLocBitmap, FaultBitmap);
     assertDisplayError(error);

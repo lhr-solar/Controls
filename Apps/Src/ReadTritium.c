@@ -17,8 +17,9 @@
 
 
 uint16_t Motor_FaultBitmap = T_NONE;
-static float Motor_RPM = CAR_STOPPED; //Car is stopped until velocity is read
-static float Motor_Velocity = CAR_STOPPED; //^^^^
+static float Motor_RPM = CAR_STOPPED;	//Car is stopped until velocity is read
+static float Motor_Velocity = CAR_STOPPED;	//^^^^
+static float BEMFq = CAR_STOPPED;	//^^^^
 
 /**
  * @brief Returns highest priority tritium error code
@@ -87,8 +88,12 @@ void Task_ReadTritium(void *p_arg){
 				}
 				
 				case VELOCITY:{
+					// Forward (Acceleration)
                     memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
                     memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+
+					// Backward (Regeneration)
+					memcpy(&BEMFq, &dataBuf.data[8], sizeof(float));
 
 					//Motor RPM is in bytes 0-3
 					Motor_RPM = *((float*)(&dataBuf.data[0]));
