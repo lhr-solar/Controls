@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file main.c
+ * @brief 
+ * 
+ */
 
 #include "common.h"
 #include "config.h"
@@ -25,6 +30,7 @@ int main(void) {
 
     OS_ERR err;
     OSInit(&err);
+    TaskSwHook_Init();
     OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
 
     assertOSError(OS_MAIN_LOC, err);
@@ -78,7 +84,7 @@ void Task_Init(void *p_arg){
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    Minion_Init();
+    Minions_Init();
     CAN_Queue_Init();
 
     // Initialize applications
@@ -193,9 +199,8 @@ void Task_Init(void *p_arg){
     assertOSError(OS_MAIN_LOC, err);
 
 
-    Minion_Error_t merr;
     while(1){
-        Contactors_Set(MOTOR_CONTACTOR, Minion_Read_Pin(IGN_2, &merr), true); //turn on the contactor if the ign switch lets us
+        Contactors_Set(MOTOR_CONTACTOR, Minions_Read(IGN_2), true); //turn on the contactor if the ign switch lets us
         assertOSError(OS_MINIONS_LOC, err);
         OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }

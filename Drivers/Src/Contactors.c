@@ -1,10 +1,13 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Contactors.h
+ * @brief 
+ * 
+ */
 
 #include "Contactors.h"
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
-
 
 static OS_MUTEX contactorsMutex;
 
