@@ -1,15 +1,7 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file MedianFilter.h
- * @brief
- *
- * @defgroup MedianFilter
- * @addtogroup MedianFilter
- * @{
- */
-
-/*
- * This file implements a median filter.
+ * @brief This file implements a median filter.
  *
  * In order to use it in another file, you must import it in
  * a particular way.
@@ -37,6 +29,10 @@
  * NOTE: importantly, this does not currently support usage from
  * header files. That is, all these types/functions are statically
  * declared, so there cannot be a non-static fifo at the moment.
+ *
+ * @defgroup MedianFilter
+ * @addtogroup MedianFilter
+ * @{
  */
 
 // The header guard only guard the import,

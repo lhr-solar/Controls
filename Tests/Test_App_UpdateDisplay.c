@@ -1,12 +1,15 @@
+/**
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ */
+
 #include "Display.h"
+#include "FaultState.h"
 #include "Tasks.h"
+#include "UpdateDisplay.h"
 #include "common.h"
 #include "config.h"
 #include "os.h"
-// #include "bsp.h"
-// #include "Contactors.h"
-#include "FaultState.h"
-#include "UpdateDisplay.h"
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];

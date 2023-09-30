@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file Pedals.h
  * @brief Header file for the Pedals driver
  *
  * @defgroup Pedals

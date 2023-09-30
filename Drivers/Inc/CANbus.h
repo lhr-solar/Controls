@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file CANbus.h
  * @brief
  *
  * @defgroup CANbus
@@ -106,8 +106,8 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist,
  * @param 	CanData 	The data to be transmitted
  * @param 	blocking 	Whether or not this transmission should be a
  * blocking send.
- * @param  	bus			The bus to transmit on. This should be either
- * CARCAN or MOTORCAN.
+ * @param  	bus			The bus to transmit on. This should be
+ * either CARCAN or MOTORCAN.
  * @return  ERROR if data wasn't sent, otherwise it was sent.
  */
 ErrorStatus CANbus_Send(CANDATA_t CanData, bool blocking, CAN_t bus);
@@ -115,8 +115,8 @@ ErrorStatus CANbus_Send(CANDATA_t CanData, bool blocking, CAN_t bus);
 /**
  * @brief   Reads a CAN message from the CAN hardware and returns it to the
  * provided pointers.
- * @param   data 		pointer to where to store the CAN id of the recieved
- * msg
+ * @param   data 		pointer to where to store the CAN id of the
+ * recieved msg
  * @param   blocking 	Whether or not this read should be a blocking read
  * @param   bus 		The bus to use. This should either be CARCAN or
  * MOTORCAN.

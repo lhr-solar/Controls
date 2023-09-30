@@ -1,22 +1,11 @@
 /**
- * @file Test_DisplayDriver.c
- * @author Nathaniel Delgado (nathaniel.delgado@utexas.edu)
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @brief Tests the driver code for display
- * @version 0.1
- * @date 2022-10-00
- *
- * @copyright Copyright (c) 2022
- *
  */
 
-// #include "common.h"
-// #include "config.h"
-// #include "os.h"
-#include "Tasks.h"
-// #include "Display.h"
-// #include "bsp.h"
-// #include "Contactors.h"
 #include "Display.h"
+#include "Tasks.h"
 
 // Stolen from UpdateDisplay.c
 /**

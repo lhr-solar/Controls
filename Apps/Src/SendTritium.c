@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file SendTritium.c
  * @brief Function implementations for the SendTritium application.
  *
  * This contains functions relevant to updating the velocity and current

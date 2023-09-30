@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ */
+
 #include "common.h"
 
 void print_float(char* str, float f) {

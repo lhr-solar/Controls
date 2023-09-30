@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file SendCarCAN.c
  * @brief Implements the SendCarCAN Task
  *
  * Resends the feedback from the motor controller

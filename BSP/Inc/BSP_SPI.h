@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file BSP_SPI.h
  * @brief Header file for the library to interact
  * over SPI with minion board(s)
  *

@@ -1,7 +1,8 @@
 /**
- * This file tests the ReadCarCAN module by spawning tasks and then reading the
- * chargeEnable of the car.
- *
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @brief This file tests the ReadCarCAN module by spawning tasks and then
+ * reading the chargeEnable of the car.
  */
 
 #include "BSP_UART.h"

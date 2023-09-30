@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ */
+
 #include "CANConfig.h"
 #include "CAN_Queue.h"
 #include "CANbus.h"
@@ -7,8 +12,8 @@
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 
-static OS_TCB Task1_TCB;
 #define STACK_SIZE 128
+static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[STACK_SIZE];
 
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))

@@ -1,9 +1,8 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file CANbus.c
- * @brief
- *
  */
+
 #include "CANbus.h"
 
 #include "CANConfig.h"
@@ -45,7 +44,6 @@ void CANbus_TxHandler(CAN_t bus) {
 
 // wrapper functions for the interrupt customized for each bus
 void CANbus_TxHandler_1() { CANbus_TxHandler(CAN_1); }
-
 void CANbus_RxHandler_1() { CANbus_RxHandler(CAN_1); }
 void CANbus_TxHandler_3() { CANbus_TxHandler(CAN_3); }
 void CANbus_RxHandler_3() { CANbus_RxHandler(CAN_3); }

@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ */
+
 #include "CAN_Queue.h"
 #include "CANbus.h"
 #include "Tasks.h"
@@ -45,6 +50,7 @@ void Task1(void *p_arg) {
     OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
   }
 }
+
 int main(void) {  // startup OS stuff, spawn test task
 
   OS_ERR err;

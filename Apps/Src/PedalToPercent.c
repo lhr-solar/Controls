@@ -1,8 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file PedalToPercent.c
- * @brief
- *
  */
 
 /* Converts accelerator pedal percentage to a decimal */

@@ -1,15 +1,7 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file fifo.h
- * @brief
- *
- * @defgroup fifo
- * @addtogroup fifo
- * @{
- */
-
-/*
- * This file implements a fifo.
+ * @brief This file implements a fifo.
  *
  * In order to use it in another file, you must import it in
  * a particular way.
@@ -35,6 +27,10 @@
  * NOTE: importantly, this does not currently support usage from
  * header files. That is, all these types/functions are statically
  * declared, so there cannot be a non-static fifo at the moment.
+ *
+ * @defgroup fifo
+ * @addtogroup fifo
+ * @{
  */
 
 // The header guard only guard the import,
@@ -236,4 +232,5 @@ POPBACK(FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
 #undef POPBACK
 #undef CONCAT
 #undef _CONCAT
+
 /* @} */

@@ -7,6 +7,7 @@
  * @addtogroup CANConfig
  * @{
  */
+
 #ifndef CAN_CONFIG
 #define CAN_CONFIG
 #include "CANbus.h"

@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file UpdateDisplay.c
  * @brief Function implementations for the display application.
  *
  * This contains functions relevant to modifying states of specific

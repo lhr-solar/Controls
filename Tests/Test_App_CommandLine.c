@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @brief Test does not use OS. This is just to test the logic
+ */
+
 #include "BSP_UART.h"
 #include "CANbus.h"
 #include "Contactors.h"
@@ -5,8 +11,6 @@
 #include "Pedals.h"
 #include "Tasks.h"
 #include "os.h"
-
-/* Test does not use OS. This is just to test the logic */
 
 int main(void) {
   BSP_UART_Init(UART_2);

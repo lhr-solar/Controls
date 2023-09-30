@@ -1,9 +1,7 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
 /**
- * @defgroup Minions
- *
- * This modules allows us to use GPIO more easily
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @brief This modules allows us to use GPIO more easily
  * for our application's purposes
  *
  * @defgroup Minions
@@ -13,6 +11,7 @@
 
 #ifndef MINIONS_H
 #define MINIONS_H
+
 #include <stdbool.h>
 
 #include "BSP_GPIO.h"

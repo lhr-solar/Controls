@@ -1,9 +1,10 @@
 /**
- * Test file that unifies all individual test files of the BSP module
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @brief Test file that unifies all individual test files of the BSP module
  *
  * Run this test in conjunction with the simulator
  * GUI.
- *
  */
 
 #include <bsp.h>

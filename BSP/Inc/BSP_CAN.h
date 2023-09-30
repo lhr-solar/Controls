@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file BSP_CAN.h
  * @brief Header file for the library to interact
  * with both CAN lines in the car
  *

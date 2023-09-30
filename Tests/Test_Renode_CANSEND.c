@@ -1,5 +1,7 @@
 /**
- * This is meant to test the ReadCarCAN module in the controls system, by
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @brief This is meant to test the ReadCarCAN module in the controls system, by
  * "pretending" to be BPS.
  *
  * This testfile is intended to be compiled and run on Renode, as the
@@ -10,10 +12,6 @@
  * us the DISABLE message. It also tests a boundary condition case, where it
  * alternates between DISABLE and ENABLE, testing that the main machine can
  * handle this.
- *
- * Author: Sidharth N. Babu
- * Date Written: 2021-03-15
- * Email: sidharth.n.babu@utexas.edu
  */
 
 #include "CANbus.h"

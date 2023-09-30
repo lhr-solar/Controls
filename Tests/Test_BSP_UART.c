@@ -1,5 +1,7 @@
 /**
- * Test file for library to interact with UART
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @brief Test file for library to interact with UART
  *
  * Run this test in conjunction with the simulator
  * GUI. As this generates randomized values, the display

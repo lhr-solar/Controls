@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file Display.h
  * @brief Function prototypes for the display driver.
  *
  * This contains function prototypes relevant to sending/receiving messages

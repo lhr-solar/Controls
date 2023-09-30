@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file BSP_ADC.h
  * @brief Header file for the library to interact
  * with the Analog to Digital Converter (ADC)
  *

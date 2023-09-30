@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file CAN_Queue.h
  * @brief Queue that holds all CAN messages that Task_CANBusConsumer needs to
  * send.
  *

@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file BSP_GPIO.h
  * @brief Header file for the library to interact
  * with the GPIO ports
  *

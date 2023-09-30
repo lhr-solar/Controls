@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ */
+
 #include "BSP_UART.h"
 #include "CANbus.h"
 #include "FaultState.h"

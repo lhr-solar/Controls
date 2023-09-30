@@ -1,4 +1,7 @@
-/* Copyright (c) 2021 UT Longhorn Racing Solar */
+/**
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ */
 
 #include "BSP_GPIO.h"
 
@@ -17,7 +20,6 @@ static GPIO_TypeDef *GPIO_GetPort(port_t port) {
  * @param	direction - input or output
  * @return  None
  */
-
 void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction) {
   GPIO_InitTypeDef GPIO_InitStruct;
 
@@ -41,7 +43,6 @@ void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction) {
  * @param   port to read
  * @return  data of the port
  */
-
 uint16_t BSP_GPIO_Read(port_t port) {
   GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
 
@@ -54,7 +55,6 @@ uint16_t BSP_GPIO_Read(port_t port) {
  * @param   data data to write
  * @return  None
  */
-
 void BSP_GPIO_Write(port_t port, uint16_t data) {
   GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
 
@@ -68,7 +68,6 @@ void BSP_GPIO_Write(port_t port, uint16_t data) {
  * @param   pin The pin to read from
  * @return  State of the pin
  */
-
 uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask) {
   GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
 
@@ -82,7 +81,6 @@ uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask) {
  * @param   state true=ON or false=OFF
  * @return  None
  */
-
 void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state) {
   GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
   GPIO_WriteBit(gpio_port, pinmask, (state == ON) ? Bit_SET : Bit_RESET);
@@ -95,7 +93,6 @@ void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state) {
  * @param   pin The pin to get state from
  * @return  1 if pin is high, 0 if low
  */
-
 uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin) {
   GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
 

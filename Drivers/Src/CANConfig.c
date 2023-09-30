@@ -1,9 +1,8 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file CANConfig.c
- * @brief
- *
  */
+
 #include "CANConfig.h"
 
 #define BYTE 1
@@ -20,11 +19,8 @@
  * parallel with changes made to the CANID_t enum in CANbus.h
  */
 const CANLUT_T CANLUT[NUM_CAN_IDS] = {
-    [BPS_TRIP] =
-        {NOIDX,
-         DOUBLE}, /**	   BPS_TRIP **/
-    [BPS_ALL_CLEAR] = {NOIDX,
-                       DOUBLE}, /**     BPS_ALL_CLEAR **/
+    [BPS_TRIP] = {NOIDX, DOUBLE},      /**	   BPS_TRIP **/
+    [BPS_ALL_CLEAR] = {NOIDX, DOUBLE}, /**     BPS_ALL_CLEAR **/
     [BPS_CONTACTOR_STATE] =
         {NOIDX, DOUBLE},                 /**	   BPS_CONTACTOR_STATE			   **/
     [CHARGE_ENABLE] = {NOIDX, DOUBLE},   /**     CHARGE_ENABLE   **/

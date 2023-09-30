@@ -1,6 +1,6 @@
 /**
+ * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file UpdateDisplay.h
  * @brief Function prototypes for the display application.
  *
  * This contains function prototypes relevant to the UpdateDisplay
@@ -53,7 +53,6 @@ typedef enum { STATE_0 = 0, STATE_1 = 1, STATE_2 = 2 } TriState_t;
  * @brief Initializes UpdateDisplay application
  * @returns UpdateDisplayError_t
  */
-
 UpdateDisplayError_t UpdateDisplay_Init();
 
 /**

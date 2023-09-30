@@ -1,5 +1,7 @@
 /**
- * Test file for library to interact with hardware connected to ADC
+ * @file
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @brief Test file for library to interact with hardware connected to ADC
  *
  * Run this test in conjunction with the simulator
  * GUI. As you move the accelerator and brake on the GUI, the respective
