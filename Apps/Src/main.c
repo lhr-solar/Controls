@@ -102,6 +102,24 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
+    // Initialize ReadTritium
+    OSTaskCreate(
+        (OS_TCB*)&ReadTritium_TCB,
+        (CPU_CHAR*)"ReadTritium",
+        (OS_TASK_PTR)Task_ReadTritium,
+        (void*)NULL,
+        (OS_PRIO)TASK_READ_TRITIUM_PRIO,
+        (CPU_STK*)ReadTritium_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_READ_TRITIUM_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
+
     // Initialize SendTritium
     OSTaskCreate(
         (OS_TCB*)&SendTritium_TCB,
@@ -156,24 +174,6 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Initialize ReadTritium
-    OSTaskCreate(
-        (OS_TCB*)&ReadTritium_TCB,
-        (CPU_CHAR*)"ReadTritium",
-        (OS_TASK_PTR)Task_ReadTritium,
-        (void*)NULL,
-        (OS_PRIO)TASK_READ_TRITIUM_PRIO,
-        (CPU_STK*)ReadTritium_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_READ_TRITIUM_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
     // Initialize SendCarCAN
     OSTaskCreate(
         (OS_TCB*)&SendCarCAN_TCB,
@@ -184,6 +184,24 @@ void Task_Init(void *p_arg){
         (CPU_STK*)SendCarCAN_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
+
+    // Initialize CommandLine
+    OSTaskCreate(
+        (OS_TCB*)&CommandLine_TCB,
+        (CPU_CHAR*)"CommandLine",
+        (OS_TASK_PTR)Task_CommandLine,
+        (void*)NULL,
+        (OS_PRIO)TASK_COMMAND_LINE_PRIO,
+        (CPU_STK*)CommandLine_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_COMMAND_LINE_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
