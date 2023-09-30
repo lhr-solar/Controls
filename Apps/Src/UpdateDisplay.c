@@ -307,16 +307,16 @@ UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
 	return ret;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetRegen(uint8_t regPercent){
+UpdateDisplayError_t UpdateDisplay_SetBackEMF(uint32_t emfPercent){
 	static uint8_t lastPercentRegen = 0;
-	if(regPercent == lastPercentRegen){
+	if(emfPercent == lastPercentRegen){
 		return UPDATEDISPLAY_ERR_NO_CHANGE;
 	}
 
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_METER, regPercent);
+	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_METER, emfPercent);
 	assertUpdateDisplayError(ret);
 	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentRegen = regPercent;
+	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentRegen = emfPercent;
 	return ret;
 }
 

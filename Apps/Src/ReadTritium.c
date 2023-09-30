@@ -19,9 +19,9 @@
 uint16_t Motor_FaultBitmap = T_NONE;
 static float Motor_RPM = CAR_STOPPED;		//Car is stopped until velocity is read
 static float Motor_Velocity = CAR_STOPPED;	//^^^^
-static float Back_EMF = CAR_STOPPED;		//^^^^
-static float Bus_Current = CAR_STOPPED;		//^^^^
-static float Bus_Voltage = CAR_STOPPED;		//^^^^
+static float Back_EMF = 0;
+static float Bus_Current = 0;
+static float Bus_Voltage = 0;
 
 /**
  * @brief Returns highest priority tritium error code
@@ -113,7 +113,7 @@ void Task_ReadTritium(void *p_arg){
 					//Bus voltage is in bytes 0-4
 					Bus_Voltage = *((float*)(&dataBuf.data[0]));
 
-					//Bus Current is in bytes 0-4
+					//Bus Current is in bytes 4-8
 					Bus_Current = *((float*)(&dataBuf.data[4]));
 				}
 
@@ -122,15 +122,15 @@ void Task_ReadTritium(void *p_arg){
 
 					//BackEMF is in bytes 0-4
 					Back_EMF = *((float*)(&dataBuf.data[0]));
+					uint32_t Regen_Power = (Back_EMF * 100) * (Bus_Current * 100);	// Fixed point factor (100)
+
+					UpdateDisplay_SetBackEMF(Regen_Power);
 				}
 
 				default:{
 					break; //for cases not handled currently
 				}
-
 			}
-
-
 		}
 
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);

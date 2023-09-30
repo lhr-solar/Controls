@@ -100,7 +100,7 @@ UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent);
  * @param percent pressure on regenerator in percent
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetRegen(uint8_t regPercent);
+UpdateDisplayError_t UpdateDisplay_SetBackEMF(uint32_t emfPercent);
 
 /**
  * @brief Sets the array indicator state on the display
