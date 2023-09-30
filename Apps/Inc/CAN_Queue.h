@@ -1,8 +1,9 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file CAN_Queue.h
- * @brief Queue that holds all CAN messages that Task_CANBusConsumer needs to send.
- * 
+ * @brief Queue that holds all CAN messages that Task_CANBusConsumer needs to
+ * send.
+ *
  * @defgroup CAN_Queue
  * @addtogroup CAN_Queue
  * @{
@@ -20,6 +21,5 @@ ErrorStatus CAN_Queue_Post(CANDATA_t message);
 ErrorStatus CAN_Queue_Pend(CANDATA_t *message);
 
 #endif
-
 
 /* @} */

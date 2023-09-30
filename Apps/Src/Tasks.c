@@ -1,18 +1,19 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Tasks.c
- * @brief 
- * 
+ * @brief
+ *
  */
 
 #include "Tasks.h"
-#include "FaultState.h"
-#include "os.h"
+
 #include "CANbus.h"
 #include "Contactors.h"
 #include "Display.h"
+#include "FaultState.h"
 #include "Minions.h"
 #include "Pedals.h"
+#include "os.h"
 
 /**
  * TCBs
@@ -55,42 +56,41 @@ OS_SEM FaultState_Sem4;
 fault_bitmap_t FaultBitmap = FAULT_NONE;
 os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
-{
-    if (err != OS_ERR_NONE)
-    {
-        FaultBitmap |= FAULT_OS;
-        OSErrLocBitmap |= OS_err_loc;
+void _assertOSError(uint16_t OS_err_loc, OS_ERR err) {
+  if (err != OS_ERR_NONE) {
+    FaultBitmap |= FAULT_OS;
+    OSErrLocBitmap |= OS_err_loc;
 
-        OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-        EnterFaultState();
-    }
+    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+    EnterFaultState();
+  }
 }
 
 /**
  * @brief Hook that's called every context switch
- * 
- * This function will append the task being switched out to the task trace if and only if:
+ *
+ * This function will append the task being switched out to the task trace if
+ * and only if:
  *      1. It's not a task created automatically by the RTOS
- *      2. It's not the previously recorded task (a long running task interrupted by the
- *         tick task will only show up once)
- * This function will overwrite tasks that have been in the trace for a while, keeping only
- * the 8 most recent tasks
+ *      2. It's not the previously recorded task (a long running task
+ * interrupted by the tick task will only show up once) This function will
+ * overwrite tasks that have been in the trace for a while, keeping only the 8
+ * most recent tasks
  */
 void App_OS_TaskSwHook(void) {
-    OS_TCB *cur = OSTCBCurPtr;
-    uint32_t idx = PrevTasks.index;
-    if (cur == &OSTickTaskTCB) return; // Ignore the tick task
-    if (cur == &OSIdleTaskTCB) return; // Ignore the idle task
-    if (cur == &OSTmrTaskTCB ) return; // Ignore the timer task
-    if (cur == &OSStatTaskTCB) return; // Ignore the stat task
-    if (cur == PrevTasks.tasks[idx]) return; // Don't record the same task again
-    if (++idx == TASK_TRACE_LENGTH) idx = 0;
-    PrevTasks.tasks[idx] = cur;
-    PrevTasks.index = idx;
+  OS_TCB *cur = OSTCBCurPtr;
+  uint32_t idx = PrevTasks.index;
+  if (cur == &OSTickTaskTCB) return;        // Ignore the tick task
+  if (cur == &OSIdleTaskTCB) return;        // Ignore the idle task
+  if (cur == &OSTmrTaskTCB) return;         // Ignore the timer task
+  if (cur == &OSStatTaskTCB) return;        // Ignore the stat task
+  if (cur == PrevTasks.tasks[idx]) return;  // Don't record the same task again
+  if (++idx == TASK_TRACE_LENGTH) idx = 0;
+  PrevTasks.tasks[idx] = cur;
+  PrevTasks.index = idx;
 }
 
 void TaskSwHook_Init(void) {
-    PrevTasks.index = TASK_TRACE_LENGTH - 1; // List starts out empty
-    OS_AppTaskSwHookPtr = App_OS_TaskSwHook;
+  PrevTasks.index = TASK_TRACE_LENGTH - 1;  // List starts out empty
+  OS_AppTaskSwHookPtr = App_OS_TaskSwHook;
 }

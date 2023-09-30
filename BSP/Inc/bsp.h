@@ -1,8 +1,8 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file bsp.h
- * @brief 
- * 
+ * @brief
+ *
  * @defgroup bsp
  * @addtogroup bsp
  * @{
@@ -11,14 +11,14 @@
 #ifndef __BSP_H
 #define __BSP_H
 
-#include "BSP_ADC.h"
-#include "BSP_CAN.h"
-#include "BSP_UART.h"
-#include "BSP_SPI.h"
-#include "BSP_GPIO.h"
-
 #include <sys/file.h>
 #include <unistd.h>
+
+#include "BSP_ADC.h"
+#include "BSP_CAN.h"
+#include "BSP_GPIO.h"
+#include "BSP_SPI.h"
+#include "BSP_UART.h"
 
 #ifdef SIMULATOR
 #define DATA_PATH(f) "BSP/Simulator/Hardware/Data/" f

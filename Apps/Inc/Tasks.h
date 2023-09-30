@@ -1,20 +1,19 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Tasks.h
- * @brief 
- * 
+ * @brief
+ *
  * @defgroup Tasks
  * @addtogroup Tasks
  * @{
  */
 
-
 #ifndef __TASKS_H
 #define __TASKS_H
 
 #include "common.h"
-#include "os.h"
 #include "config.h"
+#include "os.h"
 
 /**
  * Task initialization macro
@@ -27,34 +26,33 @@
 /**
  * Priority Definitions
  */
-#define TASK_FAULT_STATE_PRIO               1
-#define TASK_INIT_PRIO                      2
-#define TASK_READ_TRITIUM_PRIO              3
-#define TASK_SEND_TRITIUM_PRIO              4
-#define TASK_READ_CAR_CAN_PRIO              5
-#define TASK_UPDATE_DISPLAY_PRIO            6
-#define TASK_SEND_CAR_CAN_PRIO              8
-#define TASK_TELEMETRY_PRIO                 9
-#define TASK_DEBUG_DUMP_PRIO                10
-#define TASK_COMMAND_LINE_PRIO              11
+#define TASK_FAULT_STATE_PRIO 1
+#define TASK_INIT_PRIO 2
+#define TASK_READ_TRITIUM_PRIO 3
+#define TASK_SEND_TRITIUM_PRIO 4
+#define TASK_READ_CAR_CAN_PRIO 5
+#define TASK_UPDATE_DISPLAY_PRIO 6
+#define TASK_SEND_CAR_CAN_PRIO 8
+#define TASK_TELEMETRY_PRIO 9
+#define TASK_DEBUG_DUMP_PRIO 10
+#define TASK_COMMAND_LINE_PRIO 11
 
 /**
  * Stack Sizes
  */
-#define DEFAULT_STACK_SIZE                  256
-#define WATERMARK_STACK_LIMIT               DEFAULT_STACK_SIZE/2
+#define DEFAULT_STACK_SIZE 256
+#define WATERMARK_STACK_LIMIT DEFAULT_STACK_SIZE / 2
 
-#define TASK_FAULT_STATE_STACK_SIZE         DEFAULT_STACK_SIZE
-#define TASK_INIT_STACK_SIZE                DEFAULT_STACK_SIZE
-#define TASK_SEND_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_READ_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_UPDATE_DISPLAY_STACK_SIZE      DEFAULT_STACK_SIZE
-#define TASK_READ_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_TELEMETRY_STACK_SIZE           DEFAULT_STACK_SIZE
-#define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
-#define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
-
+#define TASK_FAULT_STATE_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_INIT_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_SEND_TRITIUM_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_READ_CAR_CAN_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_UPDATE_DISPLAY_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_READ_TRITIUM_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_SEND_CAR_CAN_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_TELEMETRY_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_DEBUG_DUMP_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_COMMAND_LINE_STACK_SIZE DEFAULT_STACK_SIZE
 
 /**
  * Task Prototypes
@@ -75,7 +73,7 @@ void Task_SendCarCAN(void* p_arg);
 
 void Task_Telemetry(void* p_arg);
 
-void Task_DebugDump(void *p_arg);
+void Task_DebugDump(void* p_arg);
 
 void Task_CommandLine(void* p_arg);
 
@@ -92,7 +90,6 @@ extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB Telemetry_TCB;
 extern OS_TCB DebugDump_TCB;
 extern OS_TCB CommandLine_TCB;
-
 
 /**
  * Stacks
@@ -124,61 +121,59 @@ extern OS_SEM FaultState_Sem4;
  */
 void TaskSwHook_Init(void);
 
-
 /**
  * Global Variables
  */
 
-
 /**
  * OS Error States
- * 
+ *
  * Stores error data to indicate which part of the code
  * an error is coming from.
  */
-typedef enum{
-    OS_NONE_LOC = 0x000,
-    OS_ARRAY_LOC = 0x001,
-    OS_READ_CAN_LOC = 0x002,
-    OS_READ_TRITIUM_LOC = 0x004,
-    OS_SEND_CAN_LOC = 0x008,
-    OS_SEND_TRITIUM_LOC = 0x010,
-    OS_UPDATE_VEL_LOC = 0x020,
-    OS_CONTACTOR_LOC = 0x080,
-    OS_MINIONS_LOC = 0x100,
-    OS_MAIN_LOC = 0x200,
-    OS_CANDRIVER_LOC = 0x400,
-    OS_MOTOR_CONNECTION_LOC = 0x800,
-    OS_DISPLAY_LOC = 0x1000
+typedef enum {
+  OS_NONE_LOC = 0x000,
+  OS_ARRAY_LOC = 0x001,
+  OS_READ_CAN_LOC = 0x002,
+  OS_READ_TRITIUM_LOC = 0x004,
+  OS_SEND_CAN_LOC = 0x008,
+  OS_SEND_TRITIUM_LOC = 0x010,
+  OS_UPDATE_VEL_LOC = 0x020,
+  OS_CONTACTOR_LOC = 0x080,
+  OS_MINIONS_LOC = 0x100,
+  OS_MAIN_LOC = 0x200,
+  OS_CANDRIVER_LOC = 0x400,
+  OS_MOTOR_CONNECTION_LOC = 0x800,
+  OS_DISPLAY_LOC = 0x1000
 } os_error_loc_t;
 
 /**
  * Fault Enum
- * 
+ *
  * Different fault states that need to be handled by the FaultState task
  */
-typedef enum{
-    FAULT_NONE = 0x00,      // No fault
-    FAULT_OS = 0x01,         // for OS faults
-    FAULT_UNREACH = 0x02,    // for unreachable conditions
-    FAULT_TRITIUM = 0x04,      // for errors sent from the tritium
-    FAULT_READBPS = 0x08,    // for unsuccessfully reading from BPS CAN
-    FAULT_DISPLAY = 0x10,    // for display faults
-    FAULT_BPS = 0x20,       // for if BPS trips
+typedef enum {
+  FAULT_NONE = 0x00,     // No fault
+  FAULT_OS = 0x01,       // for OS faults
+  FAULT_UNREACH = 0x02,  // for unreachable conditions
+  FAULT_TRITIUM = 0x04,  // for errors sent from the tritium
+  FAULT_READBPS = 0x08,  // for unsuccessfully reading from BPS CAN
+  FAULT_DISPLAY = 0x10,  // for display faults
+  FAULT_BPS = 0x20,      // for if BPS trips
 } fault_bitmap_t;
 
 /**
  * Task trace
- * 
+ *
  * Stores the last TASK_TRACE_LENGTH tasks that were run
  * The most recent task is at tasks[index], the one before at tasks[index-1],
  * wrapping back around at the beginnning
- * 
+ *
  */
 #define TASK_TRACE_LENGTH 8
 typedef struct {
-    OS_TCB *tasks[TASK_TRACE_LENGTH];
-    uint32_t index;
+  OS_TCB* tasks[TASK_TRACE_LENGTH];
+  uint32_t index;
 } task_trace_t;
 
 extern task_trace_t PrevTasks;
@@ -194,16 +189,18 @@ extern os_error_loc_t OSErrLocBitmap;
  * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
+void _assertOSError(
+    uint16_t OS_err_loc,
+    OS_ERR err);  // TODO: This should be changed to enforce only enum usage
 
 #if DEBUG == 1
-#define assertOSError(OS_err_loc,err) \
-        if (err != OS_ERR_NONE) { \
-            printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \
-        } \
-        _assertOSError(OS_err_loc,err);
+#define assertOSError(OS_err_loc, err)                                        \
+  if (err != OS_ERR_NONE) {                                                   \
+    printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \
+  }                                                                           \
+  _assertOSError(OS_err_loc, err);
 #else
-#define assertOSError(OS_err_loc,err) _assertOSError(OS_err_loc,err);
+#define assertOSError(OS_err_loc, err) _assertOSError(OS_err_loc, err);
 #endif
 
 #endif

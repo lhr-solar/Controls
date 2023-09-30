@@ -3,7 +3,7 @@
  * @file BSP_SPI.h
  * @brief Header file for the library to interact
  * over SPI with minion board(s)
- * 
+ *
  * @defgroup BSP_SPI
  * @addtogroup BSP_SPI
  * @{
@@ -12,15 +12,13 @@
 #ifndef __BSP_SPI_H
 #define __BSP_SPI_H
 
-#include "common.h"
 #include "bsp.h"
+#include "common.h"
 #include "os.h"
-
-
 
 /**
  * @brief   Initializes the SPI communication
- *          to be used to communicate with 
+ *          to be used to communicate with
  *          minion board(s)
  * @param   None
  * @return  None
@@ -46,6 +44,5 @@ void BSP_SPI_Write(uint8_t* txBuf, uint8_t txLen);
 void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen);
 
 #endif
-
 
 /* @} */
