@@ -70,15 +70,9 @@ void Task_Init(void *p_arg){
 
     // Start systick    
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-
-    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-
-    assertOSError(OS_MAIN_LOC, err);
     
     // Initialize drivers
     Pedals_Init();
-    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-    OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     BSP_UART_Init(UART_2);
     CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS);
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
@@ -198,10 +192,5 @@ void Task_Init(void *p_arg){
     );
     assertOSError(OS_MAIN_LOC, err);
 
-
-    while(1){
-        Contactors_Set(MOTOR_CONTACTOR, Minions_Read(IGN_2), true); //turn on the contactor if the ign switch lets us
-        assertOSError(OS_MINIONS_LOC, err);
-        OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-    }
+    OSTaskDel(NULL, &err);
 }
