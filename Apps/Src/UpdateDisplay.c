@@ -214,7 +214,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 		};
 
 		ret = UpdateDisplay_PutNext(setCmd);
-		return UpdateDisplay_PutNext(setCmd);
+		return ret;
 	}
 	else{
 		assertUpdateDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);
@@ -364,6 +364,19 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
 }
 
 /**
+ * @brief Clears the display message queue and sets the message counter semaphore value to 0
+*/
+void UpdateDisplay_ClearQueue(){
+    OS_ERR err;
+    OSSemSet(&DisplayQ_Sem4, 0, &err); // Set the message queue semaphore value to 0
+    if (err != OS_ERR_TASK_WAITING) {
+        assertOSError(OS_DISPLAY_LOC, err); // Don't fault if UpdateDisplay is waiting
+    }
+    disp_fifo_renew(&msg_queue); // Clear the message queue
+    
+}
+
+/**
  * @brief Loops through the display queue and sends all messages
  */
 void Task_UpdateDisplay(void *p_arg) {
@@ -383,7 +396,7 @@ void Task_UpdateDisplay(void *p_arg) {
  * used if we haven't reached the restart limit and encounter an error
  */ 
 static void handler_UpdateDisplay_Restart() {
-    disp_fifo_renew(&msg_queue); // Clear the message queue
+    UpdateDisplay_ClearQueue(); // Clear the message queue
     Display_Reset(); // Try resetting to fix the display error
 }
 

@@ -92,6 +92,7 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
         EmergencyContactorOpen(); // Apart from while loop because killing the motor is more important
         Display_Error(errorLoc, errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
+        UpdateDisplay_ClearQueue(); // Clear message queue to ensure no other commands overwrite the error screen
     }
 
 

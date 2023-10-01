@@ -130,4 +130,11 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
  */
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 
+/**
+ * @brief Clears the display message queue and sets the message counter semaphore value to 0
+ * @param none
+ * @returns none
+*/
+void UpdateDisplay_ClearQueue(void);
+
 #endif

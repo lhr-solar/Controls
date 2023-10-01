@@ -41,8 +41,8 @@ enum { // Test menu enum
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_UPDATEDISPLAY // Decide what to test based on test menu enum
-#define READTRITIUM_OPTION T_HARDWARE_OVER_CURRENT_ERR // The enum for the tritium error we want to test (reference error enum)
+#define TEST_OPTION TEST_READTRITIUM // Decide what to test based on test menu enum
+#define READTRITIUM_OPTION T_DC_BUS_OVERVOLT_ERR // The enum for the tritium error we want to test (reference error enum)
 
 /* READTRITIUM_OPTION menu:
     T_HARDWARE_OVER_CURRENT_ERR = (1<<0), 
@@ -159,6 +159,8 @@ void Task_ManagerTask(void* arg) {
     CANbus_Init(MOTORCAN, NULL, 0);
     CANbus_Init(CARCAN, NULL, 0);
     Contactors_Init();
+    Display_Init();
+    UpdateDisplay_Init();  
     CANDATA_t canError;
     
     
@@ -196,6 +198,7 @@ void Task_ManagerTask(void* arg) {
         case TEST_READTRITIUM:
             // Test exceptions in ReadTritium by sending the fault chosen in READTRITIUM_OPTION
             // Successful we enter a nonrecoverable fault and the fail message is not printed
+            // And the correct error info is shown on the display
             // Also if the motor is reset three times before the fault for a hall error
             printf("\n\n\r=========== Testing ReadTritium ===========");
 
@@ -212,10 +215,16 @@ void Task_ManagerTask(void* arg) {
             canError.ID = MOTOR_STATUS;
 
             createReadTritium();
+            //OSTimeDlyHMSM(0, 0, 10, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the display to initialize
+           // for (int i = 0x07; i < 0x09; i++){
+             //   printf("\n\rSending %x", i);
+              //  Display_Error(OS_DISPLAY_LOC, i);
+               // OSTimeDlyHMSM(0, 0, 0, 104, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the display to initialize
+            //}
+            //OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the display to initialize
             printf("\n\n\rNow sending: %d", tritiumError); // Sending 0 means no Tritium error
             CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
             OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for ReadTritium to finish
-            printf("\n\rTesting Tritium error %d", READTRITIUM_OPTION);
             if (tritiumError == T_HALL_SENSOR_ERR) { // Send the message extra times to allow for motor restart
                 for (int i = 0; i < 3; i++) { // Faults if greater than restart threshold (3)
                     CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
@@ -334,6 +343,9 @@ void Task_ManagerTask(void* arg) {
             // Expected output
             // The display should reset, and then the test will hit an infinite while loop.
             createUpdateDisplay();
+
+            OSTimeDlyHMSM(0, 0, 10, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the display to initialize
+            printf("\n\rSending display messages to fill queue");
             
             for (int i = 0; i < 10; i++) {
                 UpdateDisplay_SetCruiseState(1 + i); 
@@ -358,7 +370,7 @@ void Task_ManagerTask(void* arg) {
 // Initializes ReadTritium
 void createReadTritium(void) {
     OS_ERR err;
- 
+
     OSTaskCreate(
         (OS_TCB*)&ReadTritium_TCB,
         (CPU_CHAR*)"ReadTritium",
@@ -433,8 +445,6 @@ void createUpdateDisplay(void) {
         (OS_ERR *)&err
     );
     checkOSError(err);
-    Display_Init();
-    UpdateDisplay_Init();  
     printf("\n\rCreated and initialized Display and UpdateDisplay"); 
 
 }
@@ -497,6 +507,7 @@ int main(void) {
 
     checkOSError(err);  
     
+    TaskSwHook_Init();
     
     // Create the task manager thread
     OSTaskCreate(
