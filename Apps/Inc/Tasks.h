@@ -194,7 +194,7 @@ void EmergencyContactorOpen();
  * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
  * @param errorCode the enum for the specific error that happened
  * @param errorCallback a callback function to a handler for that specific error, 
- * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
+ * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
 void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
