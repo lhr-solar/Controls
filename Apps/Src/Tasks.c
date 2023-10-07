@@ -55,7 +55,7 @@ error_code_t Error_ReadCarCAN = /*READCARCAN_ERR_NONE*/ 0; // TODO: change this 
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 
-extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
+extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
  * Error assertion-related functions
@@ -147,7 +147,7 @@ void EmergencyContactorOpen() {
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
 
     // Turn additional brakelight on to indicate critical error
-    BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
+    BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);
 }
 
 /**
