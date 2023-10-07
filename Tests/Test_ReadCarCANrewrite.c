@@ -299,7 +299,8 @@ void Task1(){
 
             case TEST_HARDWARE_CHARGE_ENABLE:
                 while(1){
-                    CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
                     infoDump();
                     for(int i =0; i < 999999; i++){}
                     }

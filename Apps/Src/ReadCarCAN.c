@@ -104,7 +104,7 @@ uint32_t SBPV_Get(){
  * @param p_arg pointer to the argument passed by timer
 */
 static void callbackCANWatchdog(void *p_tmr, void *p_arg){
-    assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+   // assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
 
 /**
@@ -132,8 +132,8 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
  void updatePrechargeContactors(void){
     Minion_Error_t Merr;
 
-    arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
-    motorControllerIgnitionStatus = Minion_Read_Pin(IGN_2, &Merr);
+    arrayIgnitionStatus = (!Minion_Read_Pin(IGN_1, &Merr));
+    motorControllerIgnitionStatus = (!Minion_Read_Pin(IGN_2, &Merr));
 
     if(arrayIgnitionStatus == true && motorControllerIgnitionStatus == false){
         if(arrayBypassPrechargeComplete == true && chargeEnable == true){
@@ -146,7 +146,7 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
 
     }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == true){
         if(arrayBypassPrechargeComplete == true && chargeEnable == true){
-            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Turn off
+            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); 
             UpdateDisplay_SetArray(true);
             arrayBypassPrechargeComplete = false; 
         }
@@ -163,7 +163,7 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
         Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // Turn off
         UpdateDisplay_SetMotor(false);
     }else{
-        assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+        //assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
     }
     
     // Set precharge complete variable to false if precharge happens again
