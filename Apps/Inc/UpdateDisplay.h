@@ -1,5 +1,5 @@
-/** 
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file UpdateDisplay.h
  * @brief Function prototypes for the display application.
  * 
@@ -7,10 +7,11 @@
  * application. Call assertUpdateDisplayError after calling any of the
  * functions in this application.
  * 
- * @author Ishan Deshpande (IshDeshpa)
- * @author Roie Gal (Cam0Cow)
- * @author Nathaniel Delgado (NathanielDelgado)
-*/
+ * 
+ * @defgroup UpdateDisplay
+ * @addtogroup UpdateDisplay
+ * @{
+ */
 
 #ifndef __UPDATE_DISPLAY_H
 #define __UPDATE_DISPLAY_H
@@ -130,3 +131,5 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 
 #endif
+
+/* @} */

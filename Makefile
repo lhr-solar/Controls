@@ -68,6 +68,10 @@ stm32f413: leader
 flash:
 	$(MAKE) -C BSP -C STM32F413 flash
 
+docs:
+	doxygen Docs/doxyfile
+	$(MAKE) -C Docs html
+
 help:
 	@echo "Format: ${ORANGE}make ${BLUE}<BSP type>${NC}${ORANGE}TEST=${PURPLE}<Test type>${NC}"
 	@echo "BSP types (required):"
@@ -85,3 +89,5 @@ help:
 clean:
 	rm -fR Objects
 	rm -f *.out
+	rm -fr Docs/doxygen
+	rm -fr Docs/build

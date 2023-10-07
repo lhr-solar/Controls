@@ -1,8 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
 /**
- * Header file for the library to interact
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file BSP_SPI.h
+ * @brief Header file for the library to interact
  * over SPI with minion board(s)
+ * 
+ * @defgroup BSP_SPI
+ * @addtogroup BSP_SPI
+ * @{
  */
 
 #ifndef __BSP_SPI_H
@@ -42,3 +46,6 @@ void BSP_SPI_Write(uint8_t* txBuf, uint8_t txLen);
 void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen);
 
 #endif
+
+
+/* @} */

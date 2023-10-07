@@ -1,15 +1,16 @@
-#include "Tasks.h"
-#include "CANbus.h"
-#include "CAN_Queue.h"
-#include "common.h"
-
 /**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendCarCAN.c
  * @brief Implements the SendCarCAN Task
  * 
  * Resends the feedback from the motor controller
  * 
  */
+
+#include "Tasks.h"
+#include "CANbus.h"
+#include "CAN_Queue.h"
+#include "common.h"
 
 /**
  * @brief Sends the feedback from the motor controller to be read by telemetry and 
