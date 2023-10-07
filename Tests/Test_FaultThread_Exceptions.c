@@ -41,8 +41,8 @@ enum { // Test menu enum
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_READTRITIUM // Decide what to test based on test menu enum
-#define READTRITIUM_OPTION T_DC_BUS_OVERVOLT_ERR // The enum for the tritium error we want to test (reference error enum)
+#define TEST_OPTION TEST_UPDATEDISPLAY // Decide what to test based on test menu enum
+#define READTRITIUM_OPTION T_NONE // The enum for the tritium error we want to test (reference error enum)
 
 /* READTRITIUM_OPTION menu:
     T_HARDWARE_OVER_CURRENT_ERR = (1<<0), 
@@ -184,14 +184,13 @@ void Task_ManagerTask(void* arg) {
             case TEST_OS_ASSERT:
             // Test the assertOSError function using the OSErrorTask
             // Creates an OS error by pending on a mutex that isn't created
-            // Successful if it prints the OS Error code 24004
-            // and doesn't print the fail message (task is stopped by asserting an error)
+            // Successful if it doesn't print the fail message (task is stopped by asserting an error)
             printf("\n\n\r=========== Testing OS assert ===========");
 
             //Expected output: infinite while loop with no prints
 
             createOSErrorTask();
-            OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+            OSTimeDlyHMSM(0, 0, 2, 0, OS_OPT_TIME_HMSM_STRICT, &err);
             checkOSError(err);
             break;
 
@@ -215,13 +214,6 @@ void Task_ManagerTask(void* arg) {
             canError.ID = MOTOR_STATUS;
 
             createReadTritium();
-            //OSTimeDlyHMSM(0, 0, 10, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the display to initialize
-           // for (int i = 0x07; i < 0x09; i++){
-             //   printf("\n\rSending %x", i);
-              //  Display_Error(OS_DISPLAY_LOC, i);
-               // OSTimeDlyHMSM(0, 0, 0, 104, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the display to initialize
-            //}
-            //OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for the display to initialize
             printf("\n\n\rNow sending: %d", tritiumError); // Sending 0 means no Tritium error
             CANbus_Send(canError, CAN_BLOCKING, MOTORCAN);
             OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Wait for ReadTritium to finish
@@ -245,6 +237,7 @@ void Task_ManagerTask(void* arg) {
             // Tests exceptions in ReadCarCAN by creating the tasks and sending messages
             // Successful if charging disable and missed messages turns off contactors
             // And we enter a nonrecoverable fault immediately after receiving the trip message
+            /* Not tested on hardware due to dependencies on ReadCarCAN fix_ignition_delay branch changes */
             printf("\n\n\r=========== Testing ReadCarCAN ===========");              
 
             createReadCarCAN();  

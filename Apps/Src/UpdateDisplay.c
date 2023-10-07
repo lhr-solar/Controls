@@ -85,6 +85,8 @@ UpdateDisplayError_t UpdateDisplay_Init(){
 	assertOSError(OS_DISPLAY_LOC, err);
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetPage(INFO);
+    OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, &err); // Wait >215ms so errors will show on the display
+    assertOSError(OS_MAIN_LOC, err);
 	return ret;
 }
 
