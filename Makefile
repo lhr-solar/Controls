@@ -13,9 +13,6 @@ NC=\033[0m # No Color
 DEBUG ?= 1
 export DEBUG
 
-USE_TEST_RUNNER ?= 0
-export USE_TEST_RUNNER
-
 # Note: ?= will define the variable only if it is not already set, which means the user can override any of
 # the TEST_LEADER, TEST_MOTOR, or TEST_CAR assignments with their own test files.
 

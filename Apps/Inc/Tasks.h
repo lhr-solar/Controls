@@ -18,19 +18,16 @@
 /**
  * Priority Definitions
  */
-typedef enum {
-    TASK_FAULT_STATE_PRIO=1,
-    TASK_INIT_PRIO,
-    TASK_TEST_PRIO,
-    TASK_READ_TRITIUM_PRIO,
-    TASK_SEND_TRITIUM_PRIO,
-    TASK_READ_CAR_CAN_PRIO,
-    TASK_UPDATE_DISPLAY_PRIO,
-    TASK_SEND_CAR_CAN_PRIO,
-    TASK_TELEMETRY_PRIO,
-    TASK_DEBUG_DUMP_PRIO,
-    TASK_COMMAND_LINE_PRIO
-} task_prio_t;
+ #define TASK_FAULT_STATE_PRIO               1
+ #define TASK_INIT_PRIO                      2
+ #define TASK_READ_TRITIUM_PRIO              3
+ #define TASK_SEND_TRITIUM_PRIO              4
+ #define TASK_READ_CAR_CAN_PRIO              5
+ #define TASK_UPDATE_DISPLAY_PRIO            6
+ #define TASK_SEND_CAR_CAN_PRIO              8
+ #define TASK_TELEMETRY_PRIO                 9
+ #define TASK_DEBUG_DUMP_PRIO                10
+ #define TASK_COMMAND_LINE_PRIO              11
 
 /**
  * Stack Sizes
