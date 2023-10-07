@@ -1,4 +1,13 @@
-// Copyright (c) 2022 Longhorn Racing Solar
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file MedianFilter.h
+ * @brief 
+ * 
+ * @defgroup MedianFilter
+ * @addtogroup MedianFilter
+ * @{
+ */
+
 /*
  * This file implements a median filter.
  * 
@@ -209,3 +218,4 @@ GETSINGLE (MF_TYPE_NAME *filter, uint32_t channel) {
 #undef PUT
 #undef GETSINGLE 
 
+/* @} */

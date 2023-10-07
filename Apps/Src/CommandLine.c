@@ -28,9 +28,9 @@ static bool cmd_Contactors_Get(void);
 
 static bool cmd_Contactors_Set(void);
 
-static bool cmd_Minion_Read_Input(void);
+static bool cmd_Minions_Read(void);
 
-static bool cmd_Minion_Write_Output(void);
+static bool cmd_Minions_Write(void);
 
 static bool cmd_Pedals_Read(void);
 
@@ -41,8 +41,8 @@ const struct Command cmdline_commands[] = {
 	{.name = "CANbus_Read", .action = cmd_CANbus_Read},
 	{.name = "Contactors_Get", .action = cmd_Contactors_Get},
 	{.name = "Contactors_Set", .action = cmd_Contactors_Set},
-	{.name = "Minion_Read_Input", .action = cmd_Minion_Read_Input},
-	{.name = "Minion_Write_Output", .action = cmd_Minion_Write_Output},
+	{.name = "Minions_Read", .action = cmd_Minions_Read},
+	{.name = "Minions_Write", .action = cmd_Minions_Write},
 	{.name = "Pedals_Read", .action = cmd_Pedals_Read},
 	{.name = NULL, .action = NULL}
 };
@@ -67,8 +67,8 @@ char *help = {
 	"contactor\n\r"
 	"	Contactors_Disable  array_c/array_p/motor_c - Disables the determined\n\r"
 	"contactor\n\r"
-	"	Minion_Read_Input 'input' - Reads the current status of the input\n\r"
-	"	Minion_Write_Output `output` on/off - Sets the current state of the output\n\r"
+	"	Minions_Read 'input' - Reads the current status of the input\n\r"
+	"	Minions_Write `output` on/off - Sets the current state of the output\n\r"
 	"	Pedals_Read accel/brake - Reads the current status of the pedal\n\r"
 };
 
@@ -275,10 +275,9 @@ static bool cmd_Contactors_Set(void){
 	return true;
 }
 
-static bool cmd_Minion_Read_Input(void){
-	Minion_Error_t err;
+static bool cmd_Minions_Read(void){
 	char *pinInput = strtok_r(NULL, " ", &save);
-	MinionPin_t pin;
+	pin_t pin;
 	if(strcmp(pinInput, "ign_1") == 0){
 		pin = IGN_1;
 	}
@@ -300,21 +299,20 @@ static bool cmd_Minion_Read_Input(void){
 	else if(strcmp(pinInput, "cruz_st") == 0){
 		pin = CRUZ_ST;
 	}
-	// else if(strcmp(pinInput, "brakelight") == 0){	// uncomment when fix implemented
-	// 	pin = REGEN_SW;
-	// }
+	else if(strcmp(pinInput, "brakelight") == 0){
+		pin = BRAKELIGHT;
+	}
 	else{
 		return false;
 	}
 
-	printf("%s is %s\n\r", pinInput, Minion_Read_Pin(pin, &err) ? "on" : "off");
+	printf("%s is %s\n\r", pinInput, Minions_Read(pin) ? "on" : "off");
 	return true;
 }
 
-static bool cmd_Minion_Write_Output(void){
-	Minion_Error_t err;
+static bool cmd_Minions_Write(void){
 	char *pinInput = strtok_r(NULL, " ", &save);
-	MinionPin_t pin;
+	pin_t pin;
 	if(strcmp(pinInput, "brakelight") == 0){
 		pin = BRAKELIGHT;
 	}
@@ -334,7 +332,7 @@ static bool cmd_Minion_Write_Output(void){
 		return false;
 	}
 
-	Minion_Write_Output(pin, state, &err);
+	Minions_Write(pin, state);
 	printf("%s set to %s\n\r", pinInput, stateInput);
 	return true;
 }

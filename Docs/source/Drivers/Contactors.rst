@@ -22,3 +22,7 @@ Most of the functions below take a ``contactor_t`` parameter in order to determi
 
 ``ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking)`` — Sets the state of a given contactor.  To keep this operation thread safe, the function attempts to acquire the mutex before proceeding, releasing it at the end. If blocking is true, the call will block until the mutex is acquired; else, the function will return an error without waiting.
 This function is currently used to set the motor contactor on if the ignition switch is in position two (main.c), and sets the array contactor on if the ignition is in position one and BPS allows it (ReadCarCAN.c).
+
+.. doxygengroup:: Contactors
+   :project: doxygen
+   :path: "/doxygen/xml/group__Contactors.xml"

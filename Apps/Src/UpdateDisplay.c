@@ -1,5 +1,5 @@
-/** 
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file UpdateDisplay.c
  * @brief Function implementations for the display application.
  * 
@@ -7,10 +7,8 @@
  * components on our HMI design. The HMI has the ability to indicate 
  * relevant information about system status to the driver.
  * 
- * @author Ishan Deshpande (IshDeshpa)
- * @author Roie Gal (Cam0Cow)
- * @author Nathaniel Delgado (NathanielDelgado)
-*/
+ */
+
 #include "UpdateDisplay.h"
 #include "Minions.h"
 #include <math.h>
@@ -75,7 +73,6 @@ const char* compStrings[15]= {
 	"faulterr"
 };
 
-
 UpdateDisplayError_t UpdateDisplay_Init(){
 	OS_ERR err;
 	disp_fifo_renew(&msg_queue);
@@ -133,7 +130,7 @@ static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
 	OS_ERR err;
 
 	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-  assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(OS_DISPLAY_LOC, err);
 	
 	bool success = disp_fifo_put(&msg_queue, cmd);
 
@@ -386,7 +383,6 @@ void Task_UpdateDisplay(void *p_arg) {
 		UpdateDisplay_PopNext();
     }
 }
-
 
 /**
  * Error handler functions

@@ -10,3 +10,7 @@ This FSM depends on data from across the system, such as:
 - The Pedals
 - The switches
 - The CAN messages from BPS (indicates whether we can regen brake or not)
+
+.. doxygengroup:: SendTritium
+   :project: doxygen
+   :path: "/doxygen/xml/group__SendTritium.xml"

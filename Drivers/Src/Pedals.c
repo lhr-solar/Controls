@@ -1,7 +1,8 @@
 /**
- * C file that initializes the accelerator and brake pedals
- * and reads the position of the pedals to see how far the 
- * pedal has been pressed
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Pedals.c
+ * @brief 
+ * 
  */
 
 #include "Pedals.h"
@@ -11,12 +12,12 @@
 // Refine in testing
 static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
     400, // Accelerator lower bound
-    2800, // Brake lower bound
+    2100, // Brake lower bound
 };
 
 static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
     900, // Accelerator upper bound
-    3100, // Brake upper bound
+    3300, // Brake upper bound
 };
 
 /**
@@ -49,6 +50,8 @@ int8_t Pedals_Read(pedal_t pedal){
          (UpperBound[pedal] - LowerBound[pedal]));
     }
 
+    if (percentage > 100) return 100;
+    if (percentage <   0) return   0;
+
     return percentage;
 }
-

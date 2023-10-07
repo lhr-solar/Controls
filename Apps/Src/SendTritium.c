@@ -1,6 +1,5 @@
 /**
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
- * 
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendTritium.c
  * @brief Function implementations for the SendTritium application.
  * 
@@ -9,12 +8,9 @@
  * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
  * The logic is determined through a finite state machine implementation.
  * 
- * If the macro __TEST_SENDTRITIUM is defined prior to including SendTritium.h, relevant
- * variables will be exposed as externs for unit testing.
+ * If the macro DEBUG is defined prior to including SendTritium.h, relevant
+ * setters will be exposed for unit testing.
  * 
- * @author Nathaniel Delgado (NathanielDelgado)
- * @author Diya Rajon (diyarajon)
- * @author Ishan Deshpande (IshDeshpa, ishdeshpa@utexas.edu)
  */
 
 #include "Pedals.h"
@@ -24,6 +20,7 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "CANConfig.h"
 #include "common.h"
 
 // Macros
@@ -32,7 +29,7 @@
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f) // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
-#define BRAKE_PEDAL_THRESHOLD 5  // percent
+#define BRAKE_PEDAL_THRESHOLD 15  // percent
 #define ACCEL_PEDAL_THRESHOLD 10 // percent
 
 #define ONEPEDAL_BRAKE_THRESHOLD 25 // percent
@@ -45,22 +42,16 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-#ifndef __TEST_SENDTRITIUM
-#define SCOPE static
-#else
-#define SCOPE 
-#endif
-
 // Inputs
-SCOPE bool cruiseEnable = false;
-SCOPE bool cruiseSet = false;
-SCOPE bool onePedalEnable = false;
-SCOPE bool regenEnable = false;
+static bool cruiseEnable = false;
+static bool cruiseSet = false;
+static bool onePedalEnable = false;
+static bool regenEnable = false;
 
-SCOPE uint8_t brakePedalPercent = 0;
-SCOPE uint8_t accelPedalPercent = 0;
+static uint8_t brakePedalPercent = 0;
+static uint8_t accelPedalPercent = 0;
 
-SCOPE Gear_t gear = NEUTRAL_GEAR;
+static Gear_t gear = NEUTRAL_GEAR;
 
 // Outputs
 float currentSetpoint = 0;
@@ -68,11 +59,12 @@ float velocitySetpoint = 0;
 float cruiseVelSetpoint = 0;
 
 // Current observed velocity
-SCOPE float velocityObserved = 0;
+static float velocityObserved = 0;
 
-#ifndef __TEST_SENDTRITIUM
+#ifndef SENDTRITIUM_PRINT_MES
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
+#endif
 
 // Debouncing counters
 static uint8_t onePedalCounter = 0;
@@ -86,7 +78,9 @@ static bool onePedalPrevious = false;
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
 
-#endif
+// FSM
+static TritiumState_t prevState; // Previous state
+static TritiumState_t state; // Current state
 
 // Getter functions for local variables in SendTritium.c
 GETTER(bool, cruiseEnable)
@@ -96,10 +90,27 @@ GETTER(bool, regenEnable)
 GETTER(uint8_t, brakePedalPercent)
 GETTER(uint8_t, accelPedalPercent)
 GETTER(Gear_t, gear)
+GETTER(TritiumState_t, state)
+GETTER(float, velocityObserved)
+GETTER(float, cruiseVelSetpoint)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
-GETTER(float, cruiseVelSetpoint)
-GETTER(float, velocityObserved)
+
+// Setter functions for local variables in SendTritium.c
+#ifdef SENDTRITIUM_EXPOSE_VARS
+SETTER(bool, cruiseEnable)
+SETTER(bool, cruiseSet)
+SETTER(bool, onePedalEnable)
+SETTER(bool, regenEnable)
+SETTER(uint8_t, brakePedalPercent)
+SETTER(uint8_t, accelPedalPercent)
+SETTER(Gear_t, gear)
+SETTER(TritiumState_t, state)
+SETTER(float, velocityObserved)
+SETTER(float, cruiseVelSetpoint)
+SETTER(float, currentSetpoint)
+SETTER(float, velocitySetpoint)
+#endif
 
 // Handler & Decider Declarations
 static void ForwardDriveHandler(void);
@@ -134,9 +145,6 @@ static const TritiumState_t FSM[9] = {
     {ACCELERATE_CRUISE, &AccelerateCruiseHandler, &AccelerateCruiseDecider}
 };
 
-static TritiumState_t prevState; // Previous state
-SCOPE TritiumState_t state; // Current state
-
 // Helper Functions
 
 /**
@@ -152,10 +160,10 @@ static float percentToFloat(uint8_t percent){
     return pedalToPercent[percent];
 }
 
+#ifdef SENDTRITIUM_PRINT_MES
 /**
  * @brief Dumps info to UART during testing
 */
-#ifdef __TEST_SENDTRITIUM
 static void getName(char* nameStr, uint8_t stateNameNum){
     switch(stateNameNum){
         case FORWARD_DRIVE:
@@ -210,12 +218,11 @@ static void dumpInfo(){
 }
 #endif
 
-#ifndef __TEST_SENDTRITIUM
+#ifndef SENDTRITIUM_EXPOSE_VARS
 /**
  * @brief Reads inputs from the system
 */
 static void readInputs(){
-    Minion_Error_t err;
 
     // Update pedals
     brakePedalPercent = Pedals_Read(BRAKE);
@@ -225,18 +232,18 @@ static void readInputs(){
     regenEnable = ChargeEnable_Get();
 
     // Update buttons
-    if(Minion_Read_Pin(REGEN_SW, &err) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
+    if(Minions_Read(REGEN_SW) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
     else if(onePedalCounter > 0){onePedalCounter--;}
 
-    if(Minion_Read_Pin(CRUZ_EN, &err) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
+    if(Minions_Read(CRUZ_EN) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
     else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
 
-    if(Minion_Read_Pin(CRUZ_ST, &err) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
+    if(Minions_Read(CRUZ_ST) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
     else if(cruiseSetCounter > 0){cruiseSetCounter--;}
     
     // Update gears
-    bool forwardSwitch = Minion_Read_Pin(FOR_SW, &err);
-    bool reverseSwitch = Minion_Read_Pin(REV_SW, &err);
+    bool forwardSwitch = Minions_Read(FOR_SW);
+    bool reverseSwitch = Minions_Read(REV_SW);
     bool forwardGear = (forwardSwitch && !reverseSwitch);
     bool reverseGear = (!forwardSwitch && reverseSwitch);
     bool neutralGear = (!forwardSwitch && !reverseSwitch);
@@ -308,15 +315,6 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
         uint8_t offset_out = out_min;
         return (offset_in * out_range)/in_range + offset_out;   // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
     }
-}
-
-/**
- * @brief Meters per second to rpm conversion
- * @param velocity_mps velocity in meters per second
- * @returns rpm
-*/
-inline static float mpsToRpm(float velocity_mps){
-    return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
 }
 
 // State Handlers & Deciders
@@ -555,24 +553,23 @@ static void OnePedalDriveHandler(){
         UpdateDisplay_SetCruiseState(DISP_DISABLED);
         UpdateDisplay_SetGear(DISP_FORWARD);
     }
-    Minion_Error_t minion_err;
     if(accelPedalPercent <= ONEPEDAL_BRAKE_THRESHOLD){
         // Regen brake: Map 0 -> brake to 100 -> 0
         velocitySetpoint = 0;
         currentSetpoint = percentToFloat(map(accelPedalPercent, PEDAL_MIN, ONEPEDAL_BRAKE_THRESHOLD, CURRENT_SP_MAX, CURRENT_SP_MIN));
-        Minion_Write_Output(BRAKELIGHT, true, &minion_err);
+        Minions_Write(BRAKELIGHT, true);
         UpdateDisplay_SetRegenState(DISP_ACTIVE);
     }else if(ONEPEDAL_BRAKE_THRESHOLD < accelPedalPercent && accelPedalPercent <= ONEPEDAL_NEUTRAL_THRESHOLD){
         // Neutral: coast
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = 0;
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
         UpdateDisplay_SetRegenState(DISP_ENABLED);
     }else if(ONEPEDAL_NEUTRAL_THRESHOLD < accelPedalPercent){
         // Accelerate: Map neutral -> 100 to 0 -> 100
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = percentToFloat(map(accelPedalPercent, ONEPEDAL_NEUTRAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
         UpdateDisplay_SetRegenState(DISP_ENABLED);
     }
 }
@@ -582,15 +579,14 @@ static void OnePedalDriveHandler(){
  * drive state (brake, record velocity, neutral drive).
 */
 static void OnePedalDriveDecider(){
-    Minion_Error_t minion_err;
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
         state = FSM[BRAKE_STATE];
     }else if(cruiseSet && cruiseEnable && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
     }else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR){
         state = FSM[NEUTRAL_DRIVE];
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
     }
 }
 
@@ -605,12 +601,11 @@ static void BrakeHandler(){
         UpdateDisplay_SetRegenState(DISP_DISABLED);
         UpdateDisplay_SetGear(DISP_FORWARD);
     }
-    Minion_Error_t minion_err;
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = 0;
     cruiseEnable = false;
     onePedalEnable = false;
-    Minion_Write_Output(BRAKELIGHT, true, &minion_err);
+    Minions_Write(BRAKELIGHT, true);
 }
 
 /**
@@ -618,11 +613,10 @@ static void BrakeHandler(){
  * neutral drive).
 */
 static void BrakeDecider(){
-    Minion_Error_t minion_err;
     if(brakePedalPercent < BRAKE_PEDAL_THRESHOLD){
         if(gear == FORWARD_GEAR) state = FSM[FORWARD_DRIVE];
         else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR) state = FSM[NEUTRAL_DRIVE];
-        Minion_Write_Output(BRAKELIGHT, false, &minion_err);
+        Minions_Write(BRAKELIGHT, false);
     }
 }
 
@@ -638,8 +632,7 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
-    #ifndef __TEST_SENDTRITIUM
-    CANbus_Init(MOTORCAN);
+    #ifndef SENDTRITIUM_PRINT_MES
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
@@ -651,27 +644,25 @@ void Task_SendTritium(void *p_arg){
         prevState = state;
 
         state.stateHandler();    // do what the current state does
-        #ifndef __TEST_SENDTRITIUM
+        #ifndef SENDTRITIUM_EXPOSE_VARS
         readInputs();   // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
         #endif
         state.stateDecider();    // decide what the next state is
 
         // Drive
-        #ifdef __TEST_SENDTRITIUM
+        #ifdef SENDTRITIUM_PRINT_MES
         dumpInfo();
         #else
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
-            memcpy(&driveCmd.data[0], &currentSetpoint, sizeof(float));
-            memcpy(&driveCmd.data[4], &velocitySetpoint, sizeof(float));
+            memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
+            memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
             CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
             motorMsgCounter = 0;
         }else{
             motorMsgCounter++;
         }
         #endif
-
-        
 
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);

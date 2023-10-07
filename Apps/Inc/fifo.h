@@ -1,4 +1,13 @@
-// Copyright (c) 2021 Longhorn Racing Solar
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file fifo.h
+ * @brief 
+ * 
+ * @defgroup fifo
+ * @addtogroup fifo
+ * @{
+ */
+
 /*
  * This file implements a fifo.
  * 
@@ -235,3 +244,4 @@ POPBACK (FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
 #undef POPBACK
 #undef CONCAT
 #undef _CONCAT
+/* @} */

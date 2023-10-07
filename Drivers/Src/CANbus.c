@@ -1,3 +1,9 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file CANbus.c
+ * @brief 
+ * 
+ */
 #include "CANbus.h"
 #include "config.h"
 #include "os.h"
@@ -8,6 +14,8 @@ static OS_SEM CANMail_Sem4[NUM_CAN];       // sem4 to count how many sending har
 static OS_SEM CANBus_RecieveSem4[NUM_CAN]; // sem4 to count how many msgs in our recieving queue
 static OS_MUTEX CANbus_TxMutex[NUM_CAN];   // mutex to lock tx line
 static OS_MUTEX CANbus_RxMutex[NUM_CAN];   // mutex to lock Rx line
+
+
 
 /**
  * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly outside this driver.
@@ -63,13 +71,7 @@ static CANId_t* whitelist_validator(CANId_t* wlist, uint8_t size){
     }
     return wlist;
 }
-/**
- * @brief   Initializes the CAN system for a given bus
- * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
- * @param   idWhitelist A list of CAN IDs that we want to receive. If NULL, we will receive all messages.
- * @param   idWhitelistSize The size of the whitelist.
- * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
- */
+
 ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize)
 {
     // initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
@@ -99,13 +101,6 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
     return SUCCESS;
 }
 
-/**
- * @brief   Transmits data onto the specified CANbus. Transmits up to 8 bytes at a time. If more is necessary, please use an IDX message.
- * @param   id : CAN id of the message
- * @param 	payload : the data that will be sent.
- * @param   blocking: Whether or not this should be a blocking call
- * @return  ERROR if data wasn't sent, SUCCESS if it was sent.
- */
 ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
 {
     CPU_TS timestamp;
@@ -184,14 +179,6 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
 
     return retval;
 }
-
-/**
- * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers. **DOES NOT POPULATE IDXen or IDX. You have to manually inspect the first byte and the ID**
- * @param   MsgContainer Where to store the recieved message
- * @param   blocking     Whether or not this read should be blocking
- * @param   bus          Which bus to read a message from
- * @returns              ERROR if read failed, SUCCESS otherwise
- */
 
 ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
 {
