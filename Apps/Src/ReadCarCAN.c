@@ -127,7 +127,7 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
  * @brief Turns array and motor controller precharge bypass contactor ON/OFF based on ignition and precharge status
  * @param None
 */
-static void (void){
+static void updatePrechargeContactors(void){
     Minion_Error_t Merr;
 
     arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);

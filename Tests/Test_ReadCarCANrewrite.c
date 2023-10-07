@@ -54,8 +54,6 @@ static CANDATA_t enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
 static void infoDump(){
-    OS_ERR err;
-    OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
     // printf("\n\r");
     printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) == ON) ? "ON" : "OFF")); 
      printf("\r\nArray Ignition Status    : %s", ((ArrayIgnitionStatus_Get()) ? "ON" : "OFF"));
@@ -183,9 +181,9 @@ void Task1(){
         (CPU_CHAR*)"ReadCarCAN",
         (OS_TASK_PTR)Task_ReadCarCAN,
         (void*)NULL,
-        (OS_PRIO)TASK_READ_CAR_CAN_PRIO,
+        (OS_PRIO)1,
         (CPU_STK*)ReadCarCAN_Stk,
-        (CPU_STK_SIZE)TASK_READ_CAR_CAN_STACK_SIZE/10,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT/10,
         (CPU_STK_SIZE)TASK_READ_CAR_CAN_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)NULL,
@@ -201,10 +199,10 @@ void Task1(){
 
         switch (TEST_OPTION) {
             case TEST_RENODE:
-            // turnContactorOn(2); 
-            // turnIgnitionOFF();
-            // sendDisableMsg();
-            // infoDump();  
+            turnContactorOn(2); 
+            turnIgnitionOFF();
+            sendDisableMsg();
+            infoDump();  
 
             // turnContactorOn(1);
             // turnIgnitionOFF(); 
@@ -217,6 +215,8 @@ void Task1(){
             // infoDump(); 
 
             turnContactorOn(2); 
+            turnIgnitionOFF();
+            sendEnableMsg(0);
             turnIgnitionOFF();
             sendEnableMsg(0);
             infoDump(); 
