@@ -12,6 +12,8 @@
 #define ARRAY_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 #define MOTOR_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
+OS_SEM infoMutex;
+
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) //1000 for ms -> s conversion
@@ -127,7 +129,7 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
  * @brief Turns array and motor controller precharge bypass contactor ON/OFF based on ignition and precharge status
  * @param None
 */
-static void updatePrechargeContactors(void){
+ void updatePrechargeContactors(void){
     Minion_Error_t Merr;
 
     arrayIgnitionStatus = Minion_Read_Pin(IGN_1, &Merr);
@@ -342,6 +344,7 @@ void Task_ReadCarCAN(void *p_arg){
     assertOSError(OS_READ_CAN_LOC, err);
 
     while(1){
+        OSSemPost(&infoMutex,OS_OPT_POST_NONE,&err);
       
         updatePrechargeContactors(); // Sets array and motor controller bypass ignition (IGN_1, IGN_2) contactor ON/OFF
 
@@ -407,6 +410,7 @@ void Task_ReadCarCAN(void *p_arg){
                 break; 
             }   
         }
+        
     }
 }
 

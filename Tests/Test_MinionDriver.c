@@ -25,34 +25,34 @@ void Task1(void *arg)
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     // tests the reading and writing
-    // while (1){
-    //     char str[128];
-    //     bool regen = Minion_Read_Input(REGEN_SW);
-    //     bool forward = Minion_Read_Input(FOR_SW);
-    //     bool reverse = Minion_Read_Input(REV_SW);
-    //     bool enable = Minion_Read_Input(CRUZ_EN);
-    //     bool set = Minion_Read_Input(CRUZ_ST);
-    //     bool ign1 = Minion_Read_Input(IGN_1);
-    //     bool ign2 = Minion_Read_Input(IGN_2);
+    while (1){
+        char str[128];
+        bool regen = Minion_Read_Pin(REGEN_SW);
+        bool forward = Minion_Read_Pin(FOR_SW);
+        bool reverse = Minion_Read_Pin(REV_SW);
+        bool enable = Minion_Read_Pin(CRUZ_EN);
+        bool set = Minion_Read_Pin(CRUZ_ST);
+        bool ign1 = Minion_Read_Pin(IGN_1);
+        bool ign2 = Minion_Read_Pin(IGN_2);
 
 
-    //     int size = sprintf(str, "regen = %d, forward = %d, reverse = %d, enable = %d, set = %d IGN1 = %d, IGN2 = %d \r", regen, forward,reverse,enable,set,ign1,ign2);
-    //     BSP_UART_Write(UART_2, str, size);
+        int size = sprintf(str, "regen = %d, forward = %d, reverse = %d, enable = %d, set = %d IGN1 = %d, IGN2 = %d \r", regen, forward,reverse,enable,set,ign1,ign2);
+        BSP_UART_Write(UART_2, str, size);
         
-    //     lightState=!lightState;
-    //     Minion_Write_Output(BRAKELIGHT, lightState);
+        lightState=!lightState;
+        Minion_Write_Output(BRAKELIGHT, lightState);
 
-    //     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);           
-    // }
+        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);           
+    }
 
     //tests the edge cases
-    bool output = Minion_Write_Output(REV_SW, lightState, &mErr);
-    bool input = Minion_Read_Input(BRAKELIGHT, &mErr);
+    // bool output = Minion_Write_Output(REV_SW, lightState, &mErr);
+    // bool input = Minion_Read_Pin(BRAKELIGHT, &mErr);
 
-    printf("This should print 0: %d", input);
-    printf("This should print 0: %d", output);
+    // printf("This should print 0: %d", input);
+    // printf("This should print 0: %d", output);
 
-    lightState = !lightState;
+    // lightState = !lightState;
     for(int i = 0; i < 999999; i++){}//should be half a second
 };
 

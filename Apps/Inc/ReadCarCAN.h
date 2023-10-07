@@ -30,6 +30,9 @@ typedef enum{
 */
 bool ChargeEnable_Get(void);
 
+extern OS_SEM infoMutex; //Mutex to lock GPIO writes to input pins
+
+
 /**
  * @brief Returns the value of charge message saturation
  * @return Value between -15 to 15
@@ -44,7 +47,6 @@ int8_t PlusMinusMsgSaturation_Get(void);
  * @return Whether array ignition is ON/OFF
 */
 bool ArrayIgnitionStatus_Get(void);
-
 
 /**
  * @brief Returns the value of charge message saturation

@@ -35,7 +35,9 @@ enum { // Test menu enum
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_RENODE // Decide what to test based on test menu enum
+#define TEST_OPTION TEST_HARDWARE_CHARGE_ENABLE // Decide what to test based on test menu enum
+
+
 
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
@@ -105,7 +107,7 @@ static void sendArrayEnableMsg(uint8_t isIgnitionOn){
             }   
      }else{
        //  for(int i = 0; i < 1; i++){
-             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       
         // }
      }
 }
@@ -115,19 +117,18 @@ static void sendMotorControllerEnableMsg(uint8_t isIgnitionOn){
     printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
     if(isIgnitionOn == 2){
         while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != true){
-            CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+            CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);      
         }
     }else{
         for(int i = 0; i < 1; i++){
-            CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+            CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);     
         }
     }
 }
 
 
 static void sendDisableMsg(){
-    printf("\n\r=========== Motor Controller Disable Msg Sent ===========");
-    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN);      
 }
 
 static void sendEnableMsg(int isIgnitionOn){
@@ -135,16 +136,16 @@ static void sendEnableMsg(int isIgnitionOn){
         if(isIgnitionOn == 2){
         while(!Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR)){
             CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); 
-            }      // Charge Enable messages
+            }     
 
         if (isIgnitionOn == 1){
             while(!Contactors_Get((ARRAY_BYPASS_PRECHARGE_CONTACTOR))){
             CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); 
-            }      // Charge Enable messages
+            }    
         }
 
         for(int i = 0; i < 1; i++){
-            CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN);       // Charge Enable messages
+            CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN);     
         }
     }
 }
@@ -158,6 +159,7 @@ static void turnContactorOn(uint8_t isIgnitionOn){
         sendMotorControllerEnableMsg(2);
     }
 }
+
 
 // static void turnBothContactorsOn(){
 //     turnContactorOn(1);
@@ -193,33 +195,42 @@ void Task1(){
     );
     assertOSError(OS_MAIN_LOC, err);
 
+    OSSemCreate(&infoMutex, "mutex waits for info",1, &err);
+    assertOSError(OS_MAIN_LOC, err);
     
-
     while(1){
+         
 
         switch (TEST_OPTION) {
             case TEST_RENODE:
+
             turnContactorOn(2); 
             turnIgnitionOFF();
             sendDisableMsg();
-            infoDump();  
+            infoDump();
 
             // turnContactorOn(1);
             // turnIgnitionOFF(); 
             // sendArrayEnableMsg(0);
+            // OSMutexPend(&infoMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+            // while (err != OS_ERR_NONE)
+            // {
+            // }
             // infoDump();  
 
             // turnContactorOn(2); 
             // turnIgnitionOFF();
             // sendMotorControllerEnableMsg(0);
+            // OSMutexPend(&infoMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+            // while (err != OS_ERR_NONE)
+            // {
+            // }
             // infoDump(); 
 
             turnContactorOn(2); 
             turnIgnitionOFF();
             sendEnableMsg(0);
-            turnIgnitionOFF();
-            sendEnableMsg(0);
-            infoDump(); 
+            infoDump();
 
             turnIgnitionToArrayON();
             sendDisableMsg();
@@ -288,19 +299,22 @@ void Task1(){
 
             case TEST_HARDWARE_CHARGE_ENABLE:
                 while(1){
-                    CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
                     infoDump();
-                }
+                    for(int i =0; i < 999999; i++){}
+                    }
                 break;
 
             case TEST_HARDWARE_CHARGE_DISABLE:
                 while(1){
-                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge disable messages
-                    infoDump();
+                    Minion_Error_t Merr;
+                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    printf("\r\n%d", Minion_Read_Pin(IGN_1, &Merr));
+                    printf("\r\n%d", Minion_Read_Pin(IGN_2, &Merr));
                 }
                 break;
+            
         }
-
     }
 }
 
