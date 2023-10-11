@@ -12,8 +12,8 @@
 #define BSP_OS_H
 
 typedef struct {
-  callback_t pend;
-  callback_t post;
+    callback_t pend;
+    callback_t post;
 } bsp_os_t;
 
 #endif

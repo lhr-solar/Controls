@@ -20,25 +20,25 @@
 #include "config.h"
 
 int main() {
-  BSP_ADC_Init();
-  BSP_UART_Init(UART_2);
+    BSP_ADC_Init();
+    BSP_UART_Init(UART_2);
 
-  /* INDIVIDUAL TESTS FOR EACH FUNCTION
-  printf("TESTS\n");
+    /* INDIVIDUAL TESTS FOR EACH FUNCTION
+    printf("TESTS\n");
 
-  printf("TESTING VALUE AND MILLIVOLTAGE\n");
-  printf("ADC at channel of Accelerator is %d\n",
-  BSP_ADC_Get_Value(Accelerator)); printf("ADC at channel of Brake is %d\n",
-  BSP_ADC_Get_Value(Brake));
+    printf("TESTING VALUE AND MILLIVOLTAGE\n");
+    printf("ADC at channel of Accelerator is %d\n",
+    BSP_ADC_Get_Value(Accelerator)); printf("ADC at channel of Brake is %d\n",
+    BSP_ADC_Get_Value(Brake));
 
-  printf("ADC at channel of Accelerator in mV is %d\n",
-  BSP_ADC_Get_Millivoltage(Accelerator)); printf("ADC at channel of Brake in mV
-  is %d\n", BSP_ADC_Get_Millivoltage(Brake));
-  */
+    printf("ADC at channel of Accelerator in mV is %d\n",
+    BSP_ADC_Get_Millivoltage(Accelerator)); printf("ADC at channel of Brake in
+    mV is %d\n", BSP_ADC_Get_Millivoltage(Brake));
+    */
 
-  while (1) {
-    printf("Accelerator: %5.1d\tBrake: %5.1d\r",
-           BSP_ADC_Get_Millivoltage(Accelerator_ADC),
-           BSP_ADC_Get_Millivoltage(Brake_ADC));
-  }
+    while (1) {
+        printf("Accelerator: %5.1d\tBrake: %5.1d\r",
+               BSP_ADC_Get_Millivoltage(Accelerator_ADC),
+               BSP_ADC_Get_Millivoltage(Brake_ADC));
+    }
 }

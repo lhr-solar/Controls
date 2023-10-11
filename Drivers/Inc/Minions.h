@@ -19,23 +19,23 @@
 
 /* Should keep in line with the LUT in Minions.c */
 #define FOREACH_PIN(PIN) \
-  PIN(IGN_1)             \
-  PIN(IGN_2)             \
-  PIN(REGEN_SW)          \
-  PIN(FOR_SW)            \
-  PIN(REV_SW)            \
-  PIN(CRUZ_EN)           \
-  PIN(CRUZ_ST)           \
-  PIN(BRAKELIGHT)
+    PIN(IGN_1)           \
+    PIN(IGN_2)           \
+    PIN(REGEN_SW)        \
+    PIN(FOR_SW)          \
+    PIN(REV_SW)          \
+    PIN(CRUZ_EN)         \
+    PIN(CRUZ_ST)         \
+    PIN(BRAKELIGHT)
 
 typedef enum MINIONPIN_ENUM {
-  FOREACH_PIN(GENERATE_ENUM) NUM_PINS,
+    FOREACH_PIN(GENERATE_ENUM) NUM_PINS,
 } pin_t;
 
 typedef struct {
-  uint16_t pinMask;
-  port_t port;
-  direction_t direction;
+    uint16_t pinMask;
+    port_t port;
+    direction_t direction;
 } pinInfo_t;
 
 /**

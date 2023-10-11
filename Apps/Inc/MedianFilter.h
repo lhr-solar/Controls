@@ -83,9 +83,9 @@
 
 // The actual structure
 typedef struct MF_STRUCT_NAME {
-  MF_TYPE raw[MF_CHANNELS][MF_DEPTH];
-  MF_TYPE filtered[MF_CHANNELS];
-  uint32_t index;
+    MF_TYPE raw[MF_CHANNELS][MF_DEPTH];
+    MF_TYPE filtered[MF_CHANNELS];
+    uint32_t index;
 } MF_TYPE_NAME;
 
 // Define some names for our functions
@@ -102,27 +102,27 @@ typedef struct MF_STRUCT_NAME {
  * @param channel   the channel in the median filter to find the median of
  */
 static inline MF_TYPE __attribute__((unused)) MEDIAN(MF_TYPE *channel) {
-  static MF_TYPE sorted[MF_DEPTH];
+    static MF_TYPE sorted[MF_DEPTH];
 
-  // copy channels into temporary array
-  memcpy(sorted, channel, MF_DEPTH * sizeof(MF_TYPE));
+    // copy channels into temporary array
+    memcpy(sorted, channel, MF_DEPTH * sizeof(MF_TYPE));
 
-  // sort temporary array
-  for (uint32_t i = 0; i < MF_DEPTH; ++i) {
-    MF_TYPE min = sorted[i];
-    uint32_t minIdx = i;
-    for (uint32_t j = i + 1; j < MF_DEPTH; ++j) {
-      if (sorted[j] < min) {
-        min = sorted[j];
-        minIdx = j;
-      }
+    // sort temporary array
+    for (uint32_t i = 0; i < MF_DEPTH; ++i) {
+        MF_TYPE min = sorted[i];
+        uint32_t minIdx = i;
+        for (uint32_t j = i + 1; j < MF_DEPTH; ++j) {
+            if (sorted[j] < min) {
+                min = sorted[j];
+                minIdx = j;
+            }
+        }
+        sorted[minIdx] = sorted[i];
+        sorted[i] = min;
     }
-    sorted[minIdx] = sorted[i];
-    sorted[i] = min;
-  }
 
-  // return median
-  return sorted[MF_DEPTH >> 1];
+    // return median
+    return sorted[MF_DEPTH >> 1];
 }
 
 /**
@@ -137,16 +137,16 @@ static inline MF_TYPE __attribute__((unused)) MEDIAN(MF_TYPE *channel) {
  */
 static inline void __attribute__((unused))
 INIT(MF_TYPE_NAME *filter, MF_TYPE low, MF_TYPE high) {
-  // intialize the filter with alternating low and high values, so it will be
-  // stable at startup
-  for (uint32_t channel = 0; channel < MF_CHANNELS; ++channel) {
-    for (uint32_t i = 0; i < MF_DEPTH - 1; ++i) {
-      filter->raw[channel][i] = (i & 1) ? high : low;
+    // intialize the filter with alternating low and high values, so it will be
+    // stable at startup
+    for (uint32_t channel = 0; channel < MF_CHANNELS; ++channel) {
+        for (uint32_t i = 0; i < MF_DEPTH - 1; ++i) {
+            filter->raw[channel][i] = (i & 1) ? high : low;
+        }
+        filter->filtered[channel] = MEDIAN(filter->raw[channel]);
     }
-    filter->filtered[channel] = MEDIAN(filter->raw[channel]);
-  }
 
-  filter->index = MF_DEPTH - 1;
+    filter->index = MF_DEPTH - 1;
 }
 
 /**
@@ -160,16 +160,16 @@ INIT(MF_TYPE_NAME *filter, MF_TYPE low, MF_TYPE high) {
  */
 static inline void __attribute__((unused))
 PUT(MF_TYPE_NAME *filter, MF_TYPE *channels) {
-  // put the new data into the filter
-  for (uint32_t channel = 0; channel < MF_CHANNELS; ++channel) {
-    filter->raw[channel][filter->index] = channels[channel];
-  }
-  (filter->index) = (filter->index + 1) % MF_DEPTH;
+    // put the new data into the filter
+    for (uint32_t channel = 0; channel < MF_CHANNELS; ++channel) {
+        filter->raw[channel][filter->index] = channels[channel];
+    }
+    (filter->index) = (filter->index + 1) % MF_DEPTH;
 
-  // update the list of filtered values
-  for (uint32_t channel = 0; channel < MF_CHANNELS; ++channel) {
-    filter->filtered[channel] = MEDIAN(filter->raw[channel]);
-  }
+    // update the list of filtered values
+    for (uint32_t channel = 0; channel < MF_CHANNELS; ++channel) {
+        filter->filtered[channel] = MEDIAN(filter->raw[channel]);
+    }
 }
 
 /**
@@ -180,7 +180,7 @@ PUT(MF_TYPE_NAME *filter, MF_TYPE *channels) {
  */
 static inline void __attribute__((unused))
 GET(MF_TYPE_NAME *filter, MF_TYPE *dest) {
-  memcpy(dest, filter->filtered, sizeof(MF_TYPE) * MF_CHANNELS);
+    memcpy(dest, filter->filtered, sizeof(MF_TYPE) * MF_CHANNELS);
 }
 
 /**
@@ -192,7 +192,7 @@ GET(MF_TYPE_NAME *filter, MF_TYPE *dest) {
  */
 static inline MF_TYPE __attribute__((unused))
 GETSINGLE(MF_TYPE_NAME *filter, uint32_t channel) {
-  return filter->filtered[channel];
+    return filter->filtered[channel];
 }
 
 // undef everything, so this file can be included multiple times

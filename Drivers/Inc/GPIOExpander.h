@@ -16,9 +16,9 @@
 #include "common.h"
 
 typedef struct _spi_message {
-  int8_t opcode;
-  int8_t requestedPort;
-  int8_t data;
+    int8_t opcode;
+    int8_t requestedPort;
+    int8_t data;
 } spi_message;
 
 // Opcodes

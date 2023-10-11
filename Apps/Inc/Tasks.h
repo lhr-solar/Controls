@@ -132,19 +132,19 @@ void TaskSwHook_Init(void);
  * an error is coming from.
  */
 typedef enum {
-  OS_NONE_LOC = 0x000,
-  OS_ARRAY_LOC = 0x001,
-  OS_READ_CAN_LOC = 0x002,
-  OS_READ_TRITIUM_LOC = 0x004,
-  OS_SEND_CAN_LOC = 0x008,
-  OS_SEND_TRITIUM_LOC = 0x010,
-  OS_UPDATE_VEL_LOC = 0x020,
-  OS_CONTACTOR_LOC = 0x080,
-  OS_MINIONS_LOC = 0x100,
-  OS_MAIN_LOC = 0x200,
-  OS_CANDRIVER_LOC = 0x400,
-  OS_MOTOR_CONNECTION_LOC = 0x800,
-  OS_DISPLAY_LOC = 0x1000
+    OS_NONE_LOC = 0x000,
+    OS_ARRAY_LOC = 0x001,
+    OS_READ_CAN_LOC = 0x002,
+    OS_READ_TRITIUM_LOC = 0x004,
+    OS_SEND_CAN_LOC = 0x008,
+    OS_SEND_TRITIUM_LOC = 0x010,
+    OS_UPDATE_VEL_LOC = 0x020,
+    OS_CONTACTOR_LOC = 0x080,
+    OS_MINIONS_LOC = 0x100,
+    OS_MAIN_LOC = 0x200,
+    OS_CANDRIVER_LOC = 0x400,
+    OS_MOTOR_CONNECTION_LOC = 0x800,
+    OS_DISPLAY_LOC = 0x1000
 } os_error_loc_t;
 
 /**
@@ -153,13 +153,13 @@ typedef enum {
  * Different fault states that need to be handled by the FaultState task
  */
 typedef enum {
-  FAULT_NONE = 0x00,     // No fault
-  FAULT_OS = 0x01,       // for OS faults
-  FAULT_UNREACH = 0x02,  // for unreachable conditions
-  FAULT_TRITIUM = 0x04,  // for errors sent from the tritium
-  FAULT_READBPS = 0x08,  // for unsuccessfully reading from BPS CAN
-  FAULT_DISPLAY = 0x10,  // for display faults
-  FAULT_BPS = 0x20,      // for if BPS trips
+    FAULT_NONE = 0x00,     // No fault
+    FAULT_OS = 0x01,       // for OS faults
+    FAULT_UNREACH = 0x02,  // for unreachable conditions
+    FAULT_TRITIUM = 0x04,  // for errors sent from the tritium
+    FAULT_READBPS = 0x08,  // for unsuccessfully reading from BPS CAN
+    FAULT_DISPLAY = 0x10,  // for display faults
+    FAULT_BPS = 0x20,      // for if BPS trips
 } fault_bitmap_t;
 
 /**
@@ -172,8 +172,8 @@ typedef enum {
  */
 #define TASK_TRACE_LENGTH 8
 typedef struct {
-  OS_TCB* tasks[TASK_TRACE_LENGTH];
-  uint32_t index;
+    OS_TCB* tasks[TASK_TRACE_LENGTH];
+    uint32_t index;
 } task_trace_t;
 
 extern task_trace_t PrevTasks;
@@ -194,11 +194,12 @@ void _assertOSError(
     OS_ERR err);  // TODO: This should be changed to enforce only enum usage
 
 #if DEBUG == 1
-#define assertOSError(OS_err_loc, err)                                        \
-  if (err != OS_ERR_NONE) {                                                   \
-    printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \
-  }                                                                           \
-  _assertOSError(OS_err_loc, err);
+#define assertOSError(OS_err_loc, err)                                      \
+    if (err != OS_ERR_NONE) {                                               \
+        printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, \
+               err);                                                        \
+    }                                                                       \
+    _assertOSError(OS_err_loc, err);
 #else
 #define assertOSError(OS_err_loc, err) _assertOSError(OS_err_loc, err);
 #endif

@@ -41,94 +41,94 @@ static bool *lineRecvd[NUM_UART] = {&usbLineReceived, &displayLineReceived};
 static USART_TypeDef *handles[NUM_UART] = {USART2, USART3};
 
 static void USART_DISPLAY_Init() {
-  displayTxFifo = txfifo_new();
-  displayRxFifo = rxfifo_new();
+    displayTxFifo = txfifo_new();
+    displayRxFifo = rxfifo_new();
 
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  USART_InitTypeDef UART_InitStruct = {0};
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    USART_InitTypeDef UART_InitStruct = {0};
 
-  // Initialize clocks
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+    // Initialize clocks
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
-  // Initialize pins
-  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
-  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-  GPIO_Init(GPIOB, &GPIO_InitStruct);
-  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;
-  GPIO_Init(GPIOC, &GPIO_InitStruct);
+    // Initialize pins
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;
+    GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
-  GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_USART3);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
+    GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_USART3);
 
-  // Initialize UART3
-  UART_InitStruct.USART_BaudRate = 115200;
-  UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-  UART_InitStruct.USART_Parity = USART_Parity_No;
-  UART_InitStruct.USART_StopBits = USART_StopBits_1;
-  UART_InitStruct.USART_WordLength = USART_WordLength_8b;
-  USART_Init(USART3, &UART_InitStruct);
+    // Initialize UART3
+    UART_InitStruct.USART_BaudRate = 115200;
+    UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    UART_InitStruct.USART_Parity = USART_Parity_No;
+    UART_InitStruct.USART_StopBits = USART_StopBits_1;
+    UART_InitStruct.USART_WordLength = USART_WordLength_8b;
+    USART_Init(USART3, &UART_InitStruct);
 
-  // Enable interrupts
+    // Enable interrupts
 
-  USART_Cmd(USART3, ENABLE);
+    USART_Cmd(USART3, ENABLE);
 
-  // Enable NVIC
-  NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+    // Enable NVIC
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 static void USART_USB_Init() {
-  usbTxFifo = txfifo_new();
-  usbRxFifo = rxfifo_new();
+    usbTxFifo = txfifo_new();
+    usbRxFifo = rxfifo_new();
 
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  USART_InitTypeDef UART_InitStruct = {0};
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    USART_InitTypeDef UART_InitStruct = {0};
 
-  // Initialize clocks
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    // Initialize clocks
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
-  // Initialize pins
-  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
-  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-  GPIO_Init(GPIOA, &GPIO_InitStruct);
+    // Initialize pins
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
-  GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
 
-  // Initialize UART2
-  UART_InitStruct.USART_BaudRate = 115200;
-  UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-  UART_InitStruct.USART_Parity = USART_Parity_No;
-  UART_InitStruct.USART_StopBits = USART_StopBits_1;
-  UART_InitStruct.USART_WordLength = USART_WordLength_8b;
-  USART_Init(USART2, &UART_InitStruct);
+    // Initialize UART2
+    UART_InitStruct.USART_BaudRate = 115200;
+    UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    UART_InitStruct.USART_Parity = USART_Parity_No;
+    UART_InitStruct.USART_StopBits = USART_StopBits_1;
+    UART_InitStruct.USART_WordLength = USART_WordLength_8b;
+    USART_Init(USART2, &UART_InitStruct);
 
-  USART_Cmd(USART2, ENABLE);
+    USART_Cmd(USART2, ENABLE);
 
-  // Enable NVIC
-  NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+    // Enable NVIC
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
-  setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stdout, NULL, _IONBF, 0);
 }
 
 /**
@@ -136,26 +136,26 @@ static void USART_USB_Init() {
  */
 static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback,
                                    UART_t uart) {
-  switch (uart) {
-    case UART_2:  // their UART_USB
-      USART_USB_Init();
-      usbRxCallback = rxCallback;
-      usbTxCallback = txCallback;
-      break;
-    case UART_3:  // their UART_DISPLAY
-      USART_DISPLAY_Init();
-      displayRxCallback = rxCallback;
-      displayTxCallback = txCallback;
-      break;
-    default:
-      // Error
-      break;
-  }
+    switch (uart) {
+        case UART_2:  // their UART_USB
+            USART_USB_Init();
+            usbRxCallback = rxCallback;
+            usbTxCallback = txCallback;
+            break;
+        case UART_3:  // their UART_DISPLAY
+            USART_DISPLAY_Init();
+            displayRxCallback = rxCallback;
+            displayTxCallback = txCallback;
+            break;
+        default:
+            // Error
+            break;
+    }
 }
 
 void BSP_UART_Init(UART_t uart) {
-  // Not using callbacks for now
-  BSP_UART_Init_Internal(NULL, NULL, uart);
+    // Not using callbacks for now
+    BSP_UART_Init_Internal(NULL, NULL, uart);
 }
 
 /**
@@ -168,35 +168,35 @@ void BSP_UART_Init(UART_t uart) {
  * @return  number of bytes that was read
  */
 uint32_t BSP_UART_Read(UART_t usart, char *str) {
-  char data = 0;
-  uint32_t recvd = 0;
+    char data = 0;
+    uint32_t recvd = 0;
 
-  bool *line_recvd = lineRecvd[usart];
+    bool *line_recvd = lineRecvd[usart];
 
-  while (*line_recvd == false) {
-    BSP_UART_Write(
-        usart, "",
-        0);  // needs to be in. Otherwise, usbLineRecieved will not update
-  }
+    while (*line_recvd == false) {
+        BSP_UART_Write(
+            usart, "",
+            0);  // needs to be in. Otherwise, usbLineRecieved will not update
+    }
 
-  USART_TypeDef *usart_handle = handles[usart];
+    USART_TypeDef *usart_handle = handles[usart];
 
-  USART_ITConfig(usart_handle, USART_IT_RXNE, RESET);
+    USART_ITConfig(usart_handle, USART_IT_RXNE, RESET);
 
-  rxfifo_t *fifo = rx_fifos[usart];
+    rxfifo_t *fifo = rx_fifos[usart];
 
-  rxfifo_peek(fifo, &data);
-  while (!rxfifo_is_empty(fifo) && data != '\r') {
-    recvd += rxfifo_get(fifo, (char *)str++);
     rxfifo_peek(fifo, &data);
-  }
+    while (!rxfifo_is_empty(fifo) && data != '\r') {
+        recvd += rxfifo_get(fifo, (char *)str++);
+        rxfifo_peek(fifo, &data);
+    }
 
-  rxfifo_get(fifo, &data);
-  *str = 0;
-  *line_recvd = false;
-  USART_ITConfig(usart_handle, USART_IT_RXNE, SET);
+    rxfifo_get(fifo, &data);
+    *str = 0;
+    *line_recvd = false;
+    USART_ITConfig(usart_handle, USART_IT_RXNE, SET);
 
-  return recvd;
+    return recvd;
 }
 
 /**
@@ -212,120 +212,122 @@ uint32_t BSP_UART_Read(UART_t usart, char *str) {
  *       sections of code.
  */
 uint32_t BSP_UART_Write(UART_t usart, char *str, uint32_t len) {
-  uint32_t sent = 0;
+    uint32_t sent = 0;
 
-  USART_TypeDef *usart_handle = handles[usart];
+    USART_TypeDef *usart_handle = handles[usart];
 
-  USART_ITConfig(usart_handle, USART_IT_TC, RESET);
+    USART_ITConfig(usart_handle, USART_IT_TC, RESET);
 
-  txfifo_t *fifo = tx_fifos[usart];
+    txfifo_t *fifo = tx_fifos[usart];
 
-  while (sent < len) {
-    if (!txfifo_put(fifo, str[sent])) {
-      // Allow the interrupt to fire
-      USART_ITConfig(usart_handle, USART_IT_TC, SET);
-      // Wait for space to open up
-      while (txfifo_is_full(fifo))
-        ;
-      // Disable the interrupt again
-      USART_ITConfig(usart_handle, USART_IT_TC, RESET);
-    } else {
-      sent++;
+    while (sent < len) {
+        if (!txfifo_put(fifo, str[sent])) {
+            // Allow the interrupt to fire
+            USART_ITConfig(usart_handle, USART_IT_TC, SET);
+            // Wait for space to open up
+            while (txfifo_is_full(fifo))
+                ;
+            // Disable the interrupt again
+            USART_ITConfig(usart_handle, USART_IT_TC, RESET);
+        } else {
+            sent++;
+        }
     }
-  }
 
-  USART_ITConfig(usart_handle, USART_IT_TC, SET);
+    USART_ITConfig(usart_handle, USART_IT_TC, SET);
 
-  return sent;
+    return sent;
 }
 
 void USART2_IRQHandler(void) {
-  CPU_SR_ALLOC();
-  CPU_CRITICAL_ENTER();
-  OSIntEnter();
-  CPU_CRITICAL_EXIT();
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
 
-  if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) != RESET) {
-    uint8_t data = USART2->DR;
-    bool removeSuccess = 1;
-    if (data == '\r' || data == '\n') {
-      usbLineReceived = true;
-      if (usbRxCallback != NULL) usbRxCallback();
-    }
-    // Check if it was a backspace.
-    // '\b' for minicmom
-    // '\177' for putty
-    else if (data != '\b' && data != '\177') {
-      rxfifo_put(&usbRxFifo, data);
-    }
-    // Sweet, just a "regular" key. Put it into the fifo
-    // Doesn't matter if it fails. If it fails, then the data gets thrown away
-    // and the easiest solution for this is to increase RX_SIZE
-    else {
-      char junk;
-      // Delete the last entry!
-      removeSuccess = rxfifo_popback(&usbRxFifo, &junk);
+    if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) != RESET) {
+        uint8_t data = USART2->DR;
+        bool removeSuccess = 1;
+        if (data == '\r' || data == '\n') {
+            usbLineReceived = true;
+            if (usbRxCallback != NULL) usbRxCallback();
+        }
+        // Check if it was a backspace.
+        // '\b' for minicmom
+        // '\177' for putty
+        else if (data != '\b' && data != '\177') {
+            rxfifo_put(&usbRxFifo, data);
+        }
+        // Sweet, just a "regular" key. Put it into the fifo
+        // Doesn't matter if it fails. If it fails, then the data gets thrown
+        // away and the easiest solution for this is to increase RX_SIZE
+        else {
+            char junk;
+            // Delete the last entry!
+            removeSuccess = rxfifo_popback(&usbRxFifo, &junk);
 
-      USART_SendData(
-          UART_2, 0x7F);  // TODO: Not sure if the backspace works. Need to test
+            USART_SendData(
+                UART_2,
+                0x7F);  // TODO: Not sure if the backspace works. Need to test
+        }
+        if (removeSuccess) {
+            USART2->DR = data;
+        }
     }
-    if (removeSuccess) {
-      USART2->DR = data;
+    if (USART_GetITStatus(USART2, USART_IT_TC) != RESET) {
+        // If getting data from fifo fails i.e. the tx fifo is empty, then turn
+        // off the TX interrupt
+        if (!txfifo_get(&usbTxFifo, (char *)&(USART2->DR))) {
+            USART_ITConfig(USART2, USART_IT_TC,
+                           RESET);  // Turn off the interrupt
+            if (usbTxCallback != NULL) usbTxCallback();  // Callback
+        }
     }
-  }
-  if (USART_GetITStatus(USART2, USART_IT_TC) != RESET) {
-    // If getting data from fifo fails i.e. the tx fifo is empty, then turn off
-    // the TX interrupt
-    if (!txfifo_get(&usbTxFifo, (char *)&(USART2->DR))) {
-      USART_ITConfig(USART2, USART_IT_TC, RESET);  // Turn off the interrupt
-      if (usbTxCallback != NULL) usbTxCallback();  // Callback
-    }
-  }
-  if (USART_GetITStatus(USART2, USART_IT_ORE) != RESET)
-    ;
+    if (USART_GetITStatus(USART2, USART_IT_ORE) != RESET)
+        ;
 
-  OSIntExit();
+    OSIntExit();
 }
 
 void USART3_IRQHandler(void) {
-  CPU_SR_ALLOC();
-  CPU_CRITICAL_ENTER();
-  OSIntEnter();
-  CPU_CRITICAL_EXIT();
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
 
-  if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) {
-    uint8_t data = USART3->DR;
-    bool removeSuccess = 1;
-    if (data == '\r') {
-      displayLineReceived = true;
-      if (displayRxCallback != NULL) displayRxCallback();
+    if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) {
+        uint8_t data = USART3->DR;
+        bool removeSuccess = 1;
+        if (data == '\r') {
+            displayLineReceived = true;
+            if (displayRxCallback != NULL) displayRxCallback();
+        }
+        // Check if it was a backspace.
+        // '\b' for minicmom
+        // '\177' for putty
+        if (data != '\b' && data != '\177') rxfifo_put(&displayRxFifo, data);
+        // Sweet, just a "regular" key. Put it into the fifo
+        // Doesn't matter if it fails. If it fails, then the data gets thrown
+        // away and the easiest solution for this is to increase RX_SIZE
+        else {
+            char junk;
+            // Delete the last entry!
+            removeSuccess = rxfifo_popback(&displayRxFifo, &junk);
+        }
+        if (removeSuccess) {
+            USART3->DR = data;
+        }
     }
-    // Check if it was a backspace.
-    // '\b' for minicmom
-    // '\177' for putty
-    if (data != '\b' && data != '\177') rxfifo_put(&displayRxFifo, data);
-    // Sweet, just a "regular" key. Put it into the fifo
-    // Doesn't matter if it fails. If it fails, then the data gets thrown away
-    // and the easiest solution for this is to increase RX_SIZE
-    else {
-      char junk;
-      // Delete the last entry!
-      removeSuccess = rxfifo_popback(&displayRxFifo, &junk);
+    if (USART_GetITStatus(USART3, USART_IT_TC) != RESET) {
+        // If getting data from fifo fails i.e. the tx fifo is empty, then turn
+        // off the TX interrupt
+        if (!txfifo_get(&displayTxFifo, (char *)&(USART3->DR))) {
+            USART_ITConfig(USART3, USART_IT_TC, RESET);
+            if (displayTxCallback != NULL) displayTxCallback();
+        }
     }
-    if (removeSuccess) {
-      USART3->DR = data;
-    }
-  }
-  if (USART_GetITStatus(USART3, USART_IT_TC) != RESET) {
-    // If getting data from fifo fails i.e. the tx fifo is empty, then turn off
-    // the TX interrupt
-    if (!txfifo_get(&displayTxFifo, (char *)&(USART3->DR))) {
-      USART_ITConfig(USART3, USART_IT_TC, RESET);
-      if (displayTxCallback != NULL) displayTxCallback();
-    }
-  }
-  if (USART_GetITStatus(USART3, USART_IT_ORE) != RESET)
-    ;
+    if (USART_GetITStatus(USART3, USART_IT_ORE) != RESET)
+        ;
 
-  OSIntExit();
+    OSIntExit();
 }

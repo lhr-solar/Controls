@@ -17,9 +17,9 @@
 
 // timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u
-#define CAN_WATCH_TMR_DLY_TMR_TS                      \
-  ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / \
-   (1000u))  // 1000 for ms -> s conversion
+#define CAN_WATCH_TMR_DLY_TMR_TS                        \
+    ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / \
+     (1000u))  // 1000 for ms -> s conversion
 #define PRECHARGE_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
 
 // CAN watchdog timer variable
@@ -59,73 +59,73 @@ bool ChargeEnable_Get() { return chargeEnable; }
  * (-1)
  */
 static void updateSaturation(int8_t chargeMessage) {
-  // Replace oldest message with new charge message and update index for oldest
-  // message
-  chargeMsgBuffer[oldestMsgIdx] = chargeMessage;
-  oldestMsgIdx = (oldestMsgIdx + 1) % SAT_BUF_LENGTH;
+    // Replace oldest message with new charge message and update index for
+    // oldest message
+    chargeMsgBuffer[oldestMsgIdx] = chargeMessage;
+    oldestMsgIdx = (oldestMsgIdx + 1) % SAT_BUF_LENGTH;
 
-  // Calculate the new saturation value by assigning weightings from 1 to buffer
-  // length in order of oldest to newest
-  int newSaturation = 0;
-  for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++) {
-    newSaturation +=
-        chargeMsgBuffer[(oldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
-  }
-  chargeMsgSaturation = newSaturation;
+    // Calculate the new saturation value by assigning weightings from 1 to
+    // buffer length in order of oldest to newest
+    int newSaturation = 0;
+    for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++) {
+        newSaturation +=
+            chargeMsgBuffer[(oldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
+    }
+    chargeMsgSaturation = newSaturation;
 }
 
 // helper function to disable charging
 // Turns off contactors by setting fault bitmap and signaling fault state
 static inline void chargingDisable(void) {
-  OS_ERR err;
-  // mark regen as disabled
-  chargeEnable = false;
+    OS_ERR err;
+    // mark regen as disabled
+    chargeEnable = false;
 
-  // kill contactors
-  Contactors_Set(ARRAY_CONTACTOR, false, true);
-  Contactors_Set(ARRAY_PRECHARGE, false, true);
+    // kill contactors
+    Contactors_Set(ARRAY_CONTACTOR, false, true);
+    Contactors_Set(ARRAY_PRECHARGE, false, true);
 
-  // mark regen as disabled
-  chargeEnable = false;
+    // mark regen as disabled
+    chargeEnable = false;
 
-  // Set fault bitmap
-  FaultBitmap |= FAULT_READBPS;
+    // Set fault bitmap
+    FaultBitmap |= FAULT_READBPS;
 
-  // Signal fault state to kill contactors at its earliest convenience
-  OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-  assertOSError(OS_READ_CAN_LOC, err);
+    // Signal fault state to kill contactors at its earliest convenience
+    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
 }
 
 // helper function to call if charging should be enabled
 static inline void chargingEnable(void) {
-  OS_ERR err;
-  CPU_TS ts;
+    OS_ERR err;
+    CPU_TS ts;
 
-  // mark regen as enabled
-  chargeEnable = true;
+    // mark regen as enabled
+    chargeEnable = true;
 
-  // check if we need to run the precharge sequence to turn on the array
-  bool shouldRestartArray = false;
+    // check if we need to run the precharge sequence to turn on the array
+    bool shouldRestartArray = false;
 
-  OSMutexPend(&arrayRestartMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-  assertOSError(OS_READ_CAN_LOC, err);
-
-  // if the array is off and we're not already turning it on, start turning it
-  // on
-  shouldRestartArray =
-      !restartingArray && (Contactors_Get(ARRAY_CONTACTOR) == OFF);
-
-  // wait for precharge for array
-  if (shouldRestartArray) {
-    restartingArray = true;
-
-    // Wait to make sure precharge is finished and then restart array
-    OSTmrStart(&prechargeDlyTimer, &err);
+    OSMutexPend(&arrayRestartMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
     assertOSError(OS_READ_CAN_LOC, err);
-  }
 
-  OSMutexPost(&arrayRestartMutex, OS_OPT_NONE, &err);
-  assertOSError(OS_READ_CAN_LOC, err);
+    // if the array is off and we're not already turning it on, start turning it
+    // on
+    shouldRestartArray =
+        !restartingArray && (Contactors_Get(ARRAY_CONTACTOR) == OFF);
+
+    // wait for precharge for array
+    if (shouldRestartArray) {
+        restartingArray = true;
+
+        // Wait to make sure precharge is finished and then restart array
+        OSTmrStart(&prechargeDlyTimer, &err);
+        assertOSError(OS_READ_CAN_LOC, err);
+    }
+
+    OSMutexPost(&arrayRestartMutex, OS_OPT_NONE, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
 }
 
 /**
@@ -136,14 +136,16 @@ static inline void chargingEnable(void) {
  *
  */
 static void arrayRestart(void *p_tmr, void *p_arg) {
-  if (chargeEnable) {  // If regen has been disabled during precharge, we don't
-                       // want to turn on the main contactor immediately after
-    Contactors_Set(ARRAY_CONTACTOR, (Minions_Read(IGN_1)),
-                   false);  // turn on array contactor if the ign switch lets us
-    UpdateDisplay_SetArray(true);
-  }
-  // done restarting the array
-  restartingArray = false;
+    if (chargeEnable) {  // If regen has been disabled during precharge, we
+                         // don't want to turn on the main contactor immediately
+                         // after
+        Contactors_Set(
+            ARRAY_CONTACTOR, (Minions_Read(IGN_1)),
+            false);  // turn on array contactor if the ign switch lets us
+        UpdateDisplay_SetArray(true);
+    }
+    // done restarting the array
+    restartingArray = false;
 };
 
 /**
@@ -155,87 +157,90 @@ static void arrayRestart(void *p_tmr, void *p_arg) {
 void canWatchTimerCallback(void *p_tmr, void *p_arg) { chargingDisable(); }
 
 void Task_ReadCarCAN(void *p_arg) {
-  OS_ERR err;
+    OS_ERR err;
 
-  // data struct for CAN message
-  CANDATA_t dataBuf;
+    // data struct for CAN message
+    CANDATA_t dataBuf;
 
-  OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
-  assertOSError(OS_READ_CAN_LOC, err);
+    OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
+    assertOSError(OS_READ_CAN_LOC, err);
 
-  // Create the CAN Watchdog (periodic) timer, which disconnects the array and
-  // disables regenerative braking if we do not get a CAN message with the ID
-  // Charge_Enable within the desired interval.
-  OSTmrCreate(&canWatchTimer, "CAN Watch Timer", 0, CAN_WATCH_TMR_DLY_TMR_TS,
-              OS_OPT_TMR_PERIODIC, canWatchTimerCallback, NULL, &err);
-  assertOSError(OS_READ_CAN_LOC, err);
+    // Create the CAN Watchdog (periodic) timer, which disconnects the array and
+    // disables regenerative braking if we do not get a CAN message with the ID
+    // Charge_Enable within the desired interval.
+    OSTmrCreate(&canWatchTimer, "CAN Watch Timer", 0, CAN_WATCH_TMR_DLY_TMR_TS,
+                OS_OPT_TMR_PERIODIC, canWatchTimerCallback, NULL, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
 
-  OSTmrCreate(&prechargeDlyTimer, "Precharge Delay Timer", PRECHARGE_DLY_TMR_TS,
-              0, OS_OPT_TMR_ONE_SHOT, arrayRestart, NULL, &err);
-  assertOSError(OS_READ_CAN_LOC, err);
+    OSTmrCreate(&prechargeDlyTimer, "Precharge Delay Timer",
+                PRECHARGE_DLY_TMR_TS, 0, OS_OPT_TMR_ONE_SHOT, arrayRestart,
+                NULL, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
 
-  // Start CAN Watchdog timer
-  OSTmrStart(&canWatchTimer, &err);
-  assertOSError(OS_READ_CAN_LOC, err);
+    // Start CAN Watchdog timer
+    OSTmrStart(&canWatchTimer, &err);
+    assertOSError(OS_READ_CAN_LOC, err);
 
-  while (1) {
-    // Get any message that BPS Sent us
-    ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
-    if (status != SUCCESS) {
-      continue;
-    }
-
-    switch (dataBuf.ID) {  // we got a message
-      case BPS_TRIP: {
-        // BPS has a fault and we need to enter fault state (probably)
-        if (dataBuf.data[0] == 1) {  // If buffer contains 1 for a BPS trip, we
-                                     // should enter a nonrecoverable fault
-          OS_ERR err;
-
-          Display_Evac(SOC, SBPV);  // Display evacuation message
-
-          // Set fault bitmap and assert the error
-          FaultBitmap |= FAULT_BPS;
-          OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-          assertOSError(OS_READ_CAN_LOC, err);
+    while (1) {
+        // Get any message that BPS Sent us
+        ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
+        if (status != SUCCESS) {
+            continue;
         }
-      }
-      case CHARGE_ENABLE: {
-        // Restart CAN Watchdog timer
-        OSTmrStart(&canWatchTimer, &err);
-        assertOSError(OS_READ_CAN_LOC, err);
 
-        if (dataBuf.data[0] ==
-            0) {  // If the buffer doesn't contain 1 for enable, turn off
-                  // chargeEnable and turn array off
-          chargingDisable();
-          updateSaturation(-1);  // Update saturation and buffer
+        switch (dataBuf.ID) {  // we got a message
+            case BPS_TRIP: {
+                // BPS has a fault and we need to enter fault state (probably)
+                if (dataBuf.data[0] ==
+                    1) {  // If buffer contains 1 for a BPS trip, we
+                          // should enter a nonrecoverable fault
+                    OS_ERR err;
 
-        } else {  // We got a message of enable with a nonzero value
-          updateSaturation(1);
+                    Display_Evac(SOC, SBPV);  // Display evacuation message
 
-          // If the charge message saturation is above the threshold, wait for
-          // restart precharge sequence then enable charging. If we are already
-          // precharging/array is on, nothing will be done
-          if (chargeMsgSaturation >= SATURATION_THRESHOLD) {
-            chargingEnable();
-          }
+                    // Set fault bitmap and assert the error
+                    FaultBitmap |= FAULT_BPS;
+                    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
+                    assertOSError(OS_READ_CAN_LOC, err);
+                }
+            }
+            case CHARGE_ENABLE: {
+                // Restart CAN Watchdog timer
+                OSTmrStart(&canWatchTimer, &err);
+                assertOSError(OS_READ_CAN_LOC, err);
+
+                if (dataBuf.data[0] ==
+                    0) {  // If the buffer doesn't contain 1 for enable, turn
+                          // off chargeEnable and turn array off
+                    chargingDisable();
+                    updateSaturation(-1);  // Update saturation and buffer
+
+                } else {  // We got a message of enable with a nonzero value
+                    updateSaturation(1);
+
+                    // If the charge message saturation is above the threshold,
+                    // wait for restart precharge sequence then enable charging.
+                    // If we are already precharging/array is on, nothing will
+                    // be done
+                    if (chargeMsgSaturation >= SATURATION_THRESHOLD) {
+                        chargingEnable();
+                    }
+                }
+                break;
+            }
+            case SUPPLEMENTAL_VOLTAGE: {
+                SBPV = (*(uint16_t *)&dataBuf.data);
+                UpdateDisplay_SetSBPV(SBPV);  // Receive value in mV
+                break;
+            }
+            case STATE_OF_CHARGE: {
+                SOC = (*(uint32_t *)&dataBuf.data) /
+                      (100000);  // Convert to integer percent
+                UpdateDisplay_SetSOC(SOC);
+                break;
+            }
+            default:
+                break;
         }
-        break;
-      }
-      case SUPPLEMENTAL_VOLTAGE: {
-        SBPV = (*(uint16_t *)&dataBuf.data);
-        UpdateDisplay_SetSBPV(SBPV);  // Receive value in mV
-        break;
-      }
-      case STATE_OF_CHARGE: {
-        SOC = (*(uint32_t *)&dataBuf.data) /
-              (100000);  // Convert to integer percent
-        UpdateDisplay_SetSOC(SOC);
-        break;
-      }
-      default:
-        break;
     }
-  }
 }

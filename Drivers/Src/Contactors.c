@@ -20,19 +20,19 @@ static OS_MUTEX contactorsMutex;
  * @return  None
  */
 static void setContactor(contactor_t contactor, bool state) {
-  switch (contactor) {
-    case ARRAY_CONTACTOR:
-      BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, state);
-      break;
-    case ARRAY_PRECHARGE:
-      BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, state);
-      break;
-    case MOTOR_CONTACTOR:
-      BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, state);
-      break;
-    default:
-      break;
-  }
+    switch (contactor) {
+        case ARRAY_CONTACTOR:
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, state);
+            break;
+        case ARRAY_PRECHARGE:
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, state);
+            break;
+        case MOTOR_CONTACTOR:
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, state);
+            break;
+        default:
+            break;
+    }
 }
 
 /**
@@ -41,19 +41,20 @@ static void setContactor(contactor_t contactor, bool state) {
  * @return  None
  */
 void Contactors_Init() {
-  BSP_GPIO_Init(
-      CONTACTORS_PORT,
-      (ARRAY_CONTACTOR_PIN) | (ARRAY_PRECHARGE_PIN) | (MOTOR_CONTACTOR_PIN), 1);
+    BSP_GPIO_Init(
+        CONTACTORS_PORT,
+        (ARRAY_CONTACTOR_PIN) | (ARRAY_PRECHARGE_PIN) | (MOTOR_CONTACTOR_PIN),
+        1);
 
-  // start disabled
-  for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
-    setContactor(contactor, OFF);
-  }
+    // start disabled
+    for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
+        setContactor(contactor, OFF);
+    }
 
-  // initialize mutex
-  OS_ERR err;
-  OSMutexCreate(&contactorsMutex, "Contactors lock", &err);
-  assertOSError(OS_CONTACTOR_LOC, err);
+    // initialize mutex
+    OS_ERR err;
+    OSMutexCreate(&contactorsMutex, "Contactors lock", &err);
+    assertOSError(OS_CONTACTOR_LOC, err);
 }
 
 /**
@@ -64,21 +65,21 @@ void Contactors_Init() {
  * @return  The contactor's state (ON/OFF)
  */
 bool Contactors_Get(contactor_t contactor) {
-  State state = OFF;
-  switch (contactor) {
-    case ARRAY_CONTACTOR:
-      state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN);
-      break;
-    case ARRAY_PRECHARGE:
-      state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN);
-      break;
-    case MOTOR_CONTACTOR:
-      state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN);
-      break;
-    default:
-      break;
-  }
-  return (state == ON) ? ON : OFF;
+    State state = OFF;
+    switch (contactor) {
+        case ARRAY_CONTACTOR:
+            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN);
+            break;
+        case ARRAY_PRECHARGE:
+            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN);
+            break;
+        case MOTOR_CONTACTOR:
+            state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN);
+            break;
+        default:
+            break;
+    }
+    return (state == ON) ? ON : OFF;
 }
 
 /**
@@ -90,28 +91,28 @@ bool Contactors_Get(contactor_t contactor) {
  * @return  Whether or not the contactor was successfully set
  */
 ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
-  CPU_TS timestamp;
-  OS_ERR err;
-  ErrorStatus result = ERROR;
+    CPU_TS timestamp;
+    OS_ERR err;
+    ErrorStatus result = ERROR;
 
-  // acquire lock if its available
-  OSMutexPend(&contactorsMutex, 0,
-              blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING,
-              &timestamp, &err);
+    // acquire lock if its available
+    OSMutexPend(&contactorsMutex, 0,
+                blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING,
+                &timestamp, &err);
 
-  if (err == OS_ERR_PEND_WOULD_BLOCK) {
-    return ERROR;
-  }
-  assertOSError(OS_CONTACTOR_LOC, err);
+    if (err == OS_ERR_PEND_WOULD_BLOCK) {
+        return ERROR;
+    }
+    assertOSError(OS_CONTACTOR_LOC, err);
 
-  // change contactor to match state and make sure it worked
-  setContactor(contactor, state);
-  bool ret = (bool)Contactors_Get(contactor);
-  result = (ret == state) ? SUCCESS : ERROR;
+    // change contactor to match state and make sure it worked
+    setContactor(contactor, state);
+    bool ret = (bool)Contactors_Get(contactor);
+    result = (ret == state) ? SUCCESS : ERROR;
 
-  // release lock
-  OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
-  assertOSError(OS_CONTACTOR_LOC, err);
+    // release lock
+    OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
+    assertOSError(OS_CONTACTOR_LOC, err);
 
-  return result;
+    return result;
 }

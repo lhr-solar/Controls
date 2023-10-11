@@ -20,18 +20,18 @@
  * @param p_arg
  */
 void Task_SendCarCAN(void *p_arg) {
-  CANDATA_t motorMsg;
-  OS_ERR err;
+    CANDATA_t motorMsg;
+    OS_ERR err;
 
-  while (1) {
-    // Send motor msg
-    CAN_Queue_Pend(&motorMsg);
-    CANbus_Send(motorMsg, true, CARCAN);
+    while (1) {
+        // Send motor msg
+        CAN_Queue_Pend(&motorMsg);
+        CANbus_Send(motorMsg, true, CARCAN);
 
-    // Delay of few milliseconds (100)
-    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
-    if (err != OS_ERR_NONE) {
-      assertOSError(OS_UPDATE_VEL_LOC, err);
+        // Delay of few milliseconds (100)
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
+        if (err != OS_ERR_NONE) {
+            assertOSError(OS_UPDATE_VEL_LOC, err);
+        }
     }
-  }
 }

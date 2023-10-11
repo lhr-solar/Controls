@@ -29,28 +29,28 @@
  * the lookup table.
  */
 typedef enum {
-  BPS_TRIP = 0x002,
-  BPS_ALL_CLEAR = 0x101,
-  BPS_CONTACTOR_STATE = 0x102,
-  STATE_OF_CHARGE = 0x106,
-  WDOG_TRIGGERED = 0x107,
-  SUPPLEMENTAL_VOLTAGE = 0x10B,
-  CHARGE_ENABLE = 0x10C,
-  MOTOR_DRIVE = 0x221,
-  MOTOR_POWER = 0x222,
-  MOTOR_RESET = 0x223,
-  MOTOR_STATUS = 0x241,
-  MC_BUS = 0x242,
-  VELOCITY = 0x243,
-  MC_PHASE_CURRENT = 0x244,
-  VOLTAGE_VEC = 0x245,
-  CURRENT_VEC = 0x246,
-  BACKEMF = 0x247,
-  TEMPERATURE = 0x24B,
-  ODOMETER_AMPHOURS = 0x24E,
-  ARRAY_CONTACTOR_STATE_CHANGE = 0x24F,
-  CARDATA = 0x581,
-  NUM_CAN_IDS
+    BPS_TRIP = 0x002,
+    BPS_ALL_CLEAR = 0x101,
+    BPS_CONTACTOR_STATE = 0x102,
+    STATE_OF_CHARGE = 0x106,
+    WDOG_TRIGGERED = 0x107,
+    SUPPLEMENTAL_VOLTAGE = 0x10B,
+    CHARGE_ENABLE = 0x10C,
+    MOTOR_DRIVE = 0x221,
+    MOTOR_POWER = 0x222,
+    MOTOR_RESET = 0x223,
+    MOTOR_STATUS = 0x241,
+    MC_BUS = 0x242,
+    VELOCITY = 0x243,
+    MC_PHASE_CURRENT = 0x244,
+    VOLTAGE_VEC = 0x245,
+    CURRENT_VEC = 0x246,
+    BACKEMF = 0x247,
+    TEMPERATURE = 0x24B,
+    ODOMETER_AMPHOURS = 0x24E,
+    ARRAY_CONTACTOR_STATE_CHANGE = 0x24F,
+    CARDATA = 0x581,
+    NUM_CAN_IDS
 } CANId_t;
 
 /**
@@ -60,8 +60,8 @@ typedef enum {
  * decimal).
  */
 typedef struct {
-  bool idxEn : 1;
-  unsigned int size : 7;
+    bool idxEn : 1;
+    unsigned int size : 7;
 } CANLUT_T;
 
 /**
@@ -73,9 +73,9 @@ typedef struct {
  * @param data 	data of the message
  */
 typedef struct {
-  CANId_t ID;
-  uint8_t idx;
-  uint8_t data[8];
+    CANId_t ID;
+    uint8_t idx;
+    uint8_t data[8];
 } CANDATA_t;
 
 /**

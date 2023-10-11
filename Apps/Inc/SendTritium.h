@@ -21,32 +21,32 @@
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD) / (FSM_PERIOD)
 
 #define FOREACH_Gear(GEAR) \
-  GEAR(FORWARD_GEAR)       \
-  GEAR(NEUTRAL_GEAR)       \
-  GEAR(REVERSE_GEAR)
+    GEAR(FORWARD_GEAR)     \
+    GEAR(NEUTRAL_GEAR)     \
+    GEAR(REVERSE_GEAR)
 
 typedef enum GEAR_ENUM {
-  FOREACH_Gear(GENERATE_ENUM) NUM_GEARS,
+    FOREACH_Gear(GENERATE_ENUM) NUM_GEARS,
 } Gear_t;
 
 // State Names
 typedef enum {
-  FORWARD_DRIVE,
-  NEUTRAL_DRIVE,
-  REVERSE_DRIVE,
-  RECORD_VELOCITY,
-  POWERED_CRUISE,
-  COASTING_CRUISE,
-  BRAKE_STATE,
-  ONEPEDAL,
-  ACCELERATE_CRUISE
+    FORWARD_DRIVE,
+    NEUTRAL_DRIVE,
+    REVERSE_DRIVE,
+    RECORD_VELOCITY,
+    POWERED_CRUISE,
+    COASTING_CRUISE,
+    BRAKE_STATE,
+    ONEPEDAL,
+    ACCELERATE_CRUISE
 } TritiumStateName_t;
 
 // State Struct for FSM
 typedef struct TritiumState {
-  TritiumStateName_t name;
-  void (*stateHandler)(void);
-  void (*stateDecider)(void);
+    TritiumStateName_t name;
+    void (*stateHandler)(void);
+    void (*stateDecider)(void);
 } TritiumState_t;
 
 // Getter functions for local variables in SendTritium.c

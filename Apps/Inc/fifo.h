@@ -65,9 +65,9 @@
 
 // The actual structure
 typedef struct FIFO_STRUCT_NAME {
-  FIFO_TYPE buffer[FIFO_SIZE];
-  int put;
-  int get;
+    FIFO_TYPE buffer[FIFO_SIZE];
+    int put;
+    int get;
 } FIFO_TYPE_NAME;
 
 // Define some names for our functions
@@ -89,9 +89,9 @@ typedef struct FIFO_STRUCT_NAME {
  * @return an empty fifo
  */
 static inline FIFO_TYPE_NAME __attribute__((unused)) NEW() {
-  FIFO_TYPE_NAME fifo;
-  memset(&fifo, 0, sizeof(fifo));
-  return fifo;
+    FIFO_TYPE_NAME fifo;
+    memset(&fifo, 0, sizeof(fifo));
+    return fifo;
 }
 
 /**
@@ -102,9 +102,9 @@ static inline FIFO_TYPE_NAME __attribute__((unused)) NEW() {
  * rather marks it as "empty".
  */
 static inline void __attribute__((unused)) RENEW(FIFO_TYPE_NAME *fifo) {
-  if (fifo != NULL) {
-    fifo->get = fifo->put;
-  }
+    if (fifo != NULL) {
+        fifo->get = fifo->put;
+    }
 }
 
 /**
@@ -130,7 +130,7 @@ static bool IS_EMPTY(FIFO_TYPE_NAME *fifo) { return fifo->put == fifo->get; }
  * @return false If not full
  */
 static bool IS_FULL(FIFO_TYPE_NAME *fifo) {
-  return (fifo->put + 1) % FIFO_SIZE == fifo->get;
+    return (fifo->put + 1) % FIFO_SIZE == fifo->get;
 }
 
 /**
@@ -145,13 +145,13 @@ static bool IS_FULL(FIFO_TYPE_NAME *fifo) {
  * @return false if unsuccessful
  */
 static bool __attribute__((unused)) GET(FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
-  if (!IS_EMPTY(fifo)) {
-    *elem = fifo->buffer[fifo->get];
-    fifo->get = (fifo->get + 1) % FIFO_SIZE;
-    return true;
-  }
+    if (!IS_EMPTY(fifo)) {
+        *elem = fifo->buffer[fifo->get];
+        fifo->get = (fifo->get + 1) % FIFO_SIZE;
+        return true;
+    }
 
-  return false;
+    return false;
 }
 
 /**
@@ -166,13 +166,13 @@ static bool __attribute__((unused)) GET(FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
  * @return false if unsuccessful
  */
 static bool __attribute__((unused)) PUT(FIFO_TYPE_NAME *fifo, FIFO_TYPE elem) {
-  if (!IS_FULL(fifo)) {
-    fifo->buffer[fifo->put] = elem;
-    fifo->put = (fifo->put + 1) % FIFO_SIZE;
-    return true;
-  }
+    if (!IS_FULL(fifo)) {
+        fifo->buffer[fifo->put] = elem;
+        fifo->put = (fifo->put + 1) % FIFO_SIZE;
+        return true;
+    }
 
-  return false;
+    return false;
 }
 
 /**
@@ -188,12 +188,12 @@ static bool __attribute__((unused)) PUT(FIFO_TYPE_NAME *fifo, FIFO_TYPE elem) {
  */
 static bool __attribute__((unused))
 PEEK(FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
-  if (!IS_EMPTY(fifo)) {
-    *elem = fifo->buffer[fifo->get];
-    return true;
-  }
+    if (!IS_EMPTY(fifo)) {
+        *elem = fifo->buffer[fifo->get];
+        return true;
+    }
 
-  return false;
+    return false;
 }
 
 /**
@@ -209,13 +209,13 @@ PEEK(FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
  */
 static bool __attribute__((unused))
 POPBACK(FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
-  if (!IS_EMPTY(fifo)) {
-    fifo->put = (fifo->put + FIFO_SIZE - 1) % FIFO_SIZE;
-    *elem = fifo->buffer[fifo->put];
-    return true;
-  }
+    if (!IS_EMPTY(fifo)) {
+        fifo->put = (fifo->put + FIFO_SIZE - 1) % FIFO_SIZE;
+        *elem = fifo->buffer[fifo->put];
+        return true;
+    }
 
-  return false;
+    return false;
 }
 
 #undef IS_EMPTY

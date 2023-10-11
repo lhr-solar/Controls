@@ -32,7 +32,7 @@
  * creating the declaration in the header file
  */
 #define GETTER(type, name) \
-  type get_##name(void) { return name; }
+    type get_##name(void) { return name; }
 
 #define EXPOSE_GETTER(type, name) type get_##name(void);
 
@@ -43,7 +43,7 @@
  * creating the declaration in the header file
  */
 #define SETTER(type, name) \
-  void set_##name(type val) { name = val; }
+    void set_##name(type val) { name = val; }
 
 #define EXPOSE_SETTER(type, name) void set_##name(type val);
 
@@ -57,7 +57,7 @@ void print_float(char *str, float f);
  * @returns rpm
  */
 inline float mpsToRpm(float velocity_mps) {
-  return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
+    return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
 }
 
 #endif

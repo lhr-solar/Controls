@@ -16,10 +16,10 @@
 #include "config.h"
 
 int main() {
-  Pedals_Init();
+    Pedals_Init();
 
-  while (1) {
-    printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\r", Pedals_Read(ACCELERATOR),
-           Pedals_Read(BRAKE));
-  }
+    while (1) {
+        printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\r",
+               Pedals_Read(ACCELERATOR), Pedals_Read(BRAKE));
+    }
 }
