@@ -1,111 +1,44 @@
 ---
-Checks: 'bugprone-assert-side-effect,
-bugprone-assignment-in-if-condition,
-bugprone-bool-pointer-implicit-conversion,
-bugprone-branch-clone,
-bugprone-dynamic-static-initializers,
-bugprone-incorrect-roundings,
-bugprone-integer-division,
-bugprone-macro-parentheses,
-bugprone-macro-repeated-side-effects,
-bugprone-misplaced-widening-cast,
-bugprone-multiple-statement-macro,
-bugprone-non-zero-enum-to-bool-conversion,
-bugprone-redundant-branch-condition,
-bugprone-reserved-identifier,
-bugprone-signed-char-misuse,
-bugprone-sizeof-expression,
-bugprone-suspicious-enum-usage,
-bugprone-suspicious-include,
-bugprone-suspicious-missing-comma,
-bugprone-suspicious-semicolon,
-bugprone-suspicious-string-compare,
-bugprone-swapped-arguments,
-bugprone-terminating-continue,
-bugprone-too-small-loop-variable,
-bugprone-undefined-memory-manipulation,
-bugprone-unsafe-functions,
-clang-analyzer-core.CallAndMessage,
-clang-analyzer-core.DivideZero,
-clang-analyzer-core.NonNullParamChecker,
-clang-analyzer-core.NullDereference,
-clang-analyzer-core.StackAddressEscape,
-clang-analyzer-core.UndefinedBinaryOperatorResult,
-clang-analyzer-core.VLASize,
-clang-analyzer-core.ArraySubscript,
-clang-analyzer-core.uninitialized.Assign,
-clang-analyzer-core.uninitialized.Branch,
-clang-analyzer-core.uninitialized.CapturedBlockVariable,
-clang-analyzer-core.uninitialized.UndefReturn,
-clang-analyzer-deadcode.DeadStores,
-llvm-include-order,
-misc-confusable-identifiers,
-misc-definitions-in-headers,
-misc-include-cleaner,
-misc-misleading-bidirectional,
-misc-misleading-identifier,
-misc-misplaced-const,
-misc-no-recursion,
-misc-redundant-expression,
-misc-static-assert,
-misc-unused-parameters,
-readability-avoid-unconditional-preprocessor-if,
-readability-braces-around-statements,
-readability-const-return-type,
-readability-delete-null-pointer,
-readability-duplicate-include,
-readability-else-after-return,
-readability-function-cognitive-complexity,
-readability-function-size,
-readability-identifier-naming,
-readability-implicit-bool-conversion,
-readability-inconsistent-declaration-parameter-name,
-readability-isolate-declaration,
-readability-magic-numbers,
-readability-misleading-indentation,
-readability-misplaced-array-index,
-readability-named-parameter,
-readability-non-const-parameter,
-readability-redundant-control-flow,
-readability-redundant-declaration,
-readability-redundant-function-ptr-dereference,
-readability-redundant-preprocessor,
-readability-suspicious-call-argument,
-cert-env33-c,
-cert-err33-c,
-cert-err34-c,
-cert-flp30-c'
-
-WarningsAsErrors: true
-HeaderFilterRegex: '^((?!/RTOS/).)*$'
-FormatStyle:     file
+Checks:          'bugprone-*,clang-analyzer-*,
+                  cppcoreguidelines-*,misc-*,modernize-*,
+                  performance-*,readability-*,
+                  -cppcoreguidelines-avoid-non-const-global-variables,
+                  -misc-unused-parameters,
+                  -bugprone-branch-clone,
+                  -bugprone-easily-swappable-parameters,
+                  -readability-function-cognitive-complexity,'
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     none
 CheckOptions:
-  - key:             bugprone-assert-side-effect.AssertMacros
-    value:           assert
-  - key:             readability-identifier-naming.EnumCase
-    value:           Camel_Snake_Case
-  - key:             readability-identifier-naming.FunctionCase
-    value:           camelBack
-  - key:             readability-identifier-naming.FunctionIgnoredRegexp
-    value:           "(CAN.*|OS.*)"
-  - key:             readability-identifier-naming.GlobalFunctionCase
-    value:           Camel_Snake_Case
-  - key:             readability-identifier-naming.ParameterCase
-    value:           lower_case
-  - key:             readability-identifier-naming.ParameterIgnoredRegexp
-    value:           "(CAN.*|BPS.*|OS.*)"
-  - key:             readability-identifier-naming.UnionCase
-    value:           aNy_CasE
-  - key:             readability-identifier-naming.VariableCase
-    value:           camelBack
-  - key:             readability-identifier-naming.VariableIgnoredRegexp
-    value:           "(CAN.*|BPS.*|OS.*)"
-  - key:             readability-identifier-naming.GlobalVariableCase
-    value:           Camel_Snake_Case
-  - key:             TypedefSuffix
-    value:           _t
-  - key:             readability-identifier-naming.IgnoreMainLikeFunctions
-    value:           1
-  - key:             readability-magic-numbers.IgnoredIntegerValues
-    value:           0;1;2;3;4;100
+  - { key: readability-identifier-naming.ConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.ConstantParameterCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.ConstantPointerParameterCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.EnumCase,       value: camelBack }
+  - { key: readability-identifier-naming.EnumSuffix,       value: _e }
+  - { key: readability-identifier-naming.EnumConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.FunctionCase,       value: camelBack }
+  - { key: readability-identifier-naming.GlobalConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.GlobalConstantPointerCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.GlobalFunctionCase,       value: camelBack }
+  - { key: readability-identifier-naming.GlobalPointerCase,       value: camelBack }
+  - { key: readability-identifier-naming.GlobalVariableCase,       value: camelBack }
+  - { key: readability-identifier-naming.LocalConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.LocalPointerCase,       value: camelBack }
+  - { key: readability-identifier-naming.LocalVariableCase,       value: camelBack }
+  - { key: readability-identifier-naming.MacroDefinitionCase,       value: aNy_CasE }
+  - { key: readability-identifier-naming.ParameterCase,       value: aNy_CasE }
+  - { key: readability-identifier-naming.PointerParameterCase,       value: aNy_CasE }
+  - { key: readability-identifier-naming.ScopedEnumConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.StaticConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.StaticVariableCase,       value: camelBack }
+  - { key: readability-identifier-naming.StructCase,       value: camelBack }
+  - { key: readability-identifier-naming.StructSuffix,       value: _s }
+  - { key: readability-identifier-naming.TypedefCase,       value: camelBack }
+  - { key: readability-identifier-naming.TypedefSuffix,       value: _t }
+  - { key: readability-identifier-naming.UnionCase,       value: camelBack }
+  - { key: readability-identifier-naming.UnionSuffix,       value: _u }
+  - { key: readability-identifier-naming.VariableCase,       value: camelBack }
+  - { key: cppcoreguidelines-avoid-non-const-global-variables,       value: false }
 ...
