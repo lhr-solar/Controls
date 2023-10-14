@@ -106,7 +106,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
 
 /**
  * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers.
- * @param   data 		pointer to where to store the CAN id of the recieved msg
+ * @param   data 		pointer to where to store the CAN id of the received msg
  * @param   blocking 	Whether or not this read should be a blocking read
  * @param   bus 		The bus to use. This should either be CARCAN or MOTORCAN.
  * @returns ERROR if read failed, SUCCESS otherwise
