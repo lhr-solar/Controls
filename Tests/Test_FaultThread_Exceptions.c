@@ -41,7 +41,7 @@ enum { // Test menu enum
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_UPDATEDISPLAY // Decide what to test based on test menu enum
+#define TEST_OPTION TEST_READTRITIUM // Decide what to test based on test menu enum
 #define READTRITIUM_OPTION T_NONE // The enum for the tritium error we want to test (reference error enum)
 
 /* READTRITIUM_OPTION menu:
@@ -113,13 +113,13 @@ void ExceptionTask(callback_t test_callbacks) {
     // Throw two recoverable errors
     printf("\n\n\rAsserting recoverable errors");
     // Throw an arbitrary recoverable error w/o locking the scheduler
-    assertTaskError(OS_MAIN_LOC, 0x01, test_callbacks, OPT_NO_LOCK_SCHED, OPT_RECOV); 
+    throwTaskError(OS_MAIN_LOC, 0x01, test_callbacks, OPT_NO_LOCK_SCHED, OPT_RECOV); 
     // Throw an arbitrary recoverable error w/ locked scheduler
-    assertTaskError(OS_TASKS_LOC, 0x02, test_callbacks, OPT_LOCK_SCHED, OPT_RECOV); 
+    throwTaskError(OS_TASKS_LOC, 0x02, test_callbacks, OPT_LOCK_SCHED, OPT_RECOV); 
     
     // Throw a nonrecoverable error
     printf("\n\n\rAsserting a nonrecoverable error");
-    assertTaskError(OS_SEND_CAN_LOC, 0x03, test_callbacks, OPT_NO_LOCK_SCHED, OPT_NONRECOV); //  Should still lock sched b/c nonrecoverable
+    throwTaskError(OS_SEND_CAN_LOC, 0x03, test_callbacks, OPT_NO_LOCK_SCHED, OPT_NONRECOV); //  Should still lock sched b/c nonrecoverable
 
     printf("\n\rTest failed: locked nonrecoverable error did not immediately result in an unrecoverable fault"); // Shouldn't print
     
