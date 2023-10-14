@@ -12,9 +12,9 @@
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "ReadTritium.h" // For ReadTritium error enum
-#include "ReadCarCAN.h" // For ReadCarCAN error enum
-#include "UpdateDisplay.h" // For update display error enum
+#include "ReadTritium.h"
+#include "ReadCarCAN.h"
+#include "UpdateDisplay.h"
 
 
 /**
@@ -82,8 +82,12 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
  * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately. Only applicable for recoverable errors- nonrecoverable errors will always lock
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
+void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
+
+    if (errorCode == 0) { // Exit if there is no error
+        return;
+    }
 
     if (lockSched == OPT_LOCK_SCHED || nonrecoverable == OPT_NONRECOV) { // Prevent other tasks from interrupting the handling of important (includes all nonrecoverable) errors
         OSSchedLock(&err);
@@ -94,7 +98,7 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
     OSErrLocBitmap = errorLoc; 
 
     if (nonrecoverable == OPT_NONRECOV) {
-        EmergencyContactorOpen(); // Apart from while loop because killing the motor is more important
+        EmergencyContactorOpen();
         Display_Error(errorLoc, errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
         UpdateDisplay_ClearQueue(); // Clear message queue to ensure no other commands overwrite the error screen
@@ -109,26 +113,30 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
     if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
         while(1) {
 
-            // Print the error that caused this fault
-            printf("\n\rCurrent Error Location: 0x%04x", OSErrLocBitmap);
-            printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
+            #if DEBUG == 1
 
-            // Print the errors for each applications with error data
-            printf("\n\rAll application errors:\n\r");
-            printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
-            printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
-            printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
+               // Print the error that caused this fault
+                printf("\n\rCurrent Error Location: 0x%04x", OSErrLocBitmap);
+                printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
 
-            // Delay so that we're not constantly printing
-            for (int i = 0; i < 9999999; i++) {
-            }
+                // Print the errors for each applications with error data
+                printf("\n\rAll application errors:\n\r");
+                printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
+                printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
+                printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
+
+                // Delay so that we're not constantly printing
+                for (int i = 0; i < 9999999; i++) {
+                } 
+            #endif
+            
         }
     }
 
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
         OSSchedUnlock(&err); 
         // Don't err out if scheduler is still locked because of a timer callback
-        if (err != OS_ERR_SCHED_LOCKED && OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
+        if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
            assertOSError(OS_TASKS_LOC, err); 
         }
         

@@ -91,7 +91,7 @@ static inline void chargingDisable(void) {
     chargeEnable = false;
 
     // kill contactors TODO: fill in error code
-    assertTaskError(OS_READ_CAN_LOC, 0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
+    throwTaskError(OS_READ_CAN_LOC, 0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
 }
 
 // helper function to call if charging should be enabled
@@ -213,7 +213,7 @@ void Task_ReadCarCAN(void *p_arg)
 
                 // kill contactors and enter a nonrecoverable fault
                 // TODO: change error code to real value
-                assertTaskError(OS_READ_CAN_LOC, 0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
+                throwTaskError(OS_READ_CAN_LOC, 0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
             }
             case CHARGE_ENABLE: { 
 

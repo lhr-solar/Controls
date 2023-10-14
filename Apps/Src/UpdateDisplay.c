@@ -386,11 +386,11 @@ void Task_UpdateDisplay(void *p_arg) {
 
 /**
  * Error handler functions
- * Passed as callback functions to the main assertTaskError function by assertUpdateDisplayError
+ * Passed as callback functions to the main throwTaskError function by assertUpdateDisplayError
 */
 
 /**
- * @brief A handler callback function run by the main assertTaskError function
+ * @brief A handler callback function run by the main throwTaskError function
  * used if we haven't reached the restart limit and encounter an error
  */ 
 static void handler_UpdateDisplay_Restart() {
@@ -410,7 +410,7 @@ static void handler_UpdateDisplay_Restart() {
 	if (err == UPDATEDISPLAY_ERR_NONE) return; // No error, return
 
     // Otherwise try resetting the display using the restart callback
-    assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
+    throwTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
 
     Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
 }
