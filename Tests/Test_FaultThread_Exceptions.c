@@ -42,7 +42,7 @@ enum { // Test menu enum
 
 /*** Constants ***/
 #define TEST_OPTION TEST_READTRITIUM // Decide what to test based on test menu enum
-#define READTRITIUM_OPTION T_NONE // The enum for the tritium error we want to test (reference error enum)
+#define READTRITIUM_OPTION T_HALL_SENSOR_ERR // The enum for the tritium error we want to test (reference error enum)
 
 /* READTRITIUM_OPTION menu:
     T_HARDWARE_OVER_CURRENT_ERR = (1<<0), 
@@ -225,7 +225,7 @@ void Task_ManagerTask(void* arg) {
             }
 
             // Fail message: this should not be reached because we should hit an unrecoverable fault first
-            printf("\n\rTest failed: error assertion did not lead to an unrecoverable fault");
+            printf("\n\rError assertion did not lead to an unrecoverable fault");
             OSTaskDel(&ReadTritium_TCB, &err);
             checkOSError(err);   
         
