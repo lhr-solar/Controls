@@ -39,6 +39,7 @@ typedef struct TritiumState{
 } TritiumState_t;
 
 //#define __TEST_SENDTRITIUM
+//#define __TEST_SENDTRITIUM_SOFTWAREONLY
 #ifdef __TEST_SENDTRITIUM
 // Inputs
 extern bool cruiseEnable;

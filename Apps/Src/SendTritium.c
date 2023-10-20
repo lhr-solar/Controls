@@ -11,6 +11,8 @@
  * 
  * If the macro __TEST_SENDTRITIUM is defined prior to including SendTritium.h, relevant
  * variables will be exposed as externs for unit testing.
+ * If the macro __TEST_SENDTRITIUM_SOFTWAREONLY is also defined prior to including SendTritium.h,
+ * hardware inputs won't be read and motor commands won't be sent over MotorCAN.
  * 
  * @author Nathaniel Delgado (NathanielDelgado)
  * @author Diya Rajon (diyarajon)
@@ -72,7 +74,8 @@ float cruiseVelSetpoint = 0;
 // Current observed velocity
 SCOPE float velocityObserved = 0;
 
-#ifndef __TEST_SENDTRITIUM
+#ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
+
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 
@@ -212,7 +215,7 @@ static void dumpInfo(){
 }
 #endif
 
-#ifndef __TEST_SENDTRITIUM
+#ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
 /**
  * @brief Reads inputs from the system
 */
@@ -648,7 +651,7 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
-    #ifndef __TEST_SENDTRITIUM
+    #ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
@@ -660,7 +663,7 @@ void Task_SendTritium(void *p_arg){
         prevState = state;
 
         state.stateHandler();    // do what the current state does
-        #ifndef __TEST_SENDTRITIUM
+        #ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
         readInputs();   // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
         #endif
@@ -669,7 +672,8 @@ void Task_SendTritium(void *p_arg){
         // Drive
         #ifdef __TEST_SENDTRITIUM
         dumpInfo();
-        #else
+        #endif
+        #ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
             memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
             memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
