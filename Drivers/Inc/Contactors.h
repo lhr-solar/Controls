@@ -8,15 +8,14 @@
 #include "BSP_GPIO.h"
 #include "stm32f4xx_gpio.h"
 
+
 #define CONTACTORS_PORT                                 PORTC
 #define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_10     // Controls
-#define ARRAY_CONTACTOR_PIN                             GPIO_Pin_11     // BPS
 #define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_12     // Controls
 
 
 typedef enum {
-    ARRAY_CONTACTOR = 0,                // BPS
-    ARRAY_BYPASS_PRECHARGE_CONTACTOR,   // Controls
+    ARRAY_BYPASS_PRECHARGE_CONTACTOR,              // Controls
     MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR,   // Controls
     NUM_CONTACTORS
 } contactor_t;

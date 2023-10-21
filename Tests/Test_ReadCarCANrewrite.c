@@ -50,10 +50,10 @@ static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 static CANDATA_t bps_trip_msg = {.ID=BPS_TRIP, .idx=0, .data={1}};
 static CANDATA_t supp_voltage_msg = {.ID=SUPPLEMENTAL_VOLTAGE, .idx=0, .data={100}};
 static CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={0}};
-static CANDATA_t charge_enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b01}};
-static CANDATA_t disable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b00}};
-static CANDATA_t all_clear_enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b10}};
-static CANDATA_t enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
+static CANDATA_t HV_Array_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b01}};
+static CANDATA_t HV_Disable_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b00}};
+static CANDATA_t HV_MC_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b10}};
+static CANDATA_t HV_Enabled_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
 
 #define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
@@ -110,11 +110,11 @@ static void sendArrayEnableMsg(uint8_t isIgnitionOn){
     printf("\n\r=========== Array Enable Msg Sent ===========");
     if(isIgnitionOn == 1){
         while(!Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR)){
-            CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN); 
+            CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN); 
             }   
      }else{
        //  for(int i = 0; i < 1; i++){
-             CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN);       
+             CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN);       
         // }
      }
 }
@@ -124,34 +124,34 @@ static void sendMotorControllerEnableMsg(uint8_t isIgnitionOn){
     printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
     if(isIgnitionOn == 2){
         while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != true){
-            CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);      
+            CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN);      
         }
     }else{
         for(int i = 0; i < 1; i++){
-            CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN);     
+            CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN);     
         }
     }
 }
 
 
 static void sendDisableMsg(){
-    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN);      
+    CANbus_Send(HV_Disable_Msg, CAN_BLOCKING, CARCAN);      
 }
 
 static void sendEnableMsg(int isIgnitionOn){
     printf("\n\r=========== Enable Msg Sent ===========");
         if(isIgnitionOn == 2){
             while(!Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR)){
-                CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); 
+                CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
                 }     
 
         if (isIgnitionOn == 1){
             while(!Contactors_Get((ARRAY_BYPASS_PRECHARGE_CONTACTOR))){
-                CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); 
+                CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
             }    
         }
 
-            CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN);     
+            CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN);     
         
     }
 }
@@ -300,7 +300,7 @@ void Task1(){
         
             case TEST_HARDWARE_HV_ARRAY_ON:
                 while(1){
-                    CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN); // HV Array messages
                     printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
                     printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
                 }
@@ -308,7 +308,7 @@ void Task1(){
 
             case TEST_HARDWARE_HV_PLUS_MINUS_ON:
                 while(1){
-                    CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN); // HV Motor Controller messages
                     printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
                     printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
                 }
@@ -316,7 +316,7 @@ void Task1(){
 
             case TEST_HARDWARE_HV_CONTACTORS_BOTH_ON:
                 while(1){
-                    CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); // HV Enable messages
                     printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
                     printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
                 }
@@ -324,7 +324,7 @@ void Task1(){
 
             case TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF:
                 while(1){
-                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    CANbus_Send(HV_Disable_Msg, CAN_BLOCKING, CARCAN); // Disable messages
                     printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
                     printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
                 }
