@@ -15,8 +15,8 @@
 
 
 typedef enum {
-    ARRAY_BYPASS_PRECHARGE_CONTACTOR,
-    MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, 
+    ARRAY_PRECHARGE_BYPASS_CONTACTOR,
+    MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, 
     NUM_CONTACTORS
 } contactor_t;
 
@@ -32,14 +32,14 @@ void Contactors_Init();
  * @brief   Returns the current state of 
  *          a specified contactor
  * @param   contactor the contactor
- *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
+ *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @return  The contactor's state (ON/OFF)
  */ 
 bool Contactors_Get(contactor_t contactor);
 
 /**
  * @brief   Sets the state of a specified contactor
- * @param   contactor the contactor (MOTOR/ARRAY)
+ * @param   contactor the contactor (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @param   state the state to set (ON/OFF) (true/false)
  * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set

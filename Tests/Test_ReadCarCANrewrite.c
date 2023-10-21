@@ -38,15 +38,13 @@ enum { // Test menu enum
 
 /*** Constants ***/
 #define TEST_OPTION TEST_RENODE // Decide what to test based on test menu enum
+#define SATURATION_THRESHOLD_TEST (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
-
-
+/*** Tasks ***/
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 
-#define SATURATION_THRESHOLD_TEST (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
-#define ARBITRARY_LOOP_NUM 5
-
+/*** CAN Messages ***/
 static CANDATA_t bps_trip_msg = {.ID=BPS_TRIP, .idx=0, .data={1}};
 static CANDATA_t supp_voltage_msg = {.ID=SUPPLEMENTAL_VOLTAGE, .idx=0, .data={100}};
 static CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={0}};
@@ -54,8 +52,6 @@ static CANDATA_t HV_Array_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b01}};
 static CANDATA_t HV_Disable_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b00}};
 static CANDATA_t HV_MC_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b10}};
 static CANDATA_t HV_Enabled_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
-
-#define CARCAN_FILTER_SIZE (sizeof carCANFilterList / sizeof(CANId_t))
 
 static void infoDump(){
     // printf("\n\r");
@@ -65,7 +61,6 @@ static void infoDump(){
      printf("\r\nCharge Message Saturation: %d", HVArrayMsgSaturation_Get());
      printf("\r\nThreshold                : %s", ((HVArrayMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
      printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));   
-
 
     printf("\n\r");
     printf("\r\nMotor Contactor          : %s", ((Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) == ON) ? "ON" : "OFF"));

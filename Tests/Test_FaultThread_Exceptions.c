@@ -132,9 +132,8 @@ void OSErrorTask(void* arg) {
 
 // Helper function to see the state of the contactors
 static void print_Contactors() {
-    printf("\n\rMotor contactor: %d", Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR));
-    printf("\n\rArray_precharge contactor: %d", Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR));
-    printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+    printf("\n\rMotor PBC: %d", Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR));
+    printf("\n\rArray PBC: %d", Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR));
 }
 
 
@@ -250,7 +249,8 @@ void Task_ManagerTask(void* arg) {
                 OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
                 checkOSError(err);
                 printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-                printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+                printf("\n\rArray PBC %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
+                printf("\n\rMotor PBC %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
             }
 
             print_Contactors();
@@ -273,7 +273,8 @@ void Task_ManagerTask(void* arg) {
                 OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
                 checkOSError(err);
                 printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-                printf("\n\rArray contactor %d", Contactors_Get(ARRAY_CONTACTOR));
+                printf("\n\rArray PBC %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
+                printf("\n\rMotor PBC %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
             } 
 
             
@@ -282,7 +283,6 @@ void Task_ManagerTask(void* arg) {
             print_Contactors();
 
             // Turn on contactors so we can see if they get turned off by the error assertion
-            Contactors_Set(ARRAY_CONTACTOR, ON, true);
             Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, ON, true);
             Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Although BPS has control of the precharge contactor
 
