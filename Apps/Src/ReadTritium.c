@@ -130,7 +130,7 @@ void Task_ReadTritium(void *p_arg){
 					int32_t Regen_Power = (Back_EMF * 100) * (Bus_Current * 100);	// Fixed point factor (100)
 
 					// Divide by maximum power to input percentage
-					UpdateDisplay_SetRegen(Regen_Power / 5000);
+					UpdateDisplay_SetRegenPower(Regen_Power / 5000);
 				}
 
 				default:{
