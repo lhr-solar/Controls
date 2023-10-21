@@ -74,7 +74,7 @@ static void updateSaturation(int8_t chargeMessage){
     chargeMsgSaturation = newSaturation;
 }
 
-// exception struct callback for charging disable, kills contactors and turns of display
+// exception struct callback for charging disable, kills contactors and turns off display
 static void callback_disableContactors(void){
     // Kill contactors 
     Contactors_Set(ARRAY_CONTACTOR, OFF, true);
@@ -82,6 +82,14 @@ static void callback_disableContactors(void){
 
     // Turn off the array contactor display light
     UpdateDisplay_SetArray(false);
+}
+
+// exception callback for BPS trip. Kills contactors and displays evac screen.
+static void callback_BPSTrip(void){
+
+    callback_disableContactors();
+    Display_Evac(SOC, SBPV);    
+
 }
 
 // helper function to disable charging
@@ -209,11 +217,9 @@ void Task_ReadCarCAN(void *p_arg)
             case BPS_TRIP: {
                 // BPS has a fault and we need to enter fault state (probably)
 
-                Display_Evac(SOC, SBPV);    // Display evacuation message
-
                 // kill contactors and enter a nonrecoverable fault
                 // TODO: change error code to real value
-                throwTaskError(OS_READ_CAN_LOC, 0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
+                throwTaskError(OS_READ_CAN_LOC, 0, callback_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             }
             case CHARGE_ENABLE: { 
 
