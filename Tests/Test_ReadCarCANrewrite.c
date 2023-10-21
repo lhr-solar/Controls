@@ -65,7 +65,6 @@ static void infoDump(){
      printf("\r\nCharge Message Saturation: %d", HVArrayMsgSaturation_Get());
      printf("\r\nThreshold                : %s", ((HVArrayMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
      printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));   
-     printf("\r\nPrecharge Complete?      : %s", ((PreChargeComplete_Get()) ? "Yes" : "No"));    
 
 
     printf("\n\r");
@@ -73,7 +72,6 @@ static void infoDump(){
     printf("\r\nMotor Ignition Status    : %s", ((MotorControllerIgnition_Get()) ? "ON" : "OFF"));
     printf("\r\nCharge Message Saturation: %d", PlusMinusMsgSaturation_Get());
     printf("\r\nThreshold                : %s", ((PlusMinusMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
-    printf("\r\nPrecharge Complete?      : %s", ((PreChargeComplete_Get()) ? "Yes" : "No"));    
     printf("\n\r");
     printf("\n\r");
 }
@@ -196,9 +194,6 @@ void Task1(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
-
-    OSSemCreate(&infoMutex, "mutex waits for info",1, &err);
     assertOSError(OS_MAIN_LOC, err);
     
     while(1){

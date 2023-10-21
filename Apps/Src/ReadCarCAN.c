@@ -307,8 +307,7 @@ void Task_ReadCarCAN(void *p_arg){
     assertOSError(OS_READ_CAN_LOC, err);
 
     while(1){
-        OSSemPost(&infoMutex,OS_OPT_POST_NONE,&err);
-      
+              
         updatePrechargeContactors(); // Sets array and motor controller bypass ignition (IGN_1, IGN_2) contactor ON/OFF
 
         // BPS sent a message
