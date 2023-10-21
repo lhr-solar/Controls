@@ -115,6 +115,11 @@ void Task_ReadTritium(void *p_arg){
 
 					//Bus Current is in bytes 4-8
 					Bus_Current = *((float*)(&dataBuf.data[4]));
+
+					int32_t Forward_Power = Bus_Voltage * Bus_Current;
+
+					// Divide by maximum power to input percentage
+					UpdateDisplay_SetForwardPower(Forward_Power / 5000);
 				}
 
 				case BACKEMF:{
@@ -122,9 +127,10 @@ void Task_ReadTritium(void *p_arg){
 
 					//BackEMF is in bytes 0-4
 					Back_EMF = *((float*)(&dataBuf.data[0]));
-					uint32_t Regen_Power = (Back_EMF * 100) * (Bus_Current * 100);	// Fixed point factor (100)
+					int32_t Regen_Power = (Back_EMF * 100) * (Bus_Current * 100);	// Fixed point factor (100)
 
-					UpdateDisplay_SetBackEMF(Regen_Power);
+					// Divide by maximum power to input percentage
+					UpdateDisplay_SetRegen(Regen_Power / 5000);
 				}
 
 				default:{

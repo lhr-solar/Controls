@@ -56,6 +56,7 @@ const char* compStrings[15]= {
 	// Non-boolean components
 	"vel",
 	"accel",
+	"regen",
 	"soc",
 	"supp",
 	"cruiseSt",
@@ -307,17 +308,38 @@ UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
 	return ret;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetBackEMF(uint32_t emfPercent){
-	static uint8_t lastPercentRegen = 0;
-	if(emfPercent == lastPercentRegen){
+UpdateDisplayError_t UpdateDisplay_SetForwardPower(uint8_t percent) {
+	static uint8_t lastPercentPower = 0;
+	if(percent == lastPercentPower){
 		return UPDATEDISPLAY_ERR_NO_CHANGE;
 	}
 
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_METER, emfPercent);
+	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(MOTOR, percent);
 	assertUpdateDisplayError(ret);
 	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentRegen = emfPercent;
+	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentPower = percent;
 	return ret;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetRegenPower(int32_t percent){
+	static uint8_t lastPercentRegen = 0;
+	if(percent == lastPercentRegen){
+		return UPDATEDISPLAY_ERR_NO_CHANGE;
+	}
+
+	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_METER, percent);
+	assertUpdateDisplayError(ret);
+	
+	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentRegen = percent;
+
+	// In Nextion, we are displaying regeneration slider by
+	// modifying the background percentage.
+	return (100 - ret);
+}
+
+void UpdateDisplay_SetBackEMF(uint8_t forwardPercent, int32_t regenPercent) {
+	UpdateDisplay_SetForwardPower(forwardPercent);
+	UpdateDisplay_SetRegenPower(regenPercent);
 }
 
 UpdateDisplayError_t UpdateDisplay_SetArray(bool state){

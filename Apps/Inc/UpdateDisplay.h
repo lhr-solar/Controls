@@ -96,11 +96,26 @@ UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);
 UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent);
 
 /**
- * @brief Sets the regeneration slider value on the display
- * @param percent pressure on regenerator in percent
+ * @brief Sets the forward slider value on the display
+ * @param percent forward power in percent
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetBackEMF(uint32_t emfPercent);
+UpdateDisplayError_t UpdateDisplay_SetForwardPower(uint8_t percent);
+
+/**
+ * @brief Sets the regeneration power slider value on the display
+ * @param percent regenerative power in percent
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetRegenPower(int32_t percent);
+
+/**
+ * @brief Sets both regeneration and forward power slider value.
+ * @param forwardPercent
+ * @param regenPercent
+ * @returns UpdateDisplayError_t
+*/
+void UpdateDisplay_SetBackEMF(uint8_t accPercent, int32_t regenPercent);
 
 /**
  * @brief Sets the array indicator state on the display
