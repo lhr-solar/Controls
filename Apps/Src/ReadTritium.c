@@ -16,8 +16,8 @@
 
 
 tritium_error_code_t Motor_FaultBitmap = T_NONE;
-static float Motor_RPM = MOTOR_STOPPED;
-static float Motor_Velocity = MOTOR_STOPPED;
+static float Motor_RPM = 0;
+static float Motor_Velocity = 0;
 
 // Function prototypes
 static void assertTritiumError(tritium_error_code_t motor_err);
