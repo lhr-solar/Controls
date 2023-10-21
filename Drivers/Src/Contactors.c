@@ -11,16 +11,16 @@ static OS_MUTEX contactorsMutex;
  * @brief   Helper function for setting contactors without mutex.
  *          Should only be called if mutex is held and struct contactor has been checked
  * @param   contactor the contactor
- *              (MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR/ARRAY_BYPASS_PRECHARGE_CONTACTOR)
+ *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @param   state the state to set (ON/OFF)
  * @return  None
  */ 
 static void setContactor(contactor_t contactor, bool state) {
     switch (contactor) {
-        case ARRAY_BYPASS_PRECHARGE_CONTACTOR :
+        case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
             BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, state);
             break;
-        case MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR :
+        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
             BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, state);
             break;
         default:
@@ -54,17 +54,17 @@ void Contactors_Init() {
  * @brief   Returns the current state of 
  *          a specified contactor
  * @param   contactor the contactor
- *              (MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR/ARRAY_BYPASS_PRECHARGE_CONTACTOR)
+ *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @return  The contactor's state (ON/OFF)
  */ 
 bool Contactors_Get(contactor_t contactor) {
     State state = OFF;
     switch (contactor) {
         
-        case ARRAY_BYPASS_PRECHARGE_CONTACTOR :
+        case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
             state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN);
             break;
-        case MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR :
+        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
             state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN);
             break;
         default:
@@ -76,7 +76,7 @@ bool Contactors_Get(contactor_t contactor) {
 /**
  * @brief   Sets the state of a specified contactor
  * @param   contactor the contactor
- *              (MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR/ARRAY_BYPASS_PRECHARGE_CONTACTOR)
+ *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @param   state the state to set (ON/OFF)
  * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set

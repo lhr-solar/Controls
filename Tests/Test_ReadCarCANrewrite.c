@@ -36,6 +36,17 @@ enum { // Test menu enum
     TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
 };
 
+enum { // Test menu enum
+    BOTH_TURN_ON = 0, 
+    MOTOR_CONTROLLER_TURN_ON,
+    ARRAY_TURN_ON,
+};
+
+enum { // Test menu enum
+    SEND_ONE_MSG = 0, 
+    SEND_UNTIL_ON,
+};
+
 /*** Constants ***/
 #define TEST_OPTION TEST_RENODE // Decide what to test based on test menu enum
 #define SATURATION_THRESHOLD_TEST (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
@@ -56,14 +67,14 @@ static CANDATA_t HV_Enabled_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
 static void infoDump(){
     // printf("\n\r");
     updatePrechargeContactors();
-    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) == ON) ? "ON" : "OFF")); 
+    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == ON) ? "ON" : "OFF")); 
      printf("\r\nArray Ignition Status    : %s", ((ArrayIgnitionStatus_Get()) ? "ON" : "OFF"));
      printf("\r\nCharge Message Saturation: %d", HVArrayMsgSaturation_Get());
      printf("\r\nThreshold                : %s", ((HVArrayMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
      printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));   
 
     printf("\n\r");
-    printf("\r\nMotor Contactor          : %s", ((Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) == ON) ? "ON" : "OFF"));
+    printf("\r\nMotor Contactor          : %s", ((Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == ON) ? "ON" : "OFF"));
     printf("\r\nMotor Ignition Status    : %s", ((MotorControllerIgnition_Get()) ? "ON" : "OFF"));
     printf("\r\nCharge Message Saturation: %d", PlusMinusMsgSaturation_Get());
     printf("\r\nThreshold                : %s", ((PlusMinusMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
@@ -104,13 +115,11 @@ static void turnIgnitionBoth(){
 static void sendArrayEnableMsg(uint8_t isIgnitionOn){
     printf("\n\r=========== Array Enable Msg Sent ===========");
     if(isIgnitionOn == 1){
-        while(!Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR)){
+        while(!Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR)){
             CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN); 
             }   
      }else{
-       //  for(int i = 0; i < 1; i++){
              CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN);       
-        // }
      }
 }
 
@@ -118,13 +127,11 @@ static void sendArrayEnableMsg(uint8_t isIgnitionOn){
 static void sendMotorControllerEnableMsg(uint8_t isIgnitionOn){
     printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
     if(isIgnitionOn == 2){
-        while(Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR) != true){
+        while(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) != true){
             CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN);      
         }
     }else{
-        for(int i = 0; i < 1; i++){
             CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN);     
-        }
     }
 }
 
@@ -136,12 +143,12 @@ static void sendDisableMsg(){
 static void sendEnableMsg(int isIgnitionOn){
     printf("\n\r=========== Enable Msg Sent ===========");
         if(isIgnitionOn == 2){
-            while(!Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR)){
+            while(!Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)){
                 CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
                 }     
 
         if (isIgnitionOn == 1){
-            while(!Contactors_Get((ARRAY_BYPASS_PRECHARGE_CONTACTOR))){
+            while(!Contactors_Get((ARRAY_PRECHARGE_BYPASS_CONTACTOR))){
                 CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
             }    
         }
@@ -192,28 +199,27 @@ void Task1(){
     assertOSError(OS_MAIN_LOC, err);
     
     while(1){
-        Minion_Error_t Merr;
-        switch (TEST_OPTION) {
+        switch (TEST_RENODE) {
             case TEST_RENODE:
 
-            turnContactorOn(2); 
+            turnContactorOn(MOTOR_CONTROLLER_TURN_ON); // Turns ign to motor and sends enough messages to turn MC PBC on 
             turnIgnitionOFF();
             sendDisableMsg();
             infoDump();
 
-            turnContactorOn(1);
+            turnContactorOn(ARRAY_TURN_ON);
             turnIgnitionOFF(); 
-            sendArrayEnableMsg(0);
+            sendArrayEnableMsg(SEND_ONE_MSG);
             infoDump();  
 
-            turnContactorOn(2); 
+            turnContactorOn(MOTOR_CONTROLLER_TURN_ON); 
             turnIgnitionOFF();
-            sendMotorControllerEnableMsg(0);
+            sendMotorControllerEnableMsg(SEND_ONE_MSG);
             infoDump(); 
 
-            turnContactorOn(2); 
+            turnContactorOn(MOTOR_CONTROLLER_TURN_ON); 
             turnIgnitionOFF();
-            sendEnableMsg(0);
+            sendEnableMsg(SEND_ONE_MSG);
             infoDump();
 
             turnIgnitionToArrayON();
@@ -221,32 +227,32 @@ void Task1(){
             infoDump();
 
             turnIgnitionToArrayON();
-            sendArrayEnableMsg(1);
+            sendArrayEnableMsg(SEND_UNTIL_ON);
             infoDump();
 
             turnIgnitionToArrayON();
-            sendMotorControllerEnableMsg(1);
+            sendMotorControllerEnableMsg(SEND_UNTIL_ON);
             infoDump();
 
             turnIgnitionToArrayON();
-            sendEnableMsg(1); // check
+            sendEnableMsg(SEND_UNTIL_ON); 
             infoDump();
 
 
             turnIgnitionToMotorON();
-            sendDisableMsg();
+            sendDisableMsg(); // turns off after one msg so do not need to keep sending until off
             infoDump();
 
             turnIgnitionToMotorON();
-            sendArrayEnableMsg(1);
+            sendArrayEnableMsg(SEND_UNTIL_ON);
             infoDump();
 
             turnIgnitionToMotorON();
-            sendMotorControllerEnableMsg(1);
+            sendMotorControllerEnableMsg(SEND_UNTIL_ON);
             infoDump();
 
             turnIgnitionToMotorON();
-            sendEnableMsg(1); // check
+            sendEnableMsg(SEND_UNTIL_ON); 
             infoDump();
 
 
@@ -256,72 +262,76 @@ void Task1(){
             infoDump();
 
             turnIgnitionBoth();
-            sendArrayEnableMsg(1);
+            sendArrayEnableMsg(SEND_UNTIL_ON);
             infoDump();
 
             turnIgnitionBoth();
-            sendMotorControllerEnableMsg(1);
+            sendMotorControllerEnableMsg(SEND_UNTIL_ON);
             infoDump();
 
             turnIgnitionBoth();
-            sendEnableMsg(1); // check
+            sendEnableMsg(SEND_UNTIL_ON); 
             infoDump();
 
 
 
-                // Test case for supply voltage
-                printf("\n\r");
-                printf("\n\r=========== Testing: Supply Voltage ===========");
-                    CANbus_Send(supp_voltage_msg, CAN_BLOCKING, CARCAN); // Supply Voltage message
-                    printf("Supply Voltage: %ld", SBPV_Get());
+            // Test case for supply voltage
+            printf("\n\r");
+            printf("\n\r=========== Testing: Supply Voltage ===========");
+            CANbus_Send(supp_voltage_msg, CAN_BLOCKING, CARCAN); // Supply Voltage message
+            printf("Supply Voltage: %ld", SBPV_Get());
                 
-                // Test case for supply voltage
-                printf("\n\r");
-                printf("\n\r=========== Testing: State of Charge ===========");
-                    *(uint64_t*)(&state_of_charge_msg.data) = 42000000;
-                    CANbus_Send(state_of_charge_msg, CAN_BLOCKING, CARCAN); // State of Charge message
-                    printf("State of Charge: %d",SOC_Get());
+            // Test case for supply voltage
+            printf("\n\r");
+            printf("\n\r=========== Testing: State of Charge ===========");
+            *(uint64_t*)(&state_of_charge_msg.data) = 42000000;
+            CANbus_Send(state_of_charge_msg, CAN_BLOCKING, CARCAN); // State of Charge message
+            printf("State of Charge: %d",SOC_Get());
                 
 
-                printf("\n\n\rtest done, nothing should print after bps trip\r");
+            printf("\n\n\rtest done, nothing should print after bps trip\r");
 
-                // Test case for BPS Trip
-                printf("\n\r");
-                printf("\n\r=========== Testing: BPS Trip ===========");
-                    CANbus_Send(bps_trip_msg, CAN_BLOCKING, CARCAN); // BPS Trip
-                    infoDump();
+            // Test case for BPS Trip
+            printf("\n\r");
+            printf("\n\r=========== Testing: BPS Trip ===========");
+            CANbus_Send(bps_trip_msg, CAN_BLOCKING, CARCAN); // BPS Trip
+            infoDump();
         
-                break;
+            break;
         
             case TEST_HARDWARE_HV_ARRAY_ON:
                 while(1){
                     CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN); // HV Array messages
-                    printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
-                    printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
+                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\n");
                 }
                 break;
 
             case TEST_HARDWARE_HV_PLUS_MINUS_ON:
                 while(1){
                     CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN); // HV Motor Controller messages
-                    printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
-                    printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
+                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\n");
                 }
                 break;
 
             case TEST_HARDWARE_HV_CONTACTORS_BOTH_ON:
                 while(1){
                     CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); // HV Enable messages
-                    printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
-                    printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
+                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\n");
                 }
                 break;
 
             case TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF:
                 while(1){
                     CANbus_Send(HV_Disable_Msg, CAN_BLOCKING, CARCAN); // Disable messages
-                    printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
-                    printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
+                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\n");
                 }
                 break;
             

@@ -11,8 +11,8 @@
 #define SAT_BUF_LENGTH 5 
 
 // Precharge Delay times in seconds
-#define PRECHARGE_MOTOR_DELAY 5     // 5 Seconds
-#define PRECHARGE_ARRAY_DELAY 5     // 5 Seconds
+#define PRECHARGE_PLUS_MINUS_DELAY 1     // 5 Seconds
+#define PRECHARGE_ARRAY_DELAY 1     	 // 5 Seconds
 
 /**
  * Error types
