@@ -1,3 +1,14 @@
+/**
+ * @copyright Copyright (c) 2023 UT Longhorn Racing Solar
+ * 
+ * @file SendCarCAN.c
+ * @brief Function implementations for the SendCarCAN application.
+ * 
+ * This contains functions relevant to placing CAN messages in a CarCAN queue and periodically sending
+ * those messages in the SendCarCAN task.
+ * 
+ */
+
 #include "common.h"
 #include "os_cfg_app.h"
 #include "CANbus.h"
@@ -14,18 +25,23 @@
 #define IO_STATE_TMR_DLY_TS ((IO_STATE_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))// **** delete?
 
 // fifo
-#define FIFO_TYPE CANDATA_t
-#define FIFO_SIZE 256
-#define FIFO_NAME SendCarCAN_Q
-#include "fifo.h"
+//#define FIFO_TYPE CANDATA_t
+//#define FIFO_SIZE 256
+//#define FIFO_NAME SendCarCAN_Q
+//#include "fifo.h"
 
-static SendCarCAN_Q_t CANFifo;
+#ifdef __TEST_SENDCARCAN
+#define SCOPE
+#else
+#define SCOPE static
+#endif 
+
+SCOPE SendCarCAN_Q_t CANFifo; 
 
 static OS_SEM CarCAN_Sem4;
 static OS_MUTEX CarCAN_Mtx;
 
 static uint8_t IOStateDlyCounter = 0;
-
 
 
 static void putIOState(void);
