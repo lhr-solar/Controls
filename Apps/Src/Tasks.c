@@ -53,14 +53,12 @@ OS_SEM FaultState_Sem4;
  * Global Variables
  */
 fault_bitmap_t FaultBitmap = FAULT_NONE;
-os_error_loc_t OSErrLocBitmap = OS_NONE_LOC;
 
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err)
+void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
         FaultBitmap |= FAULT_OS;
-        OSErrLocBitmap |= OS_err_loc;
 
         OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
         EnterFaultState();

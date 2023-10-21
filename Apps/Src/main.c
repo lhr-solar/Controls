@@ -25,7 +25,6 @@ int main(void) {
     __disable_irq();
 
     // Initialize some fault bitmaps for error checking purposes
-    OSErrLocBitmap = OS_NONE_LOC;
     FaultBitmap = FAULT_NONE;
 
     OS_ERR err;
@@ -33,7 +32,7 @@ int main(void) {
     TaskSwHook_Init();
     OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
 
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize apps
     OSTaskCreate(
@@ -51,14 +50,14 @@ int main(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Enable interrupts
     __enable_irq();
 
     // Start OS
     OSStart(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     while(1);
 
@@ -73,7 +72,7 @@ void Task_Init(void *p_arg){
 
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
 
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
     
     // Initialize drivers
     Pedals_Init();
@@ -106,7 +105,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize SendTritium
     OSTaskCreate(
@@ -124,7 +123,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize ReadCarCAN
     OSTaskCreate(
@@ -142,7 +141,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize UpdateDisplay
     OSTaskCreate(
@@ -160,7 +159,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize ReadTritium
     OSTaskCreate(
@@ -178,7 +177,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize SendCarCAN
     OSTaskCreate(
@@ -196,12 +195,12 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
 
     while(1){
         Contactors_Set(MOTOR_CONTACTOR, Minions_Read(IGN_2), true); //turn on the contactor if the ign switch lets us
-        assertOSError(OS_MINIONS_LOC, err);
+        assertOSError(err);
         OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }
 }

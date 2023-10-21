@@ -75,7 +75,7 @@ static void assertUpdateDisplayError(UpdateDisplayError_t err){
 		FaultBitmap |= FAULT_DISPLAY;
 
 		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
-		assertOSError(OS_DISPLAY_LOC, os_err);
+		assertOSError(os_err);
 	}
 }
 
@@ -83,9 +83,9 @@ UpdateDisplayError_t UpdateDisplay_Init(){
 	OS_ERR err;
 	disp_fifo_renew(&msg_queue);
 	OSMutexCreate(&DisplayQ_Mutex, "Display mutex", &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	OSSemCreate(&DisplayQ_Sem4, "Display sem4", 0, &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetPage(INFO);
 	assertUpdateDisplayError(ret);
@@ -106,14 +106,14 @@ static UpdateDisplayError_t UpdateDisplay_PopNext(){
     CPU_TS ticks;
 
     OSSemPend(&DisplayQ_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(OS_DISPLAY_LOC, err);
+    assertOSError(err);
 		
     OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(OS_DISPLAY_LOC, err);
+    assertOSError(err);
 
     bool result = disp_fifo_get(&msg_queue, &cmd);
     OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(err);
 
     if(!result){
 			assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
@@ -134,16 +134,16 @@ static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
 	OS_ERR err;
 
 	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	
 	bool success = disp_fifo_put(&msg_queue, cmd);
 
 	OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 
 	if(success){
 		OSSemPost(&DisplayQ_Sem4, OS_OPT_POST_ALL, &err);
-		assertOSError(OS_DISPLAY_LOC, err);
+		assertOSError(err);
 	}
 	else{
 		assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);

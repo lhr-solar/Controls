@@ -92,7 +92,7 @@ void Task1(void *arg)
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&e);
-    assertOSError(OS_MAIN_LOC, e);
+    assertOSError(e);
 
     OSTimeDlyHMSM(0, 0, 7, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
@@ -126,7 +126,7 @@ void Task1(void *arg)
 
     testPercentageComp(&UpdateDisplay_SetAccel);
 
-    error = Display_Fault(OSErrLocBitmap, FaultBitmap);
+    error = Display_Fault(FaultBitmap);
     assertDisplayError(error);
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
@@ -148,7 +148,7 @@ int main()
         "Fault State Semaphore",
         0,
         &err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSTaskCreate( // create fault task
         (OS_TCB *)&FaultState_TCB,
@@ -164,7 +164,7 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // create tester thread
     OSTaskCreate(
@@ -181,7 +181,7 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSStart(&err);
 }

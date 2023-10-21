@@ -44,7 +44,7 @@ static void assertTritiumError(uint16_t motor_err){
 	if(motor_err != T_NONE){
 		FaultBitmap |= FAULT_TRITIUM;
 		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-		assertOSError(0, err);
+		assertOSError(err);
 	}
 }
 
@@ -114,7 +114,7 @@ void Task_ReadTritium(void *p_arg){
 		}
 
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-		assertOSError(OS_READ_TRITIUM_LOC, err);
+		assertOSError(err);
 	}
 }
 

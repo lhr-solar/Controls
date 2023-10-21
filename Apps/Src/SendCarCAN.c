@@ -30,7 +30,7 @@ void Task_SendCarCAN(void *p_arg){
         // Delay of few milliseconds (100)
         OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
-            assertOSError(OS_UPDATE_VEL_LOC, err);
+            assertOSError(err);
         }
     }
 }

@@ -94,11 +94,10 @@ DisplayError_t Display_Reset(void);
 
 /**
  * @brief Overwrites any processing commands and triggers the display fault screen
- * @param osErrCode the os error location (will be displayed in hex)
  * @param faultCode the generic fault code (will be displayed in hex)
  * @returns DisplayError_t
  */
-DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode);
+DisplayError_t Display_Fault(fault_bitmap_t faultCode);
 
 /**
  * @brief Overwrites any processing commands and triggers the evacuation screen

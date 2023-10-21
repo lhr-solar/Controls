@@ -43,7 +43,7 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     bool lightState = false;
     State contactorState = OFF;
@@ -89,7 +89,7 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSStart(&err);
 }
