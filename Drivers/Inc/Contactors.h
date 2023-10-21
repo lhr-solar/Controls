@@ -10,13 +10,13 @@
 
 
 #define CONTACTORS_PORT                                 PORTC
-#define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_10     // Controls
-#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_12     // Controls
+#define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_10
+#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_12     
 
 
 typedef enum {
-    ARRAY_BYPASS_PRECHARGE_CONTACTOR,              // Controls
-    MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR,   // Controls
+    ARRAY_BYPASS_PRECHARGE_CONTACTOR,
+    MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, 
     NUM_CONTACTORS
 } contactor_t;
 
