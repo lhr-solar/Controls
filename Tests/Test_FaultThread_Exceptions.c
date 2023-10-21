@@ -215,8 +215,10 @@ void Task_ManagerTask(void* arg) {
             
             // Message for charging enable/disable
             CANDATA_t chargeMsg;
-            chargeMsg.ID = CHARGE_ENABLE;
-            *(uint64_t*)(&chargeMsg.data) = 0;
+            // TODO: Will need to be tested post merge [ReadCarCAN --> FaultState]
+            //chargeMsg.ID = CHARGE_ENABLE;
+            chargeMsg.ID = BPS_CONTACTOR;
+            *(uint64_t*)(&chargeMsg.data) = 0b01;
             chargeMsg.idx = 0;
             printf("\n\rMade charging message");
 

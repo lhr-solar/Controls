@@ -69,4 +69,6 @@ uint32_t SBPV_Get(void);
 // Getter function for array ignition status
 bool PreChargeComplete_Get(void);
 
+void updatePrechargeContactors(void);
+
 #endif

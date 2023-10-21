@@ -126,86 +126,6 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
 };
 
 /**
- * @brief Turns array and motor controller precharge bypass contactor ON/OFF based on ignition and precharge status
- * @param None
-*/
- void updatePrechargeContactors(void){
-    Minion_Error_t Merr;
-
-    arrayIgnitionStatus = (!Minion_Read_Pin(IGN_1, &Merr));
-    motorControllerIgnitionStatus = (!Minion_Read_Pin(IGN_2, &Merr));
-
-    if(arrayIgnitionStatus == true && motorControllerIgnitionStatus == false){
-        if(arrayBypassPrechargeComplete == true && chargeEnable == true){
-            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Turn on
-            UpdateDisplay_SetArray(true);
-            arrayBypassPrechargeComplete = false; 
-        }
-        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); 
-        UpdateDisplay_SetMotor(false);
-
-    }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == true){
-        if(arrayBypassPrechargeComplete == true && chargeEnable == true){
-            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); 
-            UpdateDisplay_SetArray(true);
-            arrayBypassPrechargeComplete = false; 
-        }
-
-        if(motorControllerBypassPrechargeComplete == true){
-            Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, ON, true);
-            UpdateDisplay_SetMotor(true);
-            motorControllerBypassPrechargeComplete = false; 
-        }
-    }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == false){
-        Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // Turn off
-        UpdateDisplay_SetArray(false);
-
-        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // Turn off
-        UpdateDisplay_SetMotor(false);
-    }else{
-        //assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
-    }
-    
-    // Set precharge complete variable to false if precharge happens again
-}
-
-/*
-    // IGNITION is set to Array AND Motor Controller -- not possible, so assert error
-    if(arrayIgnitionStatus == true && motorControllerIgnitionStatus == true){
-        assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
-        return; // Return because both PBCs have been addressed
-
-    // IGNITION SET is not set to MC, so turn off MC BPC and update display.
-    }else if(motorControllerIgnitionStatus == false){
-        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); 
-        UpdateDisplay_SetMotor(false);
-
-        // If Ignition is not set to MC and is not set to array, then turn off array BPC
-        if(arrayIgnitionStatus == false){
-            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true);
-            UpdateDisplay_SetMotor(false);
-            return; // Return because both PBCs have been addressed
-        }
-
-    // IGNITION SET is set to Motor Controller
-    }else{
-        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); 
-        UpdateDisplay_SetMotor(false);
-    }
-
-    // If array BPC has completed precharge and charging is enabled, then turn on contactor. 
-    if(arrayBypassPrechargeComplete == true && chargeEnable == true){
-        Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Turn off
-        UpdateDisplay_SetArray(true);
-    }
-
-    // Set precharge complete variable to false if precharge happens again
-    arrayBypassPrechargeComplete = false; 
-    motorControllerBypassPrechargeComplete = false; 
-}
-*/
-
-/**
  * @brief Disables Array Precharge Bypass Contactor (APBC) by asserting an error. Also updates display for APBC to be open.
  * @param None
 */
@@ -293,6 +213,56 @@ static void updateHVPlusMinusSaturation(int8_t chargeMessage){
     if(chargeMessage == 1){
         updateMotorControllerPrechargeBypassContactor();
     }
+}
+
+/**
+ * @brief Turns array and motor controller precharge bypass contactor ON/OFF based on ignition and precharge status
+ * @param None
+*/
+ void updatePrechargeContactors(void){
+    Minion_Error_t Merr;
+
+    arrayIgnitionStatus = (!Minion_Read_Pin(IGN_1, &Merr));
+    motorControllerIgnitionStatus = (!Minion_Read_Pin(IGN_2, &Merr));
+
+    if(arrayIgnitionStatus == true && motorControllerIgnitionStatus == false){
+        if(arrayBypassPrechargeComplete == true && chargeEnable == true){
+            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Turn on
+            UpdateDisplay_SetArray(true);
+            arrayBypassPrechargeComplete = false; 
+        }
+        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); 
+        UpdateDisplay_SetMotor(false);
+
+    }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == true){
+        if(arrayBypassPrechargeComplete == true && chargeEnable == true){
+            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); 
+            UpdateDisplay_SetArray(true);
+            arrayBypassPrechargeComplete = false; 
+        }
+
+        if(motorControllerBypassPrechargeComplete == true && HVPlusMinusChargeMsgSaturation >= MOTOR_SATURATION_THRESHOLD){
+            Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, ON, true);
+            UpdateDisplay_SetMotor(true);
+        }
+    }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == false){
+        Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // Turn off
+        UpdateDisplay_SetArray(false);
+
+        Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, OFF, true); // Turn off
+        UpdateDisplay_SetMotor(false);
+
+        memset(HVArrayChargeMsgBuffer, -1, sizeof(HVArrayChargeMsgBuffer));
+        memset(HVPlusMinusChargeMsgBuffer, -1, sizeof(HVPlusMinusChargeMsgBuffer));
+
+        updateHVArraySaturation(-1);
+        updateHVPlusMinusSaturation(-1);
+    }else{
+        assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+    }
+    // Set precharge complete variable to false if precharge happens again
+    motorControllerBypassPrechargeComplete = false; 
+
 }
 
 void Task_ReadCarCAN(void *p_arg){

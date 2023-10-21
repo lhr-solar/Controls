@@ -21,13 +21,9 @@
  */
 typedef enum { 
 	BPS_TRIP						= 0x002,
-	//BPS_ALL_CLEAR					= 0x101,
 	BPS_CONTACTOR					= 0x101,
-	//BPS_CONTACTOR_STATE				= 0x102,
 	STATE_OF_CHARGE 				= 0x106,
-	//WDOG_TRIGGERED					= 0x107,
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
-	CHARGE_ENABLE 					= 0x10C,
 	MC_BUS 							= 0x242,
 	VELOCITY 						= 0x243,
 	MC_PHASE_CURRENT 				= 0x244,

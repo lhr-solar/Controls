@@ -30,12 +30,14 @@
 
 enum { // Test menu enum
     TEST_RENODE, 
-    TEST_HARDWARE_CHARGE_ENABLE,
-    TEST_HARDWARE_CHARGE_DISABLE
+    TEST_HARDWARE_HV_ARRAY_ON,
+    TEST_HARDWARE_HV_PLUS_MINUS_ON,
+    TEST_HARDWARE_HV_CONTACTORS_BOTH_ON,
+    TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_HARDWARE_CHARGE_ENABLE // Decide what to test based on test menu enum
+#define TEST_OPTION TEST_RENODE // Decide what to test based on test menu enum
 
 
 
@@ -57,6 +59,7 @@ static CANDATA_t enable_msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
 
 static void infoDump(){
     // printf("\n\r");
+    updatePrechargeContactors();
     printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR) == ON) ? "ON" : "OFF")); 
      printf("\r\nArray Ignition Status    : %s", ((ArrayIgnitionStatus_Get()) ? "ON" : "OFF"));
      printf("\r\nCharge Message Saturation: %d", ChargeMsgSaturation_Get());
@@ -82,18 +85,24 @@ Minion_Error_t mErr;
 
 static void turnIgnitionToMotorON(){
     printf("\n\r=========== Turn Ignition to Motor ===========");
-    Minion_Write_Output(IGN_2, 1, &mErr);                      // Ignition motor ON
-    Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
+    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor ON
+    Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array OFF
 }
 
 static void turnIgnitionToArrayON(){
     printf("\n\r=========== Turn Ignition to Array ===========");
-    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
-    Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array ON
+    Minion_Write_Output(IGN_2, 1, &mErr);                      // Ignition motor OFF
+    Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array ON
 }
 
 static void turnIgnitionOFF(){
     printf("\n\r=========== Turn Ignition to OFF ===========");
+    Minion_Write_Output(IGN_2, 1, &mErr);                      // Ignition motor OFF
+    Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array OFF
+}
+
+static void turnIgnitionBoth(){
+    printf("\n\r=========== Turn Ignition to Both ===========");
     Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
     Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
 }
@@ -134,19 +143,18 @@ static void sendDisableMsg(){
 static void sendEnableMsg(int isIgnitionOn){
     printf("\n\r=========== Enable Msg Sent ===========");
         if(isIgnitionOn == 2){
-        while(!Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR)){
-            CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); 
-            }     
+            while(!Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR)){
+                CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); 
+                }     
 
         if (isIgnitionOn == 1){
             while(!Contactors_Get((ARRAY_BYPASS_PRECHARGE_CONTACTOR))){
-            CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); 
+                CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); 
             }    
         }
 
-        for(int i = 0; i < 1; i++){
             CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN);     
-        }
+        
     }
 }
 
@@ -160,11 +168,6 @@ static void turnContactorOn(uint8_t isIgnitionOn){
     }
 }
 
-
-// static void turnBothContactorsOn(){
-//     turnContactorOn(1);
-//     turnContactorOn(2);
-// }
 
 void Task1(){
     OS_ERR err;
@@ -199,8 +202,7 @@ void Task1(){
     assertOSError(OS_MAIN_LOC, err);
     
     while(1){
-         
-
+        Minion_Error_t Merr;
         switch (TEST_OPTION) {
             case TEST_RENODE:
 
@@ -209,23 +211,15 @@ void Task1(){
             sendDisableMsg();
             infoDump();
 
-            // turnContactorOn(1);
-            // turnIgnitionOFF(); 
-            // sendArrayEnableMsg(0);
-            // OSMutexPend(&infoMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
-            // while (err != OS_ERR_NONE)
-            // {
-            // }
-            // infoDump();  
+            turnContactorOn(1);
+            turnIgnitionOFF(); 
+            sendArrayEnableMsg(0);
+            infoDump();  
 
-            // turnContactorOn(2); 
-            // turnIgnitionOFF();
-            // sendMotorControllerEnableMsg(0);
-            // OSMutexPend(&infoMutex, 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
-            // while (err != OS_ERR_NONE)
-            // {
-            // }
-            // infoDump(); 
+            turnContactorOn(2); 
+            turnIgnitionOFF();
+            sendMotorControllerEnableMsg(0);
+            infoDump(); 
 
             turnContactorOn(2); 
             turnIgnitionOFF();
@@ -245,30 +239,43 @@ void Task1(){
             infoDump();
 
             turnIgnitionToArrayON();
-            sendEnableMsg(1);
+            sendEnableMsg(1); // check
+            infoDump();
+
+
+            turnIgnitionToMotorON();
+            sendDisableMsg();
+            infoDump();
+
+            turnIgnitionToMotorON();
+            sendArrayEnableMsg(1);
+            infoDump();
+
+            turnIgnitionToMotorON();
+            sendMotorControllerEnableMsg(1);
+            infoDump();
+
+            turnIgnitionToMotorON();
+            sendEnableMsg(1); // check
             infoDump();
 
 
 
-
-            sendEnableMsg(2);
-            infoDump();  
-            sendEnableMsg(1);
-            infoDump();      
-            turnIgnitionOFF();
-            sendDisableMsg(0);
+            turnIgnitionBoth();
+            sendDisableMsg();
             infoDump();
 
-            turnContactorOn(1);    
-
-
-            turnIgnitionOFF();
-            sendArrayEnableMsg(0);
+            turnIgnitionBoth();
+            sendArrayEnableMsg(1);
             infoDump();
 
+            turnIgnitionBoth();
+            sendMotorControllerEnableMsg(1);
+            infoDump();
 
-
-            sendEnableMsg(0);
+            turnIgnitionBoth();
+            sendEnableMsg(1); // check
+            infoDump();
 
 
 
@@ -293,25 +300,38 @@ void Task1(){
                 printf("\n\r=========== Testing: BPS Trip ===========");
                     CANbus_Send(bps_trip_msg, CAN_BLOCKING, CARCAN); // BPS Trip
                     infoDump();
-                
-
+        
+                break;
+        
+            case TEST_HARDWARE_HV_ARRAY_ON:
+                while(1){
+                    CANbus_Send(charge_enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
+                    printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
+                }
                 break;
 
-            case TEST_HARDWARE_CHARGE_ENABLE:
+            case TEST_HARDWARE_HV_PLUS_MINUS_ON:
                 while(1){
-                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
-                    CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
-                    infoDump();
-                    for(int i =0; i < 999999; i++){}
-                    }
+                    CANbus_Send(all_clear_enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
+                    printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
+                }
                 break;
 
-            case TEST_HARDWARE_CHARGE_DISABLE:
+            case TEST_HARDWARE_HV_CONTACTORS_BOTH_ON:
                 while(1){
-                    Minion_Error_t Merr;
+                    CANbus_Send(enable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
+                    printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
+                    printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
+                }
+                break;
+
+            case TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF:
+                while(1){
                     CANbus_Send(disable_msg, CAN_BLOCKING, CARCAN); // Charge enable messages
-                    printf("\r\n%d", Minion_Read_Pin(IGN_1, &Merr));
-                    printf("\r\n%d", Minion_Read_Pin(IGN_2, &Merr));
+                    printf("\r\nArray PBC: %d", Minion_Read_Pin(IGN_1, &Merr));
+                    printf("\r\nMC PBC:    %d", Minion_Read_Pin(IGN_2, &Merr));
                 }
                 break;
             

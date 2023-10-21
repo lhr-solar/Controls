@@ -45,6 +45,13 @@
 */
 typedef int16_t error_code_t;
 
+
+/**
+ * @brief Initialize the task switch hook
+ * Registers the hook with the RTOS
+ */
+void TaskSwHook_Init(void);
+
 /**
  * Task Prototypes
  */
@@ -163,6 +170,23 @@ typedef enum {
  * and turns on additional brakelight to signal that a critical error happened.
 */
 void arrayMotorKill();
+
+
+/**
+ * Task trace
+ * 
+ * Stores the last TASK_TRACE_LENGTH tasks that were run
+ * The most recent task is at tasks[index], the one before at tasks[index-1],
+ * wrapping back around at the beginnning
+ * 
+ */
+#define TASK_TRACE_LENGTH 8
+typedef struct {
+    OS_TCB *tasks[TASK_TRACE_LENGTH];
+    uint32_t index;
+} task_trace_t;
+
+extern task_trace_t PrevTasks;
 
 /**
  * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 

@@ -22,7 +22,7 @@ void Task_BPS(void *p_arg){
     // An array consisting of messages we read with random "noise" messages interspersed
     int CANMsgs[] = {
         BPS_TRIP,
-        CHARGE_ENABLE,
+        BPS_CONTACTOR,
         STATE_OF_CHARGE,
         SUPPLEMENTAL_VOLTAGE,
         MOTOR_DRIVE,
