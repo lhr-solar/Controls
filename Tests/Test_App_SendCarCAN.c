@@ -11,11 +11,11 @@
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
-static OS_TCB TaskReadCAN;
+static OS_TCB TaskReadCAN_TCB;
 static CPU_STK TaskReadCANStk[DEFAULT_STACK_SIZE];
 
 // Reads CarCAN and prints what we receive
-void TaskReadCAN(void *arg)
+void Task_ReadCAN(void *arg)
 {
     OS_ERR err;
 	CANDATA_t dataBuf = {0};
@@ -29,7 +29,7 @@ void TaskReadCAN(void *arg)
             ts = (OSTimeGet(&err) / OS_CFG_TICK_RATE_HZ);
 
             printf("\n\r********* Received CANbus message **********");
-            printf("\n\rAt: %5f ms", ts);
+            printf("\n\rAt: %5ld ms", ts);
             printf("\n\r Received %x %d", dataBuf.data[0], dataBuf.data[4]);
 
 			switch(dataBuf.ID){
@@ -48,7 +48,7 @@ void TaskReadCAN(void *arg)
 
                 case IO_STATE: { 
                     printf("\n\rReceived IO_STATE message of %x", dataBuf.data[0]);
-                    printf("\n\rAccelerator: %d", *((uint8_t*)(dataBuf.data[0])));
+                    printf("\n\rAccelerator: %d", *((uint8_t*)(&dataBuf.data[0])));
                     printf("\n\rBrake: %x", *((uint8_t*)(&dataBuf.data[1])));
                     printf("\n\rPins: %x", dataBuf.data[2]);
                     printf("\n\rContactors: %d", *((uint8_t*)(&dataBuf.data[3])));
@@ -127,16 +127,16 @@ void Task1(void *arg)
     );
     assertOSError(OS_MAIN_LOC, err);
 
-    // Create task to read CANbus /////
+    // Create task to read CANbus
       OSTaskCreate(
-        (OS_TCB*)&SendCarCAN_TCB,
-        (CPU_CHAR*)"SendCarCAN",
-        (OS_TASK_PTR)Task_SendCarCAN,
+        (OS_TCB*)&TaskReadCAN_TCB,
+        (CPU_CHAR*)"Test_ReadCarCAN",
+        (OS_TASK_PTR)Task_ReadCAN,
         (void*)NULL,
-        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
-        (CPU_STK*)SendCarCAN_Stk,
+        (OS_PRIO)13, // Lower prio than other running tasks
+        (CPU_STK*)TaskReadCANStk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
@@ -166,7 +166,7 @@ void Task1(void *arg)
         printf("\n\rContactors: %x", contactors);
         // Print how full CAN Queue is 
         printf("\n\r---- Queue data ----");
-        printf("\n\rSendCarCAN_Q_is_full? %d", SendCarCAN_Q_is_full());
+        printf("\n\rSendCarCAN_Q_is_full? %d", SendCarCAN_Q_is_full(&CANFifo));
         printf("\n\rQueue put: %d, Queue get: %d", CANFifo.put, CANFifo.get);
 
     }
@@ -212,7 +212,7 @@ void Task1(void *arg)
 }
 
 
-void main() 
+int main(void) 
 {
     OS_ERR err;
     OSInit(&err);
