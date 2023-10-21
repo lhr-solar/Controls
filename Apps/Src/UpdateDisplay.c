@@ -240,126 +240,72 @@ UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page){
 
 /* WRAPPERS */
 UpdateDisplayError_t UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentage from 0-100
-	static uint8_t lastPercent = 0;
-	if(percent == lastPercent){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SOC, percent);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercent = percent;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv){
-	static uint32_t lastMv = 0;
-	if(mv == lastMv){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
-
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
+	
+    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastMv = mv;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
-	static uint32_t lastMphTenths = 0;
-	if(mphTenths == lastMphTenths){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(VELOCITY, mphTenths);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastMphTenths = mphTenths;
+    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(VELOCITY, mphTenths);
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
-	static uint8_t lastPercentAccel = 0;
-	if(percent == lastPercentAccel){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ACCEL_METER, percent);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentAccel = percent;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetArray(bool state){
-	static bool lastState = false;
-	if(state == lastState){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ARRAY, (state)?1:0);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetMotor(bool state){
-	static bool lastState = false;
-	if(state == lastState){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(MOTOR, (state)?1:0);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear){
-	static TriState_t lastGear = STATE_0;
-	if(gear == lastGear){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(GEAR, (uint32_t)gear);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastGear = gear;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state){
-	static TriState_t lastState = STATE_0;
-	if(state == lastState){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 	
 	ret = UpdateDisplay_Refresh();
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
-	static TriState_t lastState = STATE_0;
-	if(state == lastState){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state);
+    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
-
+    
 	ret = UpdateDisplay_Refresh();
-
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
-	return ret;
+    return ret;
 }
 
 /**

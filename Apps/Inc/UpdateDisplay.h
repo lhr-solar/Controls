@@ -31,7 +31,6 @@ typedef enum{
 	UPDATEDISPLAY_ERR_FIFO_PUT,     // Error putting command in fifo
 	UPDATEDISPLAY_ERR_FIFO_POP,     // Error popping command from fifo
 	UPDATEDISPLAY_ERR_PARSE_COMP,   // Error parsing component/val in SetComponent
-	UPDATEDISPLAY_ERR_NO_CHANGE,    // No change in component value
 	UPDATEDISPLAY_ERR_DRIVER        // Driver call returned an error
 } UpdateDisplayError_t;
 
