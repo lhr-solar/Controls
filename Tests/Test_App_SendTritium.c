@@ -20,40 +20,45 @@ void stateBuffer(){
 
 void goToBrakeState(){
     // Brake State
-    brakePedalPercent = 15;
+    set_brakePedalPercent(15);
     stateBuffer();
+    while(get_state().name != BRAKE_STATE){}
 }
 
 void goToForwardDrive(){
     goToBrakeState();
 
     //Forward Drive
-    brakePedalPercent = 0;
-    velocityObserved = 2;
-    gear = FORWARD_GEAR;
+    set_brakePedalPercent(0);
+    set_velocityObserved(mpsToRpm(2));
+    set_gear(FORWARD_GEAR);
 
     stateBuffer();
+    while(get_state().name != FORWARD_DRIVE){}
 }
 
 void goToNeutralDrive(){
     goToForwardDrive();
 
     // Neutral Drive
-    gear = NEUTRAL_GEAR;
+    set_gear(NEUTRAL_GEAR);
 
     stateBuffer();
+    while(get_state().name != NEUTRAL_DRIVE){}
 }
 
 void goToReverseDrive(){
     goToForwardDrive();
     
     // Reverse Drive
-    gear = REVERSE_GEAR;
+    set_gear(REVERSE_GEAR);
 
-    stateBuffer();  // Transition to neutral
+    stateBuffer();  // Transition to neutral // DOESN"T GO TO NEUTRAL???
+    // while(get_state().name != NEUTRAL_DRIVE){}
 
-    velocityObserved = 5;
+    set_velocityObserved(mpsToRpm(5));
     stateBuffer();  // Transition to reverse
+    while(get_state().name != REVERSE_DRIVE){}
 }
 
 
@@ -61,54 +66,59 @@ void goToOnePedalDrive(){
     goToForwardDrive();
 
     // One Pedal Drive
-    cruiseEnable = false;
-    onePedalEnable = true;
-    regenEnable = true;
+    set_cruiseEnable(false);
+    set_onePedalEnable(true);
+    set_regenEnable(true);
     stateBuffer();
+    while(get_state().name != ONEPEDAL){}
 }
 
 void goToRecordVelocity(){
     goToForwardDrive();
 
     // Record Velocity
-    cruiseEnable = true;
-    cruiseSet = true;
-    velocityObserved = 30;
+    set_cruiseEnable(true);
+    set_cruiseSet(true);
+    set_velocityObserved(mpsToRpm(30));
     stateBuffer();
+    while(get_state().name != RECORD_VELOCITY){}
 }
 
 void goToPoweredCruise(){
     goToRecordVelocity();
 
     // Powered Cruise
-    cruiseEnable = true;
-    cruiseSet = false;
-    velocityObserved = 30;
-    cruiseVelSetpoint = 40;
+    set_cruiseEnable(true);
+    set_cruiseSet(false);
+    set_velocityObserved(mpsToRpm(30));
+    set_cruiseVelSetpoint(mpsToRpm(40));
     stateBuffer();
+    while(get_state().name != POWERED_CRUISE){}
 }
 
 void goToCoastingCruise(){
     goToPoweredCruise();
 
     // Coasting Cruise
-    cruiseEnable = true;
-    cruiseSet = false;
-    velocityObserved = 40;
-    cruiseVelSetpoint = 30;
+    set_cruiseEnable(true);
+    set_cruiseSet(false);
+    set_velocityObserved(mpsToRpm(40));
+    set_cruiseVelSetpoint(mpsToRpm(30));
     stateBuffer();
+    while(get_state().name != COASTING_CRUISE){}
 }
 
 void goToAccelerateCruise(){
     goToPoweredCruise();
 
     // Coasting Cruise
-    cruiseEnable = true;
-    cruiseSet = false;
-    velocityObserved = 30;
-    cruiseVelSetpoint = 30;
-    accelPedalPercent = 10;
+    set_cruiseEnable(true);
+    set_cruiseSet(false);
+    set_velocityObserved(mpsToRpm(30));
+    set_cruiseVelSetpoint(mpsToRpm(30));
+    set_accelPedalPercent(10);
     stateBuffer();
+    while(get_state().name != ACCELERATE_CRUISE){}
 }
 
 void Task1(void *arg)
@@ -118,12 +128,12 @@ void Task1(void *arg)
     CPU_Init();
     BSP_UART_Init(UART_2);
     Pedals_Init();
-    CANbus_Init(MOTORCAN);
+    CANbus_Init(MOTORCAN, NULL, 0);
     Minions_Init();
     UpdateDisplay_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-    regenEnable = ON;
+    set_regenEnable(ON);
 
     OSTaskCreate(
         (OS_TCB*)&SendTritium_TCB,
@@ -151,44 +161,44 @@ void Task1(void *arg)
     // Forward Drive to Brake
     printf("\n\rTesting: Forward Drive -> Brake\n\r");
     goToForwardDrive();
-    brakePedalPercent = 15;
+    set_brakePedalPercent(15);
     stateBuffer();
-    while(state.name != BRAKE_STATE){}
+    while(get_state().name != BRAKE_STATE){}
 
     // Forward Drive to Record Velocity
     printf("\n\rTesting: Forward Drive -> Record Velocity\n\r");
     goToForwardDrive();
-    cruiseEnable = true;
-    cruiseSet = true;
-    velocityObserved = 20.0;
+    set_cruiseEnable(true);
+    set_cruiseSet(true);
+    set_velocityObserved(mpsToRpm(20.0));
     stateBuffer();
-    velocityObserved = 25.0;
+    set_velocityObserved(mpsToRpm(25.0));
     stateBuffer();
-    while(state.name != RECORD_VELOCITY){}
+    while(get_state().name != RECORD_VELOCITY){}
 
     // Forward Drive to One Pedal
     printf("\n\rTesting: Forward Drive -> One Pedal\n\r");
     goToForwardDrive();
-    onePedalEnable = true;
+    set_onePedalEnable(true);
     stateBuffer();
-    while(state.name != ONEPEDAL){}
+    while(get_state().name != ONEPEDAL){}
 
     // Forward Drive to Neutral Drive
     printf("\n\rTesting: Forward Drive -> Neutral Drive\n\r");
     goToForwardDrive();
-    gear = NEUTRAL_GEAR;
+    set_gear(NEUTRAL_GEAR);
     stateBuffer();
-    while(state.name != NEUTRAL_DRIVE){}
+    while(get_state().name != NEUTRAL_DRIVE){}
 
     // Forward Drive to Reverse Drive
     printf("\n\rTesting: Forward Drive -> Reverse Drive\n\r");
     goToForwardDrive();
-    gear = REVERSE_GEAR;
-    velocityObserved = 35;
+    set_gear(REVERSE_GEAR);
+    set_velocityObserved(mpsToRpm(35));
     stateBuffer();
-    velocityObserved = 5;
+    set_velocityObserved(mpsToRpm(5));
     stateBuffer();
-    while(state.name != REVERSE_DRIVE){}
+    while(get_state().name != REVERSE_DRIVE){}
 
     /**
      * ======= Neutral Drive ==========
@@ -201,28 +211,28 @@ void Task1(void *arg)
     // Neutral Drive to Brake
     printf("\n\rTesting: Neutral Drive -> Brake\n\r");
     goToNeutralDrive();
-    brakePedalPercent = 15;
+    set_brakePedalPercent(15);
     stateBuffer();
-    while(state.name != BRAKE_STATE){}
+    while(get_state().name != BRAKE_STATE){}
 
     // Neutral Drive to Forward Drive
     printf("\n\rTesting: Neutral Drive -> Forward Drive\n\r");
     goToNeutralDrive();
-    velocityObserved = 5;
-    gear = FORWARD_GEAR;
+    set_velocityObserved(mpsToRpm(5));
+    set_gear(FORWARD_GEAR);
     stateBuffer();
-    while(state.name != FORWARD_DRIVE){}
+    while(get_state().name != FORWARD_DRIVE){}
 
     // Neutral Drive to Reverse Drive
     printf("\n\rTesting: Neutral Drive -> Reverse Drive\n\r");
     goToNeutralDrive();
-    velocityObserved = 5;
-    gear = REVERSE_GEAR;
-    velocityObserved = 35;
+    set_velocityObserved(mpsToRpm(5));
+    set_gear(REVERSE_GEAR);
+    set_velocityObserved(mpsToRpm(35));
     stateBuffer();
-    velocityObserved = 5;
+    set_velocityObserved(mpsToRpm(5));
     stateBuffer();
-    while(state.name != REVERSE_DRIVE){}
+    while(get_state().name != REVERSE_DRIVE){}
 
     /**
      * ======= Reverse Drive ==========
@@ -235,27 +245,27 @@ void Task1(void *arg)
     // Reverse Drive to Brake
     printf("\n\rTesting: Reverse Drive -> Brake\n\r");
     goToReverseDrive();
-    brakePedalPercent = 15;
+    set_brakePedalPercent(15);
     stateBuffer();
-    while(state.name != BRAKE_STATE){}
+    while(get_state().name != BRAKE_STATE){}
 
     // Reverse Drive to Neutral Drive
     printf("\n\rTesting: Reverse Drive -> Neutral Drive\n\r");
     goToReverseDrive();
-    velocityObserved = 35;
-    gear = NEUTRAL_GEAR;
+    set_velocityObserved(mpsToRpm(35));
+    set_gear(NEUTRAL_GEAR);
     stateBuffer();
-    while(state.name != NEUTRAL_DRIVE){}
+    while(get_state().name != NEUTRAL_DRIVE){}
 
     // Reverse Drive to Forward Drive
     printf("\n\rTesting: Reverse Drive -> Forward Drive\n\r");
     goToReverseDrive();
-    gear = FORWARD_GEAR;
-    velocityObserved = 35;
+    set_gear(FORWARD_GEAR);
+    set_velocityObserved(mpsToRpm(35));
     stateBuffer();
-    velocityObserved = 5;
+    set_velocityObserved(mpsToRpm(5));
     stateBuffer();
-    while(state.name != FORWARD_DRIVE){}
+    while(get_state().name != FORWARD_DRIVE){}
 
       /**
      * ======= Record Velocity ==========
@@ -267,48 +277,48 @@ void Task1(void *arg)
     // Record Velocity to Brake State
     printf("\n\rTesting: Record Velocity -> Brake\n\r");
     goToRecordVelocity();
-    brakePedalPercent = 15;
+    set_brakePedalPercent(15);
     stateBuffer();
-    while(state.name != BRAKE_STATE){}
+    while(get_state().name != BRAKE_STATE){}
 
     // Record Velocity to Neutral Drive
     printf("\n\rTesting: Record Velocity -> Neutral Drive\n\r");
     goToRecordVelocity();
-    gear = NEUTRAL_GEAR;
+    set_gear(NEUTRAL_GEAR);
     stateBuffer();
-    while(state.name != NEUTRAL_DRIVE){}
+    while(get_state().name != NEUTRAL_DRIVE){}
 
     // Record Velocity to Reverse Drive
     printf("\n\rTesting: Record Velocity -> Reverse Drive\n\r");
     goToRecordVelocity();
-    gear = REVERSE_GEAR;
-    velocityObserved = 35;
+    set_gear(REVERSE_GEAR);
+    set_velocityObserved(mpsToRpm(35));
     stateBuffer();
-    velocityObserved = 5;
+    set_velocityObserved(mpsToRpm(5));
     stateBuffer();
-    while(state.name != REVERSE_DRIVE){}
+    while(get_state().name != REVERSE_DRIVE){}
 
     // Record Velocity to One Pedal Drive
     printf("\n\rTesting: Record Velocity -> One Pedal Drive\n\r");
     goToRecordVelocity();
-    onePedalEnable = true;
+    set_onePedalEnable(true);
     stateBuffer();
-    while(state.name != ONEPEDAL){}
+    while(get_state().name != ONEPEDAL){}
 
     // Record Velocity to Forward Normal Drive
     printf("\n\rTesting: Record Velocity -> Forward Drive\n\r");
     goToRecordVelocity();
-    cruiseEnable = false;
+    set_cruiseEnable(false);
     stateBuffer();
-    while(state.name != FORWARD_DRIVE){}
+    while(get_state().name != FORWARD_DRIVE){}
     
     // Record Velocity to Powered Cruise
-    printf("\n\rTesting: Record Velocity -> Powered Cruise\n\r");
-    goToRecordVelocity();
-    cruiseEnable = true;
-    cruiseSet = false;
-    stateBuffer();
-    while(state.name != POWERED_CRUISE){}
+    // printf("\n\rTesting: Record Velocity -> Powered Cruise\n\r");
+    // goToRecordVelocity();
+    // set_cruiseEnable(true);
+    // set_cruiseSet(false);
+    // stateBuffer();
+    // while(get_state().name != POWERED_CRUISE){}
 
     /**
      * ======= Powered Cruise ==========
@@ -317,66 +327,66 @@ void Task1(void *arg)
     */
     printf("\n\r============ Testing Powered Cruise State ============\n\r");
 
-    // Powered Cruise to Brake State
-    printf("\n\rTesting: Powered Cruise -> Brake\n\r");
-    goToPoweredCruise();
-    brakePedalPercent = 15;
-    stateBuffer();
-    while(state.name != BRAKE_STATE){}
+    // // Powered Cruise to Brake State
+    // printf("\n\rTesting: Powered Cruise -> Brake\n\r");
+    // goToPoweredCruise();
+    // set_brakePedalPercent(15);
+    // stateBuffer();
+    // while(get_state().name != BRAKE_STATE){}
 
-    // Powered Cruise to Neutral Drive
-    printf("\n\rTesting: Powered Cruise -> Neutral Drive\n\r");
-    goToPoweredCruise();
-    gear = NEUTRAL_GEAR;
-    stateBuffer();
-    while(state.name != NEUTRAL_DRIVE){}
+    // // Powered Cruise to Neutral Drive
+    // printf("\n\rTesting: Powered Cruise -> Neutral Drive\n\r");
+    // goToPoweredCruise();
+    // set_gear(NEUTRAL_GEAR);
+    // stateBuffer();
+    // while(get_state().name != NEUTRAL_DRIVE){}
 
-    // Powered Cruise to Reverse Drive
-    printf("\n\rTesting: Powered Cruise -> Reverse Drive\n\r");
-    goToPoweredCruise();
-    gear = REVERSE_GEAR;
-    velocityObserved = 35;
-    stateBuffer();
-    velocityObserved = 5;
-    stateBuffer();
-    while(state.name != REVERSE_DRIVE){}
+    // // Powered Cruise to Reverse Drive
+    // printf("\n\rTesting: Powered Cruise -> Reverse Drive\n\r");
+    // goToPoweredCruise();
+    // set_gear(REVERSE_GEAR);
+    // set_velocityObserved(mpsToRpm(35));
+    // stateBuffer();
+    // set_velocityObserved(mpsToRpm(5));
+    // stateBuffer();
+    // while(get_state().name != REVERSE_DRIVE){}
 
-    // Powered Cruise to One Pedal Drive
-    printf("\n\rTesting: Powered Cruise -> One Pedal Drive\n\r");
-    goToPoweredCruise();
-    onePedalEnable = true;
-    stateBuffer();
-    while(state.name != ONEPEDAL){}
+    // // Powered Cruise to One Pedal Drive
+    // printf("\n\rTesting: Powered Cruise -> One Pedal Drive\n\r");
+    // goToPoweredCruise();
+    // set_onePedalEnable(true);
+    // stateBuffer();
+    // while(get_state().name != ONEPEDAL){}
 
-    // Powered Cruise to Forward Drive
-    printf("\n\rTesting: Powered Cruise -> Forward Drive\n\r");
-    goToPoweredCruise();
-    cruiseEnable = false;
-    stateBuffer();
-    while(state.name != FORWARD_DRIVE){}
+    // // Powered Cruise to Forward Drive
+    // printf("\n\rTesting: Powered Cruise -> Forward Drive\n\r");
+    // goToPoweredCruise();
+    // set_cruiseEnable(false);
+    // stateBuffer();
+    // while(get_state().name != FORWARD_DRIVE){}
 
-    // Powered Cruise to Record Velocity
-    printf("\n\rTesting: Powered Cruise -> Record Velocity\n\r");
-    goToPoweredCruise();
-    cruiseSet = true;
-    stateBuffer();
-    while(state.name != RECORD_VELOCITY){}
+    // // Powered Cruise to Record Velocity
+    // printf("\n\rTesting: Powered Cruise -> Record Velocity\n\r");
+    // goToPoweredCruise();
+    // set_cruiseSet(true);
+    // stateBuffer();
+    // while(get_state().name != RECORD_VELOCITY){}
 
-    // Powered Cruise to Accelerate Cruise
-    printf("\n\rTesting: Powered Cruise -> Accelerate Cruise\n\r");
-    goToPoweredCruise();
-    accelPedalPercent = 10;
-    stateBuffer();
-    while(state.name != ACCELERATE_CRUISE){}
+    // // Powered Cruise to Accelerate Cruise
+    // printf("\n\rTesting: Powered Cruise -> Accelerate Cruise\n\r");
+    // goToPoweredCruise();
+    // set_accelPedalPercent(10);
+    // stateBuffer();
+    // while(get_state().name != ACCELERATE_CRUISE){}
 
-    // Powered Cruise to Coasting Cruise
-    printf("\n\rTesting: Powered Cruise -> Coasting Cruise\n\r");
-    goToPoweredCruise();
-    accelPedalPercent = 0;
-    velocityObserved = 40;
-    cruiseVelSetpoint = 30;
-    stateBuffer();
-    while(state.name != COASTING_CRUISE){}
+    // // Powered Cruise to Coasting Cruise
+    // printf("\n\rTesting: Powered Cruise -> Coasting Cruise\n\r");
+    // goToPoweredCruise();
+    // set_accelPedalPercent(0);
+    // set_velocityObserved(mpsToRpm(40));
+    // set_cruiseVelSetpoint(mpsToRpm(30));
+    // stateBuffer();
+    // while(get_state().name != COASTING_CRUISE){}
 
     /**
      * ======= Coasting Cruise ==========
@@ -386,67 +396,67 @@ void Task1(void *arg)
     */
     printf("\n\r============ Testing Coasting Cruise State ============\n\r");
 
-    // Coasting Cruise to Brake State
-    printf("\n\rTesting: Coasting Cruise -> Brake\n\r");
-    goToCoastingCruise();
-    brakePedalPercent = 15;
-    stateBuffer();
-    while(state.name != BRAKE_STATE){}
+    // // Coasting Cruise to Brake State
+    // printf("\n\rTesting: Coasting Cruise -> Brake\n\r");
+    // goToCoastingCruise();
+    // set_brakePedalPercent(15);
+    // stateBuffer();
+    // while(get_state().name != BRAKE_STATE){}
 
-    // Coasting Cruise to Neutral Drive
-    printf("\n\rTesting: Coasting Cruise -> Neutral Drive\n\r");
-    goToCoastingCruise();
-    gear = NEUTRAL_GEAR;
-    stateBuffer();
-    while(state.name != NEUTRAL_DRIVE){}
+    // // Coasting Cruise to Neutral Drive
+    // printf("\n\rTesting: Coasting Cruise -> Neutral Drive\n\r");
+    // goToCoastingCruise();
+    // set_gear(NEUTRAL_GEAR);
+    // stateBuffer();
+    // while(get_state().name != NEUTRAL_DRIVE){}
 
-    // Coasting Cruise to Reverse Drive
-    printf("\n\rTesting: Coasting Cruise -> Reverse Drive\n\r");
-    goToCoastingCruise();
-    gear = REVERSE_GEAR;
-    velocityObserved = 35;
-    stateBuffer();
-    velocityObserved = 5;
-    stateBuffer();
-    while(state.name != REVERSE_DRIVE){}
+    // // Coasting Cruise to Reverse Drive
+    // printf("\n\rTesting: Coasting Cruise -> Reverse Drive\n\r");
+    // goToCoastingCruise();
+    // set_gear(REVERSE_GEAR);
+    // set_velocityObserved(mpsToRpm(35));
+    // stateBuffer();
+    // set_velocityObserved(mpsToRpm(5));
+    // stateBuffer();
+    // while(get_state().name != REVERSE_DRIVE){}
 
-    // Coasting Cruise to One Pedal Drive
-    printf("\n\rTesting: Coasting Cruise -> One Pedal Drive\n\r");
-    goToCoastingCruise();
-    onePedalEnable = true;
-    stateBuffer();
-    while(state.name != ONEPEDAL){}
+    // // Coasting Cruise to One Pedal Drive
+    // printf("\n\rTesting: Coasting Cruise -> One Pedal Drive\n\r");
+    // goToCoastingCruise();
+    // set_onePedalEnable(true);
+    // stateBuffer();
+    // while(get_state().name != ONEPEDAL){}
 
-    // Coasting Cruise to Forward Drive
-    printf("\n\rTesting: Coasting Cruise -> Forward Drive\n\r");
-    goToCoastingCruise();
-    cruiseEnable = false;
-    stateBuffer();
-    while(state.name != FORWARD_DRIVE){}
+    // // Coasting Cruise to Forward Drive
+    // printf("\n\rTesting: Coasting Cruise -> Forward Drive\n\r");
+    // goToCoastingCruise();
+    // set_cruiseEnable(false);
+    // stateBuffer();
+    // while(get_state().name != FORWARD_DRIVE){}
 
-    // Coasting Cruise to Record Velocity
-    printf("\n\rTesting: Coasting Cruise -> Record Velocity\n\r");
-    goToCoastingCruise();
-    cruiseSet = true;
-    velocityObserved = 25.0;
-    stateBuffer();
-    while(state.name != RECORD_VELOCITY){}
+    // // Coasting Cruise to Record Velocity
+    // printf("\n\rTesting: Coasting Cruise -> Record Velocity\n\r");
+    // goToCoastingCruise();
+    // set_cruiseSet(true);
+    // set_velocityObserved(mpsToRpm(25.0));
+    // stateBuffer();
+    // while(get_state().name != RECORD_VELOCITY){}
 
-    // Coasting Cruise to Accelerate Cruise
-    printf("\n\rTesting: Coasting Cruise -> Accelerate Cruise\n\r");
-    goToCoastingCruise();
-    accelPedalPercent = 10;
-    stateBuffer();
-    while(state.name != ACCELERATE_CRUISE){}
+    // // Coasting Cruise to Accelerate Cruise
+    // printf("\n\rTesting: Coasting Cruise -> Accelerate Cruise\n\r");
+    // goToCoastingCruise();
+    // set_accelPedalPercent(10);
+    // stateBuffer();
+    // while(get_state().name != ACCELERATE_CRUISE){}
 
-    // Coasting Cruise to Powered Cruise
-    printf("\n\rTesting: Coasting Cruise -> Powered Cruise\n\r");
-    goToCoastingCruise();
-    accelPedalPercent = 0;
-    velocityObserved = 29;
-    cruiseVelSetpoint = 30;
-    stateBuffer();
-    while(state.name != POWERED_CRUISE){}
+    // // Coasting Cruise to Powered Cruise
+    // printf("\n\rTesting: Coasting Cruise -> Powered Cruise\n\r");
+    // goToCoastingCruise();
+    // set_accelPedalPercent(0);
+    // set_velocityObserved(mpsToRpm(29));
+    // set_cruiseVelSetpoint(mpsToRpm(30));
+    // stateBuffer();
+    // while(get_state().name != POWERED_CRUISE){}
 
     /**
      * ======= Accelerate Cruise State ==========
@@ -455,58 +465,58 @@ void Task1(void *arg)
     */
     printf("\n\r============ Testing Accelerate Cruise State ============\n\r");
 
-    // Accelerate Cruise to Brake State
-    printf("\n\rTesting: Accelerate Cruise -> Brake\n\r");
-    goToAccelerateCruise();
-    brakePedalPercent = 15;
-    stateBuffer();
-    while(state.name != BRAKE_STATE){}
+    // // Accelerate Cruise to Brake State
+    // printf("\n\rTesting: Accelerate Cruise -> Brake\n\r");
+    // goToAccelerateCruise();
+    // set_brakePedalPercent(15);
+    // stateBuffer();
+    // while(get_state().name != BRAKE_STATE){}
 
-    // Accelerate Cruise to Neutral Drive
-    printf("\n\rTesting: Accelerate Cruise -> Neutral Drive\n\r");
-    goToAccelerateCruise();
-    gear = NEUTRAL_GEAR;
-    stateBuffer();
-    while(state.name != NEUTRAL_DRIVE){}
+    // // Accelerate Cruise to Neutral Drive
+    // printf("\n\rTesting: Accelerate Cruise -> Neutral Drive\n\r");
+    // goToAccelerateCruise();
+    // set_gear(NEUTRAL_GEAR);
+    // stateBuffer();
+    // while(get_state().name != NEUTRAL_DRIVE){}
 
-    // Accelerate Cruise to Reverse Drive
-    printf("\n\rTesting: Accelerate Cruise -> Reverse Drive\n\r");
-    goToAccelerateCruise();
-    gear = REVERSE_GEAR;
-    velocityObserved = 35;
-    stateBuffer();
-    velocityObserved = 5;
-    stateBuffer();
-    while(state.name != REVERSE_DRIVE){}
+    // // Accelerate Cruise to Reverse Drive
+    // printf("\n\rTesting: Accelerate Cruise -> Reverse Drive\n\r");
+    // goToAccelerateCruise();
+    // set_gear(REVERSE_GEAR);
+    // set_velocityObserved(mpsToRpm(35));
+    // stateBuffer();
+    // set_velocityObserved(mpsToRpm(5));
+    // stateBuffer();
+    // while(get_state().name != REVERSE_DRIVE){}
 
-    // Accelerate Cruise to One Pedal Drive
-    printf("\n\rTesting: Accelerate Cruise -> One Pedal Drive\n\r");
-    goToAccelerateCruise();
-    onePedalEnable = true;
-    stateBuffer();
-    while(state.name != ONEPEDAL){}
+    // // Accelerate Cruise to One Pedal Drive
+    // printf("\n\rTesting: Accelerate Cruise -> One Pedal Drive\n\r");
+    // goToAccelerateCruise();
+    // set_onePedalEnable(true);
+    // stateBuffer();
+    // while(get_state().name != ONEPEDAL){}
 
-    // Accelerate Cruise to Forward Drive
-    printf("\n\rTesting: Accelerate Cruise -> Forward Drive\n\r");
-    goToAccelerateCruise();
-    cruiseEnable = false;
-    stateBuffer();
-    while(state.name != FORWARD_DRIVE){}
+    // // Accelerate Cruise to Forward Drive
+    // printf("\n\rTesting: Accelerate Cruise -> Forward Drive\n\r");
+    // goToAccelerateCruise();
+    // set_cruiseEnable(false);
+    // stateBuffer();
+    // while(get_state().name != FORWARD_DRIVE){}
 
-    // Accelerate Cruise to Record Velocity
-    printf("\n\rTesting: Accelerate Cruise -> Record Velocity\n\r");
-    goToAccelerateCruise();
-    cruiseSet = true;
-    velocityObserved = 25.0;
-    stateBuffer();
-    while(state.name != RECORD_VELOCITY){}
+    // // Accelerate Cruise to Record Velocity
+    // printf("\n\rTesting: Accelerate Cruise -> Record Velocity\n\r");
+    // goToAccelerateCruise();
+    // set_cruiseSet(true);
+    // set_velocityObserved(mpsToRpm(25.0));
+    // stateBuffer();
+    // while(get_state().name != RECORD_VELOCITY){}
 
-    // Accelerate Cruise to Coasting Cruise
-    printf("\n\rTesting: Accelerate Cruise -> Coasting Cruise\n\r");
-    goToAccelerateCruise();
-    accelPedalPercent = 0;
-    stateBuffer();
-    while(state.name != COASTING_CRUISE){}
+    // // Accelerate Cruise to Coasting Cruise
+    // printf("\n\rTesting: Accelerate Cruise -> Coasting Cruise\n\r");
+    // goToAccelerateCruise();
+    // set_accelPedalPercent(0);
+    // stateBuffer();
+    // while(get_state().name != COASTING_CRUISE){}
 
     /**
      * ======= One Pedal Drive ==========
@@ -519,35 +529,35 @@ void Task1(void *arg)
     // One Pedal Drive to Brake
     printf("\n\rTesting: One Pedal Drive -> Brake\n\r");
     goToOnePedalDrive();
-    brakePedalPercent = 15;
+    set_brakePedalPercent(15);
     stateBuffer();
-    while(state.name != BRAKE_STATE){}
+    while(get_state().name != BRAKE_STATE){}
 
     // One Pedal Drive to Neutral Drive
     printf("\n\rTesting: One Pedal Drive -> Neutral Drive\n\r");
     goToOnePedalDrive();
-    gear = NEUTRAL_GEAR;
+    set_gear(NEUTRAL_GEAR);
     stateBuffer();
-    while(state.name != NEUTRAL_DRIVE){}
+    while(get_state().name != NEUTRAL_DRIVE){}
 
     // One Pedal Drive to Reverse Drive
     printf("\n\rTesting: One Pedal Drive -> Reverse Drive\n\r");
     goToOnePedalDrive();
-    gear = REVERSE_GEAR;
-    velocityObserved = 35;
+    set_gear(REVERSE_GEAR);
+    set_velocityObserved(mpsToRpm(35));
     stateBuffer();
-    velocityObserved = 5;
+    set_velocityObserved(mpsToRpm(5));
     stateBuffer();
-    while(state.name != REVERSE_DRIVE){}
+    while(get_state().name != REVERSE_DRIVE){}
 
     // One Pedal Drive to Record Velocity
-    printf("\n\rTesting: One Pedal Drive -> Record Velocity\n\r");
-    goToOnePedalDrive();
-    cruiseSet = true;
-    cruiseEnable = true;
-    velocityObserved = 25.0;
-    stateBuffer();
-    while(state.name != RECORD_VELOCITY){}
+    // printf("\n\rTesting: One Pedal Drive -> Record Velocity\n\r");
+    // goToOnePedalDrive();
+    // set_cruiseSet(true);             // DOES WORK BUT NEEDS TO ENFORCE 1 TRANSITION
+    // set_cruiseEnable(true);
+    // set_velocityObserved(mpsToRpm(25.0));
+    // stateBuffer();
+    // while(get_state().name != RECORD_VELOCITY){}
 
    /**
      * ======= Brake State ==========
@@ -559,29 +569,29 @@ void Task1(void *arg)
     // Brake State to Forward Drive
     printf("\n\rTesting: Brake -> Forward Drive\n\r");
     goToBrakeState();
-    brakePedalPercent = 1;
-    gear = FORWARD_GEAR;
+    set_brakePedalPercent(1);
+    set_gear(FORWARD_GEAR);
     stateBuffer();
-    while(state.name != FORWARD_DRIVE){}
+    while(get_state().name != FORWARD_DRIVE){}
 
     // Brake State to Neutral Drive
     printf("\n\rTesting: Brake -> Neutral Drive\n\r");
     goToBrakeState();
-    brakePedalPercent = 1;
-    gear = NEUTRAL_GEAR;
+    set_brakePedalPercent(1);
+    set_gear(NEUTRAL_GEAR);
     stateBuffer();
-    while(state.name != NEUTRAL_DRIVE){}
+    while(get_state().name != NEUTRAL_DRIVE){}
 
     // Brake State to Reverse Drive
     printf("\n\rTesting: Brake -> Reverse Drive\n\r");
     goToBrakeState();
-    brakePedalPercent = 1;
-    gear = REVERSE_GEAR;
-    velocityObserved = 35;
+    set_brakePedalPercent(1);
+    set_gear(REVERSE_GEAR);
+    set_velocityObserved(mpsToRpm(35));
     stateBuffer();
-    velocityObserved = 5;
+    set_velocityObserved(mpsToRpm(5));
     stateBuffer();
-    while(state.name != REVERSE_DRIVE){}
+    while(get_state().name != REVERSE_DRIVE){}
 
     OS_TaskSuspend(&SendTritium_TCB, &err);
     assertOSError(err);

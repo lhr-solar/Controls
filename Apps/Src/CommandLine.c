@@ -196,7 +196,7 @@ static bool cmd_CANbus_Read(void){
 	}
 
 	if(CANbus_Read(&msg, blocking, bus) == SUCCESS){
-		printf("msg recieved on %s (%s)\n\r", busInput, blockInput);
+		printf("msg received on %s (%s)\n\r", busInput, blockInput);
 		printf("ID: %d, Data: ", msg.ID);
 		for(int i = 0; i < 8; i++){
 			printf("[%d] %x \n\r", i, msg.data[i]);
