@@ -37,7 +37,7 @@ extern OS_SEM infoMutex; //Mutex to lock GPIO writes to input pins
  * @brief Returns the value of charge message saturation
  * @return Value between -15 to 15
 */
-int8_t ChargeMsgSaturation_Get(void);
+int8_t HVArrayMsgSaturation_Get(void);
 
 
 int8_t PlusMinusMsgSaturation_Get(void);
@@ -61,7 +61,7 @@ bool MotorControllerIgnition_Get(void);
 uint8_t SOC_Get(void);
 
 /**
- * @brief Returns the value of supply voltage
+ * @brief Returns the value of upplemental battery pack voltage
  * @return Voltage in mV
 */
 uint32_t SBPV_Get(void);

@@ -8,11 +8,9 @@
 #include "os_cfg_app.h"
 
 // Array and Motor saturation threshold is halfway between 0 and max saturation value 
-// (half of summation from one to the number of positions)
+// The max saturation value is half of summation from one to the number of positions.
 #define ARRAY_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 #define MOTOR_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
-
-OS_SEM infoMutex;
 
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u
@@ -31,14 +29,14 @@ static OS_TMR motorControllerBypassPrechargeDlyTimer;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
-static bool chargeEnable = false;
+static bool chargeEnable = false; // Enable (High message) of BPS high voltage (HV) array contactor
 
 // BPS HV Array saturation buffer variables
 static int8_t HVArrayChargeMsgBuffer[SAT_BUF_LENGTH];
-static int8_t HVArrayChargeMsgSaturation = 0;
+static int8_t HVArrayMsgSaturation = 0;
 static uint8_t HVArrayOldestMsgIdx = 0;
 
-// BPS HV Plus/Minus (associated with the Motor) saturation buffer variables
+// BPS HV Plus/Minus (associated with Control's Motor Controller Contactor) saturation buffer variables
 static int8_t HVPlusMinusChargeMsgBuffer[SAT_BUF_LENGTH];
 static int8_t HVPlusMinusChargeMsgSaturation = 0;
 static uint8_t HVPlusMinusMotorOldestMsgIdx = 0;
@@ -47,28 +45,28 @@ static uint8_t HVPlusMinusMotorOldestMsgIdx = 0;
 static bool arrayIgnitionStatus = false;
 static bool motorControllerIgnitionStatus = false;
 
-// Boolean to indicate precharge status for Array BPC and Motor Controller BPC
+// Boolean to indicate precharge status for Array Precharge Bypass Contactor (PBC) and Motor Controller PBC
 static bool arrayBypassPrechargeComplete = false;
 static bool motorControllerBypassPrechargeComplete = false;
 
-// SOC and Supp V value intialization
+// State of Charge (SOC) and supplemental battery pack voltage (SBPV) value intialization
 static uint8_t SOC = 0;
 static uint32_t SBPV = 0;
 
 // Error assertion function prototype
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
-// Getter function for charge enable
+// Getter function for charge enable, indicating that battery charging is allowed
 bool ChargeEnable_Get(void){
     return chargeEnable;
 }
 
-// Getter function for charge message saturation
-int8_t ChargeMsgSaturation_Get(){ 
-	return HVArrayChargeMsgSaturation;
+// Getter function for HV Array message saturation
+int8_t HVArrayMsgSaturation_Get(){ 
+	return HVArrayMsgSaturation;
 }
 
-// Getter function for charge message saturation
+// Getter function for HV Plus/Minus (associated with Control's Motor Controller PBC) message saturation
 int8_t PlusMinusMsgSaturation_Get(){ 
 	return HVPlusMinusChargeMsgSaturation;
 }
@@ -78,22 +76,17 @@ bool ArrayIgnitionStatus_Get(void){
     return arrayIgnitionStatus;
 }
 
-// Getter function for array ignition status
+// Getter function for motor controller ignition status
 bool MotorControllerIgnition_Get(void){
     return motorControllerIgnitionStatus;
 }
 
-// Getter function for array ignition status
-bool PreChargeComplete_Get(void){
-    return motorControllerBypassPrechargeComplete;
-}
-
-// Getter function for SOC
+// Getter function for State of Charge (SOC)
 uint8_t SOC_Get(){ 
 	return SOC;
 }
 
-// Getter function for SBPV
+// Getter function for supplemental battery pack voltage (SBPV)
 uint32_t SBPV_Get(){ 
 	return SBPV;
 }
@@ -104,11 +97,11 @@ uint32_t SBPV_Get(){
  * @param p_arg pointer to the argument passed by timer
 */
 static void callbackCANWatchdog(void *p_tmr, void *p_arg){
-   // assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+   assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
 
 /**
- * @brief Callback function for the precharge delay timer. Waits for precharge and then sets prechargeComplete to true.
+ * @brief Callback function for the precharge delay timer. Waits for precharge and then sets arrayBypassPrechargeComplete to true.
  * @param p_tmr pointer to the timer that calls this function, passed by timer
  * @param p_arg pointer to the argument passed by timer
 */
@@ -117,7 +110,7 @@ static void setArrayBypassPrechargeComplete(void *p_tmr, void *p_arg){
 };
 
 /**
- * @brief Callback function for the precharge delay timer. Waits for precharge and then sets prechargeComplete to true.
+ * @brief Callback function for the precharge delay timer. Waits for precharge and then sets motorControllerBypassPrechargeComplete to true.
  * @param p_tmr pointer to the timer that calls this function, passed by timer
  * @param p_arg pointer to the argument passed by timer
 */
@@ -126,7 +119,7 @@ static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg){
 };
 
 /**
- * @brief Disables Array Precharge Bypass Contactor (APBC) by asserting an error. Also updates display for APBC to be open.
+ * @brief Disables Array Precharge Bypass Contactor (PBC) by asserting an error. Also updates display for Array PBC to be open.
  * @param None
 */
 static void disableArrayPrechargeBypassContactor(void){
@@ -144,7 +137,7 @@ static void updateArrayPrechargeBypassContactor(void){
       
     OS_ERR err;
     if((arrayIgnitionStatus == true  || motorControllerIgnitionStatus == true  )                                             // Ignition is ON
-        && HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD                         // Saturation Threshold has be met
+        && HVArrayMsgSaturation >= ARRAY_SATURATION_THRESHOLD                         // Saturation Threshold has be met
         && (Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR)== OFF)                                          // Array Contactor is OFF
         && (OSTmrStateGet(&arrayBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){   // and precharge is currenetly not happening  
             // Asserts error for OS timer start above if conditional was met
@@ -181,11 +174,11 @@ static void updateHVArraySaturation(int8_t chargeMessage){
     for (uint8_t i = 0; i < SAT_BUF_LENGTH; i++){
         newSaturation += HVArrayChargeMsgBuffer[(HVArrayOldestMsgIdx + i) % SAT_BUF_LENGTH] * (i + 1);
     }
-    HVArrayChargeMsgSaturation = newSaturation;
+    HVArrayMsgSaturation = newSaturation;
 
     if(chargeMessage == -1){
         chargeEnable = false;
-    }else if(HVArrayChargeMsgSaturation >= ARRAY_SATURATION_THRESHOLD){
+    }else if(HVArrayMsgSaturation >= ARRAY_SATURATION_THRESHOLD){
         chargeEnable = true;
         updateArrayPrechargeBypassContactor();
     }
