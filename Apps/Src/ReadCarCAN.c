@@ -93,7 +93,7 @@ static inline void chargingDisable(void) {
 
     // Signal fault state to kill contactors at its earliest convenience
     OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    assertOSError(err);
 
 }
 
@@ -109,7 +109,7 @@ static inline void chargingEnable(void) {
     bool shouldRestartArray = false;
 
     OSMutexPend(&arrayRestartMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    assertOSError(err);
 
     // if the array is off and we're not already turning it on, start turning it on
     shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==OFF);
@@ -121,13 +121,13 @@ static inline void chargingEnable(void) {
 
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&prechargeDlyTimer, &err);
-            assertOSError(OS_READ_CAN_LOC, err);
+            assertOSError(err);
             
         }
     
 
     OSMutexPost(&arrayRestartMutex, OS_OPT_NONE, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    assertOSError(err);
 }
 
 /**
@@ -166,7 +166,7 @@ void Task_ReadCarCAN(void *p_arg)
     CANDATA_t dataBuf;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    assertOSError(err);
 
 
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
@@ -181,7 +181,7 @@ void Task_ReadCarCAN(void *p_arg)
         NULL,
         &err
     );
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
 
     OSTmrCreate(
         &prechargeDlyTimer,
@@ -193,11 +193,11 @@ void Task_ReadCarCAN(void *p_arg)
         NULL,
         &err
     );
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
 
     //Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
     
 
     while (1)
@@ -220,14 +220,14 @@ void Task_ReadCarCAN(void *p_arg)
                     // Set fault bitmap and assert the error
                     FaultBitmap |= FAULT_BPS;
                     OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-                    assertOSError(OS_READ_CAN_LOC, err);
+                    assertOSError(err);
                 }
             }
             case CHARGE_ENABLE: { 
 
                 // Restart CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
-                assertOSError(OS_READ_CAN_LOC, err);
+                assertOSError(err);
 
 
                 if(dataBuf.data[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off chargeEnable and turn array off

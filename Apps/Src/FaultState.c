@@ -119,7 +119,7 @@ void EnterFaultState(void) {
     else if(FaultBitmap & FAULT_DISPLAY){
         static uint8_t disp_fault_cnt = 0;
         if(disp_fault_cnt>3){
-            Display_Fault(OSErrLocBitmap, FaultBitmap);
+            Display_Fault(FaultBitmap);
         } else {
             disp_fault_cnt++;
             Display_Reset();
@@ -138,7 +138,6 @@ void Task_FaultState(void *p_arg) {
     CPU_TS ts;
 
     FaultBitmap = FAULT_NONE;
-    OSErrLocBitmap = OS_NONE_LOC;
 
     // Block until fault is signaled by an assert
     while(1){

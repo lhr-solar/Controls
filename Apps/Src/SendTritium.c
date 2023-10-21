@@ -667,7 +667,7 @@ void Task_SendTritium(void *p_arg){
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
-            assertOSError(OS_UPDATE_VEL_LOC, err);
+            assertOSError(err);
         }
     }
 }

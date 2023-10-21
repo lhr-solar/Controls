@@ -15,7 +15,7 @@ static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 void stateBuffer(){
     OS_ERR err;
     OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
-    assertOSError(OS_UPDATE_VEL_LOC, err);
+    assertOSError(err);
 }
 
 void goToBrakeState(){
@@ -584,11 +584,11 @@ void Task1(void *arg)
     while(state.name != REVERSE_DRIVE){}
 
     OS_TaskSuspend(&SendTritium_TCB, &err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
     while (1){
         printf("\n\r\n\rSUCCESS! ALL TESTS PASSED\n\r\n\r");
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(OS_MAIN_LOC, err);
+        assertOSError(err);
     }
 };
 
@@ -601,7 +601,7 @@ int main()
         "Fault State Semaphore",
         0,
         &err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSTaskCreate( // create fault task
         (OS_TCB *)&FaultState_TCB,
@@ -617,7 +617,7 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // create tester thread
     OSTaskCreate(
@@ -634,7 +634,7 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSStart(&err);
 }
