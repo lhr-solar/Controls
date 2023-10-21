@@ -169,7 +169,7 @@ extern fault_bitmap_t FaultBitmap;
  * @brief   Assert Error if OS function call fails
  * @param   err OS Error that occurred
  */
-void _ERR err); //TODO: This should be changed to enforce only enum usage
+void _assertOSError (OS_ERR err); //TODO: This should be changed to enforce only enum usage
 
 #if DEBUG == 1
 #define assertOSError(err) 
