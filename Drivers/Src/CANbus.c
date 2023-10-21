@@ -25,7 +25,7 @@ void CANbus_RxHandler(CAN_t bus)
 {
     OS_ERR err;
     OSSemPost(&(CANBus_ReceiveSem4[bus]), OS_OPT_POST_1, &err); // increment our queue counter
-    assertOSError(OS_CANDRIVER_LOC,err);
+    assertOSError(err);
 }
 
 /**
@@ -96,7 +96,7 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
     assertOSError(err);
 
     OSSemCreate(&(CANBus_ReceiveSem4[bus]), (bus == CAN_1 ? "CAN Received Msg Queue Ctr 1":"CAN Received Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
-    assertOSError(OS_CANDRIVER_LOC,err);
+    assertOSError(err);
 
     return SUCCESS;
 }
