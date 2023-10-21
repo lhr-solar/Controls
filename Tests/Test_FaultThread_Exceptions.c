@@ -181,7 +181,7 @@ void Task_ManagerTask(void* arg) {
             checkOSError(err);  
             break;
 
-            case TEST_OS_ASSERT:
+        case TEST_OS_ASSERT:
             // Test the assertOSError function using the OSErrorTask
             // Creates an OS error by pending on a mutex that isn't created
             // Successful if it doesn't print the fail message (task is stopped by asserting an error)

@@ -11,20 +11,20 @@
 #include "CANConfig.h"
 
 static OS_SEM CANMail_Sem4[NUM_CAN];       // sem4 to count how many sending hardware mailboxes we have left (start at 3)
-static OS_SEM CANBus_RecieveSem4[NUM_CAN]; // sem4 to count how many msgs in our recieving queue
+static OS_SEM CANBus_ReceiveSem4[NUM_CAN]; // sem4 to count how many msgs in our recieving queue
 static OS_MUTEX CANbus_TxMutex[NUM_CAN];   // mutex to lock tx line
 static OS_MUTEX CANbus_RxMutex[NUM_CAN];   // mutex to lock Rx line
 
 
 
 /**
- * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the recieve semaphore to signal message in hardware mailbox. Do not access directly outside this driver.
+ * @brief this function will be passed down to the BSP layer to trigger on RX events. Increments the receive semaphore to signal message in hardware mailbox. Do not access directly outside this driver.
  * @param bus The CAN bus to operate on. Should be CARCAN or MOTORCAN.
  */
 void CANbus_RxHandler(CAN_t bus)
 {
     OS_ERR err;
-    OSSemPost(&(CANBus_RecieveSem4[bus]), OS_OPT_POST_1, &err); // increment our queue counter
+    OSSemPost(&(CANBus_ReceiveSem4[bus]), OS_OPT_POST_1, &err); // increment our queue counter
     assertOSError(OS_CANDRIVER_LOC,err);
 }
 
@@ -95,7 +95,7 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
     OSSemCreate(&(CANMail_Sem4[bus]), (bus == CAN_1 ? "CAN Mailbox Semaphore 1":"CAN Mailbox Semaphore 3"), 3, &err); // there's 3 hardware mailboxes on the board, so 3 software mailboxes
     assertOSError(OS_CANDRIVER_LOC,err);
 
-    OSSemCreate(&(CANBus_RecieveSem4[bus]), (bus == CAN_1 ? "CAN Recieved Msg Queue Ctr 1":"CAN Recieved Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
+    OSSemCreate(&(CANBus_ReceiveSem4[bus]), (bus == CAN_1 ? "CAN Received Msg Queue Ctr 1":"CAN Received Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
     assertOSError(OS_CANDRIVER_LOC,err);
 
     return SUCCESS;
@@ -188,7 +188,7 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
     if (blocking == CAN_BLOCKING)
     {
         OSSemPend( // check if the queue actually has anything
-            &(CANBus_RecieveSem4[bus]),
+            &(CANBus_ReceiveSem4[bus]),
             0,
             OS_OPT_PEND_BLOCKING,
             &timestamp,
@@ -197,7 +197,7 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
     else
     {
         OSSemPend(
-            &(CANBus_RecieveSem4[bus]),
+            &(CANBus_ReceiveSem4[bus]),
             0,
             OS_OPT_PEND_NON_BLOCKING,
             &timestamp,
