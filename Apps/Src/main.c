@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file main.c
+ * @brief 
+ * 
+ */
 
 #include "common.h"
 #include "config.h"
@@ -24,7 +29,7 @@ int main(void) {
 
     OS_ERR err;
     OSInit(&err);
-    
+    TaskSwHook_Init();
 
     assertOSError(OS_MAIN_LOC, err);
 
@@ -77,7 +82,7 @@ void Task_Init(void *p_arg){
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    Minion_Init();
+    Minions_Init();
     CAN_Queue_Init();
 
     // Initialize applications

@@ -1,6 +1,8 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-/** CAN_Queue.c
- * Queue that holds all CAN messages that Task_CANBusConsumer needs to send.
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file CAN_Queue.c
+ * @brief 
+ * 
  */
 
 #include "CAN_Queue.h"
@@ -65,4 +67,3 @@ ErrorStatus CAN_Queue_Pend(CANDATA_t *message) {
     assertOSError(OS_SEND_CAN_LOC, err);
     return result ? SUCCESS : ERROR;
 }
-

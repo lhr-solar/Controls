@@ -13,9 +13,9 @@ Contributing to the docs
 
 Any change in functionality or interface should be reflected in the docs: out-of-date documentation can often be worse than no documentation at all! Try to update the docs while waiting for the rest of your pull request to get approved.
 
-In order to compile the docs locally (which is essential for making sure everything looks fine before pushing), ``sphinx`` must be installed. The procedure might differ depending on distribution, but in Ubuntu this can be done with ``sudo apt install python3-sphinx``. The theme for the docs can be installed with ``pip install sphinx_rtd_theme`` (if pip is not installed, run ``sudo apt install python3-pip``).
+In order to compile the docs locally (which is essential for making sure everything looks fine before pushing), ``sphinx``, ``doxygen``, and ``breathe`` must be installed. The procedure might differ depending on distribution, but in Ubuntu this can be done with ``sudo apt install python3-sphinx``, ``pip install breathe`` and look at doxygen's documentation on how to install that. The theme for the docs can be installed with ``pip install sphinx_rtd_theme`` (if pip is not installed, run ``sudo apt install python3-pip``).
 
-To view a local copy of the docs, cd into the Docs directory and run ``make html``. The resulting ``build/html/index.html`` can then be viewed in any browser. When your pull request is merged into the master branch, the documentation changes should be automatically visible on this website.
+To create the doxygen output, run `` doxygen doxyfile`` from the root directory of the project. To view a local copy of the docs, cd into the Docs directory and run ``make html``. The resulting ``build/html/index.html`` can then be viewed in any browser. When your pull request is merged into the master branch, the documentation changes should be automatically visible on this website.
 
 Keep the docs clear and readible. Reach out to more experienced team members with any questions!
 
@@ -33,15 +33,13 @@ Keep the docs clear and readible. Reach out to more experienced team members wit
    :maxdepth: 2
    :caption: Apps
 
-   Apps/BlinkLights
    Apps/FaultState
    Apps/Main
    Apps/ReadCarCAN
-   Apps/ReadSwitches
    Apps/ReadTritium
    Apps/SendCarCAN
    Apps/UpdateDisplay
-   Apps/UpdateVelocity
+   Apps/SendTritium
    Apps/ExtraFiles
 
 

@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Contactors.h
+ * @brief 
+ * 
+ * @defgroup Contactors
+ * @addtogroup Contactors
+ * @{
+ */
 
 #ifndef __CONTACTORS_H
 #define __CONTACTORS_H
@@ -13,12 +21,15 @@
 #define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_10
 #define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_12     
 
+#define FOREACH_contactor(contactor) \
+        contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR)  \
+        contactor(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)   \
 
-typedef enum {
-    ARRAY_PRECHARGE_BYPASS_CONTACTOR,
-    MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, 
-    NUM_CONTACTORS
-} contactor_t;
+typedef enum contactor_ENUM {
+    FOREACH_contactor(GENERATE_ENUM)
+    NUM_CONTACTORS,
+}contactor_t;
+
 
 
 /**
@@ -47,3 +58,6 @@ bool Contactors_Get(contactor_t contactor);
 ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
 
 #endif
+
+
+/* @} */

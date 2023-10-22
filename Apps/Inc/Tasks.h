@@ -1,4 +1,13 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Tasks.h
+ * @brief 
+ * 
+ * @defgroup Tasks
+ * @addtogroup Tasks
+ * @{
+ */
+
 
 #ifndef __TASKS_H
 #define __TASKS_H
@@ -25,6 +34,8 @@
 #define TASK_UPDATE_DISPLAY_PRIO            6
 #define TASK_SEND_CAR_CAN_PRIO              8
 #define TASK_TELEMETRY_PRIO                 9
+#define TASK_DEBUG_DUMP_PRIO                10
+#define TASK_COMMAND_LINE_PRIO              11
 
 /**
  * Stack Sizes
@@ -39,11 +50,13 @@
 #define TASK_READ_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_TELEMETRY_STACK_SIZE           DEFAULT_STACK_SIZE
+#define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
+#define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
 
 /**
  * Task error variable type
 */
-typedef int16_t error_code_t;
+typedef uint16_t error_code_t;
 
 
 /**
@@ -69,9 +82,9 @@ void Task_SendCarCAN(void* p_arg);
 
 void Task_Telemetry(void* p_arg);
 
+void Task_DebugDump(void *p_arg);
 
-
-
+void Task_CommandLine(void* p_arg);
 
 
 
@@ -85,7 +98,8 @@ extern OS_TCB UpdateDisplay_TCB;
 extern OS_TCB ReadTritium_TCB;
 extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB Telemetry_TCB;
-
+extern OS_TCB DebugDump_TCB;
+extern OS_TCB CommandLine_TCB;
 
 
 /**
@@ -98,23 +112,25 @@ extern CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 extern CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
-
+extern CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
+extern CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 /**
  * Queues
  */
 extern OS_Q CANBus_MsgQ;
 
+/**
+ * @brief Initialize the task switch hook
+ * Registers the hook with the RTOS
+ */
+void TaskSwHook_Init(void);
+
 
 /**
  * Global Variables
  */
 
-
-//Put all global state variables here
-extern bool UpdateVel_ToggleCruise;
-extern uint16_t SupplementalVoltage;
-extern uint32_t StateOfCharge;
 
 /**
  * OS Error States
@@ -140,39 +156,6 @@ typedef enum{
 } os_error_loc_t;
 
 /**
- * Error variables
- */
-extern os_error_loc_t OSErrLocBitmap;
-
-// Store error codes that are set in task error assertion functions
-extern error_code_t Error_ReadTritium; 
-extern error_code_t Error_ReadCarCAN;
-extern error_code_t Error_UpdateDisplay;
-
-/**
- * Error-handling option enums
-*/
-
-// Scheduler lock parameter option for asserting a task error
-typedef enum {
-    OPT_LOCK_SCHED = false,
-    OPT_NO_LOCK_SCHED = true
-} error_scheduler_lock_opt_t;
-
-// Recoverable/nonrecoverable parameter option for asserting a task error
-typedef enum {
-    OPT_RECOV,
-    OPT_NONRECOV
-} error_recov_opt_t;
-
-/**
- * @brief For use in error handling: turns off array, array precharge, and motor contactor
- * and turns on additional brakelight to signal that a critical error happened.
-*/
-void arrayMotorKill();
-
-
-/**
  * Task trace
  * 
  * Stores the last TASK_TRACE_LENGTH tasks that were run
@@ -189,16 +172,48 @@ typedef struct {
 extern task_trace_t PrevTasks;
 
 /**
+ * Error variables
+ */
+extern os_error_loc_t OSErrLocBitmap;
+
+// Store error codes that are set in task error assertion functions
+extern error_code_t Error_ReadTritium; 
+extern error_code_t Error_ReadCarCAN;
+extern error_code_t Error_UpdateDisplay;
+
+/**
+ * Error-handling option enums
+*/
+
+// Scheduler lock parameter option for asserting a task error
+typedef enum {
+    OPT_NO_LOCK_SCHED,
+    OPT_LOCK_SCHED
+} error_scheduler_lock_opt_t;
+
+// Recoverable/nonrecoverable parameter option for asserting a task error
+typedef enum {
+    OPT_RECOV,
+    OPT_NONRECOV
+} error_recov_opt_t;
+
+/**
+ * @brief For use in error handling: opens array and motor precharge bypass contactor
+ * and turns on additional brakelight to signal that a critical error happened.
+*/
+void EmergencyContactorOpen();
+
+/**
  * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 
  * displaying a fault screen (if nonrecoverable), jumping to a callback function, and entering an infinite loop. 
  * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
  * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
  * @param errorCode the enum for the specific error that happened
  * @param errorCallback a callback function to a handler for that specific error, 
- * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
+ * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
+void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
 
 /**
  * @brief   Assert Error if OS function call fails
@@ -218,3 +233,5 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err);
 #endif
 
 #endif
+
+/* @} */

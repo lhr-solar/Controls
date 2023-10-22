@@ -83,32 +83,28 @@ static void infoDump(){
 }
 
 
-Minion_Error_t mErr;
-
-
-
 static void turnIgnitionToMotorON(){
     printf("\n\r=========== Turn Ignition to Motor ===========");
-    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor ON
-    Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array OFF
+    Minions_Write(IGN_2, 0);                      // Ignition motor ON
+    Minions_Write(IGN_1, 1);                      // Ignition array OFF
 }
 
 static void turnIgnitionToArrayON(){
     printf("\n\r=========== Turn Ignition to Array ===========");
-    Minion_Write_Output(IGN_2, 1, &mErr);                      // Ignition motor OFF
-    Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array ON
+    Minions_Write(IGN_2, 1);                      // Ignition motor OFF
+    Minions_Write(IGN_1, 0);                      // Ignition array ON
 }
 
 static void turnIgnitionOFF(){
     printf("\n\r=========== Turn Ignition to OFF ===========");
-    Minion_Write_Output(IGN_2, 1, &mErr);                      // Ignition motor OFF
-    Minion_Write_Output(IGN_1, 1, &mErr);                      // Ignition array OFF
+    Minions_Write(IGN_2, 1);                      // Ignition motor OFF
+    Minions_Write(IGN_1, 1);                      // Ignition array OFF
 }
 
 static void turnIgnitionBoth(){
     printf("\n\r=========== Turn Ignition to Both ===========");
-    Minion_Write_Output(IGN_2, 0, &mErr);                      // Ignition motor OFF
-    Minion_Write_Output(IGN_1, 0, &mErr);                      // Ignition array OFF
+    Minions_Write(IGN_2, 0);                      // Ignition motor OFF
+    Minions_Write(IGN_1, 0);                      // Ignition array OFF
 }
 
 
@@ -173,7 +169,7 @@ void Task1(){
     OS_ERR err;
 
     CPU_Init();
-    Minion_Init();
+    Minions_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     Contactors_Init();
     CANbus_Init(CARCAN, NULL, 0);

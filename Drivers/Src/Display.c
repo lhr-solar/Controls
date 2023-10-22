@@ -1,14 +1,11 @@
 /**
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Display.c
  * @brief Function implementations for the display driver.
  *
  * This contains functions relevant to sending/receiving messages
  * to/from our Nextion display.
- *
- * @author Ishan Deshpande (IshDeshpa)
- * @author Roie Gal (Cam0Cow)
- * @author Nathaniel Delgado (NathanielDelgado)
+ * 
  */
 
 #include "Display.h"
@@ -23,7 +20,6 @@
 // Operational commands have no attribute and no operator, just a command and >= 0 arguments
 #define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
 
-#define RESTART_THRESHOLD 3 // number of times to restart before fault
 
 
 static const char *TERMINATOR = "\xff\xff\xff";
@@ -98,7 +94,7 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Error(os_error_loc_t osErrCode, uint8_t faultCode){
+DisplayError_t Display_Error(os_error_loc_t osErrCode, error_code_t faultCode){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
 	char faultPage[7] = "page 2";
@@ -110,8 +106,8 @@ DisplayError_t Display_Error(os_error_loc_t osErrCode, uint8_t faultCode){
 	BSP_UART_Write(DISP_OUT, setOSCode, strlen(setOSCode));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
-	char setFaultCode[18];
-	sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+	char setFaultCode[20];
+	sprintf(setFaultCode, "%s\"%04x\"", "faulterr.txt=", (uint16_t)faultCode);
 	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
@@ -137,5 +133,3 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 
 	return DISPLAY_ERR_NONE;
 }
-
-

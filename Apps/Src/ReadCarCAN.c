@@ -1,4 +1,10 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file ReadCarCAN.c
+ * @brief 
+ * 
+ */
+
 
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
@@ -218,10 +224,9 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
  * @param None
 */
  void updatePrechargeContactors(void){
-    Minion_Error_t Merr;
 
-    arrayIgnitionStatus = (!Minion_Read_Pin(IGN_1, &Merr));
-    motorControllerIgnitionStatus = (!Minion_Read_Pin(IGN_2, &Merr));
+    arrayIgnitionStatus = (!Minions_Read(IGN_1));
+    motorControllerIgnitionStatus = (!Minions_Read(IGN_2));
 
     if(arrayIgnitionStatus == true && motorControllerIgnitionStatus == false){
         if(arrayBypassPrechargeComplete == true && chargeEnable == true){
@@ -321,16 +326,21 @@ void Task_ReadCarCAN(void *p_arg){
             continue;
         }
 
-        switch(dataBuf.ID){
-            case BPS_TRIP: { // BPS has a fault and we need to enter fault state
-                // Assert the error to kill contactors, display evacuation message, and enter a nonrecoverable fault
-                assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
-                }
+        switch(dataBuf.ID){ //we got a message
+            case BPS_TRIP: {
+                // BPS has a fault and we need to enter fault state 
 
-            case BPS_CONTACTOR:{
-                // Acknowledge CAN Watchdog timer
+                Display_Evac(SOC, SBPV); // Display evacuation message
+
+                // kill contactors and enter a nonrecoverable fault
+                assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
+            }
+            case BPS_CONTACTOR: { 
+
+                // Restart CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
                 assertOSError(OS_READ_CAN_LOC, err);
+
 
                 switch (dataBuf.data[0] & 0b111){ // Masking to get last three bits
                     case (0b000):
@@ -430,15 +440,15 @@ static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err){
                 break;
 
             case READCARCAN_ERR_CHARGE_DISABLE: // Received a charge disable msg and need to turn off array contactor
-                assertTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_CHARGE_DISABLE, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
+                throwTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_CHARGE_DISABLE, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
                 break;
 
             case READCARCAN_ERR_MISSED_MSG: // Missed message- treat as charging disable message
-                assertTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_MISSED_MSG, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
+                throwTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_MISSED_MSG, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
                 break;
 
             case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop
-                assertTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_BPS_TRIP, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
+                throwTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_BPS_TRIP, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
                 break;
             
             default:
