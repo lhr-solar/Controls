@@ -115,7 +115,7 @@ void Task_CommandLine(void* p_arg) {
     // Delay of 1 seconds
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     if (err != OS_ERR_NONE){
-        assertOSError(OS_NONE_LOC, err);
+        assertOSError(err);
     }
 }
 

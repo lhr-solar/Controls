@@ -120,29 +120,6 @@ extern OS_Q CANBus_MsgQ;
 void TaskSwHook_Init(void);
 
 /**
- * OS Error States
- * 
- * Stores error data to indicate which part of the code
- * an error is coming from.
- */
-typedef enum{
-    OS_NONE_LOC = 0x000,
-    OS_ARRAY_LOC = 0x001,
-    OS_READ_CAN_LOC = 0x002,
-    OS_READ_TRITIUM_LOC = 0x004,
-    OS_SEND_CAN_LOC = 0x008,
-    OS_SEND_TRITIUM_LOC = 0x010,
-    OS_UPDATE_VEL_LOC = 0x020,
-    OS_CONTACTOR_LOC = 0x080,
-    OS_MINIONS_LOC = 0x100,
-    OS_MAIN_LOC = 0x200,
-    OS_CANDRIVER_LOC = 0x400,
-    OS_MOTOR_CONNECTION_LOC = 0x800,
-    OS_DISPLAY_LOC = 0x1000,
-    OS_TASKS_LOC = 0x2000,
-} os_error_loc_t;
-
-/**
  * Task trace
  * 
  * Stores the last TASK_TRACE_LENGTH tasks that were run
@@ -198,19 +175,15 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 
 /**
  * @brief   Assert Error if OS function call fails
- * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err); 
+void _assertOSError (OS_ERR err); //TODO: This should be changed to enforce only enum usage
 
 #if DEBUG == 1
-#define assertOSError(OS_err_loc,err) \
-        if (err != OS_ERR_NONE) { \
-            printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \
-        } \
-        _assertOSError(OS_err_loc,err);
+#define assertOSError(err) 
+        _assertOSError(err);
 #else
-#define assertOSError(OS_err_loc,err) _assertOSError(OS_err_loc,err);
+#define assertOSError(err) _assertOSError(err);
 #endif
 
 #endif

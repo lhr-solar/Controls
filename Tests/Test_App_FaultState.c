@@ -15,7 +15,7 @@ void Task1(void* arg){
     OS_TICK tick = (OS_TICK)0;
     CPU_TS ts;
     OSMutexPend(&testMut,tick, OS_OPT_POST_NONE, &ts,&err);
-    assertOSError(OS_MAIN_LOC,err);
+    assertOSError(err);
 
 };
 
@@ -28,7 +28,7 @@ int main(){
         0,
         &err
     );
-    assertOSError(OS_MAIN_LOC,err); 
+    assertOSError(err); 
 
     OSTaskCreate( //create fault task
         (OS_TCB*)&FaultState_TCB,
@@ -45,7 +45,7 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC,err);
+    assertOSError(err);
 
     //create tester thread
      OSTaskCreate(
@@ -63,7 +63,7 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC,err);
+    assertOSError(err);
 
     OSStart(&err);
 } 

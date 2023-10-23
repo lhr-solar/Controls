@@ -45,11 +45,6 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
-/**
- * Global Variables
- */
-os_error_loc_t OSErrLocBitmap = OS_NONE_LOC; // Store the location of the current error
-
 // Variables to store error codes, stored and cleared in task error assert functions
 error_code_t Error_ReadCarCAN = /*READCARCAN_ERR_NONE*/ 0; // TODO: change this back to the error 
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
@@ -61,14 +56,13 @@ extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions 
  * Error assertion-related functions
 */
 
-void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
+void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
-        Display_Error(OS_err_loc, err); // Display the location and error code
+        Display_Error(err); // Display the location and error code
         while(1){;} //nonrecoverable
-
     }
 }
 
@@ -90,7 +84,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 
     if (lockSched == OPT_LOCK_SCHED || nonrecoverable == OPT_NONRECOV) { // Prevent other tasks from interrupting the handling of important (includes all nonrecoverable) errors
         OSSchedLock(&err);
-        assertOSError(OS_TASKS_LOC, err);
+        assertOSError(err);
     }
 
     if (nonrecoverable == OPT_NONRECOV) {
@@ -133,7 +127,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
         OSSchedUnlock(&err); 
         // Don't err out if scheduler is still locked because of a timer callback
         if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
-           assertOSError(OS_TASKS_LOC, err); 
+           assertOSError(err); 
         }
         
     }

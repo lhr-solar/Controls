@@ -22,10 +22,6 @@ static float Motor_Velocity = 0;
 // Function prototypes
 static void assertTritiumError(tritium_error_code_t motor_err);
 
-
-
-
-
 /* OBJECTIVES:
 Objective 1:
 - Receive motor status message from MotorController (18.4.2)
@@ -91,7 +87,7 @@ void Task_ReadTritium(void *p_arg){
 		}
 
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-		assertOSError(OS_READ_TRITIUM_LOC, err);
+		assertOSError(err);
 	}
 }
 
