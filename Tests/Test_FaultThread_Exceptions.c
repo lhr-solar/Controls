@@ -136,7 +136,7 @@ void OSErrorTask(void* arg) {
 
     printf("\n\rasserting an OS error");
     OSMutexPend(&testMut, 0, OS_OPT_PEND_NON_BLOCKING, &ts, &test_err);
-    assertOSError(OS_MAIN_LOC, test_err);
+    assertOSError(test_err);
     printf("\n\rassertOSError test failed: assertion did not immediately result in an unrecoverable fault");
     
     OSTaskDel(NULL, &err); // Self-delete task once finished
