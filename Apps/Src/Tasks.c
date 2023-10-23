@@ -76,13 +76,12 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
  * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
  * and jumping to the error's specified callback function. 
  * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
- * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
  * @param errorCode the enum for the specific error that happened
  * @param errorCallback a callback function to a handler for that specific error, 
  * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately. Only applicable for recoverable errors- nonrecoverable errors will always lock
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
+void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
     if (errorCode == 0) { // Exit if there is no error
@@ -94,12 +93,9 @@ void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t 
         assertOSError(OS_TASKS_LOC, err);
     }
 
-    // Set the location error variable
-    OSErrLocBitmap = errorLoc; 
-
     if (nonrecoverable == OPT_NONRECOV) {
         EmergencyContactorOpen();
-        Display_Error(errorLoc, errorCode); // Needs to happen before callback so that tasks can change the screen
+        Display_Error(errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
         UpdateDisplay_ClearQueue(); // Clear message queue to ensure no other commands overwrite the error screen
     }
@@ -141,8 +137,6 @@ void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t 
         }
         
     }
-
-    OSErrLocBitmap = OS_NONE_LOC; // Clear the location error variable once handled
 }
 
 /**

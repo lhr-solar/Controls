@@ -119,12 +119,6 @@ extern OS_Q CANBus_MsgQ;
  */
 void TaskSwHook_Init(void);
 
-
-/**
- * Global Variables
- */
-
-
 /**
  * OS Error States
  * 
@@ -164,11 +158,6 @@ typedef struct {
 
 extern task_trace_t PrevTasks;
 
-/**
- * Error variables
- */
-extern os_error_loc_t OSErrLocBitmap;
-
 // Store error codes that are set in task error assertion functions
 extern error_code_t Error_ReadTritium; 
 extern error_code_t Error_ReadCarCAN;
@@ -200,13 +189,12 @@ void EmergencyContactorOpen();
  * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 
  * displaying a fault screen (if nonrecoverable), jumping to a callback function, and entering an infinite loop. 
  * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
- * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
  * @param errorCode the enum for the specific error that happened
  * @param errorCallback a callback function to a handler for that specific error, 
  * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
+void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
 
 /**
  * @brief   Assert Error if OS function call fails

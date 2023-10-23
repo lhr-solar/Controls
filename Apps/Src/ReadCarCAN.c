@@ -99,7 +99,7 @@ static inline void chargingDisable(void) {
     chargeEnable = false;
 
     // kill contactors TODO: fill in error code
-    throwTaskError(OS_READ_CAN_LOC, 0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
+    throwTaskError(0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
 }
 
 // helper function to call if charging should be enabled
@@ -132,7 +132,7 @@ static inline void chargingEnable(void) {
     
 
     OSMutexPost(&arrayRestartMutex, OS_OPT_NONE, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    assertOSError(OS_READ_CAN_LOC, err);
 }
 
 /**
@@ -170,7 +170,7 @@ void Task_ReadCarCAN(void *p_arg)
     CANDATA_t dataBuf;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    assertOSError(OS_READ_CAN_LOC, err);
 
 
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
@@ -197,7 +197,7 @@ void Task_ReadCarCAN(void *p_arg)
         NULL,
         &err
     );
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(OS_READ_CAN_LOC,err);
 
     //Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
@@ -219,7 +219,7 @@ void Task_ReadCarCAN(void *p_arg)
 
                 // kill contactors and enter a nonrecoverable fault
                 // TODO: change error code to real value
-                throwTaskError(OS_READ_CAN_LOC, 0, callback_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
+                throwTaskError(0, callback_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             }
             case CHARGE_ENABLE: { 
 

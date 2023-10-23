@@ -356,7 +356,7 @@ static void handler_UpdateDisplay_Restart() {
 	if (err == UPDATEDISPLAY_ERR_NONE) return; // No error, return
 
     // Otherwise try resetting the display using the restart callback
-    throwTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
+    throwTaskError(Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
 
     Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
 }
