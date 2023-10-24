@@ -201,6 +201,8 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
 
     if(messageState == 1){
         updateMotorControllerPrechargeBypassContactor();
+    }else{
+
     }
 }
 
@@ -221,9 +223,9 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
  * @param None
 */
  void turnMotorControllerPBCOn(void){
-    if(motorControllerBypassPrechargeComplete == true && HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD){
+    if(motorControllerBypassPrechargeComplete == true){
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
-            UpdateDisplay_SetMotor(true);
+            UpdateDisplay_SetMotor(true);  
         }
  }
 
@@ -255,7 +257,12 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
 
     }else if(motorControllerIgnitionStatus == true && arrayIgnitionStatus == false){
         turnArrayPBCOn();               // Turn Array PBC On, if permitted
-        turnMotorControllerPBCOn();     // Turn Motor Controller PBC off, if permitted
+        if(HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD){
+            turnMotorControllerPBCOn();
+        }else{
+            turnMotorControllerPBCOff();
+        }
+        
     }
 
     // Set precharge complete variable to false if precharge happens again
