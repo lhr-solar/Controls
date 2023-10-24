@@ -16,12 +16,6 @@
 #include "Tasks.h"
 #include "CANbus.h"
 
-#define SAT_BUF_LENGTH 5 
-
-// Precharge Delay times in seconds
-#define PRECHARGE_PLUS_MINUS_DELAY 1     // 5 Seconds
-#define PRECHARGE_ARRAY_DELAY 1     	 // 5 Seconds
-
 /**
  * Error types
  */
@@ -37,47 +31,6 @@ typedef enum{
  * @return  Whether regen braking / charging is enabled or not
 */
 bool ChargeEnable_Get(void);
-
-extern OS_SEM infoMutex; //Mutex to lock GPIO writes to input pins
-
-
-/**
- * @brief Returns the value of charge message saturation
- * @return Value between -15 to 15
-*/
-int8_t HVArrayMsgSaturation_Get(void);
-
-
-int8_t PlusMinusMsgSaturation_Get(void);
-
-/**
- * @brief Returns the value of charge message saturation
- * @return Whether array ignition is ON/OFF
-*/
-bool ArrayIgnitionStatus_Get(void);
-
-/**
- * @brief Returns the value of charge message saturation
- * @return Whether array ignition is ON/OFF
-*/
-bool MotorControllerIgnition_Get(void);
-
-/**
- * @brief Returns the value of state of charge
- * @return Value between 1 to 100
-*/
-uint8_t SOC_Get(void);
-
-/**
- * @brief Returns the value of upplemental battery pack voltage
- * @return Voltage in mV
-*/
-uint32_t SBPV_Get(void);
-
-// Getter function for array ignition status
-bool PreChargeComplete_Get(void);
-
-void updatePrechargeContactors(void);
 
 #endif
 
