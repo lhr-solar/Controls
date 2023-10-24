@@ -5,7 +5,6 @@
  * 
  */
 
-
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
@@ -22,6 +21,15 @@
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) //1000 for ms -> s conversion
 #define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS (PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
 #define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS (PRECHARGE_PLUS_MINUS_DELAY * OS_CFG_TMR_TASK_RATE_HZ)
+
+// High Voltage BPS Contactor bit mapping
+#define HV_ARRAY_CONTACTOR_BIT 0b001
+#define HV_MINUS_CONTACTOR_BIT 0b010
+#define HV_PLUS_CONTACTOR_BIT 0b100
+
+// Saturation messages
+#define DISABLE_SATURATION_MSG -1
+#define ENABLE_SATURATION_MSG 1
 
 // CAN watchdog timer variable
 static OS_TMR canWatchTimer;
@@ -228,7 +236,22 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
     arrayIgnitionStatus = (!Minions_Read(IGN_1));
     motorControllerIgnitionStatus = (!Minions_Read(IGN_2));
 
-    if(arrayIgnitionStatus == true && motorControllerIgnitionStatus == false){
+
+    if(motorControllerIgnitionStatus == false && arrayIgnitionStatus == false){
+        Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, OFF, true); // Turn off
+        UpdateDisplay_SetArray(false);
+
+        Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, OFF, true); // Turn off
+        UpdateDisplay_SetMotor(false);
+
+        memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
+        memset(HVPlusMinusChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVPlusMinusChargeMsgBuffer));
+
+        updateHVArraySaturation(DISABLE_SATURATION_MSG);
+        updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
+    }
+
+    if(motorControllerIgnitionStatus == false && arrayIgnitionStatus == true){
         if(arrayBypassPrechargeComplete == true && chargeEnable == true){
             Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON, true); // Turn on
             UpdateDisplay_SetArray(true);
@@ -236,10 +259,11 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
         }
         Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, OFF, true); 
         UpdateDisplay_SetMotor(false);
+    }
 
-    }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == true){
+    if(motorControllerIgnitionStatus == true && arrayIgnitionStatus == false){
         if(arrayBypassPrechargeComplete == true && chargeEnable == true){
-            Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON, true); 
+            Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON, true); // Turn on
             UpdateDisplay_SetArray(true);
             arrayBypassPrechargeComplete = false; 
         }
@@ -248,21 +272,12 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
             UpdateDisplay_SetMotor(true);
         }
-    }else if(arrayIgnitionStatus == false && motorControllerIgnitionStatus == false){
-        Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, OFF, true); // Turn off
-        UpdateDisplay_SetArray(false);
+    }
 
-        Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, OFF, true); // Turn off
-        UpdateDisplay_SetMotor(false);
-
-        memset(HVArrayChargeMsgBuffer, -1, sizeof(HVArrayChargeMsgBuffer));
-        memset(HVPlusMinusChargeMsgBuffer, -1, sizeof(HVPlusMinusChargeMsgBuffer));
-
-        updateHVArraySaturation(-1);
-        updateHVPlusMinusSaturation(-1);
-    }else{
+    if(motorControllerIgnitionStatus == true && arrayIgnitionStatus == true){
         assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
     }
+
     // Set precharge complete variable to false if precharge happens again
     motorControllerBypassPrechargeComplete = false; 
 
@@ -340,38 +355,22 @@ void Task_ReadCarCAN(void *p_arg){
                 // Restart CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
                 assertOSError(OS_READ_CAN_LOC, err);
+                
+                bool HVPlusMinusState = (dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT) && (dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT);
+                bool HVArrayState = dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT;
 
-
-                switch (dataBuf.data[0] & 0b111){ // Masking to get last three bits
-                    case (0b000):
-                    case (0b010):
-                    case (0b100):{ // HV+/- and HV Arr did not recieve enable message
-                        disableArrayPrechargeBypassContactor();
-                        updateHVPlusMinusSaturation(-1);
-                        break;
-                    }
-                    case (0b001):
-                    case (0b011):
-                    case (0b101):{ // Only HV Arr recieved enable message
-                        updateHVArraySaturation(1);
-                        updateHVPlusMinusSaturation(-1);
-                        break;
-                    }      
-                    case 0b110:{ // Only HV +/- recieved enable message
-                        disableArrayPrechargeBypassContactor();
-                        updateHVPlusMinusSaturation(1);
-                        break;
-                    }
-                    case 0b111: { // Both recieved enable message
-                        updateHVArraySaturation(1);
-                        updateHVPlusMinusSaturation(1);
-                        break;
-                    }
-                    default: {  
-                        // Should not reach here
-                        break;
-                    }
+                if(HVArrayState == true){
+                    updateHVArraySaturation(ENABLE_SATURATION_MSG);
+                }else{
+                    disableArrayPrechargeBypassContactor();
                 }
+
+                if(HVPlusMinusState == true){
+                    updateHVPlusMinusSaturation(ENABLE_SATURATION_MSG);
+                }else{
+                    updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
+                }
+
                 break;
             // End of BPS Contactor Status Updates
             }
@@ -403,9 +402,34 @@ static void handler_ReadCarCAN_chargeDisable(void) {
 
     // mark regen as disabled and update saturation
     updateHVArraySaturation(-1);
+   // updateHVPlusMinusSaturation(-1);
 
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
+
+    // Check that the contactor was successfully turned off
+    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
+
+    if(ret != false) { // Contactor failed to turn off; display the evac screen and infinite loop
+         Display_Evac(SOC, SBPV);
+         while(1){;}
+    }
+  
+}
+
+/**
+ * @brief error handler callback for disabling charging, 
+ * kills contactor and turns off display
+ */ 
+static void handler_ReadCarCAN_contactorsDisable(void) {
+
+    // mark regen as disabled and update saturation
+    updateHVArraySaturation(-1);
+    updateHVPlusMinusSaturation(-1);
+
+    // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, false);
 
     // Check that the contactor was successfully turned off
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
@@ -444,7 +468,7 @@ static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err){
                 break;
 
             case READCARCAN_ERR_MISSED_MSG: // Missed message- treat as charging disable message
-                throwTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_MISSED_MSG, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
+                throwTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_MISSED_MSG, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_RECOV);
                 break;
 
             case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop

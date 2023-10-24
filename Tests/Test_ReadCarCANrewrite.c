@@ -38,13 +38,14 @@ enum { // Test menu enum
 
 enum { // Test menu enum
     BOTH_TURN_ON = 0, 
-    MOTOR_CONTROLLER_TURN_ON,
     ARRAY_TURN_ON,
+    MOTOR_CONTROLLER_TURN_ON
 };
 
 enum { // Test menu enum
     SEND_ONE_MSG = 0, 
-    SEND_UNTIL_ON,
+    SEND_UNTIL_ARRAY_ON,
+    SEND_UNTIL_MOTOR_CONT_ON
 };
 
 /*** Constants ***/
@@ -59,37 +60,41 @@ static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 static CANDATA_t bps_trip_msg = {.ID=BPS_TRIP, .idx=0, .data={1}};
 static CANDATA_t supp_voltage_msg = {.ID=SUPPLEMENTAL_VOLTAGE, .idx=0, .data={100}};
 static CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={0}};
-static CANDATA_t HV_Array_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b01}};
-static CANDATA_t HV_Disable_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b00}};
-static CANDATA_t HV_MC_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b10}};
-static CANDATA_t HV_Enabled_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b11}};
+static CANDATA_t HV_Array_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b001}};
+static CANDATA_t HV_Disable_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b000}};
+static CANDATA_t HV_MC_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b110}};
+static CANDATA_t HV_Enabled_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b111}};
+static uint8_t truthTableCounter = 0; 
 
 static void infoDump(){
-    // printf("\n\r");
+    
+    printf("\n\r%d", truthTableCounter);
+    truthTableCounter++;
     updatePrechargeContactors();
+
     printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == ON) ? "ON" : "OFF")); 
-     printf("\r\nArray Ignition Status    : %s", ((ArrayIgnitionStatus_Get()) ? "ON" : "OFF"));
-     printf("\r\nCharge Message Saturation: %d", HVArrayMsgSaturation_Get());
-     printf("\r\nThreshold                : %s", ((HVArrayMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
-     printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));   
+    // printf("\r\nArray Ignition Status    : %s", ((ArrayIgnitionStatus_Get()) ? "ON" : "OFF"));
+    // printf("\r\nCharge Message Saturation: %d", HVArrayMsgSaturation_Get());
+    // printf("\r\nThreshold                : %s", ((HVArrayMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
+    // printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));   
 
     printf("\n\r");
     printf("\r\nMotor Contactor          : %s", ((Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == ON) ? "ON" : "OFF"));
-    printf("\r\nMotor Ignition Status    : %s", ((MotorControllerIgnition_Get()) ? "ON" : "OFF"));
-    printf("\r\nCharge Message Saturation: %d", PlusMinusMsgSaturation_Get());
-    printf("\r\nThreshold                : %s", ((PlusMinusMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
-    printf("\n\r");
+    // printf("\r\nMotor Ignition Status    : %s", ((MotorControllerIgnition_Get()) ? "ON" : "OFF"));
+    // printf("\r\nCharge Message Saturation: %d", PlusMinusMsgSaturation_Get());
+    // printf("\r\nThreshold                : %s", ((PlusMinusMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
+    // printf("\n\r");
     printf("\n\r");
 }
 
 
-static void turnIgnitionToMotorON(){
+static void turnIgnitionToMotorOn(){
     printf("\n\r=========== Turn Ignition to Motor ===========");
     Minions_Write(IGN_2, 0);                      // Ignition motor ON
     Minions_Write(IGN_1, 1);                      // Ignition array OFF
 }
 
-static void turnIgnitionToArrayON(){
+static void turnIgnitionToArrayOn(){
     printf("\n\r=========== Turn Ignition to Array ===========");
     Minions_Write(IGN_2, 1);                      // Ignition motor OFF
     Minions_Write(IGN_1, 0);                      // Ignition array ON
@@ -122,7 +127,7 @@ static void sendArrayEnableMsg(uint8_t isIgnitionOn){
 
 static void sendMotorControllerEnableMsg(uint8_t isIgnitionOn){
     printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
-    if(isIgnitionOn == 2){
+    if(isIgnitionOn == MOTOR_CONTROLLER_TURN_ON){
         while(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) != true){
             CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN);      
         }
@@ -133,21 +138,22 @@ static void sendMotorControllerEnableMsg(uint8_t isIgnitionOn){
 
 
 static void sendDisableMsg(){
+    printf("\n\r=========== Disable Msg Sent ===========");
     CANbus_Send(HV_Disable_Msg, CAN_BLOCKING, CARCAN);      
 }
 
 static void sendEnableMsg(int isIgnitionOn){
     printf("\n\r=========== Enable Msg Sent ===========");
-        if(isIgnitionOn == 2){
-            while(!Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)){
-                CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
-                }     
 
-        if (isIgnitionOn == 1){
-            while(!Contactors_Get((ARRAY_PRECHARGE_BYPASS_CONTACTOR))){
+         if (isIgnitionOn == SEND_UNTIL_ARRAY_ON){
+            while(Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == false){
                 CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
             }    
         }
+        if(isIgnitionOn == SEND_UNTIL_MOTOR_CONT_ON){
+            while(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == false){
+                CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
+                }     
 
             CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN);     
         
@@ -155,12 +161,12 @@ static void sendEnableMsg(int isIgnitionOn){
 }
 
 static void turnContactorOn(uint8_t isIgnitionOn){
-    if(isIgnitionOn == 1){
-        turnIgnitionToArrayON();
-        sendArrayEnableMsg(1);
-    }else if(isIgnitionOn == 2){
-        turnIgnitionToMotorON();
-        sendMotorControllerEnableMsg(2);
+    if(isIgnitionOn == ARRAY_TURN_ON){
+        turnIgnitionToArrayOn();
+        sendArrayEnableMsg(ARRAY_TURN_ON);
+    }else if(isIgnitionOn == MOTOR_CONTROLLER_TURN_ON){
+        turnIgnitionToMotorOn();
+        sendMotorControllerEnableMsg(MOTOR_CONTROLLER_TURN_ON);
     }
 }
 
@@ -198,75 +204,93 @@ void Task1(){
         switch (TEST_RENODE) {
             case TEST_RENODE:
 
-            turnContactorOn(MOTOR_CONTROLLER_TURN_ON); // Turns ign to motor and sends enough messages to turn MC PBC on 
+            // Ignition is in OFF position
+
+            // Case 0
+            turnContactorOn(SEND_UNTIL_MOTOR_CONT_ON); // Turns ign to motor and sends enough messages to turn MC PBC on 
             turnIgnitionOFF();
             sendDisableMsg();
             infoDump();
 
-            turnContactorOn(ARRAY_TURN_ON);
+            // Case 1
+            turnContactorOn(SEND_UNTIL_ARRAY_ON);
             turnIgnitionOFF(); 
             sendArrayEnableMsg(SEND_ONE_MSG);
             infoDump();  
 
-            turnContactorOn(MOTOR_CONTROLLER_TURN_ON); 
+            // Case 2
+            turnContactorOn(SEND_UNTIL_MOTOR_CONT_ON); 
             turnIgnitionOFF();
             sendMotorControllerEnableMsg(SEND_ONE_MSG);
             infoDump(); 
 
-            turnContactorOn(MOTOR_CONTROLLER_TURN_ON); 
+            // Case 3
+            turnContactorOn(SEND_UNTIL_MOTOR_CONT_ON); 
             turnIgnitionOFF();
+            updatePrechargeContactors();
             sendEnableMsg(SEND_ONE_MSG);
             infoDump();
 
-            turnIgnitionToArrayON();
+            // Ignition is in ARRAY position
+            // Case 4
+            turnIgnitionToArrayOn();
             sendDisableMsg();
             infoDump();
 
-            turnIgnitionToArrayON();
-            sendArrayEnableMsg(SEND_UNTIL_ON);
+            // Case 5
+            turnIgnitionToArrayOn();
+            sendArrayEnableMsg(SEND_UNTIL_ARRAY_ON);
             infoDump();
 
-            turnIgnitionToArrayON();
-            sendMotorControllerEnableMsg(SEND_UNTIL_ON);
+            // Case 6
+            turnIgnitionToArrayOn();
+            sendMotorControllerEnableMsg(SEND_UNTIL_ARRAY_ON);
             infoDump();
 
-            turnIgnitionToArrayON();
-            sendEnableMsg(SEND_UNTIL_ON); 
+            // Case 7
+            turnIgnitionToArrayOn();
+            sendEnableMsg(SEND_UNTIL_ARRAY_ON); 
             infoDump();
 
-
-            turnIgnitionToMotorON();
+            // Ignition is in MOTOR position
+            // Case 8
+            turnIgnitionToMotorOn();
             sendDisableMsg(); // turns off after one msg so do not need to keep sending until off
             infoDump();
 
-            turnIgnitionToMotorON();
-            sendArrayEnableMsg(SEND_UNTIL_ON);
+            // Case 9
+            turnIgnitionToMotorOn();
+            sendArrayEnableMsg(SEND_UNTIL_ARRAY_ON);
             infoDump();
 
-            turnIgnitionToMotorON();
-            sendMotorControllerEnableMsg(SEND_UNTIL_ON);
+            // Case 10
+            turnIgnitionToMotorOn();
+            sendMotorControllerEnableMsg(SEND_UNTIL_MOTOR_CONT_ON);
             infoDump();
 
-            turnIgnitionToMotorON();
-            sendEnableMsg(SEND_UNTIL_ON); 
+            // Case 11
+            turnIgnitionToMotorOn();
+            sendEnableMsg(SEND_UNTIL_ARRAY_ON); 
+            sendEnableMsg(SEND_UNTIL_MOTOR_CONT_ON); 
+            sendEnableMsg(SEND_UNTIL_ARRAY_ON); 
             infoDump();
 
-
-
+            // Ignition is in IMPOSSIBLE array and motor position (both at the same time)
             turnIgnitionBoth();
             sendDisableMsg();
             infoDump();
 
             turnIgnitionBoth();
-            sendArrayEnableMsg(SEND_UNTIL_ON);
+            // Test stops working past this point because array PBC never closes
+            sendArrayEnableMsg(SEND_UNTIL_ARRAY_ON);
             infoDump();
 
             turnIgnitionBoth();
-            sendMotorControllerEnableMsg(SEND_UNTIL_ON);
+            sendMotorControllerEnableMsg(SEND_UNTIL_ARRAY_ON);
             infoDump();
 
             turnIgnitionBoth();
-            sendEnableMsg(SEND_UNTIL_ON); 
+            sendEnableMsg(SEND_UNTIL_ARRAY_ON); 
             infoDump();
 
 
