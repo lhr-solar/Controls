@@ -256,13 +256,12 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
         turnMotorControllerPBCOff();    // Turn Motor Controller PBC Off
 
     }else if(motorControllerIgnitionStatus == true && arrayIgnitionStatus == false){
-        turnArrayPBCOn();               // Turn Array PBC On, if permitted
-        if(HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD){
+        turnArrayPBCOn();                                                           // Turn Array PBC On, if permitted
+        if(HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD){      // Turn Motor Conotroller PBC On, if threshold is reached
             turnMotorControllerPBCOn();
         }else{
             turnMotorControllerPBCOff();
         }
-        
     }
 
     // Set precharge complete variable to false if precharge happens again
