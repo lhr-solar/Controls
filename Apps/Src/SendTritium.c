@@ -389,12 +389,10 @@ static void ReverseDriveHandler(){
         UpdateDisplay_SetGear(DISP_REVERSE);
     }
     velocitySetpoint = -MAX_VELOCITY;
-    if (velocityObserved >= MAX_REVERSE_VELOCITY) {
-        currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX * 0));  // cutoff current to motor
-    }
-    else {
-        currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
-    }
+
+    uint8_t currentSetpointMax = (velocityObserved >= MAX_REVERSE_VELOCITY) ? 0 : CURRENT_SP_MAX; // cutoff current to motor if velocity is too high
+    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, currentSetpointMax));  
+
     cruiseEnable = false;
     onePedalEnable = false;
 }
