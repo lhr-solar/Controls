@@ -38,8 +38,8 @@ typedef struct TritiumState{
     void (*stateDecider)(void);
 } TritiumState_t;
 
-//#define __TEST_SENDTRITIUM
-//#define __TEST_SENDTRITIUM_SOFTWAREONLY
+#define __TEST_SENDTRITIUM
+#define __TEST_SENDTRITIUM_SOFTWAREONLY
 #ifdef __TEST_SENDTRITIUM
 // Inputs
 extern bool cruiseEnable;

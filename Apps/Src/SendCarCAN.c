@@ -22,21 +22,14 @@
 #define IO_STATE_DLY_MS 250u 
 #define SENDCARCAN_LOOP_DLY_MS 50u // How often we should check the CAN queue (in ms delay). Must send faster than queue messages get put in
 #define IO_STATE_DLY_COUNT (IO_STATE_DLY_MS / SENDCARCAN_LOOP_DLY_MS) // The number of periods to wait before sending IO state message
-#define IO_STATE_TMR_DLY_TS ((IO_STATE_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))// **** delete?
 
-// fifo
-//#define FIFO_TYPE CANDATA_t
-//#define FIFO_SIZE 256
-//#define FIFO_NAME SendCarCAN_Q
-//#include "fifo.h"
+//fifo
+#define FIFO_TYPE CANDATA_t
+#define FIFO_SIZE 256
+#define FIFO_NAME SendCarCAN_Q
+#include "fifo.h"
 
-#ifdef __TEST_SENDCARCAN
-#define SCOPE
-#else
-#define SCOPE static
-#endif 
-
-SCOPE SendCarCAN_Q_t CANFifo; 
+static SendCarCAN_Q_t CANFifo; 
 
 static OS_SEM CarCAN_Sem4;
 static OS_MUTEX CarCAN_Mtx;
@@ -45,6 +38,13 @@ static uint8_t IOStateDlyCounter = 0;
 
 
 static void putIOState(void);
+
+/**
+ * @brief Wrapper to check if SendCarCAN_Q is full
+*/
+bool SendCarCAN_Queue_is_full() {
+    return SendCarCAN_Q_is_full(&CANFifo);
+}
 
 /**
  * @brief Wrapper to put new message in the CAN queue

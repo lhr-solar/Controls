@@ -118,7 +118,7 @@ void Task1(void *arg)
     CPU_Init();
     BSP_UART_Init(UART_2);
     Pedals_Init();
-    CANbus_Init(MOTORCAN);
+    CANbus_Init(MOTORCAN, NULL, 0);
     Minions_Init();
     UpdateDisplay_Init();
 

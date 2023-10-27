@@ -166,48 +166,10 @@ void Task1(void *arg)
         printf("\n\rContactors: %x", contactors);
         // Print how full CAN Queue is 
         printf("\n\r---- Queue data ----");
-        printf("\n\rSendCarCAN_Q_is_full? %d", SendCarCAN_Q_is_full(&CANFifo));
-        printf("\n\rQueue put: %d, Queue get: %d", CANFifo.put, CANFifo.get);
+        printf("\n\rSendCarCAN_Q_is_full? %d", SendCarCAN_Queue_is_full());
+        //printf("\n\rQueue put: %d, Queue get: %d", CANFifo.put, CANFifo.get); Could be nice to add this info
 
-    }
-    
-    // Test if things put in the queue come out
-    // Can I just see if the putIOand SendTritium things come out?
-    // What if I do a while loop that just reads and prints out CarCAN?
-    // what is a good test?
-    // Test if the carstate from SendTritium come out
-    // Edge cases: we stack up a bunch of messages because SendCarCAN doesn't run
-    // We don't have any messages
-    // We have a lot of fsm messages for the first case
-    // I can't think of any other edge cases right now
-    // Test if we're sending the correct messages...(?) 
-    // can we check if the minion pin messages are correct?
-    // We don't find out if the queue is full- we just don't add the message to the queue
-    // Do we care about testing the display? Probably not.Probably just
-    // - Do the IO state and car state come out
-    // - Do the car state messages come out in order
-
-    // Check if the car state messages come out correctly
-
-    // How do we see the state output messages?
-        //
-    // How do we know what states we went through in SendTritium
-        // Software test: tell it what states to go to and see if they print out in the correct order
-    // How do we check if the fifo is full
-
-    // Case: hardware test
-    // Input: Simboard, motor controller
-    // Output: CAN, viewed via logic analyzer
-    // Output: IOState, Carstate, Motor messages printed for comparison
-    // Carstate: done via __TEST_SENDTRITIUM
-
-    // Case: software test
-    // Input: Testfile controls only
-    // Output: CAN messages, via UART
-    // Output: IOState, Carstate, motor messages printed for comparison;
-    // Carstate: done via __TEST_SENDTRITIUM
-
-   
+    }   
 
 }
 
