@@ -91,16 +91,11 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+DisplayError_t Display_Fault(fault_bitmap_t faultCode){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
 	char faultPage[7] = "page 2";
 	BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-
-	char setOSCode[17];
-	sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
-	BSP_UART_Write(DISP_OUT, setOSCode, strlen(setOSCode));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	char setFaultCode[18];
@@ -138,6 +133,6 @@ void assertDisplayError(DisplayError_t err){
 		FaultBitmap |= FAULT_DISPLAY;
 
 		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
-		assertOSError(OS_DISPLAY_LOC, os_err);
+		assertOSError(os_err);
 	}
 }
