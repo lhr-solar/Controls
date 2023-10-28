@@ -31,6 +31,7 @@
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "CANConfig.h"
+#include "Minions.h"
 
 enum { // Test menu enum
     TEST_GENERAL,
@@ -41,7 +42,7 @@ enum { // Test menu enum
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_READTRITIUM // Decide what to test based on test menu enum
+#define TEST_OPTION TEST_READCARCAN // Decide what to test based on test menu enum
 #define READTRITIUM_OPTION T_HALL_SENSOR_ERR // The enum for the tritium error we want to test (reference error enum)
 
 /* READTRITIUM_OPTION menu:
@@ -145,8 +146,8 @@ void OSErrorTask(void* arg) {
 
 // Helper function to see the state of the contactors
 static void print_Contactors() {
-    printf("\n\rMotor PBC: %d", Contactors_Get(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR));
-    printf("\n\rArray PBC: %d", Contactors_Get(ARRAY_BYPASS_PRECHARGE_CONTACTOR));
+    printf("\n\rMotor PBC: %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+    printf("\n\rArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
 }
 
 
@@ -246,9 +247,17 @@ void Task_ManagerTask(void* arg) {
             // TODO: Will need to be tested post merge [ReadCarCAN --> FaultState]
             //chargeMsg.ID = CHARGE_ENABLE;
             chargeMsg.ID = BPS_CONTACTOR;
-            *(uint64_t*)(&chargeMsg.data) = 0b01;
+            *(uint64_t*)(&chargeMsg.data) = 0b001; 
             chargeMsg.idx = 0;
             printf("\n\rMade charging message");
+
+            // Turn on array ignition
+            printf("\n\rTurn Ignition to Array");
+            Minions_Write(IGN_2, 1);                      // Ignition motor OFF
+            Minions_Write(IGN_1, 0);                      // Ignition array ON
+            if(Minions_Read(IGN_1) != false){             // Ensure ign array is ON
+                printf("\n\rFailed to turn ign to array");
+            }
 
             // Message for BPS Fault
             CANDATA_t tripBPSMsg;
@@ -257,7 +266,7 @@ void Task_ManagerTask(void* arg) {
             tripBPSMsg.idx = 0;
             printf("\n\rMade BPS trip message");
 
-            // Send charge enable messages
+            // Send enough charge enable messages
             chargeMsg.data[0] = true;
             for(int i = 0; i<7; i++){
                 CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
@@ -269,8 +278,9 @@ void Task_ManagerTask(void* arg) {
 
             print_Contactors();
 
-            // Send charge disable messages to test disable contactor callback
-            // Fault state should turn off the array contactor but not enter a nonrecoverable fault
+            printf("\n\n\rSending Charge Disable Msg");
+            // Send charge disable messages to test charge disable contactor callback
+            // Fault state should turn off the array PBC but not enter a nonrecoverable fault
             chargeMsg.data[0] = false;
             for(int i = 0; i<5; i++){
                 CANbus_Send(chargeMsg, CAN_BLOCKING,CARCAN);
@@ -284,6 +294,7 @@ void Task_ManagerTask(void* arg) {
 
             print_Contactors();
 
+            printf("\n\n\rSending Charge Enable Msg");
             // Send more charge enable messages so the contactor gets flipped on again
             chargeMsg.data[0] = true;
             for(int i = 0; i < 7; i++){
@@ -296,6 +307,7 @@ void Task_ManagerTask(void* arg) {
 
             print_Contactors();
 
+            printf("\n\n\rTrigger canWatchTimer");
             // Pause the delivery of messages to trigger the canWatchTimer
             for(int i = 0; i<5; i++){
                 printf("\n\rDelay %d", i);
@@ -306,17 +318,16 @@ void Task_ManagerTask(void* arg) {
                 printf("\n\rMotor PBC %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
             } 
 
-            
-            
             // Check the contactors
             print_Contactors();
 
             // Turn on contactors so we can see if they get turned off by the error assertion
-            Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, ON, true);
-            Contactors_Set(ARRAY_BYPASS_PRECHARGE_CONTACTOR, ON, true); // Although BPS has control of the precharge contactor
+            Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
+            Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON, true); // Although BPS has control of the precharge contactor
 
             print_Contactors(); // See the state of the contactors before we send the trip message
 
+            printf("\n\n\rBPS Trip");
             // Send a trip message of 1 (trip)
             *(uint64_t*)(&tripBPSMsg.data) = 1;
             CANbus_Send(tripBPSMsg, CAN_BLOCKING, CARCAN);
