@@ -23,7 +23,9 @@
 // Length of the array and motor PBC saturation buffers
 #define SAT_BUF_LENGTH 5 
 
-// BPS Array and Plus/Minus saturation threshold is halfway between 0 and max saturation value 
+// The Array/Motor Controller Saturation Threshold is used to determine if Controls has 
+//      received a sufficient number of BPS's HV Array/Plus-Minus Enable Messages.
+//      BPS Array and Plus/Minus saturation threshold is halfway between 0 and max saturation value.
 #define ARRAY_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 #define PLUS_MINUS_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
@@ -136,10 +138,12 @@ static void updateArrayPrechargeBypassContactor(void){
         && HVArrayMsgSaturation >= ARRAY_SATURATION_THRESHOLD                                       // Saturation Threshold has be met
         && (Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == OFF)                                // Array PBC is OFF
         && (OSTmrStateGet(&arrayBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){           // and precharge is currently not happening  
-            // Asserts error for OS timer start above if conditional was met
+            // Asserts error for OS timer state above if conditional was met
             assertOSError(err);
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&arrayBypassPrechargeDlyTimer, &err);
+            // Asserts error for OS timer start above if conditional was met
+            assertOSError(err);
     }
 }
 
@@ -155,10 +159,12 @@ static void updateMotorControllerPrechargeBypassContactor(void){
         && HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD                                // Saturation Threshold has be met
         &&(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == OFF)                              // Motor Controller PBC is OFF
         && (OSTmrStateGet(&motorControllerBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){         // and precharge is currently not happening  
-            // Asserts error for OS timer start above if conditional was met
+            // Asserts error for OS timer state above if conditional was met
             assertOSError(err);
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&motorControllerBypassPrechargeDlyTimer, &err);
+            // Asserts error for OS timer start above if conditional was met
+            assertOSError(err);
         }
 }
 
@@ -257,7 +263,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
     motorControllerIgnitionStatus = (!Minions_Read(IGN_2));
 
     if((motorControllerIgnitionStatus == false && arrayIgnitionStatus == false) || (motorControllerIgnitionStatus == true && arrayIgnitionStatus == true)){
-        assertReadCarCANError(READCARCAN_ERR_MISSED_MSG); // Turn Array and Motor Controller PBC off using error assert
+        assertReadCarCANError(READCARCAN_ERR_DISABLE_CONTACTORS_MSG); // Turn Array and Motor Controller PBC off using error assert
 
     }else if(motorControllerIgnitionStatus == false && arrayIgnitionStatus == true){
         turnArrayPBCOn();               // Turn Array PBC On, if permitted
@@ -325,6 +331,10 @@ void Task_ReadCarCAN(void *p_arg){
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(err);
 
+    // Fills buffers with disable messages
+    memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
+    memset(HVPlusMinusChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVPlusMinusChargeMsgBuffer));
+
     while(1){
               
         updatePrechargeContactors(); // Sets array and motor controller PBC if all conditions (PBC Status, Threshold, Precharge Complete) permit
@@ -337,8 +347,6 @@ void Task_ReadCarCAN(void *p_arg){
 
         switch(dataBuf.ID){  // Switch case based on BPS msg received
             case BPS_TRIP: { // BPS has a fault and we need to enter fault state 
-
-                Display_Evac(SOC, SBPV); // Display evacuation message
 
                 // kill contactors and enter a nonrecoverable fault
                 assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
@@ -407,7 +415,7 @@ static void handler_ReadCarCAN_chargeDisable(void) {
  */ 
 static void handler_ReadCarCAN_contactorsDisable(void) {
 
-    // mark regen as disabled and update saturation
+    // Mark regen as disabled and update saturation
     updateHVArraySaturation(DISABLE_SATURATION_MSG);
     updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
 
@@ -459,6 +467,10 @@ static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err){
                 break;
 
             case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
+                throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_RECOV);
+                break;
+
+            case READCARCAN_ERR_DISABLE_CONTACTORS_MSG: // Ignition turned to off or turned to last two simultaneously 
                 throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_RECOV);
                 break;
 
