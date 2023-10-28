@@ -138,3 +138,4 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 void UpdateDisplay_ClearQueue(void);
 
 #endif
+/* @} */

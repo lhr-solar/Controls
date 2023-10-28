@@ -89,7 +89,7 @@ void Task1(void *arg)
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&e);
-    assertOSError(OS_MAIN_LOC, e);
+    assertOSError(e);
 
     OSTimeDlyHMSM(0, 0, 7, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
@@ -123,7 +123,7 @@ void Task1(void *arg)
 
     testPercentageComp(&UpdateDisplay_SetAccel);
 
-    Display_Error(OSErrLocBitmap, (error_code_t)error); // Testing Display_Error
+    Display_Error((error_code_t)error); // Testing Display_Error
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     Display_Reset();
@@ -154,7 +154,7 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSStart(&err);
 }

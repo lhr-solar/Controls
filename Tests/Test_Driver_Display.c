@@ -131,9 +131,8 @@ int main()
 	delay();
 
 	// Test the fault screen
-	os_error_loc_t osErrCode = 0x0420;
-	fault_bitmap_t faultCode = 0x69;
-	err = Display_Error(osErrCode, faultCode);
+	error_code_t faultCode = 0x69;
+	err = Display_Error(faultCode);
 	//assertDisplayError(err);
 
 	while (1)

@@ -77,13 +77,13 @@ UpdateDisplayError_t UpdateDisplay_Init(){
 	OS_ERR err;
 	disp_fifo_renew(&msg_queue);
 	OSMutexCreate(&DisplayQ_Mutex, "Display mutex", &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	OSSemCreate(&DisplayQ_Sem4, "Display sem4", 0, &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetPage(INFO);
     OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, &err); // Wait >215ms so errors will show on the display
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 	return ret;
 }
 
@@ -101,14 +101,14 @@ static UpdateDisplayError_t UpdateDisplay_PopNext(){
     CPU_TS ticks;
 
     OSSemPend(&DisplayQ_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(OS_DISPLAY_LOC, err);
+    assertOSError(err);
 		
     OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(OS_DISPLAY_LOC, err);
+    assertOSError(err);
 
     bool result = disp_fifo_get(&msg_queue, &cmd);
     OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(err);
 
     if(!result){
 			assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
@@ -130,16 +130,16 @@ static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
 	OS_ERR err;
 
 	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	
 	bool success = disp_fifo_put(&msg_queue, cmd);
 
 	OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 
 	if(success){
 		OSSemPost(&DisplayQ_Sem4, OS_OPT_POST_ALL, &err);
-		assertOSError(OS_DISPLAY_LOC, err);
+		assertOSError(err);
 	}
 	else{
 		assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);
@@ -315,7 +315,7 @@ void UpdateDisplay_ClearQueue(){
     OS_ERR err;
     OSSemSet(&DisplayQ_Sem4, 0, &err); // Set the message queue semaphore value to 0
     if (err != OS_ERR_TASK_WAITING) {
-        assertOSError(OS_DISPLAY_LOC, err); // Don't fault if UpdateDisplay is waiting
+        assertOSError(err); // Don't fault if UpdateDisplay is waiting
     }
     disp_fifo_renew(&msg_queue); // Clear the message queue
     
@@ -356,7 +356,7 @@ static void handler_UpdateDisplay_Restart() {
 	if (err == UPDATEDISPLAY_ERR_NONE) return; // No error, return
 
     // Otherwise try resetting the display using the restart callback
-    throwTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
+    throwTaskError(Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
 
     Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
 }

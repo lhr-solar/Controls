@@ -24,14 +24,11 @@ int main(void) {
     // Disable interrupts
     __disable_irq();
 
-    // Initialize some fault bitmaps for error checking purposes
-    OSErrLocBitmap = OS_NONE_LOC;
-
     OS_ERR err;
     OSInit(&err);
     TaskSwHook_Init();
 
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize apps
     OSTaskCreate(
@@ -49,14 +46,14 @@ int main(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Enable interrupts
     __enable_irq();
 
     // Start OS
     OSStart(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     while(1);
 
@@ -71,7 +68,7 @@ void Task_Init(void *p_arg){
 
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
 
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
     
     // Initialize drivers
     Pedals_Init();
@@ -104,7 +101,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize ReadCarCAN
     OSTaskCreate(
@@ -122,7 +119,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize UpdateDisplay
     OSTaskCreate(
@@ -140,7 +137,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize ReadTritium
     OSTaskCreate(
@@ -158,7 +155,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize SendCarCAN
     OSTaskCreate(
@@ -176,7 +173,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
 
     while(1){

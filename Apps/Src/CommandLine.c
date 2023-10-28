@@ -115,7 +115,7 @@ void Task_CommandLine(void* p_arg) {
     // Delay of 1 seconds
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     if (err != OS_ERR_NONE){
-        assertOSError(OS_NONE_LOC, err);
+        assertOSError(err);
     }
 }
 
@@ -213,7 +213,7 @@ static bool cmd_Contactors_Get(void){
 	if(strcmp(contactorInput, "array_p") == 0){
 		contactor = ARRAY_PRECHARGE_BYPASS_CONTACTOR;
 	}
-	else if(strcmp(contactorInput, "motor_c") == 0){
+	else if(strcmp(contactorInput, "motor_p") == 0){
 		contactor = MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR;
 	}
 	else{
@@ -230,7 +230,7 @@ static bool cmd_Contactors_Set(void){
 	if(strcmp(contactorInput, "array_p") == 0){
 		contactor = ARRAY_PRECHARGE_BYPASS_CONTACTOR;
 	}
-	else if(strcmp(contactorInput, "motor_c") == 0){
+	else if(strcmp(contactorInput, "motor_p") == 0){
 		contactor = MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR;
 	}
 	else{

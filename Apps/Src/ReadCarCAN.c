@@ -5,12 +5,20 @@
  * 
  */
 
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file ReadCarCAN.c
+ * @brief 
+ * 
+ */
+
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "os.h"
 #include "os_cfg_app.h"
+#include "Display.h"
 
 // Length of the array and motor PBC saturation buffers
 #define SAT_BUF_LENGTH 5 
@@ -129,7 +137,7 @@ static void updateArrayPrechargeBypassContactor(void){
         && (Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == OFF)                                // Array PBC is OFF
         && (OSTmrStateGet(&arrayBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){           // and precharge is currently not happening  
             // Asserts error for OS timer start above if conditional was met
-            assertOSError(OS_READ_CAN_LOC, err);
+            assertOSError(err);
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&arrayBypassPrechargeDlyTimer, &err);
     }
@@ -148,7 +156,7 @@ static void updateMotorControllerPrechargeBypassContactor(void){
         &&(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == OFF)                              // Motor Controller PBC is OFF
         && (OSTmrStateGet(&motorControllerBypassPrechargeDlyTimer, &err) != OS_TMR_STATE_RUNNING)){         // and precharge is currently not happening  
             // Asserts error for OS timer start above if conditional was met
-            assertOSError(OS_READ_CAN_LOC, err);
+            assertOSError(err);
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&motorControllerBypassPrechargeDlyTimer, &err);
         }
@@ -287,19 +295,19 @@ void Task_ReadCarCAN(void *p_arg){
         NULL,
         &err
     );
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
 
     OSTmrCreate(
         &arrayBypassPrechargeDlyTimer,
         "Array Bypass Precharge Delay Timer",
-        0, 
+        0,
         ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS,
         OS_OPT_TMR_ONE_SHOT,
         setArrayBypassPrechargeComplete,
         NULL,
         &err
     );
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
 
     OSTmrCreate(
         &motorControllerBypassPrechargeDlyTimer,
@@ -311,11 +319,11 @@ void Task_ReadCarCAN(void *p_arg){
         NULL,
         &err
     );
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
 
     // Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
 
     while(1){
               
@@ -338,7 +346,7 @@ void Task_ReadCarCAN(void *p_arg){
             case BPS_CONTACTOR: { 
 
                 OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
-                assertOSError(OS_READ_CAN_LOC, err); 
+                assertOSError(err); 
                 
                 // Retrieving HV contactor statuses using bit mapping
                 // Bitwise to get HV Plus and Minus, and then &&ing to ensure both are on
@@ -447,15 +455,15 @@ static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err){
                 break;
 
             case READCARCAN_ERR_CHARGE_DISABLE: // Received a charge disable msg and need to turn off array contactor
-                throwTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_CHARGE_DISABLE, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
+                throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
                 break;
 
             case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
-                throwTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_MISSED_MSG, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_RECOV);
+                throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_RECOV);
                 break;
 
             case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop
-                throwTaskError(OS_READ_CAN_LOC, READCARCAN_ERR_BPS_TRIP, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
+                throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
                 break;
             
             default:

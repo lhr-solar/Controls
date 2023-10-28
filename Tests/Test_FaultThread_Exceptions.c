@@ -114,13 +114,13 @@ void ExceptionTask(callback_t test_callbacks) {
     // Throw two recoverable errors
     printf("\n\n\rAsserting recoverable errors");
     // Throw an arbitrary recoverable error w/o locking the scheduler
-    throwTaskError(OS_MAIN_LOC, 0x01, test_callbacks, OPT_NO_LOCK_SCHED, OPT_RECOV); 
+    throwTaskError(0x01, test_callbacks, OPT_NO_LOCK_SCHED, OPT_RECOV); 
     // Throw an arbitrary recoverable error w/ locked scheduler
-    throwTaskError(OS_TASKS_LOC, 0x02, test_callbacks, OPT_LOCK_SCHED, OPT_RECOV); 
+    throwTaskError(0x02, test_callbacks, OPT_LOCK_SCHED, OPT_RECOV); 
     
     // Throw a nonrecoverable error
     printf("\n\n\rAsserting a nonrecoverable error");
-    throwTaskError(OS_SEND_CAN_LOC, 0x03, test_callbacks, OPT_NO_LOCK_SCHED, OPT_NONRECOV); //  Should still lock sched b/c nonrecoverable
+    throwTaskError(0x03, test_callbacks, OPT_NO_LOCK_SCHED, OPT_NONRECOV); //  Should still lock sched b/c nonrecoverable
 
     printf("\n\rTest failed: locked nonrecoverable error did not immediately result in an unrecoverable fault"); // Shouldn't print
     
@@ -137,7 +137,7 @@ void OSErrorTask(void* arg) {
 
     printf("\n\rasserting an OS error");
     OSMutexPend(&testMut, 0, OS_OPT_PEND_NON_BLOCKING, &ts, &test_err);
-    assertOSError(OS_MAIN_LOC, test_err);
+    assertOSError(test_err);
     printf("\n\rassertOSError test failed: assertion did not immediately result in an unrecoverable fault");
     
     OSTaskDel(NULL, &err); // Self-delete task once finished

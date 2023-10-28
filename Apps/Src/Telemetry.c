@@ -59,7 +59,7 @@ void Task_Telemetry(void *p_arg){
         // Delay of few milliseconds (500)
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
-            assertOSError(OS_UPDATE_VEL_LOC, err);
+            assertOSError(err);
         }
     }
 }

@@ -22,10 +22,6 @@ static float Motor_Velocity = 0;
 // Function prototypes
 static void assertTritiumError(tritium_error_code_t motor_err);
 
-
-
-
-
 /* OBJECTIVES:
 Objective 1:
 - Receive motor status message from MotorController (18.4.2)
@@ -91,7 +87,7 @@ void Task_ReadTritium(void *p_arg){
 		}
 
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-		assertOSError(OS_READ_TRITIUM_LOC, err);
+		assertOSError(err);
 	}
 }
 
@@ -142,7 +138,7 @@ static void assertTritiumError(tritium_error_code_t motor_err){
     // or combination of errors includes at least one that is nonrecoverable        // accidentally fall into this nonrecoverable bucket
 	if(motor_err != T_HALL_SENSOR_ERR){                                             
 		// Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
-		throwTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+		throwTaskError(Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
 	}
 
@@ -150,12 +146,12 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 
 	if(++hall_fault_cnt > MOTOR_RESTART_THRESHOLD){  // Threshold has been exceeded
 		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
-		throwTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+		throwTaskError(Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
 	} 
 
 	// Threshold hasn't been exceeded, so assert a recoverable error with the motor restart callback function
-	throwTaskError(OS_READ_TRITIUM_LOC, Error_ReadTritium, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV); 
+	throwTaskError(Error_ReadTritium, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV); 
 	
 	Error_ReadTritium = T_NONE; // Clear the error after handling it
 }

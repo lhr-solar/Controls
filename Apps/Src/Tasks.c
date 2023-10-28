@@ -45,13 +45,8 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
-/**
- * Global Variables
- */
-os_error_loc_t OSErrLocBitmap = OS_NONE_LOC; // Store the location of the current error
-
 // Variables to store error codes, stored and cleared in task error assert functions
-error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE;
+error_code_t Error_ReadCarCAN = /*READCARCAN_ERR_NONE*/ 0; // TODO: change this back to the error 
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 
@@ -61,14 +56,13 @@ extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions 
  * Error assertion-related functions
 */
 
-void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
+void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
-        Display_Error(OS_err_loc, err); // Display the location and error code
+        Display_Error(err); // Display the location and error code
         while(1){;} //nonrecoverable
-
     }
 }
 
@@ -76,13 +70,12 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
  * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
  * and jumping to the error's specified callback function. 
  * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
- * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
  * @param errorCode the enum for the specific error that happened
  * @param errorCallback a callback function to a handler for that specific error, 
  * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately. Only applicable for recoverable errors- nonrecoverable errors will always lock
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
+void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
     if (errorCode == 0) { // Exit if there is no error
@@ -91,15 +84,12 @@ void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t 
 
     if (lockSched == OPT_LOCK_SCHED || nonrecoverable == OPT_NONRECOV) { // Prevent other tasks from interrupting the handling of important (includes all nonrecoverable) errors
         OSSchedLock(&err);
-        assertOSError(OS_TASKS_LOC, err);
+        assertOSError(err);
     }
-
-    // Set the location error variable
-    OSErrLocBitmap = errorLoc; 
 
     if (nonrecoverable == OPT_NONRECOV) {
         EmergencyContactorOpen();
-        Display_Error(errorLoc, errorCode); // Needs to happen before callback so that tasks can change the screen
+        Display_Error(errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
         UpdateDisplay_ClearQueue(); // Clear message queue to ensure no other commands overwrite the error screen
     }
@@ -137,12 +127,10 @@ void throwTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t 
         OSSchedUnlock(&err); 
         // Don't err out if scheduler is still locked because of a timer callback
         if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
-           assertOSError(OS_TASKS_LOC, err); 
+           assertOSError(err); 
         }
         
     }
-
-    OSErrLocBitmap = OS_NONE_LOC; // Clear the location error variable once handled
 }
 
 /**
@@ -180,7 +168,6 @@ void App_OS_TaskSwHook(void) {
     PrevTasks.tasks[idx] = cur;
     PrevTasks.index = idx;
 }
-
 
 void TaskSwHook_Init(void) {
     PrevTasks.index = TASK_TRACE_LENGTH - 1; // List starts out empty
