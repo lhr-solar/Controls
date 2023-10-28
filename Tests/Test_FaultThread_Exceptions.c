@@ -369,8 +369,6 @@ void Task_ManagerTask(void* arg) {
     }
 }
 
-
-
 // Task creation functions
 
 // Initializes ReadTritium

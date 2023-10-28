@@ -21,9 +21,9 @@
 
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u // 500 ms
-#define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) //1000 for ms -> s conversion
+#define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) // 1000 for ms -> s conversion
 
-// Precharge Delay times in seconds
+// Precharge Delay times in milliseconds
 #define PRECHARGE_PLUS_MINUS_DELAY 100u	// 100 ms, as this the smallest time delay that the RTOS can work with
 #define PRECHARGE_ARRAY_DELAY 100u     	// 100 ms
 #define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS ((PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) 
