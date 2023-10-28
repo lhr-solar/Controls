@@ -11,8 +11,6 @@
 #include "Tasks.h"
 #include "SendTritium.h"
 
-// global variables
-extern fault_bitmap_t FaultBitmap;
 
 static const char *MINIONPIN_STRING[] = {
     FOREACH_PIN(GENERATE_STRING)
@@ -30,15 +28,6 @@ static const char *GEAR_STRING[] = {
 /*----------------------------------------------*/
 #define FAULT_BITMAP_NUM 6
 
-static const char *FAULT_BITMAP_STRING[] = { 
-    "FAULT_NONE", 
-    "FAULT_OS", 
-    "FAULT_UNREACH", 
-    "FAULT_TRITIUM",
-    "FAULT_READBPS",
-    "FAULT_DISPLAY",
-    "FAULT_BPS"
-};
 /*----------------------------------------------*/
 
 void Task_DebugDump(void* p_arg) {
@@ -76,17 +65,6 @@ void Task_DebugDump(void* p_arg) {
         printf("Current Gear: %s\n\r", GEAR_STRING[get_gear()]);
         print_float("Current Setpoint: ", get_currentSetpoint());
 
-        // fault bitmap
-        printf("Fault Bitmap: ");
-        if(FaultBitmap == FAULT_NONE){
-            printf("%s", FAULT_BITMAP_STRING[0]);
-        }else{
-            for(int i = 0; i < FAULT_BITMAP_NUM; i++){
-                if(FaultBitmap & (1 << i)){
-                    printf("%s ", FAULT_BITMAP_STRING[i]);
-                }
-            }
-        }
         printf("\n\r");
 
         // Delay of 5 seconds

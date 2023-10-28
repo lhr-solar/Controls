@@ -24,13 +24,9 @@ int main(void) {
     // Disable interrupts
     __disable_irq();
 
-    // Initialize some fault bitmaps for error checking purposes
-    FaultBitmap = FAULT_NONE;
-
     OS_ERR err;
     OSInit(&err);
     TaskSwHook_Init();
-    OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
 
     assertOSError(err);
 
@@ -88,24 +84,6 @@ void Task_Init(void *p_arg){
 
     // Initialize applications
     UpdateDisplay_Init();
-
-    // Initialize FaultState
-    OSTaskCreate(
-        (OS_TCB*)&FaultState_TCB,
-        (CPU_CHAR*)"FaultState",
-        (OS_TASK_PTR)Task_FaultState,
-        (void*)NULL,
-        (OS_PRIO)TASK_FAULT_STATE_PRIO,
-        (CPU_STK*)FaultState_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_FAULT_STATE_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    assertOSError(err);
 
     // Initialize SendTritium
     OSTaskCreate(
