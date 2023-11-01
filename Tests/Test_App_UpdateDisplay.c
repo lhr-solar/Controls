@@ -2,12 +2,10 @@
 #include "config.h"
 #include "os.h"
 #include "Tasks.h"
-#include "Display.h"
+#include "Display.h" 
 // #include "bsp.h"
 // #include "Contactors.h"
 #include "UpdateDisplay.h"
-#include "FaultState.h"
-
 
 
 static OS_TCB Task1TCB;
@@ -50,16 +48,16 @@ void testPercentageComp(UpdateDisplayError_t(*function)(uint8_t)){
 void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
     OS_ERR e;
 
-    function(DISABLED);
+    function(STATE_0); // DISP_DISABLED & DISP_NEUTRAL
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    function(ENABLED);
+    function(STATE_1); // DISP_ENABLED & DISP_FORWARD
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    function(ACTIVE);
+    function(STATE_2); // DISP_ACTIVE & DISP_REVERSE
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    function(DISABLED);
+    function(STATE_0);
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
 }
@@ -70,7 +68,6 @@ void Task1(void *arg)
 
     CPU_Init();
     error = Display_Init();
-    assertDisplayError(error);
     UpdateDisplay_Init();
     
 
@@ -92,7 +89,7 @@ void Task1(void *arg)
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&e);
-    assertOSError(OS_MAIN_LOC, e);
+    assertOSError(e);
 
     OSTimeDlyHMSM(0, 0, 7, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
@@ -126,12 +123,10 @@ void Task1(void *arg)
 
     testPercentageComp(&UpdateDisplay_SetAccel);
 
-    error = Display_Error(OSErrLocBitmap, FaultBitmap);
-    assertDisplayError(error);
+    Display_Error((error_code_t)error); // Testing Display_Error
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
-    error = Display_Reset();
-    assertDisplayError(error);
+    Display_Reset();
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     while (1) {
@@ -143,28 +138,6 @@ int main()
 {
     OS_ERR err;
     OSInit(&err);
-    OSSemCreate( // create fault sem4
-        &FaultState_Sem4,
-        "Fault State Semaphore",
-        0,
-        &err);
-    assertOSError(OS_MAIN_LOC, err);
-
-    OSTaskCreate( // create fault task
-        (OS_TCB *)&FaultState_TCB,
-        (CPU_CHAR *)"Fault State",
-        (OS_TASK_PTR)&Task_FaultState,
-        (void *)NULL,
-        (OS_PRIO)1,
-        (CPU_STK *)FaultState_Stk,
-        (CPU_STK_SIZE)128 / 10,
-        (CPU_STK_SIZE)128,
-        (OS_MSG_QTY)0,
-        (OS_TICK)NULL,
-        (void *)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
 
     // create tester thread
     OSTaskCreate(
@@ -181,7 +154,7 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSStart(&err);
 }

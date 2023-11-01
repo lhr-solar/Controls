@@ -1,7 +1,11 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
 /**
- * Header file for the Pedals driver
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Pedals.h
+ * @brief Header file for the Pedals driver
+ * 
+ * @defgroup Pedals
+ * @addtogroup Pedals
+ * @{
  */
 
 #ifndef __PEDALS_H
@@ -9,6 +13,10 @@
 
 #include "BSP_ADC.h"
 
+/**
+ * @brief Stuff
+ * 
+ */
 typedef enum 
 {
     ACCELERATOR, 
@@ -32,3 +40,6 @@ int8_t Pedals_Read(pedal_t pedal);
 
 
 #endif
+
+
+/* @} */

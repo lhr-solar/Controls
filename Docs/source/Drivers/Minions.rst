@@ -41,3 +41,7 @@ Implementation Details
 Some of the switches and lights are connected through GPIO. These are the ignition switch, the headlights, and the external blinkers. The rest of the lights and switches are on the minion board and connected through SPI. **NOTE: CURRENTLY, THE LIGHTS ON THE MINON BOARD ARE NON-FUNCTIONAL; THEY'RE SHOWN ON THE DISPLAY INSTEAD. THE SPI COMMANDS ARE STILL SENT, HOWEVER.**
 
 The minion board is placed far away from the Controls leaderboard. As such, the SPI wires connecting the two are unusually long. This results in quite a bit of interference, which makes the lights on the minion board quite unreliable. The switches still work reliably due to the median filter used. The median filter keeps the last ten samples for each switch, and uses the median (since a switch is either on or off, this is equivalent to a majority check i.e. do we have more ones or more zeros) to determine the used state for each switch. This filter will hopefully be made redundant by a hardware redesign of the minon board to leaderboard connection.
+
+.. doxygengroup:: Minions
+   :project: doxygen
+   :path: "/doxygen/xml/group__Minions.xml"

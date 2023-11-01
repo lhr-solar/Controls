@@ -11,11 +11,9 @@
 #include "Tasks.h"
 #include "SendTritium.h"
 
-// global variables
-extern os_error_loc_t OSErrLocBitmap;
 
 static const char *MINIONPIN_STRING[] = {
-    FOREACH_MinionPin(GENERATE_STRING)
+    FOREACH_PIN(GENERATE_STRING)
 };
 
 static const char *CONTACTOR_STRING[] = {
@@ -29,28 +27,11 @@ static const char *GEAR_STRING[] = {
 // Need to keep this in sync with Task.h
 /*----------------------------------------------*/
 #define FAULT_BITMAP_NUM 6
-#define OS_LOC_NUM 14
-static const char *OS_LOC_STRING[] = { 
-    "OS_NONE_LOC", 
-    "OS_ARRAY_LOC", 
-    "OS_READ_CAN_LOC", 
-    "OS_READ_TRITIUM_LOC",
-    "OS_SEND_CAN_LOC",
-    "OS_SEND_TRITIUM_LOC",
-    "OS_UPDATE_VEL_LOC",
-    "OS_CONTACTOR_LOC",
-    "OS_MINIONS_LOC",
-    "OS_MAIN_LOC",
-    "OS_CANDRIVER_LOC",
-    "OS_MOTOR_CONNECTION_LOC",
-    "OS_DISPLAY_LOC"
-};
 
 /*----------------------------------------------*/
 
 void Task_DebugDump(void* p_arg) {
     OS_ERR err;
-    Minion_Error_t mErr;
 
     while(1){
 
@@ -62,8 +43,8 @@ void Task_DebugDump(void* p_arg) {
         printf("BRAKE: %d\n\r", brakePedal);
 
         // Get minion information
-        for(MinionPin_t pin = 0; pin < NUM_MINIONPINS-1; pin++){ // Plan to change NUM_MINIONPINS-1 -> NUM_MINIONPINS after Minion function is fixed
-            bool pinState = Minion_Read_Pin(pin, &mErr);
+        for(pin_t pin = 0; pin < NUM_PINS; pin++){
+            bool pinState = Minions_Read(pin);
             // Ignition pins are negative logic, special-case them
             printf("%s: %s\n\r", MINIONPIN_STRING[pin], pinState ^ (pin == IGN_1 || pin == IGN_2) ? "on" : "off");
         }
@@ -84,24 +65,12 @@ void Task_DebugDump(void* p_arg) {
         printf("Current Gear: %s\n\r", GEAR_STRING[get_gear()]);
         print_float("Current Setpoint: ", get_currentSetpoint());
 
-        // os loc bitmap
-        printf("OS Location Bitmap: ");
-        if(OSErrLocBitmap == OS_NONE_LOC){
-            printf("%s", OS_LOC_STRING[0]);
-        }
-        else{
-            for(int i = 0; i < OS_LOC_NUM; i++){
-                if(OSErrLocBitmap & (1 << i)){
-                    printf("%s ", OS_LOC_STRING[i]);
-                }
-            }
-        }
         printf("\n\r");
 
         // Delay of 5 seconds
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
-            assertOSError(OS_NONE_LOC, err);
+            assertOSError(err);
         }
     }
 }

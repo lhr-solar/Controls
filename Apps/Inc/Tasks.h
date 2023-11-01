@@ -1,4 +1,13 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Tasks.h
+ * @brief 
+ * 
+ * @defgroup Tasks
+ * @addtogroup Tasks
+ * @{
+ */
+
 
 #ifndef __TASKS_H
 #define __TASKS_H
@@ -47,7 +56,7 @@
 /**
  * Task error variable type
 */
-typedef int16_t error_code_t;
+typedef uint16_t error_code_t;
 
 /**
  * Task Prototypes
@@ -110,35 +119,6 @@ extern OS_Q CANBus_MsgQ;
  */
 void TaskSwHook_Init(void);
 
-
-/**
- * Global Variables
- */
-
-
-/**
- * OS Error States
- * 
- * Stores error data to indicate which part of the code
- * an error is coming from.
- */
-typedef enum{
-    OS_NONE_LOC = 0x000,
-    OS_ARRAY_LOC = 0x001,
-    OS_READ_CAN_LOC = 0x002,
-    OS_READ_TRITIUM_LOC = 0x004,
-    OS_SEND_CAN_LOC = 0x008,
-    OS_SEND_TRITIUM_LOC = 0x010,
-    OS_UPDATE_VEL_LOC = 0x020,
-    OS_CONTACTOR_LOC = 0x080,
-    OS_MINIONS_LOC = 0x100,
-    OS_MAIN_LOC = 0x200,
-    OS_CANDRIVER_LOC = 0x400,
-    OS_MOTOR_CONNECTION_LOC = 0x800,
-    OS_DISPLAY_LOC = 0x1000,
-    OS_TASKS_LOC = 0x2000,
-} os_error_loc_t;
-
 /**
  * Task trace
  * 
@@ -155,11 +135,6 @@ typedef struct {
 
 extern task_trace_t PrevTasks;
 
-/**
- * Error variables
- */
-extern os_error_loc_t OSErrLocBitmap;
-
 // Store error codes that are set in task error assertion functions
 extern error_code_t Error_ReadTritium; 
 extern error_code_t Error_ReadCarCAN;
@@ -171,8 +146,8 @@ extern error_code_t Error_UpdateDisplay;
 
 // Scheduler lock parameter option for asserting a task error
 typedef enum {
-    OPT_LOCK_SCHED = false,
-    OPT_NO_LOCK_SCHED = true
+    OPT_NO_LOCK_SCHED,
+    OPT_LOCK_SCHED
 } error_scheduler_lock_opt_t;
 
 // Recoverable/nonrecoverable parameter option for asserting a task error
@@ -180,6 +155,28 @@ typedef enum {
     OPT_RECOV,
     OPT_NONRECOV
 } error_recov_opt_t;
+
+/**
+ * @brief For use in error handling: opens array and motor precharge bypass contactor
+ * and turns on additional brakelight to signal that a critical error happened.
+*/
+void EmergencyContactorOpen();
+
+/**
+ * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 
+ * displaying a fault screen (if nonrecoverable), jumping to a callback function, and entering an infinite loop. 
+ * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
+ * @param errorCode the enum for the specific error that happened
+ * @param errorCallback a callback function to a handler for that specific error, 
+ * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately
+ * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
+*/
+void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
+
+// Store error codes that are set in task error assertion functions
+extern error_code_t Error_ReadTritium; 
+extern error_code_t Error_ReadCarCAN;
+extern error_code_t Error_UpdateDisplay;
 
 /**
  * @brief For use in error handling: turns off array, array precharge, and motor contactor
@@ -197,23 +194,21 @@ void arrayMotorKill();
  * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
+void assertTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
 
 /**
  * @brief   Assert Error if OS function call fails
- * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err); 
+void _assertOSError (OS_ERR err); //TODO: This should be changed to enforce only enum usage
 
 #if DEBUG == 1
-#define assertOSError(OS_err_loc,err) \
-        if (err != OS_ERR_NONE) { \
-            printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \
-        } \
-        _assertOSError(OS_err_loc,err);
+#define assertOSError(err) 
+        _assertOSError(err);
 #else
-#define assertOSError(OS_err_loc,err) _assertOSError(OS_err_loc,err);
+#define assertOSError(err) _assertOSError(err);
 #endif
 
 #endif
+
+/* @} */

@@ -1,5 +1,5 @@
-/** 
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file UpdateDisplay.c
  * @brief Function implementations for the display application.
  * 
@@ -7,10 +7,8 @@
  * components on our HMI design. The HMI has the ability to indicate 
  * relevant information about system status to the driver.
  * 
- * @author Ishan Deshpande (IshDeshpa)
- * @author Roie Gal (Cam0Cow)
- * @author Nathaniel Delgado (NathanielDelgado)
-*/
+ */
+
 #include "UpdateDisplay.h"
 #include "Minions.h"
 #include <math.h>
@@ -38,7 +36,7 @@ static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/re
  * Function prototypes
 */
 // check for and assert errors in UpdateDisplay
-static void assertUpdateDisplayError(DisplayError_t err); 
+static void assertUpdateDisplayError(UpdateDisplayError_t err); 
 
 
 /**
@@ -78,17 +76,17 @@ const char* compStrings[15]= {
 	"faulterr"
 };
 
-
 UpdateDisplayError_t UpdateDisplay_Init(){
 	OS_ERR err;
 	disp_fifo_renew(&msg_queue);
 	OSMutexCreate(&DisplayQ_Mutex, "Display mutex", &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	OSSemCreate(&DisplayQ_Sem4, "Display sem4", 0, &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetPage(INFO);
-	assertUpdateDisplayError(ret);
+    OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, &err); // Wait >215ms so errors will show on the display
+    assertOSError(err);
 	return ret;
 }
 
@@ -106,14 +104,14 @@ static UpdateDisplayError_t UpdateDisplay_PopNext(){
     CPU_TS ticks;
 
     OSSemPend(&DisplayQ_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(OS_DISPLAY_LOC, err);
+    assertOSError(err);
 		
     OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(OS_DISPLAY_LOC, err);
+    assertOSError(err);
 
     bool result = disp_fifo_get(&msg_queue, &cmd);
     OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(err);
 
     if(!result){
 			assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
@@ -135,16 +133,16 @@ static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
 	OS_ERR err;
 
 	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-  assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 	
 	bool success = disp_fifo_put(&msg_queue, cmd);
 
 	OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
-	assertOSError(OS_DISPLAY_LOC, err);
+	assertOSError(err);
 
 	if(success){
 		OSSemPost(&DisplayQ_Sem4, OS_OPT_POST_ALL, &err);
-		assertOSError(OS_DISPLAY_LOC, err);
+		assertOSError(err);
 	}
 	else{
 		assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);
@@ -174,7 +172,6 @@ static UpdateDisplayError_t UpdateDisplay_Refresh(){
 	};
 
 	UpdateDisplayError_t ret = UpdateDisplay_PutNext(refreshCmd);
-	assertUpdateDisplayError(ret);
 	return ret;
 }
 
@@ -203,7 +200,6 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 		};
 		
 		ret = UpdateDisplay_PutNext(visCmd);
-		assertUpdateDisplayError(ret);
 		return ret;
 	}
 	// For components that have a non-boolean value
@@ -220,8 +216,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 		};
 
 		ret = UpdateDisplay_PutNext(setCmd);
-		assertUpdateDisplayError(ret);
-		return UpdateDisplay_PutNext(setCmd);
+		return ret;
 	}
 	else{
 		assertUpdateDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);
@@ -248,139 +243,85 @@ UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page){
 
 /* WRAPPERS */
 UpdateDisplayError_t UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentage from 0-100
-	static uint8_t lastPercent = 0;
-	if(percent == lastPercent){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SOC, percent);
-	assertUpdateDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercent = percent;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv){
-	static uint32_t lastMv = 0;
-	if(mv == lastMv){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
-
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
-	assertUpdateDisplayError(ret);
+	
+    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
-
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastMv = mv;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
-	static uint32_t lastMphTenths = 0;
-	if(mphTenths == lastMphTenths){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(VELOCITY, mphTenths);
-	assertUpdateDisplayError(ret);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastMphTenths = mphTenths;
+    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(VELOCITY, mphTenths);
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
-	static uint8_t lastPercentAccel = 0;
-	if(percent == lastPercentAccel){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ACCEL_METER, percent);
-	assertUpdateDisplayError(ret);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastPercentAccel = percent;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetArray(bool state){
-	static bool lastState = false;
-	if(state == lastState){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ARRAY, (state)?1:0);
-	assertUpdateDisplayError(ret);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetMotor(bool state){
-	static bool lastState = false;
-	if(state == lastState){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(MOTOR, (state)?1:0);
-	assertUpdateDisplayError(ret);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear){
-	static TriState_t lastGear = STATE_0;
-	if(gear == lastGear){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(GEAR, (uint32_t)gear);
-	assertUpdateDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastGear = gear;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state){
-	static TriState_t lastState = STATE_0;
-	if(state == lastState){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state);
-	assertUpdateDisplayError(ret);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
 	
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
-	
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
 	return ret;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
-	static TriState_t lastState = STATE_0;
-	if(state == lastState){
-		return UPDATEDISPLAY_ERR_NO_CHANGE;
-	}
 	
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state);
+    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
-
+    
 	ret = UpdateDisplay_Refresh();
-	assertUpdateDisplayError(ret);
+    return ret;
+}
 
-	if(ret == UPDATEDISPLAY_ERR_NONE) lastState = state;
-	return ret;
+/**
+ * @brief Clears the display message queue and sets the message counter semaphore value to 0
+*/
+void UpdateDisplay_ClearQueue(){
+    OS_ERR err;
+    OSSemSet(&DisplayQ_Sem4, 0, &err); // Set the message queue semaphore value to 0
+    if (err != OS_ERR_TASK_WAITING) {
+        assertOSError(err); // Don't fault if UpdateDisplay is waiting
+    }
+    disp_fifo_renew(&msg_queue); // Clear the message queue
+    
 }
 
 /**
@@ -388,56 +329,37 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
  */
 void Task_UpdateDisplay(void *p_arg) {
     while (1) {
-			UpdateDisplayError_t err = UpdateDisplay_PopNext();
-			assertUpdateDisplayError(err);
+		UpdateDisplay_PopNext();
     }
 }
 
-
 /**
  * Error handler functions
- * Passed as callback functions to the main assertTaskError function by assertUpdateDisplayError
+ * Passed as callback functions to the main throwTaskError function by assertUpdateDisplayError
 */
 
 /**
- * @brief A handler callback function run by the main assertTaskError function
+ * @brief A handler callback function run by the main throwTaskError function
  * used if we haven't reached the restart limit and encounter an error
  */ 
 static void handler_UpdateDisplay_Restart() {
-	Display_Reset(); // Try resetting to fix the display error
+    UpdateDisplay_ClearQueue(); // Clear the message queue
+    Display_Reset(); // Try resetting to fix the display error
 }
-
-/**
- * @brief A handler callback function run by the main assertTaskErrorfunction
- * to show the error screen if we have reached the restart limit
- */ 
-static void handler_UpdateDisplay_ShowError() {
-	Display_Error(OS_DISPLAY_LOC, Error_UpdateDisplay); // Try resetting the display
-}
-
 
 /**
  * @brief Check for a display error and assert it if it exists.
  * Stores the error code, calls the main assertion function 
- * and runs a callback function as a handler to restart the display or show the error.
+ * and runs a callback function as a handler to restart the display and clear the queue.
  * @param   err variable with display error codes
- */static void assertUpdateDisplayError(DisplayError_t err){
-	static uint8_t disp_error_cnt = 0; // Track the number of display errors, doesn't ever reset
-
+ */
+ static void assertUpdateDisplayError(UpdateDisplayError_t err){
 	Error_UpdateDisplay = (error_code_t)err; // Store the error code for inspection
 
-	if (err != DISPLAY_ERR_NONE){
-		disp_error_cnt++;
+	if (err == UPDATEDISPLAY_ERR_NONE) return; // No error, return
 
-		if (disp_error_cnt > RESTART_THRESHOLD){ 
-			// Show error screen if restart attempt limit has been reached
-			assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_ShowError,
-			OPT_NO_LOCK_SCHED, OPT_RECOV);
-		} else { // Otherwise try resetting the display using the restart callback
-			assertTaskError(OS_DISPLAY_LOC, Error_UpdateDisplay, handler_UpdateDisplay_Restart,
-			OPT_NO_LOCK_SCHED, OPT_RECOV);
-		}
+    // Otherwise try resetting the display using the restart callback
+    throwTaskError(Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
 
-		Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
-	}
+    Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
 }

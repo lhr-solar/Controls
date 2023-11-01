@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file main.c
+ * @brief 
+ * 
+ */
 
 #include "common.h"
 #include "config.h"
@@ -19,14 +24,11 @@ int main(void) {
     // Disable interrupts
     __disable_irq();
 
-    // Initialize some fault bitmaps for error checking purposes
-    OSErrLocBitmap = OS_NONE_LOC;
-
     OS_ERR err;
     OSInit(&err);
     TaskSwHook_Init();
 
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize apps
     OSTaskCreate(
@@ -44,14 +46,14 @@ int main(void) {
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Enable interrupts
     __enable_irq();
 
     // Start OS
     OSStart(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     while(1);
 
@@ -66,7 +68,7 @@ void Task_Init(void *p_arg){
 
     OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
 
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
     
     // Initialize drivers
     Pedals_Init();
@@ -77,7 +79,7 @@ void Task_Init(void *p_arg){
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    Minion_Init();
+    Minions_Init();
     CAN_Queue_Init();
 
     // Initialize applications
@@ -99,7 +101,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize ReadCarCAN
     OSTaskCreate(
@@ -117,7 +119,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize UpdateDisplay
     OSTaskCreate(
@@ -135,7 +137,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize ReadTritium
     OSTaskCreate(
@@ -153,7 +155,7 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize SendCarCAN
     OSTaskCreate(
@@ -171,13 +173,12 @@ void Task_Init(void *p_arg){
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
 
-    Minion_Error_t merr;
     while(1){
-        Contactors_Set(MOTOR_CONTACTOR, Minion_Read_Pin(IGN_2, &merr), true); //turn on the contactor if the ign switch lets us
-        assertOSError(OS_MINIONS_LOC, err);
+        Contactors_Set(MOTOR_CONTACTOR, Minions_Read(IGN_2), true); //turn on the contactor if the ign switch lets us
+        assertOSError(err);
         OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
     }
 }

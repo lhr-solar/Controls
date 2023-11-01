@@ -20,12 +20,11 @@ void Task1(void *arg)
     CAN_Queue_Init();
     // BSP_UART_Init(UART_2);
     Pedals_Init();
-    Minion_Init();
+    Minions_Init();
     Contactors_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
 
-    Minion_Error_t Merr;
     OS_ERR err;
 
     // Initialize Telemetry
@@ -44,7 +43,7 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     bool lightState = false;
     State contactorState = OFF;
@@ -56,7 +55,7 @@ void Task1(void *arg)
 
         // Check light
         lightState = !lightState;
-        Minion_Write_Output(BRAKELIGHT, lightState, &Merr);
+        Minions_Write(BRAKELIGHT, lightState);
 
         // Check contactors (HAVE NOTHING HOOKED UP TO CONTACTORS)
         contactorState = contactorState == OFF ? ON : OFF;
@@ -90,7 +89,7 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSStart(&err);
 }

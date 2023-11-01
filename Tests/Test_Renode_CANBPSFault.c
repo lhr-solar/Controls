@@ -89,7 +89,7 @@ int main(void){ //startup OS stuff, spawn test task
         0,
         &err
     );
-    assertOSError(OS_MAIN_LOC,err); 
+    assertOSError(err); 
 
 
     OSTaskCreate( // Create fault task

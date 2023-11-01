@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Tasks.c
+ * @brief 
+ * 
+ */
 
 #include "Tasks.h"
 #include "os.h"
@@ -7,9 +12,9 @@
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "ReadTritium.h" // For ReadTritium error enum
-#include "ReadCarCAN.h" // For ReadCarCAN error enum
-#include "UpdateDisplay.h" // For update display error enum
+#include "ReadTritium.h"
+#include "ReadCarCAN.h"
+#include "UpdateDisplay.h"
 
 
 /**
@@ -40,34 +45,105 @@ CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
-/**
- * Global Variables
- */
-os_error_loc_t OSErrLocBitmap = OS_NONE_LOC; // Store the location of the current error
-
 // Variables to store error codes, stored and cleared in task error assert functions
-error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_ReadCarCAN = /*READCARCAN_ERR_NONE*/ 0; // TODO: change this back to the error 
+error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 
-extern const PinInfo_t PINS_LOOKARR[]; // For GPIO writes. Externed from Minions Driver C file.
+extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
  * Error assertion-related functions
 */
 
-void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
+void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
-        printf("\n\rOS Error code %d", err);
-        BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
-        
-        BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
-        BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
+        EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
+        Display_Error(err); // Display the location and error code
         while(1){;} //nonrecoverable
-
     }
+}
+
+/**
+ * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
+ * and jumping to the error's specified callback function. 
+ * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
+ * @param errorCode the enum for the specific error that happened
+ * @param errorCallback a callback function to a handler for that specific error, 
+ * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately. Only applicable for recoverable errors- nonrecoverable errors will always lock
+ * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
+*/
+void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
+    OS_ERR err;
+
+    if (errorCode == 0) { // Exit if there is no error
+        return;
+    }
+
+    if (lockSched == OPT_LOCK_SCHED || nonrecoverable == OPT_NONRECOV) { // Prevent other tasks from interrupting the handling of important (includes all nonrecoverable) errors
+        OSSchedLock(&err);
+        assertOSError(err);
+    }
+
+    if (nonrecoverable == OPT_NONRECOV) {
+        EmergencyContactorOpen();
+        Display_Error(errorCode); // Needs to happen before callback so that tasks can change the screen
+        // (ex: readCarCAN and evac screen for BPS trip)
+        UpdateDisplay_ClearQueue(); // Clear message queue to ensure no other commands overwrite the error screen
+    }
+
+
+    if (errorCallback != NULL) {
+        errorCallback(); // Run a handler for this error that was specified in another task file
+    }
+    
+
+    if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
+        while(1) {
+
+            #if DEBUG == 1
+
+               // Print the error that caused this fault
+                printf("\n\rCurrent Error Location: 0x%04x", OSErrLocBitmap);
+                printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
+
+                // Print the errors for each applications with error data
+                printf("\n\rAll application errors:\n\r");
+                printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
+                printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
+                printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
+
+                // Delay so that we're not constantly printing
+                for (int i = 0; i < 9999999; i++) {
+                } 
+            #endif
+            
+        }
+    }
+
+    if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
+        OSSchedUnlock(&err); 
+        // Don't err out if scheduler is still locked because of a timer callback
+        if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
+           assertOSError(err); 
+        }
+        
+    }
+}
+
+/**
+ * @brief For use in error handling: opens array and motor precharge bypass contactor
+ * and turns on additional brakelight to signal that a critical error happened.
+*/
+void EmergencyContactorOpen() {
+    // Array motor kill
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
+
+    // Turn additional brakelight on to indicate critical error
+    BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);
 }
 
 /**
@@ -80,20 +156,17 @@ void _assertOSError(os_error_loc_t OS_err_loc, OS_ERR err)
  * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
 */
-void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
+void assertTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
     if (lockSched == OPT_LOCK_SCHED) { // We want this error to be handled immediately without other tasks being able to interrupt
         OSSchedLock(&err);
-        assertOSError(OS_TASKS_LOC, err);
+        assertOSError(err);
     }
-
-    // Set the location error variable
-    OSErrLocBitmap = errorLoc; 
 
     if (nonrecoverable == OPT_NONRECOV) {
         arrayMotorKill(); // Apart from while loop because killing the motor is more important
-        Display_Error(errorLoc, errorCode); // Needs to happen before callback so that tasks can change the screen
+        Display_Error(errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
     }
 
@@ -111,12 +184,10 @@ void assertTaskError(os_error_loc_t errorLoc, error_code_t errorCode, callback_t
         OSSchedUnlock(&err); 
         // Don't err out if scheduler is still locked because of a timer callback
         if (err != OS_ERR_SCHED_LOCKED && OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
-           assertOSError(OS_TASKS_LOC, err); 
+           assertOSError(err); 
         }
         
     }
-
-    OSErrLocBitmap = OS_NONE_LOC; // Clear the location error variable once handled
 }
 
 /**
@@ -130,7 +201,7 @@ void arrayMotorKill() {
     BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
 
     // Turn additional brakelight on to indicate critical error
-    BSP_GPIO_Write_Pin(PINS_LOOKARR[BRAKELIGHT].port, PINS_LOOKARR[BRAKELIGHT].pinMask, true);
+    BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);
 }
 
 /**

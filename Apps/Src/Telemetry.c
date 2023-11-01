@@ -1,3 +1,15 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Telemetry.c
+ * @brief Implements the SendCarCAN Task
+ * 
+ * Creates a datatype to house the data to be read by telemetry
+ * 
+ * Gathers the information of the pedals, lights, switches, and contactors 
+ * to be read by telemetry
+ * 
+ */
+
 #include "Tasks.h"
 #include "CANbus.h"
 #include "CAN_Queue.h"
@@ -5,7 +17,6 @@
 #include "Minions.h"
 #include "Contactors.h"
 #include "common.h"
-
 
 // Make sure updated to the CarData_t and carMSGID are reflected in the CAN Bus IDs excel sheet
 
@@ -22,7 +33,6 @@ void Task_Telemetry(void *p_arg){
     }
     OS_ERR err;
 
-    Minion_Error_t Merr;
 
     while (1) {
         // Get pedal information
@@ -31,8 +41,8 @@ void Task_Telemetry(void *p_arg){
 
         // Get minion information
         carMsg.data[2] = 0;
-        for(MinionPin_t pin = 0; pin < NUM_MINIONPINS; pin++){
-            bool pinState = Minion_Read_Pin(pin, &Merr);
+        for(pin_t pin = 0; pin < NUM_PINS; pin++){
+            bool pinState = Minions_Read(pin);
             carMsg.data[2] |= pinState << pin;
         }
 
@@ -49,7 +59,7 @@ void Task_Telemetry(void *p_arg){
         // Delay of few milliseconds (500)
         OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
-            assertOSError(OS_UPDATE_VEL_LOC, err);
+            assertOSError(err);
         }
     }
 }
