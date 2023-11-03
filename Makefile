@@ -13,9 +13,6 @@ NC=\033[0m # No Color
 DEBUG ?= 1
 export DEBUG
 
-USE_TEST_RUNNER ?= 0
-export USE_TEST_RUNNER
-
 # Note: ?= will define the variable only if it is not already set, which means the user can override any of
 # the TEST_LEADER, TEST_MOTOR, or TEST_CAR assignments with their own test files.
 
@@ -71,6 +68,10 @@ stm32f413: leader
 flash:
 	$(MAKE) -C BSP -C STM32F413 flash
 
+docs:
+	doxygen Docs/doxyfile
+	$(MAKE) -C Docs html
+
 help:
 	@echo "Format: ${ORANGE}make ${BLUE}<BSP type>${NC}${ORANGE}TEST=${PURPLE}<Test type>${NC}"
 	@echo "BSP types (required):"
@@ -88,3 +89,5 @@ help:
 clean:
 	rm -fR Objects
 	rm -f *.out
+	rm -fr Docs/doxygen
+	rm -fr Docs/build

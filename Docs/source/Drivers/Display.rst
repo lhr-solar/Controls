@@ -30,3 +30,7 @@ A more detailed description of the command structure is given below. For more in
 * ``argTypes[]`` — A list of the argument types to follow
 
 * ``args`` — The actual arguments for the command (strings or ints)
+
+.. doxygengroup:: Display
+   :project: doxygen
+   :path: "/doxygen/xml/group__Display.xml"

@@ -41,16 +41,6 @@ C_SOURCES += \
 $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))	\
 ../../$(TEST)
 
-# This line adds the test runner if necessary. MotorSim and CarSim currently use nothing from the test runner.
-# TODO: Remove once all of our tests have been integrated with the new test framework
-ifeq ($(USE_TEST_RUNNER), 1)
-ifeq (,$(findstring MotorSim/, $(C_SOURCES)))
-ifeq (,$(findstring CarSim/, $(C_SOURCES)))
-	C_SOURCES += ../../Tests/Leader/Test_Runner.c
-endif
-endif
-endif
-
 # ASM sources
 ASM_SOURCES =  \
 ../../BSP/STM32F413/Src/startup_stm32f413xx.s \

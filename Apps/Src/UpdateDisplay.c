@@ -1,5 +1,5 @@
-/** 
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file UpdateDisplay.c
  * @brief Function implementations for the display application.
  * 
@@ -7,10 +7,8 @@
  * components on our HMI design. The HMI has the ability to indicate 
  * relevant information about system status to the driver.
  * 
- * @author Ishan Deshpande (IshDeshpa)
- * @author Roie Gal (Cam0Cow)
- * @author Nathaniel Delgado (NathanielDelgado)
-*/
+ */
+
 #include "UpdateDisplay.h"
 #include "Minions.h"
 #include <math.h>

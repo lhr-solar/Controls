@@ -20,16 +20,6 @@
                 "args": ["-i"]
             },   
         },
-        "files.associations": {
-            "Test_Runner.h": "c",
-            "tasks.h": "c",
-            "stm32f4xx.h": "c",
-            "os.h": "c",
-            "bsp.h": "c",
-            "bsp_gpio.h": "c",
-            "uart.h": "c",
-            "fifo.h": "c"
-        }
     },
     "tasks": {
         "version": "2.0.0",
@@ -41,7 +31,6 @@
                 "args": [
                     "${input:target}",
                     "TEST=${input:test}",
-                    "USE_TEST_RUNNER=${input:use_test_runner}",
                     "DEBUG=${input:debug}"
                 ],
                 "presentation": {

@@ -4,13 +4,13 @@ $motor_bin?=$ORIGIN/../Objects/motor-sim.elf
 $platform=$ORIGIN/stm32f413.repl
 
 EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.DMA.STM32DMA"
-Execute Command          include @${CURDIR}/STM32DMA_Fix.cs
+include $ORIGIN/STM32DMA_Fix.cs
 
 EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.Analog.STM32_ADC"
-Execute Command          include @${CURDIR}/STM32_ADC_Fix.cs
+include $ORIGIN/STM32_ADC_Fix.cs
 
 EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.UART.STM32_UART"
-Execute Command          include @${CURDIR}/STM32_UART_Fix.cs
+include $ORIGIN/STM32_UART_Fix.cs
 
 macro reset
 """

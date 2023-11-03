@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #define TEST_USE_RTOS 0
-#include "Test_Runner.h"
 
 // Handlers
 static void RX_Handler(){
