@@ -13,7 +13,7 @@
 #include <string.h>
 
 //status limit flag masks
-#define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor 6
+#define MASK_MOTOR_TEMP_LIMIT (1<<6) //check if motor temperature is limiting the motor
 #define MAX_CAN_LEN 8
 #define RESTART_THRESHOLD 3	// Number of times to restart before asserting a nonrecoverable error
 #define MOTOR_TIMEOUT_SECS 1
