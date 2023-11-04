@@ -33,9 +33,9 @@ bool Minions_Read(pin_t pin){
 }
 
 bool Minions_Write(pin_t pin, bool status){
-   // if(PININFO_LUT[pin].direction == OUTPUT){
+    if(PININFO_LUT[pin].direction == OUTPUT){
         BSP_GPIO_Write_Pin(PININFO_LUT[pin].port, PININFO_LUT[pin].pinMask, status);
         return true;
-   // }
-   // return false;
+    }
+    return false;
 }

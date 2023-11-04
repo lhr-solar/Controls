@@ -244,7 +244,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
  }
 
 /**
- * @brief Helper to turn motorControllerPBCOff
+ * @brief Helper to turn motorControllerPBCOff if ignition is not turned to motor or motor controller threshold isn't reached. 
  * @param None
 */
  void turnMotorControllerPBCOff(void){
