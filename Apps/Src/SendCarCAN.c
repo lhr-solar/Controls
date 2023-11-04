@@ -40,10 +40,13 @@ static uint8_t IOStateDlyCounter = 0;
 static void putIOState(void);
 
 /**
- * @brief Wrapper to check if SendCarCAN_Q is full
+ * @brief print SendCarCAN_Q put/get for debug purposes
 */
-bool SendCarCAN_Queue_is_full() {
-    return SendCarCAN_Q_is_full(&CANFifo);
+void print_SendCarCAN_Q(void) {
+    if(SendCarCAN_Q_is_full(&CANFifo)) {
+        printf("\n\rSendCarCAN_Q is full.");
+    }
+    printf("\n\rSendCarCAN_Q put: %d\n\rSendCarCAN_Q get: %d", CANFifo.put, CANFifo.get);
 }
 
 /**

@@ -23,7 +23,7 @@ void Task_ReadCAN(void *arg)
 
 
     while (1) {
-        ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
+        ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
 
 		if (status == SUCCESS){
             ts = (OSTimeGet(&err) / OS_CFG_TICK_RATE_HZ);
@@ -85,6 +85,7 @@ void Task1(void *arg)
     BSP_UART_Init(UART_2);
     Pedals_Init();
     CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS);
+    CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Minions_Init();
     //UpdateDisplay_Init(); // Do we need this? Are we using the display?
 
@@ -119,6 +120,24 @@ void Task1(void *arg)
         (CPU_STK*)SendCarCAN_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
+
+    // Initialize ReadTritium
+    OSTaskCreate(
+        (OS_TCB*)&ReadTritium_TCB,
+        (CPU_CHAR*)"ReadTritium",
+        (OS_TASK_PTR)Task_ReadTritium,
+        (void*)NULL,
+        (OS_PRIO)TASK_READ_TRITIUM_PRIO,
+        (CPU_STK*)ReadTritium_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_READ_TRITIUM_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
@@ -166,9 +185,9 @@ void Task1(void *arg)
         printf("\n\rContactors: %x", contactors);
         // Print how full CAN Queue is 
         printf("\n\r---- Queue data ----");
-        printf("\n\rSendCarCAN_Q_is_full? %d", SendCarCAN_Queue_is_full());
-        //printf("\n\rQueue put: %d, Queue get: %d", CANFifo.put, CANFifo.get); Could be nice to add this info
+        print_SendCarCAN_Q();
 
+        OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
     }   
 
 }

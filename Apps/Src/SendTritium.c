@@ -9,14 +9,11 @@
  * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
  * The logic is determined through a finite state machine implementation.
  * 
- * If the macro __TEST_SENDTRITIUM is defined prior to including SendTritium.h, relevant
- * variables will be exposed as externs for unit testing.
- * If the macro __TEST_SENDTRITIUM_SOFTWAREONLY is also defined prior to including SendTritium.h,
- * hardware inputs won't be read and motor commands won't be sent over MotorCAN.
- * 
- * @author Nathaniel Delgado (NathanielDelgado)
- * @author Diya Rajon (diyarajon)
- * @author Ishan Deshpande (IshDeshpa, ishdeshpa@utexas.edu)
+ * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including SendTritium.h, 
+ * relevant variables will be exposed as externs for unit testing
+ * and hardware inputs won't be read and motor commands won't be sent over MotorCAN.
+ * If the macro SENDTRITIUM_PRINT_MES is also defined prior to including SendTritium.h,
+ * debug info will be printed via UART.
  */
 
 #include "Pedals.h"
@@ -49,7 +46,7 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-#ifndef __TEST_SENDTRITIUM
+#ifndef SENDTRITIUM_EXPOSE_VARS
 #define SCOPE static
 #else
 #define SCOPE 
@@ -74,7 +71,7 @@ float cruiseVelSetpoint = 0;
 // Current observed velocity
 SCOPE float velocityObserved = 0;
 
-#ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
+#ifndef SENDTRITIUM_EXPOSE_VARS
 
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
@@ -160,7 +157,7 @@ static float percentToFloat(uint8_t percent){
 /**
  * @brief Dumps info to UART during testing
 */
-#ifdef __TEST_SENDTRITIUM
+#ifdef SENDTRITIUM_PRINT_MES
 static void getName(char* nameStr, uint8_t stateNameNum){
     switch(stateNameNum){
         case FORWARD_DRIVE:
@@ -215,7 +212,7 @@ static void dumpInfo(){
 }
 #endif
 
-#ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
+#ifndef SENDTRITIUM_EXPOSE_VARS
 /**
  * @brief Reads inputs from the system
 */
@@ -651,7 +648,7 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
-    #ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
+    #ifndef SENDTRITIUM_EXPOSE_VARS
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
@@ -663,17 +660,17 @@ void Task_SendTritium(void *p_arg){
         prevState = state;
 
         state.stateHandler();    // do what the current state does
-        #ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
+        #ifndef SENDTRITIUM_EXPOSE_VARS
         readInputs();   // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
         #endif
         state.stateDecider();    // decide what the next state is
 
         // Drive
-        #ifdef __TEST_SENDTRITIUM
+        #ifdef SENDTRITIUM_PRINT_MES
         dumpInfo();
         #endif
-        #ifndef __TEST_SENDTRITIUM_SOFTWAREONLY
+        #ifndef SENDTRITIUM_EXPOSE_VARS
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
             memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
             memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));

@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#define SENDTRITIUM_PRINT_MES
+
 #define MOTOR_MSG_PERIOD 100
 #define FSM_PERIOD 100
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
@@ -38,9 +40,7 @@ typedef struct TritiumState{
     void (*stateDecider)(void);
 } TritiumState_t;
 
-#define __TEST_SENDTRITIUM
-#define __TEST_SENDTRITIUM_SOFTWAREONLY
-#ifdef __TEST_SENDTRITIUM
+#ifdef SENDTRITIUM_EXPOSE_VARS
 // Inputs
 extern bool cruiseEnable;
 extern bool cruiseSet;

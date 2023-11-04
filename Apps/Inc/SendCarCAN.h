@@ -14,8 +14,8 @@ void SendCarCAN_Init();
 void SendCarCAN_Put(CANDATA_t message);
 
 /**
- * @brief Wrapper to check if SendCarCAN_Q is full
+ * @brief print SendCarCAN_Q put/get for debug purposes
 */
-bool SendCarCAN_Queue_is_full();
+void print_SendCarCAN_Q(void);
 
 #endif
