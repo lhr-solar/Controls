@@ -20,7 +20,10 @@
 // Operational commands have no attribute and no operator, just a command and >= 0 arguments
 #define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
 
+
+
 static const char *TERMINATOR = "\xff\xff\xff";
+
 
 DisplayError_t Display_Init(){
 	BSP_UART_Init(DISP_OUT);
@@ -91,15 +94,16 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Fault(fault_bitmap_t faultCode){
+DisplayError_t Display_Error(error_code_t faultCode){
+
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
 	char faultPage[7] = "page 2";
 	BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
-	char setFaultCode[18];
-	sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+	char setFaultCode[20];
+	sprintf(setFaultCode, "%s\"%04x\"", "faulterr.txt=", (uint16_t)faultCode);
 	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
@@ -124,15 +128,4 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	return DISPLAY_ERR_NONE;
-}
-
-void assertDisplayError(DisplayError_t err){
-	OS_ERR os_err;
-
-	if (err != DISPLAY_ERR_NONE){
-		FaultBitmap |= FAULT_DISPLAY;
-
-		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
-		assertOSError(os_err);
-	}
 }
