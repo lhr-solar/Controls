@@ -173,29 +173,6 @@ void EmergencyContactorOpen();
 */
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
 
-// Store error codes that are set in task error assertion functions
-extern error_code_t Error_ReadTritium; 
-extern error_code_t Error_ReadCarCAN;
-extern error_code_t Error_UpdateDisplay;
-
-/**
- * @brief For use in error handling: turns off array, array precharge, and motor contactor
- * and turns on additional brakelight to signal that a critical error happened.
-*/
-void arrayMotorKill();
-
-/**
- * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 
- * displaying a fault screen (if nonrecoverable), jumping to a callback function, and entering an infinite loop. 
- * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
- * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
- * @param errorCode the enum for the specific error that happened
- * @param errorCallback a callback function to a handler for that specific error, 
- * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
- * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
-*/
-void assertTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
-
 /**
  * @brief   Assert Error if OS function call fails
  * @param   err OS Error that occurred

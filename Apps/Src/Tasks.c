@@ -147,64 +147,6 @@ void EmergencyContactorOpen() {
 }
 
 /**
- * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
- * and jumping to the error's specified callback function. 
- * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
- * @param errorLoc the task from which the error originated. Note: should be taken out when last task pointer is integrated
- * @param faultCode the enum for the specific error that happened
- * @param errorCallback a callback function to a handler for that specific error, 
- * @param schedLock whether or not to lock the scheduler to ensure the error is handled immediately
- * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
-*/
-void assertTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
-    OS_ERR err;
-
-    if (lockSched == OPT_LOCK_SCHED) { // We want this error to be handled immediately without other tasks being able to interrupt
-        OSSchedLock(&err);
-        assertOSError(err);
-    }
-
-    if (nonrecoverable == OPT_NONRECOV) {
-        arrayMotorKill(); // Apart from while loop because killing the motor is more important
-        Display_Error(errorCode); // Needs to happen before callback so that tasks can change the screen
-        // (ex: readCarCAN and evac screen for BPS trip)
-    }
-
-
-    if (errorCallback != NULL) {
-        errorCallback(); // Run a handler for this error that was specified in another task file
-    }
-    
-
-    if (nonrecoverable == OPT_NONRECOV) { // enter an infinite while loop
-        while(1){;}
-    }
-
-    if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
-        OSSchedUnlock(&err); 
-        // Don't err out if scheduler is still locked because of a timer callback
-        if (err != OS_ERR_SCHED_LOCKED && OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
-           assertOSError(err); 
-        }
-        
-    }
-}
-
-/**
- * @brief For use in error handling: turns off array and motor contactor
- * and turns on additional brakelight to signal that a critical error happened.
-*/
-void arrayMotorKill() {
-    // Array motor kill
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
-
-    // Turn additional brakelight on to indicate critical error
-    BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);
-}
-
-/**
  * @brief Hook that's called every context switch
  * 
  * This function will append the task being switched out to the task trace if and only if:
