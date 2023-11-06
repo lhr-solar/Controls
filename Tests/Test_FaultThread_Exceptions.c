@@ -363,7 +363,6 @@ void Task_ManagerTask(void* arg) {
 // Initializes ReadTritium
 void createReadTritium(void) {
     OS_ERR err;
-
     OSTaskCreate(
         (OS_TCB*)&ReadTritium_TCB,
         (CPU_CHAR*)"ReadTritium",
