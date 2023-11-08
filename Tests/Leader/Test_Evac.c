@@ -45,7 +45,7 @@ void Task1(){
 int main(){
     OS_ERR err;
     OSInit(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSSemCreate(&FaultState_Sem4, "Fault State Semaphore", 0, &err);
     OSTaskCreate(
@@ -63,7 +63,7 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSTaskCreate(
         (OS_TCB*)&UpdateDisplay_TCB,
@@ -80,7 +80,7 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSTaskCreate(
         (OS_TCB*)&FaultState_TCB,
@@ -97,7 +97,7 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSTaskCreate(
         (OS_TCB*)&ReadCarCAN_TCB,
@@ -114,9 +114,9 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSStart(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 }
 
