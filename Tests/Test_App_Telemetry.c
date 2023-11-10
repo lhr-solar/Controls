@@ -60,7 +60,7 @@ void Task1(void *arg)
         // Check contactors (HAVE NOTHING HOOKED UP TO CONTACTORS)
         contactorState = contactorState == OFF ? ON : OFF;
         Contactors_Set(MOTOR_CONTROLLER_BYPASS_PRECHARGE_CONTACTOR, contactorState, true);
-        Contactors_Set(ARRAY_CONTACTOR, contactorState, true);
+        Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, contactorState, true);
 
         CANbus_Read(&msg, CAN_BLOCKING, CARCAN);
 

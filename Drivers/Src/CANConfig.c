@@ -19,9 +19,13 @@
  */
 const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[BPS_TRIP]						= {NOIDX, DOUBLE}, /**	   BPS_TRIP						   **/
-	[BPS_CONTACTOR]			= {NOIDX, DOUBLE}, /**	   BPS_CONTACTOR		   **/
+	[BPS_CONTACTOR]		        	= {NOIDX, DOUBLE}, /**	   BPS_CONTACTOR		           **/
 	[STATE_OF_CHARGE] 				= {NOIDX, DOUBLE}, /**     STATE_OF_CHARGE                 **/
 	[SUPPLEMENTAL_VOLTAGE] 			= {NOIDX, DOUBLE}, /**     SUPPLEMENTAL_VOLTAGE            **/
+	[MOTOR_DRIVE] 					= {NOIDX, DOUBLE}, /**     MOTOR_DRIVE                     **/
+	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
+	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
+	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
 	[MC_BUS] 						= {NOIDX, DOUBLE}, /**     MC_BUS                          **/
 	[VELOCITY] 						= {NOIDX, DOUBLE}, /**     VELOCITY                        **/
 	[MC_PHASE_CURRENT] 				= {NOIDX, DOUBLE}, /**     MC_PHASE_CURRENT                **/
@@ -31,10 +35,6 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[TEMPERATURE] 					= {NOIDX, DOUBLE}, /**     TEMPERATURE                     **/
 	[ODOMETER_AMPHOURS] 			= {NOIDX, DOUBLE}, /**     ODOMETER_AMPHOURS               **/
 	[ARRAY_CONTACTOR_STATE_CHANGE] 	= {NOIDX, BYTE  }, /**     ARRAY_CONTACTOR_STATE_CHANGE    **/
-	[MOTOR_DRIVE] 					= {NOIDX, DOUBLE}, /**     MOTOR_DRIVE                     **/
-	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
-	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
-	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
 	[CARDATA] 						= {NOIDX, DOUBLE}, /**     CARDATA			               **/
 };
 

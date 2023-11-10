@@ -32,6 +32,10 @@ typedef enum {
 	BPS_CONTACTOR					= 0x101,
 	STATE_OF_CHARGE 				= 0x106,
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
+	MOTOR_DRIVE 					= 0x221,
+	MOTOR_POWER						= 0x222,
+	MOTOR_RESET 					= 0x223,
+	MOTOR_STATUS 					= 0x241,
 	MC_BUS 							= 0x242,
 	VELOCITY 						= 0x243,
 	MC_PHASE_CURRENT 				= 0x244,
@@ -41,10 +45,6 @@ typedef enum {
 	TEMPERATURE 					= 0x24B,
 	ODOMETER_AMPHOURS 				= 0x24E,
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
-	MOTOR_DRIVE 					= 0x221,
-	MOTOR_POWER						= 0x222,
-	MOTOR_RESET 					= 0x223,
-	MOTOR_STATUS 					= 0x241,
 	CARDATA 						= 0x581,
 	MAX_CAN_ID
 } CANId_t;
