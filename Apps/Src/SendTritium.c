@@ -229,7 +229,6 @@ static void dumpInfo(){
 #endif
 
 #ifndef SENDTRITIUM_EXPOSE_VARS
-#ifndef SENDTRITIUM_EXPOSE_VARS
 /**
  * @brief Reads inputs from the system
 */
@@ -328,14 +327,6 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
     }
 }
 
-/**
- * @brief Meters per second to rpm conversion
- * @param velocity_mps velocity in meters per second
- * @returns rpm
-*/
-static inline float mpsToRpm(float velocity_mps){
-    return (velocity_mps * 60) / WHEEL_CIRCUMFERENCE;
-}
 
 /**
  * @brief Put the CONTROL_MODE message onto the CarCAN bus, detailing
@@ -684,7 +675,6 @@ void Task_SendTritium(void *p_arg){
         state.stateDecider();    // decide what the next state is
 
         // Drive
-        #ifdef SENDTRITIUM_PRINT_MES
         #ifdef SENDTRITIUM_PRINT_MES
         dumpInfo();
         #endif
