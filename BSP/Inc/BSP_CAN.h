@@ -1,8 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
 /**
- * Header file for the library to interact
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file BSP_CAN.h
+ * @brief Header file for the library to interact
  * with both CAN lines in the car
+ * 
+ * @defgroup BSP_CAN
+ * @addtogroup BSP_CAN
+ * @{
  */
 
 #ifndef __BSP_CAN_H
@@ -47,3 +51,6 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t len);
 ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data);
 
 #endif
+
+
+/* @} */

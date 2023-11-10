@@ -6,9 +6,10 @@
  * This modules allows us to use GPIO more easily 
  * for our application's purposes
  * 
+ * @defgroup Minions
+ * @addtogroup Minions
+ * @{
  */
-
-/** @addtogroup Minions @{ */
 
 #ifndef MINIONS_H
 #define MINIONS_H
@@ -66,4 +67,4 @@ bool Minions_Write(pin_t pin, bool status);
 
 #endif 
 
-/** @} */
+/* @} */

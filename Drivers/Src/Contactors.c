@@ -1,5 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Contactors.h
+ * @brief 
+ * 
+ */
 
 #include "Contactors.h"
 #include "stm32f4xx_gpio.h"
@@ -51,7 +55,7 @@ void Contactors_Init() {
     // initialize mutex
     OS_ERR err;
     OSMutexCreate(&contactorsMutex, "Contactors lock", &err);
-    assertOSError(OS_CONTACTOR_LOC, err);
+    assertOSError(err);
 }
 
 /**
@@ -98,7 +102,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     if(err == OS_ERR_PEND_WOULD_BLOCK){
         return ERROR;
     }
-    assertOSError(OS_CONTACTOR_LOC, err);
+    assertOSError(err);
 
     // change contactor to match state and make sure it worked
     setContactor(contactor, state);
@@ -107,7 +111,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
 
     // release lock
     OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
-    assertOSError(OS_CONTACTOR_LOC, err);
+    assertOSError(err);
 
     return result;
 }

@@ -1,4 +1,12 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file Contactors.h
+ * @brief 
+ * 
+ * @defgroup Contactors
+ * @addtogroup Contactors
+ * @{
+ */
 
 #ifndef __CONTACTORS_H
 #define __CONTACTORS_H
@@ -51,3 +59,6 @@ bool Contactors_Get(contactor_t contactor);
 ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
 
 #endif
+
+
+/* @} */

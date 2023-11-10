@@ -1,3 +1,9 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file CANConfig.c
+ * @brief 
+ * 
+ */
 #include "CANConfig.h"
 
 #define BYTE 1

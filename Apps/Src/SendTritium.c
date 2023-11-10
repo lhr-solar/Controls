@@ -1,6 +1,5 @@
 /**
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
- * 
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendTritium.c
  * @brief Function implementations for the SendTritium application.
  * 
@@ -33,7 +32,7 @@
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f) // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
-#define BRAKE_PEDAL_THRESHOLD 5  // percent
+#define BRAKE_PEDAL_THRESHOLD 15  // percent
 #define ACCEL_PEDAL_THRESHOLD 10 // percent
 
 #define ONEPEDAL_BRAKE_THRESHOLD 25 // percent
@@ -53,15 +52,15 @@
 #endif
 
 // Inputs
-SCOPE bool cruiseEnable = false;
-SCOPE bool cruiseSet = false;
-SCOPE bool onePedalEnable = false;
-SCOPE bool regenEnable = false;
+static bool cruiseEnable = false;
+static bool cruiseSet = false;
+static bool onePedalEnable = false;
+static bool regenEnable = false;
 
-SCOPE uint8_t brakePedalPercent = 0;
-SCOPE uint8_t accelPedalPercent = 0;
+static uint8_t brakePedalPercent = 0;
+static uint8_t accelPedalPercent = 0;
 
-SCOPE Gear_t gear = NEUTRAL_GEAR;
+static Gear_t gear = NEUTRAL_GEAR;
 
 // Outputs
 float currentSetpoint = 0;
@@ -75,6 +74,7 @@ SCOPE float velocityObserved = 0;
 
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
+#endif
 
 // Debouncing counters
 static uint8_t onePedalCounter = 0;
@@ -88,7 +88,9 @@ static bool onePedalPrevious = false;
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
 
-#endif
+// FSM
+static TritiumState_t prevState; // Previous state
+static TritiumState_t state; // Current state
 
 // Getter functions for local variables in SendTritium.c
 GETTER(bool, cruiseEnable)
@@ -98,10 +100,27 @@ GETTER(bool, regenEnable)
 GETTER(uint8_t, brakePedalPercent)
 GETTER(uint8_t, accelPedalPercent)
 GETTER(Gear_t, gear)
+GETTER(TritiumState_t, state)
+GETTER(float, velocityObserved)
+GETTER(float, cruiseVelSetpoint)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
-GETTER(float, cruiseVelSetpoint)
-GETTER(float, velocityObserved)
+
+// Setter functions for local variables in SendTritium.c
+#ifdef SENDTRITIUM_EXPOSE_VARS
+SETTER(bool, cruiseEnable)
+SETTER(bool, cruiseSet)
+SETTER(bool, onePedalEnable)
+SETTER(bool, regenEnable)
+SETTER(uint8_t, brakePedalPercent)
+SETTER(uint8_t, accelPedalPercent)
+SETTER(Gear_t, gear)
+SETTER(TritiumState_t, state)
+SETTER(float, velocityObserved)
+SETTER(float, cruiseVelSetpoint)
+SETTER(float, currentSetpoint)
+SETTER(float, velocitySetpoint)
+#endif
 
 // Handler & Decider Declarations
 static void ForwardDriveHandler(void);
@@ -136,9 +155,6 @@ static const TritiumState_t FSM[9] = {
     {ACCELERATE_CRUISE, &AccelerateCruiseHandler, &AccelerateCruiseDecider}
 };
 
-static TritiumState_t prevState; // Previous state
-SCOPE TritiumState_t state; // Current state
-
 // Helper Functions
 
 /**
@@ -154,6 +170,7 @@ static float percentToFloat(uint8_t percent){
     return pedalToPercent[percent];
 }
 
+#ifdef SENDTRITIUM_PRINT_MES
 /**
  * @brief Dumps info to UART during testing
 */
@@ -211,6 +228,7 @@ static void dumpInfo(){
 }
 #endif
 
+#ifndef SENDTRITIUM_EXPOSE_VARS
 #ifndef SENDTRITIUM_EXPOSE_VARS
 /**
  * @brief Reads inputs from the system
@@ -667,6 +685,7 @@ void Task_SendTritium(void *p_arg){
 
         // Drive
         #ifdef SENDTRITIUM_PRINT_MES
+        #ifdef SENDTRITIUM_PRINT_MES
         dumpInfo();
         #endif
         #ifndef SENDTRITIUM_EXPOSE_VARS
@@ -685,7 +704,7 @@ void Task_SendTritium(void *p_arg){
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
-            assertOSError(OS_UPDATE_VEL_LOC, err);
+            assertOSError(err);
         }
     }
 }

@@ -1,14 +1,11 @@
 /**
- * @copyright Copyright (c) 2022 UT Longhorn Racing Solar
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Display.c
  * @brief Function implementations for the display driver.
  *
  * This contains functions relevant to sending/receiving messages
  * to/from our Nextion display.
- *
- * @author Ishan Deshpande (IshDeshpa)
- * @author Roie Gal (Cam0Cow)
- * @author Nathaniel Delgado (NathanielDelgado)
+ * 
  */
 
 #include "Display.h"
@@ -23,7 +20,10 @@
 // Operational commands have no attribute and no operator, just a command and >= 0 arguments
 #define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
 
+
+
 static const char *TERMINATOR = "\xff\xff\xff";
+
 
 DisplayError_t Display_Init(){
 	BSP_UART_Init(DISP_OUT);
@@ -94,20 +94,16 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Fault(os_error_loc_t osErrCode, fault_bitmap_t faultCode){
+DisplayError_t Display_Error(error_code_t faultCode){
+
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
 	char faultPage[7] = "page 2";
 	BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
-	char setOSCode[17];
-	sprintf(setOSCode, "%s\"%04x\"", "oserr.txt=", (uint16_t)osErrCode);
-	BSP_UART_Write(DISP_OUT, setOSCode, strlen(setOSCode));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-
-	char setFaultCode[18];
-	sprintf(setFaultCode, "%s\"%02x\"", "faulterr.txt=", (uint8_t)faultCode);
+	char setFaultCode[20];
+	sprintf(setFaultCode, "%s\"%04x\"", "faulterr.txt=", (uint16_t)faultCode);
 	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
@@ -132,15 +128,4 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	return DISPLAY_ERR_NONE;
-}
-
-void assertDisplayError(DisplayError_t err){
-	OS_ERR os_err;
-
-	if (err != DISPLAY_ERR_NONE){
-		FaultBitmap |= FAULT_DISPLAY;
-
-		OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &os_err);
-		assertOSError(OS_DISPLAY_LOC, os_err);
-	}
 }

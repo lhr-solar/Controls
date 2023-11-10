@@ -8,3 +8,7 @@ Internal implementation
 -----------------------
 
 In a similar way to :ref:`can-queue`, the task implements a queue of command structures. Tasks that wish to write the display call one of the wrapper functions exposed in the public interface. Internally, all of these functions construct a command structure and then call ``UpdateDisplay_PutNext(Display_Cmd_t cmd)``, which places the command structure in the queue and notifies UpdateDisplay. Another internal function, ``UpdateDisplay_Error_t UpdateDisplay_PopNext(void)``, gets called by UpdateDisplay. It blocks on a semaphore until the queue is not empty, and then grabs the next command structure. It then parses the command and sends it out over UART. Check these functions in ``UpdateDisplay.c`` for more information.
+
+.. doxygengroup:: UpdateDisplay
+   :project: doxygen
+   :path: "/doxygen/xml/group__UpdateDisplay.xml"

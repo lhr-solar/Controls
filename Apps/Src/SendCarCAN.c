@@ -1,6 +1,5 @@
 /**
- * @copyright Copyright (c) 2023 UT Longhorn Racing Solar
- * 
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendCarCAN.c
  * @brief Function implementations for the SendCarCAN application.
  * 
@@ -57,15 +56,15 @@ void SendCarCAN_Put(CANDATA_t message){
     CPU_TS ticks;
     
     OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(err);
     
     bool success = SendCarCAN_Q_put(&CANFifo, message);
 
     OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(err);
 
     if(success) OSSemPost(&CarCAN_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(err);
 }
 
 /**
@@ -76,10 +75,10 @@ void Task_SendCarCAN(void *p_arg){
     CPU_TS ticks;
     
     OSMutexCreate(&CarCAN_Mtx, "CarCAN_Mtx", &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(err);
     
     OSSemCreate(&CarCAN_Sem4, "CarCAN_Sem4", 0, &err);
-    assertOSError(OS_SEND_CAN_LOC, err);
+    assertOSError(err);
 
     SendCarCAN_Q_renew(&CANFifo);
 
@@ -98,13 +97,13 @@ void Task_SendCarCAN(void *p_arg){
         // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
         OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
         if (err != OS_ERR_PEND_WOULD_BLOCK) { // We have a message in the queue to send
-            assertOSError(OS_SEND_CAN_LOC, err);
+            assertOSError(err);
 
             OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-            assertOSError(OS_SEND_CAN_LOC, err);
+            assertOSError(err);
         
             bool res = SendCarCAN_Q_get(&CANFifo, &message);
-            assertOSError(OS_SEND_CAN_LOC, err);
+            assertOSError(err);
 
             OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
 
@@ -112,7 +111,7 @@ void Task_SendCarCAN(void *p_arg){
         }
             
         OSTimeDlyHMSM(0, 0, 0, SENDCARCAN_LOOP_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(OS_SEND_CAN_LOC, err);
+        assertOSError(err);
         
     }
 }
