@@ -20,10 +20,7 @@
 // Operational commands have no attribute and no operator, just a command and >= 0 arguments
 #define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
 
-
-
 static const char *TERMINATOR = "\xff\xff\xff";
-
 
 DisplayError_t Display_Init(){
 	BSP_UART_Init(DISP_OUT);
