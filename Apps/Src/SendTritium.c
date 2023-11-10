@@ -157,7 +157,6 @@ static float percentToFloat(uint8_t percent){
 /**
  * @brief Dumps info to UART during testing
 */
-#ifdef SENDTRITIUM_PRINT_MES
 static void getName(char* nameStr, uint8_t stateNameNum){
     switch(stateNameNum){
         case FORWARD_DRIVE:

@@ -82,9 +82,6 @@ void Task_SendCarCAN(void *p_arg){
     assertOSError(OS_SEND_CAN_LOC, err);
 
     SendCarCAN_Q_renew(&CANFifo);
-    
-    // Set up timer to put car data message every IO_STATE_TMR_DLY_MS ms //***************
-
 
     CANDATA_t message;
     memset(&message, 0, sizeof(CANDATA_t));

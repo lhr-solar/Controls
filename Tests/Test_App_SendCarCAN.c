@@ -1,3 +1,14 @@
+/**
+ * This test file for SendCarCAN checks if messages added to the queue are sent on CarCAN.
+ * It does this by starting the SendTritium, SendCarCAN, and ReadTritium tasks,
+ * which place messages into the SendCarCAN_Q, and then printing messages read on CarCAN via UART.
+ * It also prints the IO_State and queue status to see if the messages are accurate and the queue has space.
+ * 
+ * This test is intended to be run on hardware with CarCAN in LoopBack mode.
+ * It is also intended to be tested using the motor controller on to read motor messages.
+ * Alternatively, you can just use it to spin up tasks and then check output using a logic analyzer.
+*/
+
 #include "Tasks.h"
 #include "BSP_UART.h"
 #include "CANbus.h"
@@ -8,13 +19,15 @@
 #include "SendTritium.h"
 #include "Contactors.h"
 #include "Pedals.h"
+#include "Display.h"
+#include "UpdateDisplay.h"
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 static OS_TCB TaskReadCAN_TCB;
 static CPU_STK TaskReadCANStk[DEFAULT_STACK_SIZE];
 
-// Reads CarCAN and prints what we receive
+// Reads CarCAN and prints what we receive on UART
 void Task_ReadCAN(void *arg)
 {
     OS_ERR err;
@@ -33,18 +46,6 @@ void Task_ReadCAN(void *arg)
             printf("\n\r Received %x %d", dataBuf.data[0], dataBuf.data[4]);
 
 			switch(dataBuf.ID){
-				case MOTOR_STATUS:{
-                    // Motor status error flags is in bytes 4-5
-                    printf("\n\r Received MOTOR_STATUS message of %d", *((uint16_t*)(&dataBuf.data[4])));
-					break;
-				}
-				
-				case VELOCITY:{
-                    // Motor RPM is in bytes 0-3, Car Velocity (in m/s) is in bytes 4-7
-                    printf("\n\r Received VELOCITY message of ");
-                    printf("\n\rMotor RPM: %f\n\rMotor Velocity: %f", *((float*)(&dataBuf.data[0])), *((float*)(&dataBuf.data[4])));
-                    break;
-				}
 
                 case IO_STATE: { 
                     printf("\n\rReceived IO_STATE message of %x", dataBuf.data[0]);
@@ -61,13 +62,15 @@ void Task_ReadCAN(void *arg)
                     break;
                 }
 
-				default:{
+    
+
+				default:{ // Other messages will only be received if CARCAN messages aren't filtered.
                     printf("\n\rReceived an uncategorized message ID type of %x", dataBuf.ID);
 					break; //for cases not handled currently
 				}
             }
         } else {
-            // If status != no error
+            // CANbus read is unsuccessful
             printf("\n\rCANbus_Read error of %x", status);
         }  
 
@@ -77,6 +80,8 @@ void Task_ReadCAN(void *arg)
 
 }
 
+
+
 void Task1(void *arg)
 {
     OS_ERR err;
@@ -84,13 +89,31 @@ void Task1(void *arg)
     CPU_Init();
     BSP_UART_Init(UART_2);
     Pedals_Init();
-    CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS);
+    CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS); // Set filter list to NULL to receive all messages
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Minions_Init();
-    //UpdateDisplay_Init(); // Do we need this? Are we using the display?
+    Display_Init();
+    UpdateDisplay_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-    // do we need regenEnable = ON;?
+
+  // Initialize SendCarCAN
+    OSTaskCreate(
+        (OS_TCB*)&SendCarCAN_TCB,
+        (CPU_CHAR*)"SendCarCAN",
+        (OS_TASK_PTR)Task_SendCarCAN,
+        (void*)NULL,
+        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
+        (CPU_STK*)SendCarCAN_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
 
     // Initialize SendTritium
     OSTaskCreate(
@@ -102,24 +125,6 @@ void Task1(void *arg)
         (CPU_STK*)SendTritium_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_SEND_TRITIUM_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    assertOSError(OS_MAIN_LOC, err);
-
-    // Initialize SendCarCAN
-    OSTaskCreate(
-        (OS_TCB*)&SendCarCAN_TCB,
-        (CPU_CHAR*)"SendCarCAN",
-        (OS_TASK_PTR)Task_SendCarCAN,
-        (void*)NULL,
-        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
-        (CPU_STK*)SendCarCAN_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
@@ -164,10 +169,29 @@ void Task1(void *arg)
     );
     assertOSError(OS_MAIN_LOC, err);
 
+    // Initialize UpdateDisplay
+    OSTaskCreate(
+        (OS_TCB*)&UpdateDisplay_TCB,
+        (CPU_CHAR*)"UpdateDisplay",
+        (OS_TASK_PTR)Task_UpdateDisplay,
+        (void*)NULL,
+        (OS_PRIO)TASK_UPDATE_DISPLAY_PRIO,
+        (CPU_STK*)UpdateDisplay_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_UPDATE_DISPLAY_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(OS_MAIN_LOC, err);
+
    
     while (1) {
-        // Print Car State (done in SendTritium)
-        // Print IO State (need to do this)
+        // SendTritium task will print Car State
+
+        // Print IO State
         printf("\n\r---- IO State ----");
         printf("\n\rAccelerator: %d", Pedals_Read(ACCELERATOR));
         printf("\n\rBrake: %d", Pedals_Read(BRAKE));
