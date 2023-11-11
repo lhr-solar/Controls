@@ -23,6 +23,9 @@
 #define FIFO_NAME disp_fifo
 #include "fifo.h"
 
+// For fault handling
+#define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
+
 disp_fifo_t msg_queue;
 
 static OS_SEM DisplayQ_Sem4;    // counting semaphore for queue message availability
