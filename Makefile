@@ -14,8 +14,8 @@ DEBUG ?= 1
 export DEBUG
 
 # Check if test file exists for the leader.
-ifneq (,$(wildcard Tests/Leader/Test_$(TEST).c))
-	TEST_LEADER ?= Tests/Leader/Test_$(TEST).c
+ifneq (,$(wildcard Tests/Test_$(TEST).c))
+	TEST_LEADER ?= Tests/Test_$(TEST).c
 else
 	TEST_LEADER ?= Apps/Src/main.c
 endif

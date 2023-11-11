@@ -3,7 +3,7 @@ $platform=$ORIGIN/stm32f413.repl
 
 EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.DMA.STM32DMA"
 include $ORIGIN/STM32DMA_Fix.cs
-
+    
 EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.Analog.STM32_ADC"
 include $ORIGIN/STM32_ADC_Fix.cs
 
