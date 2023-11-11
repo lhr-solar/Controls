@@ -19,8 +19,6 @@
 #include "SendTritium.h"
 
 #define IO_STATE_DLY_MS 250u 
-#define SENDCARCAN_LOOP_DLY_MS 5u // 50How often we should check the CAN queue (in ms delay). Must send faster than queue messages get put in
-#define IO_STATE_DLY_COUNT (IO_STATE_DLY_MS / SENDCARCAN_LOOP_DLY_MS) // The number of periods to wait before sending IO state message
 
 // Task_PutIOState
 OS_TCB putIOState_TCB;
@@ -32,10 +30,18 @@ CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 #define FIFO_NAME SendCarCAN_Q
 #include "fifo.h"
 
+// Motor message
+#define NUM_MOTOR_MSGS 15 // Messages received from the motor controller
+#define MOTOR_MSG_BASE_ADDRESS 0x240
+
 static SendCarCAN_Q_t CANFifo; 
 
 static OS_SEM CarCAN_Sem4;
 static OS_MUTEX CarCAN_Mtx;
+
+// Counter array to reduce the frequency at which we send out messages
+static uint8_t motorMsgCount[NUM_MOTOR_MSGS] = {0};
+static uint8_t motorMsgThreshold[NUM_MOTOR_MSGS] = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
 static void Task_PutIOState(void *p_arg);
 
@@ -55,6 +61,17 @@ void print_SendCarCAN_Q(void) {
 void SendCarCAN_Put(CANDATA_t message){
     OS_ERR err;
     CPU_TS ticks;
+
+    // Reduce the frequency at which we forward motor messages to CarCAN
+    uint8_t msgIdx = message.ID - MOTOR_MSG_BASE_ADDRESS;
+
+    if (msgIdx >= 0 && msgIdx < NUM_MOTOR_MSGS) {  // Check if the message is from the motor controller
+        if (++motorMsgCount[msgIdx] < motorMsgThreshold[msgIdx]) {
+            return;  
+        } else {
+            motorMsgCount[msgIdx] = 0; // Reset counter and continue sending
+        }     
+    }
     
     OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
     assertOSError(err);

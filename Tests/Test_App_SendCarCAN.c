@@ -86,15 +86,6 @@ void Task1(void *arg)
 {
     OS_ERR err;
 
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-    CPU_Init();
-    BSP_UART_Init(UART_2);
-    Pedals_Init();
-    CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS); // Set filter list to NULL to receive all messages
-    CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
-    SendCarCAN_Init();
-    Minions_Init();
-    Display_Init();
     UpdateDisplay_Init();
 
   // Initialize SendCarCAN
@@ -221,6 +212,18 @@ int main(void)
 {
     OS_ERR err;
     OSInit(&err);
+
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+
+    CPU_Init();
+    BSP_UART_Init(UART_2);
+    Pedals_Init();
+    CANbus_Init(CARCAN, NULL, NUM_CARCAN_FILTERS); // Set filter list to (CANId_t*)carCANFilterList to receive filtered messages
+    CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
+    SendCarCAN_Init();
+    Minions_Init();
+    Display_Init();
+    TaskSwHook_Init();
 
     OSTaskCreate(
         (OS_TCB *)&Task1TCB,
