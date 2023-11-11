@@ -123,6 +123,9 @@ ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
 endif
 
+ifeq ($(LOOPBACK), 1)
+CFLAGS += -DLOOPBACK
+endif
 
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
