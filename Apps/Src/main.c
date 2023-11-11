@@ -83,6 +83,7 @@ void Task_Init(void *p_arg){
 
     // Initialize applications
     UpdateDisplay_Init();
+    SendCarCAN_Init();
 
     // Initialize SendTritium
     OSTaskCreate(

@@ -86,16 +86,16 @@ void Task1(void *arg)
 {
     OS_ERR err;
 
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     CPU_Init();
     BSP_UART_Init(UART_2);
     Pedals_Init();
     CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS); // Set filter list to NULL to receive all messages
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
+    SendCarCAN_Init();
     Minions_Init();
     Display_Init();
     UpdateDisplay_Init();
-
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
 
   // Initialize SendCarCAN
     OSTaskCreate(
@@ -113,7 +113,7 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize SendTritium
     OSTaskCreate(
@@ -131,7 +131,7 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize ReadTritium
     OSTaskCreate(
@@ -149,7 +149,7 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Create task to read CANbus
       OSTaskCreate(
@@ -167,7 +167,7 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     // Initialize UpdateDisplay
     OSTaskCreate(
@@ -185,7 +185,7 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
    
     while (1) {
@@ -237,8 +237,8 @@ int main(void)
         (OS_OPT)(OS_OPT_TASK_STK_CLR), 
         (OS_ERR *)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSStart(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 }
