@@ -41,7 +41,7 @@
 #define DISABLE_SATURATION_MSG -1
 #define ENABLE_SATURATION_MSG 1
 
-// State of Charge scalar to scale it to correct fix point
+// State of Charge scalar to scale it to correct fixed point
 #define SOC_SCALER 1000000
 
 // CAN watchdog timer variable
@@ -233,7 +233,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
  * @brief Helper to turn motorControllerPBCOn if motorControllerBypassPrecharge is completed and threshold is reached
  * @param None
 */
- void attempTurnMotorControllerPBCOn(void){
+ void attemptTurnMotorControllerPBCOn(void){
     if(mcPBCComplete){
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
             UpdateDisplay_SetMotor(true);  
@@ -273,7 +273,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
     }else if(mcIgnStatus && !arrIgnStatus){
         attemptTurnArrayPBCOn();                                                           // Turn Array PBC On, if permitted
         if(HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD){      // Turn Motor Controller PBC On, if threshold is reached
-            attempTurnMotorControllerPBCOn();
+            attemptTurnMotorControllerPBCOn();
         }else{
             turnMotorControllerPBCOff();
         }
