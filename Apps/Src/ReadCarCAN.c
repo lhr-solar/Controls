@@ -9,9 +9,9 @@
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
-#include "FaultState.h"
 #include "Minions.h"
 #include "os_cfg_app.h"
+#include "Display.h"
 
 // Saturation threshold is halfway between 0 and max saturation value (half of summation from one to the number of positions)
 #define SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
@@ -74,27 +74,32 @@ static void updateSaturation(int8_t chargeMessage){
     chargeMsgSaturation = newSaturation;
 }
 
+// exception struct callback for charging disable, kills contactors and turns off display
+static void callback_disableContactors(void){
+    // Kill contactors 
+    Contactors_Set(ARRAY_CONTACTOR, OFF, true);
+    Contactors_Set(ARRAY_PRECHARGE, OFF, true);
+
+    // Turn off the array contactor display light
+    UpdateDisplay_SetArray(false);
+}
+
+// exception callback for BPS trip. Kills contactors and displays evac screen.
+static void callback_BPSTrip(void){
+
+    callback_disableContactors();
+    Display_Evac(SOC, SBPV);    
+
+}
+
 // helper function to disable charging
-// Turns off contactors by setting fault bitmap and signaling fault state
+// Turns off contactors by signaling fault state
 static inline void chargingDisable(void) {
-    OS_ERR err;
     // mark regen as disabled
     chargeEnable = false;
 
-    //kill contactors 
-    Contactors_Set(ARRAY_CONTACTOR, false, true);
-    Contactors_Set(ARRAY_PRECHARGE, false, true);
-    
-    // mark regen as disabled
-    chargeEnable = false;
-
-    // Set fault bitmap 
-    FaultBitmap |= FAULT_READBPS;
-
-    // Signal fault state to kill contactors at its earliest convenience
-    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
+    // kill contactors TODO: fill in error code
+    throwTaskError(0, callback_disableContactors, OPT_LOCK_SCHED, OPT_RECOV);
 }
 
 // helper function to call if charging should be enabled
@@ -109,7 +114,7 @@ static inline void chargingEnable(void) {
     bool shouldRestartArray = false;
 
     OSMutexPend(&arrayRestartMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    assertOSError(err);
 
     // if the array is off and we're not already turning it on, start turning it on
     shouldRestartArray = !restartingArray && (Contactors_Get(ARRAY_CONTACTOR)==OFF);
@@ -121,13 +126,13 @@ static inline void chargingEnable(void) {
 
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&prechargeDlyTimer, &err);
-            assertOSError(OS_READ_CAN_LOC, err);
+            assertOSError(err);
             
         }
     
 
     OSMutexPost(&arrayRestartMutex, OS_OPT_NONE, &err);
-    assertOSError(OS_READ_CAN_LOC,err);
+    assertOSError(err);
 }
 
 /**
@@ -152,7 +157,6 @@ static void arrayRestart(void *p_tmr, void *p_arg){
  * @param p_arg pointer to the argument passed by timer
 */
 void canWatchTimerCallback (void *p_tmr, void *p_arg){
-
     chargingDisable();
 }
 
@@ -166,8 +170,7 @@ void Task_ReadCarCAN(void *p_arg)
     CANDATA_t dataBuf;
 
     OSMutexCreate(&arrayRestartMutex, "array restart mutex", &err);
-    assertOSError(OS_READ_CAN_LOC,err);
-
+    assertOSError(err);
 
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID Charge_Enable within the desired interval.
@@ -181,7 +184,7 @@ void Task_ReadCarCAN(void *p_arg)
         NULL,
         &err
     );
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
 
     OSTmrCreate(
         &prechargeDlyTimer,
@@ -193,11 +196,11 @@ void Task_ReadCarCAN(void *p_arg)
         NULL,
         &err
     );
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
 
     //Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
-    assertOSError(OS_READ_CAN_LOC, err);
+    assertOSError(err);
     
 
     while (1)
@@ -212,22 +215,16 @@ void Task_ReadCarCAN(void *p_arg)
         switch(dataBuf.ID){ //we got a message
             case BPS_TRIP: {
                 // BPS has a fault and we need to enter fault state (probably)
-                if(dataBuf.data[0] == 1){ // If buffer contains 1 for a BPS trip, we should enter a nonrecoverable fault
-                    OS_ERR err;
 
-                    Display_Evac(SOC, SBPV);    // Display evacuation message
-
-                    // Set fault bitmap and assert the error
-                    FaultBitmap |= FAULT_BPS;
-                    OSSemPost(&FaultState_Sem4, OS_OPT_POST_1, &err);
-                    assertOSError(OS_READ_CAN_LOC, err);
-                }
+                // kill contactors and enter a nonrecoverable fault
+                // TODO: change error code to real value
+                throwTaskError(0, callback_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             }
             case CHARGE_ENABLE: { 
 
                 // Restart CAN Watchdog timer
                 OSTmrStart(&canWatchTimer, &err);
-                assertOSError(OS_READ_CAN_LOC, err);
+                assertOSError(err);
 
 
                 if(dataBuf.data[0] == 0){ // If the buffer doesn't contain 1 for enable, turn off chargeEnable and turn array off

@@ -1,5 +1,4 @@
-/**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+/* Copyright (c) 2021 UT Longhorn Racing Solar
  * @file ReadTritium.h
  * @brief 
  * 
@@ -14,8 +13,6 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
-
-#define CAR_STOPPED 0
 
 /**
  * Motor Error States
@@ -33,18 +30,12 @@ typedef enum{
     T_DESAT_FAULT_ERR = (1<<7), 
     T_MOTOR_OVER_SPEED_ERR = (1<<8), 
     T_INIT_FAIL = (1<<9), //motor controller fails to restart or initialize
+    T_MOTOR_WATCHDOG_TRIP = (1 << 15),
     T_NONE = 0x00,
 } tritium_error_code_t;
-#define NUM_TRITIUM_ERRORS 9 //9 errors, and 1 entry for no error
-
-/**
- * @brief Returns the current error status of the tritium controller
- */
-tritium_error_code_t MotorController_getTritiumError(void);
 
 float Motor_RPM_Get();
 float Motor_Velocity_Get();
-void MotorController_Restart();
 
 #endif
 
