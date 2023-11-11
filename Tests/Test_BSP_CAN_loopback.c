@@ -2,6 +2,7 @@
 #include "common.h"
 #include "CANbus.h"
 #include "config.h"
+#include "CANConfig.h"
 
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
@@ -9,7 +10,8 @@ static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 void Task1(){
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    BSP_CAN_Init(CAN_1, NULL, NULL, NULL, 0);
+    CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS);
+    CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
 }
 
 int main(){
@@ -35,10 +37,10 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
      );
-     assertOSError(OS_MAIN_LOC, err);
+     assertOSError(err);
 
      OSStart(&err);
-     assertOSError(OS_MAIN_LOC, err);
+     assertOSError(err);
 
      while(1){};
 }
