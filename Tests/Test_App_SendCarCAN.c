@@ -22,59 +22,93 @@
 #include "Display.h"
 #include "UpdateDisplay.h"
 
+#define NUM_MOTOR_MSGS 15 // Messages received from the motor controller
+#define MOTOR_MSG_BASE_ADDRESS 0x240
+
+
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 static OS_TCB TaskReadCAN_TCB;
 static CPU_STK TaskReadCANStk[DEFAULT_STACK_SIZE];
 
+static uint32_t msgCount[20];
+
 // Reads CarCAN and prints what we receive on UART
 void Task_ReadCAN(void *arg)
 {
-    OS_ERR err;
+    //OS_ERR err;
 	CANDATA_t dataBuf = {0};
-    uint32_t ts;
+    //uint32_t ts;
 
 
     while (1) {
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
 
 		if (status == SUCCESS){
-            ts = (OSTimeGet(&err) / OS_CFG_TICK_RATE_HZ);
-
-            printf("\n\r********* Received CANbus message **********");
-            printf("\n\rAt: %5ld ms", ts);
-            printf("\n\r Received %x %d", dataBuf.data[0], dataBuf.data[4]);
-
-			switch(dataBuf.ID){
-
-                case IO_STATE: { 
+            switch(dataBuf.ID) {
+                case IO_STATE: {
+                    msgCount[0]++;
                     printf("\n\rReceived IO_STATE message of %x", dataBuf.data[0]);
                     printf("\n\rAccelerator: %d", *((uint8_t*)(&dataBuf.data[0])));
                     printf("\n\rBrake: %x", *((uint8_t*)(&dataBuf.data[1])));
                     printf("\n\rPins: %x", dataBuf.data[2]);
                     printf("\n\rContactors: %d", *((uint8_t*)(&dataBuf.data[3])));
                     break;
-
                 }
 
                 case CONTROL_MODE: {
-                    printf("\n\rReceived CONTROL_MODE message of %d", *((uint8_t*)(&dataBuf.data[0])));
+                    msgCount[1]++;
                     break;
                 }
 
+                default: {
+                    uint8_t msgIdx = dataBuf.ID - MOTOR_MSG_BASE_ADDRESS;
+
+                    if (msgIdx >= 0 && msgIdx < NUM_MOTOR_MSGS) {  // Check if the message is from the motor controller
+                        msgCount[msgIdx + 2]++; // Reset counter and continue sending
+                    } else {
+                        msgCount[20]++;
+                    }
+                     
+                }
+
+            }
+            
+            // ts = (OSTimeGet(&err) / OS_CFG_TICK_RATE_HZ);
+
+            // printf("\n\r********* Received CANbus message **********");
+            // printf("\n\rAt: %5ld ms", ts);
+            // printf("\n\r Received %x %d", dataBuf.data[0], dataBuf.data[4]);
+
+			// switch(dataBuf.ID){
+
+            //     case IO_STATE: { 
+            //         printf("\n\rReceived IO_STATE message of %x", dataBuf.data[0]);
+            //         printf("\n\rAccelerator: %d", *((uint8_t*)(&dataBuf.data[0])));
+            //         printf("\n\rBrake: %x", *((uint8_t*)(&dataBuf.data[1])));
+            //         printf("\n\rPins: %x", dataBuf.data[2]);
+            //         printf("\n\rContactors: %d", *((uint8_t*)(&dataBuf.data[3])));
+            //         break;
+
+            //     }
+
+            //     case CONTROL_MODE: {
+            //         printf("\n\rReceived CONTROL_MODE message of %d", *((uint8_t*)(&dataBuf.data[0])));
+            //         break;
+            //     }
+
     
 
-				default:{ // Other messages will only be received if CARCAN messages aren't filtered.
-                    printf("\n\rReceived an uncategorized message ID type of %x", dataBuf.ID);
-					break; //for cases not handled currently
-				}
-            }
+			// 	default:{ // Other messages will only be received if CARCAN messages aren't filtered.
+            //         printf("\n\rReceived an uncategorized message ID type of %x", dataBuf.ID);
+			// 		break; //for cases not handled currently
+			// 	}
         } else {
             // CANbus read is unsuccessful
             printf("\n\rCANbus_Read error of %x", status);
         }  
 
-        printf("\n\r**********************************");
+        //printf("\n\r**********************************");
     }
 
 
@@ -202,7 +236,7 @@ void Task1(void *arg)
         printf("\n\r---- Queue data ----");
         print_SendCarCAN_Q();
 
-        OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, 10 * FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
     }   
 
 }
