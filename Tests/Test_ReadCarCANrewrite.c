@@ -28,13 +28,12 @@
 #include "Display.h"
 #include "common.h"
 
-enum { // Test menu enum
-    TEST_RENODE, 
-    TEST_HARDWARE_HV_ARRAY_ON,
-    TEST_HARDWARE_HV_PLUS_MINUS_ON,
-    TEST_HARDWARE_HV_CONTACTORS_BOTH_ON,
-    TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
-};
+// Test menu enum
+//#define TEST_RENODE      // Renode test does not work unless updatePrechargeContactor is added to this file
+//#define TEST_HARDWARE_HV_ARRAY_ON
+//#define TEST_HARDWARE_HV_PLUS_MINUS_ON
+#define TEST_HARDWARE_HV_CONTACTORS_BOTH_ON
+//#define TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
 
 enum { // Test menu enum
     SEND_ONE_MSG = 0, 
@@ -43,12 +42,29 @@ enum { // Test menu enum
 };
 
 /*** Constants ***/
-#define TEST_OPTION TEST_RENODE // Decide what to test based on test menu enum
 #define SATURATION_THRESHOLD_TEST (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
 /*** Tasks ***/
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
+
+#ifdef TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
+static CANDATA_t HV_Disable_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b000}};
+#endif
+
+#ifdef TEST_HARDWARE_HV_ARRAY_ON
+static CANDATA_t HV_Array_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b001}};
+#endif
+
+#ifdef TEST_HARDWARE_HV_CONTACTORS_BOTH_ON
+static CANDATA_t HV_Enabled_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b111}};
+#endif
+
+#ifdef TEST_HARDWARE_HV_PLUS_MINUS_ON
+static CANDATA_t HV_MC_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b110}};
+#endif
+
+#ifdef TEST_RENODE
 
 /*** CAN Messages ***/
 static CANDATA_t bps_trip_msg = {.ID=BPS_TRIP, .idx=0, .data={1}};
@@ -79,7 +95,6 @@ static void infoDump(){
     // printf("\n\r");
     printf("\n\r");
 }
-
 
 static void turnIgnitionToMotorOn(){
     printf("\n\r=========== Turn Ignition to Motor ===========");
@@ -163,6 +178,7 @@ static void turnContactorOn(uint8_t isIgnitionOn){
     }
 }
 
+#endif
 
 void Task1(){
     OS_ERR err;
@@ -194,8 +210,7 @@ void Task1(){
     assertOSError(err);
     
     while(1){
-        switch (TEST_RENODE) {
-            case TEST_RENODE:
+        #ifdef TESTRENODE
 
             // Ignition is in OFF position
 
@@ -310,47 +325,51 @@ void Task1(){
             CANbus_Send(bps_trip_msg, CAN_BLOCKING, CARCAN); // BPS Trip
             infoDump();
         
-            break;
-        
-            case TEST_HARDWARE_HV_ARRAY_ON:
+            #endif 
+            OS_ERR err;
+            #ifdef TEST_HARDWARE_HV_ARRAY_ON
                 while(1){
                     CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN); // HV Array messages
                     printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\n");
+                    OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
                 }
-                break;
+            #endif
 
-            case TEST_HARDWARE_HV_PLUS_MINUS_ON:
+            #ifdef TEST_HARDWARE_HV_PLUS_MINUS_ON
                 while(1){
                     CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN); // HV Motor Controller messages
                     printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\n");
+                    OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
                 }
-                break;
+            #endif
 
-            case TEST_HARDWARE_HV_CONTACTORS_BOTH_ON:
+            #ifdef TEST_HARDWARE_HV_CONTACTORS_BOTH_ON
                 while(1){
                     CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); // HV Enable messages
                     printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\n");
+                    OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
                 }
-                break;
+            #endif
 
-            case TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF:
+            #ifdef TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
                 while(1){
                     CANbus_Send(HV_Disable_Msg, CAN_BLOCKING, CARCAN); // Disable messages
                     printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\n");
+                    OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
                 }
-                break;
+            #endif
             
         }
     }
-}
+
 
 int main(){
     OS_ERR err;

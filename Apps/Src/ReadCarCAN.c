@@ -33,9 +33,9 @@
 #define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS ((PRECHARGE_PLUS_MINUS_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
 
 // High Voltage BPS Contactor bit mapping
-#define HV_ARRAY_CONTACTOR_BIT 0b001
-#define HV_MINUS_CONTACTOR_BIT 0b010
-#define HV_PLUS_CONTACTOR_BIT 0b100
+#define HV_ARRAY_CONTACTOR_BIT 1  //0b001
+#define HV_MINUS_CONTACTOR_BIT 2  //0b010
+#define HV_PLUS_CONTACTOR_BIT  4  //0b100
 
 // Saturation messages
 #define DISABLE_SATURATION_MSG -1
@@ -88,7 +88,7 @@ bool ChargeEnable_Get(void){
 }
 
 /**
- * @brief Nested function as the same function needs to be cexecuted however the timer requires different parameters
+ * @brief Nested function as the same function needs to be executed however the timer requires different parameters
  * @param p_tmr pointer to the timer that calls this function, passed by timer
  * @param p_arg pointer to the argument passed by timer
 */
@@ -140,9 +140,8 @@ static void updateArrayPrechargeBypassContactor(void){
             assertOSError(err);
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&arrayPBCDlyTimer, &err);
-            // Asserts error for OS timer start above if conditional was met
-            assertOSError(err);
     }
+    // Asserts error for OS timer state above if conditional was not met
     assertOSError(err);
 }
 
@@ -154,17 +153,16 @@ static void updateArrayPrechargeBypassContactor(void){
 */
 static void updateMCPBC(void){
     OS_ERR err = OS_ERR_NONE;
-    if(mcIgnStatus == true                                                                // Ignition is ON
-        && HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD                                // Saturation Threshold has be met
-        &&(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == OFF)                              // Motor Controller PBC is OFF
-        && (OSTmrStateGet(&motorControllerPBCDlyTimer, &err) != OS_TMR_STATE_RUNNING)){         // and precharge is currently not happening  
+    if(mcIgnStatus                                                                      // Ignition is ON
+        && HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD            // Saturation Threshold has be met
+        &&(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == OFF)          // Motor Controller PBC is OFF
+        && (OSTmrStateGet(&motorControllerPBCDlyTimer, &err) != OS_TMR_STATE_RUNNING)){ // and precharge is currently not happening  
             // Asserts error for OS timer state above if conditional was met
             assertOSError(err);
             // Wait to make sure precharge is finished and then restart array
             OSTmrStart(&motorControllerPBCDlyTimer, &err);
-            // Asserts error for OS timer start above if conditional was met
-            assertOSError(err);
         }
+    // Asserts error for OS timer start above if conditional was not met
     assertOSError(err);
 }
 
@@ -222,7 +220,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
  * @brief Helper to turn arrayPBCOn if arrayBypassPrecharge is completed and charging is enabled
  * @param None
 */
- void turnArrayPBCOn(void){
+ void attemptTurnArrayPBCOn(void){
     if(arrPBCComplete && chargeEnable){
             Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON, true); // Turn on
             UpdateDisplay_SetArray(true);
@@ -234,7 +232,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
  * @brief Helper to turn motorControllerPBCOn if motorControllerBypassPrecharge is completed and threshold is reached
  * @param None
 */
- void turnMotorControllerPBCOn(void){
+ void attempTurnMotorControllerPBCOn(void){
     if(mcPBCComplete){
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
             UpdateDisplay_SetMotor(true);  
@@ -268,13 +266,13 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
         assertReadCarCANError(READCARCAN_ERR_DISABLE_CONTACTORS_MSG); // Turn Array and Motor Controller PBC off using error assert
 
     }else if(!mcIgnStatus && arrIgnStatus){
-        turnArrayPBCOn();               // Turn Array PBC On, if permitted
+        attemptTurnArrayPBCOn();               // Turn Array PBC On, if permitted
         turnMotorControllerPBCOff();    // Turn Motor Controller PBC Off
 
     }else if(mcIgnStatus && !arrIgnStatus){
-        turnArrayPBCOn();                                                           // Turn Array PBC On, if permitted
+        attemptTurnArrayPBCOn();                                                           // Turn Array PBC On, if permitted
         if(HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD){      // Turn Motor Controller PBC On, if threshold is reached
-            turnMotorControllerPBCOn();
+            attempTurnMotorControllerPBCOn();
         }else{
             turnMotorControllerPBCOff();
         }
@@ -334,6 +332,8 @@ void Task_ReadCarCAN(void *p_arg){
     assertOSError(err);
 
     // Fills buffers with disable messages
+    // NOTE: If the buffer becomes bigger than of type int8_t, memset will not work and 
+    //  would need to be reimplemented. 
     memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
     memset(HVPlusMinusChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVPlusMinusChargeMsgBuffer));
 
@@ -405,7 +405,7 @@ static void handler_ReadCarCAN_chargeDisable(void) {
     // Check that the contactor was successfully turned off
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
 
-    if(ret != false) { // Contactor failed to turn off; display the evac screen and infinite loop
+    if(ret) { // Contactor failed to turn off; display the evac screen and infinite loop
         Display_Evac(SOC, SBPV);
         while(1){;}
     }
@@ -436,7 +436,7 @@ static void handler_ReadCarCAN_contactorsDisable(void) {
     // Check that the contactor was successfully turned off
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) || (bool)Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
 
-    if(ret != false) { // Contactor failed to turn off; display the evac screen and infinite loop
+    if(ret) { // Contactor failed to turn off; display the evac screen and infinite loop
          Display_Evac(SOC, SBPV);
          while(1){;}
     }
@@ -448,7 +448,7 @@ static void handler_ReadCarCAN_contactorsDisable(void) {
  */ 
 static void handler_ReadCarCAN_BPSTrip(void) {
     chargeEnable = false;       // Not really necessary but makes inspection less confusing
-	Display_Evac(SOC, SBPV);   // Display evacuation screen
+	Display_Evac(SOC, SBPV);    // Display evacuation screen
 }
 
 
