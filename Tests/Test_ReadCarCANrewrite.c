@@ -28,14 +28,15 @@
 #include "Display.h"
 #include "common.h"
 
-// Test menu enum
+/*** Test menu ***/
 //#define TEST_RENODE      // Renode test does not work unless updatePrechargeContactor is added to this file
 //#define TEST_HARDWARE_HV_ARRAY_ON
 //#define TEST_HARDWARE_HV_PLUS_MINUS_ON
 #define TEST_HARDWARE_HV_CONTACTORS_BOTH_ON
 //#define TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
 
-enum { // Test menu enum
+/*** How many msgs to send based on contactor status ***/
+enum {
     SEND_ONE_MSG = 0, 
     SEND_UNTIL_ARRAY_ON,
     SEND_UNTIL_MOTOR_CONT_ON
