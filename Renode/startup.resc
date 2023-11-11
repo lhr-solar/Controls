@@ -1,6 +1,4 @@
 $bin?=$ORIGIN/../Objects/controls-leader.elf
-$car_bin?=$ORIGIN/../Objects/car-sim.elf
-$motor_bin?=$ORIGIN/../Objects/motor-sim.elf
 $platform=$ORIGIN/stm32f413.repl
 
 EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.DMA.STM32DMA"
@@ -29,30 +27,6 @@ macro show_uart_display
     connector Connect sysbus.usart3 disp-uart-con
 """
 
-macro show_uart_motor
-"""
-    emulation CreateServerSocketTerminal $motorcan_socket "motor-uart-con" false
-    connector Connect sysbus.usart2 motor-uart-con
-"""
-
-macro show_uart_car
-"""
-    emulation CreateServerSocketTerminal $carcan_socket "car-uart-con" false
-    connector Connect sysbus.usart2 car-uart-con
-"""
-
-macro create_car
-"""
-    mach create "car-sim"
-    mach set "car-sim"
-    machine LoadPlatformDescription $platform
-    sysbus LoadELF $car_bin
-    logLevel 3
-    runMacro $show_uart_car
-    machine StartGdbServer 3334 true
-    connector Connect sysbus.can1 carCan
-"""
-
 macro create_leader
 """
     mach create "ctrl-leader"
@@ -67,25 +41,11 @@ macro create_leader
     connector Connect sysbus.can3 motorCan
 """
 
-macro create_motor
-"""
-    mach create "motor-sim"
-    mach set "motor-sim"
-    machine LoadPlatformDescription $platform
-    sysbus LoadELF $motor_bin
-    logLevel 3
-    runMacro $show_uart_motor
-    machine StartGdbServer 3335 true
-    connector Connect sysbus.can3 motorCan
-"""
-
 emulation CreateCANHub "carCan"
 emulation CreateCANHub "motorCan"
 emulation SetGlobalAdvanceImmediately true
 
 runMacro $create_leader
-runMacro $create_car
-runMacro $create_motor
 
 mach set "ctrl-leader"
 string Renode Simulator is now active

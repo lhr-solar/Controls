@@ -198,7 +198,6 @@
                 "type": "pickString",
                 "description": "Target to compile.",
                 "options": [
-                    "simulator",
                     "leader",
                     "flash",
                     "clean"
