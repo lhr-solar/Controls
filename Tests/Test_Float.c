@@ -1,7 +1,7 @@
 /**
  * Test file for testing floating point register restoration on context switch
  * 
- * To be tested on hardware
+ * To be tested on hardware, if it doesn't hard fault then it worked!
  */
 
 
