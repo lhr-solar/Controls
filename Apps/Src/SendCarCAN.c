@@ -154,7 +154,7 @@ static void putIOState(void){
         message.data[3] |= contactorState << contactor;
     }
 
-    SendCarCAN_Put(message);
+    CANbus_Send(message, true, CARCAN);
 }
 
 /**
