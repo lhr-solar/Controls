@@ -4,7 +4,6 @@ __pycache__
 *.csv
 .vscode
 *.swp
-Tests/Results
 
 !.vscode/LHR.code-workspace
 !.vscode/c_cpp_properties.json

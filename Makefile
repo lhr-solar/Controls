@@ -41,8 +41,7 @@ docs:
 help:
 	@echo "Format: ${ORANGE}make ${BLUE}<BSP type>${NC}${ORANGE}TEST=${PURPLE}<Test type>${NC}"
 	@echo "BSP types (required):"
-	@echo " BSP types (required):"
-	@echo "	${BLUE}stm32f413${NC}"
+	@echo "	${BLUE}stm32f413/leader${NC}"
 	@echo ""
 	@echo "Test types (optional):"
 	@echo "	Set TEST only if you want to build a test."

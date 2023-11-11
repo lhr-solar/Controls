@@ -19,8 +19,7 @@
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uCOS-III/Source",
                 "${workspaceFolder}/RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU",
                 "${workspaceFolder}/CMSIS/Include",
-                "${workspaceFolder}/CMSIS/Device/ST/STM32F4xx/Include",
-                "${workspaceFolder}/Tests/Inc"
+                "${workspaceFolder}/CMSIS/Device/ST/STM32F4xx/Include"
             ],
             "defines": [
                 "STM32F413_423xx",
@@ -28,7 +27,6 @@
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
-            "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64"
         }
     ],

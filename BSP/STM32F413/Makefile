@@ -11,7 +11,7 @@ TARGET = controls-leader
 ifeq ($(DEBUG), 0)
 OPT = -O3
 else
-OPT = -Og
+OPT = -Og -g3
 endif
 
 #######################################
@@ -39,7 +39,7 @@ $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-LIB/*.c)
 # This line adds everything in Apps/Src/*.c except for main.c, then adds the test file
 C_SOURCES += \
 $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))	\
-../../$(TEST)
+../../$(TEST)	
 
 # ASM sources
 ASM_SOURCES =  \
