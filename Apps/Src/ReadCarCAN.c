@@ -134,7 +134,8 @@ static void updateArrayPrechargeBypassContactor(void){
     OS_ERR err = OS_ERR_NONE;
     if((arrIgnStatus || mcIgnStatus)                                             // Ignition is ON
         && HVArrayMsgSaturation >= ARRAY_SATURATION_THRESHOLD                    // Saturation Threshold has be met
-        && (Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR))                    // Array PBC is OFF
+        && (Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == OFF)             
+        // Array PBC is OFF
         && (OSTmrStateGet(&arrayPBCDlyTimer, &err) != OS_TMR_STATE_RUNNING)){    // and precharge is currently not happening  
             // Asserts error for OS timer state above if conditional was met
             assertOSError(err);
