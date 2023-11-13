@@ -9,7 +9,7 @@
  * The logic is determined through a finite state machine implementation.
  * 
  * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including SendTritium.h, 
- * relevant variables will be exposed as externs for unit testing
+ * relevant setters will be exposed as externs for unit testing
  * and hardware inputs won't be read and motor commands won't be sent over MotorCAN.
  * If the macro SENDTRITIUM_PRINT_MES is also defined prior to including SendTritium.h,
  * debug info will be printed via UART.
@@ -45,12 +45,6 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-#ifndef SENDTRITIUM_EXPOSE_VARS
-#define SCOPE static
-#else
-#define SCOPE 
-#endif
-
 // Inputs
 static bool cruiseEnable = false;
 static bool cruiseSet = false;
@@ -68,9 +62,9 @@ float velocitySetpoint = 0;
 float cruiseVelSetpoint = 0;
 
 // Current observed velocity
-SCOPE float velocityObserved = 0;
 
 #ifndef SENDTRITIUM_EXPOSE_VARS
+static float velocityObserved = 0;
 
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;

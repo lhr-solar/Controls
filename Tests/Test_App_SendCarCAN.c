@@ -23,7 +23,7 @@
 #include "UpdateDisplay.h"
 
 #define NUM_MOTOR_MSGS 15 // Messages received from the motor controller
-#define MOTOR_MSG_BASE_ADDRESS 0x240
+#define MOTOR_MSG_BASE_ADDRESS 0x240 // Offset to index into msgCount array
 
 
 static OS_TCB Task1TCB;
@@ -48,11 +48,6 @@ void Task_ReadCAN(void *arg)
             switch(dataBuf.ID) {
                 case IO_STATE: {
                     msgCount[0]++;
-                    printf("\n\rReceived IO_STATE message of %x", dataBuf.data[0]);
-                    printf("\n\rAccelerator: %d", *((uint8_t*)(&dataBuf.data[0])));
-                    printf("\n\rBrake: %x", *((uint8_t*)(&dataBuf.data[1])));
-                    printf("\n\rPins: %x", dataBuf.data[2]);
-                    printf("\n\rContactors: %d", *((uint8_t*)(&dataBuf.data[3])));
                     break;
                 }
 
@@ -65,7 +60,7 @@ void Task_ReadCAN(void *arg)
                     uint8_t msgIdx = dataBuf.ID - MOTOR_MSG_BASE_ADDRESS;
 
                     if (msgIdx >= 0 && msgIdx < NUM_MOTOR_MSGS) {  // Check if the message is from the motor controller
-                        msgCount[msgIdx + 2]++; // Reset counter and continue sending
+                        msgCount[msgIdx + 2]++; // If so, increment based on the ID
                     } else {
                         msgCount[20]++;
                     }
@@ -99,16 +94,17 @@ void Task_ReadCAN(void *arg)
 
     
 
-			// 	default:{ // Other messages will only be received if CARCAN messages aren't filtered.
+			// 	default:{ // Some messages will only be received if CARCAN messages aren't filtered.
             //         printf("\n\rReceived an uncategorized message ID type of %x", dataBuf.ID);
 			// 		break; //for cases not handled currently
 			// 	}
+            // }
         } else {
             // CANbus read is unsuccessful
             printf("\n\rCANbus_Read error of %x", status);
         }  
 
-        //printf("\n\r**********************************");
+        printf("\n\r**********************************");
     }
 
 
@@ -252,7 +248,7 @@ int main(void)
     CPU_Init();
     BSP_UART_Init(UART_2);
     Pedals_Init();
-    CANbus_Init(CARCAN, NULL, NUM_CARCAN_FILTERS); // Set filter list to (CANId_t*)carCANFilterList to receive filtered messages
+    CANbus_Init(CARCAN, NULL, NUM_CARCAN_FILTERS); // Set filter list to (CANId_t*)carCANFilterList to receive only selected messages
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     SendCarCAN_Init();
     Minions_Init();

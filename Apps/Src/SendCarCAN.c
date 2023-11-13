@@ -26,22 +26,14 @@ CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 
 //fifo
 #define FIFO_TYPE CANDATA_t
-#define FIFO_SIZE 256
+#define FIFO_SIZE 16
 #define FIFO_NAME SendCarCAN_Q
 #include "fifo.h"
-
-// Motor message
-#define NUM_MOTOR_MSGS 15 // Messages received from the motor controller
-#define MOTOR_MSG_BASE_ADDRESS 0x240
 
 static SendCarCAN_Q_t CANFifo; 
 
 static OS_SEM CarCAN_Sem4;
 static OS_MUTEX CarCAN_Mtx;
-
-// Counter array to reduce the frequency at which we send out messages
-static uint8_t motorMsgCount[NUM_MOTOR_MSGS] = {0};
-static uint8_t motorMsgThreshold[NUM_MOTOR_MSGS] = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
 static void Task_PutIOState(void *p_arg);
 
@@ -62,17 +54,6 @@ void SendCarCAN_Put(CANDATA_t message){
     OS_ERR err;
     CPU_TS ticks;
 
-    // Reduce the frequency at which we forward motor messages to CarCAN
-    uint8_t msgIdx = message.ID - MOTOR_MSG_BASE_ADDRESS;
-
-    if (msgIdx >= 0 && msgIdx < NUM_MOTOR_MSGS) {  // Check if the message is from the motor controller
-        if (++motorMsgCount[msgIdx] < motorMsgThreshold[msgIdx]) {
-            return;  
-        } else {
-            motorMsgCount[msgIdx] = 0; // Reset counter and continue sending
-        }     
-    }
-    
     OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
     assertOSError(err);
     
@@ -108,7 +89,7 @@ void Task_SendCarCAN(void *p_arg){
     CPU_TS ticks;
 
     CANDATA_t message;
-    memset(&message, 0, sizeof(CANDATA_t));
+    memset(&message, 0, sizeof message);
 
     // PutIOState
     OSTaskCreate(
@@ -116,7 +97,7 @@ void Task_SendCarCAN(void *p_arg){
         (CPU_CHAR*)"PutIOState",
         (OS_TASK_PTR)Task_PutIOState,
         (void*)NULL,
-        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO,
+        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO, // Round-robin with SendCarCAN task
         (CPU_STK*)putIOState_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
@@ -150,7 +131,7 @@ void Task_SendCarCAN(void *p_arg){
 
 static void putIOState(void){
     CANDATA_t message;
-    memset(&message, 0, sizeof(message));
+    memset(&message, 0, sizeof message);
     message.ID = IO_STATE;
     
     // Get pedal information
@@ -158,14 +139,12 @@ static void putIOState(void){
     message.data[1] = Pedals_Read(BRAKE);
 
     // Get minion information
-    message.data[2] = 0;
     for(pin_t pin = 0; pin < NUM_PINS; pin++){
         bool pinState = Minions_Read(pin);
         message.data[2] |= pinState << pin;
     }
     
     // Get contactor info
-    message.data[3] = 0;
     for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
         bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
         message.data[3] |= contactorState << contactor;
