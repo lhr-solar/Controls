@@ -210,14 +210,11 @@ static bool cmd_CANbus_Read(void){
 static bool cmd_Contactors_Get(void){
 	char *contactorInput = strtok_r(NULL, " ", &save);
 	contactor_t contactor;
-	if(strcmp(contactorInput, "array_c") == 0){
-		contactor = ARRAY_CONTACTOR;
+	if(strcmp(contactorInput, "array_p") == 0){
+		contactor = ARRAY_PRECHARGE_BYPASS_CONTACTOR;
 	}
-	else if(strcmp(contactorInput, "array_p") == 0){
-		contactor = ARRAY_PRECHARGE;
-	}
-	else if(strcmp(contactorInput, "motor_c") == 0){
-		contactor = MOTOR_CONTACTOR;
+	else if(strcmp(contactorInput, "motor_p") == 0){
+		contactor = MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR;
 	}
 	else{
 		return false;
@@ -230,14 +227,11 @@ static bool cmd_Contactors_Get(void){
 static bool cmd_Contactors_Set(void){
 	char *contactorInput = strtok_r(NULL, " ", &save);
 	contactor_t contactor;
-	if(strcmp(contactorInput, "array_c") == 0){
-		contactor = ARRAY_CONTACTOR;
+	if(strcmp(contactorInput, "array_p") == 0){
+		contactor = ARRAY_PRECHARGE_BYPASS_CONTACTOR;
 	}
-	else if(strcmp(contactorInput, "array_p") == 0){
-		contactor = ARRAY_PRECHARGE;
-	}
-	else if(strcmp(contactorInput, "motor_c") == 0){
-		contactor = MOTOR_CONTACTOR;
+	else if(strcmp(contactorInput, "motor_p") == 0){
+		contactor = MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR;
 	}
 	else{
 		return false;
