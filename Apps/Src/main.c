@@ -43,7 +43,7 @@ int main(void) {
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -98,7 +98,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -116,7 +116,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -134,7 +134,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -152,7 +152,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -170,7 +170,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
