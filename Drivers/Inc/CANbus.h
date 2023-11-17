@@ -47,7 +47,7 @@ typedef enum {
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
 	CONTROL_MODE                    = 0x580,
     IO_STATE 						= 0x581,
-	NUM_CAN_IDS
+	MAX_CAN_ID
 } CANId_t;
 
 /**
