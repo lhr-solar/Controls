@@ -1,16 +1,17 @@
 /**
  * This test file for SendCarCAN checks if messages added to the queue are sent on CarCAN.
  * It does this by starting the SendTritium, SendCarCAN, and ReadTritium tasks,
- * which place messages into the SendCarCAN_Q, and then printing messages read on CarCAN via UART.
- * It also prints the IO_State and queue status to see if the messages are accurate and the queue has space.
+ * which place messages into the SendCarCAN_Q, and then counting the CarCAN messages it receives in msgReadCount.
+ * It also prints the IO State and, if the SendTritium macro SENDTRITIUM_PRINT_MES is defined, the control mode
+ * for comparison to see if the data received on CarCAN is accurate.
  * 
- * This test is intended to be run on hardware with CarCAN in LoopBack mode.
- * It is also intended to be tested using the motor controller on to read motor messages.
- * The idea is to use "display msgReadCount" in GDB so that the program can be stopped intermittently to view CAN stats.
+ * This test is intended to be run on hardware with CarCAN in LoopBack mode and the motor controller connected.
+ * The idea is to display the struct msgReadCount using a debugger view what messages we've received.
  * Alternatively, you can just use it to spin up tasks and then check output using a logic analyzer.
  * 
- * If TEST_SOFTWARE is defined prior to compilation, then a task will be created to simulate the motor controller.
- * In this case, MotorCAN should be in LoopBack mode.
+ * If TEST_SOFTWARE is defined prior to compilation, then a fake "motor controller" task
+ * will also be created to send us motor messages.
+ * In this case, MotorCAN should also be in LoopBack mode.
 */
 
 #include "Tasks.h"
@@ -26,23 +27,27 @@
 #include "Display.h"
 #include "UpdateDisplay.h"
 
-#define TEST_SOFTWARE // Uncomment to do a software test with a fake motor controller. (Motorcan must be in loopback mode)
+#define TEST_SOFTWARE 
 
 #define NUM_MOTOR_MSGS 15 // Messages we forward from the motor controller
 #define NUM_NONMOTOR_MSGS 2 // We also send IO_STATE and CONTROL_MODE
-#define IO_STATE_IDX 0 // index in msgArray for tracking info 
-#define CONTROL_MODE_IDX 1
-#define MOTOR_MSG_BASE_ADDRESS 0x240 // Offset to index into msgCount array
 
+// indexes in msgArray for tracking info 
+#define IO_STATE_IDX 0 
+#define CONTROL_MODE_IDX 1
+
+#define MOTOR_MSG_BASE_ADDRESS 0x240 // Offset to index into msgCount array
+// Test data stored for an individual message type
 typedef struct {
     CANDATA_t lastMsg;
     uint16_t numReceived;
 } msgInfo;
 
+// Struct containing all test file message data
 typedef struct {
     uint32_t lastReceiveTime_ms;
     uint16_t lastMsgReceived;
-    msgInfo msgArray[NUM_MOTOR_MSGS + NUM_NONMOTOR_MSGS + 1]; // Message types we send plus an extra space just in case
+    msgInfo msgArray[NUM_MOTOR_MSGS + NUM_NONMOTOR_MSGS + 1]; // Message types we send plus an extra space 
     uint8_t SpaceLeftInQ;
 } CANInfo;
 
@@ -56,10 +61,9 @@ static CPU_STK TaskMC_Stk[DEFAULT_STACK_SIZE];
 static OS_TCB TaskReadCAN_TCB;
 static CPU_STK TaskReadCAN_Stk[DEFAULT_STACK_SIZE];
 
-//static uint32_t msgCount[20];
 static CANInfo msgReadCount = {0};
 
-// Reads CarCAN and prints what we receive on UART
+// Reads CarCAN and saves message statistics in the msgReadCount struct
 void Task_ReadCAN(void *arg)
 {
     OS_ERR err;
@@ -90,7 +94,7 @@ void Task_ReadCAN(void *arg)
                         msgReadCount.msgArray[msgIdx + NUM_NONMOTOR_MSGS].numReceived++; // If so, increment based on the ID
                         memcpy((void *)&msgReadCount.msgArray[msgIdx + NUM_NONMOTOR_MSGS].lastMsg, &dataBuf, sizeof dataBuf);
 
-                    } else { // In case we receive messages not otherwise accounted for
+                    } else { // Place messages not otherwise accounted for into the last index of the array
                         msgReadCount.msgArray[NUM_MOTOR_MSGS + NUM_NONMOTOR_MSGS].numReceived++;
                         memcpy((void *)(&msgReadCount.msgArray[NUM_MOTOR_MSGS + NUM_NONMOTOR_MSGS].lastMsg), &dataBuf, sizeof dataBuf);
                         
@@ -100,6 +104,7 @@ void Task_ReadCAN(void *arg)
 
             }
             
+            // Other CAN stats
             msgReadCount.lastReceiveTime_ms = (OSTimeGet(&err) / OS_CFG_TICK_RATE_HZ);
             msgReadCount.lastMsgReceived = dataBuf.ID;
             msgReadCount.SpaceLeftInQ = get_SendCarCAN_Q_Space();
@@ -121,7 +126,7 @@ void Task_MC(void *arg) {
     CANDATA_t motorMsg = {
         .ID=VELOCITY,
         .idx=0,
-        .data={0xD, 0xE, 0xA, 0xD, 0x0, 0x0, 0xE, 0xF},
+        .data={0xD, 0xE, 0xA, 0xD, 0x0, 0x0, 0xE, 0xF}, // Bytes 4-5 store error flags and must be empty
     };
     
     while(1) {
@@ -152,7 +157,7 @@ void Task_MC(void *arg) {
 #endif
 
 
-
+// Initialize other tasks and print IO state
 void Task1(void *arg)
 {
     OS_ERR err;
@@ -271,7 +276,7 @@ void Task1(void *arg)
 
    
     while (1) {
-        // SendTritium task will print Car State
+        // (SendTritium task will print Control Mode for us)
 
         // Print IO State
         printf("\n\r---- IO State ----");
@@ -305,8 +310,8 @@ int main(void)
     CPU_Init();
     BSP_UART_Init(UART_2);
     Pedals_Init();
-    CANbus_Init(CARCAN, NULL, NUM_CARCAN_FILTERS); // Set filter list to (CANId_t*)carCANFilterList to receive only selected messages
-    CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
+    CANbus_Init(CARCAN, NULL, NUM_CARCAN_FILTERS);      // CarCAN filter list is normally (CANId_t*)carCANFilterList
+    CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);  // but for testing, we'd like to receive all messages
     SendCarCAN_Init();
     Minions_Init();
     Display_Init();
@@ -317,13 +322,13 @@ int main(void)
         (CPU_CHAR *)"Task 1",
         (OS_TASK_PTR)Task1, 
         (void *)NULL,
-        (OS_PRIO)13, //
+        (OS_PRIO)13, 
         (CPU_STK *)Task1Stk,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
         (OS_MSG_QTY)0, 
         (OS_TICK)NULL,
-        (void *)NULL, //
+        (void *)NULL, 
         (OS_OPT)(OS_OPT_TASK_STK_CLR), 
         (OS_ERR *)&err
     );
