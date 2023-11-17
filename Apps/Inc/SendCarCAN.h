@@ -14,8 +14,8 @@ void SendCarCAN_Init();
 void SendCarCAN_Put(CANDATA_t message);
 
 /**
- * @brief print SendCarCAN_Q put/get for debug purposes
+ * @brief return the space left in SendCarCAN_Q for debug purposes
 */
-void print_SendCarCAN_Q(void);
+uint8_t get_SendCarCAN_Q_Space(void);
 
 #endif

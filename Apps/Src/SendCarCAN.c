@@ -38,13 +38,10 @@ static OS_MUTEX CarCAN_Mtx;
 static void Task_PutIOState(void *p_arg);
 
 /**
- * @brief print SendCarCAN_Q put/get for debug purposes
+ * @brief return the space left in SendCarCAN_Q for debug purposes
 */
-void print_SendCarCAN_Q(void) {
-    if(SendCarCAN_Q_is_full(&CANFifo)) {
-        printf("\n\rSendCarCAN_Q is full.");
-    }
-    printf("\n\rSendCarCAN_Q put: %d\n\rSendCarCAN_Q get: %d", CANFifo.put, CANFifo.get);
+uint8_t get_SendCarCAN_Q_Space(void) {
+    return (CANFifo.get - CANFifo.put - 1) % (sizeof CANFifo.buffer / sizeof CANFifo.buffer[0]);
 }
 
 /**
