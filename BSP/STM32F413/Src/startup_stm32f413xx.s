@@ -105,6 +105,11 @@ LoopFillZerobss:
   cmp  r2, r3
   bcc  FillZerobss
 
+  ldr r3, =0xE000EF34 @ FPCCR
+  ldr r2, [r3]
+  bic r2, 0xc0000000 @ Clear LSPEN and ASPEN
+  str r2, [r3]
+
 /* Call the clock system intitialization function.*/
   bl  SystemInit   
 /* Call static constructors */

@@ -174,7 +174,10 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 void _assertOSError (OS_ERR err); //TODO: This should be changed to enforce only enum usage
 
 #if DEBUG == 1
-#define assertOSError(err) 
+#define assertOSError(err) \
+        if (err != OS_ERR_NONE) { \
+            printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \
+        } \
         _assertOSError(err);
 #else
 #define assertOSError(err) _assertOSError(err);
