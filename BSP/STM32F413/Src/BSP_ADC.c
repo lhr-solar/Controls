@@ -34,11 +34,10 @@ static void ADC_InitDMA(void) {
 }
 
 /**
- * @brief   Initializes the ADC module. This is to measure the hall effect sensors
- *          on the Current Monitor Board.
- * @param   None
+ * @brief   Initialize the ADC module
+ * @param	None
  * @return  None
- */
+ */ 
 void BSP_ADC_Init(void) {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	// Enable the ADC clock
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	// Enable the PC clock for port C
@@ -88,10 +87,10 @@ void BSP_ADC_Init(void) {
 }
 
 /**
- * @brief   Gets converted ADC value in units of mV.
- * @param   None
- * @return  millivoltage value ADC measurement
- */
+ * @brief   Provides the ADC value of the channel at the specified index
+ * @param   hardwareDevice pedal enum that represents the specific device
+ * @return  Raw ADC value without conversion
+ */ 
 int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice) {
 
     // Get ADC raw data
@@ -101,10 +100,10 @@ int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice) {
 }
 
 /**
- * @brief   Gets converted ADC value in units of mV.
- * @param   None
- * @return  millivoltage value ADC measurement
- */
+ * @brief   Provides the ADC value in millivolts of the channel at the specified index
+ * @param   hardwareDevice pedal enum that represents the specific device
+ * @return  ADC value in millivolts
+ */ 
 int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice) {
 
     // Get ADC raw data

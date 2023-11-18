@@ -30,23 +30,21 @@ typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
 void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize);
 
 /**
- * @brief   Writes a message to the specified CAN line
- * @param   bus the proper CAN line to write to
- *          defined by the CAN_t enum
- * @param   id the hex ID for the message to be sent
- * @param   data pointer to the array containing the message
- * @param   len length of the message in bytes
- * @return  number of bytes transmitted (0 if unsuccessful)
+ * @brief   Transmits the data onto the CAN bus with the specified id
+ * @param   id : Message of ID. Also indicates the priority of message. The lower the value, the higher the priority.
+ * @param   data : data to be transmitted. The max is 8 bytes.
+ * @param   length : num of bytes of data to be transmitted. This must be <= 8 bytes or else the rest of the message is dropped.
+ * @return  ERROR if module was unable to transmit the data onto the CAN bus. SUCCESS indicates data was transmitted.
  */
 ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t len);
 
 /**
- * @brief   Reads the message on the specified CAN line
- * @param   id pointer to integer to store the 
- *          message ID that was read
- * @param   data pointer to integer array to store
- *          the message in bytes
- * @return  number of bytes read (0 if unsuccessful)
+ * @brief   Gets the data that was received from the CAN bus.
+ * @note    Non-blocking statement
+ * @pre     The data parameter must be at least 8 bytes or hardfault may occur.
+ * @param   id : pointer to store id of the message that was received.
+ * @param   data : pointer to store data that was received. Must be 8bytes or bigger.
+ * @return  ERROR if nothing was received so ignore id and data that was received. SUCCESS indicates data was received and stored.
  */
 ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data);
 

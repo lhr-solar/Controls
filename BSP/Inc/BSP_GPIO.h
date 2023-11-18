@@ -23,17 +23,17 @@ typedef enum {INPUT = 0, OUTPUT} direction_t;
 
 /**
  * @brief   Initializes a GPIO port
- * @param   port - port to initialize
- * @param	mask - pins
- * @param	direction - input or output 
+ * @param   port port to initialize
+ * @param	mask pins
+ * @param	direction input or output 
  * @return  None
  */ 
 void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction);
 
 /**
  * @brief   Reads value of the specified port
- * @param   port to read
- * @return  data of the port
+ * @param   port port to read
+ * @return  data in the port
  */ 
 uint16_t BSP_GPIO_Read(port_t port);
 

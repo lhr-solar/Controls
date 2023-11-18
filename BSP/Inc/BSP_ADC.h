@@ -29,6 +29,7 @@ typedef enum
 
 /**
  * @brief   Initialize the ADC module
+ * @param   None
  * @return  None
  */ 
 void BSP_ADC_Init(void);

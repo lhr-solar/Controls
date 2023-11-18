@@ -21,7 +21,3 @@ Recoverable Faults
 ==================
 
 Recoverable faults leave the car in a consistent state from which the system can proceed without being reset. They are, however, still faults, and so the system doesn't ignore them completely. The three recoverable faults in the system are hall sensor errors (in the motor); motor controller intialization errors; display errors; and not receiving charge enable messages on time. These are recoverable since the system can just try again. If these faults occur a few times, this may indicate a hardware failure somewhere (such as a loose connection or a faulty hall sensor) which is clearly non-recoverable. In order to handle this, some recoverable faults have a trip counter, which is incremented every time the fault occurrs. If the trip counter exceeds some pre-determined value, a non-recoverable fault is manually triggered.
-
-.. doxygengroup:: FaultState
-   :project: doxygen
-   :path: "/doxygen/xml/group__FaultState.xml"

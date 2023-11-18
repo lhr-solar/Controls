@@ -36,11 +36,13 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
 
 /**
  * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
+ * @param   bus : The bus to initialize. Should only be either CAN_1 or CAN_3.
  * @param   rxEvent : the function to execute when recieving a message. NULL for no action.
- * @param   txEnd   : the function to execute after transmitting a message. NULL for no action.
+ * @param   txEnd : the function to execute after transmitting a message. NULL for no action.
+ * @param   idWhitelist : the idWhitelist to use for message filtering. NULL for no filtering.
+ * @param   idWhitelistSize : the size of the idWhitelist, if it is not NULL.
  * @return  None
  */
-
 void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idWhitelist, uint8_t idWhitelistSize) {
 
     // Configure event handles
