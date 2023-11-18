@@ -13,9 +13,14 @@ The Controls system is composed of:
 Motor
 =====
 
+A high-efficiency motor from Mitsuba. Three-phase, 96V nominal (160V max), 2000 watt nominal
+(5000 watt max).
+
 ================
 Motor Controller
 ================
+
+Wavesculptor 22 from Prohelion. 14kw max output, 140V max input.
 
 ====
 PCBs
@@ -25,9 +30,15 @@ PCBs
 Leader Board
 ------------
 
+The brains of Controls. Contains the microcontroller running our code (STM32f413),
+CAN tranceivers, USB chip, analog filtering circuits, and voltage regulators.
+
 ------------
 Minion Board
 ------------
+
+Contains driving transistors and connectors for external lights, as well as inputs
+and outputs for internal connections such as indicators.
 
 ===================
 Lights and Switches
