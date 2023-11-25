@@ -8,9 +8,11 @@
  * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
  * The logic is determined through a finite state machine implementation.
  * 
- * If the macro DEBUG is defined prior to including SendTritium.h, relevant
- * setters will be exposed for unit testing.
- * 
+ * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including SendTritium.h, 
+ * relevant setters will be exposed as externs for unit testing
+ * and hardware inputs won't be read and motor commands won't be sent over MotorCAN.
+ * If the macro SENDTRITIUM_PRINT_MES is also defined prior to including SendTritium.h,
+ * debug info will be printed via UART.
  */
 
 #include "Pedals.h"
@@ -18,6 +20,7 @@
 #include "Minions.h"
 #include "SendTritium.h"
 #include "ReadTritium.h"
+#include "SendCarCAN.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
 #include "CANConfig.h"
@@ -59,9 +62,10 @@ float velocitySetpoint = 0;
 float cruiseVelSetpoint = 0;
 
 // Current observed velocity
+
+#ifndef SENDTRITIUM_EXPOSE_VARS
 static float velocityObserved = 0;
 
-#ifndef SENDTRITIUM_PRINT_MES
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 #endif
@@ -315,6 +319,20 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
         uint8_t offset_out = out_min;
         return (offset_in * out_range)/in_range + offset_out;   // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
     }
+}
+
+
+/**
+ * @brief Put the CONTROL_MODE message onto the CarCAN bus, detailing
+ * the current mode of control.
+*/
+static void putControlModeCAN(){
+    CANDATA_t message;
+    memset(&message, 0, sizeof(message));
+    message.ID = CONTROL_MODE;
+    message.data[0] = state.name;
+
+    SendCarCAN_Put(message);
 }
 
 // State Handlers & Deciders
@@ -632,7 +650,7 @@ void Task_SendTritium(void *p_arg){
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
 
-    #ifndef SENDTRITIUM_PRINT_MES
+    #ifndef SENDTRITIUM_EXPOSE_VARS
     CANDATA_t driveCmd = {
         .ID=MOTOR_DRIVE, 
         .idx=0,
@@ -655,7 +673,8 @@ void Task_SendTritium(void *p_arg){
         // Drive
         #ifdef SENDTRITIUM_PRINT_MES
         dumpInfo();
-        #else
+        #endif
+        #ifndef SENDTRITIUM_EXPOSE_VARS
         if(MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter){
             memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
             memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
@@ -665,6 +684,8 @@ void Task_SendTritium(void *p_arg){
             motorMsgCounter++;
         }
         #endif
+
+        putControlModeCAN();        
 
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);

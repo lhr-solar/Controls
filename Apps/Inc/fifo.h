@@ -42,6 +42,8 @@
 #ifndef __FIFO_H
 #define __FIFO_H
 #include <stdbool.h>
+#include <string.h>
+#include "common.h"
 #endif
 
 // The type of the fifo

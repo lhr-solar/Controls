@@ -15,8 +15,8 @@
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "CAN_Queue.h"
 #include "UpdateDisplay.h"
+#include "SendCarCAN.h"
 
 int main(void) {
     // Disable interrupts
@@ -70,10 +70,10 @@ void Task_Init(void *p_arg){
     Contactors_Init();
     Display_Init();
     Minions_Init();
-    CAN_Queue_Init();
 
     // Initialize applications
     UpdateDisplay_Init();
+    SendCarCAN_Init();
 
     // Initialize ReadTritium
     OSTaskCreate(
