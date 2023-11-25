@@ -650,6 +650,8 @@ void Task_SendTritium(void *p_arg){
         #endif
         state.stateDecider();    // decide what the next state is
 
+        velocitySetpoint = (velocitySetpoint>0)?MAX_VELOCITY:-MAX_VELOCITY;
+
         // Drive
         #ifdef SENDTRITIUM_PRINT_MES
         dumpInfo();
