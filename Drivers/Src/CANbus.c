@@ -63,7 +63,7 @@ void CANbus_RxHandler_3(){
 static CANId_t* whitelist_validator(CANId_t* wlist, uint8_t size){
     for(int i = 0; i < size; i++){
         CANId_t curr = wlist[i];
-        if(curr >= NUM_CAN_IDS) {
+        if(curr >= MAX_CAN_ID) {
             wlist[i] = 0;
         } else if (CANLUT[curr].size == 0 ) {
             wlist[i] = 0;
@@ -107,7 +107,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
     OS_ERR err;
 
     //error check the id
-    if(CanData.ID >= NUM_CAN_IDS){return ERROR;}
+    if(CanData.ID >= MAX_CAN_ID){return ERROR;}
 
     CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
     
@@ -237,7 +237,7 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
 
     //error check the id
     MsgContainer->ID = (CANId_t) id;
-    if(MsgContainer->ID >= NUM_CAN_IDS){
+    if(MsgContainer->ID >= MAX_CAN_ID){
         MsgContainer = NULL;
         return ERROR;
     }

@@ -29,12 +29,9 @@
  */
 typedef enum { 
 	BPS_TRIP						= 0x002,
-	BPS_ALL_CLEAR					= 0x101,
-	BPS_CONTACTOR_STATE				= 0x102,
+	BPS_CONTACTOR					= 0x101,
 	STATE_OF_CHARGE 				= 0x106,
-	WDOG_TRIGGERED					= 0x107,
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
-	CHARGE_ENABLE 					= 0x10C,
 	MOTOR_DRIVE 					= 0x221,
 	MOTOR_POWER						= 0x222,
 	MOTOR_RESET 					= 0x223,
@@ -49,7 +46,7 @@ typedef enum {
 	ODOMETER_AMPHOURS 				= 0x24E,
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
 	CARDATA 						= 0x581,
-	NUM_CAN_IDS
+	MAX_CAN_ID
 } CANId_t;
 
 /**

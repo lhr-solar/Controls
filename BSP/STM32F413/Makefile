@@ -8,7 +8,11 @@ TARGET = controls-leader
 # building variables
 ######################################
 # optimization
-OPT = -Og -g
+ifeq ($(DEBUG), 0)
+OPT = -O3
+else
+OPT = -Og -g3
+endif
 
 #######################################
 # paths
@@ -32,15 +36,10 @@ $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/*.c) \
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/*.c) \
 $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-LIB/*.c)
 
-ifneq ($(TEST), none)
-TEST_FILE := $(TEST).c
-# This line adds everything in Apps/Src/*.c except for main.c
+# This line adds everything in Apps/Src/*.c except for main.c, then adds the test file
 C_SOURCES += \
 $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))	\
-$(wildcard ../../$(TEST_FILE))
-else
-C_SOURCES += $(wildcard ../../Apps/Src/*.c)
-endif
+../../$(TEST)	
 
 # ASM sources
 ASM_SOURCES =  \
@@ -111,8 +110,8 @@ C_INCLUDES =  \
 -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ \
 -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ \
 -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ \
--I../../RTOS/uCOS-III-STM32F4/uC-LIB/
-
+-I../../RTOS/uCOS-III-STM32F4/uC-LIB/ \
+-I../../Tests/Inc/ \
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
