@@ -54,8 +54,6 @@ int main(void) {
     assertOSError(err);
 
     while(1);
-
-    return 0;
 }
 
 void Task_Init(void *p_arg){
@@ -90,7 +88,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -108,7 +106,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -126,7 +124,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -144,7 +142,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -161,25 +159,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
-        (OS_ERR*)&err
-    );
-    assertOSError(err);
-
-    // Initialize CommandLine
-    OSTaskCreate(
-        (OS_TCB*)&CommandLine_TCB,
-        (CPU_CHAR*)"CommandLine",
-        (OS_TASK_PTR)Task_CommandLine,
-        (void*)NULL,
-        (OS_PRIO)TASK_COMMAND_LINE_PRIO,
-        (CPU_STK*)CommandLine_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_COMMAND_LINE_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
