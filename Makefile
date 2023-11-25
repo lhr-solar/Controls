@@ -10,25 +10,48 @@ DARKGRAY=\033[1;30m
 YELLOW=\033[0;33m
 NC=\033[0m # No Color
 
+# Set debug
 DEBUG ?= 1
 export DEBUG
 
-# Check if test file exists for the leader.
-ifneq (,$(wildcard Tests/Test_$(TEST).c))
-	TEST_LEADER ?= Tests/Test_$(TEST).c
-else
-	TEST_LEADER ?= Apps/Src/main.c
-endif
+# Set target
+TARGET ?= controls-leader
+export TARGET
 
-LEADER = controls-leader
+# Set build dir
+BUILD_DIR = ../../../Objects
+export BUILD_DIR
+
+# Set test file
+ifdef TEST
+	ifneq (,$(wildcard Tests/Test_$(TEST).c))
+		TEST = ../../../Tests/Test_$(TEST).c
+	else
+		TEST = $(error TEST is not found. Please make sure your testfile exists.)
+	endif
+endif
+export TEST
+
+# Set project c sources and includes
+PROJECT_DIRS = Apps Drivers
+PROJECT_C_SOURCES := $(foreach dir, $(PROJECT_DIRS), $(wildcard $(dir)/Src/*.c))
+PROJECT_C_INCLUDES := $(addsuffix /Inc, $(PROJECT_DIRS))
+
+# Add prefix for relative reference from Embedded-Sharepoint directory
+PROJECT_C_SOURCES := $(addprefix ../../../, $(PROJECT_C_SOURCES))
+PROJECT_C_INCLUDES := $(addprefix ../../../, $(PROJECT_C_INCLUDES))
+
+export PROJECT_C_SOURCES
+export PROJECT_C_INCLUDES
 
 all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
 
 .PHONY: stm32f413
 leader:
+	@echo $(PROJECT_C_SOURCES)
 	@echo "${YELLOW}Compiling for leader...${NC}"
-	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
+	$(MAKE) -C Embedded-Sharepoint/BSP/STM32F413
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
 
 flash:
@@ -49,7 +72,6 @@ help:
 	@echo "	To build a test, replace ${PURPLE}<Test type>${NC} with the name of the file"
 	@echo "	excluding the file type (.c) e.g. say you want to test Voltage.c, call"
 	@echo "		${ORANGE}make ${BLUE}stm32f413 ${ORANGE}TEST=${PURPLE}Voltage${NC}"
-
 
 clean:
 	rm -fR Objects

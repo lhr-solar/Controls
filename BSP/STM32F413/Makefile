@@ -39,14 +39,13 @@ $(wildcard ../../RTOS/uCOS-III-STM32F4/uC-LIB/*.c)
 # This line adds everything in Apps/Src/*.c except for main.c, then adds the test file
 C_SOURCES += \
 $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))	\
-../../$(TEST)	
+$(TEST)	
 
 # ASM sources
 ASM_SOURCES =  \
 ../../BSP/STM32F413/Src/startup_stm32f413xx.s \
 ../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/os_cpu_a.s \
 ../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/cpu_a.s
-
 
 #######################################
 # binaries
@@ -121,7 +120,6 @@ CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Werror -fdata-sections -ff
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
 endif
-
 
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
