@@ -49,7 +49,6 @@ all:
 
 .PHONY: stm32f413
 leader:
-	@echo $(PROJECT_C_SOURCES)
 	@echo "${YELLOW}Compiling for leader...${NC}"
 	$(MAKE) -C Embedded-Sharepoint/BSP/STM32F413
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
