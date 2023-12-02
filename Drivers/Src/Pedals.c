@@ -22,9 +22,7 @@ static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
 
 /**
  * @brief   Initializes the brake and accelerator by using the 
- *          BSP_ADC_Init function with parameters ACCELERATOR
- *          and BRAKE 
- * @param   None
+ *          BSP_ADC_Init function
  * @return  None
  */
 void Pedals_Init(){
@@ -36,7 +34,7 @@ void Pedals_Init(){
  *          by the ADC channel of the requested pedal (Accelerator or Brake),
  *          converts it to a percentage of the total distance pressed using 
  *          data from calibration testing, and returns it
- * @param   pedal_t, ACCELERATOR or BRAKE as defined in enum
+ * @param   pedal_t ACCELERATOR or BRAKE
  * @return  percent amount the pedal has been pressed in percentage
  */
 int8_t Pedals_Read(pedal_t pedal){

@@ -2,15 +2,10 @@
 Display Driver
 **************
 
-The display driver is responsible for all interactions with the display. As such, it includes many functions to set various screen elements' values. The driver defines a command struct, which represents a command to be sent to the display. The driver exposes the following functions:
-
-* ``Display_Error_t Display_Init(void)`` — Initializes UART and resets the display.
-
-* ``Display_Error_t Display_Reset(void)`` — Sends the reset command to the display.
-
-* ``Display_Error_t Display_Send(Display_Cmd_t cmd)`` — Send the given command to the display. In general, this function shouldn't be called directly. See FILLER for more details on where it's called.
-
-* ``Display_Error_t Display_Fault(fault_bitmap_t faultCode)`` — Display the fault page on the display, presenting ``faultCode`` to the user.
+The display driver is responsible for all interactions with the display.
+It includes functions to reset the display and to send commands to it.
+It also defines a display command struct, from which a command string is
+assembled and then sent out to the display.
 
 .. _cmd:
 
@@ -23,7 +18,7 @@ A more detailed description of the command structure is given below. For more in
 
 * ``char *attr`` — When the above is a component, the attribute of that component. Else, ``NULL``
 
-* ``char *op`` — The operation when the above two are set, usually ``=``. Else, NULL
+* ``char *op`` — The operation when the above two are set, usually ``=``. Else, ``NULL``
 
 * ``numArgs`` — The number of arguments the command takes. Should be 1 if setting component
 

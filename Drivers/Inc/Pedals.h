@@ -24,17 +24,23 @@ typedef enum
 } pedal_t;
 
 /**
- * @brief   Initialize the pedals
- * @param   None
+ * @brief   Initializes the brake and accelerator by using the 
+ *          BSP_ADC_Init function
  * @return  None
- */ 
+ */
+void Pedals_Init(){
+    BSP_ADC_Init();
+}
 void Pedals_Init(void);
 
 /**
- * @brief   Provides the pedal distance pressed in percetage (accelerator or brake)
- * @param   pedal_t pedal, ACCELERATOR or BRAKE as defined in enum
- * @return  distance the pedal has been pressed in percentage
- */ 
+ * @brief   Fetches the millivoltage value of the potentiomenter as provided 
+ *          by the ADC channel of the requested pedal (Accelerator or Brake),
+ *          converts it to a percentage of the total distance pressed using 
+ *          data from calibration testing, and returns it
+ * @param   pedal_t ACCELERATOR or BRAKE
+ * @return  percent amount the pedal has been pressed in percentage
+ */
 int8_t Pedals_Read(pedal_t pedal);
 
 

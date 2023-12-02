@@ -35,9 +35,8 @@ static void setContactor(contactor_t contactor, bool state) {
 /**
  * @brief   Initializes contactors to be used
  *          in connection with the Motor and Array
- * @return  None
  */ 
-void Contactors_Init() {
+void Contactors_Init(void) {
     BSP_GPIO_Init(CONTACTORS_PORT,  
                  (ARRAY_PRECHARGE_BYPASS_PIN) |
                  (MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN), 
@@ -57,9 +56,8 @@ void Contactors_Init() {
 /**
  * @brief   Returns the current state of 
  *          a specified contactor
- * @param   contactor the contactor
- *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
- * @return  The contactor's state (ON/OFF)
+ * @param   contactor MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR or ARRAY_PRECHARGE_BYPASS_CONTACTOR
+ * @return  Contactor state (ON/OFF)
  */ 
 bool Contactors_Get(contactor_t contactor) {
     State state = OFF;
@@ -79,8 +77,7 @@ bool Contactors_Get(contactor_t contactor) {
 
 /**
  * @brief   Sets the state of a specified contactor
- * @param   contactor the contactor
- *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
+ * @param   contactor MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR or ARRAY_PRECHARGE_BYPASS_CONTACTOR
  * @param   state the state to set (ON/OFF)
  * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set

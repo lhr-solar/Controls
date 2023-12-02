@@ -46,19 +46,17 @@ void Minions_Init(void);
 /**
  * @brief Reads the status of a pin
  * 
- * @param pin 
- * @return true is high
- * @return false is low
+ * @param pin the pin to read
+ * @return high or low
  */
 bool Minions_Read(pin_t pin);
 
 /**
  * @brief Updates the status of a pin
  * 
- * @param pin 
- * @param status 
- * @return true is fail (wrote to an input)
- * @return false is success (wrote to an output)
+ * @param pin the pint to read
+ * @param status high or low
+ * @return whether output was successfully written
  */
 bool Minions_Write(pin_t pin, bool status);
 

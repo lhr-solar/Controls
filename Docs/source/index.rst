@@ -52,7 +52,6 @@ Keep the docs clear and readible. Reach out to more experienced team members wit
    Drivers/Contactors
    Drivers/Display
    Drivers/Minions
-   Drivers/MotorController
    Drivers/Pedals
 
 .. toctree::
