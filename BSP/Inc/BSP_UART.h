@@ -4,7 +4,6 @@
  * @brief Header file for the library to interact
  * with the UART line
  * 
- * @defgroup BSP_UART
  * @addtogroup BSP_UART
  * @{
  */
@@ -56,4 +55,4 @@ uint32_t BSP_UART_Write(UART_t uart ,char *str, uint32_t len);
 #endif
 
 
-/* @} */
+/** @} */

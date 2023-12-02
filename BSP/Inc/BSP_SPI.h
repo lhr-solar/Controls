@@ -4,7 +4,6 @@
  * @brief Header file for the library to interact
  * over SPI with minion board(s)
  * 
- * @defgroup BSP_SPI
  * @addtogroup BSP_SPI
  * @{
  */
@@ -48,4 +47,4 @@ void BSP_SPI_Read(uint8_t* rxBuf, uint8_t rxLen);
 #endif
 
 
-/* @} */
+/** @} */

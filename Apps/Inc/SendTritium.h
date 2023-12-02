@@ -3,7 +3,6 @@
  * @file SendTritium.h
  * @brief 
  * 
- * @defgroup SendTritium
  * @addtogroup SendTritium
  * @{
  */
@@ -82,4 +81,4 @@ EXPOSE_SETTER(float, velocitySetpoint)
 #endif
 
 
-/* @} */
+/** @} */

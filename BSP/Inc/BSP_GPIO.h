@@ -4,7 +4,6 @@
  * @brief Header file for the library to interact
  * with the GPIO ports
  * 
- * @defgroup BSP_GPIO
  * @addtogroup BSP_GPIO
  * @{
  */
@@ -73,4 +72,4 @@ uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin);
 #endif
 
 
-/* @} */
+/** @} */

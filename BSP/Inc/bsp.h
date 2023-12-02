@@ -3,7 +3,6 @@
  * @file bsp.h
  * @brief 
  * 
- * @defgroup bsp
  * @addtogroup bsp
  * @{
  */
@@ -36,4 +35,4 @@
 
 #endif
 
-/* @} */
+/** @} */

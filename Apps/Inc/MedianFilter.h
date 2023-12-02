@@ -3,7 +3,6 @@
  * @file MedianFilter.h
  * @brief 
  * 
- * @defgroup MedianFilter
  * @addtogroup MedianFilter
  * @{
  */
@@ -218,4 +217,4 @@ GETSINGLE (MF_TYPE_NAME *filter, uint32_t channel) {
 #undef PUT
 #undef GETSINGLE 
 
-/* @} */
+/** @} */

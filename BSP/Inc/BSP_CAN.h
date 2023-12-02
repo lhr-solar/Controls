@@ -4,7 +4,6 @@
  * @brief Header file for the library to interact
  * with both CAN lines in the car
  * 
- * @defgroup BSP_CAN
  * @addtogroup BSP_CAN
  * @{
  */
@@ -51,4 +50,4 @@ ErrorStatus BSP_CAN_Read(CAN_t bus, uint32_t* id, uint8_t* data);
 #endif
 
 
-/* @} */
+/** @} */

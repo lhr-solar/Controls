@@ -3,7 +3,6 @@
  * @file CANbus.h
  * @brief 
  * 
- * @defgroup CANbus
  * @addtogroup CANbus
  * @{
  */
@@ -50,9 +49,10 @@ typedef enum {
 } CANId_t;
 
 /**
+ * \struct CANLUT_T
  * @brief Struct to use in CAN MSG LUT
- * @param idxEn Whether or not this message is part of a sequence of messages.
- * @param size Size of message's data. Should be a maximum of eight (in decimal).
+ * @param idxEn Whether or not this message is part of a sequence of messages
+ * @param size Size of message data in bytes, should not exceed 8
  */
 typedef struct {
 	bool idxEn: 1;
@@ -62,21 +62,14 @@ typedef struct {
 /**
  * Standard CAN packet
  * @param ID 	CANId_t value indicating which message we are trying to send
- * @param idx 	If message is part of a sequence of messages (for messages longer than 64 bits), this indicates the index of the message. 
- * 				This is not designed to exceed the 8bit unsigned max value.
- * @param data 	data of the message
+ * @param idx 	If message is part of a sequence of messages (for messages longer than 64 bits), this indicates the index of the message
+ * @param data 	message data
 */
 typedef struct {
 	CANId_t ID; 		
 	uint8_t idx; 		
 	uint8_t data[8]; 
 } CANDATA_t;
-
-/**
- * Standard identifier for whether or not a CAN transaction is blocking or not
- * (DEPRECATED)
- */
-// typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
 
 //Compatibility macros for deprecated enum
 #define CAN_BLOCKING true
@@ -85,27 +78,27 @@ typedef struct {
 
 /**
  * @brief   Initializes the CAN system for a given bus
- * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
- * @param   idWhitelist A list of CAN IDs that we want to receive. If NULL, we will receive all messages.
- * @param   idWhitelistSize The size of the whitelist.
- * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
+ * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported
+ * @param   idWhitelist A list of CAN IDs that we want to receive. If NULL, we will receive all messages
+ * @param   idWhitelistSize The size of the whitelist
+ * @return  ERROR if bus isn't CAN1 or CAN3, SUCCESS otherwise
  */
 ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize);
 
 /**
- * @brief   Transmits data onto the CANbus. Transmits up to 8 bytes at a time. If more is necessary, please use an IDX message.
+ * @brief   Transmits up to 8 bytes of data onto the CANbus. Use an IDX message to send more data
  * @param 	CanData 	The data to be transmitted
- * @param 	blocking 	Whether or not this transmission should be a blocking send.
- * @param  	bus			The bus to transmit on. This should be either CARCAN or MOTORCAN.
- * @return  ERROR if data wasn't sent, otherwise it was sent.
+ * @param 	blocking 	Whether or not this transmission should be a blocking send
+ * @param  	bus			The bus to transmit on. This should be either CARCAN or MOTORCAN
+ * @return  ERROR if data wasn't sent, SUCCESS otherwise
  */
 ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
 
 /**
- * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers.
- * @param   data 		pointer to where to store the CAN id of the received msg
- * @param   blocking 	Whether or not this read should be a blocking read
- * @param   bus 		The bus to use. This should either be CARCAN or MOTORCAN.
+ * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers
+ * @param   data 		where to store the received message
+ * @param   blocking 	Whether or not this read should be blocking
+ * @param   bus 		The bus to use, either be CARCAN or MOTORCAN
  * @returns ERROR if read failed, SUCCESS otherwise
  */
 ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
@@ -113,4 +106,4 @@ ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
 #endif
 
 
-/* @} */
+/** @} */

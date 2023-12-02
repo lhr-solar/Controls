@@ -1,12 +1,10 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 /**
- * @defgroup Minions
  * 
  * This modules allows us to use GPIO more easily 
  * for our application's purposes
  * 
- * @defgroup Minions
  * @addtogroup Minions
  * @{
  */
@@ -66,4 +64,4 @@ bool Minions_Write(pin_t pin, bool status);
 
 #endif 
 
-/* @} */
+/** @} */

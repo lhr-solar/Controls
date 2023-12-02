@@ -3,7 +3,6 @@
  * @file GPIOExpander.h
  * @brief 
  * 
- * @defgroup GPIOExpander
  * @addtogroup GPIOExpander
  * @{
  */
@@ -51,4 +50,4 @@ typedef struct _spi_message {
 
 #endif
 
-/* @} */
+/** @} */

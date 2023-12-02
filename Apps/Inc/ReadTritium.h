@@ -2,7 +2,6 @@
  * @file ReadTritium.h
  * @brief 
  * 
- * @defgroup ReadTritium
  * @addtogroup ReadTritium
  * @{
  */
@@ -40,4 +39,4 @@ float Motor_Velocity_Get();
 #endif
 
 
-/* @} */
+/** @} */

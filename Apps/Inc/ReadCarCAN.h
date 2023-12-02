@@ -3,7 +3,6 @@
  * @file ReadCarCAN.h
  * @brief 
  * 
- * @defgroup ReadCarCAN
  * @addtogroup ReadCarCAN
  * @{
  */
@@ -36,4 +35,4 @@ bool ChargeEnable_Get(void);
 #endif
 
 
-/* @} */
+/** @} */

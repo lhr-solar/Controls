@@ -6,7 +6,6 @@
  * This contains function prototypes relevant to sending/receiving messages
  * to/from our Nextion HMI.
  * 
- * @defgroup Display
  * @addtogroup Display
  * @{
  */
@@ -105,4 +104,4 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
 #endif
 
 
-/* @} */
+/** @} */

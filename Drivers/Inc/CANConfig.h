@@ -3,7 +3,6 @@
  * @file CANConfig.h
  * @brief 
  * 
- * @defgroup CANConfig
  * @addtogroup CANConfig
  * @{
  */
@@ -27,4 +26,4 @@ extern const CANLUT_T CANLUT[MAX_CAN_ID];
 #endif
 
 
-/* @} */
+/** @} */
