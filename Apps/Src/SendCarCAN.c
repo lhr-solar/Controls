@@ -83,7 +83,7 @@ void SendCarCAN_Init(void) {
 */
 void Task_SendCarCAN(void *p_arg){
     OS_ERR err;
-    CPU_TS ticks;
+    // CPU_TS ticks;
 
     CANDATA_t message;
     memset(&message, 0, sizeof message);
@@ -94,7 +94,7 @@ void Task_SendCarCAN(void *p_arg){
         (CPU_CHAR*)"PutIOState",
         (OS_TASK_PTR)Task_PutIOState,
         (void*)NULL,
-        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO, // Round-robin with SendCarCAN task
+        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
         (CPU_STK*)putIOState_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
@@ -109,20 +109,20 @@ void Task_SendCarCAN(void *p_arg){
     while (1) {
           
         // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
-        OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-        assertOSError(err);
+        // OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        // assertOSError(err);
 
-        OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-        assertOSError(err);
+        // OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        // assertOSError(err);
     
-        bool res = SendCarCAN_Q_get(&CANFifo, &message);
-        assertOSError(err);
+        // bool res = SendCarCAN_Q_get(&CANFifo, &message);
+        // assertOSError(err);
 
-        OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
-        assertOSError(err);
+        // OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
+        // assertOSError(err);
 
-        if(res) CANbus_Send(message, true, CARCAN);
-        
+        // if(res) CANbus_Send(message, true, CARCAN);
+        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_NONE, &err);
     }
 }
 
@@ -158,6 +158,5 @@ static void Task_PutIOState(void *p_arg) {
     while (1) {
         putIOState();
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
-    }
-   
+    }  
 }
