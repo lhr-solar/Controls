@@ -112,22 +112,22 @@ void Task_Init(void *p_arg){
     // assertOSError(err);
 
     // Initialize ReadCarCAN
-    // OSTaskCreate(
-    //     (OS_TCB*)&ReadCarCAN_TCB,
-    //     (CPU_CHAR*)"ReadCarCAN",
-    //     (OS_TASK_PTR)Task_ReadCarCAN,
-    //     (void*)NULL,
-    //     (OS_PRIO)TASK_READ_CAR_CAN_PRIO,
-    //     (CPU_STK*)ReadCarCAN_Stk,
-    //     (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-    //     (CPU_STK_SIZE)TASK_READ_CAR_CAN_STACK_SIZE,
-    //     (OS_MSG_QTY)0,
-    //     (OS_TICK)0,
-    //     (void*)NULL,
-    //     (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
-    //     (OS_ERR*)&err
-    // );
-    // assertOSError(err);
+    OSTaskCreate(
+        (OS_TCB*)&ReadCarCAN_TCB,
+        (CPU_CHAR*)"ReadCarCAN",
+        (OS_TASK_PTR)Task_ReadCarCAN,
+        (void*)NULL,
+        (OS_PRIO)TASK_READ_CAR_CAN_PRIO,
+        (CPU_STK*)ReadCarCAN_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_READ_CAR_CAN_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
+        (OS_ERR*)&err
+    );
+    assertOSError(err);
 
     // Initialize UpdateDisplay
     // OSTaskCreate(

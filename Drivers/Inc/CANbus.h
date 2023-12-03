@@ -29,7 +29,7 @@
  */
 typedef enum { 
 	BPS_TRIP						= 0x002,
-	BPS_CONTACTOR					= 0x101,
+	BPS_CONTACTOR					= 0x102,
 	STATE_OF_CHARGE 				= 0x106,
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
 	MOTOR_DRIVE 					= 0x221,
