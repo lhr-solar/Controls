@@ -138,6 +138,7 @@ static void putIOState(void){
     // Get minion information
     for(pin_t pin = 0; pin < NUM_PINS; pin++){
         bool pinState = Minions_Read(pin);
+        if(pin == IGN_1 || pin == IGN_2) pinState = !pinState;
         message.data[2] |= pinState << pin;
     }
     
@@ -146,6 +147,8 @@ static void putIOState(void){
         bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
         message.data[3] |= contactorState << contactor;
     }
+    // Tell BPS if the array contactor should be on
+    message.data[3] |= (!Minions_Read(IGN_1) || !Minions_Read(IGN_2)) << 2;
 
     CANbus_Send(message, true, CARCAN);
 }
