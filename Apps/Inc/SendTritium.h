@@ -12,7 +12,7 @@
 
 #include "common.h"
 
-#define SENDTRITIUM_PRINT_MES
+//#define SENDTRITIUM_PRINT_MES
 
 #define MOTOR_MSG_PERIOD 100
 #define FSM_PERIOD 100

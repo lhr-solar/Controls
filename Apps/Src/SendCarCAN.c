@@ -26,7 +26,7 @@ CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 
 //fifo
 #define FIFO_TYPE CANDATA_t
-#define FIFO_SIZE 16
+#define FIFO_SIZE 50
 #define FIFO_NAME SendCarCAN_Q
 #include "fifo.h"
 
@@ -48,16 +48,25 @@ uint8_t get_SendCarCAN_Q_Space(void) {
  * @brief Wrapper to put new message in the CAN queue
 */
 void SendCarCAN_Put(CANDATA_t message){
-    OS_ERR err;
+    OS_ERR err = OS_ERR_NONE;
     CPU_TS ticks;
-
-    OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(err);
+    bool success = false;
     
-    bool success = SendCarCAN_Q_put(&CANFifo, message);
+    static uint8_t carcan_ctr = 0;
+    
+    if(carcan_ctr > 3){
+        OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        assertOSError(err);
 
-    OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
-    assertOSError(err);
+        success = SendCarCAN_Q_put(&CANFifo, message);
+
+        OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
+        assertOSError(err);
+
+        carcan_ctr = 0;
+    }
+    carcan_ctr++;
+
 
     if(success) OSSemPost(&CarCAN_Sem4, OS_OPT_POST_1, &err);
     assertOSError(err);
@@ -83,7 +92,7 @@ void SendCarCAN_Init(void) {
 */
 void Task_SendCarCAN(void *p_arg){
     OS_ERR err;
-    // CPU_TS ticks;
+    CPU_TS ticks;
 
     CANDATA_t message;
     memset(&message, 0, sizeof message);
@@ -109,20 +118,18 @@ void Task_SendCarCAN(void *p_arg){
     while (1) {
           
         // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
-        // OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-        // assertOSError(err);
+        OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        assertOSError(err);
 
-        // OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-        // assertOSError(err);
+        OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        assertOSError(err);
     
-        // bool res = SendCarCAN_Q_get(&CANFifo, &message);
-        // assertOSError(err);
+        bool res = SendCarCAN_Q_get(&CANFifo, &message);
 
-        // OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
-        // assertOSError(err);
+        OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
+        assertOSError(err);
 
-        // if(res) CANbus_Send(message, true, CARCAN);
-        OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_NONE, &err);
+        if(res) CANbus_Send(message, true, CARCAN);
     }
 }
 

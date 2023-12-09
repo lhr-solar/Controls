@@ -62,15 +62,22 @@ void Task_ReadTritium(void *p_arg){
 	CANDATA_t dataBuf = {0};
 
 	// Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
-	OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
-	assertOSError(err);
-	OSTmrStart(&MotorWatchdog, &err);
-	assertOSError(err);
+	static bool watchdogCreated = false;
 
 	while (1){
 		ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
 
 		if (status == SUCCESS){
+            if(!watchdogCreated){
+                OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
+                assertOSError(err);
+
+                OSTmrStart(&MotorWatchdog, &err);
+                assertOSError(err);
+
+                watchdogCreated = true;
+            }
+
 			switch(dataBuf.ID){
 				case MOTOR_STATUS:{
 					// motor status error flags is in bytes 4-5
@@ -108,7 +115,7 @@ void Task_ReadTritium(void *p_arg){
             SendCarCAN_Put(dataBuf); // Forward message on CarCAN for telemetry
 		}
 
-		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+		// OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
 		assertOSError(err);
 	}
 }

@@ -32,7 +32,7 @@
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f) // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
-#define BRAKE_PEDAL_THRESHOLD 15  // percent
+#define BRAKE_PEDAL_THRESHOLD 30  // percent
 #define ACCEL_PEDAL_THRESHOLD 10 // percent
 
 #define ONEPEDAL_BRAKE_THRESHOLD 25 // percent
