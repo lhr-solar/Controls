@@ -93,9 +93,6 @@ void Task_ReadTritium(void *p_arg){
             
             SendCarCAN_Put(dataBuf); // Forward message on CarCAN for telemetry
 		}
-
-		// OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-		assertOSError(err);
 	}
 }
 
