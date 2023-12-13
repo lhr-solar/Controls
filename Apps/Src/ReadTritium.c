@@ -21,18 +21,25 @@
 
 
 tritium_error_code_t Motor_FaultBitmap = T_NONE; //initialized to no error, changed when the motor asserts an error
-static float Motor_RPM = 0;
-static float Motor_Velocity = 0;
-
-static OS_TMR MotorWatchdog;
 
 // Function prototypes
 static void assertTritiumError(tritium_error_code_t motor_err);
 
-// Callback for motor watchdog
+// Motor watchdog
+static OS_TMR MotorWatchdog;
 static void motorWatchdog(void *tmr, void *p_arg) {
     // Attempt to restart 3 times, then fail
     assertTritiumError(T_MOTOR_WATCHDOG_TRIP);
+}
+
+static float Motor_RPM = 0;
+float Motor_RPM_Get(){ //getter function for motor RPM
+	return Motor_RPM;
+}
+
+static float Motor_Velocity = 0;
+float Motor_Velocity_Get(){ //getter function for motor velocity
+	return Motor_Velocity;
 }
 
 
@@ -62,49 +69,56 @@ void Task_ReadTritium(void *p_arg){
 	CANDATA_t dataBuf = {0};
 
 	// Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
-	OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
+	OSTmrCreate(
+		&MotorWatchdog, 
+		"Motor watchdog",
+		MOTOR_TIMEOUT_TICKS, 
+		MOTOR_TIMEOUT_TICKS, 
+		OS_OPT_TMR_PERIODIC, 
+		motorWatchdog, 
+		NULL, 
+		&err
+	);
+
 	assertOSError(err);
 	OSTmrStart(&MotorWatchdog, &err);
 	assertOSError(err);
 
 	while (1){
 		ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
+		if (status != SUCCESS) continue;
 
-		if (status == SUCCESS){
-			switch(dataBuf.ID){
-				case MOTOR_STATUS:{
-					// motor status error flags is in bytes 4-5
-					Motor_FaultBitmap = *((uint16_t*)(&dataBuf.data[4])); //Storing error flags into Motor_FaultBitmap
-					assertTritiumError(Motor_FaultBitmap);
-					break;
-				}
-				
-				case VELOCITY:{
-                    OSTmrStart(&MotorWatchdog, &err); // Reset the watchdog
-                    assertOSError(err);
-                    memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
-                    memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
-
-					//Motor RPM is in bytes 0-3
-					Motor_RPM = *((float*)(&dataBuf.data[0]));
-
-					//Car Velocity (in m/s) is in bytes 4-7
-					Motor_Velocity = *((float*)(&dataBuf.data[4]));
-					uint32_t Car_Velocity = Motor_Velocity;
-					
-					Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
-					Car_Velocity = ((Car_Velocity / 160934) * 10); //Converting from m/h to mph, multiplying by 10 to make value "larger" for displaying
-
-					UpdateDisplay_SetVelocity(Car_Velocity);
-
-				}
-
-				default:{
-					break; //for cases not handled currently
-				}
-
+		switch(dataBuf.ID){
+			case MOTOR_STATUS:{
+				// motor status error flags is in bytes 4-5
+				memcpy(&Motor_FaultBitmap, &dataBuf.data[4], sizeof(uint16_t)); //Storing error flags into Motor_FaultBitmap
+				assertTritiumError(Motor_FaultBitmap);
+				break;
 			}
+			
+			case VELOCITY:{
+				OSTmrStart(&MotorWatchdog, &err); // Reset the watchdog
+				assertOSError(err);
+
+				//Motor RPM is in bytes 0-3
+				memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+
+				//Car Velocity (in m/s) is in bytes 4-7
+				memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+
+				//Converting from m/s to m/h, using fixed point factor of 100
+				uint32_t Car_Velocity = Motor_Velocity;
+				Car_Velocity = ((Car_Velocity * 100) * 3600); 
+
+				//Converting from m/h to mph, multiplying by 10 to make value "larger" for displaying
+				Car_Velocity = ((Car_Velocity / 160934) * 10); 
+				UpdateDisplay_SetVelocity(Car_Velocity);
+			}
+
+			default: break;
+
 		}
+
 
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
 		assertOSError(err);
@@ -118,13 +132,6 @@ static void restartMotorController(void){
 }
 
 
-float Motor_RPM_Get(){ //getter function for motor RPM
-	return Motor_RPM;
-}
-
-float Motor_Velocity_Get(){ //getter function for motor velocity
-	return Motor_Velocity;
-}
 
 
 /**
