@@ -46,6 +46,7 @@ uint8_t get_SendCarCAN_Q_Space(void) {
 
 /**
  * @brief Wrapper to put new message in the CAN queue
+ * @param message the CAN message to put in SendCarCAN Queue
 */
 void SendCarCAN_Put(CANDATA_t message){
     OS_ERR err;
