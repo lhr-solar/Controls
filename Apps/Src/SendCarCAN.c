@@ -40,9 +40,11 @@ static void Task_PutIOState(void *p_arg);
 /**
  * @brief return the space left in SendCarCAN_Q for debug purposes
 */
+#ifdef DEBUG
 uint8_t get_SendCarCAN_Q_Space(void) {
     return (CANFifo.get - CANFifo.put - 1) % (sizeof CANFifo.buffer / sizeof CANFifo.buffer[0]);
 }
+#endif
 
 /**
  * @brief Wrapper to put new message in the CAN queue
