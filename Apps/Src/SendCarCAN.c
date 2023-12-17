@@ -2,7 +2,10 @@
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendCarCAN.c
  * @brief Function implementations for the SendCarCAN application.
+ * @brief Function implementations for the SendCarCAN application.
  * 
+ * This contains functions relevant to placing CAN messages in a CarCAN queue and periodically sending
+ * those messages in the SendCarCAN task.
  * This contains functions relevant to placing CAN messages in a CarCAN queue and periodically sending
  * those messages in the SendCarCAN task.
  * 
@@ -40,9 +43,11 @@ static void Task_PutIOState(void *p_arg);
 /**
  * @brief return the space left in SendCarCAN_Q for debug purposes
 */
+#ifdef DEBUG
 uint8_t get_SendCarCAN_Q_Space(void) {
     return (CANFifo.get - CANFifo.put - 1) % (sizeof CANFifo.buffer / sizeof CANFifo.buffer[0]);
 }
+#endif
 
 /**
  * @brief Wrapper to put new message in the CAN queue
