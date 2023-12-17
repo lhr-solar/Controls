@@ -62,13 +62,10 @@ float velocitySetpoint = 0;
 float cruiseVelSetpoint = 0;
 
 // Current observed velocity
-
-#ifndef SENDTRITIUM_EXPOSE_VARS
 static float velocityObserved = 0;
 
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
-#endif
 
 // Debouncing counters
 static uint8_t onePedalCounter = 0;
