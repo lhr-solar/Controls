@@ -8,38 +8,31 @@ This repository contains all code related to Longhorn Racing Solar's Controls Sy
 1. [Project Status](#project-status)
 1. [Getting Started](#getting-started)
 	1. [Workspace Setup](#workspace-setup)
-	1. [Building](#building)
-	2. [Running Tests](#running-tests)
-		1. [Other Tests](#other-tests)
-	1. [Installation](#installation)
-	1. [Usage](#usage)
+	1. [Build System](#build-system)
+    1. [Running Tests](#running-tests)
+    1. [Formatting](#formatting)
+    1. [Usage](#usage)
 1. [Release Process](#release-process)
 	1. [Versioning](#versioning)
-	1. [Payload](#payload)
-1. [How to Get Help](#how-to-get-help)
 1. [Contributing](#contributing)
-1. [Further Reading](#further-reading)
+    1. [Branch Convention](#branch-convention)
+    1. [Review Process](#review-process)
+1. [Documentation](#documentation)
 1. [License](#license)
 1. [Authors](#authors)
 1. [Acknowledgments](#acknowledgements)
 
 ## About the Project
 
-Here you can provide more details about the project
-* What features does your project provide?
-* Short motivation for the project? (Don't be too long winded)
-* Links to the project site
+This repository contains all code related to [Longhorn Racing Solar](https://www.longhornracing.org/solar-vehicle-team)'s Controls System, affiliated with **UT Austin**. The Controls System is responsible for driver interactions, motor control, and lighting systems control. The system is built on [custom hardware](https://github.com/lhr-solar/Controls-LeaderPCB) and an ARM Cortex-M4 Processor (STM32F413).
 
-```
-Show some example code to describe what your project does
-Show some of your APIs
-```
+For more information, see our [documentation](https://controls-docs.readthedocs.io/en/latest/).
 
 **[Back to top](#table-of-contents)**
 
 ## Project Status
 
-The Controls System is currently on release **M2.0** for the 2022-24 build cycle, to compete in FSGP 2024. See our [Release Process](#release-process).
+The Controls System is currently on release **M2.0** for the 2022-24 build cycle, to compete in FSGP 2024. See our [Versioning](#versioning).
 
 **[Back to top](#table-of-contents)**
 
@@ -72,7 +65,7 @@ The preferred development environment for the system is VSCode on a Linux machin
     * GitLens
     * Subway Surfers
 
-### Building
+### Build System
 
 We use the GNU Make utility as our build system.
 
@@ -81,42 +74,84 @@ Examples:
 make leader
 make leader TEST=HelloWorld
 make leader TEST=HelloWorld DEBUG=1
+make flash
+make docs
 ```
 
 ### Running Tests
 
-WIP: A formal test framework has yet to be defined for the Controls system.
+WIP: A formal test framework has yet to be defined for the Controls system. For now, ```make leader TEST=TestName``` should build the Controls system excluding **main.c** and including **Tests/Test_TestName.c**
 
-#### Other Tests
+### Formatting
 
-If you have formatting checks, coding style checks, or static analysis tests that must pass before changes will be considered, add a section for those and provide instructions
+WIP: clang-format and clang-tidy are in the process of being integrated into our workflow.
 
-WIP: clang-format and clang-tidy are used
+### Usage
 
+Follow our documentation to set up the Controls test rig, power the board with 12V, and use ```make flash``` to flash the board with your ```Objects/controls-leader.elf``` executable, either built from source or placed in the Objects folder from your intended release.
+
+For debugging purposes, make sure there is a Nucleo plugged into your computer and connected to the leaderboard via JTAG. Run ```openocd``` in one bash session and ```gdb-multiarch``` in another, then attach to the process openocd has started.
 
 **[Back to top](#table-of-contents)**
 
 ## Release Process
 
-Talk about the release process. How are releases made? What cadence? How to get new releases?
+Each release commit will be tagged with the version number (**MX.X.X**) and live on a production branch (**production/MX.X**). The controls-leader.elf binary corresponding to the release will also be uploaded to our [Releases](https://github.com/lhr-solar/Controls/releases) page on Github.
 
 ### Versioning
 
-This project uses [Semantic Versioning](http://semver.org/). For a list of available versions, see the [repository tag list](https://github.com/your/project/tags).
+Our versioning system does NOT follow semantic versioning, but instead is based around iterations of the Longhorn Racing Solar Car. Each major version change corresponds to a different iteration of the car for a different year of competition.
+
+Current versions:
+- **M1** is for the FSGP 2022 Solar Car
+- **M2** is for the FSGP 2024 Solar Car
+- **M3** is for the FSGP 2025 Solar Car
+
+Intermediate version names usually refers to a major change that exists for the same vehicle, such as breaking API changes or a rearchitecture.
 
 **[Back to top](#table-of-contents)**
-
-## How to Get Help
-
-Provide any instructions or contact information for users who need to get further help with your project.
 
 ## Contributing
 
+### Branch Convention
+
+**Feature** branches (```feature/*-###```) are for features or bug fixes that are specifically associated with an existing issue ticket.
+- Feature branches end with the issue ticket number that the feature is solving.
+
+**Development** branches (```dev/*```) are for temporary development purposes or hotfixes.
+- If a feature, bug, or enhancement starts being worked on without an existing issue ticket, a development branch can be created for it. 
+- Hotfixes without associated issue tickets can also be created on development branches and merged from a PR without the need for a feature branch, given that the change is small.
+- Any other experimentation or temporary needs can live on a development branch.
+
+**Integration** branches (```integration/*-###```) are for integration testing.
+- This includes integration between Controls and other systems on the vehicle, as well as integration between our internal Applications/Drivers.
+- Integration branches end with the issue ticket number for the specific integration being done.
+
+**Production** branches (```production/MX.X```) are for specific versions of the codebase. ```master``` will always host the latest version.
+
+### Review Process
+
+Commit frequently into your branch. Create a Pull Request whenever you are ready to add you working code to the master branch. You must select 2 reviewers for approval. Any trained contributors are allowed to review and approve code. See our [PR Template](#PULL_REQUEST_TEMPLATE.md) for more review guidelines.
+
 **[Back to top](#table-of-contents)**
 
-## Further Reading
+## Documentation
 
-Provide links to other relevant documentation here
+### Controls System
+[LHRS Controls ReadTheDocs](https://controls-docs.readthedocs.io/en/latest/)
+
+### RTOS
+[uCOS-III Documentation](https://www.analog.com/media/en/dsp-documentation/software-manuals/Micrium-uCOS-III-UsersManual.pdf)
+
+[FreeRTOS Developer Documentation](https://www.freertos.org/features.html)
+
+### Hardware
+[STM32F413 Documentation](https://www.st.com/resource/en/reference_manual/rm0430-stm32f413423-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+
+[Controls Leader Repo](https://github.com/lhr-solar/Controls-LeaderPCB)
+
+### Simulator
+[Renode Simulator Documentation](https://renode.readthedocs.io/en/latest/)
 
 **[Back to top](#table-of-contents)**
 
@@ -130,14 +165,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## Authors
 
-* **[Phillip Johnston](https://github.com/phillipjohnston)** - *Initial work* - [Embedded Artistry](https://github.com/embeddedartistry)
-
-Also see the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-**[Back to top](#table-of-contents)**
-
-## Acknowledgments
-
-Provide proper credits, shout-outs, and honorable mentions here. Also provide links to relevant repositories, blog posts, or contributors worth mentioning.
+See the list of [contributors](https://github.com/lhr-solar/Controls/contributors) who participated in this project.
 
 **[Back to top](#table-of-contents)**
