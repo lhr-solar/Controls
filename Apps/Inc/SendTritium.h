@@ -23,9 +23,6 @@
         GEAR(FORWARD_GEAR),   \
         GEAR(NEUTRAL_GEAR),  \
         GEAR(REVERSE_GEAR),   \
-        GEAR(FORWARD_GEAR),   \
-        GEAR(NEUTRAL_GEAR),  \
-        GEAR(REVERSE_GEAR),   \
 
 typedef enum GEAR_ENUM {
     FOREACH_Gear(GENERATE_ENUM)
@@ -51,23 +48,6 @@ typedef struct TritiumState{
     void (*stateHandler)(void);
     void (*stateDecider)(void);
 } TritiumState_t;
-
-#ifdef SENDTRITIUM_EXPOSE_VARS
-// Inputs
-extern bool cruiseEnable;
-extern bool cruiseSet;
-extern bool onePedalEnable;
-extern bool regenEnable;
-
-extern uint8_t brakePedalPercent;
-extern uint8_t accelPedalPercent;
-
-extern Gear_t gear;
-
-extern TritiumState_t state;
-extern float velocityObserved;
-extern float cruiseVelSetpoint;
-#endif
 
 #ifdef SENDTRITIUM_EXPOSE_VARS
 // Inputs
