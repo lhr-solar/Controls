@@ -35,7 +35,12 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[TEMPERATURE] 					= {NOIDX, DOUBLE}, /**     TEMPERATURE                     **/
 	[ODOMETER_AMPHOURS] 			= {NOIDX, DOUBLE}, /**     ODOMETER_AMPHOURS               **/
 	[ARRAY_CONTACTOR_STATE_CHANGE] 	= {NOIDX, BYTE  }, /**     ARRAY_CONTACTOR_STATE_CHANGE    **/
-	[CARDATA] 						= {NOIDX, DOUBLE}, /**     CARDATA			               **/
+	[MOTOR_DRIVE] 					= {NOIDX, DOUBLE}, /**     MOTOR_DRIVE                     **/
+	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
+	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
+	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
+	[IO_STATE] 				        = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
+    [CONTROL_MODE]                  = {NOIDX, BYTE  }, /**     CONTROL_MODE			           **/
 };
 
 /**
