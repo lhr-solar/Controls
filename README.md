@@ -1,7 +1,5 @@
 # LHRS Controls
 
-This repository contains all code related to Longhorn Racing Solar's Controls System. The Controls System is responsible for driver interactions, motor control, and lighting systems control.
-
 ## Table of Contents
 
 1. [About the Project](#about-the-project)
@@ -12,6 +10,7 @@ This repository contains all code related to Longhorn Racing Solar's Controls Sy
     1. [Running Tests](#running-tests)
     1. [Formatting](#formatting)
     1. [Usage](#usage)
+        1. [Debugging](#debugging)
 1. [Release Process](#release-process)
 	1. [Versioning](#versioning)
 1. [Contributing](#contributing)
@@ -32,17 +31,42 @@ For more information, see our [documentation](https://controls-docs.readthedocs.
 
 ## Project Status
 
-The Controls System is currently on release **M2.0** for the 2022-24 build cycle, to compete in FSGP 2024. See our [Versioning](#versioning).
+The Controls System is currently on release **M2.0** for the 2022-24 build cycle to compete in [FSGP 2024](https://www.americansolarchallenge.org/the-competition/2024-american-solar-challenge/). See our [Versioning](#versioning).
+
+LHR Solar uses ClickUp as our project management tool. To access the [our ClickUp board](https://app.clickup.com/9011033583/v/f/90110413188), make sure a system lead has added you as a member.
+
+We also use GitHub Projects to track software releases. See our [active projects](https://github.com/lhr-solar/Controls/projects?query=is%3Aopen).
 
 **[Back to top](#table-of-contents)**
 
 ## Getting Started
 
-The preferred development environment for the system is VSCode on a Linux machine. Options for developers on Windows environments include WSL or a Virtual Machine. Instructions provided here will assume that you have a working Linux environment with terminal control.
+The preferred development environment for the system is VSCode on a Linux machine. Options for developers not on a native Linux machine include WSL (specifically WSL2, supported on Windows) or a Virtual Machine (supported on both Windows and macOS). Instructions provided here will assume that you have a working Linux environment with terminal control.
+
+Currently Ubuntu 20.04 and 22.04 (preferably Server edition) are the latest tested & supported Linux distributions. Other options may work but have not been rigorously tested.
+
+[WSL2 Install Guide (Preferred)](https://learn.microsoft.com/en-us/windows/wsl/install)
+
+For WSL2 USB support (for flashing the leaderboard), additional instructions will need to be followed. This guide assumes you are using either Windows 10 or 11. [USB/IP on WSL2](https://learn.microsoft.com/en-us/windows/wsl/connect-usb)
+
+[Ubuntu 22.04 Server ISO Download](https://releases.ubuntu.com/jammy/) (Server edition is best, not desktop)
+
+[Ubuntu 22.04 VM (VMWare) Install Guide](https://automaticaddison.com/how-to-install-ubuntu-22-04-virtual-machine-on-a-windows-pc/)
+
+[Ubuntu 22.04 VM (VirtualBox) Install Guide](https://linuxhint.com/install-ubuntu22-04-virtual-box/)
+
+In order to use a VM, you will need to set up VSCode via SSH to remote into the machine. You will not need to do this if using WSL as VSCode supports direct connection to WSL.
+
+[SSH Setup from Windows -> Linux VM](https://dev.to/risafj/ssh-key-authentication-for-absolute-beginners-in-plain-english-2m3f)
+
+Finally, it is a good idea to set up ssh keys for GitHub. Make sure you do this on your **Linux machine**.
+
+[Generating SSH Key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+[Adding SSH Key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
 
 ### Workspace Setup
 
-1. Clone this repository via [SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh): ```git clone --recurse-submodules git@github.com:lhr-solar/Controls.git```.
+1. Clone this repository via [SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh): ```git clone --recurse-submodules git@github.com:lhr-solar/Controls.git```. Make sure to include the --recurse-submodules flag, or run ```git submodule update --init --recursive``` to pull all necessary submodules.
 
 1. In VSCode, remote into your Linux machine if needed. Click **File** &#8594; **Open Workspace from File** and select the workspace located in ```.vscode/LHR.code-workspace```.
 
@@ -80,7 +104,9 @@ make docs
 
 ### Running Tests
 
-WIP: A formal test framework has yet to be defined for the Controls system. For now, ```make leader TEST=TestName``` should build the Controls system excluding **main.c** and including **Tests/Test_TestName.c**
+WIP: A formal test framework has yet to be defined for the Controls system. 
+
+For now, ```make leader TEST=TestName``` should build the Controls system excluding **Apps/Src/main.c** and including **Tests/Test_TestName.c**.
 
 ### Formatting
 
@@ -88,9 +114,15 @@ WIP: clang-format and clang-tidy are in the process of being integrated into our
 
 ### Usage
 
-Follow our documentation to set up the Controls test rig, power the board with 12V, and use ```make flash``` to flash the board with your ```Objects/controls-leader.elf``` executable, either built from source or placed in the Objects folder from your intended release.
+Follow our [documentation](https://utexas.sharepoint.com/:w:/s/ENGR-LonghornRacing/EUx6dS9swT1Js18ZlOrAfJIBKsM_7dLuQ818EnGZKrpbAQ?e=PyRIyh) to set up the Controls test rig, power the board with 12V, and use ```make flash``` to flash the board with your ```Objects/controls-leader.elf``` executable, either built from source using ```make leader``` or placed in the Objects folder from your intended release.
 
-For debugging purposes, make sure there is a Nucleo plugged into your computer and connected to the leaderboard via JTAG. Run ```openocd``` in one bash session and ```gdb-multiarch``` in another, then attach to the process openocd has started.
+#### Debugging
+OpenOCD is a debugger program that is open source and compatible with the STM32F413. GDB is a debugger program that can be used to step through a program as it is being run on the board. To use, you need two terminals open, as well as a USB connection to the ST-Link programmer (as if you were going to flash the program to the board). 
+1. Run ```openocd``` in one terminal. Make sure it does not crash and there are no errors. You should see that it tells you what port to connect to (usually :3333).
+1. In the other terminal, start gdb with the command ```gdb-multiarch ./Objects/controls-leader.elf``` (assuming that you are doing this in the root of the project directory).
+1. This will launch GDB and read in all of the symbols from the program that you are running on the board. In order to attach gdb to the board, execute the command ```target extended-remote :3333```, which will connect to the openocd session started earlier.
+
+**Note:** If you get an error message for Permission denied, try giving openocd read/write permissions using chmod: ```chmod 764 openocd```
 
 **[Back to top](#table-of-contents)**
 
@@ -107,7 +139,7 @@ Current versions:
 - **M2** is for the FSGP 2024 Solar Car
 - **M3** is for the FSGP 2025 Solar Car
 
-Intermediate version names usually refers to a major change that exists for the same vehicle, such as breaking API changes or a rearchitecture.
+Intermediate version names usually refer to a major change that exists for the same vehicle, such as breaking API changes or a rearchitecture.
 
 **[Back to top](#table-of-contents)**
 
@@ -117,6 +149,7 @@ Intermediate version names usually refers to a major change that exists for the 
 
 **Feature** branches (```feature/*-###```) are for features or bug fixes that are specifically associated with an existing issue ticket.
 - Feature branches end with the issue ticket number that the feature is solving.
+- Unit testing should be done on these feature branches to ensure that the feature works on an isolated level.
 
 **Development** branches (```dev/*```) are for temporary development purposes or hotfixes.
 - If a feature, bug, or enhancement starts being worked on without an existing issue ticket, a development branch can be created for it. 
@@ -131,7 +164,7 @@ Intermediate version names usually refers to a major change that exists for the 
 
 ### Review Process
 
-Commit frequently into your branch. Create a Pull Request whenever you are ready to add you working code to the master branch. You must select 2 reviewers for approval. Any trained contributors are allowed to review and approve code. See our [PR Template](#PULL_REQUEST_TEMPLATE.md) for more review guidelines.
+Commit frequently to your branch. A good rule of thumb is to push at natural stopping points + the end of each work session or workday, or more frequently that that if necessary. Create a pull request whenever you are ready to add you working code to the master branch. You must select 2 reviewers for approval. Any trained contributors are allowed to review and approve code. See our [PR Template](#PULL_REQUEST_TEMPLATE.md) for more review guidelines.
 
 **[Back to top](#table-of-contents)**
 
@@ -148,7 +181,7 @@ Commit frequently into your branch. Create a Pull Request whenever you are ready
 ### Hardware
 [STM32F413 Documentation](https://www.st.com/resource/en/reference_manual/rm0430-stm32f413423-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 
-[Controls Leader Repo](https://github.com/lhr-solar/Controls-LeaderPCB)
+[Controls Leaderboard Repo](https://github.com/lhr-solar/Controls-LeaderPCB)
 
 ### Simulator
 [Renode Simulator Documentation](https://renode.readthedocs.io/en/latest/)
