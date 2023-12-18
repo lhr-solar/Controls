@@ -20,6 +20,9 @@ else
 	TEST_LEADER ?= Apps/Src/main.c
 endif
 
+LINT = none
+export LINT
+
 LEADER = controls-leader
 
 all:
@@ -31,6 +34,9 @@ leader:
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
 
+tidy:
+	$(MAKE) -C BSP -C STM32F413 tidy
+
 flash:
 	$(MAKE) -C BSP -C STM32F413 flash
 
@@ -41,7 +47,7 @@ docs:
 help:
 	@echo "Format: ${ORANGE}make ${BLUE}<BSP type>${NC}${ORANGE}TEST=${PURPLE}<Test type>${NC}"
 	@echo "BSP types (required):"
-	@echo "	${BLUE}stm32f413/leader${NC}"
+	@echo "	${BLUE}leader/stm32f413${NC}"
 	@echo ""
 	@echo "Test types (optional):"
 	@echo "	Set TEST only if you want to build a test."

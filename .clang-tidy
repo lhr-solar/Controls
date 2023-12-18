@@ -1,0 +1,44 @@
+---
+Checks:          'bugprone-*,clang-analyzer-*,
+                  cppcoreguidelines-*,misc-*,modernize-*,
+                  performance-*,readability-*,
+                  -cppcoreguidelines-avoid-non-const-global-variables,
+                  -misc-unused-parameters,
+                  -bugprone-branch-clone,
+                  -bugprone-easily-swappable-parameters,
+                  -readability-function-cognitive-complexity,'
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     none
+CheckOptions:
+  - { key: readability-identifier-naming.ConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.ConstantParameterCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.ConstantPointerParameterCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.EnumCase,       value: camelBack }
+  - { key: readability-identifier-naming.EnumSuffix,       value: _e }
+  - { key: readability-identifier-naming.EnumConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.FunctionCase,       value: camelBack }
+  - { key: readability-identifier-naming.GlobalConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.GlobalConstantPointerCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.GlobalFunctionCase,       value: camelBack }
+  - { key: readability-identifier-naming.GlobalPointerCase,       value: camelBack }
+  - { key: readability-identifier-naming.GlobalVariableCase,       value: camelBack }
+  - { key: readability-identifier-naming.LocalConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.LocalPointerCase,       value: camelBack }
+  - { key: readability-identifier-naming.LocalVariableCase,       value: camelBack }
+  - { key: readability-identifier-naming.MacroDefinitionCase,       value: aNy_CasE }
+  - { key: readability-identifier-naming.ParameterCase,       value: aNy_CasE }
+  - { key: readability-identifier-naming.PointerParameterCase,       value: aNy_CasE }
+  - { key: readability-identifier-naming.ScopedEnumConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.StaticConstantCase,       value: UPPER_CASE }
+  - { key: readability-identifier-naming.StaticVariableCase,       value: camelBack }
+  - { key: readability-identifier-naming.StructCase,       value: camelBack }
+  - { key: readability-identifier-naming.StructSuffix,       value: _s }
+  - { key: readability-identifier-naming.TypedefCase,       value: camelBack }
+  - { key: readability-identifier-naming.TypedefSuffix,       value: _t }
+  - { key: readability-identifier-naming.UnionCase,       value: camelBack }
+  - { key: readability-identifier-naming.UnionSuffix,       value: _u }
+  - { key: readability-identifier-naming.VariableCase,       value: camelBack }
+  - { key: cppcoreguidelines-avoid-non-const-global-variables,       value: false }
+...
