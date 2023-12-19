@@ -1,4 +1,5 @@
-/** Copyright (c) 2021 UT Longhorn Racing Solar
+/** 
+ * @copyright Copyright (c) 2021 UT Longhorn Racing Solar
  * @file ReadTritium.h
  * @brief 
  * 
