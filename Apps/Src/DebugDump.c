@@ -2,7 +2,6 @@
 #include "Tasks.h"
 #include "bsp.h"
 #include "CANbus.h"
-#include "CAN_Queue.h"
 #include "Pedals.h"
 #include "Minions.h"
 #include "Contactors.h"

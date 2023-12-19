@@ -21,8 +21,8 @@
 #define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_12     
 
 #define FOREACH_contactor(contactor) \
-        contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR)  \
-        contactor(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)   \
+        contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR),  \
+        contactor(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR),   \
 
 typedef enum contactor_ENUM {
     FOREACH_contactor(GENERATE_ENUM)

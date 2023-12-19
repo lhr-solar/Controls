@@ -20,8 +20,8 @@
 #include "config.h"
 
 /* Used for generating ENUMS */
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
+#define GENERATE_ENUM(ENUM) ENUM
+#define GENERATE_STRING(STRING) #STRING
 
 /**
  * Used for creating getter functions (returns the value based on given inputs) 

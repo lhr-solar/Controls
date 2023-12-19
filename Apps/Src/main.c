@@ -15,8 +15,8 @@
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "CAN_Queue.h"
 #include "UpdateDisplay.h"
+#include "SendCarCAN.h"
 
 #define IGN_CONT_PERIOD 100
 
@@ -80,10 +80,10 @@ void Task_Init(void *p_arg){
     Contactors_Init();
     Display_Init();
     Minions_Init();
-    CAN_Queue_Init();
 
     // Initialize applications
     UpdateDisplay_Init();
+    SendCarCAN_Init();
 
     // Initialize SendTritium
     OSTaskCreate(
@@ -175,7 +175,7 @@ void Task_Init(void *p_arg){
     );
     assertOSError(err);
 
-
+    
     while(1){
         CPU_WaitForInt();
     }
