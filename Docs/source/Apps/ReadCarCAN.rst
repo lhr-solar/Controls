@@ -2,12 +2,15 @@
 Read Car CAN Task
 *****************
 
-The Read Car CAN task reads the car's CANBus for values relevant to Controls. Currently we parse three types of messages: charge enable, supplemental voltage, and state of charge. All three values are sent by BPS.
+The Read Car CAN task reads the car's CANBus for values relevant to Controls. Currently we parse four types of messages: BPS trip, BPS contactor state, Supplemental Voltage, and State of Charge.
 
-Charge Enable
+Ignition Sequence
 =============
 
-The BPS sends the Controls system a charge enable message that lets us know if it's safe to charge the battery. This is important because regen braking sends current from the motor to the battery. In order to ensure that we're only charging when it's safe, a watchdog is employed: it checks that a message is received from BPS every few seconds and disables charging if one isn't. This is to account for communication issues or anything else that might bar us from receiving the message.
+ReadCarCAN handles precharge for both the array and motor. The ignition switch has four positions: OFF, LV_ON (low voltage on), ARR_ON (array on), and MOTOR_ON. 
+
+*   When turned to ARR_ON, BPS is meant to close their main HV Array Contactor, and ReadCarCAN will detect this change and start the precharge sequence for the Array. Array precharge is a delay of PRECHARGE_ARRAY_DELAY ms (see below).
+*   When turned to MOTOR_ON, ReadCarCAN will make sure that both HV+ and HV- contactors are closed and start the precharge sequence for the Motor. Motor precharge is a delay of PRECHARGE_PLUS_MINUS_DELAY ms (see below).
 
 Other messages
 ==============
@@ -17,9 +20,9 @@ We also expect to receive supplemental voltage and state of charge messages from
 Implementation Details
 ======================
 
-The Read Car CAN task uses timer callbacks to make sure message timings remain appropriate. More specifically, there is a timer that waits for the precharge contactor to be opened and closed by BPS before restarting the array, and another timer that ensures a charge enable message is received from BPS at least every half second. If no such message is received, the timer signals the fault state task to unblock and enter fault state, classifying it as one of the :ref:`recoverable`, and opening the contactors controlled by the system.
+The Read Car CAN task uses RTOS timers to make sure message timings remain appropriate. A watchdog is pet on BPS contactor state message receive to ensure that if communication is lost with BPS, the system disables the contactors.
 
-In order to avoid charging in unsafe conditions, a saturation buffer is used to require that charge enable messages are sufficiently consistent. See `ReadCarCAN.c` for more details, as this is subject to change.
+In order to avoid charging in unsafe conditions, a saturation buffer is used to require that charge enable messages are sufficiently consistent.
 
 .. doxygengroup:: ReadCarCAN
    :project: doxygen
