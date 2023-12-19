@@ -174,7 +174,13 @@ epub_title = project
 epub_exclude_files = ['search.html']
 
 # Breathe configurations
-extensions = ['breathe']
+extensions = [
+    'breathe',
+    'sphinx.ext.autosectionlabel'
+]
+
 breathe_projects = {"doxygen": "../doxygen/xml/"}
 breathe_default_project = "doxygen"
 breathe_show_define_initializer = True
+
+autosectionlabel_prefix_document = True
