@@ -13,9 +13,7 @@ The fault bitmap keeps track of the type of error that was encountered. The type
 Non-recoverable Faults
 ======================
 
-Non-recoverable faults put the car in a state that cannot be safely rolled back to an operational state. This mainly includes OS faults, as well as motor controller overvoltage and overcurrent faults. It also includes recoverable faults that occur too often, see :ref:`recoverable`. When a non-recoverable fault is encountered, the controls fault light is activated (as are the blinkers and brake lights, for good measure) and the array and motor contactors are open. The system can only be reset by powering down and then powering up again.
-
-.. _recoverable:
+Non-recoverable faults put the car in a state that cannot be safely rolled back to an operational state. This mainly includes OS faults, as well as motor controller overvoltage and overcurrent faults. It also includes recoverable faults that occur too often, see :ref:`Apps/FaultState:Recoverable Faults`. When a non-recoverable fault is encountered, the controls fault light is activated (as are the blinkers and brake lights, for good measure) and the array and motor contactors are open. The system can only be reset by powering down and then powering up again.
 
 Recoverable Faults
 ==================

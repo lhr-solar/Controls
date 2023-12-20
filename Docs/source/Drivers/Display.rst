@@ -7,8 +7,6 @@ It includes functions to reset the display and to send commands to it.
 It also defines a display command struct, from which a command string is
 assembled and then sent out to the display.
 
-.. _cmd:
-
 Command Structure
 -----------------
 
