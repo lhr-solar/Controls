@@ -7,10 +7,13 @@
 1. [Getting Started](#getting-started)
 	1. [Workspace Setup](#workspace-setup)
 	1. [Build System](#build-system)
-    1. [Running Tests](#running-tests)
-    1. [Formatting](#formatting)
     1. [Usage](#usage)
-        1. [Debugging](#debugging)
+    1. [Running Tests](#running-tests)
+    1. [Debugging](#debugging)
+1. [Toolset](#toolset)
+    1. [Renode Simulator](#renode-simulator)
+    1. [Formatting](#formatting)
+    1. [Other](#other)
 1. [Release Process](#release-process)
 	1. [Versioning](#versioning)
 1. [Contributing](#contributing)
@@ -68,7 +71,7 @@ Finally, it is a good idea to set up ssh keys for GitHub. Make sure you do this 
 
 1. Clone this repository via [SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh): ```git clone --recurse-submodules git@github.com:lhr-solar/Controls.git```. Make sure to include the --recurse-submodules flag, or run ```git submodule update --init --recursive``` to pull all necessary submodules.
 
-1. In VSCode, remote into your Linux machine if needed. Click **File** &#8594; **Open Workspace from File** and select the workspace located in ```.vscode/LHR.code-workspace```.
+1. In VSCode, remote into your Linux machine if needed. Click **File** &#8594; **Open Workspace from File** and select the workspace located in ```.vscode/LHR.code-workspace```. The VSCode Workspace has many integrations that developers may find useful while debugging or writing code, including but not limited to integrations with [Renode Simulator](#renode-simulator) and the openocd on-chip debugger.
 
 1. Run ```Embedded-Sharepoint/Scripts/install.sh``` to selectively install your packages. For Controls development, you will need the following packages:
     * ARM Toolchain
@@ -100,7 +103,12 @@ make leader TEST=HelloWorld
 make leader TEST=HelloWorld DEBUG=1
 make flash
 make docs
+make clean
 ```
+
+### Usage
+
+Follow our [documentation](https://utexas.sharepoint.com/:w:/s/ENGR-LonghornRacing/EUx6dS9swT1Js18ZlOrAfJIBKsM_7dLuQ818EnGZKrpbAQ?e=PyRIyh) to set up the Controls test rig, power the board with 12V, and use ```make flash``` to flash the board with your ```Objects/controls-leader.elf``` executable, either built from source using ```make leader``` or placed in the Objects folder from your intended release.
 
 ### Running Tests
 
@@ -108,21 +116,35 @@ WIP: A formal test framework has yet to be defined for the Controls system.
 
 For now, ```make leader TEST=TestName``` should build the Controls system excluding **Apps/Src/main.c** and including **Tests/Test_TestName.c**.
 
-### Formatting
-
-WIP: clang-format and clang-tidy are in the process of being integrated into our workflow.
-
-### Usage
-
-Follow our [documentation](https://utexas.sharepoint.com/:w:/s/ENGR-LonghornRacing/EUx6dS9swT1Js18ZlOrAfJIBKsM_7dLuQ818EnGZKrpbAQ?e=PyRIyh) to set up the Controls test rig, power the board with 12V, and use ```make flash``` to flash the board with your ```Objects/controls-leader.elf``` executable, either built from source using ```make leader``` or placed in the Objects folder from your intended release.
-
-#### Debugging
+### Debugging
 OpenOCD is a debugger program that is open source and compatible with the STM32F413. GDB is a debugger program that can be used to step through a program as it is being run on the board. To use, you need two terminals open, as well as a USB connection to the ST-Link programmer (as if you were going to flash the program to the board). 
 1. Run ```openocd``` in one terminal. Make sure it does not crash and there are no errors. You should see that it tells you what port to connect to (usually :3333).
 1. In the other terminal, start gdb with the command ```gdb-multiarch ./Objects/controls-leader.elf``` (assuming that you are doing this in the root of the project directory).
 1. This will launch GDB and read in all of the symbols from the program that you are running on the board. In order to attach gdb to the board, execute the command ```target extended-remote :3333```, which will connect to the openocd session started earlier.
 
 **Note:** If you get an error message for Permission denied, try giving openocd read/write permissions using chmod: ```chmod 764 openocd```
+
+**[Back to top](#table-of-contents)**
+
+## Toolset
+
+The Controls toolset currently includes the [Renode Simulator](#renode-simulator), [formatting tools](#formatting)(WIP), and [other](#other).
+
+### Renode Simulator
+
+The [Renode](https://github.com/renode/renode) simulator is a software tool developed by Antmicro that the Controls team uses to run unmodified binaries identical to the ones one would normally flash onto target hardware. Put simply, it simulates the hardware and allows us to run and debug tests in preparation for hardware testing. It supports GDB usage and is incredibly useful for ironing out our higher level software bugs.
+
+Check out our [Renode folder](./Renode/). See the [Renode Documentation](https://renode.readthedocs.io/en/latest/index.html) for more information on setup. To start Renode, run [```Scripts/start_renode.sh```](./Scripts/start_renode.sh).
+
+### Formatting
+
+WIP: clang-format and clang-tidy are in the process of being integrated into our workflow.
+
+### Other
+
+* [```load_env_vars.sh```](./Scripts/load_env_vars.sh) is our script for loading environment variables.
+* [```bps_sim_can.py```](./Scripts/bps_sim_can.py) is a program to control a [CANDapter](https://www.ewertenergy.com/products.php?item=candapter) to simulate BPS CAN messages, as a black box isolated test for the Controls CarCAN system.
+* See the [Embedded Sharepoint](https://github.com/lhr-solar/Embedded-Sharepoint) for more of our shared toolset with the rest of the Solar Embedded systems.
 
 **[Back to top](#table-of-contents)**
 
