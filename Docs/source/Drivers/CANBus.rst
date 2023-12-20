@@ -16,7 +16,7 @@ Data Types
 CAN messages are sent from and received into ``CANDATA_t``, which contains the CAN ID, idx byte, and up to 8 data bytes. 
 Internally, the driver also uses the ``CANLUT_T`` type, which is the entry type of a lookup table used to determine the data types used by incoming messages. 
 This lookup table can also be used to determine the length of incoming messages if it is needed.
-See ``CANbus.h`` and ``CANLUT.c`` for details.
+See ``CANbus.h`` and ``CANConfig.c`` for details.
 
 Implementation Details
 ======================

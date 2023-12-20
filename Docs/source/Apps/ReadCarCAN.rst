@@ -5,7 +5,7 @@ Read Car CAN Task
 The Read Car CAN task reads the car's CANBus for values relevant to Controls. Currently we parse four types of messages: BPS trip, BPS contactor state, Supplemental Voltage, and State of Charge.
 
 Ignition Sequence
-=============
+=================
 
 ReadCarCAN handles precharge for both the array and motor. The ignition switch has four positions: OFF, LV_ON (low voltage on), ARR_ON (array on), and MOTOR_ON. 
 
