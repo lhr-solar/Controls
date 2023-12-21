@@ -91,6 +91,7 @@ Finally, it is a good idea to set up ssh keys for GitHub. Make sure you do this 
     * GitHub Pull Requests
     * GitLens
     * Subway Surfers
+    * WSL
 
 ### Build System
 
@@ -204,6 +205,8 @@ Commit frequently to your branch. A good rule of thumb is to push at natural sto
 [STM32F413 Documentation](https://www.st.com/resource/en/reference_manual/rm0430-stm32f413423-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 
 [Controls Leaderboard Repo](https://github.com/lhr-solar/Controls-LeaderPCB)
+
+[GDB Cheatsheet](https://darkdust.net/files/GDB%20Cheat%20Sheet.pdf)
 
 ### Simulator
 [Renode Simulator Documentation](https://renode.readthedocs.io/en/latest/)
