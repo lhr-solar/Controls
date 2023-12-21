@@ -265,6 +265,10 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
     mcPBCComplete = false; 
 }
 
+/**
+ * @brief Task to read CAN messages from the BPS and update the display
+ * @param p_arg pointer that is passed to the task when it is created. Used to pass the task number.
+*/
 void Task_ReadCarCAN(void *p_arg){
     OS_ERR err;
 

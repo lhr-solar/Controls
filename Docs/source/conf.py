@@ -35,12 +35,6 @@ release = u''
 #
 # needs_sphinx = '1.0'
 
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
-extensions = [
-    
-]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -173,7 +167,9 @@ epub_title = project
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
-# Breathe configurations
+# Add any Sphinx extension module names here, as strings. They can be
+# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
+# ones.
 extensions = [
     'breathe',
     'sphinx.ext.autosectionlabel'
@@ -183,6 +179,7 @@ breathe_domain_by_extension = {
     "h": "c"
 }
 
+# Get all sources
 import os
 src_list = []
 controls_root = os.path.abspath("../../")
@@ -199,6 +196,7 @@ breathe_projects_source = {
     "doxygen": ("./", src_list)
 }
 
+breathe_implementation_filename_extensions = ['.c']
 breathe_default_project = "doxygen"
 breathe_show_define_initializer = True
 
