@@ -8,8 +8,6 @@
  * functions in this application.
  * 
  * 
- * @addtogroup UpdateDisplay
- * @{
  */
 
 #ifndef __UPDATE_DISPLAY_H
@@ -138,4 +136,4 @@ void UpdateDisplay_ClearQueue(void);
 
 #endif
 
-/** @} */
+

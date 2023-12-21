@@ -6,6 +6,5 @@ The contactor driver is responsible for communication with the array and motor c
 
 The contactors can be set using a blocking or non-blocking interface. The blocking interface will wait until the contactor can be set, while the non-blocking interface will return early if another thread is currently setting the contactor.
 
-.. doxygengroup:: Contactors
+.. autodoxygenfile:: Contactors.h
    :project: doxygen
-   :path: "/doxygen/xml/group__Contactors.xml"

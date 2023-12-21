@@ -179,7 +179,26 @@ extensions = [
     'sphinx.ext.autosectionlabel'
 ]
 
+breathe_domain_by_extension = {
+    "h": "c"
+}
+
+import os
+src_list = []
+controls_root = os.path.abspath("../../")
+controls_file_dirs = ["Apps/Inc/", "Apps/Src/", "Drivers/Inc/", "Drivers/Src/", "BSP/Inc/", "BSP/STM32F413/Src/"]
+
+for dir in controls_file_dirs:
+    for root, dirs, files in os.walk(os.path.join(controls_root, dir)):
+        for file in files:
+            if file.endswith(".h") or file.endswith(".c"):
+                src_list.append(os.path.join(root, file))
+
 breathe_projects = {"doxygen": "../doxygen/xml/"}
+breathe_projects_source = {
+    "doxygen": ("./", src_list)
+}
+
 breathe_default_project = "doxygen"
 breathe_show_define_initializer = True
 

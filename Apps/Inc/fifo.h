@@ -3,8 +3,6 @@
  * @file fifo.h
  * @brief 
  * 
- * @addtogroup fifo
- * @{
  */
 
 /*
@@ -244,4 +242,4 @@ POPBACK (FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
 #undef CONCAT
 #undef _CONCAT
 
-/** @} */
+

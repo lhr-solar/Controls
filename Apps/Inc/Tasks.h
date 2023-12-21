@@ -3,8 +3,6 @@
  * @file Tasks.h
  * @brief 
  * 
- * @addtogroup Tasks
- * @{
  */
 
 
@@ -184,4 +182,4 @@ void _assertOSError (OS_ERR err); //TODO: This should be changed to enforce only
 
 #endif
 
-/** @} */
+

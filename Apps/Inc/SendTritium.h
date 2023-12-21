@@ -2,9 +2,6 @@
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendTritium.h
  * @brief 
- * 
- * @addtogroup SendTritium
- * @{
  */
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
@@ -28,7 +25,10 @@ typedef enum GEAR_ENUM {
     NUM_GEARS,
 } Gear_t;
 
-// State Names
+/**
+ * @enum TritiumStateName_t
+ * @brief Enumerated list of states for the FSM
+*/
 typedef enum{
     FORWARD_DRIVE,
     NEUTRAL_DRIVE,
@@ -41,7 +41,11 @@ typedef enum{
     ACCELERATE_CRUISE
 } TritiumStateName_t;
 
-// State Struct for FSM
+/**
+ * @struct TritiumState_t
+ * @brief Struct containing the state name, state handler, and state decider
+ * function for the Tritium FSM
+*/
 typedef struct TritiumState{
     TritiumStateName_t name;
     void (*stateHandler)(void);
@@ -98,4 +102,4 @@ EXPOSE_SETTER(float, velocitySetpoint)
 #endif
 
 
-/** @} */
+

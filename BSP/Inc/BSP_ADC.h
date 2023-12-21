@@ -4,8 +4,6 @@
  * @brief Header file for the library to interact
  * with the Analog to Digital Converter (ADC)
  * 
- * @addtogroup BSP_ADC
- * @{
  */
 
 #ifndef __BSP_ADC_H
@@ -50,4 +48,4 @@ int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
 #endif
 
 
-/** @} */
+

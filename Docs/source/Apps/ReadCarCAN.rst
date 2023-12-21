@@ -24,6 +24,5 @@ The Read Car CAN task uses RTOS timers to make sure message timings remain appro
 
 In order to avoid charging in unsafe conditions, a saturation buffer is used to require that charge enable messages are sufficiently consistent.
 
-.. doxygengroup:: ReadCarCAN
+.. autodoxygenfile:: ReadCarCAN.h
    :project: doxygen
-   :path: "/doxygen/xml/group__ReadCarCAN.xml"

@@ -34,7 +34,6 @@ static bool cmd_Minions_Write(void);
 
 static bool cmd_Pedals_Read(void);
 
-
 const struct Command cmdline_commands[] = {
 	{.name = "help", .action = cmd_help},
 	{.name = "CANbus_Send", .action = cmd_CANbus_Send},

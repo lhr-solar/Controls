@@ -3,8 +3,6 @@
  * @file Pedals.h
  * @brief Header file for the Pedals driver
  * 
- * @addtogroup Pedals
- * @{
  */
 
 #ifndef __PEDALS_H
@@ -47,4 +45,4 @@ int8_t Pedals_Read(pedal_t pedal);
 #endif
 
 
-/** @} */
+

@@ -2,9 +2,6 @@
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file BSP_OS.h
  * @brief 
- * 
- * @addtogroup BSP_OS
- * @{
  */
 
 #ifndef BSP_OS_H
@@ -18,4 +15,4 @@ typedef struct {
 #endif
 
 
-/** @} */
+

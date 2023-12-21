@@ -24,6 +24,5 @@ A more detailed description of the command structure is given below. For more in
 
 * ``args`` — The actual arguments for the command (strings or ints)
 
-.. doxygengroup:: Display
+.. autodoxygenfile:: Display.h
    :project: doxygen
-   :path: "/doxygen/xml/group__Display.xml"

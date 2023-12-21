@@ -2,9 +2,6 @@
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file CANbus.h
  * @brief 
- * 
- * @addtogroup CANbus
- * @{
  */
 
 #ifndef CAN_H__
@@ -107,4 +104,4 @@ ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
 #endif
 
 
-/** @} */
+

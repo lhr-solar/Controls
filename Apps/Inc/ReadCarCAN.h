@@ -2,9 +2,6 @@
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file ReadCarCAN.h
  * @brief 
- * 
- * @addtogroup ReadCarCAN
- * @{
  */
 
 #ifndef __READ_CAR_CAN_H
@@ -54,4 +51,4 @@ bool ChargeEnable_Get(void);
 #endif
 
 
-/** @} */
+

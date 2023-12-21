@@ -3,8 +3,6 @@
  * @file common.h
  * @brief 
  * 
- * @addtogroup common
- * @{
  */
 
 #ifndef __COMMON_H
@@ -64,4 +62,4 @@ inline float mpsToRpm(float velocity_mps){
 
 #endif
 
-/** @} */
+
