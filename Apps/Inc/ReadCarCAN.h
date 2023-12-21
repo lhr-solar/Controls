@@ -95,7 +95,6 @@ typedef enum{
  * @brief Returns whether regen braking / charging is enabled or not
  * @return true if regen braking / charging is enabled, false otherwise
  */
-*/
 bool ChargeEnable_Get(void);
 
 #endif

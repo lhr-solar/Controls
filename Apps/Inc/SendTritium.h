@@ -1,7 +1,10 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendTritium.h
- * @brief 
+ * @brief SendTritium contains functions relevant to updating the velocity and current setpoitns
+ * of the Tritium motor controller. The implementation includes a normal current
+ * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
+ * The logic is determined through a finite state machine implementation.
  */
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
