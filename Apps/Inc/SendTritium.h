@@ -8,18 +8,48 @@
 
 #include "common.h"
 
-#define SENDTRITIUM_PRINT_MES
+/**
+ * @def SENDTRITIUM_PRINT_MES
+ * @brief Print messages for SendTritium.c
+ */
+// #define SENDTRITIUM_PRINT_MES
 
-#define MOTOR_MSG_PERIOD 100
+/**
+ * @def SENDTRITIUM_EXPOSE_VARS
+ * @brief Expose variables for SendTritium.c
+ */
+// #define SENDTRITIUM_EXPOSE_VARS
+
+/**
+ * @def FSM_PERIOD
+ * @brief Period of the state machine in milliseconds
+ */
 #define FSM_PERIOD 100
-#define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
+
+/**
+ * @def DEBOUNCE_PERIOD
+ * @brief Period of the debouncer in units of FSM_PERIOD
+ */
+#define DEBOUNCE_PERIOD 2
+
+/**
+ * @def MOTOR_MSG_COUNTER_THRESHOLD
+ * @brief Threshold for the motor message counter
+*/
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
+/**
+ * Generate enum list for Gear_t
+*/
 #define FOREACH_Gear(GEAR) \
         GEAR(FORWARD_GEAR),   \
         GEAR(NEUTRAL_GEAR),  \
         GEAR(REVERSE_GEAR),   \
 
+/**
+ * @enum Gear_t
+ * @brief Enumerated list of gears
+*/
 typedef enum GEAR_ENUM {
     FOREACH_Gear(GENERATE_ENUM)
     NUM_GEARS,
@@ -30,15 +60,24 @@ typedef enum GEAR_ENUM {
  * @brief Enumerated list of states for the FSM
 */
 typedef enum{
-    FORWARD_DRIVE,
-    NEUTRAL_DRIVE,
-    REVERSE_DRIVE,
-    RECORD_VELOCITY,
-    POWERED_CRUISE,
-    COASTING_CRUISE,
-    BRAKE_STATE,
-    ONEPEDAL,
-    ACCELERATE_CRUISE
+    /** Forward drive state */
+    FORWARD_DRIVE,   
+    /** Neutral drive state */
+    NEUTRAL_DRIVE,   
+    /** Reverse drive state */
+    REVERSE_DRIVE,   
+    /** Record velocity state (cruise) */
+    RECORD_VELOCITY, 
+    /** Powered cruise state (cruise) */
+    POWERED_CRUISE,  
+    /** Coasting cruise state (cruise) */
+    COASTING_CRUISE, 
+    /** Brake state */
+    BRAKE_STATE,     
+    /** One pedal state (regen) */
+    ONEPEDAL,        
+    /** Accelerate cruise state (cruise) */
+    ACCELERATE_CRUISE   
 } TritiumStateName_t;
 
 /**
@@ -47,9 +86,12 @@ typedef enum{
  * function for the Tritium FSM
 */
 typedef struct TritiumState{
-    TritiumStateName_t name;
+    /** Name of the state */
+    TritiumStateName_t name;   
+    /** Function pointer to the state handler */ 
     void (*stateHandler)(void);
-    void (*stateDecider)(void);
+    /** Function pointer to the state decider */ 
+    void (*stateDecider)(void); 
 } TritiumState_t;
 
 #ifdef SENDTRITIUM_EXPOSE_VARS

@@ -685,8 +685,8 @@ void Task_SendTritium(void *p_arg){
 
         putControlModeCAN();        
 
-        // Delay of MOTOR_MSG_PERIOD ms
-        OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
+        // Delay of FSM_PERIOD ms
+        OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
             assertOSError(err);
         }
