@@ -10,7 +10,6 @@
 #include "Tasks.h"
 #include "SendTritium.h"
 
-
 static const char *MINIONPIN_STRING[] = {
     FOREACH_PIN(GENERATE_STRING)
 };
@@ -33,7 +32,6 @@ void Task_DebugDump(void* p_arg) {
     OS_ERR err;
 
     while(1){
-
         // Get pedal information
         int8_t accelPedal = Pedals_Read(ACCELERATOR);
         printf("ACCELERATOR: %d\n\r", accelPedal);
