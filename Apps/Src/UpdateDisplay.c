@@ -14,7 +14,8 @@
 #include <math.h>
 
 /**
- * Creates queue for display commands.
+ * @def DISP_Q_SIZE
+ * @brief Size of the display queue
  */
 #define DISP_Q_SIZE 10
 
@@ -23,46 +24,56 @@
 #define FIFO_NAME disp_fifo
 #include "fifo.h"
 
-// For fault handling
-#define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
+/**
+ * @def RESTART_THRESHOLD
+ * @brief Number of times to reset before displaying the fault screen
+*/
+#define RESTART_THRESHOLD 3
 
 disp_fifo_t msg_queue;
 
 static OS_SEM DisplayQ_Sem4;    // counting semaphore for queue message availability
 static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/reading to queue
 
+// Function prototypes
 
 /**
- * Function prototypes
+ * @brief Check for a display error and assert it if it exists.
+ * Stores the error code, calls the main assertion function
+ * and runs a callback function as a handler to restart the display and clear the queue.
+ * @param   err variable with display error codes
 */
-// check for and assert errors in UpdateDisplay
 static void assertUpdateDisplayError(UpdateDisplayError_t err); 
 
-
 /**
- * Enum and corresponding array for easy component selection.
- */
+ * @enum Component_t
+ * @brief Enum for components on the display
+ * @note Used to index into compStrings array
+*/
 typedef enum{
 	// Boolean components
-	ARRAY=0,
-	MOTOR,
-	// Non-boolean components
-	VELOCITY,
-	ACCEL_METER,
-	SOC,
-	SUPP_BATT,
-	CRUISE_ST,
-	REGEN_ST,
-	GEAR,
+	ARRAY=0, // Array precharge contactor
+	MOTOR, // Motor precharge contactor
+	
+    // Non-boolean components
+	VELOCITY, // Velocity
+	ACCEL_METER, // Acceleration meter
+	SOC, // State of Charge
+	SUPP_BATT, // Supplemental battery voltage
+	CRUISE_ST, // Cruise state
+	REGEN_ST, // Regen state
+	GEAR, // Gear
+
 	// Fault code components
-	OS_CODE,
-	FAULT_CODE
+	OS_CODE, // OS error code
+	FAULT_CODE // Fault error code
 } Component_t;
 
 const char* compStrings[15]= {
 	// Boolean components
 	"arr",
 	"mot",
+
 	// Non-boolean components
 	"vel",
 	"accel",
@@ -71,6 +82,7 @@ const char* compStrings[15]= {
 	"cruiseSt",
 	"rbsSt",
 	"gear",
+
 	// Fault code components
 	"oserr",
 	"faulterr"

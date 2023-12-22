@@ -7,7 +7,6 @@
  * application. Call assertUpdateDisplayError after calling any of the
  * functions in this application.
  * 
- * 
  */
 
 #ifndef __UPDATE_DISPLAY_H
@@ -21,40 +20,77 @@
 #include "Contactors.h"
 
 /**
- * Error types
- */
+ * @enum UpdateDisplayError_t
+ * @brief Error types for UpdateDisplay application
+*/
 typedef enum{
+    /** No error */
 	UPDATEDISPLAY_ERR_NONE,
-	UPDATEDISPLAY_ERR_FIFO_PUT,     // Error putting command in fifo
-	UPDATEDISPLAY_ERR_FIFO_POP,     // Error popping command from fifo
-	UPDATEDISPLAY_ERR_PARSE_COMP,   // Error parsing component/val in SetComponent
-	UPDATEDISPLAY_ERR_DRIVER        // Driver call returned an error
+    /** Error putting command in fifo */
+	UPDATEDISPLAY_ERR_FIFO_PUT,     
+    /** Error popping command from fifo */
+	UPDATEDISPLAY_ERR_FIFO_POP,     
+    /** Error parsing component/val in SetComponent */
+	UPDATEDISPLAY_ERR_PARSE_COMP,   
+    /** Driver call returned an error */
+	UPDATEDISPLAY_ERR_DRIVER        
 } UpdateDisplayError_t;
 
 /**
- * For display elements with three states
- */
+ * @enum TriState_t
+ * @brief Three states for display elements
+*/
 typedef enum{
-	STATE_0	=0,
-	STATE_1	=1,
-	STATE_2	=2
+    /** State 0 */
+	STATE_0	= 0,
+    /** State 1 */ 
+	STATE_1	= 1,
+    /** State 2 */ 
+	STATE_2	= 2
 } TriState_t;
 
 // For cruise control and regen
+/**
+ * @def DISP_DISABLED
+ * @brief Disabled state for cruise control and regen
+*/
 #define DISP_DISABLED STATE_0
-#define DISP_ENABLED STATE_1	// Able to be used
-#define DISP_ACTIVE STATE_2	// Actively being used right now
+
+/**
+ * @def DISP_ENABLED
+ * @brief Enabled state for cruise control and regen (able to be used)
+*/
+#define DISP_ENABLED STATE_1
+
+/**
+ * @def DISP_ACTIVE
+ * @brief Active state for cruise control and regen (currently being used)
+*/
+#define DISP_ACTIVE STATE_2
 
 // For gear changes
+/**
+ * @def DISP_NEUTRAL
+ * @brief Neutral state for gear changes
+*/
 #define DISP_NEUTRAL STATE_0
+
+/**
+ * @def DISP_FORWARD
+ * @brief Forward state for gear changes
+*/
 #define DISP_FORWARD STATE_1
+
+/**
+ * @def DISP_REVERSE
+ * @brief Reverse state for gear changes
+*/
 #define DISP_REVERSE STATE_2
 
 /**
  * @brief Initializes UpdateDisplay application
  * @returns UpdateDisplayError_t
  */
-
 UpdateDisplayError_t UpdateDisplay_Init();
 
 /**
@@ -129,8 +165,6 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0
- * @param none
- * @returns none
 */
 void UpdateDisplay_ClearQueue(void);
 
