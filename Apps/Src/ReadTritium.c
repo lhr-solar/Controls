@@ -4,7 +4,6 @@
  * @brief Task to read data from the Tritium Motor Controller
  * 
  */
-
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
@@ -19,7 +18,6 @@
 #define MOTOR_TIMEOUT_SECS 1 // Timeout for several missed motor messages
 #define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
 
-
 tritium_error_code_t Motor_FaultBitmap = T_NONE; //initialized to no error, changed when the motor asserts an error
 static float Motor_RPM = 0;
 static float Motor_Velocity = 0;
@@ -29,33 +27,15 @@ static OS_TMR MotorWatchdog;
 // Function prototypes
 static void assertTritiumError(tritium_error_code_t motor_err);
 
-// Callback for motor watchdog
+/**
+ * @brief Callback function for the motor watchdog timer
+ * @param tmr Pointer to the timer
+ * @param p_arg unused
+*/
 static void motorWatchdog(void *tmr, void *p_arg) {
     // Attempt to restart 3 times, then fail
     assertTritiumError(T_MOTOR_WATCHDOG_TRIP);
 }
-
-
-/* OBJECTIVES:
-Objective 1:
-- Receive motor status message from MotorController (18.4.2)
-- interpret error status
-	- if error
-		- assertOSError
-- determine information important to telementry
-	- Telemetry
-- determine information important for storage
-	- acquire mutex on Storage Array
-	- Store information in Storage Array (based on index) 
-	- release mutex on Storage Array
-
-Objective 2:
-- create function able to read data from Storage Array
-	- pend on Storage Array mutex
-	- acquire Storage Array mutex
-	- read information of array index 
-	- release Storage Array mutex
-*/
 
 void Task_ReadTritium(void *p_arg){
 	OS_ERR err;
@@ -113,12 +93,14 @@ void Task_ReadTritium(void *p_arg){
 	}
 }
 
+/**
+ * @brief Restarts the motor controller by sending a reset message
+*/
 static void restartMotorController(void){
 	CANDATA_t resetmsg = {0};
 	resetmsg.ID = MOTOR_RESET;
 	CANbus_Send(resetmsg, true, MOTORCAN);
 }
-
 
 float Motor_RPM_Get(){ //getter function for motor RPM
 	return Motor_RPM;
@@ -127,7 +109,6 @@ float Motor_RPM_Get(){ //getter function for motor RPM
 float Motor_Velocity_Get(){ //getter function for motor velocity
 	return Motor_Velocity;
 }
-
 
 /**
  * Error handler functions
