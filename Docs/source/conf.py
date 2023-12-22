@@ -183,7 +183,7 @@ breathe_domain_by_extension = {
 import os
 src_list = []
 controls_root = os.path.abspath("../../")
-controls_file_dirs = ["Apps/Inc/", "Apps/Src/", "Drivers/Inc/", "Drivers/Src/", "BSP/Inc/", "BSP/STM32F413/Src/"]
+controls_file_dirs = ["Apps/Inc/", "Drivers/Inc/", "BSP/Inc/"]
 
 for dir in controls_file_dirs:
     for root, dirs, files in os.walk(os.path.join(controls_root, dir)):

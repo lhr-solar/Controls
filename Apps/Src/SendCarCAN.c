@@ -5,7 +5,6 @@
  * 
  * This contains functions relevant to placing CAN messages in a CarCAN queue and periodically sending
  * those messages in the SendCarCAN task.
- * 
  */
 
 #include "common.h"
@@ -18,13 +17,17 @@
 #include "SendCarCAN.h"
 #include "SendTritium.h"
 
+/**
+ * @def IO_STATE_DLY_MS
+ * @brief Period of the IO state message in milliseconds
+ */
 #define IO_STATE_DLY_MS 250u 
 
 // Task_PutIOState
 OS_TCB putIOState_TCB;
 CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 
-//fifo
+// SendCarCAN Queue
 #define FIFO_TYPE CANDATA_t
 #define FIFO_SIZE 16
 #define FIFO_NAME SendCarCAN_Q
@@ -37,19 +40,12 @@ static OS_MUTEX CarCAN_Mtx;
 
 static void Task_PutIOState(void *p_arg);
 
-/**
- * @brief return the space left in SendCarCAN_Q for debug purposes
-*/
 #ifdef DEBUG
 uint8_t get_SendCarCAN_Q_Space(void) {
     return (CANFifo.get - CANFifo.put - 1) % (sizeof CANFifo.buffer / sizeof CANFifo.buffer[0]);
 }
 #endif
 
-/**
- * @brief Wrapper to put new message in the CAN queue
- * @param message the CAN message to put in SendCarCAN Queue
-*/
 void SendCarCAN_Put(CANDATA_t message){
     OS_ERR err;
     CPU_TS ticks;
@@ -66,9 +62,6 @@ void SendCarCAN_Put(CANDATA_t message){
     assertOSError(err);
 }
 
-/**
- * @brief Initialize SendCarCAN
-*/
 void SendCarCAN_Init(void) {
     OS_ERR err;
     
@@ -81,9 +74,6 @@ void SendCarCAN_Init(void) {
     SendCarCAN_Q_renew(&CANFifo);
 }
 
-/**
- * @brief Grabs the latest messages from the queue and sends over CarCAN
-*/
 void Task_SendCarCAN(void *p_arg){
     OS_ERR err;
     CPU_TS ticks;
@@ -129,6 +119,9 @@ void Task_SendCarCAN(void *p_arg){
     }
 }
 
+/**
+ * @brief Sends IO information over CarCAN
+*/
 static void putIOState(void){
     CANDATA_t message;
     memset(&message, 0, sizeof message);
@@ -157,7 +150,8 @@ static void putIOState(void){
 }
 
 /**
- * @brief sends IO information over CarCAN every IO_STATE_DLY_MS
+ * @brief Sends IO information over CarCAN every IO_STATE_DLY_MS
+ * @param p_arg unused
 */
 static void Task_PutIOState(void *p_arg) {
     OS_ERR err;
