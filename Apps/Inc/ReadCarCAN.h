@@ -34,7 +34,6 @@
  *         received a sufficient number of BPS's HV Plus-Minus Enable Messages.
  *        BPS Plus-Minus Saturation threshold is halfway between 0 and max saturation value.
  */
-*/
 #define PLUS_MINUS_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 
 /**
@@ -78,7 +77,7 @@
  * @brief Error codes for ReadCarCAN
  * 
  */
-typedef enum{
+typedef enum {
     /** No error */
 	READCARCAN_ERR_NONE,
     /** Received a charge disable msg **/	    		

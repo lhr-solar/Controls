@@ -36,7 +36,7 @@ typedef enum{
     T_DESAT_FAULT_ERR = (1<<7), 
     /** motor over speed error */
     T_MOTOR_OVER_SPEED_ERR = (1<<8),
-    /** motor controller fails to restart or initialize */ = (1<<8), 
+    /** motor controller fails to restart or initialize */
     T_INIT_FAIL = (1<<9), 
     /** motor watchdog trip */
     T_MOTOR_WATCHDOG_TRIP = (1<<15),

@@ -26,9 +26,6 @@ typedef enum
  *          BSP_ADC_Init function
  * @return  None
  */
-void Pedals_Init(){
-    BSP_ADC_Init();
-}
 void Pedals_Init(void);
 
 /**
