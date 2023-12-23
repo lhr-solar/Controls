@@ -24,6 +24,12 @@
 // #define SENDTRITIUM_EXPOSE_VARS
 
 /**
+ * @def MOTOR_MSG_PERIOD
+ * @brief Period of the motor CAN message in milliseconds
+ */
+#define MOTOR_MSG_PERIOD 100
+
+/**
  * @def FSM_PERIOD
  * @brief Period of the state machine in milliseconds
  */
@@ -34,12 +40,6 @@
  * @brief Period of the debouncer in units of FSM_PERIOD
  */
 #define DEBOUNCE_PERIOD 2
-
-/**
- * @def MOTOR_MSG_COUNTER_THRESHOLD
- * @brief Threshold for the motor message counter
-*/
-#define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
 /**
  * Generate enum list for Gear_t

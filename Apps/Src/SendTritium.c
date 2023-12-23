@@ -27,23 +27,86 @@
 #include "common.h"
 
 // Macros
-#define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
+/**
+ * @def MOTOR_MSG_COUNTER_THRESHOLD
+ * @brief Threshold for the motor message counter
+*/
+#define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
-#define MIN_CRUISE_VELOCITY mpsToRpm(20.0f) // rpm
-#define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
+/**
+ * @def MAX_VELOCITY
+ * @brief Maximum velocity of the car in rpm (unobtainable value)
+*/
+#define MAX_VELOCITY 20000.0f
 
-#define BRAKE_PEDAL_THRESHOLD 15  // percent
-#define ACCEL_PEDAL_THRESHOLD 10 // percent
+// Velocity Limits
+/**
+ * @def MIN_CRUISE_VELOCITY
+ * @brief Minimum velocity of the car in rpm to enable cruise control
+*/
+#define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)
 
-#define ONEPEDAL_BRAKE_THRESHOLD 25 // percent
-#define ONEPEDAL_NEUTRAL_THRESHOLD 35 // percent
+/**
+ * @def MAX_GEARSWITCH_VELOCITY
+ * @brief Maximum velocity of the car in rpm to switch gears
+*/
+#define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f)
 
+// Deadbands & Thresholds
+/**
+ * @def BRAKE_PEDAL_DEADBAND
+ * @brief Minimum brake pedal percentage to engage brake state
+*/
+#define BRAKE_PEDAL_DEADBAND 15
+
+/**
+ * @def ACCEL_PEDAL_DEADBAND
+ * @brief Minimum accelerator pedal percentage to engage acceleration in 
+ * normal drive mode
+*/
+#define ACCEL_PEDAL_DEADBAND 10
+
+/**
+ * @def ONEPEDAL_BRAKE_THRESHOLD
+ * @brief One pedal drive mode upper limit for regenerative braking
+*/
+#define ONEPEDAL_BRAKE_THRESHOLD 25
+
+/**
+ * @def ONEPEDAL_NEUTRAL_THRESHOLD
+ * @brief One pedal drive mode upper limit for neutral
+*/
+#define ONEPEDAL_NEUTRAL_THRESHOLD 35
+
+/**
+ * @def PEDAL_MIN
+ * @brief Minimum pedal percentage
+*/
 #define PEDAL_MIN 0  // percent
+
+/**
+ * @def PEDAL_MAX
+ * @brief Maximum pedal percentage
+*/
 #define PEDAL_MAX 100 // percent
+
+/**
+ * @def CURRENT_SP_MIN
+ * @brief Minimum current setpoint percentage
+*/
 #define CURRENT_SP_MIN 0 // percent
+
+/**
+ * @def CURRENT_SP_MAX
+ * @brief Maximum current setpoint percentage
+*/
 #define CURRENT_SP_MAX 100 // percent
 
-#define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
+/**
+ * @def GEAR_FAULT_THRESHOLD
+ * @brief Number of times gear fault can occur before it is considered a fault
+*/
+#define GEAR_FAULT_THRESHOLD 3
 
 // Inputs
 static bool cruiseEnable = false;
@@ -150,7 +213,6 @@ static const TritiumState_t FSM[9] = {
 };
 
 // Helper Functions
-
 /**
  * @brief Converts integer percentage to float percentage
  * @param percent integer percentage from 0-100
@@ -348,7 +410,7 @@ static void ForwardDriveHandler(){
         UpdateDisplay_SetGear(DISP_FORWARD);
     }
     velocitySetpoint = MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_DEADBAND, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
 }
 
 /**
@@ -356,7 +418,7 @@ static void ForwardDriveHandler(){
  * forward drive state (brake, record velocity, one pedal, neutral drive).
 */
 static void ForwardDriveDecider(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent >= BRAKE_PEDAL_DEADBAND){
         state = FSM[BRAKE_STATE];
     }else if(cruiseSet && cruiseEnable && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
@@ -388,7 +450,7 @@ static void NeutralDriveHandler(){
  * neutral drive state (brake, forward drive, reverse drive).
 */
 static void NeutralDriveDecider(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent >= BRAKE_PEDAL_DEADBAND){
         state = FSM[BRAKE_STATE];
     }else if(gear == FORWARD_GEAR && velocityObserved >= -MAX_GEARSWITCH_VELOCITY){
         state = FSM[FORWARD_DRIVE];
@@ -408,7 +470,7 @@ static void ReverseDriveHandler(){
         UpdateDisplay_SetGear(DISP_REVERSE);
     }
     velocitySetpoint = -MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_DEADBAND, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
     cruiseEnable = false;
     onePedalEnable = false;
 }
@@ -418,7 +480,7 @@ static void ReverseDriveHandler(){
  * reverse drive state (brake, neutral drive).
 */
 static void ReverseDriveDecider(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent >= BRAKE_PEDAL_DEADBAND){
         state = FSM[BRAKE_STATE];
     }
     else if(gear == NEUTRAL_GEAR || gear == FORWARD_GEAR){
@@ -447,7 +509,7 @@ static void RecordVelocityHandler(){
  * state (brake, neutral drive, one pedal, forward drive, powered cruise).
 */
 static void RecordVelocityDecider(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent >= BRAKE_PEDAL_DEADBAND){
         state = FSM[BRAKE_STATE];
     }else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR){
         state = FSM[NEUTRAL_DRIVE];
@@ -476,7 +538,7 @@ static void PoweredCruiseHandler(){
  * accelerate cruise, coasting cruise).
 */
 static void PoweredCruiseDecider(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent >= BRAKE_PEDAL_DEADBAND){
         state = FSM[BRAKE_STATE];
     }else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR){
         state = FSM[NEUTRAL_DRIVE];
@@ -487,7 +549,7 @@ static void PoweredCruiseDecider(){
         state = FSM[FORWARD_DRIVE];
     }else if(cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
-    }else if(accelPedalPercent >= ACCEL_PEDAL_THRESHOLD){
+    }else if(accelPedalPercent >= ACCEL_PEDAL_DEADBAND){
         state = FSM[ACCELERATE_CRUISE];
     }else if(velocityObserved > cruiseVelSetpoint){
         state = FSM[COASTING_CRUISE];
@@ -510,7 +572,7 @@ static void CoastingCruiseHandler(){
  * accelerate cruise, powered cruise).
 */
 static void CoastingCruiseDecider(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent >= BRAKE_PEDAL_DEADBAND){
         state = FSM[BRAKE_STATE];
     }else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR){
         state = FSM[NEUTRAL_DRIVE];
@@ -521,7 +583,7 @@ static void CoastingCruiseDecider(){
         state = FSM[FORWARD_DRIVE];
     }else if(cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
-    }else if(accelPedalPercent >= ACCEL_PEDAL_THRESHOLD){
+    }else if(accelPedalPercent >= ACCEL_PEDAL_DEADBAND){
         state = FSM[ACCELERATE_CRUISE];
     }else if(velocityObserved <= cruiseVelSetpoint){
         state = FSM[POWERED_CRUISE];
@@ -535,7 +597,7 @@ static void CoastingCruiseDecider(){
 */
 static void AccelerateCruiseHandler(){
     velocitySetpoint = MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_DEADBAND, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
 }
 
 /**
@@ -544,7 +606,7 @@ static void AccelerateCruiseHandler(){
  * coasting cruise).
 */
 static void AccelerateCruiseDecider(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent >= BRAKE_PEDAL_DEADBAND){
         state = FSM[BRAKE_STATE];
     }else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR){
         state = FSM[NEUTRAL_DRIVE];
@@ -555,7 +617,7 @@ static void AccelerateCruiseDecider(){
         state = FSM[FORWARD_DRIVE];
     }else if(cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
-    }else if(accelPedalPercent < ACCEL_PEDAL_THRESHOLD){
+    }else if(accelPedalPercent < ACCEL_PEDAL_DEADBAND){
         state = FSM[COASTING_CRUISE];
     }
 }
@@ -597,7 +659,7 @@ static void OnePedalDriveHandler(){
  * drive state (brake, record velocity, neutral drive).
 */
 static void OnePedalDriveDecider(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent >= BRAKE_PEDAL_DEADBAND){
         state = FSM[BRAKE_STATE];
     }else if(cruiseSet && cruiseEnable && velocityObserved >= MIN_CRUISE_VELOCITY){
         state = FSM[RECORD_VELOCITY];
@@ -631,7 +693,7 @@ static void BrakeHandler(){
  * neutral drive).
 */
 static void BrakeDecider(){
-    if(brakePedalPercent < BRAKE_PEDAL_THRESHOLD){
+    if(brakePedalPercent < BRAKE_PEDAL_DEADBAND){
         if(gear == FORWARD_GEAR) state = FSM[FORWARD_DRIVE];
         else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR) state = FSM[NEUTRAL_DRIVE];
         Minions_Write(BRAKELIGHT, false);
