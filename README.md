@@ -26,9 +26,11 @@
 
 ## About the Project
 
-This repository contains all code related to [Longhorn Racing Solar](https://www.longhornracing.org/solar-vehicle-team)'s Controls System, affiliated with **UT Austin**. The Controls System is responsible for driver interactions, motor control, and lighting systems control. The system is built on [custom hardware](https://github.com/lhr-solar/Controls-LeaderPCB) and an ARM Cortex-M4 Processor (STM32F413).
+This repository contains all code related to [Longhorn Racing Solar](https://www.longhornracing.org/solar-vehicle-team)'s Controls System, affiliated with the **University of Texas at Austin**. The Controls System is responsible for driver interactions, motor control, and lighting systems control. The system is built on [custom hardware](https://github.com/lhr-solar/Controls-LeaderPCB) and an ARM Cortex-M4 Processor (STM32F413).
 
-For more information, see our [documentation](https://controls-docs.readthedocs.io/en/latest/).
+For more information, see:
+- [API documentation](https://controls-docs.readthedocs.io/en/latest/)
+- [LHR Solar Wiki](https://wikis.utexas.edu/display/LHRSOLAR/Controls+Documentation)
 
 **[Back to top](#table-of-contents)**
 
@@ -44,28 +46,7 @@ We also use GitHub Projects to track software releases. See our [active projects
 
 ## Getting Started
 
-The preferred development environment for the system is VSCode on a Linux machine. Options for developers not on a native Linux machine include WSL (specifically WSL2, supported on Windows) or a Virtual Machine (supported on both Windows and macOS). Instructions provided here will assume that you have a working Linux environment with terminal control.
-
-Currently Ubuntu 20.04 and 22.04 (preferably Server edition) are the latest tested & supported Linux distributions. Other options may work but have not been rigorously tested.
-
-[WSL2 Install Guide (Preferred)](https://learn.microsoft.com/en-us/windows/wsl/install)
-
-For WSL2 USB support (for flashing the leaderboard), additional instructions will need to be followed. This guide assumes you are using either Windows 10 or 11. [USB/IP on WSL2](https://learn.microsoft.com/en-us/windows/wsl/connect-usb)
-
-[Ubuntu 22.04 Server ISO Download](https://releases.ubuntu.com/jammy/) (Server edition is best, not desktop)
-
-[Ubuntu 22.04 VM (VMWare) Install Guide](https://automaticaddison.com/how-to-install-ubuntu-22-04-virtual-machine-on-a-windows-pc/)
-
-[Ubuntu 22.04 VM (VirtualBox) Install Guide](https://linuxhint.com/install-ubuntu22-04-virtual-box/)
-
-In order to use a VM, you will need to set up VSCode via SSH to remote into the machine. You will not need to do this if using WSL as VSCode supports direct connection to WSL.
-
-[SSH Setup from Windows -> Linux VM](https://dev.to/risafj/ssh-key-authentication-for-absolute-beginners-in-plain-english-2m3f)
-
-Finally, it is a good idea to set up ssh keys for GitHub. Make sure you do this on your **Linux machine**.
-
-[Generating SSH Key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-[Adding SSH Key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+Please review [Setting Up an Embedded Development Environment](https://wikis.utexas.edu/display/LHRSOLAR/Setting+up+an+Embedded+Development+Environment) on our wiki. This should get you up and running with some sort of Linux machine.
 
 ### Workspace Setup
 
@@ -85,13 +66,6 @@ Finally, it is a good idea to set up ssh keys for GitHub. Make sure you do this 
     The script will prompt for installation of each of these packages.
 
 1. Add ```source /path/to/Controls/Scripts/load_env_vars.sh``` to the end of your ```~/.bashrc``` file in order to load the necessary environment variables on shell startup. A typical example: ```source /${HOME}/LHR/Controls/Scripts/load_env_vars.sh```
-
-1. Recommended extensions for VSCode:
-    * C/C++ Extension Pack
-    * GitHub Pull Requests
-    * GitLens
-    * Subway Surfers
-    * WSL
 
 ### Build System
 
@@ -123,7 +97,7 @@ OpenOCD is a debugger program that is open source and compatible with the STM32F
 1. In the other terminal, start gdb with the command ```gdb-multiarch ./Objects/controls-leader.elf``` (assuming that you are doing this in the root of the project directory).
 1. This will launch GDB and read in all of the symbols from the program that you are running on the board. In order to attach gdb to the board, execute the command ```target extended-remote :3333```, which will connect to the openocd session started earlier.
 
-**Note:** If you get an error message for Permission denied, try giving openocd read/write permissions using chmod: ```chmod 764 openocd```
+**Note:** If you get an error message for permission denied, try giving openocd read/write permissions using chmod: ```chmod 764 openocd```
 
 **[Back to top](#table-of-contents)**
 
@@ -195,6 +169,7 @@ Commit frequently to your branch. A good rule of thumb is to push at natural sto
 
 ### Controls System
 [LHRS Controls ReadTheDocs](https://controls-docs.readthedocs.io/en/latest/)
+[LHRS Controls Wiki](https://wikis.utexas.edu/display/LHRSOLAR/Controls+Documentation)
 
 ### RTOS
 [uCOS-III Documentation](https://www.analog.com/media/en/dsp-documentation/software-manuals/Micrium-uCOS-III-UsersManual.pdf)
