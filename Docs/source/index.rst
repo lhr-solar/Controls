@@ -32,7 +32,6 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    :maxdepth: 2
    :caption: Apps
 
-   Apps/FaultState
    Apps/Main
    Apps/ReadCarCAN
    Apps/ReadTritium
@@ -43,6 +42,7 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    Apps/CommandLine
    Apps/DebugDump
    Apps/PedalToPercent
+   Apps/FaultState
 
 .. toctree::
    :hidden:
