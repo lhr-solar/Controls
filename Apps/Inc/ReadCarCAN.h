@@ -1,5 +1,4 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file ReadCarCAN.h
  * @brief The Read Car CAN task reads the car’s CANBus for values 
  * relevant to Controls. Currently we parse four types of messages: 

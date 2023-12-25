@@ -1,10 +1,10 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendCarCAN.h
- * @brief Function prototypes for the SendCarCAN application.
+ * @brief The Send Car CAN task is a simple queue consumer task. Multiple 
+ * tasks that need to write the the car CAN bus; in order to do this safely, 
+ * they append their messages to a CAN queue. The Send Car CAN task simply pends 
+ * on this queue and forwards messages to the Car CAN bus when any arrive.
  * 
- * SendCarCAN contains functions relevant to placing CAN messages in a CarCAN queue and 
- * periodically sending those messages in the SendCarCAN task.
 */
 #ifndef __SENDCARCAN_H
 #define __SENDCARCAN_H

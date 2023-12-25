@@ -1,7 +1,9 @@
 /** 
- * @copyright Copyright (c) 2021 UT Longhorn Racing Solar
  * @file ReadTritium.h
- * @brief Reads data from the Tritium Motor Controller
+ * @brief In its current iteration, the Read Tritium task facilitates all received
+ * communication from MotorCAN. All messages are forwarded to CarCAN, and velocity and error
+ * information are recorded.
+ * 
  */
 
 #ifndef __READ_TRITIUM_H

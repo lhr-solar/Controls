@@ -1,10 +1,14 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendCarCAN.c
- * @brief Function implementations for the SendCarCAN application.
+ * @details
+ * The tasks that produce messages for the SendCarCAN queue include:
+ * - [ReadTritium](./ReadTritium.html) (all messages on MotorCAN bus are echoed across CarCAN bus)
+ * - [SendTritium](./ReadTritium.html) (the current FSM state is echoed across CarCAN bus for logging)
  * 
- * This contains functions relevant to placing CAN messages in a CarCAN queue and periodically sending
- * those messages in the SendCarCAN task.
+ * # Put IO State Task
+ * The Put IO State task puts the current IO state on the CAN bus. It is used to send the IO state 
+ * to Data Acquisition (for logging purposes) and the BPS (for ignition sequence purposes). Currently, it is 
+ * written within `SendCarCAN.c`. It is a separate task from SendCarCAN (subject to change).
  */
 
 #include "common.h"

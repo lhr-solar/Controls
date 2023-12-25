@@ -1,7 +1,14 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file ReadTritium.c
- * @brief Task to read data from the Tritium Motor Controller
+ * @details
+ * ReadTritium forwards all messages from MotorCAN to CarCAN. It does this using the FIFO 
+ * defined in [SendCarCAN](./SendCarCAN.html). The task posts messages to the queue, which are then 
+ * read out by the SendCarCAN task.
+ * 
+ * ReadTritium also facilitates reading velocity and error information in from the motor controller. 
+ * Velocity is put on the display, and error information is used to determine if the motor controller 
+ * is in a fault state. If the motor controller is in a fault state, the task will attempt to reset the 
+ * motor controller. If the motor controller cannot be reset, the task will set the car to a fault state.
  * 
  */
 #include "ReadTritium.h"

@@ -183,7 +183,7 @@ breathe_domain_by_extension = {
 import os
 src_list = []
 controls_root = os.path.abspath("../../")
-controls_file_dirs = ["Apps/Inc/", "Drivers/Inc/", "BSP/Inc/"]
+controls_file_dirs = ["Apps/Inc/", "Apps/Src/", "Drivers/Inc/", "BSP/Inc/"]
 
 for dir in controls_file_dirs:
     for root, dirs, files in os.walk(os.path.join(controls_root, dir)):
@@ -195,7 +195,9 @@ breathe_projects = {"doxygen": "../doxygen/xml/"}
 breathe_projects_source = {
     "doxygen": ("./", src_list)
 }
-
+breathe_doxygen_aliases = {
+    'rstdoc{1}': r'\verbatim embed:rst:inline :doc:`\1` \endverbatim',
+}
 breathe_implementation_filename_extensions = ['.c']
 breathe_default_project = "doxygen"
 breathe_show_define_initializer = True

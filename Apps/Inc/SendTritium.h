@@ -1,5 +1,4 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendTritium.h
  * @brief SendTritium contains functions relevant to updating the velocity and current setpoitns
  * of the Tritium motor controller. The implementation includes a normal current

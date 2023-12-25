@@ -1,5 +1,4 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file UpdateDisplay.c
  * @brief Function implementations for the display application.
  * 
