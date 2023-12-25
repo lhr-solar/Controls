@@ -1,9 +1,12 @@
 /**
  * @file SendTritium.h
- * @brief SendTritium contains functions relevant to updating the velocity and current setpoitns
- * of the Tritium motor controller. The implementation includes a normal current
- * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
- * The logic is determined through a finite state machine implementation.
+ * @brief The SendTritium task currently houses our velocity control code. 
+ * It utilizes a FSM to coordinate what messages should be sent to the motor 
+ * controller depending on a certain set of input variables. This FSM depends 
+ * on data from across the system, such as the [Pedals](../Drivers/Pedals.html), 
+ * the [Switches](../Drivers/Minions.html), and the CAN messages from 
+ * BPS (indicating whether charging is enabled).
+ * 
  */
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H

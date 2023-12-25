@@ -1,17 +1,22 @@
 /**
  * @file SendTritium.c
- * @brief Function implementations for the SendTritium application.
+ * @details
+ * The FSM has three major supermodes, which are:
+ * - "Normal" (Current Controlled) mode. This includes the Forward, Neutral, and Reverse states.
+ * - One Pedal Drive (Velocity Controlled) mode. This is the state where the driver is only using the accelerator pedal to control the car.
+ * - Cruise Control (Velocity Controlled) mode. This is the state where the driver is using the cruise control buttons to control the car. This includes the Record Velocity, Powered Cruise, Coasting Cruise, and Accelerate Cruise states.
+ * The FSM also includes the brake state.
  * 
- * This contains functions relevant to updating the velocity and current setpoitns
- * of the Tritium motor controller. The implementation includes a normal current
- * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
- * The logic is determined through a finite state machine implementation.
- * 
- * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including SendTritium.h, 
+ * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including `SendTritium.h`, 
  * relevant setters will be exposed as externs for unit testing
  * and hardware inputs won't be read and motor commands won't be sent over MotorCAN.
- * If the macro SENDTRITIUM_PRINT_MES is also defined prior to including SendTritium.h,
+ * If the macro SENDTRITIUM_PRINT_MES is also defined prior to including `SendTritium.h`,
  * debug info will be printed via UART.
+ * 
+ * # FSM Diagram
+ * ![FSM Diagram](SendTritiumFSM.png)
+ * @image xml SendTritiumFSM.png
+ * 
  */
 
 #include "Pedals.h"

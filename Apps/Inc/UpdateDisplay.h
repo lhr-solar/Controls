@@ -1,10 +1,7 @@
 /**
  * @file UpdateDisplay.h
- * @brief Function prototypes for the display application.
- * 
- * This contains function prototypes relevant to the UpdateDisplay
- * application. Call assertUpdateDisplayError after calling any of the
- * functions in this application.
+ * @brief The update display task maintains a queue of command structures, allowing 
+ * other tasks to submit commands and sending out commands to the display as time allows.
  * 
  */
 
