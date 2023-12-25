@@ -291,7 +291,8 @@
             "GitHub.vscode-pull-request-github",    // For reviewing pull requests directly from VSCode
             "eamodio.gitlens",                      // For better github stuff
             "jirkavrba.subway-surfers",             // For fun
-            "ms-vscode-remote.remote-wsl"           // For WSL
+            "ms-vscode-remote.remote-wsl",           // For WSL
+            "waderyan.gitblame"                     // For tracking commit history and authors within code
         ]
     }
 
