@@ -17,13 +17,15 @@
  * @brief Lookup table to simplify user-defined packet structs. Contains metadata fields that are always the same for every message of a given ID.
  *        Indexed by CANId_t values. Any changes or additions must be made in parallel with changes made to the CANID_t enum in CANbus.h
  */
-const CANLUT_T CANLUT[NUM_CAN_IDS] = {
+const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[BPS_TRIP]						= {NOIDX, DOUBLE}, /**	   BPS_TRIP						   **/
-	[BPS_ALL_CLEAR]					= {NOIDX, DOUBLE}, /**     BPS_ALL_CLEAR				   **/
-	[BPS_CONTACTOR_STATE]			= {NOIDX, DOUBLE}, /**	   BPS_CONTACTOR_STATE			   **/
-	[CHARGE_ENABLE] 				= {NOIDX, DOUBLE}, /**     CHARGE_ENABLE                   **/
+	[BPS_CONTACTOR]		        	= {NOIDX, DOUBLE}, /**	   BPS_CONTACTOR		           **/
 	[STATE_OF_CHARGE] 				= {NOIDX, DOUBLE}, /**     STATE_OF_CHARGE                 **/
 	[SUPPLEMENTAL_VOLTAGE] 			= {NOIDX, DOUBLE}, /**     SUPPLEMENTAL_VOLTAGE            **/
+	[MOTOR_DRIVE] 					= {NOIDX, DOUBLE}, /**     MOTOR_DRIVE                     **/
+	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
+	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
+	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
 	[MC_BUS] 						= {NOIDX, DOUBLE}, /**     MC_BUS                          **/
 	[VELOCITY] 						= {NOIDX, DOUBLE}, /**     VELOCITY                        **/
 	[MC_PHASE_CURRENT] 				= {NOIDX, DOUBLE}, /**     MC_PHASE_CURRENT                **/
@@ -37,7 +39,8 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
 	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
 	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
 	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
-	[CARDATA] 						= {NOIDX, DOUBLE}, /**     CARDAT			               **/
+	[IO_STATE] 				        = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
+    [CONTROL_MODE]                  = {NOIDX, BYTE  }, /**     CONTROL_MODE			           **/
 };
 
 /**
@@ -46,8 +49,8 @@ const CANLUT_T CANLUT[NUM_CAN_IDS] = {
 
 CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
     BPS_TRIP, 
-    STATE_OF_CHARGE,
-    SUPPLEMENTAL_VOLTAGE,
-    CHARGE_ENABLE
+	BPS_CONTACTOR,			// Bit 1 and 0 contain BPS HV Plus/Minus (associated Motor Controller) Contactor and BPS HV Array Contactor, respectively
+    STATE_OF_CHARGE,	
+    SUPPLEMENTAL_VOLTAGE
 };
 CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {};

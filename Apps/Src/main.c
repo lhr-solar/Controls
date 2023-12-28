@@ -15,8 +15,8 @@
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "CAN_Queue.h"
 #include "UpdateDisplay.h"
+#include "SendCarCAN.h"
 
 #define IGN_CONT_PERIOD 100
 
@@ -43,7 +43,7 @@ int main(void) {
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -80,10 +80,10 @@ void Task_Init(void *p_arg){
     Contactors_Init();
     Display_Init();
     Minions_Init();
-    CAN_Queue_Init();
 
     // Initialize applications
     UpdateDisplay_Init();
+    SendCarCAN_Init();
 
     // Initialize SendTritium
     OSTaskCreate(
@@ -98,7 +98,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -116,7 +116,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -134,7 +134,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -152,7 +152,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -170,15 +170,13 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
 
-
+    
     while(1){
-        Contactors_Set(MOTOR_CONTACTOR, Minions_Read(IGN_2), true); //turn on the contactor if the ign switch lets us
-        assertOSError(err);
-        OSTimeDlyHMSM(0, 0, 0, IGN_CONT_PERIOD, OS_OPT_TIME_HMSM_NON_STRICT, &err);
+        CPU_WaitForInt();
     }
 }

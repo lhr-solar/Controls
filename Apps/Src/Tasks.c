@@ -26,7 +26,6 @@ OS_TCB ReadCarCAN_TCB;
 OS_TCB UpdateDisplay_TCB;
 OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
-OS_TCB Telemetry_TCB;
 OS_TCB DebugDump_TCB;
 OS_TCB CommandLine_TCB;
 
@@ -41,7 +40,6 @@ CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
 CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
 CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
-CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
 CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
@@ -104,9 +102,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
         while(1) {
 
             #if DEBUG == 1
-
                // Print the error that caused this fault
-                printf("\n\rCurrent Error Location: 0x%04x", OSErrLocBitmap);
                 printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
 
                 // Print the errors for each applications with error data
@@ -139,8 +135,8 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 */
 void EmergencyContactorOpen() {
     // Array motor kill
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, OFF);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, OFF);
 
     // Turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);
