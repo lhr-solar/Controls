@@ -1,3 +1,16 @@
+/**
+ * Test file to check that CAN loopback is working properly
+ * 
+ * Designed to be stepped through with a debugger such as GDB
+ * 
+ * Run make simulator with proper parameters, setting LOOPBACK 
+ * equal to 1 or 0
+ * 
+ * After changing the parameter, run make clean 
+ * to ensure that macro is changed
+ * 
+ */ 
+
 #include "Tasks.h"
 #include "common.h"
 #include "CANbus.h"
