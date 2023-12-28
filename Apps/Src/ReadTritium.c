@@ -6,9 +6,9 @@
  */
 
 #include "ReadTritium.h"
-#include "CAN_Queue.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "SendCarCAN.h"
 #include "os_cfg_app.h"
 #include <string.h>
 
@@ -43,7 +43,7 @@ Objective 1:
 	- if error
 		- assertOSError
 - determine information important to telementry
-	- SendCarCAN
+	- Telemetry
 - determine information important for storage
 	- acquire mutex on Storage Array
 	- Store information in Storage Array (based on index) 
@@ -104,6 +104,8 @@ void Task_ReadTritium(void *p_arg){
 				}
 
 			}
+            
+            SendCarCAN_Put(dataBuf); // Forward message on CarCAN for telemetry
 		}
 
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);

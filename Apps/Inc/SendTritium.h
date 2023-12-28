@@ -12,7 +12,7 @@
 
 #include "common.h"
 
-// #define SENDTRITIUM_PRINT_MES
+#define SENDTRITIUM_PRINT_MES
 
 #define MOTOR_MSG_PERIOD 100
 #define FSM_PERIOD 100
@@ -20,9 +20,9 @@
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
 #define FOREACH_Gear(GEAR) \
-        GEAR(FORWARD_GEAR)   \
-        GEAR(NEUTRAL_GEAR)  \
-        GEAR(REVERSE_GEAR)   \
+        GEAR(FORWARD_GEAR),   \
+        GEAR(NEUTRAL_GEAR),  \
+        GEAR(REVERSE_GEAR),   \
 
 typedef enum GEAR_ENUM {
     FOREACH_Gear(GENERATE_ENUM)
@@ -48,6 +48,23 @@ typedef struct TritiumState{
     void (*stateHandler)(void);
     void (*stateDecider)(void);
 } TritiumState_t;
+
+#ifdef SENDTRITIUM_EXPOSE_VARS
+// Inputs
+extern bool cruiseEnable;
+extern bool cruiseSet;
+extern bool onePedalEnable;
+extern bool regenEnable;
+
+extern uint8_t brakePedalPercent;
+extern uint8_t accelPedalPercent;
+
+extern Gear_t gear;
+
+extern TritiumState_t state;
+extern float velocityObserved;
+extern float cruiseVelSetpoint;
+#endif
 
 // Getter functions for local variables in SendTritium.c
 EXPOSE_GETTER(bool, cruiseEnable)

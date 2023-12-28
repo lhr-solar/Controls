@@ -45,7 +45,8 @@ typedef enum {
 	TEMPERATURE 					= 0x24B,
 	ODOMETER_AMPHOURS 				= 0x24E,
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
-	CARDATA 						= 0x581,
+	CONTROL_MODE                    = 0x580,
+    IO_STATE 						= 0x581,
 	MAX_CAN_ID
 } CANId_t;
 
