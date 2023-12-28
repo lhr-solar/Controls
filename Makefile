@@ -16,8 +16,10 @@ TEST_CAR = none
 
 DEBUG = 0
 export DEBUG
-LOOPBACK = 0
-export LOOPBACK
+MOTOR_LOOPBACK = 0
+export MOTOR_LOOPBACK
+CAR_LOOPBACK = 0
+export CAR_LOOPBACK
 
 LEADER = controls-leader
 MOTORSIM = motor-sim
