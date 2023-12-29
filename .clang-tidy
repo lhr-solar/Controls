@@ -1,0 +1,54 @@
+---
+Checks:          'clang-diagnostic-*,clang-analyzer-*,
+                  bugprone-*, cppcoreguidelines-*, readability-*,
+                  -cppcoreguidelines-avoid-non-const-global-variables'
+WarningsAsErrors: ''
+HeaderFileExtensions:
+  - ''
+  - h
+  - hh
+  - hpp
+  - hxx
+ImplementationFileExtensions:
+  - c
+  - cc
+  - cpp
+  - cxx
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     none
+User:            nate
+CheckOptions:
+  readability-magic-numbers.IgnoredIntegerValues: 100
+  cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues: 100
+  readability-identifier-naming.EnumCase: CamelCase
+  readability-identifier-naming.EnumConstantCase: CamelCase
+  readability-identifier-naming.EnumConstantPrefix: k
+  readability-identifier-naming.FunctionCase: camelBack
+  readability-identifier-naming.GlobalConstantCase: CamelCase
+  readability-identifier-naming.GlobalConstantPrefix: k
+  readability-identifier-naming.GlobalConstantPointerCase: CamelCase
+  readability-identifier-naming.GlobalConstantPointerPrefix: k
+  readability-identifier-naming.GlobalFunctionCase: CamelCase
+  readability-identifier-naming.GlobalPointerCase: lower_case
+  readability-identifier-naming.GlobalVariableCase: lower_case
+  readability-identifier-naming.LocalConstantCase: CamelCase
+  readability-identifier-naming.LocalConstantPrefix: k
+  readability-identifier-naming.LocalConstantPointerCase: CamelCase
+  readability-identifier-naming.LocalConstantPointerPrefix: k
+  readability-identifier-naming.LocalPointerCase: lower_case
+  readability-identifier-naming.LocalVariableCase: lower_case
+  readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
+  readability-identifier-naming.ParameterCase: lower_case
+  readability-identifier-naming.PointerParameterCase: lower_case
+  readability-identifier-naming.StaticConstantCase: CamelCase
+  readability-identifier-naming.StaticConstantPrefix: k
+  readability-identifier-naming.StaticVariableCase: lower_case
+  readability-identifier-naming.StructCase: CamelCase
+  readability-identifier-naming.TypedefCase: CamelCase
+  readability-identifier-naming.UnionCase: CamelCase
+  readability-identifier-naming.VariableCase: lower_case
+  readability-identifier-naming.IgnoreMainLikeFunctions: false
+SystemHeaders:   false
+...
+
