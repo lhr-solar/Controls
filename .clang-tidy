@@ -1,7 +1,9 @@
 ---
 Checks:          'clang-diagnostic-*,clang-analyzer-*,
                   bugprone-*, cppcoreguidelines-*, readability-*,
-                  -cppcoreguidelines-avoid-non-const-global-variables'
+                  -cppcoreguidelines-avoid-non-const-global-variables,
+                  -bugprone-easily-swappable-parameters,
+                  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling'
 WarningsAsErrors: ''
 HeaderFileExtensions:
   - ''
@@ -19,8 +21,8 @@ AnalyzeTemporaryDtors: false
 FormatStyle:     none
 User:            nate
 CheckOptions:
-  readability-magic-numbers.IgnoredIntegerValues: 100
-  cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues: 100
+  cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues: 1,2,3,4,100
+  readability-magic-numbers.IgnoredIntegerValues: 1,2,3,4,100
   readability-identifier-naming.EnumCase: CamelCase
   readability-identifier-naming.EnumConstantCase: CamelCase
   readability-identifier-naming.EnumConstantPrefix: k
@@ -49,6 +51,8 @@ CheckOptions:
   readability-identifier-naming.UnionCase: CamelCase
   readability-identifier-naming.VariableCase: lower_case
   readability-identifier-naming.IgnoreMainLikeFunctions: false
+  readability-identifier-length.MinimumVariableNameLength: 2
+  readability-identifier-length.MinimumParameterNameLength: 2
 SystemHeaders:   false
 ...
 
