@@ -12,9 +12,9 @@ NC=\033[0m # No Color
 
 DEBUG ?= 1
 export DEBUG
-MOTOR_LOOPBACK = 0
+MOTOR_LOOPBACK ?= 0
 export MOTOR_LOOPBACK
-CAR_LOOPBACK = 0
+CAR_LOOPBACK ?= 0
 export CAR_LOOPBACK
 
 # Check if test file exists for the leader.

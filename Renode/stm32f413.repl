@@ -71,13 +71,6 @@ nvicInput40: Miscellaneous.CombinedInput @ none
     numberOfInputs: 6
     -> nvic@40
 
-nvicInput23: Miscellaneous.CombinedInput @ none
-    numberOfInputs: 5
-    -> nvic@23
-nvicInput40: Miscellaneous.CombinedInput @ none
-    numberOfInputs: 6
-    -> nvic@40
-
 syscfg: Miscellaneous.STM32_SYSCFG @ sysbus 0x40013800
     [0-15] -> exti@[0-15]
 
