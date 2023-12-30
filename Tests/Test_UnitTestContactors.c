@@ -11,10 +11,10 @@ void tearDown(void) {}
 
 FAKE_VALUE_FUNC2(int, perform_addition, int, int);
 void test_unittest(void){
-    int hello = 1;
-    int bye = 2;
-    perform_addition_fake.return_val = 3;
-    TEST_ASSERT_EQUAL(6, perform_scaling(hello, bye));
+    int num1 = 1;
+    int num2 = 2;
+    perform_addition_fake.return_val = 6;
+    TEST_ASSERT_EQUAL(6, perform_scaling(num1, num2));
 }
 
 
