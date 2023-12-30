@@ -122,6 +122,13 @@ ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
 endif
 
+ifeq ($(MOTOR_LOOPBACK), 1)
+CFLAGS += -DMOTOR_LOOPBACK
+endif
+
+ifeq ($(CAR_LOOPBACK), 1)
+CFLAGS += -DCAR_LOOPBACK
+endif
 
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
