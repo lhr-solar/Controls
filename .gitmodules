@@ -7,3 +7,6 @@
 [submodule "Embedded-Sharepoint"]
 	path = Embedded-Sharepoint
 	url = https://github.com/lhr-solar/Embedded-Sharepoint
+[submodule "/home/diya/LonghornRacing/Controls/Unity"]
+	path = /home/diya/LonghornRacing/Controls/Unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
