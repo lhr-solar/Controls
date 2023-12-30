@@ -54,9 +54,7 @@ Please review [Setting Up an Embedded Development Environment](https://wikis.ute
 
 1. In VSCode, remote into your Linux machine if needed. Click **File** &#8594; **Open Workspace from File** and select the workspace located in ```.vscode/LHR.code-workspace```. The VSCode Workspace has many integrations that developers may find useful while debugging or writing code, including but not limited to integrations with [Renode Simulator](#renode-simulator) and the openocd on-chip debugger.
 
-1. Clone the [Embedded-Sharepoint](https://github.com/lhr-solar/Embedded-Sharepoint) separately. Eventually this will become a submodule of our repository, but currently it is not.
-
-1. Run ```Embedded-Sharepoint/Scripts/install.sh``` to selectively install your packages. For Controls development, you will need the following packages:
+1. Run ```Embedded-Sharepoint/Scripts/install.sh``` to selectively install your packages. **If you have not done the first step, this will not work, since the Embedded-Sharepoint is one of our submodules.** For Controls development, you will need the following packages:
     * ARM Toolchain
     * build-essential
     * gdb-multiarch
