@@ -33,7 +33,11 @@ all: clean default
 
 UNITY_ROOT=../
 
+<<<<<<< Updated upstream
 SRC_FILES1= unity.c Test_UnitTestExample.c ../Apps/Src/scalar.c test_runners/TestUnitTest.c
+=======
+SRC_FILES1=../Unity/src/unity.c Test_UnitTestContactors.c ../Drivers/Src/Contactors.c test_runners/TestContactors_Runner.c
+>>>>>>> Stashed changes
 
 C_COMPILER=gcc
 ifeq ($(shell uname -s), Darwin)
@@ -61,8 +65,19 @@ TARGET1 = $(TARGET_BASE1)$(TARGET_EXTENSION)
 
 C_INCLUDES =  \
 -I../Apps/Inc	\
--I../Apps/Src	\
+-I../Drivers/Inc	\
+-I../Config/Inc	\
+-I../BSP/Inc	\
+-I../CMSIS/Device/ST/STM32F4xx/Include	\
+-I../CMSIS/Include	\
+-I../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc \
+-I../RTOS/uCOS-III-STM32F4/uCOS-III/Source/ \
+-I../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ \
+-I../RTOS/uCOS-III-STM32F4/uC-CPU/ \
+-I../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ \
+-I../RTOS/uCOS-III-STM32F4/uC-LIB/ \
 -I../Tests/Inc/ \
+
 
 CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -Wall -fdata-sections -ffunction-sections -g -Wextra
 
