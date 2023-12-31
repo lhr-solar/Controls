@@ -19,7 +19,7 @@
 }
 
 /*=======Automagically Detected Files To Include=====*/
-#include "../unity.h"
+#include "../../Unity/src/unity.h"
 #include <setjmp.h>
 #include <stdio.h>
 #include "scalar.h"
@@ -42,8 +42,8 @@ void resetTest(void)
 /*=======MAIN=====*/
 int main(void)
 {
-  UnityBegin("Tsest/Test_UnitTestContactors.c");
-  RUN_TEST(test_unittest, 20);
+  UnityBegin("Tests/Test_UnitTestContactors.c");
+  RUN_TEST(test_UnitTestExamples, 20);
 
   return (UnityEnd());
 }

@@ -33,7 +33,7 @@ all: clean default
 
 UNITY_ROOT=../
 
-SRC_FILES1=../Unity/src/unity.c Test_UnitTestContactors.c ../Apps/Src/scalar.c test_runners/TestUnitTest.c
+SRC_FILES1= unity.c Test_UnitTestExample.c ../Apps/Src/scalar.c test_runners/TestUnitTest.c
 
 C_COMPILER=gcc
 ifeq ($(shell uname -s), Darwin)

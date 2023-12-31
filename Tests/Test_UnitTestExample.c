@@ -14,7 +14,7 @@ void test_unittest(void){
     int num1 = 1;
     int num2 = 2;
     perform_addition_fake.return_val = 6;
-    TEST_ASSERT_EQUAL(6, perform_scaling(num1, num2));
+    TEST_ASSERT_EQUAL(7, perform_scaling(num1, num2));
 }
 
 
