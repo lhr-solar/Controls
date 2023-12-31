@@ -1,7 +1,8 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file CANbus.h
- * @brief 
+ * @brief The CANbus driver is responsible for all incoming and outgoing CAN communication on both 
+ * CAN lines. The driver knows of more than a dozen different CAN messages it can send or receive, 
+ * and can automatically determine their size and data type.
  */
 
 #ifndef CAN_H__
@@ -9,14 +10,16 @@
 
 #include "BSP_CAN.h"
 
-#define CARCAN CAN_1 //convenience aliases for the CANBuses
+#define CARCAN CAN_1 //convenience aliases for the CANbuses
 #define MOTORCAN CAN_3
 
 /**
- * This enum is used to signify the ID of the message you want to send. 
+ * @enum CANId_t
+ * @brief This enum is used to signify the ID of the message you want to send. 
  * It is used internally to index our lookup table (CANLUT.C) and get message-specific fields.
  * For user purposes, it selects the message to send.
  * 
+ * @details
  * If changing the order of this enum, make sure to mirror that change in the lookup table, or
  * else the driver will not work properly. 
  * 
@@ -47,7 +50,7 @@ typedef enum {
 } CANId_t;
 
 /**
- * \struct CANLUT_T
+ * @struct CANLUT_T
  * @brief Struct to use in CAN MSG LUT
  * @param idxEn Whether or not this message is part of a sequence of messages
  * @param size Size of message data in bytes, should not exceed 8
@@ -70,7 +73,16 @@ typedef struct {
 } CANDATA_t;
 
 //Compatibility macros for deprecated enum
+/**
+ * @def CAN_BLOCKING
+ * @brief Compatibility macro for deprecated enum
+ */
 #define CAN_BLOCKING true
+
+/**
+ * @def CAN_NON_BLOCKING
+ * @brief Compatibility macro for deprecated enum
+ */
 #define CAN_NON_BLOCKING false
 
 

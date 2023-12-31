@@ -179,22 +179,8 @@ breathe_domain_by_extension = {
     "h": "c"
 }
 
-# Get all sources
-import os
-src_list = []
-controls_root = os.path.abspath("../../")
-controls_file_dirs = ["Apps/Inc/", "Apps/Src/", "Drivers/Inc/", "BSP/Inc/"]
-
-for dir in controls_file_dirs:
-    for root, dirs, files in os.walk(os.path.join(controls_root, dir)):
-        for file in files:
-            if file.endswith(".h") or file.endswith(".c"):
-                src_list.append(os.path.join(root, file))
-
 breathe_projects = {"controls_docs": "../doxygen/xml/"}
-breathe_projects_source = {
-    "controls_docs": ("./", src_list)
-}
+
 breathe_implementation_filename_extensions = ['.c']
 breathe_default_project = "controls_docs"
 breathe_show_define_initializer = True

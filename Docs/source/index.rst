@@ -49,7 +49,7 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    :maxdepth: 2
    :caption: Drivers
 
-   Drivers/CANBus
+   Drivers/CANbus
    Drivers/Contactors
    Drivers/Display
    Drivers/Minions
