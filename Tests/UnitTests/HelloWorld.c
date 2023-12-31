@@ -2,6 +2,7 @@
 #include "fff.h"
 #define MOCK_CONTACTORS
 #include "Contactors.h"
+#include "Unity/unity.h"
 
 int main(void) {
     printf("\rHello world\n\r");

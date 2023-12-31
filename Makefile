@@ -61,6 +61,8 @@ help:
 	@echo "	excluding the file type (.c) e.g. say you want to test Voltage.c, call"
 	@echo "		${ORANGE}make ${BLUE}stm32f413 ${ORANGE}TEST=${PURPLE}Voltage${NC}"
 
+unitclean:
+	rm -fR Tests/UnitTests/Objects
 
 clean:
 	rm -fR Objects

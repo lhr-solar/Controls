@@ -92,6 +92,7 @@ $(BUILD_DIR)/$(TARGET).o: $(BUILD_DIR) $(TOCOMPILE).c
 	@echo "LD $(<:../../%=%)"
 	@$(CC) $(C_INCLUDES) $(TOCOMPILE).c -o $(BUILD_DIR)/$(TOCOMPILE).o			
 	@echo "SZ $(<:../../%=%)"
+	- ./$(BUILD_DIR)/$(TOCOMPILE).o
 	
 #end add									^^ use to be @$(SZ) $@
 
