@@ -51,6 +51,15 @@ SF = st-flash
 # AS includes
 #AS_INCLUDES = 									#co
 
+C_INCLUDES :=	\
+-I../../Apps/Inc	\
+-I../../Drivers/Inc	\
+-I../../Config/Inc	\
+-I../../BSP/Inc	\
+-I../../Tests/Inc/	\
+-I../../Tests/UnitTests \
+-IInc
+
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
 endif
@@ -79,9 +88,9 @@ TOCOMPILE := $(TEST_LEADER)
 ##									#  @$(CC) $(OBJECTS) -o $@
 
 #added
-$(BUILD_DIR)/$(TARGET).o: $(BUILD_DIR)
+$(BUILD_DIR)/$(TARGET).o: $(BUILD_DIR) $(TOCOMPILE).c
 	@echo "LD $(<:../../%=%)"
-	@$(CC) $(TOCOMPILE).c -o $(BUILD_DIR)/$(TOCOMPILE).o			
+	@$(CC) $(C_INCLUDES) $(TOCOMPILE).c -o $(BUILD_DIR)/$(TOCOMPILE).o			
 	@echo "SZ $(<:../../%=%)"
 	
 #end add									^^ use to be @$(SZ) $@

@@ -12,9 +12,13 @@
 #define __CONTACTORS_H
 
 #include "common.h"
+#ifdef MOCK_CONTACTORS /////////////////////////////////
+#include "fff.h"
+#else
 #include "config.h"
 #include "BSP_GPIO.h"
 #include "stm32f4xx_gpio.h"
+#endif
 
 
 #define CONTACTORS_PORT                                 PORTC
@@ -31,7 +35,12 @@ typedef enum contactor_ENUM {
 }contactor_t;
 
 
-
+#ifdef MOCK_CONTACTORS
+DEFINE_FFF_GLOBALS;
+FAKE_VOID_FUNC(Contactors_Init);
+FAKE_VALUE_FUNC(bool, Contactors_Get, contactor_t);
+FAKE_VALUE_FUNC(bool, Contactors_Set, contactor_t, bool, bool);
+#else
 /**
  * @brief   Initializes contactors to be used
  *          in connection with the Motor and Array
@@ -56,7 +65,7 @@ bool Contactors_Get(contactor_t contactor);
  * @return  Whether or not the contactor was successfully set
  */
 ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
-
+#endif
 #endif
 
 
