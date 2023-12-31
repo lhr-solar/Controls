@@ -6,9 +6,12 @@
  */
 
 #include "Contactors.h"
-#include "stm32f4xx_gpio.h"
 #include "Tasks.h"
+#define MOCK_BSP_GPIO
 
+#ifndef MOCK_BSP_GPIO
+#include "stm32f4xx_gpio.h"
+#endif
 static OS_MUTEX contactorsMutex;
 
 /**

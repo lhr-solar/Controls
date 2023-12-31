@@ -14,7 +14,6 @@
 
 #include "common.h"
 #include "config.h"
-#include "stm32f4xx_gpio.h"
 #include <bsp.h>
 #include <stdbool.h>
 
