@@ -15,5 +15,5 @@ All of the switches and lights that are controllable via software are connected 
 *   Cruise Set Button
 *   Brakelight
 
-.. autodoxygenfile:: Minions.h
-   :project: doxygen
+.. doxygenfile:: Minions.h
+   

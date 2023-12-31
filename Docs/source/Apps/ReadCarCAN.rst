@@ -2,14 +2,14 @@
 Read Car CAN Task
 *****************
 
-.. autodoxygenfile:: ReadCarCAN.h
-   :project: doxygen
+.. doxygenfile:: ReadCarCAN.h
+   
    :sections: briefdescription
 
-.. autodoxygenfile:: ReadCarCAN.c
-   :project: doxygen
+.. doxygenfile:: ReadCarCAN.c
+   
    :sections: detaileddescription
 
-.. autodoxygenfile:: ReadCarCAN.h
-   :project: doxygen
+.. doxygenfile:: ReadCarCAN.h
+   
    :sections: define enum func typedef

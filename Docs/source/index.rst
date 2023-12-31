@@ -42,7 +42,7 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    Apps/CommandLine
    Apps/DebugDump
    Apps/PedalToPercent
-   Apps/FaultState
+   Apps/ErrorHandling
 
 .. toctree::
    :hidden:

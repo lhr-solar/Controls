@@ -2,14 +2,11 @@
 Read Tritium Task
 *****************
 
-.. autodoxygenfile:: ReadTritium.h
-    :project: doxygen
+.. doxygenfile:: ReadTritium.h
     :sections: briefdescription
 
-.. autodoxygenfile:: ReadTritium.c
-    :project: doxygen
+.. doxygenfile:: ReadTritium.c
     :sections: detaileddescription
 
-.. autodoxygenfile:: ReadTritium.h
-    :project: doxygen
+.. doxygenfile:: ReadTritium.h
     :sections: define enum func typedef

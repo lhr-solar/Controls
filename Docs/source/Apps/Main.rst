@@ -2,6 +2,5 @@
 Init Task
 *********
 
-.. autodoxygenfile:: main.c
-   :project: doxygen
+.. doxygenfile:: main.c
    :sections: briefdescription detaileddescription

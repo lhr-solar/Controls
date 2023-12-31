@@ -2,14 +2,11 @@
 SendTritium Task
 ********************
 
-.. autodoxygenfile:: SendTritium.h
-   :project: doxygen
+.. doxygenfile:: SendTritium.h
    :sections: briefdescription
 
-.. autodoxygenfile:: SendTritium.c
-   :project: doxygen
+.. doxygenfile:: SendTritium.c
    :sections: detaileddescription
 
-.. autodoxygenfile:: SendTritium.h
-   :project: doxygen
+.. doxygenfile:: SendTritium.h
    :sections: define enum func typedef

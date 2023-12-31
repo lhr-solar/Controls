@@ -2,14 +2,11 @@
 Update Display Task
 *******************
 
-.. autodoxygenfile:: UpdateDisplay.h
-   :project: doxygen
+.. doxygenfile:: UpdateDisplay.h
    :sections: briefdescription
 
-.. autodoxygenfile:: UpdateDisplay.c
-   :project: doxygen
+.. doxygenfile:: UpdateDisplay.c
    :sections: detaileddescription
 
-.. autodoxygenfile:: UpdateDisplay.h
-   :project: doxygen
+.. doxygenfile:: UpdateDisplay.h
    :sections: define enum func typedef

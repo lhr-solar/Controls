@@ -24,5 +24,5 @@ A more detailed description of the command structure is given below. For more in
 
 * ``args`` — The actual arguments for the command (strings or ints)
 
-.. autodoxygenfile:: Display.h
-   :project: doxygen
+.. doxygenfile:: Display.h
+   

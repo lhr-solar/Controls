@@ -80,7 +80,7 @@ html_theme = 'sphinx_book_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ["../../img"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -191,15 +191,12 @@ for dir in controls_file_dirs:
             if file.endswith(".h") or file.endswith(".c"):
                 src_list.append(os.path.join(root, file))
 
-breathe_projects = {"doxygen": "../doxygen/xml/"}
+breathe_projects = {"controls_docs": "../doxygen/xml/"}
 breathe_projects_source = {
-    "doxygen": ("./", src_list)
-}
-breathe_doxygen_aliases = {
-    'rstdoc{1}': r'\verbatim embed:rst:inline :doc:`\1` \endverbatim',
+    "controls_docs": ("./", src_list)
 }
 breathe_implementation_filename_extensions = ['.c']
-breathe_default_project = "doxygen"
+breathe_default_project = "controls_docs"
 breathe_show_define_initializer = True
 
 autosectionlabel_prefix_document = True

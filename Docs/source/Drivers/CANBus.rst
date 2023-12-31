@@ -30,5 +30,5 @@ When reading, the driver will read directly from a software queue in the BSP lay
 Everytime the BSP software queue is posted to, a receive interrupt signals to a driver-layer semaphore that a message has been received. This allows any waiting tasks to wake up and read the message. 
 This is done since tasks that read and write CAN messages don't usually have anything else to do while waiting, which makes blocking fairly efficient. 
 
-.. autodoxygenfile:: CANbus.h
-   :project: doxygen
+.. doxygenfile:: CANbus.h
+   

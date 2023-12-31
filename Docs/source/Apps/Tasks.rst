@@ -6,5 +6,5 @@ This file contains the storage for all general tasks related objects, including 
 
 API
 ===
-.. autodoxygenfile:: Tasks.h
-   :project: doxygen
+.. doxygenfile:: Tasks.h
+   

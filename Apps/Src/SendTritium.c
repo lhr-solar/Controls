@@ -14,7 +14,6 @@
  * debug info will be printed via UART.
  * 
  * # FSM Diagram
- * ![FSM Diagram](SendTritiumFSM.png)
  * @image xml SendTritiumFSM.png
  * 
  */
