@@ -17,7 +17,9 @@
 #else
 #include "config.h"
 #include "BSP_GPIO.h"
+#ifndef MOCK_BSP_GPIO
 #include "stm32f4xx_gpio.h"
+#endif
 #endif
 
 

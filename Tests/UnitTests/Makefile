@@ -58,6 +58,8 @@ C_INCLUDES :=	\
 -I../../BSP/Inc	\
 -I../../Tests/Inc/	\
 -I../../Tests/UnitTests \
+-I../../Tests/UnitTests/Unity \
+-I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source \
 -IInc
 
 ifeq ($(DEBUG), 1)
