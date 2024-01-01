@@ -172,7 +172,8 @@ epub_exclude_files = ['search.html']
 # ones.
 extensions = [
     'breathe',
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
+    'sphinxcontrib.confluencebuilder'
 ]
 
 breathe_domain_by_extension = {
@@ -186,3 +187,14 @@ breathe_default_project = "controls_docs"
 breathe_show_define_initializer = True
 
 autosectionlabel_prefix_document = True
+
+confluence_space_key = 'LHRSOLAR'
+confluence_parent_page = 'Controls Software'
+confluence_server_url = 'https://wikis.utexas.edu/display/LHRSOLAR/'
+confluence_server_user = 'ishdeshpa@utexas.edu'
+# confluence_ask_password = True
+confluence_publish_dryrun = True
+confluence_editor = 'v2'
+confluence_ask_user = True
+confluence_publish = True
+confluence_publish_token = 'OTEzMTYwNTk5NTExOoaKYqFQTGtE1P3yqSRHYlvEIBBU'
