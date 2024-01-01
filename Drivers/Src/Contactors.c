@@ -1,7 +1,12 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file Contactors.h
- * @brief 
+ * @file Contactors.c
+ * @details
+ * The contactors can be set using a blocking or non-blocking interface. 
+ * The blocking interface will wait until the contactor can be set, while 
+ * the non-blocking interface will return early if another thread is currently 
+ * setting the contactor.
+ * 
+ * The contactors are controlled via GPIO writes to the contactors board.
  * 
  */
 
