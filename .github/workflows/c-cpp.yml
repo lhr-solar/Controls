@@ -19,5 +19,5 @@ jobs:
         sudo apt -y update
     - name: clean
       run: make clean
-    - name: make stm32f413
-      run: make stm32f413
+    - name: make leader
+      run: make leader
