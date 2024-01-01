@@ -11,12 +11,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install tools
-      run: |
-        sudo apt -y update
-        ./Embedded-Sharepoint/install.sh -y
     - name: Initialize Submodules
       run: git submodule update --init --recursive
+    - name: Install tools
+      run: |
+        ./Embedded-Sharepoint/install.sh -y
+        sudo apt -y update
     - name: clean
       run: make clean
     - name: make stm32f413
