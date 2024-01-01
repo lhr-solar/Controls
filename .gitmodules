@@ -4,3 +4,6 @@
 [submodule "uCOS-III-STM32F4"]
 	path = RTOS/uCOS-III-STM32F4
 	url = https://github.com/lhr-solar/uCOS-III-STM32F4.git
+[submodule "Embedded-Sharepoint"]
+	path = Embedded-Sharepoint
+	url = https://github.com/lhr-solar/Embedded-Sharepoint

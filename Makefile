@@ -30,6 +30,8 @@ all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
 
 .PHONY: stm32f413
+stm32f413: leader
+
 leader:
 	@echo "${YELLOW}Compiling for leader...${NC}"
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
