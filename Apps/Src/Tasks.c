@@ -54,13 +54,12 @@ extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions 
  * Error assertion-related functions
 */
 
-void _assertOSError(volatile OS_ERR err)
+void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
         Display_Error(err); // Display the location and error code
-        printf("%d\n\r", err);
         while(1){;} //nonrecoverable
     }
 }
@@ -90,7 +89,6 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
         EmergencyContactorOpen();
         Display_Error(errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
-        printf("%d\n\r", errorCode);
         UpdateDisplay_ClearQueue(); // Clear message queue to ensure no other commands overwrite the error screen
     }
 

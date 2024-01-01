@@ -20,6 +20,8 @@
 
 #define IO_STATE_DLY_MS 250u 
 
+#define SENDCARCAN_MSG_SKIP_CTR 3
+
 // Task_PutIOState
 OS_TCB putIOState_TCB;
 CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
@@ -56,7 +58,7 @@ void SendCarCAN_Put(CANDATA_t message){
     
     static uint8_t carcan_ctr = 0;
     
-    if(carcan_ctr > 3){
+    if(carcan_ctr > SENDCARCAN_MSG_SKIP_CTR){
         OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
         assertOSError(err);
 

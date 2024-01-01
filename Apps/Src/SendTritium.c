@@ -665,6 +665,8 @@ void Task_SendTritium(void *p_arg){
         #endif
         state.stateDecider();    // decide what the next state is
 
+        // Disable velocity controlled mode by always overwriting velocity to the maximum
+        // in the appropriate direction.
         velocitySetpoint = (velocitySetpoint>0)?MAX_VELOCITY:-MAX_VELOCITY;
 
         // Drive
