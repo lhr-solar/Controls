@@ -15,7 +15,7 @@ jobs:
       run: git submodule update --init --recursive
     - name: Install tools
       run: |
-        ./Embedded-Sharepoint/install.sh -y
+        ./Embedded-Sharepoint/Scripts/install.sh -y
         sudo apt -y update
     - name: clean
       run: make clean
