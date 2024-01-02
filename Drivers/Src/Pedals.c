@@ -1,7 +1,9 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Pedals.c
- * @brief 
+ * @details **Note:** The brake pedal that is currently in the car isn't quite working, so 
+ * it's been switched over to a GPIO pin. The Pedals driver is still used to access 
+ * the brake pedal state, but it's now negative logic; a low pedal percentage means 
+ * that the brake pedal is pressed down.
  * 
  */
 

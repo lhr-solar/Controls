@@ -1,9 +1,17 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Minions.c
- * @brief 
+ * @details
+ * # Implementation Details
+ * All of the switches and lights that are controllable via software are connected through GPIO. These include:
+ * - Ignition Switch 1 & 2 (ARR_ON and MOTOR_ON)
+ * - Regen Enable Button
+ * - Gear Switch (Forward and Reverse) (note: if both Forward and Reverse are off, the gear switch is assumed to be in Neutral state)
+ * - Cruise Enable Button
+ * - Cruise Set Button
+ * - Brakelight
  * 
  */
+
 #include "Minions.h"
 
 /* Should be in sync with enum in Minions.h */

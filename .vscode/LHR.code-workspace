@@ -19,7 +19,7 @@
                 "args": ["-i"]
             },   
         },
-        "livePreview.defaultPreviewPath": "/Docs/build/html/",
+        "livePreview.defaultPreviewPath": "./Docs/build/html/",
         "C_Cpp.simplifyStructuredComments": false,
     },
     "tasks": {
