@@ -52,7 +52,7 @@ uint8_t get_SendCarCAN_Q_Space(void) {
  * @brief Wrapper to put new message in the CAN queue
 */
 void SendCarCAN_Put(CANDATA_t message){
-    OS_ERR err = OS_ERR_NONE;
+    OS_ERR err;
     CPU_TS ticks;
     bool success = false;
     
@@ -72,8 +72,10 @@ void SendCarCAN_Put(CANDATA_t message){
     carcan_ctr++;
 
 
-    if(success) OSSemPost(&CarCAN_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(err);
+    if(success) {
+        OSSemPost(&CarCAN_Sem4, OS_OPT_POST_1, &err);
+        assertOSError(err);
+    }
 }
 
 /**
