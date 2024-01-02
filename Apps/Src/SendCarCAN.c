@@ -174,5 +174,6 @@ static void Task_PutIOState(void *p_arg) {
     while (1) {
         putIOState();
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
+        assertOSError(err);
     }  
 }
