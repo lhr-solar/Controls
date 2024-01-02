@@ -36,10 +36,10 @@ leader:
 	@echo "${YELLOW}Compiling for leader...${NC}"
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
-
+ #TEST - need to add .c somehow, also no longer TEST_LEADER but we may want to check that there's a valid file first
 unittest:
 	@echo "${YELLOW}Compiling unit test...${NC}"
-	$(MAKE) -C Tests -C UnitTests -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
+	$(MAKE) -C Tests -C UnitTests -j TARGET=$(LEADER) TEST=$(TEST)
 	@echo "${BLUE}Compiled unit test! Jolly Good!${NC}"
 
 flash:

@@ -6,8 +6,10 @@ BUILD_DIR = Objects#../../Objects
 # source
 
 #																							changed to
-C_SOURCES = \
-../$(TEST)
+# since current path is in the BSP folder, go to the top level with ../../
+# C_SOURCES =  \															
+# $(wildcard ../../Drivers/Src/*.c)	\
+# $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))
 
 #######################################
 # binaries
@@ -86,7 +88,7 @@ OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 ##Added
-TOCOMPILE := $(TEST_LEADER)
+TOCOMPILE := $(TEST)
 ##									#  @$(CC) $(OBJECTS) -o $@
 
 #added
