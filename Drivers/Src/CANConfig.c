@@ -35,6 +35,7 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[TEMPERATURE] 					= {NOIDX, DOUBLE}, /**     TEMPERATURE                     **/
 	[ODOMETER_AMPHOURS] 			= {NOIDX, DOUBLE}, /**     ODOMETER_AMPHOURS               **/
 	[ARRAY_CONTACTOR_STATE_CHANGE] 	= {NOIDX, BYTE  }, /**     ARRAY_CONTACTOR_STATE_CHANGE    **/
+    [SLIP_SPEED]                    = {NOIDX, DOUBLE},
 	[MOTOR_DRIVE] 					= {NOIDX, DOUBLE}, /**     MOTOR_DRIVE                     **/
 	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
 	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
@@ -53,4 +54,13 @@ CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
     STATE_OF_CHARGE,	
     SUPPLEMENTAL_VOLTAGE
 };
-CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {};
+
+CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {
+    MC_BUS,
+    VELOCITY,
+    BACKEMF,
+    TEMPERATURE,
+    ODOMETER_AMPHOURS,
+    SLIP_SPEED,
+    MOTOR_STATUS
+};

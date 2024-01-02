@@ -18,8 +18,6 @@
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 
-#define IGN_CONT_PERIOD 100
-
 int main(void) {
     // Disable interrupts
     __disable_irq();
@@ -56,8 +54,6 @@ int main(void) {
     assertOSError(err);
 
     while(1);
-
-    return 0;
 }
 
 void Task_Init(void *p_arg){
@@ -65,17 +61,11 @@ void Task_Init(void *p_arg){
 
     // Start systick    
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-
-    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-
-    assertOSError(err);
     
     // Initialize drivers
     Pedals_Init();
-    OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
-    OSTimeDlyHMSM(0,0,10,0,OS_OPT_TIME_HMSM_STRICT,&err);
     BSP_UART_Init(UART_2);
-    CANbus_Init(CARCAN, (CANId_t*)carCANFilterList, NUM_CARCAN_FILTERS);
+    CANbus_Init(CARCAN, carCANFilterList, NUM_CARCAN_FILTERS);
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
@@ -84,6 +74,24 @@ void Task_Init(void *p_arg){
     // Initialize applications
     UpdateDisplay_Init();
     SendCarCAN_Init();
+
+    // Initialize ReadTritium
+    OSTaskCreate(
+        (OS_TCB*)&ReadTritium_TCB,
+        (CPU_CHAR*)"ReadTritium",
+        (OS_TASK_PTR)Task_ReadTritium,
+        (void*)NULL,
+        (OS_PRIO)TASK_READ_TRITIUM_PRIO,
+        (CPU_STK*)ReadTritium_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_READ_TRITIUM_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
+        (OS_ERR*)&err
+    );
+    assertOSError(err);
 
     // Initialize SendTritium
     OSTaskCreate(
@@ -98,7 +106,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -116,7 +124,7 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
@@ -134,29 +142,11 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
-
-    // Initialize ReadTritium
-    OSTaskCreate(
-        (OS_TCB*)&ReadTritium_TCB,
-        (CPU_CHAR*)"ReadTritium",
-        (OS_TASK_PTR)Task_ReadTritium,
-        (void*)NULL,
-        (OS_PRIO)TASK_READ_TRITIUM_PRIO,
-        (CPU_STK*)ReadTritium_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_READ_TRITIUM_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
-        (OS_ERR*)&err
-    );
-    assertOSError(err);
-
+    
     // Initialize SendCarCAN
     OSTaskCreate(
         (OS_TCB*)&SendCarCAN_TCB,
@@ -170,13 +160,10 @@ void Task_Init(void *p_arg){
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP|OS_OPT_TASK_SAVE_FP),
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
         (OS_ERR*)&err
     );
     assertOSError(err);
 
-    
-    while(1){
-        CPU_WaitForInt();
-    }
+    OSTaskDel(NULL, &err);
 }

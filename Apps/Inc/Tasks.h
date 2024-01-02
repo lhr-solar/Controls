@@ -31,10 +31,11 @@
 #define TASK_READ_TRITIUM_PRIO              3
 #define TASK_SEND_TRITIUM_PRIO              4
 #define TASK_READ_CAR_CAN_PRIO              5
-#define TASK_UPDATE_DISPLAY_PRIO            6
-#define TASK_SEND_CAR_CAN_PRIO              7
-#define TASK_DEBUG_DUMP_PRIO                8
-#define TASK_COMMAND_LINE_PRIO              9
+#define TASK_SEND_CAR_CAN_PRIO              6
+#define TASK_PUT_IOSTATE_PRIO               7
+#define TASK_UPDATE_DISPLAY_PRIO            8
+#define TASK_DEBUG_DUMP_PRIO                9
+#define TASK_COMMAND_LINE_PRIO              10
 
 /**
  * Stack Sizes

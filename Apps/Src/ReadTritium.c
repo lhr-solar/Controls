@@ -36,41 +36,26 @@ static void motorWatchdog(void *tmr, void *p_arg) {
 }
 
 
-/* OBJECTIVES:
-Objective 1:
-- Receive motor status message from MotorController (18.4.2)
-- interpret error status
-	- if error
-		- assertOSError
-- determine information important to telementry
-	- Telemetry
-- determine information important for storage
-	- acquire mutex on Storage Array
-	- Store information in Storage Array (based on index) 
-	- release mutex on Storage Array
-
-Objective 2:
-- create function able to read data from Storage Array
-	- pend on Storage Array mutex
-	- acquire Storage Array mutex
-	- read information of array index 
-	- release Storage Array mutex
-*/
-
 void Task_ReadTritium(void *p_arg){
 	OS_ERR err;
 	CANDATA_t dataBuf = {0};
 
-	// Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
-	OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
-	assertOSError(err);
-	OSTmrStart(&MotorWatchdog, &err);
-	assertOSError(err);
+	static bool watchdogCreated = false;
 
 	while (1){
 		ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
 
 		if (status == SUCCESS){
+            if(!watchdogCreated){    // Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
+                OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
+                assertOSError(err);
+
+                OSTmrStart(&MotorWatchdog, &err);
+                assertOSError(err);
+
+                watchdogCreated = true;
+            }
+
 			switch(dataBuf.ID){
 				case MOTOR_STATUS:{
 					// motor status error flags is in bytes 4-5
@@ -107,9 +92,6 @@ void Task_ReadTritium(void *p_arg){
             
             SendCarCAN_Put(dataBuf); // Forward message on CarCAN for telemetry
 		}
-
-		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_NON_STRICT, &err);
-		assertOSError(err);
 	}
 }
 
