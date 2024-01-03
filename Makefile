@@ -29,10 +29,10 @@ LEADER = controls-leader
 all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
 
-.PHONY: stm32f413
-stm32f413: leader
+.PHONY: leader
+leader: stm32f413
 
-leader:
+stm32f413:
 	@echo "${YELLOW}Compiling for leader...${NC}"
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"

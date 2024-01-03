@@ -226,9 +226,9 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
 */
  void attemptTurnMotorControllerPBCOn(void){
     if(mcPBCComplete){
-            Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
-            UpdateDisplay_SetMotor(true);  
-        }
+        Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
+        UpdateDisplay_SetMotor(true);  
+    }
  }
 
 /**
