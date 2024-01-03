@@ -169,11 +169,11 @@ epub_exclude_files = ['search.html']
 
 
 import os
-stdperiph_dir = "../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Src/"
+stdperiph_dir = "../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/"
 stdperiph_srcs = []
 
-for file in os.listdir(stdperiph_dir):
-    stdperiph_srcs.append(file)
+for file in os.listdir(stdperiph_dir + 'Src'):
+    stdperiph_srcs.append('Src/'+file)
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -197,5 +197,6 @@ breathe_projects_source = {
 breathe_implementation_filename_extensions = ['.c']
 breathe_default_project = "controls_docs"
 breathe_show_define_initializer = True
-
+breathe_doxygen_config_options = {'QUIET': 'YES', 'WARNINGS': 'NO'} # did this so that it would stop complaining about the stdperiph files,
+                                                    # but it would be nice to get rid of the warnings in the future
 autosectionlabel_prefix_document = True

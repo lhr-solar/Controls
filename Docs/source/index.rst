@@ -62,4 +62,4 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    :maxdepth: 2
    :caption: STM32F4_StdPeriph
 
-   STM32F4_StdPeriph/StdPeriph_Docs.rst
+   STM32F4_StdPeriph/StdPeriph_Docs
