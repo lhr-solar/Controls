@@ -24,6 +24,13 @@ else
 	TEST_LEADER ?= Apps/Src/main.c
 endif
 
+#Check if unit test file exists (and yes we don't use unittest right now but maybe we will in the future)
+ifneq (,$(wildcard Tests/UnitTests/Test_$(TEST).c))
+	UNITTEST ?= Tests/UnitTests/Test_$(TEST).c
+else
+	UNITTEST ?= no test found
+endif
+
 LEADER = controls-leader
 
 all:
@@ -39,7 +46,8 @@ leader:
  #TEST - need to add .c somehow, also no longer TEST_LEADER but we may want to check that there's a valid file first
 unittest:
 	@echo "${YELLOW}Compiling unit test...${NC}"
-	$(MAKE) -C Tests -C UnitTests -j TARGET=$(LEADER) TEST=$(TEST)
+	echo "$(UNITTEST)"	
+	$(MAKE) -C Tests -C UnitTests -j TARGET=$(LEADER) TEST=$(TEST)	
 	@echo "${BLUE}Compiled unit test! Jolly Good!${NC}"
 
 flash:

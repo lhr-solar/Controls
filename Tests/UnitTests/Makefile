@@ -7,9 +7,9 @@ BUILD_DIR = Objects#../../Objects
 
 #																							changed to
 # since current path is in the BSP folder, go to the top level with ../../
-# C_SOURCES =  \															
-# $(wildcard ../../Drivers/Src/*.c)	\
-# $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))
+C_SOURCES = $(wildcard ../../*/Src/$(TEST).c)	\
+$(wildcard Stubs/*.c)
+#echo "$(C_SOURCE) is c source"	
 
 #######################################
 # binaries
@@ -59,11 +59,12 @@ C_INCLUDES :=	\
 -I../../Config/Inc	\
 -I../../BSP/Inc	\
 -I../../Tests/Inc/	\
--I../../Tests/UnitTests \
--I../../Tests/UnitTests/Unity \
--I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source \
--IInc
-
+-I../../Tests/UnitTests	\
+-I../../Tests/UnitTests/Unity	\
+-I../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc \
+-I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source	\
+-IInc	
+ 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
 endif
@@ -76,6 +77,9 @@ ifeq ($(CAR_LOOPBACK), 1)
 CFLAGS += -DCAR_LOOPBACK
 endif
 
+ MOCKING=1
+ export MOCKING
+ CFLAGS += -DMOCKING
 
 #######################################
 # build the application
@@ -88,13 +92,14 @@ OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 ##Added
-TOCOMPILE := $(TEST)
+TOCOMPILE := Test_$(TEST)
 ##									#  @$(CC) $(OBJECTS) -o $@
 
 #added
 $(BUILD_DIR)/$(TARGET).o: $(BUILD_DIR) $(TOCOMPILE).c
 	@echo "LD $(<:../../%=%)"
-	@$(CC) $(C_INCLUDES) $(TOCOMPILE).c -o $(BUILD_DIR)/$(TOCOMPILE).o			
+	@echo "Mocking is $(MOCKING)"
+	@$(CC) $(CFLAGS) $(C_INCLUDES) $(TOCOMPILE).c $(C_SOURCES) -o $(BUILD_DIR)/$(TOCOMPILE).o			
 	@echo "SZ $(<:../../%=%)"
 	- ./$(BUILD_DIR)/$(TOCOMPILE).o
 	
