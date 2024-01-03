@@ -167,6 +167,14 @@ epub_title = project
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
+
+import os
+stdperiph_dir = "../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Src/"
+stdperiph_srcs = []
+
+for file in os.listdir(stdperiph_dir):
+    stdperiph_srcs.append(file)
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -180,6 +188,11 @@ breathe_domain_by_extension = {
 }
 
 breathe_projects = {"controls_docs": "../doxygen/xml/"}
+breathe_projects_source = {
+    "stdperiph_docs": (
+        stdperiph_dir, stdperiph_srcs
+    )
+}
 
 breathe_implementation_filename_extensions = ['.c']
 breathe_default_project = "controls_docs"

@@ -33,13 +33,10 @@ void Pedals_Init(void);
  *          by the ADC channel of the requested pedal (Accelerator or Brake),
  *          converts it to a percentage of the total distance pressed using 
  *          data from calibration testing, and returns it
- * @param   pedal_t ACCELERATOR or BRAKE
+ * @param   pedal ACCELERATOR or BRAKE
  * @return  percent amount the pedal has been pressed in percentage
  */
 int8_t Pedals_Read(pedal_t pedal);
 
 
 #endif
-
-
-

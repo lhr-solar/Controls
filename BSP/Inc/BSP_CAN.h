@@ -1,9 +1,7 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file BSP_CAN.h
- * @brief Header file for the library to interact
- * with both CAN lines in the car
- * 
+ * @brief This module provides low-level access to the Leaderboard's two CAN interfaces, 
+ * intended to be used for car CAN and motor CAN.
  */
 
 #ifndef __BSP_CAN_H
@@ -13,6 +11,12 @@
 #include "config.h"
 #include <bsp.h>
 
+/**
+ * @enum    CAN_t
+ * @brief   The CAN bus to use.
+ * @note    CAN_3 is the CAN bus that communicates with the motor controller.
+ *         CAN_1 is the CAN bus that communicates with the car.
+*/
 typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
 
 /**

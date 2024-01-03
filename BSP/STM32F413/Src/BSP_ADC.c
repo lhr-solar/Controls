@@ -1,4 +1,8 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @file BSP_ADC.c
+ * @details
+ * Internally, we use DMA to continuously copy the ADC values into an array that is served out.
+*/
 
 #include "BSP_ADC.h"
 #include "stm32f4xx.h"

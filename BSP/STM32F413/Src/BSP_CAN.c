@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @file    BSP_CAN.c
+ * @details 
+ * The implementation allows for custom receive and transmit callbacks, which 
+ * aid in creating higher-level drivers (see [CANbus](../Drivers/CANbus.html)).
+*/
 
 #include "BSP_CAN.h"
 #include "stm32f4xx.h"

@@ -22,14 +22,6 @@ Keep the docs clear and readable. Follow the style of the existing documentation
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Overview
-   
-   Overview/Hardware
-   Overview/Software
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
    :caption: Apps
 
    Apps/Main
@@ -60,7 +52,14 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    :maxdepth: 2
    :caption: BSP
 
-   BSP/ADC
-   BSP/CAN
-   BSP/GPIO
-   BSP/UART
+   BSP/BSP_ADC
+   BSP/BSP_CAN
+   BSP/BSP_GPIO
+   BSP/BSP_UART
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: STM32F4_StdPeriph
+
+   STM32F4_StdPeriph/StdPeriph_Docs.rst

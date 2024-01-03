@@ -1,9 +1,8 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file BSP_UART.h
- * @brief Header file for the library to interact
- * with the UART line
- */
+ * @file    BSP_UART.h
+ * @brief This module provides a low-level interface to two UART ports, 
+ * intended for use for the display and USB communication.
+*/
 
 #ifndef __BSP_UART_H
 #define __BSP_UART_H
@@ -11,12 +10,17 @@
 #include "common.h"
 #include <bsp.h>
 
+/**
+ * @enum   UART_t
+ * @brief   Enumeration of the UART devices
+*/
 typedef enum {UART_2, UART_3, NUM_UART} UART_t;
+
 /**
  * @brief   Initializes the UART peripheral
+ * @param   usart device selected
  */
-void BSP_UART_Init(UART_t);
-
+void BSP_UART_Init(UART_t usart);
 
 /**
  * @brief   Gets one line of ASCII text that was received 
