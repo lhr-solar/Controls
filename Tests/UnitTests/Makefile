@@ -1,3 +1,14 @@
+# COLORS
+RED=\033[0;31m
+GREEN=\033[0;32m
+ORANGE=\033[0;33m
+BLUE=\033[0;34m
+PURPLE=\033[0;35m
+CYAN=\033[0;36m
+LIGHTGRAY=\033[0;37m
+DARKGRAY=\033[1;30m
+YELLOW=\033[0;33m
+NC=\033[0m # No Color
 
 # Build path
 BUILD_DIR = Objects#../../Objects
@@ -5,10 +16,18 @@ BUILD_DIR = Objects#../../Objects
 ######################################
 # source
 
-#																							changed to
-# since current path is in the BSP folder, go to the top level with ../../
-C_SOURCES = $(wildcard ../../*/Src/$(TEST).c)	\
-$(wildcard Stubs/*.c)
+# C sources																			changed to
+
+C_SOURCES = \
+$(wildcard ../../*/Src/$(TEST).c) \
+Unity/unity.c \
+../../BSP/STM32F413/Src/BSP_GPIO.c \
+../../BSP/STM32F413/Src/BSP_ADC.c 
+
+
+$(foreach src,$(C_SOURCES),$(info --- $(src)))
+
+#$(wildcard Stubs/*.c)
 #echo "$(C_SOURCE) is c source"	
 
 #######################################
@@ -61,8 +80,6 @@ C_INCLUDES :=	\
 -I../../Tests/Inc/	\
 -I../../Tests/UnitTests	\
 -I../../Tests/UnitTests/Unity	\
--I../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc \
--I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source	\
 -IInc	
  
 ifeq ($(DEBUG), 1)
@@ -96,12 +113,36 @@ TOCOMPILE := Test_$(TEST)
 ##									#  @$(CC) $(OBJECTS) -o $@
 
 #added
-$(BUILD_DIR)/$(TARGET).o: $(BUILD_DIR) $(TOCOMPILE).c
+$(BUILD_DIR)/$(TOCOMPILE).o: $(BUILD_DIR) $(TOCOMPILE).c
 	@echo "LD $(<:../../%=%)"
 	@echo "Mocking is $(MOCKING)"
 	@$(CC) $(CFLAGS) $(C_INCLUDES) $(TOCOMPILE).c $(C_SOURCES) -o $(BUILD_DIR)/$(TOCOMPILE).o			
 	@echo "SZ $(<:../../%=%)"
 	- ./$(BUILD_DIR)/$(TOCOMPILE).o
+
+
+# $(BUILD_DIR)/$(TOCOMPILE).o: $(TOCOMPILE).c Makefile | $(BUILD_DIR)
+# 	@echo "CC $(<:../../%=%)"
+# 	@$(CC) $(C_INCLUDES) -c $(CFLAGS) $< -o $@
+# 	- ./$(BUILD_DIR)/$(TOCOMPILE).o
+
+# $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
+# 	@echo "AS $(<:../../%=%)"
+# 	@$(AS) -c $(CFLAGS) $< -o $@
+
+# $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
+# 	@echo "LD $(<:../../%=%)"
+# 	@$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+# 	@echo "SZ $(<:../../%=%)"
+# 	@$(SZ) $@
+
+# $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
+# 	@echo "HEX $(<:../../%=%)"
+# 	@$(HEX) $< $@
+	
+# $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
+# 	@echo "BIN $(<:../../%=%)"
+# 	@$(BIN) $< $@
 	
 #end add									^^ use to be @$(SZ) $@
 

@@ -1,7 +1,16 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "BSP_ADC.h"
-#include "stm32f4xx.h"
+//#include "stm32f4xx.h"
+
+
+
+#ifdef MOCKING
+//DEFINE_FFF_GLOBALS;
+DEFINE_FAKE_VOID_FUNC(BSP_ADC_Init);
+DEFINE_FAKE_VALUE_FUNC(int16_t, BSP_ADC_Get_Millivoltage, int);
+DEFINE_FAKE_VALUE_FUNC(int16_t, BSP_ADC_Get_Value, int);
+#else
 
 static volatile uint16_t ADCresults[2];
 
@@ -39,7 +48,7 @@ static void ADC_InitDMA(void) {
  * @param   None
  * @return  None
  */
-void BSP_ADC_Init(void) {
+static void BSP_ADC_Init(void) {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	// Enable the ADC clock
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	// Enable the PC clock for port C
 
@@ -113,3 +122,6 @@ int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice) {
     // Convert to millivoltage
     return (ADC_RANGE_MILLIVOLTS * data) >> ADC_PRECISION_BITS;
 }
+
+
+#endif

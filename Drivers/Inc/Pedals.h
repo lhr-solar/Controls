@@ -11,6 +11,8 @@
 #ifndef __PEDALS_H
 #define __PEDALS_H
 
+#include <stdio.h>
+#include <stdint.h>
 #include "BSP_ADC.h"
 
 /**
@@ -29,17 +31,15 @@ typedef enum
  * @param   None
  * @return  None
  */ 
-void Pedals_Init(void);
+ void Pedals_Init(void);
 
 /**
  * @brief   Provides the pedal distance pressed in percetage (accelerator or brake)
  * @param   pedal_t pedal, ACCELERATOR or BRAKE as defined in enum
  * @return  distance the pedal has been pressed in percentage
  */ 
-int8_t Pedals_Read(pedal_t pedal);
-
+ int8_t Pedals_Read(pedal_t pedal);
 
 #endif
 
-
-/* @} */
+/* @ */

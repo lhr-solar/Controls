@@ -11,8 +11,10 @@
 
 #ifndef __BSP_ADC_H
 #define __BSP_ADC_H
-
+#define MOCK_BSP_ADC
+#ifndef MOCK_BSP_ADC
 #include "bsp.h"
+#endif
 #include "common.h"
 #include "config.h"
 
@@ -27,27 +29,34 @@ typedef enum
     NUMBER_OF_CHANNELS
 } ADC_t;
 
+#ifdef MOCKING
+#include "fff.h"
+DECLARE_FAKE_VOID_FUNC(BSP_ADC_Init);
+DECLARE_FAKE_VALUE_FUNC(int16_t, BSP_ADC_Get_Millivoltage, int);
+DECLARE_FAKE_VALUE_FUNC(int16_t, BSP_ADC_Get_Value, int);
+#else
+
 /**
  * @brief   Initialize the ADC module
  * @return  None
  */ 
-void BSP_ADC_Init(void);
+extern void BSP_ADC_Init(void);
 
 /**
  * @brief   Provides the ADC value of the channel at the specified index
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  Raw ADC value without conversion
  */ 
-int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
+extern int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
 
 /**
  * @brief   Provides the ADC value in millivolts of the channel at the specified index
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  ADC value in millivolts
  */ 
-int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
+extern int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
 
 #endif
-
+#endif
 
 /* @} */

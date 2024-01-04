@@ -46,7 +46,7 @@ leader:
  #TEST - need to add .c somehow, also no longer TEST_LEADER but we may want to check that there's a valid file first
 unittest:
 	@echo "${YELLOW}Compiling unit test...${NC}"
-	echo "$(UNITTEST)"	
+	@echo "$(UNITTEST)"	
 	$(MAKE) -C Tests -C UnitTests -j TARGET=$(LEADER) TEST=$(TEST)	
 	@echo "${BLUE}Compiled unit test! Jolly Good!${NC}"
 
@@ -70,10 +70,12 @@ help:
 	@echo "		${ORANGE}make ${BLUE}stm32f413 ${ORANGE}TEST=${PURPLE}Voltage${NC}"
 
 unitclean:
-	rm -fR Tests/UnitTests/Objects
+	
 
 clean:
+	rm -fR Tests/UnitTests/Objects
 	rm -fR Objects
 	rm -f *.out
 	rm -fr Docs/doxygen
 	rm -fr Docs/build
+	
