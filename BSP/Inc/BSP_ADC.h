@@ -13,8 +13,8 @@
 #define __BSP_ADC_H
 #define MOCK_BSP_ADC
 #ifndef MOCK_BSP_ADC
-#include "bsp.h"
 #endif
+#include "bsp.h"
 #include "common.h"
 #include "config.h"
 
@@ -40,21 +40,21 @@ DECLARE_FAKE_VALUE_FUNC(int16_t, BSP_ADC_Get_Value, int);
  * @brief   Initialize the ADC module
  * @return  None
  */ 
-extern void BSP_ADC_Init(void);
+void BSP_ADC_Init(void);
 
 /**
  * @brief   Provides the ADC value of the channel at the specified index
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  Raw ADC value without conversion
  */ 
-extern int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
+int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
 
 /**
  * @brief   Provides the ADC value in millivolts of the channel at the specified index
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  ADC value in millivolts
  */ 
-extern int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
+int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
 
 #endif
 #endif

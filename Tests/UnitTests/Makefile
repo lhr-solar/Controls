@@ -17,12 +17,13 @@ BUILD_DIR = Objects#../../Objects
 # source
 
 # C sources																			changed to
-
+# Need to include test, unity, source file for the test, mock c functions minus source file for test
 C_SOURCES = \
-$(wildcard ../../*/Src/$(TEST).c) \
+Tests/Test_$(TEST).c \
 Unity/unity.c \
-../../BSP/STM32F413/Src/BSP_GPIO.c \
-../../BSP/STM32F413/Src/BSP_ADC.c 
+$(wildcard ../../*/Src/$(TEST).c)	\
+$(filter-out $(wildcard Mocks/*/Src/$(TEST).c), $(wildcard Mocks/*/Src/*))
+
 
 
 $(foreach src,$(C_SOURCES),$(info --- $(src)))
@@ -70,9 +71,10 @@ SF = st-flash
 
 
 # AS includes
-#AS_INCLUDES = 									#co
+#AS_INCLUDES = 									#co TEST=Pedals -> include Pedals.c and Pedals.h
 
 C_INCLUDES :=	\
+$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc))	\
 -I../../Apps/Inc	\
 -I../../Drivers/Inc	\
 -I../../Config/Inc	\
@@ -81,6 +83,8 @@ C_INCLUDES :=	\
 -I../../Tests/UnitTests	\
 -I../../Tests/UnitTests/Unity	\
 -IInc	
+$(foreach src,$(C_INCLUDES),$(info --- $(src)))
+
  
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG

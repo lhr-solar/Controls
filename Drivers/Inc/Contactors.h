@@ -12,12 +12,9 @@
 #define __CONTACTORS_H
 
 #include "common.h"
-#include "fff.h"
 #include "config.h"
 #include "BSP_GPIO.h"
-//#include "stm32f4xx_gpio.h"
-#define GPIO_Pin_10                ((uint16_t)0x0400)  /* Pin 10 selected */
-#define GPIO_Pin_12                ((uint16_t)0x0400)  /* Pin 10 selected */
+#include "stm32f4xx_gpio.h"
 
 
 #define CONTACTORS_PORT                                 PORTC
