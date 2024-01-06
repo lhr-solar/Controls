@@ -22,7 +22,7 @@ C_SOURCES = \
 Tests/Test_$(TEST).c \
 Unity/unity.c \
 $(wildcard ../../*/Src/$(TEST).c)	\
-$(filter-out $(wildcard Mocks/*/Src/$(TEST).c), $(wildcard Mocks/*/Src/*))
+$(filter-out $(wildcard Mocks/*/Src/$(TEST).c), $(wildcard Mocks/*/Src/*.c))
 
 
 
@@ -74,7 +74,7 @@ SF = st-flash
 #AS_INCLUDES = 									#co TEST=Pedals -> include Pedals.c and Pedals.h
 
 C_INCLUDES :=	\
-$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc))	\
+$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc/*.h))	\
 -I../../Apps/Inc	\
 -I../../Drivers/Inc	\
 -I../../Config/Inc	\
@@ -82,6 +82,11 @@ $(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc))	\
 -I../../Tests/Inc/	\
 -I../../Tests/UnitTests	\
 -I../../Tests/UnitTests/Unity	\
+-I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/ \
+-I../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ \
+-I../../RTOS/uCOS-III-STM32F4/uC-CPU/ \
+-I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ \
+-I../../RTOS/uCOS-III-STM32F4/uC-LIB/ \
 -IInc	
 $(foreach src,$(C_INCLUDES),$(info --- $(src)))
 
