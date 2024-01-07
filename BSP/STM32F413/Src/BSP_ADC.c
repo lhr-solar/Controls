@@ -45,7 +45,7 @@ static void ADC_InitDMA(void) {
  * @param   None
  * @return  None
  */
-static void BSP_ADC_Init(void) {
+void BSP_ADC_Init(void) {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	// Enable the ADC clock
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	// Enable the PC clock for port C
 
