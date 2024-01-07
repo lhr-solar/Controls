@@ -117,17 +117,16 @@ vpath %.c $(sort $(dir $(C_SOURCES)))
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
-##Added
-TOCOMPILE := Test_$(TEST)
+
 ##									#  @$(CC) $(OBJECTS) -o $@
 
 #added
-$(BUILD_DIR)/$(TOCOMPILE).o: $(BUILD_DIR) $(TOCOMPILE).c
+$(BUILD_DIR)/$(TEST): $(BUILD_DIR) $(C_SOURCES)
 	@echo "LD $(<:../../%=%)"
 	@echo "Mocking is $(MOCKING)"
-	@$(CC) $(CFLAGS) $(C_INCLUDES) $(TOCOMPILE).c $(C_SOURCES) -o $(BUILD_DIR)/$(TOCOMPILE).o			
+	@$(CC) $(CFLAGS) $(C_INCLUDES) $(C_SOURCES) -o $(BUILD_DIR)/Test_$(TEST).out			
 	@echo "SZ $(<:../../%=%)"
-	- ./$(BUILD_DIR)/$(TOCOMPILE).o
+	- ./$(BUILD_DIR)/Test_$(TEST).out
 
 
 # $(BUILD_DIR)/$(TOCOMPILE).o: $(TOCOMPILE).c Makefile | $(BUILD_DIR)
