@@ -73,8 +73,10 @@ SF = st-flash
 # AS includes
 #AS_INCLUDES = 									#co TEST=Pedals -> include Pedals.c and Pedals.h
 
+#$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc/*.h))	*Doesn't work since we can only include directories as search paths, not actual files
 C_INCLUDES :=	\
-$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc/*.h))	\
+-I../../Tests/UnitTests/Mocks/Drivers/Inc	\
+-I../../Tests/UnitTests/Mocks/BSP/Inc	\
 -I../../Apps/Inc	\
 -I../../Drivers/Inc	\
 -I../../Config/Inc	\
@@ -87,10 +89,9 @@ $(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc/*.h))	\
 -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ \
 -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ \
 -I../../RTOS/uCOS-III-STM32F4/uC-LIB/ \
--IInc	
+
 $(foreach src,$(C_INCLUDES),$(info --- $(src)))
 
- 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG
 endif
@@ -103,9 +104,11 @@ ifeq ($(CAR_LOOPBACK), 1)
 CFLAGS += -DCAR_LOOPBACK
 endif
 
- MOCKING=1
- export MOCKING
- CFLAGS += -DMOCKING
+MOCKING=1
+CFLAGS += -DMOCKING
+
+FILETOTEST = $(shell echo '$(TEST)' | tr '[:lower:]' '[:upper:]') #Uses shell to make TEST file uppercase to define a macro
+CFLAGS += -DTEST_$(FILETOTEST) #Defines a macro TEST_<FILENAME> to determine if we should use a mock or regular header file
 
 #######################################
 # build the application
@@ -123,7 +126,6 @@ vpath %.s $(sort $(dir $(ASM_SOURCES)))
 #added
 $(BUILD_DIR)/$(TEST): $(BUILD_DIR) $(C_SOURCES)
 	@echo "LD $(<:../../%=%)"
-	@echo "Mocking is $(MOCKING)"
 	@$(CC) $(CFLAGS) $(C_INCLUDES) $(C_SOURCES) -o $(BUILD_DIR)/Test_$(TEST).out			
 	@echo "SZ $(<:../../%=%)"
 	- ./$(BUILD_DIR)/Test_$(TEST).out

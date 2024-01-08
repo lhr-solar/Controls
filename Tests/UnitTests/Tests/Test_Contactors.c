@@ -6,7 +6,12 @@
 //////////////////////////////////////////
 // The header file we are unit testing:
 #include "Contactors.h"
+//////////////////////////////////////////
+// fff header so we can DEFINE_FFF_GLOBALS
+// (can only happen once per test)
+#include "fff.h"
 
+DEFINE_FFF_GLOBALS;
 
 void setUp(void) {}
 
