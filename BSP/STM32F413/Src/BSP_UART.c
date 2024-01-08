@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @file    BSP_UART.c
+ * @details The implementation uses receive and transmit FIFOs, as well as 
+ * receive and transmit callbacks in order to be able to send and receive longer 
+ * messages without losing any data.
+*/
 
 #include "BSP_UART.h"
 #include "stm32f4xx.h"

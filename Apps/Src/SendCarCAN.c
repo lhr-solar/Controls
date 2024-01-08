@@ -27,13 +27,15 @@
  */
 #define IO_STATE_DLY_MS 250u 
 
+#define SENDCARCAN_MSG_SKIP_CTR 3
+
 // Task_PutIOState
 OS_TCB putIOState_TCB;
 CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 
 // SendCarCAN Queue
 #define FIFO_TYPE CANDATA_t
-#define FIFO_SIZE 16
+#define FIFO_SIZE 50
 #define FIFO_NAME SendCarCAN_Q
 #include "fifo.h"
 
@@ -50,20 +52,34 @@ uint8_t get_SendCarCAN_Q_Space(void) {
 }
 #endif
 
+/**
+ * @brief Wrapper to put new message in the CAN queue
+*/
 void SendCarCAN_Put(CANDATA_t message){
     OS_ERR err;
     CPU_TS ticks;
-
-    OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(err);
+    bool success = false;
     
-    bool success = SendCarCAN_Q_put(&CANFifo, message);
+    static uint8_t carcan_ctr = 0;
+    
+    if(carcan_ctr > SENDCARCAN_MSG_SKIP_CTR){
+        OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        assertOSError(err);
 
-    OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
-    assertOSError(err);
+        success = SendCarCAN_Q_put(&CANFifo, message);
 
-    if(success) OSSemPost(&CarCAN_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(err);
+        OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
+        assertOSError(err);
+
+        carcan_ctr = 0;
+    }
+    carcan_ctr++;
+
+
+    if(success) {
+        OSSemPost(&CarCAN_Sem4, OS_OPT_POST_1, &err);
+        assertOSError(err);
+    }
 }
 
 void SendCarCAN_Init(void) {
@@ -91,7 +107,7 @@ void Task_SendCarCAN(void *p_arg){
         (CPU_CHAR*)"PutIOState",
         (OS_TASK_PTR)Task_PutIOState,
         (void*)NULL,
-        (OS_PRIO)TASK_SEND_CAR_CAN_PRIO, // Round-robin with SendCarCAN task
+        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
         (CPU_STK*)putIOState_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
@@ -113,13 +129,11 @@ void Task_SendCarCAN(void *p_arg){
         assertOSError(err);
     
         bool res = SendCarCAN_Q_get(&CANFifo, &message);
-        assertOSError(err);
 
         OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
         assertOSError(err);
 
         if(res) CANbus_Send(message, true, CARCAN);
-        
     }
 }
 
@@ -138,7 +152,6 @@ static void putIOState(void){
     // Get minion information
     for(pin_t pin = 0; pin < NUM_PINS; pin++){
         bool pinState = Minions_Read(pin);
-        if(pin == IGN_1 || pin == IGN_2) pinState = !pinState;
         message.data[2] |= pinState << pin;
     }
     
@@ -147,6 +160,7 @@ static void putIOState(void){
         bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
         message.data[3] |= contactorState << contactor;
     }
+
     // Tell BPS if the array contactor should be on
     message.data[3] |= (!Minions_Read(IGN_1) || !Minions_Read(IGN_2)) << 2;
 
@@ -162,6 +176,6 @@ static void Task_PutIOState(void *p_arg) {
     while (1) {
         putIOState();
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
-    }
-   
+        assertOSError(err);
+    }  
 }

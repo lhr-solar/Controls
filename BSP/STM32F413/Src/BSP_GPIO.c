@@ -1,4 +1,7 @@
-/* Copyright (c) 2021 UT Longhorn Racing Solar */
+/**
+ * @file    BSP_GPIO.c
+ * @details
+*/
 
 #include "BSP_GPIO.h"
 #include "Tasks.h"

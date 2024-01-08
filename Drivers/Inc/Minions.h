@@ -1,9 +1,8 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
-
 /**
- * 
- * This modules allows us to use GPIO more easily 
- * for our application's purposes
+ * @file Minions.h
+ * @brief The Minions driver is responsible for most of the lights and 
+ * switches in the system, and in particular those that are present on the Controls Lighting board. 
+ * The driver uses GPIO to set/read pins on the MCU, which in turn are connected to the Lighting Board.
  * 
  */
 
@@ -25,14 +24,27 @@
         PIN(CRUZ_ST),  \
         PIN(BRAKELIGHT),  \
 
+/**
+ * @enum pin_t
+ * @brief Enumerates all software-controllable switches/lights
+ * @details The enum is used to index into the lookup table PINS_LOOKARR in Minions.c
+ * If the enum is changed, the lookup table should be changed accordingly.
+*/
 typedef enum MINIONPIN_ENUM {
     FOREACH_PIN(GENERATE_ENUM)
     NUM_PINS,
 } pin_t;
 
+/**
+ * @struct pinInfo_t
+ * @brief Contains information about a pin
+*/
 typedef struct {
+    /* GPIO Pin mask */
     uint16_t pinMask;
+    /* GPIO port */
     port_t port;
+    /* Direction (input/output)*/
     direction_t direction;
 } pinInfo_t;
 

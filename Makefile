@@ -12,6 +12,10 @@ NC=\033[0m # No Color
 
 DEBUG ?= 1
 export DEBUG
+MOTOR_LOOPBACK ?= 0
+export MOTOR_LOOPBACK
+CAR_LOOPBACK ?= 0
+export CAR_LOOPBACK
 
 # Check if test file exists for the leader.
 ifneq (,$(wildcard Tests/Test_$(TEST).c))
@@ -25,8 +29,10 @@ LEADER = controls-leader
 all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
 
-.PHONY: stm32f413
-leader:
+.PHONY: leader
+leader: stm32f413
+
+stm32f413:
 	@echo "${YELLOW}Compiling for leader...${NC}"
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"

@@ -85,25 +85,25 @@
  * @def PEDAL_MIN
  * @brief Minimum pedal percentage
 */
-#define PEDAL_MIN 0  // percent
+#define PEDAL_MIN 0
 
 /**
  * @def PEDAL_MAX
  * @brief Maximum pedal percentage
 */
-#define PEDAL_MAX 100 // percent
+#define PEDAL_MAX 100
 
 /**
  * @def CURRENT_SP_MIN
  * @brief Minimum current setpoint percentage
 */
-#define CURRENT_SP_MIN 0 // percent
+#define CURRENT_SP_MIN 0
 
 /**
  * @def CURRENT_SP_MAX
  * @brief Maximum current setpoint percentage
 */
-#define CURRENT_SP_MAX 100 // percent
+#define CURRENT_SP_MAX 100
 
 /**
  * @def GEAR_FAULT_THRESHOLD
@@ -128,13 +128,10 @@ float velocitySetpoint = 0;
 float cruiseVelSetpoint = 0;
 
 // Current observed velocity
-
-#ifndef SENDTRITIUM_EXPOSE_VARS
 static float velocityObserved = 0;
 
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
-#endif
 
 // Debouncing counters
 static uint8_t onePedalCounter = 0;
@@ -732,6 +729,10 @@ void Task_SendTritium(void *p_arg){
         UpdateDisplay_SetAccel(accelPedalPercent);
         #endif
         state.stateDecider();    // decide what the next state is
+
+        // Disable velocity controlled mode by always overwriting velocity to the maximum
+        // in the appropriate direction.
+        velocitySetpoint = (velocitySetpoint>0)?MAX_VELOCITY:-MAX_VELOCITY;
 
         // Drive
         #ifdef SENDTRITIUM_PRINT_MES

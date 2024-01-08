@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @file    BSP_CAN.c
+ * @details 
+ * The implementation allows for custom receive and transmit callbacks, which 
+ * aid in creating higher-level drivers (see [CANbus](../Drivers/CANbus.html)).
+*/
 
 #include "BSP_CAN.h"
 #include "stm32f4xx.h"
@@ -96,7 +101,11 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
     CAN_InitStruct.CAN_TXFP = ENABLE;
+    #ifdef CAR_LOOPBACK
+    CAN_InitStruct.CAN_Mode = CAN_Mode_LoopBack;
+    #else
     CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
+    #endif
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
     /* CAN Baudrate = 125 KBps
@@ -236,7 +245,11 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
     CAN_InitStruct.CAN_TXFP = ENABLE;
+    #ifdef MOTOR_LOOPBACK
+    CAN_InitStruct.CAN_Mode = CAN_Mode_LoopBack;
+    #else
     CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
+    #endif
     CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
 
     /* CAN Baudrate = 125 KBps

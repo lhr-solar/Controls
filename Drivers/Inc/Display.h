@@ -1,10 +1,9 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Display.h
- * @brief Function prototypes for the display driver.
- * 
- * This contains function prototypes relevant to sending/receiving messages
- * to/from our Nextion HMI.
+ * @brief The display driver is responsible for all interactions with the display. 
+ * It includes functions to reset the display and to send commands to it. 
+ * It also defines a display command struct, from which a command string is assembled 
+ * and then sent out to the display.
  * 
  */
 
@@ -14,28 +13,47 @@
 #include "common.h"	// common headers
 #include "Tasks.h"	// for os and fault error locs
 
-#define MAX_ARGS 2	// maximum # of arguments in a command packet
+/**
+ * @def MAX_ARGS
+ * @brief maximum number of arguments in a command packet
+ */
+#define MAX_ARGS 2
 
 /**
- * Error types
+ * @enum DisplayError_t
+ * @brief Error codes for display driver
+ * @note Currently only ERR_NONE and ERR_PARSE are used, since there is a bug
+ * where the nextion does not return errors properly to us.
  */
-typedef enum{ // Currently only ERR_NONE and ERR_PARSE are used
+typedef enum{
+    /* No error */
 	DISPLAY_ERR_NONE,
-	DISPLAY_ERR_PARSE,	    // Error parsing command struct passed to Display_Send
-	DISPLAY_ERR_INV_INSTR,	// Invalid instruction passed to nextion (0x00)
-	DISPLAY_ERR_INV_COMP,	// Invalid component id passed to nextion (0x02)
-	DISPLAY_ERR_INV_PGID,	// Invalid page id passed to nextion	(0x03)
-	DISPLAY_ERR_INV_VAR,	// Invalid variable name passed to nextion	(0x1A)
-	DISPLAY_ERR_INV_VAROP,	// Invalid variable operation passed to nextion	(0x1B)
-	DISPLAY_ERR_ASSIGN,	    // Assignment failure nextion	(0x1C)
-	DISPLAY_ERR_PARAMS,	    // Invalid number of parameters passed to nextion	(0x1E)
-	DISPLAY_ERR_MAX_ARGS,   // Command arg list exceeded MAX_ARGS elements
-	DISPLAY_ERR_OTHER       // Other nextion display error
+	/* Error parsing command struct passed to Display_Send */
+    DISPLAY_ERR_PARSE,	    
+	/* Invalid instruction passed to nextion (0x00) */
+    DISPLAY_ERR_INV_INSTR,	
+	/* Invalid component id passed to nextion (0x02) */
+    DISPLAY_ERR_INV_COMP,	
+	/* Invalid page id passed to nextion	(0x03) */
+    DISPLAY_ERR_INV_PGID,	
+	/* Invalid variable name passed to nextion	(0x1A) */
+    DISPLAY_ERR_INV_VAR,	
+	/* Invalid variable operation passed to nextion	(0x1B) */
+    DISPLAY_ERR_INV_VAROP,	
+	/* Assignment failure nextion	(0x1C) */
+    DISPLAY_ERR_ASSIGN,	    
+	/* Invalid number of parameters passed to nextion	(0x1E) */
+    DISPLAY_ERR_PARAMS,	    
+	/* Command arg list exceeded MAX_ARGS elements */
+    DISPLAY_ERR_MAX_ARGS,   
+	/* Other nextion display error */
+    DISPLAY_ERR_OTHER       
 } DisplayError_t;
 
 
 /**
- * All three pages on the HMI 
+ * @def Page_t
+ * @brief All three pages on the HMI 
  */
 typedef enum{
 	STARTUP	=0,
@@ -44,15 +62,17 @@ typedef enum{
 } Page_t;
 
 /**
- * Argument types
+ * @def Arg_e
+ * @brief Argument types
  */
 typedef enum{
 	STR_ARG,
 	INT_ARG
-}	Arg_e;
+} Arg_e;
 
 /**
- * Packages relevant display command data
+ * @struct DisplayCmd_t
+ * @brief Packages relevant display command data
  */
 typedef struct{
 	char* compOrCmd;
