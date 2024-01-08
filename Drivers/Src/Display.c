@@ -29,54 +29,50 @@ DisplayError_t Display_Init(){
 
 DisplayError_t Display_Send(DisplayCmd_t cmd){
 	char msgArgs[MAX_MSG_LEN];
-	if (isAssignCmd(cmd)){
-		if (cmd.argTypes[0] == INT_ARG){
-			sprintf(msgArgs, "%d", (int)cmd.args[0].num);
-		}
-		else{
-			if (cmd.args[0].str == NULL){return DISPLAY_ERR_PARSE;}
-			sprintf(msgArgs, "%s", cmd.args[0].str);
-		}
-
-		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
-		BSP_UART_Write(DISP_OUT, ".", 1);
-		BSP_UART_Write(DISP_OUT, cmd.attr, strlen(cmd.attr));
-		BSP_UART_Write(DISP_OUT, cmd.op, strlen(cmd.op));
-	}
-	else if (isOpCmd(cmd)){
+	if (!isAssignCmd(cmd) && !isOpCmd(cmd)){return DISPLAY_ERR_PARSE;} //parse error, has to be one of these 
+	
+	if(isOpCmd(cmd) && cmd.numArgs > MAX_ARGS){return DISPLAY_ERR_OTHER;} //too many args
+	
+	if(isOpCmd(cmd) && cmd.numArgs == 1){
 		msgArgs[0] = ' '; // No args
 		msgArgs[1] = '\0';
-		if (cmd.numArgs > MAX_ARGS){return DISPLAY_ERR_OTHER;}
-		if (cmd.numArgs >= 1){ // If there are arguments
-			for (int i = 0; i < cmd.numArgs; i++){
-				char arg[MAX_ARG_LEN];
-				if (cmd.argTypes[i] == INT_ARG){
-					sprintf(arg, "%d", (int)cmd.args[i].num);
-				}
-				else{
-					sprintf(arg, "%s", cmd.args[i].str);
-				}
-
-				strcat(msgArgs, arg);
-
-				if (i < cmd.numArgs - 1){ // delimiter
-					strcat(msgArgs, ",");
-				}
-			}
+		char arg[MAX_ARG_LEN];
+		if (cmd.argTypes[1] == INT_ARG){
+			sprintf(arg, "%d", (int)cmd.args[1].num);
 		}
+		else{
+			sprintf(arg, "%s", cmd.args[1].str);
+		}
+		strcat(msgArgs, arg);
 		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
-	}
-	else{ // Error parsing command struct
-		return DISPLAY_ERR_PARSE;
-	}
-
-	if (cmd.numArgs >= 1){ // If there are arguments
 		BSP_UART_Write(DISP_OUT, msgArgs, strlen(msgArgs));
+		BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+		return DISPLAY_ERR_NONE;
 	}
 
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	if(isOpCmd(cmd) && cmd.numArgs == 0){
+		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
+		BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+		return DISPLAY_ERR_NONE;
+	}
 
+	// Assignment command
+	if (cmd.argTypes[0] == INT_ARG){
+		sprintf(msgArgs, "%d", (int)cmd.args[0].num);
+	}
+	else{
+		if (cmd.args[0].str == NULL){return DISPLAY_ERR_PARSE;}
+		sprintf(msgArgs, "%s", cmd.args[0].str);
+	}
+
+	BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
+	BSP_UART_Write(DISP_OUT, ".", 1);
+	BSP_UART_Write(DISP_OUT, cmd.attr, strlen(cmd.attr));
+	BSP_UART_Write(DISP_OUT, cmd.op, strlen(cmd.op));
+	BSP_UART_Write(DISP_OUT, msgArgs, strlen(msgArgs));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 	return DISPLAY_ERR_NONE;
+	
 }
 
 DisplayError_t Display_Reset(){
