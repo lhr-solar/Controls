@@ -42,6 +42,7 @@ enum {
     SEND_UNTIL_MOTOR_CONT_ON
 };
 
+
 /*** Constants ***/
 #define SATURATION_THRESHOLD_TEST (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4) 
 

@@ -22,6 +22,7 @@ C_SOURCES = \
 Tests/Test_$(TEST).c \
 Unity/unity.c \
 $(wildcard ../../*/Src/$(TEST).c)	\
+$(wildcard Mocks/RTOS/os.c) \
 $(filter-out $(wildcard Mocks/*/Src/$(TEST).c), $(wildcard Mocks/*/Src/*.c))
 
 
@@ -75,8 +76,10 @@ SF = st-flash
 
 #$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc/*.h))	*Doesn't work since we can only include directories as search paths, not actual files
 C_INCLUDES :=	\
+-I../../Tests/UnitTests/Mocks/Apps/Inc	\
 -I../../Tests/UnitTests/Mocks/Drivers/Inc	\
 -I../../Tests/UnitTests/Mocks/BSP/Inc	\
+-I../../Tests/UnitTests/Mocks/RTOS/	\
 -I../../Apps/Inc	\
 -I../../Drivers/Inc	\
 -I../../Config/Inc	\

@@ -6,11 +6,11 @@
  */
 
 #include "Contactors.h"
-//#include "stm32f4xx_gpio.h"
-//#include "Tasks.h"
+#include "Tasks.h"
+#include "os.h"
 
 
-//static OS_MUTEX contactorsMutex;
+static OS_MUTEX contactorsMutex;
 
 /**
  * @brief   Helper function for setting contactors without mutex.
@@ -49,10 +49,10 @@ void Contactors_Init() {
         setContactor(contactor, OFF);
     }
 
-    // initialize mutex
-    //OS_ERR err;
-    //OSMutexCreate(&contactorsMutex, "Contactors lock", &err);
-   // assertOSError(err);
+    //initialize mutex
+    OS_ERR err;
+    OSMutexCreate(&contactorsMutex, "Contactors lock", &err);
+   assertOSError(err);
 }
 
 /**
@@ -87,26 +87,26 @@ bool Contactors_Get(contactor_t contactor) {
  * @return  Whether or not the contactor was successfully set
  */
 ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
-    //CPU_TS timestamp;
-    //OS_ERR err;
+    CPU_TS timestamp;
+    OS_ERR err;
     ErrorStatus result = ERROR;
 
     // acquire lock if its available
-    //OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &timestamp, &err);
+    OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &timestamp, &err);
     
-    //if(err == OS_ERR_PEND_WOULD_BLOCK){
-    //    return ERROR;
-   // }
-   // assertOSError(err);
+    if(err == OS_ERR_PEND_WOULD_BLOCK){
+       return ERROR;
+   }
+   assertOSError(err);
 
     // change contactor to match state and make sure it worked
     setContactor(contactor, state);
     bool ret = (bool)Contactors_Get(contactor);
     result = (ret == state) ? SUCCESS: ERROR;
 
-    // release lock
-  //  OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
- //   assertOSError(err);
+    //release lock
+   OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
+   assertOSError(err);
 
     return result;
 }

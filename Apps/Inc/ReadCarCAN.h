@@ -11,10 +11,10 @@
 #ifndef __READ_CAR_CAN_H
 #define __READ_CAR_CAN_H
 
-#include "os.h"
 #include "common.h"
-#include "Tasks.h"
 #include "CANbus.h"
+#include "Tasks.h"
+#include "Minions.h"
 
 /**
  * Error types

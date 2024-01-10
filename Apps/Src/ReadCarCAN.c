@@ -6,12 +6,12 @@
  */
 
 #include "ReadCarCAN.h"
-#include "UpdateDisplay.h"
+//#include "UpdateDisplay.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "os.h"
 #include "os_cfg_app.h"
-#include "Display.h"
+//#include "Display.h"
 
 // Length of the array and motor PBC saturation buffers
 #define SAT_BUF_LENGTH 5 
@@ -44,14 +44,14 @@
 // State of Charge scalar to scale it to correct fixed point
 #define SOC_SCALER 1000000
 
-// CAN watchdog timer variable
-static OS_TMR canWatchTimer;
+// // CAN watchdog timer variable
+// static OS_TMR canWatchTimer;
 
-// Array precharge bypass contactor delay timer variable
-static OS_TMR arrayPBCDlyTimer;
+// // Array precharge bypass contactor delay timer variable
+// static OS_TMR arrayPBCDlyTimer;
 
-// Motor controller precharge bypass contactor delay timer variable
-static OS_TMR motorControllerPBCDlyTimer;
+// // Motor controller precharge bypass contactor delay timer variable
+// static OS_TMR motorControllerPBCDlyTimer;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
@@ -131,19 +131,19 @@ static void disableArrayPrechargeBypassContactor(void){
  * @param None
 */
 static void updateArrayPrechargeBypassContactor(void){ 
-    OS_ERR err = OS_ERR_NONE;
+  //  OS_ERR err = OS_ERR_NONE;
     if((arrIgnStatus || mcIgnStatus)                                             // Ignition is ON
         && HVArrayMsgSaturation >= ARRAY_SATURATION_THRESHOLD                    // Saturation Threshold has be met
         && (Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == OFF)             
         // Array PBC is OFF
-        && (OSTmrStateGet(&arrayPBCDlyTimer, &err) != OS_TMR_STATE_RUNNING)){    // and precharge is currently not happening  
+        /*&& (OSTmrStateGet(&arrayPBCDlyTimer, &err) != OS_TMR_STATE_RUNNING)*/){    // and precharge is currently not happening  
             // Asserts error for OS timer state above if conditional was met
-            assertOSError(err);
+ //           assertOSError(err);
             // Wait to make sure precharge is finished and then restart array
-            OSTmrStart(&arrayPBCDlyTimer, &err);
+ //           OSTmrStart(&arrayPBCDlyTimer, &err);
     }
     // Asserts error for OS timer state above if conditional was not met
-    assertOSError(err);
+ //   assertOSError(err);
 }
 
 
@@ -153,18 +153,18 @@ static void updateArrayPrechargeBypassContactor(void){
  * @param None
 */
 static void updateMCPBC(void){
-    OS_ERR err = OS_ERR_NONE;
+ //   OS_ERR err = OS_ERR_NONE;
     if(mcIgnStatus                                                                      // Ignition is ON
         && HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD            // Saturation Threshold has be met
         &&(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == OFF)          // Motor Controller PBC is OFF
-        && (OSTmrStateGet(&motorControllerPBCDlyTimer, &err) != OS_TMR_STATE_RUNNING)){ // and precharge is currently not happening  
+        /*&& (OSTmrStateGet(&motorControllerPBCDlyTimer, &err) != OS_TMR_STATE_RUNNING)*/){ // and precharge is currently not happening  
             // Asserts error for OS timer state above if conditional was met
-            assertOSError(err);
+     //       assertOSError(err);
             // Wait to make sure precharge is finished and then restart array
-            OSTmrStart(&motorControllerPBCDlyTimer, &err);
+   //         OSTmrStart(&motorControllerPBCDlyTimer, &err);
         }
     // Asserts error for OS timer start above if conditional was not met
-    assertOSError(err);
+ //   assertOSError(err);
 }
 
 /**
@@ -236,7 +236,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
  void attemptTurnMotorControllerPBCOn(void){
     if(mcPBCComplete){
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
-            UpdateDisplay_SetMotor(true);  
+          //  UpdateDisplay_SetMotor(true);  
         }
  }
 
@@ -285,52 +285,52 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
 }
 
 void Task_ReadCarCAN(void *p_arg){
-    OS_ERR err;
+ //   OS_ERR err;
 
     // data struct for CAN message
     CANDATA_t dataBuf;
 
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID Charge_Enable within the desired interval.
-    OSTmrCreate(
-        &canWatchTimer,
-        "CAN Watch Timer",
-        CAN_WATCH_TMR_DLY_TMR_TS, // Initial delay equal to the period since 0 doesn't seem to work
-        CAN_WATCH_TMR_DLY_TMR_TS, 
-        OS_OPT_TMR_PERIODIC,
-        callbackCANWatchdog, 
-        NULL,
-        &err
-    );
-    assertOSError(err);
+    // OSTmrCreate(
+    //     &canWatchTimer,
+    //     "CAN Watch Timer",
+    //     CAN_WATCH_TMR_DLY_TMR_TS, // Initial delay equal to the period since 0 doesn't seem to work
+    //     CAN_WATCH_TMR_DLY_TMR_TS, 
+    //     OS_OPT_TMR_PERIODIC,
+    //     callbackCANWatchdog, 
+    //     NULL,
+    //     &err
+    // );
+    // assertOSError(err);
 
-    OSTmrCreate(
-        &arrayPBCDlyTimer,
-        "Array Bypass Precharge Delay Timer",
-        0,
-        ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS,
-        OS_OPT_TMR_ONE_SHOT,
-        setArrayBypassPrechargeComplete,
-        NULL,
-        &err
-    );
-    assertOSError(err);
+    // OSTmrCreate(
+    //     &arrayPBCDlyTimer,
+    //     "Array Bypass Precharge Delay Timer",
+    //     0,
+    //     ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS,
+    //     OS_OPT_TMR_ONE_SHOT,
+    //     setArrayBypassPrechargeComplete,
+    //     NULL,
+    //     &err
+    // );
+    // assertOSError(err);
 
-    OSTmrCreate(
-        &motorControllerPBCDlyTimer,
-        "Motor Controller Bypass Precharge Delay Timer",
-        0,
-        MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS,
-        OS_OPT_TMR_ONE_SHOT,
-        setMotorControllerBypassPrechargeComplete,
-        NULL,
-        &err
-    );
-    assertOSError(err);
+    // OSTmrCreate(
+    //     &motorControllerPBCDlyTimer,
+    //     "Motor Controller Bypass Precharge Delay Timer",
+    //     0,
+    //     MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS,
+    //     OS_OPT_TMR_ONE_SHOT,
+    //     setMotorControllerBypassPrechargeComplete,
+    //     NULL,
+    //     &err
+    // );
+    // assertOSError(err);
 
     // Start CAN Watchdog timer
-    OSTmrStart(&canWatchTimer, &err);
-    assertOSError(err);
+  //  OSTmrStart(&canWatchTimer, &err);
+  //  assertOSError(err);
 
     // Fills buffers with disable messages
     // NOTE: If the buffer becomes bigger than of type int8_t, memset will not work and 
@@ -356,8 +356,8 @@ void Task_ReadCarCAN(void *p_arg){
             }
             case BPS_CONTACTOR: { 
 
-                OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
-                assertOSError(err); 
+       //         OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
+     //           assertOSError(err); 
                 
                 // Retrieving HV contactor statuses using bit mapping
                 // Bitwise to get HV Plus and Minus, and then &&ing to ensure both are on
@@ -374,12 +374,12 @@ void Task_ReadCarCAN(void *p_arg){
 
             case SUPPLEMENTAL_VOLTAGE: {
                 SBPV = (*(uint16_t *) &dataBuf.data);
-                UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
+              //  UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
                 SOC = (*(uint32_t*) &dataBuf.data)/(SOC_SCALER);  // Convert to integer percent
-                UpdateDisplay_SetSOC(SOC);
+             //   UpdateDisplay_SetSOC(SOC);
                 break;
             }
         default: {  
@@ -407,7 +407,7 @@ static void handler_ReadCarCAN_chargeDisable(void) {
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
 
     if(ret) { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
+       // Display_Evac(SOC, SBPV);
         while(1){;}
     }
 }

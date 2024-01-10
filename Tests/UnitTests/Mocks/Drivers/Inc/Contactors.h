@@ -7,6 +7,7 @@
 #include "fff.h"
 #include "common.h"
 #include "stm32f4xx_gpio.h"
+#include "os.h"
 
 #define CONTACTORS_PORT                                 PORTC
 #define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_10
@@ -22,7 +23,7 @@ typedef enum contactor_ENUM {
 }contactor_t;
 
 DECLARE_FAKE_VOID_FUNC(Contactors_Init);
-DECLARE_FAKE_VALUE_FUNC(bool, Contactors_Get);
+DECLARE_FAKE_VALUE_FUNC(bool, Contactors_Get, contactor_t);
 DECLARE_FAKE_VALUE_FUNC(ErrorStatus, Contactors_Set, contactor_t, bool, bool);
 
 #endif

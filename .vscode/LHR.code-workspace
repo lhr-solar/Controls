@@ -28,7 +28,11 @@
             "common.h": "c",
             "stdio.h": "c",
             "stm32f4xx.h": "c",
-            "bsp_gpio.h": "c"
+            "bsp_gpio.h": "c",
+            "os.h": "c",
+            "tasks.h": "c",
+            "canbus.h": "c",
+            "readcarcan.h": "c"
         },
     },
     "tasks": {
