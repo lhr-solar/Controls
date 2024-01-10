@@ -76,6 +76,7 @@ SF = st-flash
 
 #$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc/*.h))	*Doesn't work since we can only include directories as search paths, not actual files
 C_INCLUDES :=	\
+-iquote	\
 -I../../Tests/UnitTests/Mocks/Apps/Inc	\
 -I../../Tests/UnitTests/Mocks/Drivers/Inc	\
 -I../../Tests/UnitTests/Mocks/BSP/Inc	\
