@@ -11,6 +11,7 @@
 #include "Minions.h"
 #include "os.h"
 #include "os_cfg_app.h"
+#include "Tasks.h"
 //#include "Display.h"
 
 // Length of the array and motor PBC saturation buffers
@@ -44,14 +45,14 @@
 // State of Charge scalar to scale it to correct fixed point
 #define SOC_SCALER 1000000
 
-// // CAN watchdog timer variable
-// static OS_TMR canWatchTimer;
+// CAN watchdog timer variable
+static OS_TMR canWatchTimer;
 
-// // Array precharge bypass contactor delay timer variable
-// static OS_TMR arrayPBCDlyTimer;
+// Array precharge bypass contactor delay timer variable
+static OS_TMR arrayPBCDlyTimer;
 
-// // Motor controller precharge bypass contactor delay timer variable
-// static OS_TMR motorControllerPBCDlyTimer;
+// Motor controller precharge bypass contactor delay timer variable
+static OS_TMR motorControllerPBCDlyTimer;
 
 // NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
 // Indicates whether or not regenerative braking / charging is enabled.
@@ -122,7 +123,7 @@ static void disableArrayPrechargeBypassContactor(void){
     // Assert error to disable regen and update saturation in callback function
     assertReadCarCANError(READCARCAN_ERR_CHARGE_DISABLE);
     // Turn off the array contactor display light
-    UpdateDisplay_SetArray(false); // Can assume contactor turned off or else this won't be reached
+    //UpdateDisplay_SetArray(false); // Can assume contactor turned off or else this won't be reached
 }
 
 /**
@@ -224,7 +225,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
  void attemptTurnArrayPBCOn(void){
     if(arrPBCComplete && chargeEnable){
             Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON, true); // Turn on
-            UpdateDisplay_SetArray(true);
+            //UpdateDisplay_SetArray(true);
             arrPBCComplete = false; 
         }
  }
@@ -246,7 +247,7 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
 */
  void turnMotorControllerPBCOff(void){
     Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, OFF, true); 
-    UpdateDisplay_SetMotor(false);
+    //UpdateDisplay_SetMotor(false);
  }
 
 
@@ -438,7 +439,7 @@ static void handler_ReadCarCAN_contactorsDisable(void) {
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) || (bool)Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
 
     if(ret) { // Contactor failed to turn off; display the evac screen and infinite loop
-         Display_Evac(SOC, SBPV);
+         //Display_Evac(SOC, SBPV);
          while(1){;}
     }
 }
@@ -449,7 +450,7 @@ static void handler_ReadCarCAN_contactorsDisable(void) {
  */ 
 static void handler_ReadCarCAN_BPSTrip(void) {
     chargeEnable = false;       // Not really necessary but makes inspection less confusing
-	Display_Evac(SOC, SBPV);    // Display evacuation screen
+	//Display_Evac(SOC, SBPV);    // Display evacuation screen
 }
 
 
@@ -459,7 +460,7 @@ static void handler_ReadCarCAN_BPSTrip(void) {
  * @param  rcc_err error code to specify the issue encountered
  */
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err){   
-	Error_ReadCarCAN = (error_code_t) rcc_err; // Store error code for inspection
+	//Error_ReadCarCAN = (error_code_t) rcc_err; // Store error code for inspection
 
     switch (rcc_err) {
             case READCARCAN_ERR_NONE: 

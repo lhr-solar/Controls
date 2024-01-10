@@ -32,7 +32,8 @@
             "os.h": "c",
             "tasks.h": "c",
             "canbus.h": "c",
-            "readcarcan.h": "c"
+            "readcarcan.h": "c",
+            "minions.h": "c"
         },
     },
     "tasks": {

@@ -1,7 +1,7 @@
-#ifdef TEST_READCARCAN
-#include_next "ReadCarCAN.h" // Include the next instance of the file. 
-// If the real version is in the include search paths after the mock one, it will include it here
-#else // Mocked Contactors.h
+// #ifdef TEST_READCARCAN
+// #include_next "ReadCarCAN.h" // Include the next instance of the file. 
+// // If the real version is in the include search paths after the mock one, it will include it here
+// #else // Mocked Contactors.h
 #ifndef MINIONS_H
 #define MINIONS_H
 #include "fff.h"
@@ -38,4 +38,4 @@ DECLARE_FAKE_VOID_FUNC(Minions_Init);
 DECLARE_FAKE_VALUE_FUNC(bool, Minions_Read, pin_t);
 
 #endif
-#endif
+// #endif
