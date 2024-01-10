@@ -203,11 +203,11 @@ breathe_doxygen_config_options = {'QUIET': 'YES', 'WARNINGS': 'NO'} # did this s
 autosectionlabel_prefix_document = True
 
 confluence_space_key = 'LHRSOLAR'
-confluence_parent_page = 'Controls Software'
-confluence_server_url = 'https://wikis.utexas.edu/display/LHRSOLAR/'
-confluence_server_user = 'ishdeshpa@utexas.edu'
+confluence_parent_page = 'Controls API Docs'
+confluence_server_url = 'https://wikis.utexas.edu'
+confluence_server_user = 'iud58'
 # confluence_ask_password = True
-confluence_publish_dryrun = True
+# confluence_publish_dryrun = True
 confluence_editor = 'v2'
 confluence_ask_user = True
 confluence_publish = True
