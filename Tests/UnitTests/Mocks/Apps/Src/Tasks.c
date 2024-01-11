@@ -58,4 +58,4 @@ DEFINE_FAKE_VOID_FUNC(Task_Init, void*);
 DEFINE_FAKE_VOID_FUNC(throwTaskError, error_code_t, callback_t, error_scheduler_lock_opt_t, error_recov_opt_t);
 
 
-DEFINE_FAKE_VOID_FUNC(_assertOSError, OS_ERR);
+//DEFINE_FAKE_VOID_FUNC(_assertOSError, OS_ERR);

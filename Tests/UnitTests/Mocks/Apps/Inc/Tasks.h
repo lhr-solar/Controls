@@ -52,21 +52,21 @@ typedef uint16_t error_code_t;
 /**
  * Task Prototypes
  */
-void Task_Init(void* p_arg);
+//void Task_Init(void* p_arg);
 
-void Task_SendTritium(void* p_arg);
+//void Task_SendTritium(void* p_arg);
 
 void Task_ReadCarCAN(void* p_arg);
 
-void Task_UpdateDisplay(void* p_arg);
+//void Task_UpdateDisplay(void* p_arg);
 
-void Task_ReadTritium(void* p_arg);
+//void Task_ReadTritium(void* p_arg);
 
-void Task_SendCarCAN(void* p_arg);
+//void Task_SendCarCAN(void* p_arg);
 
-void Task_DebugDump(void *p_arg);
+//void Task_DebugDump(void *p_arg);
 
-void Task_CommandLine(void* p_arg);
+//void Task_CommandLine(void* p_arg);
 
 
 
@@ -146,11 +146,11 @@ typedef enum {
 
 // DECLARE_FAKE_VOID_FUNC(MOCK_TEST);
 
-DECLARE_FAKE_VOID_FUNC(Task_Init, void*);
+DECLARE_FAKE_VOID_FUNC(Task_Init, void *);
 
 // DECLARE_FAKE_VOID_FUNC(Task_SendTritium, void*);
 
-DECLARE_FAKE_VOID_FUNC(Task_ReadCarCAN, void*);
+// DECLARE_FAKE_VOID_FUNC(Task_ReadCarCAN, void*);
 
 // DECLARE_FAKE_VOID_FUNC(Task_UpdateDisplay, void*);
 
@@ -169,6 +169,6 @@ DECLARE_FAKE_VOID_FUNC(Task_ReadCarCAN, void*);
 DECLARE_FAKE_VOID_FUNC(throwTaskError, error_code_t, callback_t, error_scheduler_lock_opt_t, error_recov_opt_t);
 
 
-DECLARE_FAKE_VOID_FUNC(_assertOSError, OS_ERR);
+//DECLARE_FAKE_VOID_FUNC(_assertOSError, OS_ERR);
 #endif
 // #endif

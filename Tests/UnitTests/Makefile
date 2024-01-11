@@ -75,24 +75,27 @@ SF = st-flash
 #AS_INCLUDES = 									#co TEST=Pedals -> include Pedals.c and Pedals.h
 
 #$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc/*.h))	*Doesn't work since we can only include directories as search paths, not actual files
+#-iquote: used to stop the compiler from searching the current directory first. Another effect: -Idirs before it are only searched for "" files
+# Whatever I put after iquote doesn't seem to be found, but putting it in twice works. This will break #include-next, though
 C_INCLUDES :=	\
--iquote	\
+-I-	\
+-I../../Tests/Inc/	\
 -I../../Tests/UnitTests/Mocks/Apps/Inc	\
 -I../../Tests/UnitTests/Mocks/Drivers/Inc	\
 -I../../Tests/UnitTests/Mocks/BSP/Inc	\
 -I../../Tests/UnitTests/Mocks/RTOS/	\
 -I../../Apps/Inc	\
 -I../../Drivers/Inc	\
--I../../Config/Inc	\
 -I../../BSP/Inc	\
--I../../Tests/Inc/	\
+-I../../Config/Inc	\
 -I../../Tests/UnitTests	\
 -I../../Tests/UnitTests/Unity	\
 -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Source/ \
 -I../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/ \
 -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ \
 -I../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/ \
--I../../RTOS/uCOS-III-STM32F4/uC-LIB/ \
+-I../../RTOS/uCOS-III-STM32F4/uC-LIB/	
+
 
 $(foreach src,$(C_INCLUDES),$(info --- $(src)))
 
