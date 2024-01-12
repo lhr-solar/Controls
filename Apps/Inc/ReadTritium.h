@@ -1,8 +1,12 @@
 /** 
  * @file ReadTritium.h
- * @brief In its current iteration, the Read Tritium task facilitates all received
- * communication from MotorCAN. All messages are forwarded to CarCAN, and velocity and error
- * information are recorded.
+ * @brief Reads messages sent by the Tritium motor controller & handles conditional logic based on the message.
+ * @details
+ * # Usage Details
+ * Call Motor_RPM_Get() to get the motor velocity in RPM. Call 
+ * Motor_Velocity_Get() to get the motor velocity in m/s. Starting the task will
+ * automatically forward all messages from MotorCAN to CarCAN, detect and handle motor errors,
+ * and forward velocity information to the display.
  * 
  */
 
@@ -14,35 +18,32 @@
 #include "Tasks.h"
 
 /**
- * @enum tritium_error_code_t
- * @brief Motor Error States
- * Read messages from motor in ReadTritium and trigger appropriate 
- * error messages as needed based on bits
+ * Motor Error States
 */
 typedef enum{
-    /** hardware over current error */
+    /** Hardware over current error */
     T_HARDWARE_OVER_CURRENT_ERR = (1<<0), 
-    /** software over current error */
+    /** Software over current error */
     T_SOFTWARE_OVER_CURRENT_ERR = (1<<1),
     /** DC bus over voltage error */
     T_DC_BUS_OVERVOLT_ERR = (1<<2),
-    /** hall sensor error */
+    /** Hall sensor error */
     T_HALL_SENSOR_ERR = (1<<3), 
-    /** watchdog last reset error */
+    /** Watchdog last reset error */
     T_WATCHDOG_LAST_RESET_ERR = 
-    /** config read error */(1<<4), 
+    /** Config read error */(1<<4), 
     T_CONFIG_READ_ERR = (1<<5), 
-    /** under voltage lockout error */
+    /** Under voltage lockout error */
     T_UNDER_VOLTAGE_LOCKOUT_ERR = (1<<6),
-    /** desaturation fault error */
+    /** Desaturation fault error */
     T_DESAT_FAULT_ERR = (1<<7), 
-    /** motor over speed error */
+    /** Motor over speed error */
     T_MOTOR_OVER_SPEED_ERR = (1<<8),
-    /** motor controller fails to restart or initialize */
+    /** Motor controller fails to restart or initialize */
     T_INIT_FAIL = (1<<9), 
-    /** motor watchdog trip */
+    /** Motor watchdog trip */
     T_MOTOR_WATCHDOG_TRIP = (1<<15),
-    /** no error */ 
+    /** No error */ 
     T_NONE = 0x00,
 } tritium_error_code_t;
 
