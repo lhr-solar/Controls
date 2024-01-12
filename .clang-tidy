@@ -46,8 +46,8 @@ CheckOptions:
   readability-identifier-naming.StaticConstantCase: CamelCase
   readability-identifier-naming.StaticConstantPrefix: k
   readability-identifier-naming.StaticVariableCase: lower_case
-  readability-identifier-naming.StructCase: CamelCase
   readability-identifier-naming.TypedefCase: CamelCase
+  readability-identifier-naming.StructCase: lower_case
   readability-identifier-naming.UnionCase: CamelCase
   readability-identifier-naming.VariableCase: lower_case
   readability-identifier-naming.IgnoreMainLikeFunctions: false
