@@ -24,6 +24,8 @@
 
 #define IO_STATE_DLY_MS 250u
 
+#define SENDCARCAN_MSG_SKIP_CTR 3
+
 // Task_PutIOState
 OS_TCB put_io_state_tcb;
 CPU_STK put_io_state_stk[TASK_SEND_CAR_CAN_STACK_SIZE];
@@ -61,7 +63,7 @@ void SendCarCanPut(CanData message) {
 
     static uint8_t carcan_ctr = 0;
 
-    if (carcan_ctr > 3) {
+    if (carcan_ctr > SENDCARCAN_MSG_SKIP_CTR) {
         OSMutexPend(&car_can_mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
         ASSERT_OS_ERROR(err);
 
@@ -76,8 +78,8 @@ void SendCarCanPut(CanData message) {
 
     if (success) {
         OSSemPost(&car_can_sem4, OS_OPT_POST_1, &err);
+        ASSERT_OS_ERROR(err);
     }
-    ASSERT_OS_ERROR(err);
 }
 
 /**
@@ -170,5 +172,6 @@ static void taskPutIoState(void *p_arg) {
     while (1) {
         putIOState();
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
+        ASSERT_OS_ERROR(err);
     }
 }

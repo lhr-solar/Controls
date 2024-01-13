@@ -14,9 +14,9 @@
 
 // #define SENDTRITIUM_PRINT_MES
 
-#define MOTOR_MSG_PERIOD 100
-#define FSM_PERIOD 100
-#define DEBOUNCE_PERIOD 2  // in units of FSM_PERIOD
+#define MOTOR_MSG_PERIOD 100  // in ms
+#define FSM_PERIOD 100        // in ms
+#define DEBOUNCE_PERIOD 2     // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD ((MOTOR_MSG_PERIOD) / (FSM_PERIOD))
 
 #define FOREACH_GEAR(GEAR) \
