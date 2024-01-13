@@ -1,7 +1,6 @@
 /**
  * @file ReadTritium.c
  * @details
- * # Implementation Details
  * ReadTritium forwards all messages from MotorCAN to CarCAN. It does this using the FIFO 
  * defined in [SendCarCAN](./SendCarCAN.html). The task posts messages to the queue, which are then 
  * read out by the SendCarCAN task.
@@ -11,12 +10,13 @@
  * has detected an error. Depending on the frequency and severity of the error, the task will either 
  * attempt to reset the motor controller or set the car to a fault state.  
  * 
- * ## Error Handling
+ * # Error Handling
  * The motor controller can detect a variety of errors. These are enumerated in
  * #tritium_error_code_t. The task will attempt to restart the motor controller for hall sensor errors.
  * All other errors will result in the task locking the scheduler and entering a nonrecoverable fault state.
  * 
  */
+
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"

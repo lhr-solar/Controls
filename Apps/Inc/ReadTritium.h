@@ -1,8 +1,7 @@
 /** 
  * @file ReadTritium.h
  * @brief Reads messages sent by the Tritium motor controller & handles conditional logic based on the message.
- * @details
- * # Usage Details
+ * 
  * Call Motor_RPM_Get() to get the motor velocity in RPM. Call 
  * Motor_Velocity_Get() to get the motor velocity in m/s. Starting the task will
  * automatically forward all messages from MotorCAN to CarCAN, detect and handle motor errors,
@@ -30,8 +29,8 @@ typedef enum{
     /** Hall sensor error */
     T_HALL_SENSOR_ERR = (1<<3), 
     /** Watchdog last reset error */
-    T_WATCHDOG_LAST_RESET_ERR = 
-    /** Config read error */(1<<4), 
+    T_WATCHDOG_LAST_RESET_ERR = (1<<4), 
+    /** Config read error */
     T_CONFIG_READ_ERR = (1<<5), 
     /** Under voltage lockout error */
     T_UNDER_VOLTAGE_LOCKOUT_ERR = (1<<6),
