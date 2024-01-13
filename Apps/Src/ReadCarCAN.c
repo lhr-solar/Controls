@@ -1,16 +1,16 @@
 /**
  * @file ReadCarCAN.c
- * @details 
+ * 
  * # Ignition Sequence
  * ReadCarCAN handles precharge for both the array and motor. The ignition switch has four positions: OFF, LV_ON (low voltage on), ARR_ON (array on), and MOTOR_ON. 
  * - When turned to ARR_ON, BPS is meant to close their main HV Array Contactor, and ReadCarCAN will detect this change and start the precharge sequence for the Array. Array precharge is a delay of PRECHARGE_ARRAY_DELAY ms (see below).
  * - When turned to MOTOR_ON, ReadCarCAN will make sure that both HV+ and HV- contactors are closed and start the precharge sequence for the Motor. Motor precharge is a delay of PRECHARGE_PLUS_MINUS_DELAY ms (see below).
  * 
  * # Other messages
- * We also expect to receive supplemental voltage and state of charge messages from BPS. Both of these are simply stored to show on the display.
+ * We also expect to receive supplemental voltage (SBPV) and state of charge (SOC) messages from BPS. SOC is converted to an integer percent. Both SBPV and SOC are simply stored to show on the display.  
  * 
  * # Implementation Details
- * The Read Car CAN task uses RTOS timers to make sure message timings remain appropriate. A watchdog is pet on BPS contactor state message receive to ensure that if communication is lost with BPS, the system disables the contactors.
+ * The Read Car CAN task uses RTOS timers to make sure message timings remain appropriate. A watchdog is pet on receiving the BPS contactor state message to ensure that if communication is lost with BPS, the system disables the contactors.
  * In order to avoid charging in unsafe conditions, a saturation buffer is used to require that charge enable messages are sufficiently consistent.
  * 
  */
@@ -34,6 +34,15 @@
 
 // State of Charge scalar to scale it to correct fixed point
 #define SOC_SCALER 1000000
+
+// Delay time in timer ticks for the CAN Watchdog Timer
+#define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
+
+// Delay time in timer ticks for the Motor Precharge Bypass Timer
+#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS ((PRECHARGE_MOTOR_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
+
+// Delay time in timer ticks for the Array Precharge Bypass Timer
+#define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS ((PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) 
 
 // CAN watchdog timer variable
 static OS_TMR canWatchTimer;
@@ -159,7 +168,7 @@ static void updateMCPBC(void){
 }
 
 /**
- * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
+ * @brief Adds new messages by overwriting old messages in the saturation buffer and then updates saturation
  * @param messageState whether bps message was enable (1) or disable (-1)
 */
 static void updateHVArraySaturation(int8_t messageState){
@@ -186,7 +195,7 @@ static void updateHVArraySaturation(int8_t messageState){
 }
 
 /**
- * @brief adds new messages by overwriting old messages in the saturation buffer and then updates saturation
+ * @brief Adds new messages by overwriting old messages in the saturation buffer and then updates saturation
  * @param messageState whether bps message was  enable (1) or disable (-1)
 */
 static void updateHVPlusMinusSaturation(int8_t messageState){
@@ -239,7 +248,6 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
     Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, OFF, true); 
     UpdateDisplay_SetMotor(false);
  }
-
 
 /**
  * @brief Turns array and motor controller PBC ON/OFF based on ignition and precharge status
@@ -372,13 +380,15 @@ void Task_ReadCarCAN(void *p_arg){
                 UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
                 break;
             }
+            
             case STATE_OF_CHARGE:{
                 SOC = (*(uint32_t*) &dataBuf.data)/(SOC_SCALER);  // Convert to integer percent
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }
-        default: {  
-            break; // Unhandled CAN message IDs, do nothing
+
+            default: {  
+                break; // Unhandled CAN message IDs, do nothing
             }   
         }
     }
