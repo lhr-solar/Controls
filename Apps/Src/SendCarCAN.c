@@ -3,175 +3,172 @@
  * @file SendCarCAN.c
  * @brief Function implementations for the SendCarCAN application.
  * @brief Function implementations for the SendCarCAN application.
- * 
- * This contains functions relevant to placing CAN messages in a CarCAN queue and periodically sending
- * those messages in the SendCarCAN task.
- * This contains functions relevant to placing CAN messages in a CarCAN queue and periodically sending
- * those messages in the SendCarCAN task.
- * 
+ *
+ * This contains functions relevant to placing CAN messages in a CarCAN queue
+ * and periodically sending those messages in the SendCarCAN task. This contains
+ * functions relevant to placing CAN messages in a CarCAN queue and periodically
+ * sending those messages in the SendCarCAN task.
+ *
  */
 
+#include "SendCarCAN.h"
+
+#include "CANbus.h"
+#include "Contactors.h"
+#include "Minions.h"
+#include "Pedals.h"
+#include "SendTritium.h"
+#include "Tasks.h"
 #include "common.h"
 #include "os_cfg_app.h"
-#include "CANbus.h"
-#include "Minions.h"
-#include "Contactors.h"
-#include "Pedals.h"
-#include "Tasks.h"
-#include "SendCarCAN.h"
-#include "SendTritium.h"
 
-#define IO_STATE_DLY_MS 250u 
+#define IO_STATE_DLY_MS 250u
 
 // Task_PutIOState
-OS_TCB putIOState_TCB;
-CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
+OS_TCB put_io_state_tcb;
+CPU_STK put_io_state_stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 
-//fifo
-#define FIFO_TYPE CANDATA_t
+// fifo
+#define FIFO_TYPE CanData
 #define FIFO_SIZE 50
-#define FIFO_NAME SendCarCAN_Q
+#define FIFO_NAME Queue
 #include "fifo.h"
 
-static SendCarCAN_Q_t CANFifo; 
+static Queue can_fifo;
 
-static OS_SEM CarCAN_Sem4;
-static OS_MUTEX CarCAN_Mtx;
+static OS_SEM car_can_sem4;
+static OS_MUTEX car_can_mtx;
 
-static void Task_PutIOState(void *p_arg);
+static void taskPutIoState(void *p_arg);
 
 /**
- * @brief return the space left in SendCarCAN_Q for debug purposes
-*/
+ * @brief return the space left in Queue for debug purposes
+ */
 #ifdef DEBUG
-uint8_t get_SendCarCAN_Q_Space(void) {
-    return (CANFifo.get - CANFifo.put - 1) % (sizeof CANFifo.buffer / sizeof CANFifo.buffer[0]);
+uint8_t get_Queue_Space(void) {
+    return (can_fifo.get - can_fifo.put - 1) %
+           (sizeof can_fifo.buffer / sizeof can_fifo.buffer[0]);
 }
 #endif
 
 /**
  * @brief Wrapper to put new message in the CAN queue
-*/
-void SendCarCAN_Put(CANDATA_t message){
+ */
+void SendCarCanPut(CanData message) {
     OS_ERR err = OS_ERR_NONE;
-    CPU_TS ticks;
+    CPU_TS ticks = 0;
     bool success = false;
-    
+
     static uint8_t carcan_ctr = 0;
-    
-    if(carcan_ctr > 3){
-        OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-        assertOSError(err);
 
-        success = SendCarCAN_Q_put(&CANFifo, message);
+    if (carcan_ctr > 3) {
+        OSMutexPend(&car_can_mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        ASSERT_OS_ERROR(err);
 
-        OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
-        assertOSError(err);
+        success = QueuePut(&can_fifo, message);
+
+        OSMutexPost(&car_can_mtx, OS_OPT_POST_NONE, &err);
+        ASSERT_OS_ERROR(err);
 
         carcan_ctr = 0;
     }
     carcan_ctr++;
 
-
-    if(success) OSSemPost(&CarCAN_Sem4, OS_OPT_POST_1, &err);
-    assertOSError(err);
+    if (success) {
+        OSSemPost(&car_can_sem4, OS_OPT_POST_1, &err);
+    }
+    ASSERT_OS_ERROR(err);
 }
 
 /**
  * @brief Initialize SendCarCAN
-*/
-void SendCarCAN_Init(void) {
-    OS_ERR err;
-    
-    OSMutexCreate(&CarCAN_Mtx, "CarCAN_Mtx", &err);
-    assertOSError(err);
-    
-    OSSemCreate(&CarCAN_Sem4, "CarCAN_Sem4", 0, &err);
-    assertOSError(err);
+ */
+void SendCarCanInit(void) {
+    OS_ERR err = 0;
 
-    SendCarCAN_Q_renew(&CANFifo);
+    OSMutexCreate(&car_can_mtx, "CarCAN_Mtx", &err);
+    ASSERT_OS_ERROR(err);
+
+    OSSemCreate(&car_can_sem4, "CarCAN_Sem4", 0, &err);
+    ASSERT_OS_ERROR(err);
+
+    QueueRenew(&can_fifo);
 }
 
 /**
  * @brief Grabs the latest messages from the queue and sends over CarCAN
-*/
-void Task_SendCarCAN(void *p_arg){
-    OS_ERR err;
-    CPU_TS ticks;
+ */
+void TaskSendCarCan(void *p_arg) {
+    OS_ERR err = 0;
+    CPU_TS ticks = 0;
 
-    CANDATA_t message;
+    CanData message;
     memset(&message, 0, sizeof message);
 
     // PutIOState
-    OSTaskCreate(
-        (OS_TCB*)&putIOState_TCB,
-        (CPU_CHAR*)"PutIOState",
-        (OS_TASK_PTR)Task_PutIOState,
-        (void*)NULL,
-        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
-        (CPU_STK*)putIOState_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    assertOSError(err);
+    OSTaskCreate((OS_TCB *)&put_io_state_tcb, (CPU_CHAR *)"PutIOState",
+                 (OS_TASK_PTR)taskPutIoState, (void *)NULL,
+                 (OS_PRIO)TASK_PUT_IOSTATE_PRIO, (CPU_STK *)put_io_state_stk,
+                 (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+                 (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE, (OS_MSG_QTY)0,
+                 (OS_TICK)0, (void *)NULL, (OS_OPT)(OS_OPT_TASK_STK_CLR),
+                 (OS_ERR *)&err);
+    ASSERT_OS_ERROR(err);
 
     while (1) {
-          
-        // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
-        OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-        assertOSError(err);
+        // Check if there's something to send in the queue (either IOState or
+        // Car state from sendTritium)
+        OSSemPend(&car_can_sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        ASSERT_OS_ERROR(err);
 
-        OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-        assertOSError(err);
-    
-        bool res = SendCarCAN_Q_get(&CANFifo, &message);
+        OSMutexPend(&car_can_mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
+        ASSERT_OS_ERROR(err);
 
-        OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
-        assertOSError(err);
+        bool res = QueueGet(&can_fifo, &message);
 
-        if(res) CANbus_Send(message, true, CARCAN);
+        OSMutexPost(&car_can_mtx, OS_OPT_POST_NONE, &err);
+        ASSERT_OS_ERROR(err);
+
+        if (res) {
+            CanBusSend(message, true, CARCAN);
+        }
     }
 }
 
-static void putIOState(void){
-    CANDATA_t message;
+static void putIOState(void) {
+    CanData message;
     memset(&message, 0, sizeof message);
-    message.ID = IO_STATE;
-    
+    message.id = kIoState;
+
     // Get pedal information
-    message.data[0] = Pedals_Read(ACCELERATOR);
-    message.data[1] = Pedals_Read(BRAKE);
+    message.data[0] = PedalsRead(kAccelerator);
+    message.data[1] = PedalsRead(kBrake);
 
     // Get minion information
-    for(pin_t pin = 0; pin < NUM_PINS; pin++){
-        bool pinState = Minions_Read(pin);
-        message.data[2] |= pinState << pin;
+    for (Pin pin = 0; pin < kNumPins; pin++) {
+        bool pin_state = MinionsRead(pin);
+        message.data[2] |= pin_state << pin;
     }
-    
+
     // Get contactor info
-    for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-        bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
-        message.data[3] |= contactorState << contactor;
+    for (Contactor contactor = 0; contactor < kNumContactors; contactor++) {
+        bool contactor_state = (ContactorsGet(contactor) == ON) ? true : false;
+        message.data[3] |= contactor_state << contactor;
     }
 
     // Tell BPS if the array contactor should be on
-    message.data[3] |= (!Minions_Read(IGN_1) || !Minions_Read(IGN_2)) << 2;
+    message.data[3] |= (!MinionsRead(kIgn1) || !MinionsRead(kIgn2)) << 2;
 
-    CANbus_Send(message, true, CARCAN);
+    CanBusSend(message, true, CARCAN);
 }
 
 /**
  * @brief sends IO information over CarCAN every IO_STATE_DLY_MS
-*/
-static void Task_PutIOState(void *p_arg) {
-    OS_ERR err;
+ */
+static void taskPutIoState(void *p_arg) {
+    OS_ERR err = 0;
     while (1) {
         putIOState();
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
-    }  
+    }
 }

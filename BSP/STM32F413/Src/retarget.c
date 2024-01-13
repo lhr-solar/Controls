@@ -1,35 +1,25 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-#include "common.h"
 #include "BSP_UART.h"
+#include "common.h"
 
-#define STDIN_FILENO  0
+#define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
-int _write(int fd, char *buffer, unsigned int len) {
-    if(buffer != NULL) {
-        BSP_UART_Write(UART_2, buffer, len);
+int _write(int fd, char *buffer, unsigned int len) {  // NOLINT
+    if (buffer != NULL) {
+        BspUartWrite(kUart2, buffer, len);
     }
-    return len;
+    return (int)len;
 }
 
-int _read(int const fd, char *buffer, unsigned const len) {
-    if(buffer != NULL) {
-        
+int _read(int const fd, const char *buffer, unsigned const len) {  // NOLINT
+    if (buffer != NULL) {
     }
     return 1;
 }
 
-int _close(int file)
-{
-    return -1;
-}
+int _close(int file) { return -1; }  // NOLINT
 
-int _lseek(int file, int ptr, int dir)
-{
-    return 0;
-}
-
-
-
+int _lseek(int file, int ptr, int dir) { return 0; }  // NOLINT
