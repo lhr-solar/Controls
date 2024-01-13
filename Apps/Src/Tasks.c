@@ -62,9 +62,7 @@ void AssertOsError(volatile OS_ERR err) {
                                    // brakelight to indicate an emergency
         DisplayFault(err);         // Display the location and error code
         printf("%d\n\r", err);
-        while (1) {
-            ;
-        }  // nonrecoverable
+        while (1) {}  // nonrecoverable
     }
 }
 

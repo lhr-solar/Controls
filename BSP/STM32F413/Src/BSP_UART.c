@@ -7,7 +7,7 @@
 
 #define TX_SIZE 128
 #define RX_SIZE 64
-#define NUM_UART 2
+#define NUM_USART 2
 
 // Initialize the FIFOs
 
@@ -33,18 +33,18 @@ static Callback usb_tx_callback = NULL;
 static Callback display_rx_callback = NULL;
 static Callback display_tx_callback = NULL;
 
-static RxFifo *rx_fifos[NUM_UART] = {&usb_rx_fifo, &display_rx_fifo};
-static TxFifo *tx_fifos[NUM_UART] = {&usb_tx_fifo, &display_tx_fifo};
-static bool *line_recvd_global[NUM_UART] = {&usb_line_received,
-                                            &display_line_received};
-static USART_TypeDef *handles[NUM_UART] = {USART2, USART3};
+static RxFifo *rx_fifos[NUM_USART] = {&usb_rx_fifo, &display_rx_fifo};
+static TxFifo *tx_fifos[NUM_USART] = {&usb_tx_fifo, &display_tx_fifo};
+static bool *line_recvd_global[NUM_USART] = {&usb_line_received,
+                                             &display_line_received};
+static USART_TypeDef *handles[NUM_USART] = {USART2, USART3};
 
 static void usartDisplayInit() {
     display_tx_fifo = TxFifoNew();
     display_rx_fifo = RxFifoNew();
 
     GPIO_InitTypeDef gpio_init_struct = {0};
-    USART_InitTypeDef uart_init_struct = {0};
+    USART_InitTypeDef usart_init_struct = {0};
 
     // Initialize clocks
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
@@ -64,14 +64,15 @@ static void usartDisplayInit() {
     GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
     GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_USART3);
 
-    // Initialize UART3
-    uart_init_struct.USART_BaudRate = 115200;  // NOLINT
-    uart_init_struct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    uart_init_struct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-    uart_init_struct.USART_Parity = USART_Parity_No;
-    uart_init_struct.USART_StopBits = USART_StopBits_1;
-    uart_init_struct.USART_WordLength = USART_WordLength_8b;
-    USART_Init(USART3, &uart_init_struct);
+    // Initialize USART3
+    usart_init_struct.USART_BaudRate = 115200;  // NOLINT
+    usart_init_struct.USART_HardwareFlowControl =
+        USART_HardwareFlowControl_None;
+    usart_init_struct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    usart_init_struct.USART_Parity = USART_Parity_No;
+    usart_init_struct.USART_StopBits = USART_StopBits_1;
+    usart_init_struct.USART_WordLength = USART_WordLength_8b;
+    USART_Init(USART3, &usart_init_struct);
 
     // Enable interrupts
 
@@ -91,7 +92,7 @@ static void usartUsbInit() {
     usb_rx_fifo = RxFifoNew();
 
     GPIO_InitTypeDef gpio_init_struct = {0};
-    USART_InitTypeDef uart_init_struct = {0};
+    USART_InitTypeDef usart_init_struct = {0};
 
     // Initialize clocks
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
@@ -108,14 +109,15 @@ static void usartUsbInit() {
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
 
-    // Initialize UART2
-    uart_init_struct.USART_BaudRate = 115200;  // NOLINT
-    uart_init_struct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    uart_init_struct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-    uart_init_struct.USART_Parity = USART_Parity_No;
-    uart_init_struct.USART_StopBits = USART_StopBits_1;
-    uart_init_struct.USART_WordLength = USART_WordLength_8b;
-    USART_Init(USART2, &uart_init_struct);
+    // Initialize USART2
+    usart_init_struct.USART_BaudRate = 115200;  // NOLINT
+    usart_init_struct.USART_HardwareFlowControl =
+        USART_HardwareFlowControl_None;
+    usart_init_struct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    usart_init_struct.USART_Parity = USART_Parity_No;
+    usart_init_struct.USART_StopBits = USART_StopBits_1;
+    usart_init_struct.USART_WordLength = USART_WordLength_8b;
+    USART_Init(USART2, &usart_init_struct);
 
     USART_Cmd(USART2, ENABLE);
 
@@ -131,17 +133,17 @@ static void usartUsbInit() {
 }
 
 /**
- * @brief   Initializes the UART peripheral
+ * @brief   Initializes the USART peripheral
  */
 static void bspUartInitInternal(Callback rx_callback, Callback tx_callback,
-                                Uart uart) {
-    switch (uart) {
-        case kUart2:  // their UART_USB
+                                Uart usart) {
+    switch (usart) {
+        case kUart2:  // their USART_USB
             usartUsbInit();
             usb_rx_callback = rx_callback;
             usb_tx_callback = tx_callback;
             break;
-        case kUart3:  // their UART_DISPLAY
+        case kUart3:  // their USART_DISPLAY
             usartDisplayInit();
             display_rx_callback = rx_callback;
             display_tx_callback = tx_callback;
@@ -152,9 +154,9 @@ static void bspUartInitInternal(Callback rx_callback, Callback tx_callback,
     }
 }
 
-void BspUartInit(Uart uart) {
+void BspUartInit(Uart usart) {
     // Not using callbacks for now
-    bspUartInitInternal(NULL, NULL, uart);
+    bspUartInitInternal(NULL, NULL, usart);
 }
 
 /**
@@ -166,23 +168,23 @@ void BspUartInit(Uart uart) {
  * @param   usart : which usart to read from (2 or 3)
  * @return  number of bytes that was read
  */
-uint32_t BspUartRead(Uart uart, char *str) {
+uint32_t BspUartRead(Uart usart, char *str) {
     char data = 0;
     uint32_t recvd = 0;
 
-    bool *line_recvd = line_recvd_global[uart];
+    bool *line_recvd = line_recvd_global[usart];
 
     while (*line_recvd == false) {
         BspUartWrite(
-            uart, "",
+            usart, "",
             0);  // needs to be in. Otherwise, usbLineReceived will not update
     }
 
-    USART_TypeDef *usart_handle = handles[uart];
+    USART_TypeDef *usart_handle = handles[usart];
 
     USART_ITConfig(usart_handle, USART_IT_RXNE, (FunctionalState)RESET);
 
-    RxFifo *fifo = rx_fifos[uart];
+    RxFifo *fifo = rx_fifos[usart];
 
     RxFifoPeek(fifo, &data);
     while (!RxFifoIsEmpty(fifo) && data != '\r') {
@@ -199,7 +201,7 @@ uint32_t BspUartRead(Uart uart, char *str) {
 }
 
 /**
- * @brief   Transmits data to through UART line
+ * @brief   Transmits data to through USART line
  * @param   str : pointer to buffer with data to send.
  * @param   len : size of buffer
  * @param   usart : which usart to read from (2 or 3)
@@ -210,14 +212,14 @@ uint32_t BspUartRead(Uart uart, char *str) {
  *       space to open up. Do not call from timing-critical
  *       sections of code.
  */
-uint32_t BspUartWrite(Uart uart, char *str, uint32_t len) {
+uint32_t BspUartWrite(Uart usart, char *str, uint32_t len) {
     uint32_t sent = 0;
 
-    USART_TypeDef *usart_handle = handles[uart];
+    USART_TypeDef *usart_handle = handles[usart];
 
     USART_ITConfig(usart_handle, USART_IT_TC, (FunctionalState)RESET);
 
-    TxFifo *fifo = tx_fifos[uart];
+    TxFifo *fifo = tx_fifos[usart];
 
     while (sent < len) {
         if (!TxFifoPut(fifo, str[sent])) {
@@ -288,13 +290,12 @@ void UsarT2IrqHandler(void) {
             }
         }
     }
-    if (USART_GetITStatus(USART2, USART_IT_ORE) != RESET) {
-    }
+    if (USART_GetITStatus(USART2, USART_IT_ORE) != RESET) {}
 
     OSIntExit();
 }
 
-void UsarT3IrqHandler(void) {
+void Usart3IrqHandler(void) {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
@@ -337,8 +338,7 @@ void UsarT3IrqHandler(void) {
             }
         }
     }
-    if (USART_GetITStatus(USART3, USART_IT_ORE) != RESET) {
-    }
+    if (USART_GetITStatus(USART3, USART_IT_ORE) != RESET) {}
 
     OSIntExit();
 }

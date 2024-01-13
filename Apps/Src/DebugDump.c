@@ -55,8 +55,8 @@ void TaskDebugDump(void *p_arg) {
         printf("One Pedal Enable: %s\n\r",
                GetOnePedalEnable() ? "true" : "false");
         printf("Regen Enable: %s\n\r", GetRegenEnable() ? "true" : "false");
-        printf("Pedal Brake Percent: %d\n\r", GetBrakePedelPercent());
-        printf("Pedal Accel Percent: %d\n\r", GetAccelPedelPercent());
+        printf("Pedal Brake Percent: %d\n\r", GetBrakePedalPercent());
+        printf("Pedal Accel Percent: %d\n\r", GetAccelPedalPercent());
         printf("Current Gear: %s\n\r", gear_string[GetGear()]);
         PrintFloat("Current Setpoint: ", GetCurrentSetpoint());
 

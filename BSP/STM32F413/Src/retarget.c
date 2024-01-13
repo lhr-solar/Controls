@@ -15,8 +15,7 @@ int _write(int fd, char *buffer, unsigned int len) {  // NOLINT
 }
 
 int _read(int const fd, const char *buffer, unsigned const len) {  // NOLINT
-    if (buffer != NULL) {
-    }
+    if (buffer != NULL) {}
     return 1;
 }
 

@@ -28,8 +28,8 @@ struct Command {
 };
 
 static bool cmdHelp(void);
-static bool cmdCaNbusSend(void);
-static bool cmdCaNbusRead(void);
+static bool cmdCanBusSend(void);
+static bool cmdCanBusRead(void);
 static bool cmdContactorsGet(void);
 static bool cmdContactorsSet(void);
 static bool cmdMinionsRead(void);
@@ -38,8 +38,8 @@ static bool cmdPedalsRead(void);
 
 const struct Command kCmdlineCommands[] = {
     {.name = "help", .action = cmdHelp},
-    {.name = "CANbus_Send", .action = cmdCaNbusSend},
-    {.name = "CANbus_Read", .action = cmdCaNbusRead},
+    {.name = "CANbus_Send", .action = cmdCanBusSend},
+    {.name = "CANbus_Read", .action = cmdCanBusRead},
     {.name = "Contactors_Get", .action = cmdContactorsGet},
     {.name = "Contactors_Set", .action = cmdContactorsSet},
     {.name = "Minions_Read", .action = cmdMinionsRead},
@@ -133,7 +133,7 @@ static inline bool cmdHelp(void) {
 
 /* This has not been tested and not sure if this implementation is correct (not
 sure if we want to just transmit string data from serial) */
-static bool cmdCaNbusSend(void) {
+static bool cmdCanBusSend(void) {
     char *data = strtok_r(NULL, " ", &save);
     CanData msg = {
         .id = CAN_DIAG_ID,
@@ -171,7 +171,7 @@ static bool cmdCaNbusSend(void) {
     return true;
 }
 
-static bool cmdCaNbusRead(void) {
+static bool cmdCanBusRead(void) {
     CanData msg;
 
     char *block_input = strtok_r(NULL, " ", &save);

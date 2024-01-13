@@ -12,7 +12,8 @@
 
 #include "common.h"
 
-// #define SENDTRITIUM_PRINT_MES
+#define SENDTRITIUM_PRINT_MES
+#define SENDTRITIUM_EXPOSE_VARS
 
 #define MOTOR_MSG_PERIOD 100  // in ms
 #define FSM_PERIOD 100        // in ms
@@ -35,7 +36,7 @@ typedef enum {
     kPoweredCruise,
     kCoastingCruise,
     kBrakeState,
-    kOnepedal,
+    kOnePedal,
     kAccelerateCruise
 } TritiumStateName;
 
@@ -51,8 +52,8 @@ bool GetCruiseEnable(void);
 bool GetCruiseSet(void);
 bool GetOnePedalEnable(void);
 bool GetRegenEnable(void);
-uint8_t GetBrakePedelPercent(void);
-uint8_t GetAccelPedelPercent(void);
+uint8_t GetBrakePedalPercent(void);
+uint8_t GetAccelPedalPercent(void);
 Gear GetGear(void);
 TritiumState GetState(void);
 float GetVelocityObserved(void);
@@ -66,8 +67,8 @@ void SetCruiseEnable(bool value);
 void SetCruiseSet(bool value);
 void SetOnePedalEnable(bool value);
 void SetRegenEnable(bool value);
-void SetBrakePedelPercent(uint8_t value);
-void SetAccelPedelPercent(uint8_t value);
+void SetBrakePedalPercent(uint8_t value);
+void SetAccelPedalPercent(uint8_t value);
 void SetGear(Gear value);
 void SetState(TritiumState value);
 void SetVelocityObserved(float value);

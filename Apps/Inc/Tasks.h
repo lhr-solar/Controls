@@ -170,8 +170,7 @@ void ThrowTaskError(ErrorCode error_code, Callback error_callback,
  * @brief   Assert Error if OS function call fails
  * @param   err OS Error that occurred
  */
-void AssertOsError(
-    OS_ERR err);  // TODO: This should be changed to enforce only enum usage
+void AssertOsError(OS_ERR err);
 
 #if DEBUG == 1
 #define ASSERT_OS_ERROR(err)                                                \

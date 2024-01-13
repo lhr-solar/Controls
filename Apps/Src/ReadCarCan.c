@@ -362,8 +362,7 @@ void TaskReadCarCan(void *p_arg) {
 
     // Fills buffers with disable messages
     // NOTE: If the buffer becomes bigger than of type int8_t, memset will not
-    // work and
-    //  would need to be reimplemented.
+    // work and would need to be reimplemented.
     memset(hv_array_charge_msg_buffer, DISABLE_SATURATION_MSG,
            sizeof(hv_array_charge_msg_buffer));
     memset(hv_plus_minus_charge_msg_buffer, DISABLE_SATURATION_MSG,
@@ -454,9 +453,7 @@ static void handlerReadCarCanChargeDisable(void) {
     if (ret) {  // Contactor failed to turn off; display the evac screen and
                 // infinite loop
         DisplayEvac(soc, sbpv);
-        while (1) {
-            ;
-        }
+        while (1) {}
     }
 }
 
@@ -492,9 +489,7 @@ static void handlerReadCarCanContactorsDisable(void) {
     if (ret) {  // Contactor failed to turn off; display the evac screen and
                 // infinite loop
         DisplayEvac(soc, sbpv);
-        while (1) {
-            ;
-        }
+        while (1) {}
     }
 }
 

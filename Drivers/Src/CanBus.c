@@ -26,7 +26,7 @@ static OS_MUTEX can_bus_rx_mutex[kNumCan];    // mutex to lock Rx line
  * mailbox. Do not access directly outside this driver.
  * @param bus The CAN bus to operate on. Should be CARCAN or MOTORCAN.
  */
-void CaNbusRxHandler(Can bus) {
+void CanBusRxHandler(Can bus) {
     OS_ERR err = 0;
     OSSemPost(&(can_bus_receive_sem4[bus]), OS_OPT_POST_1,
               &err);  // increment our queue counter
@@ -39,18 +39,18 @@ void CaNbusRxHandler(Can bus) {
  * available). Do not access directly outside this driver.
  * @param bus The CAN bus to operate on. Should be CARCAN or MOTORCAN.
  */
-void CaNbusTxHandler(Can bus) {
+void CanBusTxHandler(Can bus) {
     OS_ERR err = 0;
     OSSemPost(&(can_mail_sem4[bus]), OS_OPT_POST_1, &err);
     ASSERT_OS_ERROR(err);
 }
 
 // wrapper functions for the interrupt customized for each bus
-void CaNbusTxHandler1() { CaNbusTxHandler(kCan1); }
+void CanBusTxHandler1() { CanBusTxHandler(kCan1); }
 
-void CaNbusRxHandler1() { CaNbusRxHandler(kCan1); }
-void CaNbusTxHandler3() { CaNbusTxHandler(kCan3); }
-void CaNbusRxHandler3() { CaNbusRxHandler(kCan3); }
+void CanBusRxHandler1() { CanBusRxHandler(kCan1); }
+void CanBusTxHandler3() { CanBusTxHandler(kCan3); }
+void CanBusRxHandler3() { CanBusRxHandler(kCan3); }
 
 /**
  * @brief Checks each CAN ID. If an ID is not in kCanLut, set that ID to NULL
@@ -75,10 +75,10 @@ ErrorStatus CanBusInit(Can bus, CanId* id_whitelist,
     OS_ERR err = 0;
     id_whitelist = whitelistValidator(id_whitelist, id_whitelist_size);
     if (bus == kCan1) {
-        BspCanInit(bus, &CaNbusRxHandler1, &CaNbusTxHandler1,
+        BspCanInit(bus, &CanBusRxHandler1, &CanBusTxHandler1,
                    (uint16_t*)id_whitelist, id_whitelist_size);
     } else if (bus == kCan3) {
-        BspCanInit(bus, &CaNbusRxHandler3, &CaNbusTxHandler3,
+        BspCanInit(bus, &CanBusRxHandler3, &CanBusTxHandler3,
                    (uint16_t*)id_whitelist, id_whitelist_size);
     } else {
         return ERROR;
@@ -169,7 +169,7 @@ ErrorStatus CanBusSend(CanData can_data, bool blocking, Can bus) {
         &(can_bus_tx_mutex[bus]), OS_OPT_POST_NONE, &err);
     ASSERT_OS_ERROR(err);
     if (retval == ERROR) {
-        CaNbusTxHandler(bus);  // release the mailbox by posting back to the
+        CanBusTxHandler(bus);  // release the mailbox by posting back to the
                                // counter semaphore
     }
 

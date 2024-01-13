@@ -46,9 +46,7 @@ int main(void) {
     OSStart(&err);
     ASSERT_OS_ERROR(err);
 
-    while (1) {
-        ;
-    }
+    while (1) {}
 }
 
 void TaskInit(void *p_arg) {

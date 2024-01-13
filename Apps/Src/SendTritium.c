@@ -67,6 +67,7 @@ float cruise_vel_setpoint = 0;
 // Current observed velocity
 static float velocity_observed = 0;
 
+#ifndef SENDTRITIUM_EXPOSE_VARS
 // Counter for sending setpoints to motor
 static uint8_t motor_msg_counter = 0;
 
@@ -81,6 +82,7 @@ static bool one_pedal_previous = false;
 
 static bool cruise_enable_button = false;
 static bool cruise_enable_previous = false;
+#endif
 
 // FSM
 static TritiumState prev_state;  // Previous state
@@ -94,9 +96,9 @@ bool GetOnePedalEnable(void) { return one_pedal_enable; }
 
 bool GetRegenEnable(void) { return regen_enable; }
 
-uint8_t GetBrakePedelPercent(void) { return brake_pedal_percent; }
+uint8_t GetBrakePedalPercent(void) { return brake_pedal_percent; }
 
-uint8_t GetAccelPedelPercent(void) { return accel_pedal_percent; }
+uint8_t GetAccelPedalPercent(void) { return accel_pedal_percent; }
 
 Gear GetGear(void) { return gear; }
 
@@ -119,9 +121,9 @@ void SetOnePedalEnable(bool value) { one_pedal_enable = value; }
 
 void SetRegenEnable(bool value) { regen_enable = value; }
 
-void SetBrakePedelPercent(uint8_t value) { brake_pedal_percent = value; }
+void SetBrakePedalPercent(uint8_t value) { brake_pedal_percent = value; }
 
-void SetAccelPedelPercent(uint8_t value) { accel_pedal_percent = value; }
+void SetAccelPedalPercent(uint8_t value) { accel_pedal_percent = value; }
 
 void SetGear(Gear value) { gear = value; }
 
@@ -165,7 +167,7 @@ static const TritiumState kFsm[9] = {
     {kPoweredCruise, &poweredCruiseHandler, &poweredCruiseDecider},
     {kCoastingCruise, &coastingCruiseHandler, &coastingCruiseDecider},
     {kBrakeState, &brakeHandler, &brakeDecider},
-    {kOnepedal, &onePedalDriveHandler, &onePedalDriveDecider},
+    {kOnePedal, &onePedalDriveHandler, &onePedalDriveDecider},
     {kAccelerateCruise, &accelerateCruiseHandler, &accelerateCruiseDecider}};
 
 // Helper Functions
@@ -184,59 +186,61 @@ static float percentToFloat(uint8_t percent) {
 }
 
 #ifdef SENDTRITIUM_PRINT_MES
+
+#define STATE_NAME_STR_SIZE 20
+
 /**
  * @brief Dumps info to UART during testing
  */
-static void getName(char* nameStr, uint8_t stateNameNum) {
-    switch (stateNameNum) {
-        case FORWARD_DRIVE:
-            strcpy(nameStr, "FORWARD_DRIVE");
+static void getName(char* name_str, uint8_t state_name_num) {
+    switch (state_name_num) {
+        case kForwardDrive:
+            strcpy(name_str, "FORWARD_DRIVE");
             break;
-        case NEUTRAL_DRIVE:
-            strcpy(nameStr, "NEUTRAL_DRIVE");
+        case kNeutralDrive:
+            strcpy(name_str, "NEUTRAL_DRIVE");
             break;
-        case REVERSE_DRIVE:
-            strcpy(nameStr, "REVERSE_DRIVE");
+        case kReverseDrive:
+            strcpy(name_str, "REVERSE_DRIVE");
             break;
-        case RECORD_VELOCITY:
-            strcpy(nameStr, "RECORD_VELOCITY");
+        case kRecordVelocity:
+            strcpy(name_str, "RECORD_VELOCITY");
             break;
-        case POWERED_CRUISE:
-            strcpy(nameStr, "POWERED_CRUISE");
+        case kPoweredCruise:
+            strcpy(name_str, "POWERED_CRUISE");
             break;
-        case COASTING_CRUISE:
-            strcpy(nameStr, "COASTING_CRUISE");
+        case kCoastingCruise:
+            strcpy(name_str, "COASTING_CRUISE");
             break;
-        case BRAKE_STATE:
-            strcpy(nameStr, "BRAKE_STATE");
+        case kBrakeState:
+            strcpy(name_str, "BRAKE_STATE");
             break;
-        case ONEPEDAL:
-            strcpy(nameStr, "ONEPEDAL");
+        case kOnePedal:
+            strcpy(name_str, "ONEPEDAL");
             break;
-        case ACCELERATE_CRUISE:
-            strcpy(nameStr, "ACCELERATE_CRUISE");
+        case kAccelerateCruise:
+            strcpy(name_str, "ACCELERATE_CRUISE");
             break;
         default:
-            strcpy(nameStr, "UNKNOWN");
+            strcpy(name_str, "UNKNOWN");
             break;
     }
-    return;
 }
 
 static void dumpInfo() {
     printf("-------------------\n\r");
-    char stateName[20];
-    getName(stateName, state.name);
-    printf("State: %s\n\r", stateName);
-    printf("cruiseEnable: %d\n\r", cruiseEnable);
-    printf("cruiseSet: %d\n\r", cruiseSet);
-    printf("onePedalEnable: %d\n\r", onePedalEnable);
-    printf("brakePedalPercent: %d\n\r", brakePedalPercent);
-    printf("accelPedalPercent: %d\n\r", accelPedalPercent);
+    char state_name[STATE_NAME_STR_SIZE];
+    getName(state_name, state.name);
+    printf("State: %s\n\r", state_name);
+    printf("cruiseEnable: %d\n\r", cruise_enable);
+    printf("cruiseSet: %d\n\r", cruise_set);
+    printf("onePedalEnable: %d\n\r", one_pedal_enable);
+    printf("brakePedalPercent: %d\n\r", brake_pedal_percent);
+    printf("accelPedalPercent: %d\n\r", accel_pedal_percent);
     printf("gear: %d\n\r", (uint8_t)gear);
-    print_float("currentSetpoint: ", currentSetpoint);
-    print_float("velocitySetpoint: ", velocitySetpoint);
-    print_float("velocityObserved: ", velocityObserved);
+    PrintFloat("currentSetpoint: ", current_setpoint);
+    PrintFloat("velocitySetpoint: ", velocity_setpoint);
+    PrintFloat("velocityObserved: ", velocity_observed);
     printf("-------------------\n\r");
 }
 #endif
@@ -418,7 +422,7 @@ static void forwardDriveDecider() {
                velocity_observed >= MIN_CRUISE_VELOCITY) {
         state = kFsm[kRecordVelocity];
     } else if (one_pedal_enable) {
-        state = kFsm[kOnepedal];
+        state = kFsm[kOnePedal];
     } else if (gear == kNeutralGear || gear == kReverseGear) {
         state = kFsm[kNeutralDrive];
     }
@@ -514,7 +518,7 @@ static void recordVelocityDecider() {
         state = kFsm[kNeutralDrive];
     } else if (one_pedal_enable) {
         cruise_enable = false;
-        state = kFsm[kOnepedal];
+        state = kFsm[kOnePedal];
     } else if (!cruise_enable) {
         state = kFsm[kForwardDrive];
     } else if (cruise_enable && !cruise_set) {
@@ -543,7 +547,7 @@ static void poweredCruiseDecider() {
         state = kFsm[kNeutralDrive];
     } else if (one_pedal_enable) {
         cruise_enable = false;
-        state = kFsm[kOnepedal];
+        state = kFsm[kOnePedal];
     } else if (!cruise_enable) {
         state = kFsm[kForwardDrive];
     } else if (cruise_set && velocity_observed >= MIN_CRUISE_VELOCITY) {
@@ -577,7 +581,7 @@ static void coastingCruiseDecider() {
         state = kFsm[kNeutralDrive];
     } else if (one_pedal_enable) {
         cruise_enable = false;
-        state = kFsm[kOnepedal];
+        state = kFsm[kOnePedal];
     } else if (!cruise_enable) {
         state = kFsm[kForwardDrive];
     } else if (cruise_set && velocity_observed >= MIN_CRUISE_VELOCITY) {
@@ -614,7 +618,7 @@ static void accelerateCruiseDecider() {
         state = kFsm[kNeutralDrive];
     } else if (one_pedal_enable) {
         cruise_enable = false;
-        state = kFsm[kOnepedal];
+        state = kFsm[kOnePedal];
     } else if (!cruise_enable) {
         state = kFsm[kForwardDrive];
     } else if (cruise_set && velocity_observed >= MIN_CRUISE_VELOCITY) {

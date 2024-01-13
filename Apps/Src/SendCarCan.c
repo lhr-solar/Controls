@@ -47,7 +47,7 @@ static void taskPutIoState(void *p_arg);
  * @brief return the space left in Queue for debug purposes
  */
 #ifdef DEBUG
-uint8_t get_Queue_Space(void) {
+uint8_t GetSendCarCanQueueSpace(void) {
     return (can_fifo.get - can_fifo.put - 1) %
            (sizeof can_fifo.buffer / sizeof can_fifo.buffer[0]);
 }

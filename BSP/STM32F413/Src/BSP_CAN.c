@@ -422,7 +422,7 @@ ErrorStatus BspCanRead(Can bus, uint32_t* id, uint8_t* data) {
     return SUCCESS;
 }
 
-void CaN3RX0IrqHandler() {
+void Can3RX0IrqHandler() {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
@@ -453,7 +453,7 @@ void CaN3RX0IrqHandler() {
     OSIntExit();  // Signal to uC/OS
 }
 
-void CaN1RX0IrqHandler(void) {
+void Can1RX0IrqHandler(void) {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
@@ -484,7 +484,7 @@ void CaN1RX0IrqHandler(void) {
     OSIntExit();  // Signal to uC/OS
 }
 
-void CaN3TxIrqHandler(void) {
+void Can3TxIrqHandler(void) {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
@@ -499,7 +499,7 @@ void CaN3TxIrqHandler(void) {
     OSIntExit();  // Signal to uC/OS
 }
 
-void CaN1TxIrqHandler(void) {
+void Can1TxIrqHandler(void) {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
