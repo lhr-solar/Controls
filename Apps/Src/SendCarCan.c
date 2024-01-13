@@ -2,7 +2,6 @@
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendCarCAN.c
  * @brief Function implementations for the SendCarCAN application.
- * @brief Function implementations for the SendCarCAN application.
  *
  * This contains functions relevant to placing CAN messages in a CarCAN queue
  * and periodically sending those messages in the SendCarCAN task. This contains
