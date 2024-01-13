@@ -21,7 +21,7 @@ jobs:
       run: make clean
     - name: make leader
       run: make leader
-    # Run tidy and format and then tidy again incase format moves any NOLINTs to other lines, thus creating warnings/errors
+    # Run tidy and format and then tidy again in case format moves any NOLINTs to other lines, thus creating warnings/errors
     - name: tidy
       run: make tidy
     - name: format
