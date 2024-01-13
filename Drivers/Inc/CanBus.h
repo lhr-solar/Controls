@@ -1,6 +1,6 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file CANbus.h
+ * @file CanBus.h
  * @brief
  *
  * @defgroup CANbus

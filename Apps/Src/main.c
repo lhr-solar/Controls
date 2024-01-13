@@ -6,13 +6,13 @@
  */
 
 #include "BSP_UART.h"
-#include "CANConfig.h"
-#include "CANbus.h"
+#include "CanBus.h"
+#include "CanConfig.h"
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "SendCarCAN.h"
+#include "SendCarCan.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "common.h"

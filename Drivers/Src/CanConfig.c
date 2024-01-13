@@ -5,7 +5,7 @@
  *
  */
 
-#include "CANConfig.h"
+#include "CanConfig.h"
 
 #define BYTE 1
 #define HALFWORD 2
@@ -18,7 +18,7 @@
  * @brief Lookup table to simplify user-defined packet structs. Contains
  * metadata fields that are always the same for every message of a given ID.
  *        Indexed by CanId values. Any changes or additions must be made in
- * parallel with changes made to the CANID_t enum in CANbus.h
+ * parallel with changes made to the CANID_t enum in CanBus.h
  */
 const CanLut kCanLut[kMaxCanId] = {
     [kBpsTrip] = {NOIDX, DOUBLE},             /**	   kBpsTrip **/

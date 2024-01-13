@@ -9,8 +9,8 @@
 
 #include <string.h>
 
-#include "CANbus.h"
-#include "SendCarCAN.h"
+#include "CanBus.h"
+#include "SendCarCan.h"
 #include "UpdateDisplay.h"
 #include "os_cfg_app.h"
 

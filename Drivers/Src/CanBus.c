@@ -5,9 +5,9 @@
  *
  */
 
-#include "CANbus.h"
+#include "CanBus.h"
 
-#include "CANConfig.h"
+#include "CanConfig.h"
 #include "Tasks.h"
 #include "config.h"
 #include "os.h"
@@ -17,8 +17,8 @@ static OS_SEM
                              // mailboxes we have left (start at 3)
 static OS_SEM can_bus_receive_sem4[kNumCan];  // sem4 to count how many msgs in
                                               // our recieving queue
-static OS_MUTEX ca_nbus_tx_mutex[kNumCan];    // mutex to lock tx line
-static OS_MUTEX ca_nbus_rx_mutex[kNumCan];    // mutex to lock Rx line
+static OS_MUTEX can_bus_tx_mutex[kNumCan];    // mutex to lock tx line
+static OS_MUTEX can_bus_rx_mutex[kNumCan];    // mutex to lock Rx line
 
 /**
  * @brief this function will be passed down to the BSP layer to trigger on RX
@@ -84,11 +84,11 @@ ErrorStatus CanBusInit(Can bus, CanId* id_whitelist,
         return ERROR;
     }
 
-    OSMutexCreate(&(ca_nbus_tx_mutex[bus]),
+    OSMutexCreate(&(can_bus_tx_mutex[bus]),
                   (bus == kCan1 ? "CAN TX Lock 1" : "CAN TX Lock 3"), &err);
     ASSERT_OS_ERROR(err);
 
-    OSMutexCreate(&(ca_nbus_rx_mutex[bus]),
+    OSMutexCreate(&(can_bus_rx_mutex[bus]),
                   (bus == kCan1 ? "CAN RX Lock 1" : "CAN RX Lock 3"), &err);
     ASSERT_OS_ERROR(err);
 
@@ -152,7 +152,7 @@ ErrorStatus CanBusSend(CanData can_data, bool blocking, Can bus) {
     }
 
     OSMutexPend(  // ensure that tx line is available
-        &(ca_nbus_tx_mutex[bus]), 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+        &(can_bus_tx_mutex[bus]), 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
     ASSERT_OS_ERROR(err);  // couldn't lock tx line
 
     // tx line locked
@@ -166,7 +166,7 @@ ErrorStatus CanBusSend(CanData can_data, bool blocking, Can bus) {
     );
 
     OSMutexPost(  // unlock the TX line
-        &(ca_nbus_tx_mutex[bus]), OS_OPT_POST_NONE, &err);
+        &(can_bus_tx_mutex[bus]), OS_OPT_POST_NONE, &err);
     ASSERT_OS_ERROR(err);
     if (retval == ERROR) {
         CaNbusTxHandler(bus);  // release the mailbox by posting back to the
@@ -200,7 +200,7 @@ ErrorStatus CanBusRead(CanData* msg_container, bool blocking, Can bus) {
     }
 
     OSMutexPend(  // ensure that RX line is available
-        &(ca_nbus_rx_mutex[bus]), 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
+        &(can_bus_rx_mutex[bus]), 0, OS_OPT_PEND_BLOCKING, &timestamp, &err);
     ASSERT_OS_ERROR(err);
 
     // Actually get the message
@@ -208,7 +208,7 @@ ErrorStatus CanBusRead(CanData* msg_container, bool blocking, Can bus) {
     ErrorStatus status = BspCanRead(bus, &id, msg_container->data);
 
     OSMutexPost(  // unlock RX line
-        &(ca_nbus_rx_mutex[bus]), OS_OPT_POST_NONE, &err);
+        &(can_bus_rx_mutex[bus]), OS_OPT_POST_NONE, &err);
     ASSERT_OS_ERROR(err);
     if (status == ERROR) {
         return ERROR;

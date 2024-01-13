@@ -18,13 +18,13 @@
 
 #include "SendTritium.h"
 
-#include "CANConfig.h"
-#include "CANbus.h"
+#include "CanBus.h"
+#include "CanConfig.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "ReadCarCAN.h"
+#include "ReadCarCan.h"
 #include "ReadTritium.h"
-#include "SendCarCAN.h"
+#include "SendCarCan.h"
 #include "UpdateDisplay.h"
 #include "common.h"
 

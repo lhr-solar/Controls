@@ -1,6 +1,6 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file CANConfig.h
+ * @file CanConfig.h
  * @brief
  *
  * @defgroup CANConfig
@@ -10,7 +10,7 @@
 #ifndef CAN_CONFIG
 #define CAN_CONFIG
 
-#include "CANbus.h"
+#include "CanBus.h"
 
 /**
  * Filter Lists for CarCAN and MotorCAN

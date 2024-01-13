@@ -11,9 +11,9 @@
  *
  */
 
-#include "SendCarCAN.h"
+#include "SendCarCan.h"
 
-#include "CANbus.h"
+#include "CanBus.h"
 #include "Contactors.h"
 #include "Minions.h"
 #include "Pedals.h"

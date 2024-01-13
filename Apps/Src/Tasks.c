@@ -7,12 +7,12 @@
 
 #include "Tasks.h"
 
-#include "CANbus.h"
+#include "CanBus.h"
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
-#include "ReadCarCAN.h"
+#include "ReadCarCan.h"
 #include "ReadTritium.h"
 #include "UpdateDisplay.h"
 #include "os.h"
