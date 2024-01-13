@@ -15,9 +15,20 @@ jobs:
       run: |
         sudo apt -y update
         sudo apt -y install gcc-arm-none-eabi
+        wget https://apt.llvm.org/llvm.sh 
+        chmod +x llvm.sh
+        sudo ./llvm.sh 17 all
+        sudo apt-get install gcc-multilib
     - name: Initialize Submodules
       run: git submodule update --init --recursive
     - name: clean
       run: make clean
-    - name: make stm32f413
+    - name: make main
       run: make stm32f413
+    # Run tidy and format and then tidy again incase format moves any NOLINTs to other lines, thus creating warnings/errors
+    - name: tidy
+      run: make tidy
+    - name: format
+      run: make format
+    - name: tidy
+      run: make tidy
