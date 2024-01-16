@@ -52,7 +52,7 @@ void test_UnitTest_bsptrip(void){
     TEST_ASSERT_EQUAL(4, throwTaskError_fake.arg0_history[1]);
     printf("%d", throwTaskError_fake.call_count);
     TEST_ASSERT_EQUAL(false, UpdateDisplay_SetArray_fake.arg0_history[0]);
-    TEST_ASSERT_EQUAL(2, Display_Evac_fake.call_count)
+    TEST_ASSERT_EQUAL(2, Display_Evac_fake.call_count);
 }
 
 void test_UnitTest_bspcontactor(void){
