@@ -154,11 +154,6 @@ static void assertTritiumError(TritiumErrorCode motor_err) {
     if (motor_err == kNone) {
         return;  // No error, return
     }
-    // NOTE: If we had >1 recoverable errors,
-    // Hall sensor error is the only recoverable error, so any other error //
-    // make sure a combination of them wouldn't or combination of errors
-    // includes at least one that is nonrecoverable        // accidentally fall
-    // into this nonrecoverable bucket
     if (motor_err != kHallSensorErr && motor_err != kMotorWatchdogTrip) {
         // Assert a nonrecoverable error with no callback function-
         // nonrecoverable will kill the motor and infinite loop
