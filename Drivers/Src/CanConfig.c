@@ -21,27 +21,26 @@
  * parallel with changes made to the CANID_t enum in CanBus.h
  */
 const CanLut kCanLut[kMaxCanId] = {
-    [kBpsTrip] = {NOIDX, DOUBLE},             /**	   kBpsTrip **/
-    [kBpsContactor] = {NOIDX, DOUBLE},        /**	   kBpsContactor        **/
-    [kStateOfCharge] = {NOIDX, DOUBLE},       /**     kStateOfCharge      **/
-    [kSupplementalVoltage] = {NOIDX, DOUBLE}, /**     kSupplementalVoltage **/
-    [kMotorDrive] = {NOIDX, DOUBLE}, /**     kMotorDrive                     **/
-    [kMotorPower] = {NOIDX, DOUBLE}, /**     kMotorPower                     **/
-    [kMotorReset] = {NOIDX, DOUBLE}, /**     kMotorReset                     **/
-    [kMotorStatus] = {NOIDX, DOUBLE}, /**     kMotorStatus **/
-    [kMcBus] = {NOIDX, DOUBLE},    /**     kMcBus                          **/
-    [kVelocity] = {NOIDX, DOUBLE}, /**     kVelocity                        **/
-    [kMcPhaseCurrent] = {NOIDX, DOUBLE}, /**     kMcPhaseCurrent **/
-    [kVoltageVec] = {NOIDX, DOUBLE}, /**     kVoltageVec                     **/
-    [kCurrentVec] = {NOIDX, DOUBLE}, /**     kCurrentVec                     **/
-    [kBackEmf] = {NOIDX, DOUBLE}, /**     kBackEmf                         **/
-    [kTemperature] = {NOIDX, DOUBLE},      /**     kTemperature      **/
-    [kOdometerAmpHours] = {NOIDX, DOUBLE}, /**     kOdometerAmpHours **/
-    [kArrayContactorStateChange] =
-        {NOIDX, BYTE}, /**     kArrayContactorStateChange    **/
+    [kBpsTrip] = {NOIDX, DOUBLE},
+    [kBpsContactor] = {NOIDX, DOUBLE},
+    [kStateOfCharge] = {NOIDX, DOUBLE},
+    [kSupplementalVoltage] = {NOIDX, DOUBLE},
+    [kMotorDrive] = {NOIDX, DOUBLE},
+    [kMotorPower] = {NOIDX, DOUBLE},
+    [kMotorReset] = {NOIDX, DOUBLE},
+    [kMotorStatus] = {NOIDX, DOUBLE},
+    [kMcBus] = {NOIDX, DOUBLE},
+    [kVelocity] = {NOIDX, DOUBLE},
+    [kMcPhaseCurrent] = {NOIDX, DOUBLE},
+    [kVoltageVec] = {NOIDX, DOUBLE},
+    [kCurrentVec] = {NOIDX, DOUBLE},
+    [kBackEmf] = {NOIDX, DOUBLE},
+    [kTemperature] = {NOIDX, DOUBLE},
+    [kOdometerAmpHours] = {NOIDX, DOUBLE},
+    [kArrayContactorStateChange] = {NOIDX, BYTE},
     [kSlipSpeed] = {NOIDX, DOUBLE},
-    [kIoState] = {NOIDX, DOUBLE},   /**     kIoState     **/
-    [kControlMode] = {NOIDX, BYTE}, /**     kControlMode **/
+    [kIoState] = {NOIDX, DOUBLE},
+    [kControlMode] = {NOIDX, BYTE},
 };
 
 /**
