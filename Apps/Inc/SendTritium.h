@@ -66,6 +66,12 @@ extern float velocityObserved;
 extern float cruiseVelSetpoint;
 #endif
 
+/**
+ * Task Prototype
+ */
+void Task_SendTritium(void* p_arg);
+
+
 // Getter functions for local variables in SendTritium.c
 EXPOSE_GETTER(bool, cruiseEnable)
 EXPOSE_GETTER(bool, cruiseSet)

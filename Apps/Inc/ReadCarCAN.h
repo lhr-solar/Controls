@@ -27,6 +27,13 @@ typedef enum{
 	READCARCAN_ERR_BPS_TRIP		    		    // Received a BPS trip msg (0 or 1)
 } ReadCarCAN_error_code_t;
 
+
+/**
+ * Task Prototype
+ */
+void Task_ReadCarCAN(void* p_arg);
+
+
 /**
  * @brief Returns whether regen braking / charging is enabled or not
  * @return  Whether regen braking / charging is enabled or not

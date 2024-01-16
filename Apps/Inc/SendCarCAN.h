@@ -4,6 +4,12 @@
 #include "CANbus.h"
 
 /**
+ * Task Prototype
+ */
+void Task_SendCarCAN(void* p_arg);
+
+
+/**
  * @brief Initialize SendCarCAN
 */
 void SendCarCAN_Init();

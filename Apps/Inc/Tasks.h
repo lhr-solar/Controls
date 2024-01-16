@@ -60,16 +60,6 @@ typedef uint16_t error_code_t;
  */
 void Task_Init(void* p_arg);
 
-void Task_SendTritium(void* p_arg);
-
-void Task_ReadCarCAN(void* p_arg);
-
-void Task_UpdateDisplay(void* p_arg);
-
-void Task_ReadTritium(void* p_arg);
-
-void Task_SendCarCAN(void* p_arg);
-
 void Task_DebugDump(void *p_arg);
 
 void Task_CommandLine(void* p_arg);

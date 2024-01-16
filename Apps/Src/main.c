@@ -16,7 +16,10 @@
 #include "Minions.h"
 #include "Pedals.h"
 #include "UpdateDisplay.h"
+#include "ReadCarCAN.h"
 #include "SendCarCAN.h"
+#include "ReadTritium.h"
+#include "SendTritium.h"
 
 #define IGN_CONT_PERIOD 100
 

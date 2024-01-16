@@ -54,6 +54,12 @@ typedef enum{
 #define DISP_REVERSE STATE_2
 
 /**
+ * Task Prototype
+ */
+void Task_UpdateDisplay(void* p_arg);
+
+
+/**
  * @brief Initializes UpdateDisplay application
  * @returns UpdateDisplayError_t
  */
