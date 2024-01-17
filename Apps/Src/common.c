@@ -1,19 +1,25 @@
 #include "common.h"
 
-void print_float(char * str, float f) {
-    if(str) printf("%s", str);
+#define MASK 0x80000000L
 
-    int32_t n = (int32_t)f;
-    f -= n;
-    f *= 100;
-    int32_t d = (f<0)?-f:f;
-    printf("%d.%02d\n\r", (int)n, (int)d);
+void PrintFloat(char* str, float value) {
+    if (str) {
+        printf("%s", str);
+    }
+
+    int32_t num = (int32_t)value;
+    value -= (float)num;
+    value *= 100;
+    int32_t dec = (int32_t)((value < 0) ? -value : value);
+    printf("%d.%02d\n\r", (int)num, (int)dec);
 }
 
-void print_bin(char * str, uint32_t i){
-    if(str) printf("%s", str);
+void PrintBin(char* str, uint32_t value) {
+    if (str) {
+        printf("%s", str);
+    }
 
-    for(uint32_t mask=0x80000000L; mask > 0L; mask >>= 1){
-        printf("%d\n\r",(mask & i)?1:0);
+    for (uint32_t mask = MASK; mask > 0L; mask >>= 1) {
+        printf("%d\n\r", (mask & value) ? 1 : 0);
     }
 }

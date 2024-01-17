@@ -5,124 +5,133 @@
  *
  * This contains functions relevant to sending/receiving messages
  * to/from our Nextion display.
- * 
+ *
  */
 
 #include "Display.h"
-#include "bsp.h"   // for writing to UART
-#include "Tasks.h" // for os and fault error codes
 
-#define DISP_OUT UART_3
+#include "Tasks.h"  // for os and fault error codes
+#include "bsp.h"    // for writing to UART
+
+#define PAGE_STR_SIZE 7
+#define FAULT_STR_SIZE 20
+#define SOC_STR_SIZE 13
+#define SUPP_STR_SIZE 18
+
+#define DISP_OUT kUart3
 #define MAX_MSG_LEN 32
 #define MAX_ARG_LEN 16
 // Assignment commands have only 1 arg, an operator, and an attribute
-#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
-// Operational commands have no attribute and no operator, just a command and >= 0 arguments
-#define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
+#define IS_ASSIGN_CMD(cmd)                                 \
+    ((((cmd).comp_or_cmd != NULL) && ((cmd).op != NULL) && \
+      ((cmd).attr != NULL) && ((cmd).num_args == 1)))
+// Operational commands have no attribute and no operator, just a command and >=
+// 0 arguments
+#define IS_OP_CMD(cmd) ((cmd).op == NULL && (cmd).attr == NULL)
 
-static const char *TERMINATOR = "\xff\xff\xff";
+static const char *terminator = "\xff\xff\xff";
 
-DisplayError_t Display_Init(){
-	BSP_UART_Init(DISP_OUT);
-	return Display_Reset();
+DisplayError DisplayInit() {
+    BspUartInit(DISP_OUT);
+    return DisplayReset();
 }
 
-DisplayError_t Display_Send(DisplayCmd_t cmd){
-	char msgArgs[MAX_MSG_LEN];
-	if (isAssignCmd(cmd)){
-		if (cmd.argTypes[0] == INT_ARG){
-			sprintf(msgArgs, "%d", (int)cmd.args[0].num);
-		}
-		else{
-			if (cmd.args[0].str == NULL){return DISPLAY_ERR_PARSE;}
-			sprintf(msgArgs, "%s", cmd.args[0].str);
-		}
+DisplayError DisplaySend(DisplayCmd cmd) {
+    char msg_args[MAX_MSG_LEN];
+    if (IS_ASSIGN_CMD(cmd)) {
+        if (cmd.arg_types[0] == kIntArg) {
+            sprintf(msg_args, "%d", (int)cmd.args[0].num);
+        } else {
+            if (cmd.args[0].str == NULL) {
+                return kDisplayErrParse;
+            }
+            sprintf(msg_args, "%s", cmd.args[0].str);
+        }
 
-		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
-		BSP_UART_Write(DISP_OUT, ".", 1);
-		BSP_UART_Write(DISP_OUT, cmd.attr, strlen(cmd.attr));
-		BSP_UART_Write(DISP_OUT, cmd.op, strlen(cmd.op));
-	}
-	else if (isOpCmd(cmd)){
-		msgArgs[0] = ' '; // No args
-		msgArgs[1] = '\0';
-		if (cmd.numArgs > MAX_ARGS){return DISPLAY_ERR_OTHER;}
-		if (cmd.numArgs >= 1){ // If there are arguments
-			for (int i = 0; i < cmd.numArgs; i++){
-				char arg[MAX_ARG_LEN];
-				if (cmd.argTypes[i] == INT_ARG){
-					sprintf(arg, "%d", (int)cmd.args[i].num);
-				}
-				else{
-					sprintf(arg, "%s", cmd.args[i].str);
-				}
+        BspUartWrite(DISP_OUT, cmd.comp_or_cmd, strlen(cmd.comp_or_cmd));
+        BspUartWrite(DISP_OUT, ".", 1);
+        BspUartWrite(DISP_OUT, cmd.attr, strlen(cmd.attr));
+        BspUartWrite(DISP_OUT, cmd.op, strlen(cmd.op));
+    } else if (IS_OP_CMD(cmd)) {
+        msg_args[0] = ' ';  // No args
+        msg_args[1] = '\0';
+        if (cmd.num_args > DISPLAY_CMD_MAX_ARGS) {
+            return kDisplayErrOther;
+        }
+        if (cmd.num_args >= 1) {  // If there are arguments
+            for (int i = 0; i < cmd.num_args; i++) {
+                char arg[MAX_ARG_LEN];
+                if (cmd.arg_types[i] == kIntArg) {
+                    sprintf(arg, "%d", (int)cmd.args[i].num);
+                } else {
+                    sprintf(arg, "%s", cmd.args[i].str);
+                }
 
-				strcat(msgArgs, arg);
+                strcat(msg_args, arg);
 
-				if (i < cmd.numArgs - 1){ // delimiter
-					strcat(msgArgs, ",");
-				}
-			}
-		}
-		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
-	}
-	else{ // Error parsing command struct
-		return DISPLAY_ERR_PARSE;
-	}
+                if (i < cmd.num_args - 1) {  // delimiter
+                    strcat(msg_args, ",");
+                }
+            }
+        }
+        BspUartWrite(DISP_OUT, cmd.comp_or_cmd, strlen(cmd.comp_or_cmd));
+    } else {  // Error parsing command struct
+        return kDisplayErrParse;
+    }
 
-	if (cmd.numArgs >= 1){ // If there are arguments
-		BSP_UART_Write(DISP_OUT, msgArgs, strlen(msgArgs));
-	}
+    if (cmd.num_args >= 1) {  // If there are arguments
+        BspUartWrite(DISP_OUT, msg_args, strlen(msg_args));
+    }
 
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    BspUartWrite(DISP_OUT, (char *)terminator, strlen(terminator));
 
-	return DISPLAY_ERR_NONE;
+    return kDisplayErrNone;
 }
 
-DisplayError_t Display_Reset(){
-	DisplayCmd_t restCmd = {
-		.compOrCmd = "rest",
-		.attr = NULL,
-		.op = NULL,
-		.numArgs = 0};
+DisplayError DisplayReset() {
+    DisplayCmd rest_cmd = {
+        .comp_or_cmd = "rest", .attr = NULL, .op = NULL, .num_args = 0};
 
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
+    BspUartWrite(DISP_OUT, (char *)terminator,
+                 strlen(terminator));  // Terminates any in progress command
 
-	return Display_Send(restCmd);
+    return DisplaySend(rest_cmd);
 }
 
-DisplayError_t Display_Error(error_code_t faultCode){
+DisplayError DisplayFault(ErrorCode fault_code) {
+    BspUartWrite(DISP_OUT, (char *)terminator,
+                 strlen(terminator));  // Terminates any in progress command
 
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
+    char fault_page[PAGE_STR_SIZE] = "page 2";
+    BspUartWrite(DISP_OUT, fault_page, strlen(fault_page));
+    BspUartWrite(DISP_OUT, (char *)terminator, strlen(terminator));
 
-	char faultPage[7] = "page 2";
-	BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    char set_fault_code[FAULT_STR_SIZE];
+    sprintf(set_fault_code, "%s\"%04x\"",
+            "faulterr.txt=", (uint16_t)fault_code);
+    BspUartWrite(DISP_OUT, set_fault_code, strlen(set_fault_code));
+    BspUartWrite(DISP_OUT, (char *)terminator, strlen(terminator));
 
-	char setFaultCode[20];
-	sprintf(setFaultCode, "%s\"%04x\"", "faulterr.txt=", (uint16_t)faultCode);
-	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-
-	return DISPLAY_ERR_NONE;
+    return kDisplayErrNone;
 }
 
-DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
+DisplayError DisplayEvac(uint8_t soc_percent, uint32_t supp_mv) {
+    BspUartWrite(DISP_OUT, (char *)terminator,
+                 strlen(terminator));  // Terminates any in progress command
 
-	char evacPage[7] = "page 3";
-	BSP_UART_Write(DISP_OUT, evacPage, strlen(evacPage));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    char evac_page[PAGE_STR_SIZE] = "page 3";
+    BspUartWrite(DISP_OUT, evac_page, strlen(evac_page));
+    BspUartWrite(DISP_OUT, (char *)terminator, strlen(terminator));
 
-	char soc[13];
-	sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
-	BSP_UART_Write(DISP_OUT, soc, strlen(soc));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    char soc[SOC_STR_SIZE];
+    sprintf(soc, "%s%d", "soc.val=", (int)soc_percent);
+    BspUartWrite(DISP_OUT, soc, strlen(soc));
+    BspUartWrite(DISP_OUT, (char *)terminator, strlen(terminator));
 
-	char supp[18];
-	sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
-	BSP_UART_Write(DISP_OUT, supp, strlen(supp));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    char supp[SUPP_STR_SIZE];
+    sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
+    BspUartWrite(DISP_OUT, supp, strlen(supp));
+    BspUartWrite(DISP_OUT, (char *)terminator, strlen(terminator));
 
-	return DISPLAY_ERR_NONE;
+    return kDisplayErrNone;
 }
