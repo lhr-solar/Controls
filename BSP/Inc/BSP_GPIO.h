@@ -13,27 +13,13 @@
 #define __BSP_GPIO_H
 
 #include "common.h"
-#ifdef MOCKING
-#include "fff.h"
-#else
 #include "config.h"
 #include "stm32f4xx_gpio.h"
 #include <bsp.h>
 #include <stdbool.h>
-#endif
 
 typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t; 
 typedef enum {INPUT = 0, OUTPUT} direction_t;
-
-#ifdef MOCKING
-DECLARE_FAKE_VOID_FUNC(BSP_GPIO_Write_Pin, port_t, uint16_t, bool);
-DECLARE_FAKE_VOID_FUNC(BSP_GPIO_Init, port_t, uint16_t, direction_t);
-//FAKE_VOID_FUNC3(OSMutexCreate, struct os_mutex, CPU_CHAR, OS_ERR);
-DECLARE_FAKE_VALUE_FUNC(uint8_t,BSP_GPIO_Get_State, port_t, uint16_t );
-//FAKE_VOID_FUNC5(OSMutexPend, OS_MUTEX, OS_TICK, OS_OPT, CPU_TS, OS_ERR);
-//FAKE_VOID_FUNC3(OSMutexPost, OS_MUTEX, OS_OPT, OS_ERR);
-DECLARE_FAKE_VOID_FUNC(assertOSError, int);
-#else
 
 /**
  * @brief   Initializes a GPIO port
@@ -84,7 +70,6 @@ void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state);
  */ 
 uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin);
 
-#endif
 #endif
 
 

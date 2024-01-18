@@ -1,4 +1,3 @@
-
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Tasks.c
@@ -104,17 +103,17 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 
             #if DEBUG == 1
                // Print the error that caused this fault
-                printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
+                // printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
 
-                // Print the errors for each applications with error data
-                printf("\n\rAll application errors:\n\r");
-                printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
-                printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
-                printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
+                // // Print the errors for each applications with error data
+                // printf("\n\rAll application errors:\n\r");
+                // printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
+                // printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
+                // printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
 
-                // Delay so that we're not constantly printing
-                for (int i = 0; i < 9999999; i++) {
-                } 
+                // // Delay so that we're not constantly printing
+                // for (int i = 0; i < 9999999; i++) {
+                // } 
             #endif
             
         }

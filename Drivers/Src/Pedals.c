@@ -6,11 +6,10 @@
  */
 
 #include "Pedals.h"
-#include "BSP_ADC.h"
+
 // Constants used to tune the pedals
 // Indexed using pedal_t
 // Refine in testing
-
 static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
     400, // Accelerator lower bound
     2100, // Brake lower bound

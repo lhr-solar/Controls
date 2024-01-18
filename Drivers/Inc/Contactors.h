@@ -56,6 +56,8 @@ bool Contactors_Get(contactor_t contactor);
  * @return  Whether or not the contactor was successfully set
  */
 ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
+
 #endif
+
 
 /* @} */

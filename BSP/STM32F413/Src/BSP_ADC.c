@@ -3,12 +3,6 @@
 #include "BSP_ADC.h"
 #include "stm32f4xx.h"
 
-
-
-#ifdef MOCKING
-
-#else
-
 static volatile uint16_t ADCresults[2];
 
 static void ADC_InitDMA(void) {
@@ -119,6 +113,3 @@ int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice) {
     // Convert to millivoltage
     return (ADC_RANGE_MILLIVOLTS * data) >> ADC_PRECISION_BITS;
 }
-
-
-#endif

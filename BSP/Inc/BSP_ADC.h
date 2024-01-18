@@ -11,9 +11,7 @@
 
 #ifndef __BSP_ADC_H
 #define __BSP_ADC_H
-#define MOCK_BSP_ADC
-#ifndef MOCK_BSP_ADC
-#endif
+
 #include "bsp.h"
 #include "common.h"
 #include "config.h"
@@ -28,13 +26,6 @@ typedef enum
     Brake_ADC,
     NUMBER_OF_CHANNELS
 } ADC_t;
-
-#ifdef MOCKING
-#include "fff.h"
-DECLARE_FAKE_VOID_FUNC(BSP_ADC_Init);
-DECLARE_FAKE_VALUE_FUNC(int16_t, BSP_ADC_Get_Millivoltage, int);
-DECLARE_FAKE_VALUE_FUNC(int16_t, BSP_ADC_Get_Value, int);
-#else
 
 /**
  * @brief   Initialize the ADC module
@@ -57,6 +48,6 @@ int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
 int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
 
 #endif
-#endif
+
 
 /* @} */

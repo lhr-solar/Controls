@@ -13,8 +13,6 @@
 
 #include "common.h"
 #include "CANbus.h"
-#include "Tasks.h"
-#include "Minions.h"
 
 /**
  * Error types

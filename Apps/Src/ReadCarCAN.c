@@ -11,7 +11,6 @@
 #include "Minions.h"
 #include "os.h"
 #include "os_cfg_app.h"
-#include "Tasks.h"
 #include "Display.h"
 
 // Length of the array and motor PBC saturation buffers
@@ -330,8 +329,8 @@ void Task_ReadCarCAN(void *p_arg){
     assertOSError(err);
 
     // Start CAN Watchdog timer
-   OSTmrStart(&canWatchTimer, &err);
-   assertOSError(err);
+    OSTmrStart(&canWatchTimer, &err);
+    assertOSError(err);
 
     // Fills buffers with disable messages
     // NOTE: If the buffer becomes bigger than of type int8_t, memset will not work and 
@@ -357,8 +356,8 @@ void Task_ReadCarCAN(void *p_arg){
             }
             case BPS_CONTACTOR: { 
 
-               OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
-               assertOSError(err); 
+                OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
+                assertOSError(err); 
                 
                 // Retrieving HV contactor statuses using bit mapping
                 // Bitwise to get HV Plus and Minus, and then &&ing to ensure both are on

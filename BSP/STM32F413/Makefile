@@ -41,6 +41,11 @@ C_SOURCES += \
 $(filter-out ../../Apps/Src/main.c, $(wildcard ../../Apps/Src/*.c))	\
 ../../$(TEST)	
 
+# ASM sources
+ASM_SOURCES =  \
+../../BSP/STM32F413/Src/startup_stm32f413xx.s \
+../../RTOS/uCOS-III-STM32F4/uCOS-III/Ports/ARM-Cortex-M4/Generic/GNU/os_cpu_a.s \
+../../RTOS/uCOS-III-STM32F4/uC-CPU/ARM-Cortex-M4/GNU/cpu_a.s
 
 
 #######################################
@@ -72,7 +77,7 @@ SF = st-flash
 CPU = -mcpu=cortex-m4
 
 # float-abi
-FLOAT-ABI = -mfloat-abi=soft
+FLOAT-ABI = -mfloat-abi=hard
 
 # mcu
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
@@ -150,6 +155,9 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 # list of objects
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
+# list of ASM program objects
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
+vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
 	@echo "CC $(<:../../%=%)"
