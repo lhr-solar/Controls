@@ -1,45 +1,39 @@
 /**
  * @file SendTritium.h
- * @brief The SendTritium task currently houses our velocity control code. 
- * It utilizes a FSM to coordinate what messages should be sent to the motor 
- * controller depending on a certain set of input variables. This FSM depends 
- * on data from across the system, such as the [Pedals](../Drivers/Pedals.html), 
- * the [Switches](../Drivers/Minions.html), and the CAN messages from 
- * BPS (indicating whether charging is enabled).
+ * @brief Runs the car's State Machine and sends control messages to the Tritium motor controller. 
+ * 
+ * Starting the SendTritium task will start sending CAN messages 
+ * and running the state machine. For details on the state machine, see
  * 
  */
+
 #ifndef __SENDTRITIUM_H
 #define __SENDTRITIUM_H
 
 #include "common.h"
 
 /**
- * @def SENDTRITIUM_PRINT_MES
- * @brief Print messages for SendTritium.c
+ * Print messages for SendTritium.c
  */
 // #define SENDTRITIUM_PRINT_MES
 
 /**
- * @def SENDTRITIUM_EXPOSE_VARS
- * @brief Expose variables for SendTritium.c
+ * Expose variables for SendTritium.c
  */
 // #define SENDTRITIUM_EXPOSE_VARS
 
 /**
- * @def MOTOR_MSG_PERIOD
- * @brief Period of the motor CAN message in milliseconds
+ * Period of the motor CAN message in milliseconds
  */
 #define MOTOR_MSG_PERIOD 100
 
 /**
- * @def FSM_PERIOD
- * @brief Period of the state machine in milliseconds
+ * Period of the state machine in milliseconds
  */
 #define FSM_PERIOD 100
 
 /**
- * @def DEBOUNCE_PERIOD
- * @brief Period of the debouncer in units of FSM_PERIOD
+ * Period of the debouncer in units of FSM_PERIOD
  */
 #define DEBOUNCE_PERIOD 2
 
@@ -52,8 +46,7 @@
         GEAR(REVERSE_GEAR),   \
 
 /**
- * @enum Gear_t
- * @brief Enumerated list of gears
+ * Gears
 */
 typedef enum GEAR_ENUM {
     FOREACH_Gear(GENERATE_ENUM)
@@ -61,8 +54,7 @@ typedef enum GEAR_ENUM {
 } Gear_t;
 
 /**
- * @enum TritiumStateName_t
- * @brief Enumerated list of states for the FSM
+ * States for the FSM
 */
 typedef enum{
     /** Forward drive state */
@@ -86,8 +78,7 @@ typedef enum{
 } TritiumStateName_t;
 
 /**
- * @struct TritiumState_t
- * @brief Struct containing the state name, state handler, and state decider
+ * Struct containing the state name, state handler, and state decider
  * function for the Tritium FSM
 */
 typedef struct TritiumState{

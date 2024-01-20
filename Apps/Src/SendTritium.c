@@ -1,12 +1,33 @@
 /**
  * @file SendTritium.c
- * @details
- * The FSM has three major supermodes, which are:
+ * 
+ * SendTritium utilizes an FSM to coordinate what messages should be sent to the motor 
+ * controller depending on a certain set of input variables. This FSM depends 
+ * on data from across the system, such as the [Pedals](../Drivers/Pedals.html), 
+ * the [Switches](../Drivers/Minions.html), and the CAN messages from 
+ * BPS (indicating whether charging is enabled).
+ * 
+ * The FSM has three major modes of operation, which are:
  * - "Normal" (Current Controlled) mode. This includes the Forward, Neutral, and Reverse states.
  * - One Pedal Drive (Velocity Controlled) mode. This is the state where the driver is only using the accelerator pedal to control the car.
  * - Cruise Control (Velocity Controlled) mode. This is the state where the driver is using the cruise control buttons to control the car. This includes the Record Velocity, Powered Cruise, Coasting Cruise, and Accelerate Cruise states.
- * The FSM also includes the brake state.
+ * The FSM also includes the brake state, which disables One Pedal Drive or Cruise Control and puts the car in neutral to allow the physical brakes to be used.
  * 
+ * **Normal** mode allows the driver to control the car with the accelerator mapped directly to the current setpoint, and the brake pedal tied to the physical brake. 
+ * This is similar to operation of a typical vehicle. This includes three states for the three gears: Forward, Neutral, and Reverse.
+ *
+ * **One Pedal** Drive mode allows the driver to control the car with the accelerator pedal only. A certain percentage of the pedal is mapped to regenerative braking,
+ * a certain percentage is mapped to coasting, and the rest is mapped to acceleration. This means that if the driver lifts their foot completely off the pedal, the car
+ * will come to a halt.
+ * 
+ * **Cruise Control** mode allows the driver to control the car with the cruise control buttons. The driver can set the cruise control speed by pressing the *Cruise Set* button,
+ * and the car will maintain that speed until the driver presses the brake pedal. The driver can also accelerate or decelerate the car by pressing the accelerator pedal (this will enter the 
+ * Accelerate Cruise state). 
+ * - A concern with cruise control is that the vehicle operates in the motor controller's Velocity Controlled mode, which uses motor braking. Since the car has a one pedal drive, the use
+ * of motor braking in conjunction with physical braking can cause the car to spin out due to a force differential. To mitigate this, the Powered Cruise/Coasting Cruise distinction was made,
+ * where the car will coast if the observed velocity is greater than the setpoint (Coasting Cruise), and will use velocity control if the observed velocity is less than the setpoint (Powered Cruise).
+ * 
+ * # Implementation Details
  * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including `SendTritium.h`, 
  * relevant setters will be exposed as externs for unit testing
  * and hardware inputs won't be read and motor commands won't be sent over MotorCAN.
@@ -31,82 +52,69 @@
 
 // Macros
 /**
- * @def MOTOR_MSG_COUNTER_THRESHOLD
  * @brief Threshold for the motor message counter
 */
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
 /**
- * @def MAX_VELOCITY
  * @brief Maximum velocity of the car in rpm (unobtainable value)
 */
 #define MAX_VELOCITY 20000.0f
 
 // Velocity Limits
 /**
- * @def MIN_CRUISE_VELOCITY
  * @brief Minimum velocity of the car in rpm to enable cruise control
 */
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)
 
 /**
- * @def MAX_GEARSWITCH_VELOCITY
  * @brief Maximum velocity of the car in rpm to switch gears
 */
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f)
 
 // Deadbands & Thresholds
 /**
- * @def BRAKE_PEDAL_DEADBAND
  * @brief Minimum brake pedal percentage to engage brake state
 */
 #define BRAKE_PEDAL_DEADBAND 15
 
 /**
- * @def ACCEL_PEDAL_DEADBAND
  * @brief Minimum accelerator pedal percentage to engage acceleration in 
  * normal drive mode
 */
 #define ACCEL_PEDAL_DEADBAND 10
 
 /**
- * @def ONEPEDAL_BRAKE_THRESHOLD
  * @brief One pedal drive mode upper limit for regenerative braking
 */
 #define ONEPEDAL_BRAKE_THRESHOLD 25
 
 /**
- * @def ONEPEDAL_NEUTRAL_THRESHOLD
  * @brief One pedal drive mode upper limit for neutral
 */
 #define ONEPEDAL_NEUTRAL_THRESHOLD 35
 
 /**
- * @def PEDAL_MIN
  * @brief Minimum pedal percentage
 */
 #define PEDAL_MIN 0
 
 /**
- * @def PEDAL_MAX
  * @brief Maximum pedal percentage
 */
 #define PEDAL_MAX 100
 
 /**
- * @def CURRENT_SP_MIN
  * @brief Minimum current setpoint percentage
 */
 #define CURRENT_SP_MIN 0
 
 /**
- * @def CURRENT_SP_MAX
  * @brief Maximum current setpoint percentage
 */
 #define CURRENT_SP_MAX 100
 
 /**
- * @def GEAR_FAULT_THRESHOLD
  * @brief Number of times gear fault can occur before it is considered a fault
 */
 #define GEAR_FAULT_THRESHOLD 3
