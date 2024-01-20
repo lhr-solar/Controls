@@ -1,6 +1,6 @@
-********************
-SendTritium Task
-********************
+***********
+SendTritium
+***********
 .. doxygenfile:: SendTritium.h
    :sections: briefdescription
 

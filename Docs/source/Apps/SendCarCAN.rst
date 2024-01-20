@@ -1,6 +1,6 @@
-*****************
-Send Car CAN Task
-*****************
+************
+Send Car CAN
+************
 
 .. doxygenfile:: SendCarCAN.h
     :sections: briefdescription

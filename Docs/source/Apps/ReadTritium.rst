@@ -1,6 +1,7 @@
-*****************
-Read Tritium Task
-*****************
+************
+Read Tritium
+************
+
 .. doxygenfile:: ReadTritium.h
     :sections: briefdescription
 
@@ -10,9 +11,9 @@ Usage Details
 .. doxygenfile:: ReadTritium.h
     :sections: detaileddescription
 
-======================
-Implementation Details
-======================
+==================
+Functional Details
+==================
 .. doxygenfile:: ReadTritium.c
     :sections: detaileddescription
 

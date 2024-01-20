@@ -1,6 +1,6 @@
-***************
-Debug Dump Task
-***************
+**********
+Debug Dump
+**********
 
 .. doxygenfile:: DebugDump.c
     :sections: briefdescription detaileddescription

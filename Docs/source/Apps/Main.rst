@@ -1,6 +1,6 @@
-*********
-Init Task
-*********
+**************
+Initialization
+**************
 
 .. doxygenfile:: main.c
    :sections: briefdescription detaileddescription

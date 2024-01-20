@@ -1,6 +1,6 @@
-****************
+**************
 Error Handling
-****************
+**************
 The Controls system deals with two types of errors: OS Errors and task errors. OS Errors are returned by OS function calls and immediately result in a shutdown of the Controls system. Task errors are thrown by applications as a result of undesirable conditions experienced by the car and are thrown by individual assertion functions local to apps.
 
 OS Errors

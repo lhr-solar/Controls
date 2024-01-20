@@ -1,6 +1,6 @@
-*******************
-Update Display Task
-*******************
+**************
+Update Display
+**************
 
 .. doxygenfile:: UpdateDisplay.h
    :sections: briefdescription

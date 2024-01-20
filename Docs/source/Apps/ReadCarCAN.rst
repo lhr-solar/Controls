@@ -1,6 +1,6 @@
-*****************
-Read Car CAN Task
-*****************
+************
+Read Car CAN
+************
 
 .. doxygenfile:: ReadCarCAN.h
    :sections: briefdescription 
@@ -11,9 +11,9 @@ Usage Details
 .. doxygenfile:: ReadCarCAN.h
    :sections: detaileddescription
 
-===================
-Operational Details
-===================
+==================
+Functional Details
+==================
 .. doxygenfile:: ReadCarCAN.c
    :sections: detaileddescription
 

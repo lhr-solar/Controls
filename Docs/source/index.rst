@@ -15,7 +15,7 @@ Any change in functionality or interface should be reflected in the docs: out-of
 
 To ensure all dependencies are installed, run `install.sh` in the `Embedded-Sharepoint <https://github.com/lhr-solar/Embedded-Sharepoint>` for the documentation_toolset package.
 
-To actually build the documentation, run ``make docs``. The resulting ``build/html/index.html`` can then be viewed in any browser. When your pull request is merged into the master branch, the documentation changes should be automatically visible on this website.
+To actually build the documentation, run ``make docs``. The resulting ``build/html/index.html`` can then be viewed in any browser or in the editor using this [VSCode extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server) by navigating to the Controls/Docs/build/html directory. When your pull request is merged into the master branch, the documentation changes should be automatically visible on this website.  
 
 Keep the docs clear and readable. Follow the style of the existing documentation. If you're not sure how to document something, ask someone else on the team.
 
