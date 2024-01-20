@@ -1,11 +1,11 @@
 /**
  * @file UpdateDisplay.c
- * @details
+ * 
  * The task implements a queue of command structures. Tasks that wish to 
- * write the display call one of the wrapper functions exposed in the public interface. 
+ * write to the display call one of the wrapper functions exposed in the public interface. 
  * Internally, all of these functions construct a command structure and then call 
- * ``UpdateDisplay_PutNext(Display_Cmd_t cmd)``, which places the command structure in the queue 
- * and notifies UpdateDisplay. Another internal function, ``UpdateDisplay_Error_t UpdateDisplay_PopNext(void)``, 
+ * ``UpdateDisplay_PutNext()``, which places the command structure in the queue 
+ * and notifies UpdateDisplay. Another internal function, ``UpdateDisplay_PopNext()``, 
  * gets called by UpdateDisplay. It blocks on a semaphore until the queue is not empty, and then 
  * grabs the next command structure. It then parses the command and sends it out over UART. Check these 
  * functions in ``UpdateDisplay.c`` for more information.
@@ -17,7 +17,6 @@
 #include <math.h>
 
 /**
- * @def DISP_Q_SIZE
  * @brief Size of the display queue
  */
 #define DISP_Q_SIZE 10
@@ -28,7 +27,6 @@
 #include "fifo.h"
 
 /**
- * @def RESTART_THRESHOLD
  * @brief Number of times to reset before displaying the fault screen
 */
 #define RESTART_THRESHOLD 3
@@ -49,7 +47,6 @@ static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/re
 static void assertUpdateDisplayError(UpdateDisplayError_t err); 
 
 /**
- * @enum Component_t
  * @brief Enum for components on the display
  * @note Used to index into compStrings array
 */

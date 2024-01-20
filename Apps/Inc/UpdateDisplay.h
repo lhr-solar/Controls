@@ -1,7 +1,12 @@
 /**
  * @file UpdateDisplay.h
- * @brief The update display task maintains a queue of command structures, allowing 
- * other tasks to submit commands and sending out commands to the display as time allows.
+ * @brief Maintains a queue of command structures, allowing other tasks to
+ * submit commands and sending out commands to the display as time allows.
+ * 
+ * Once the UpdateDisplay task has been started, call any of the exposed UpdateDisplay 
+ * functions to send a command to the display. Call UpdateDisplay_ClearQueue() to clear the queue.
+ * The macros defined in Display.h can be used to set the values of some of the components with more
+ * explicit naming.
  * 
  */
 
@@ -16,7 +21,6 @@
 #include "Contactors.h"
 
 /**
- * @enum UpdateDisplayError_t
  * @brief Error types for UpdateDisplay application
 */
 typedef enum{
@@ -33,7 +37,6 @@ typedef enum{
 } UpdateDisplayError_t;
 
 /**
- * @enum TriState_t
  * @brief Three states for display elements
 */
 typedef enum{
@@ -47,38 +50,32 @@ typedef enum{
 
 // For cruise control and regen
 /**
- * @def DISP_DISABLED
  * @brief Disabled state for cruise control and regen
 */
 #define DISP_DISABLED STATE_0
 
 /**
- * @def DISP_ENABLED
  * @brief Enabled state for cruise control and regen (able to be used)
 */
 #define DISP_ENABLED STATE_1
 
 /**
- * @def DISP_ACTIVE
  * @brief Active state for cruise control and regen (currently being used)
 */
 #define DISP_ACTIVE STATE_2
 
 // For gear changes
 /**
- * @def DISP_NEUTRAL
  * @brief Neutral state for gear changes
 */
 #define DISP_NEUTRAL STATE_0
 
 /**
- * @def DISP_FORWARD
  * @brief Forward state for gear changes
 */
 #define DISP_FORWARD STATE_1
 
 /**
- * @def DISP_REVERSE
  * @brief Reverse state for gear changes
 */
 #define DISP_REVERSE STATE_2
