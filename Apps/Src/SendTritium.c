@@ -655,7 +655,7 @@ void Task_SendTritium(void *p_arg){
     };
     #endif
 
-    while(1){
+    LOOP {
         prevState = state;
 
         state.stateHandler();    // do what the current state does

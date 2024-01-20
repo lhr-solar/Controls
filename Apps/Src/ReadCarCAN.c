@@ -337,15 +337,17 @@ void Task_ReadCarCAN(void *p_arg){
     //  would need to be reimplemented. 
     memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
     memset(HVPlusMinusChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVPlusMinusChargeMsgBuffer));
-    int x = -3;
-    while(++x){
+    
+    LOOP {
               
         updatePrechargeContactors(); // Sets array and motor controller PBC if all conditions (PBC Status, Threshold, Precharge Complete) permit
 
         // BPS sent a message
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
         if(status != SUCCESS){
+            #ifndef MOCKING
             continue;
+            #endif
         }
 
         switch(dataBuf.ID){  // Switch case based on BPS msg received
@@ -408,7 +410,7 @@ static void handler_ReadCarCAN_chargeDisable(void) {
 
     if(ret) { // Contactor failed to turn off; display the evac screen and infinite loop
         Display_Evac(SOC, SBPV);
-        while(1){;}
+        LOOP{;}
     }
 }
 
@@ -439,7 +441,7 @@ static void handler_ReadCarCAN_contactorsDisable(void) {
 
     if(ret) { // Contactor failed to turn off; display the evac screen and infinite loop
          Display_Evac(SOC, SBPV);
-         while(1){;}
+         LOOP {;}
     }
 }
 

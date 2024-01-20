@@ -32,7 +32,7 @@ static const char *GEAR_STRING[] = {
 void Task_DebugDump(void* p_arg) {
     OS_ERR err;
 
-    while(1){
+    LOOP {
 
         // Get pedal information
         int8_t accelPedal = Pedals_Read(ACCELERATOR);

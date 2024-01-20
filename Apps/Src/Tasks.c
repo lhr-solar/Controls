@@ -60,7 +60,7 @@ void _assertOSError(OS_ERR err)
     {
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
         Display_Error(err); // Display the location and error code
-        while(1){;} //nonrecoverable
+        LOOP {;} //nonrecoverable
     }
 }
 

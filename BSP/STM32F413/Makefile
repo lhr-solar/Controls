@@ -130,6 +130,9 @@ ifeq ($(CAR_LOOPBACK), 1)
 CFLAGS += -DCAR_LOOPBACK
 endif
 
+# Not mocking -> LOOP = while(1)
+CFLAGS += -D'LOOP=while(1)'
+
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 

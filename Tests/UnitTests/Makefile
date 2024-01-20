@@ -86,6 +86,9 @@ endif
 MOCKING=1
 CFLAGS += -DMOCKING
 
+# mocking -> LOOP = ''
+CFLAGS += -D'LOOP='
+
 FILETOTEST = $(shell echo '$(TEST)' | tr '[:lower:]' '[:upper:]') #Uses shell to make TEST file uppercase to define a macro
 CFLAGS += -DTEST_$(FILETOTEST) #Defines a macro TEST_<FILENAME> to determine if we should use a mock or regular header file
 

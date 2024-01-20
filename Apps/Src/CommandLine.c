@@ -102,7 +102,7 @@ void Task_CommandLine(void* p_arg) {
 	// output welcome/help screen
 	printf(help);
 	
-	while(1){
+	LOOP {
 		printf("> ");
 		BSP_UART_Read(UART_2, input);
 		printf("\n\r");

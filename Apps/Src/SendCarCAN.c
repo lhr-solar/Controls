@@ -121,7 +121,7 @@ void Task_SendCarCAN(void *p_arg){
     );
     assertOSError(err);
 
-    while (1) {
+    LOOP {
           
         // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
         OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
@@ -171,7 +171,7 @@ static void putIOState(void){
 */
 static void Task_PutIOState(void *p_arg) {
     OS_ERR err;
-    while (1) {
+    LOOP {
         putIOState();
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);

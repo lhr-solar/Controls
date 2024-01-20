@@ -42,7 +42,7 @@ void Task_ReadTritium(void *p_arg){
 
 	static bool watchdogCreated = false;
 
-	while (1){
+	LOOP {
 		ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
 
 		if (status == SUCCESS){
