@@ -1,14 +1,21 @@
 /**
  * @file SendCarCAN.c
- * @details
+ * 
+ * The Send Car CAN task is a simple queue consumer task. Multiple 
+ * tasks need to write to the car CAN bus; in order to do this safely, 
+ * they append their messages to a CAN queue. The Send Car CAN task simply pends 
+ * on this queue and forwards messages to the Car CAN bus when any arrive.
+ * 
  * The tasks that produce messages for the SendCarCAN queue include:
  * - [ReadTritium](./ReadTritium.html) (all messages on MotorCAN bus are echoed across CarCAN bus)
- * - [SendTritium](./ReadTritium.html) (the current FSM state is echoed across CarCAN bus for logging)
+ * - [SendTritium](./SendTritium.html) (the current FSM state is echoed across CarCAN bus for logging)
+ * - PutIOState (the current IO state is echoed across CarCAN bus for logging and for the ignition sequence)
  * 
  * # Put IO State Task
  * The Put IO State task puts the current IO state on the CAN bus. It is used to send the IO state 
  * to Data Acquisition (for logging purposes) and the BPS (for ignition sequence purposes). Currently, it is 
- * written within `SendCarCAN.c`. It is a separate task from SendCarCAN (subject to change).
+ * written within SendCarCAN.c. It is a separate task from SendCarCAN (subject to change).
+ * 
  */
 
 #include "common.h"
@@ -22,7 +29,6 @@
 #include "SendTritium.h"
 
 /**
- * @def IO_STATE_DLY_MS
  * @brief Period of the IO state message in milliseconds
  */
 #define IO_STATE_DLY_MS 250u 

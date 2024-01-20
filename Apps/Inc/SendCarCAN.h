@@ -1,9 +1,11 @@
 /**
  * @file SendCarCAN.h
- * @brief The Send Car CAN task is a simple queue consumer task. Multiple 
- * tasks that need to write the the car CAN bus; in order to do this safely, 
- * they append their messages to a CAN queue. The Send Car CAN task simply pends 
- * on this queue and forwards messages to the Car CAN bus when any arrive.
+ * @brief Sends any CarCAN messages put in the queue via SendCarCAN_Put, and handles
+ * transmitting the IO State of the car for telemetry & ignition sequence.
+ * 
+ * Call SendCarCAN_Init() to initialize the queue and semaphore. Call SendCarCAN_Put() to 
+ * put a message in the queue. Starting the SendCarCAN task will send any messages
+ * put in the queue, as well as spawn PutIOState task to forward the IO state.
  * 
 */
 #ifndef __SENDCARCAN_H
