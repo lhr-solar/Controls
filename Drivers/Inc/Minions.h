@@ -25,7 +25,6 @@
         PIN(BRAKELIGHT),  \
 
 /**
- * @enum pin_t
  * @brief Enumerates all software-controllable switches/lights
  * @details The enum is used to index into the lookup table PINS_LOOKARR in Minions.c
  * If the enum is changed, the lookup table should be changed accordingly.

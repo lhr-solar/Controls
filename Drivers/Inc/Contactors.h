@@ -16,19 +16,16 @@
 #include "stm32f4xx_gpio.h"
 
 /**
- * @def    CONTACTORS_PORT
  * @brief  The GPIO port used for the contactors
  */
 #define CONTACTORS_PORT                                 PORTC
 
 /**
- * @def    ARRAY_PRECHARGE_BYPASS_PIN
  * @brief  The GPIO pin used for the array precharge bypass contactor
  */
 #define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_10
 
 /**
- * @def    MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN
  * @brief  The GPIO pin used for the motor controller precharge bypass contactor
  */
 #define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_12     
@@ -38,7 +35,6 @@
         contactor(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR),   \
 
 /**
- * @enum contactor_t
  * @brief The contactors that can be set
 */
 typedef enum {

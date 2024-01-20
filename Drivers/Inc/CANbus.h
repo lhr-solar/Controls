@@ -14,7 +14,6 @@
 #define MOTORCAN CAN_3
 
 /**
- * @enum CANId_t
  * @brief This enum is used to signify the ID of the message you want to send. 
  * It is used internally to index our lookup table (CANLUT.C) and get message-specific fields.
  * For user purposes, it selects the message to send.
@@ -75,13 +74,11 @@ typedef struct {
 
 //Compatibility macros for deprecated enum
 /**
- * @def CAN_BLOCKING
  * @brief Compatibility macro for deprecated enum
  */
 #define CAN_BLOCKING true
 
 /**
- * @def CAN_NON_BLOCKING
  * @brief Compatibility macro for deprecated enum
  */
 #define CAN_NON_BLOCKING false

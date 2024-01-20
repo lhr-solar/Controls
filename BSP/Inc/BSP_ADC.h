@@ -13,25 +13,21 @@
 #include "config.h"
 
 /**
- * @def MAX_CHANNELS
  * @brief This macro represents the maximum number of ADC channels that can be used.
 */
 #define MAX_CHANNELS 10
 
 /**
- * @def ADC_PRECISION_BITS
  * @brief This macro represents the number of bits of precision of the ADC.
 */
 #define ADC_PRECISION_BITS 12
 
 /**
- * @def ADC_RANGE_MILLIVOLTS
  * @brief This macro represents the range of the ADC in millivolts.
 */
 #define ADC_RANGE_MILLIVOLTS 3300
 
 /**
- * @enum ADC_t
  * @brief This enum represents the ADC channels that are available on the board.
 */
 typedef enum {

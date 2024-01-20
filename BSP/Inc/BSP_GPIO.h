@@ -16,13 +16,11 @@
 #include <stdbool.h>
 
 /**
- * @enum port_t
  * @brief GPIO ports
  */
 typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t; 
 
 /**
- * @enum direction_t
  * @brief GPIO direction
  */
 typedef enum {INPUT = 0, OUTPUT} direction_t;

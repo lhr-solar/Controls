@@ -12,7 +12,6 @@
 #include <bsp.h>
 
 /**
- * @enum    CAN_t
  * @brief   The CAN bus to use.
  * @note    CAN_3 is the CAN bus that communicates with the motor controller.
  *         CAN_1 is the CAN bus that communicates with the car.

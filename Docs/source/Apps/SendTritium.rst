@@ -1,6 +1,6 @@
-***********
-SendTritium
-***********
+************
+Send Tritium
+************
 .. doxygenfile:: SendTritium.h
    :sections: briefdescription
 

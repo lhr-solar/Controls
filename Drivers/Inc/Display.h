@@ -14,13 +14,11 @@
 #include "Tasks.h"	// for os and fault error locs
 
 /**
- * @def MAX_ARGS
  * @brief maximum number of arguments in a command packet
  */
 #define MAX_ARGS 2
 
 /**
- * @enum DisplayError_t
  * @brief Error codes for display driver
  * @note Currently only ERR_NONE and ERR_PARSE are used, since there is a bug
  * where the nextion does not return errors properly to us.
@@ -52,7 +50,6 @@ typedef enum{
 
 
 /**
- * @def Page_t
  * @brief All three pages on the HMI 
  */
 typedef enum{
@@ -62,7 +59,6 @@ typedef enum{
 } Page_t;
 
 /**
- * @def Arg_e
  * @brief Argument types
  */
 typedef enum{

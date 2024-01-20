@@ -8,7 +8,7 @@
  * and notifies UpdateDisplay. Another internal function, ``UpdateDisplay_PopNext()``, 
  * gets called by UpdateDisplay. It blocks on a semaphore until the queue is not empty, and then 
  * grabs the next command structure. It then parses the command and sends it out over UART. Check these 
- * functions in ``UpdateDisplay.c`` for more information.
+ * functions in UpdateDisplay.c for more information.
  * 
  */
 

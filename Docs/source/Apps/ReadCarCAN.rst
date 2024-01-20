@@ -3,22 +3,22 @@ Read Car CAN
 ************
 
 .. doxygenfile:: ReadCarCAN.h
-   :sections: briefdescription 
+    :sections: briefdescription 
 
 =============
 Usage Details
 =============   
 .. doxygenfile:: ReadCarCAN.h
-   :sections: detaileddescription
+    :sections: detaileddescription
 
 ==================
 Functional Details
 ==================
 .. doxygenfile:: ReadCarCAN.c
-   :sections: detaileddescription
+    :sections: detaileddescription
 
 ===
 API
 ===
 .. doxygenfile:: ReadCarCAN.h
-   :sections: define enum func typedef
+    :sections: define enum func typedef

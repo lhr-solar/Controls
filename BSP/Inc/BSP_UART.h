@@ -11,7 +11,6 @@
 #include <bsp.h>
 
 /**
- * @enum   UART_t
  * @brief   Enumeration of the UART devices
 */
 typedef enum {UART_2, UART_3, NUM_UART} UART_t;

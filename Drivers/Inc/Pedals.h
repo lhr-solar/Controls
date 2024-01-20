@@ -13,7 +13,6 @@
 #include "BSP_ADC.h"
 
 /**
- * @enum pedal_t
  * @brief Used to index the LowerBound and UpperBound arrays
  */
 typedef enum {
