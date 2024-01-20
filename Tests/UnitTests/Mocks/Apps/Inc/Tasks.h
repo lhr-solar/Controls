@@ -1,8 +1,10 @@
-// #ifdef TEST_READCARCAN
-// #include_next "ReadCarCAN.h" // Include the next instance of the file. 
-// // If the real version is in the include search paths after the mock one, it will include it here
-// #else // Mocked Contactors.h
+/////////////////////////////////////////////
+//////              MOCK               //////
+/////////////////////////////////////////////
 
+#ifdef TEST_TASKS
+#include_next "Tasks.h"
+#else
 #ifndef __TASKS_H
 #define __TASKS_H
 #include "fff.h"
@@ -50,27 +52,6 @@
 typedef uint16_t error_code_t;
 
 /**
- * Task Prototypes
- */
-//void Task_Init(void* p_arg);
-
-//void Task_SendTritium(void* p_arg);
-
-void Task_ReadCarCAN(void* p_arg);
-
-//void Task_UpdateDisplay(void* p_arg);
-
-//void Task_ReadTritium(void* p_arg);
-
-//void Task_SendCarCAN(void* p_arg);
-
-//void Task_DebugDump(void *p_arg);
-
-//void Task_CommandLine(void* p_arg);
-
-
-
-/**
  * TCBs
  */
 extern OS_TCB Init_TCB;
@@ -99,12 +80,6 @@ extern CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
  * Queues
  */
 extern OS_Q CANBus_MsgQ;
-
-/**
- * @brief Initialize the task switch hook
- * Registers the hook with the RTOS
- */
-void TaskSwHook_Init(void);
 
 /**
  * Task trace
@@ -143,32 +118,31 @@ typedef enum {
     OPT_NONRECOV
 } error_recov_opt_t;
 
-
-// DECLARE_FAKE_VOID_FUNC(MOCK_TEST);
-
+#ifndef TEST_MAIN
 DECLARE_FAKE_VOID_FUNC(Task_Init, void *);
+#else
+void Task_Init(void* p_arg);
+#endif
 
-// DECLARE_FAKE_VOID_FUNC(Task_SendTritium, void*);
+#ifndef TEST_DEBUGDUMP
+DECLARE_FAKE_VOID_FUNC(Task_DebugDump, void*);
+#else
+void Task_DebugDump(void *p_arg);
+#endif
 
-// DECLARE_FAKE_VOID_FUNC(Task_ReadCarCAN, void*);
+#ifndef TEST_COMMANDLINE
+DECLARE_FAKE_VOID_FUNC(Task_CommandLine, void*);
+#else
+void Task_CommandLine(void* p_arg);
+#endif
 
-// DECLARE_FAKE_VOID_FUNC(Task_UpdateDisplay, void*);
+DECLARE_FAKE_VOID_FUNC(TaskSwHook_Init);
 
-// DECLARE_FAKE_VOID_FUNC(Task_ReadTritium, void*);
-
-// DECLARE_FAKE_VOID_FUNC(Task_SendCarCAN, void*);
-
-// DECLARE_FAKE_VOID_FUNC(Task_DebugDump, void*);
-
-// DECLARE_FAKE_VOID_FUNC(Task_CommandLine, void*);
-
-// DECLARE_FAKE_VOID_FUNC(TaskSwHook_Init);
-
-// DECLARE_FAKE_VOID_FUNC(EmergencyContactorOpen);
+DECLARE_FAKE_VOID_FUNC(EmergencyContactorOpen);
 
 DECLARE_FAKE_VOID_FUNC(throwTaskError, error_code_t, callback_t, error_scheduler_lock_opt_t, error_recov_opt_t);
 
+DECLARE_FAKE_VOID_FUNC(assertOSError, OS_ERR);
 
-//DECLARE_FAKE_VOID_FUNC(_assertOSError, OS_ERR);
 #endif
-// #endif
+#endif

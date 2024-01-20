@@ -1,7 +1,10 @@
-// #ifdef TEST_READCARCAN
-// #include_next "ReadCarCAN.h" // Include the next instance of the file. 
-// // If the real version is in the include search paths after the mock one, it will include it here
-// #else // Mocked Contactors.h
+/////////////////////////////////////////////
+//////              MOCK               //////
+/////////////////////////////////////////////
+
+#ifdef TEST_CANBUS
+#include_next "CANbus.h"
+#else
 
 #ifndef CAN_H__
 #define CAN_H__
@@ -70,12 +73,6 @@ typedef struct {
 	uint8_t data[8]; 
 } CANDATA_t;
 
-/**
- * Standard identifier for whether or not a CAN transaction is blocking or not
- * (DEPRECATED)
- */
-// typedef enum {CAN_BLOCKING=0, CAN_NON_BLOCKING} CAN_blocking_t;
-
 //Compatibility macros for deprecated enum
 #define CAN_BLOCKING true
 #define CAN_NON_BLOCKING false
@@ -87,4 +84,4 @@ DECLARE_FAKE_VALUE_FUNC(ErrorStatus, CANbus_Send, CANDATA_t, bool, CAN_t);
 DECLARE_FAKE_VALUE_FUNC(ErrorStatus, CANbus_Read, CANDATA_t*, bool, CAN_t);
 
 #endif
-// #endif
+#endif

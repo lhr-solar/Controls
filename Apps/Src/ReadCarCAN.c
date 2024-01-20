@@ -131,7 +131,7 @@ static void disableArrayPrechargeBypassContactor(void){
  * @param None
 */
 static void updateArrayPrechargeBypassContactor(void){ 
-   OS_ERR err = OS_ERR_NONE;
+    OS_ERR err = OS_ERR_NONE;
     if((arrIgnStatus || mcIgnStatus)                                             // Ignition is ON
         && HVArrayMsgSaturation >= ARRAY_SATURATION_THRESHOLD                    // Saturation Threshold has be met
         && (Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == OFF)             

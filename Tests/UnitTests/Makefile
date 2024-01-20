@@ -11,17 +11,17 @@ YELLOW=\033[0;33m
 NC=\033[0m # No Color
 
 # Build path
-BUILD_DIR = Objects#../../Objects
+BUILD_DIR = Objects
 
 ######################################
 # source
 
-# C sources																			changed to
-# Need to include test, unity, source file for the test, mock c functions minus source file for test
+# C sources																			
+# Need to include test, unity, real source file for the test, mock c functions minus source file for test
 C_SOURCES = \
 Tests/Test_$(TEST).c \
 Unity/unity.c \
-$(wildcard ../../*/Src/$(TEST).c)	\
+$(filter-out $(wildcard ../../Tests/*/Src/$(TEST).c), $(wildcard ../../*/Src/$(TEST).c))	\
 $(wildcard Mocks/RTOS/os.c) \
 $(filter-out $(wildcard Mocks/*/Src/$(TEST).c), $(wildcard Mocks/*/Src/*.c))
 
@@ -29,19 +29,14 @@ $(filter-out $(wildcard Mocks/*/Src/$(TEST).c), $(wildcard Mocks/*/Src/*.c))
 
 $(foreach src,$(C_SOURCES),$(info --- $(src)))
 
-#$(wildcard Stubs/*.c)
-#echo "$(C_SOURCE) is c source"	
-
 #######################################
 # binaries
 #######################################
-PREFIX = #arm-none-eabi- 														not this time! ##
-# The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
-# or it can be added to the PATH environment variable.
-CC = $(PREFIX)gcc
-AS = $(PREFIX)gcc -x assembler-with-cpp
-CP = $(PREFIX)objcopy
-SZ = $(PREFIX)size
+
+CC = gcc
+AS = gcc -x assembler-with-cpp
+CP = objcopy
+SZ = size
 
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
@@ -49,32 +44,9 @@ BIN = $(CP) -O binary -S
 SF = st-flash
  
 #######################################
-# CFLAGS
+# C_INCLUDES
 #######################################
-# cpu
-#CPU = -mcpu=cortex-m4						commented out##
 
-# float-abi
-#FLOAT-ABI = -mfloat-abi=soft					co##
-
-# mcu
-#MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)		co##
-
-# macros for gcc
-# AS defines
-#AS_DEFS = 										co##
-
-# C defines
-# C_DEFS =  \									co##
-# -DSTM32F413_423xx	\
-# -DUSE_STDPERIPH_DRIVER	\
-# -D__FPU_PRESENT
-
-
-# AS includes
-#AS_INCLUDES = 									#co TEST=Pedals -> include Pedals.c and Pedals.h
-
-#$(filter-out $(wildcard Mocks/*/$(TEST).h), $(wildcard Mocks/*/Inc/*.h))	*Doesn't work since we can only include directories as search paths, not actual files
 #-iquote: used to stop the compiler from searching the current directory first. Another effect: -Idirs before it are only searched for "" files
 # Whatever I put after iquote doesn't seem to be found, but putting it in twice works. This will break #include-next, though
 C_INCLUDES :=	\
@@ -130,7 +102,7 @@ vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 ##									#  @$(CC) $(OBJECTS) -o $@
 
-#added
+
 $(BUILD_DIR)/$(TEST): $(BUILD_DIR) $(C_SOURCES)
 	@echo "LD $(<:../../%=%)"
 	@$(CC) $(CFLAGS) $(C_INCLUDES) $(C_SOURCES) -o $(BUILD_DIR)/Test_$(TEST).out			
@@ -138,32 +110,6 @@ $(BUILD_DIR)/$(TEST): $(BUILD_DIR) $(C_SOURCES)
 	- ./$(BUILD_DIR)/Test_$(TEST).out
 
 
-# $(BUILD_DIR)/$(TOCOMPILE).o: $(TOCOMPILE).c Makefile | $(BUILD_DIR)
-# 	@echo "CC $(<:../../%=%)"
-# 	@$(CC) $(C_INCLUDES) -c $(CFLAGS) $< -o $@
-# 	- ./$(BUILD_DIR)/$(TOCOMPILE).o
-
-# $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
-# 	@echo "AS $(<:../../%=%)"
-# 	@$(AS) -c $(CFLAGS) $< -o $@
-
-# $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
-# 	@echo "LD $(<:../../%=%)"
-# 	@$(CC) $(OBJECTS) $(LDFLAGS) -o $@
-# 	@echo "SZ $(<:../../%=%)"
-# 	@$(SZ) $@
-
-# $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-# 	@echo "HEX $(<:../../%=%)"
-# 	@$(HEX) $< $@
-	
-# $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-# 	@echo "BIN $(<:../../%=%)"
-# 	@$(BIN) $< $@
-	
-#end add									^^ use to be @$(SZ) $@
-
-	
 $(BUILD_DIR):
 	mkdir $@		
 
@@ -176,12 +122,12 @@ clean:
 #######################################
 # flash
 #######################################
-flash:
-	$(SF) write $(BUILD_DIR)/$(TARGET).bin 0x8000000
-
+#flash:
+#	$(SF) write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+# 	unsure if this works or if we would ever use it
 #######################################
 # dependencies
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
-
+#don't think we use any .d files?
 # *** EOF ***

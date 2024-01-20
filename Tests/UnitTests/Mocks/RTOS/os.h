@@ -1,7 +1,7 @@
-// #ifdef TEST_READCARCAN
-// #include_next "ReadCarCAN.h" // Include the next instance of the file. 
-// // If the real version is in the include search paths after the mock one, it will include it here
-// #else // Mocked Contactors.h
+/////////////////////////////////////////////
+//////              MOCK               //////
+/////////////////////////////////////////////
+
 #ifndef   OS_H
 #define   OS_H
 #include "os_type.h"
