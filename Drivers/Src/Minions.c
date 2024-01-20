@@ -22,11 +22,15 @@ void MinionsInit(void) {
 
 bool MinionsRead(Pin pin) {
     if ((kPininfoLut[pin].direction == kInput)) {
-        return (bool)BspGpioReadPin(kPininfoLut[pin].port,
-                                    kPininfoLut[pin].pin_mask);
+        if (pin == kIgn1 || pin == kIgn2) {
+            return !((bool)BspGpioReadPin(kPininfoLut[pin].port,
+                                        kPininfoLut[pin].pin_mask));
+        }
+        else {
+            return (bool)BspGpioReadPin(kPininfoLut[pin].port,
+                                        kPininfoLut[pin].pin_mask);
+        }
     }
-    return (bool)BspGpioGetState(kPininfoLut[pin].port,
-                                 kPininfoLut[pin].pin_mask);
 }
 
 bool MinionsWrite(Pin pin, bool status) {

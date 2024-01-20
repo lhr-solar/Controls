@@ -295,8 +295,8 @@ void TurnMotorControllerPbcOff(void) {
  * @param None
  */
 void UpdatePrechargeContactors(void) {
-    arr_ign_status = (!MinionsRead(kIgn1));
-    mc_ign_status = (!MinionsRead(kIgn2));
+    arr_ign_status = (MinionsRead(kIgn1));
+    mc_ign_status = (MinionsRead(kIgn2));
 
     // Logic helper in cases both are off or (impossible) on
     bool both_status_off = !mc_ign_status && !arr_ign_status;
