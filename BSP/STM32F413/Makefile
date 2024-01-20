@@ -185,6 +185,36 @@ $(BUILD_DIR):
 	mkdir $@		
 
 #######################################
+# clang
+#######################################
+CLANGINPUTS = \
+$(wildcard ../../Apps/Inc/*)	\
+$(wildcard ../../Apps/Src/*)	\
+$(wildcard ../../Drivers/Inc/*)	\
+$(wildcard ../../Drivers/Src/*)	\
+$(wildcard ../../BSP/Inc/*)	\
+$(wildcard ../../BSP/STM32F413/Src/BSP_*.c)	\
+$(wildcard ../../BSP/STM32F413/Src/retarget.c)	\
+
+#######################################
+# tidy
+#######################################
+TIDYFLAGS = --config-file=../../.clang-tidy
+TIDYCFLAGS = $(C_DEFS)
+TIDYCFLAGS += -m32
+
+tidy:
+	clang-tidy-17 $(TIDYFLAGS) $(CLANGINPUTS) --fix -- $(C_INCLUDES) $(TIDYCFLAGS)
+
+#######################################
+# format
+#######################################
+FORMATFLAGS = --config-file=../../.clang-format
+
+format:
+	clang-format-17 -i $(CLANGINPUTS)
+
+#######################################
 # clean up
 #######################################
 clean:

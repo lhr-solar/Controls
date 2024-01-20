@@ -62,3 +62,9 @@ clean:
 	rm -f *.out
 	rm -fr Docs/doxygen
 	rm -fr Docs/build
+
+tidy:
+	$(MAKE) -C BSP -C STM32F413 tidy
+
+format:
+	$(MAKE) -C BSP -C STM32F413 format
