@@ -42,8 +42,6 @@ void test_UnitTestContactors_Set(void){
 
 }
 
-
-
 /*=======MAIN=====*/
 int main(void)
 {

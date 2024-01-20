@@ -25,8 +25,9 @@ else
 endif
 
 #Check if unit test file exists (just to inform user if it isn't found)
-ifneq (,$(wildcard Tests/UnitTests/Test_$(TEST).c))
-	UNITTEST ?= Tests/UnitTests/Test_$(TEST).c
+#UNITTEST is solely used for echoing purposes
+ifneq (,$(wildcard Tests/UnitTests/Tests/Test_$(TEST).c))
+	UNITTEST ?= Tests/UnitTests/Tests/Test_$(TEST).c
 else
 	UNITTEST ?= no test found
 endif
