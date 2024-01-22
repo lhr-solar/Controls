@@ -11,26 +11,28 @@
  */
 
 #include "Contactors.h"
-#include "stm32f4xx_gpio.h"
+
 #include "Tasks.h"
 
-static OS_MUTEX contactorsMutex;
+static OS_MUTEX contactors_mutex;
 
 /**
  * @brief   Helper function for setting contactors without mutex.
- *          Should only be called if mutex is held and struct contactor has been checked
+ *          Should only be called if mutex is held and struct contactor has been
+ * checked
  * @param   contactor the contactor
- *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
+ *              (kMotorControllerPrechargeBypassContactor/kArrayPrechargeBypassContactor)
  * @param   state the state to set (ON/OFF)
  * @return  None
- */ 
-static void setContactor(contactor_t contactor, bool state) {
+ */
+static void setContactor(Contactor contactor, bool state) {
     switch (contactor) {
-        case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, state);
+        case kArrayPrechargeBypassContactor:
+            BspGpioWritePin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, state);
             break;
-        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, state);
+        case kMotorControllerPrechargeBypassContactor:
+            BspGpioWritePin(CONTACTORS_PORT,
+                            MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, state);
             break;
         default:
             break;
@@ -40,39 +42,41 @@ static void setContactor(contactor_t contactor, bool state) {
 /**
  * @brief   Initializes contactors to be used
  *          in connection with the Motor and Array
- */ 
-void Contactors_Init(void) {
-    BSP_GPIO_Init(CONTACTORS_PORT,  
-                 (ARRAY_PRECHARGE_BYPASS_PIN) |
-                 (MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN), 
-                  1);
+ * @return  None
+ */
+void ContactorsInit() {
+    BspGpioInit(
+        CONTACTORS_PORT,
+        (ARRAY_PRECHARGE_BYPASS_PIN) | (MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN),
+        1);
 
     // start disabled
-    for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
+    for (int contactor = 0; contactor < kNumContactors; ++contactor) {
         setContactor(contactor, OFF);
     }
 
     // initialize mutex
-    OS_ERR err;
-    OSMutexCreate(&contactorsMutex, "Contactors lock", &err);
-    assertOSError(err);
+    OS_ERR err = 0;
+    OSMutexCreate(&contactors_mutex, "Contactors lock", &err);
+    ASSERT_OS_ERROR(err);
 }
 
 /**
- * @brief   Returns the current state of 
+ * @brief   Returns the current state of
  *          a specified contactor
  * @param   contactor MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR or ARRAY_PRECHARGE_BYPASS_CONTACTOR
  * @return  Contactor state (ON/OFF)
  */ 
-bool Contactors_Get(contactor_t contactor) {
+bool ContactorsGet(Contactor contactor) {
     State state = OFF;
     switch (contactor) {
-        
-        case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
-            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN);
+        case kArrayPrechargeBypassContactor:
+            state =
+                BspGpioGetState(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN);
             break;
-        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
-            state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN);
+        case kMotorControllerPrechargeBypassContactor:
+            state = BspGpioGetState(CONTACTORS_PORT,
+                                    MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN);
             break;
         default:
             break;
@@ -82,32 +86,35 @@ bool Contactors_Get(contactor_t contactor) {
 
 /**
  * @brief   Sets the state of a specified contactor
- * @param   contactor MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR or ARRAY_PRECHARGE_BYPASS_CONTACTOR
+ * @param   contactor the contactor
+ *              (kMotorControllerPrechargeBypassContactor/kArrayPrechargeBypassContactor)
  * @param   state the state to set (ON/OFF)
  * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set
  */
-ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
-    CPU_TS timestamp;
-    OS_ERR err;
+ErrorStatus ContactorsSet(Contactor contactor, bool state, bool blocking) {
+    CPU_TS timestamp = 0;
+    OS_ERR err = 0;
     ErrorStatus result = ERROR;
 
     // acquire lock if its available
-    OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &timestamp, &err);
-    
-    if(err == OS_ERR_PEND_WOULD_BLOCK){
+    OSMutexPend(&contactors_mutex, 0,
+                blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING,
+                &timestamp, &err);
+
+    if (err == OS_ERR_PEND_WOULD_BLOCK) {
         return ERROR;
     }
-    assertOSError(err);
+    ASSERT_OS_ERROR(err);
 
     // change contactor to match state and make sure it worked
     setContactor(contactor, state);
-    bool ret = (bool)Contactors_Get(contactor);
-    result = (ret == state) ? SUCCESS: ERROR;
+    bool ret = (bool)ContactorsGet(contactor);
+    result = (ret == state) ? SUCCESS : ERROR;
 
     // release lock
-    OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
-    assertOSError(err);
+    OSMutexPost(&contactors_mutex, OS_OPT_POST_NONE, &err);
+    ASSERT_OS_ERROR(err);
 
     return result;
 }

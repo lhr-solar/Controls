@@ -10,156 +10,147 @@
  * 
  */
 
-#ifndef __UPDATE_DISPLAY_H
-#define __UPDATE_DISPLAY_H
-
-#include "os.h"
-#include "common.h"
-#include "Tasks.h"
+#ifndef UPDATE_DISPLAY_H
+#define UPDATE_DISPLAY_H
 
 #include "Display.h"
-#include "Contactors.h"
+#include "common.h"
 
 /**
  * @brief Error types for UpdateDisplay application
 */
 typedef enum{
     /** No error */
-	UPDATEDISPLAY_ERR_NONE,
+	kUpdateDisplayErrNone,
     /** Error putting command in fifo */
-	UPDATEDISPLAY_ERR_FIFO_PUT,     
+	kUpdateDisplayErrFifoPut,     
     /** Error popping command from fifo */
-	UPDATEDISPLAY_ERR_FIFO_POP,     
+	kUpdateDisplayErrFifoPop,     
     /** Error parsing component/val in SetComponent */
-	UPDATEDISPLAY_ERR_PARSE_COMP,   
+	kUpdateDisplayErrParseComp,   
     /** Driver call returned an error */
-	UPDATEDISPLAY_ERR_DRIVER        
-} UpdateDisplayError_t;
+	kUpdateDisplayErrDriver        
+} UpdateDisplayError;
 
 /**
  * @brief Three states for display elements
 */
-typedef enum{
-    /** State 0 */
-	STATE_0	= 0,
-    /** State 1 */ 
-	STATE_1	= 1,
-    /** State 2 */ 
-	STATE_2	= 2
-} TriState_t;
+typedef enum { kState0 = 0, kState1 = 1, kState2 = 2 } TriState;
 
 // For cruise control and regen
 /**
  * @brief Disabled state for cruise control and regen
 */
-#define DISP_DISABLED STATE_0
+#define DISP_DISABLED kState0
 
 /**
  * @brief Enabled state for cruise control and regen (able to be used)
 */
-#define DISP_ENABLED STATE_1
+#define DISP_ENABLED kState1 
 
 /**
  * @brief Active state for cruise control and regen (currently being used)
 */
-#define DISP_ACTIVE STATE_2
+#define DISP_ACTIVE kState2
 
 // For gear changes
 /**
  * @brief Neutral state for gear changes
 */
-#define DISP_NEUTRAL STATE_0
+#define DISP_NEUTRAL kState0
 
 /**
  * @brief Forward state for gear changes
 */
-#define DISP_FORWARD STATE_1
+#define DISP_FORWARD kState1
 
 /**
  * @brief Reverse state for gear changes
 */
-#define DISP_REVERSE STATE_2
+#define DISP_REVERSE kState2
 
 /**
  * @brief Initializes UpdateDisplay application
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_Init();
+
+UpdateDisplayError UpdateDisplayInit();
 
 /**
  * @brief Selects visible page on the display
  * @param page which page to select
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page);
+UpdateDisplayError UpdateDisplaySetPage(Page page);
 
 /**
  * @brief Sets the state of charge value on the display
  * @param percent charge as a percent (0 digits of precision)
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetSOC(uint8_t percent);
+UpdateDisplayError UpdateDisplaySetSoc(uint8_t percent);
 
 /**
  * @brief Sets the supplemental battery pack voltage value on the display
  * @param mv supplemental battery pack voltage in millivolts
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv);
+UpdateDisplayError UpdateDisplaySetSbpv(uint32_t mv);
 
 /**
  * @brief Sets the velocity of the vehicle on the display
- * @param mphTenths velocity of the vehicle in tenths of mph (1 digit of precision)
+ * @param mphTenths velocity of the vehicle in tenths of mph (1 digit of
+ * precision)
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);
+UpdateDisplayError UpdateDisplaySetVelocity(uint32_t mph_tenths);
 
 /**
  * @brief Sets the accelerator slider value on the display
  * @param percent pressure on accelerator in percent
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent);
+UpdateDisplayError UpdateDisplaySetAccel(uint8_t percent);
 
 /**
  * @brief Sets the array indicator state on the display
  * @param state array contactor on (true) or off (false)
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetArray(bool state);
+UpdateDisplayError UpdateDisplaySetArray(bool state);
 
 /**
  * @brief Sets the motor contactor indicator state on the display
  * @param state motor contactor on (true) or off (false)
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetMotor(bool state);
+UpdateDisplayError UpdateDisplaySetMotor(bool state);
 
 /**
  * @brief Sets the gear selection state on the display
  * @param gear DISABLED=N, ENABLED=F, ACTIVE=R
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear);
+UpdateDisplayError UpdateDisplaySetGear(TriState gear);
 
 /**
  * @brief Sets the regenerative braking indicator state on the display
  * @param state DISABLED, ENABLED, or ACTIVE
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
+UpdateDisplayError UpdateDisplaySetRegenState(TriState state);
 
 /**
  * @brief Sets the cruise control indicator state on the display
  * @param state DISABLED, ENABLED, or ACTIVE
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
+UpdateDisplayError UpdateDisplaySetCruiseState(TriState state);
 
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0
-*/
-void UpdateDisplay_ClearQueue(void);
+ */
+void UpdateDisplayClearQueue(void);
 
 #endif
 

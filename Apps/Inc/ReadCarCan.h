@@ -1,5 +1,5 @@
 /**
- * @file ReadCarCAN.h
+ * @file ReadCarCan.h
  * @brief Reads the car’s CAN bus for values relevant to Controls, and handles ignition sequence logic.
  * 
  * Call ChargeEnable_Get() to get whether regen braking / charging is enabled or not. Starting the task will
@@ -8,13 +8,10 @@
  * 
  */
 
-#ifndef __READ_CAR_CAN_H
-#define __READ_CAR_CAN_H
+#ifndef READ_CAR_CAN_H
+#define READ_CAR_CAN_H
 
-#include "os.h"
 #include "common.h"
-#include "Tasks.h"
-#include "CANbus.h"
 
 /**
  * Length of the array and motor precharge-bypass contactor (PBC) saturation buffers
@@ -51,28 +48,22 @@
 #define PRECHARGE_ARRAY_DELAY 100u
 
 /**
- * Error codes for ReadCarCAN
+ * Error types
  */
 typedef enum {
-    /** No error */
-	READCARCAN_ERR_NONE,
-    /** Received a charge disable msg **/	    		
-	READCARCAN_ERR_CHARGE_DISABLE,
-	/** Didn't receive a BPS charge msg in time **/
-    READCARCAN_ERR_MISSED_MSG,
-    /** Ignition is turned to neither (off due to LV) or both are on at the same time (impossible)  **/
-	READCARCAN_ERR_DISABLE_CONTACTORS_MSG,
-	/** Received a BPS trip msg (0 or 1) **/
-    READCARCAN_ERR_BPS_TRIP
-} ReadCarCAN_error_code_t;
+    kReadCarCanErrNone,
+    kReadCarCanErrChargeDisable,  // Received a charge disable msg
+    kReadCarCanErrMissedMsg,      // Didn't receive a BPS charge msg in time
+    kReadCarCanErrDisableContactorsMsg,  // Ignition is turned to neither (off
+                                         // due to LV) or both at the same time
+                                         // (impossible) are on at
+    kReadCarCanErrBpsTrip                // Received a BPS trip msg (0 or 1)
+} ReadCarCanErrorCode;
 
 /**
  * @brief Returns whether regen braking / charging is enabled or not
- * @return true if regen braking / charging is enabled, false otherwise
+ * @return  Whether regen braking / charging is enabled or not
  */
-bool ChargeEnable_Get(void);
+bool ChargeEnableGet(void);
 
 #endif
-
-
-

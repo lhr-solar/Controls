@@ -8,31 +8,24 @@
 
 #ifndef MINIONS_H
 #define MINIONS_H
-#include "common.h"
-#include <stdbool.h>
+
 #include "BSP_GPIO.h"
+#include "common.h"
 
 // used to index into lookup table
 // if changed, PINS_LOOKARR should be changed in Minions.c
-#define FOREACH_PIN(PIN) \
-        PIN(IGN_1),   \
-        PIN(IGN_2),  \
-        PIN(REGEN_SW),   \
-        PIN(FOR_SW),  \
-        PIN(REV_SW),  \
-        PIN(CRUZ_EN),  \
-        PIN(CRUZ_ST),  \
-        PIN(BRAKELIGHT),  \
+#define FOREACH_PIN(PIN)                                             \
+    PIN(kIgn1), PIN(kIgn2), PIN(kRegenSw), PIN(kForSw), PIN(kRevSw), \
+        PIN(kCruzEn), PIN(kCruzSt), PIN(kBrakeLight),
 
 /**
  * @brief Enumerates all software-controllable switches/lights
  * @details The enum is used to index into the lookup table PINS_LOOKARR in Minions.c
  * If the enum is changed, the lookup table should be changed accordingly.
 */
-typedef enum MINIONPIN_ENUM {
-    FOREACH_PIN(GENERATE_ENUM)
-    NUM_PINS,
-} pin_t;
+typedef enum {
+    FOREACH_PIN(GENERATE_ENUM) kNumPins,
+} Pin;
 
 /**
  * @struct pinInfo_t
@@ -40,18 +33,18 @@ typedef enum MINIONPIN_ENUM {
 */
 typedef struct {
     /* GPIO Pin mask */
-    uint16_t pinMask;
+    uint16_t pin_mask;
     /* GPIO port */
-    port_t port;
+    Port port;
     /* Direction (input/output)*/
-    direction_t direction;
-} pinInfo_t;
+    Direction direction;
+} PinInfo;
 
 /**
  * @brief Initializes digital I/O
- * 
+ *
  */
-void Minions_Init(void);
+void MinionsInit(void);
 
 /**
  * @brief Reads the status of a pin
@@ -59,7 +52,7 @@ void Minions_Init(void);
  * @param pin the pin to read
  * @return high or low
  */
-bool Minions_Read(pin_t pin);
+bool MinionsRead(Pin pin);
 
 /**
  * @brief Updates the status of a pin
@@ -68,8 +61,8 @@ bool Minions_Read(pin_t pin);
  * @param status high or low
  * @return whether output was successfully written
  */
-bool Minions_Write(pin_t pin, bool status);
+bool MinionsWrite(Pin pin, bool status);
 
-#endif 
+#endif
 
 

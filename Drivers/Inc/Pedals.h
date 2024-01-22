@@ -7,25 +7,20 @@
  * 
  */
 
-#ifndef __PEDALS_H
-#define __PEDALS_H
+#ifndef PEDALS_H
+#define PEDALS_H
 
 #include "BSP_ADC.h"
 
 /**
  * @brief Used to index the LowerBound and UpperBound arrays
  */
-typedef enum {
-    ACCELERATOR,
-    BRAKE,
-    NUMBER_OF_PEDALS
-} pedal_t;
+typedef enum { kAccelerator, kBrake, kNumberOfPedals } Pedal;
 
 /**
- * @brief   Initializes the brake and accelerator by using the 
- *          BSP_ADC_Init function
+ * @brief   Initializes the pedals
  */
-void Pedals_Init(void);
+void PedalsInit(void);
 
 /**
  * @brief   Fetches the millivoltage value of the potentiomenter as provided 
@@ -35,7 +30,6 @@ void Pedals_Init(void);
  * @param   pedal ACCELERATOR or BRAKE
  * @return  percent amount the pedal has been pressed in percentage
  */
-int8_t Pedals_Read(pedal_t pedal);
-
+int8_t PedalsRead(Pedal pedal);
 
 #endif
