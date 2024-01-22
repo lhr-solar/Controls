@@ -1,49 +1,39 @@
 /* Copyright (c) 2021 UT Longhorn Racing Solar
  * @file ReadTritium.h
- * @brief 
- * 
+ * @brief
+ *
  * @defgroup ReadTritium
  * @addtogroup ReadTritium
  * @{
  */
 
-#ifndef __READ_TRITIUM_H
-#define __READ_TRITIUM_H
-
-#include "os.h"
-#include "common.h"
-#include "Tasks.h"
+#ifndef READ_TRITIUM_H
+#define READ_TRITIUM_H
 
 /**
  * Motor Error States
- * Read messages from motor in ReadTritium and trigger appropriate error messages as needed based on bits
- * 
+ * Read messages from motor in ReadTritium and trigger appropriate error
+ * messages as needed based on bits
+ *
  */
-typedef enum{
-    T_HARDWARE_OVER_CURRENT_ERR = (1<<0), 
-    T_SOFTWARE_OVER_CURRENT_ERR = (1<<1), 
-    T_DC_BUS_OVERVOLT_ERR = (1<<2), 
-    T_HALL_SENSOR_ERR = (1<<3), 
-    T_WATCHDOG_LAST_RESET_ERR = (1<<4), 
-    T_CONFIG_READ_ERR = (1<<5), 
-    T_UNDER_VOLTAGE_LOCKOUT_ERR = (1<<6), 
-    T_DESAT_FAULT_ERR = (1<<7), 
-    T_MOTOR_OVER_SPEED_ERR = (1<<8), 
-    T_INIT_FAIL = (1<<9), //motor controller fails to restart or initialize
-    T_MOTOR_WATCHDOG_TRIP = (1 << 15),
-    T_NONE = 0x00,
-} tritium_error_code_t;
+typedef enum {
+    kHardwareOverCurrentErr = (1 << 0),
+    kSoftwareOverCurrentErr = (1 << 1),
+    kDcBusOverVoltErr = (1 << 2),
+    kHallSensorErr = (1 << 3),
+    kWatchdogLastResetErr = (1 << 4),
+    kConfigReadErr = (1 << 5),
+    kUnderVoltageLockoutErr = (1 << 6),
+    kDesatFaultErr = (1 << 7),
+    kMotorOverSpeedErr = (1 << 8),
+    kInitFail = (1 << 9),  // motor controller fails to restart or initialize
+    kMotorWatchdogTrip = (1 << 15),
+    kNone = 0x00,
+} TritiumErrorCode;
 
-/**
- * Task Prototype
- */
-void Task_ReadTritium(void* p_arg);
-
-
-float Motor_RPM_Get();
-float Motor_Velocity_Get();
+float MotorRpmGet();
+float MotorVelocityGet();
 
 #endif
-
 
 /* @} */

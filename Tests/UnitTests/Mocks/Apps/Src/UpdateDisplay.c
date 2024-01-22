@@ -4,15 +4,15 @@
 
 #include "UpdateDisplay.h"
 
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_Init);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetPage, Page_t);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetSOC, uint8_t);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetSBPV, uint32_t);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetVelocity, uint32_t);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetAccel, uint8_t);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetArray, bool);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetMotor, bool);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetGear, TriState_t);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetRegenState, TriState_t);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError_t, UpdateDisplay_SetCruiseState, TriState_t);
-DEFINE_FAKE_VOID_FUNC(UpdateDisplay_ClearQueue);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplayInit);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetPage, Page);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetSOC, uint8_t);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetSBPV, uint32_t);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetVelocity, uint32_t);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetAccel, uint8_t);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetArray, bool);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetMotor, bool);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetGear, TriState);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetRegenState, TriState);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetCruiseState, TriState);
+DEFINE_FAKE_VOID_FUNC(UpdateDisplayClearQueue);

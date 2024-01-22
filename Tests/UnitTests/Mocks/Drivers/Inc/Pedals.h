@@ -8,7 +8,7 @@
 
 #include "fff.h"
 
-DECLARE_FAKE_VOID_FUNC(Pedals_Init);
-DECLARE_FAKE_VALUE_FUNC(int8_t, Pedals_Read, pedal_t);
+DECLARE_FAKE_VOID_FUNC(PedalsInit);
+DECLARE_FAKE_VALUE_FUNC(int8_t, PedalsRead, Pedal);
 
 #endif

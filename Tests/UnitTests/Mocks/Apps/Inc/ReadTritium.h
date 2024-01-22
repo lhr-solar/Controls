@@ -8,8 +8,8 @@
 
 #include "fff.h"
 
-DECLARE_FAKE_VOID_FUNC(Task_ReadTritium, void*);
-DECLARE_FAKE_VALUE_FUNC(float, Motor_RPM_Get);
-DECLARE_FAKE_VALUE_FUNC(float, Motor_Velocity_Get);
+DECLARE_FAKE_VOID_FUNC(TaskReadTritium, void*);
+DECLARE_FAKE_VALUE_FUNC(float, MotorRpmGet);
+DECLARE_FAKE_VALUE_FUNC(float, MotorVelocityGet);
 
 #endif

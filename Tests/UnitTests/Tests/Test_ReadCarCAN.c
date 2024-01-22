@@ -5,7 +5,7 @@
 //////////////////////////////////////////
 //////////////////////////////////////////
 // The header file we are unit testing:
-#include "ReadCarCAN.h"
+#include "ReadCarCan.h"
 //////////////////////////////////////////
 // fff header so we can DEFINE_FFF_GLOBALS
 // (can only happen once per test)
@@ -18,11 +18,11 @@ DEFINE_FFF_GLOBALS;
 
 
 /*** CAN Messages ***/
-static CANDATA_t bps_trip_msg = {.ID=BPS_TRIP, .idx=0, .data={1}};
+static CanData bps_trip_msg = {.id=BPS_TRIP, .idx=0, .data={1}};
 //static CANDATA_t supp_voltage_msg = {.ID=SUPPLEMENTAL_VOLTAGE, .idx=0, .data={100}};
 // static CANDATA_t state_of_charge_msg = {.ID=STATE_OF_CHARGE, .idx=0, .data={0}};
 // static CANDATA_t HV_Array_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b001}};
-static CANDATA_t HV_Disable_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b000}};
+static CanData HV_Disable_Msg = {.id=BPS_CONTACTOR, .idx=0, .data={0b000}};
 // static CANDATA_t HV_MC_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b110}};
 // static CANDATA_t HV_Enabled_Msg = {.ID=BPS_CONTACTOR, .idx=0, .data={0b111}};
 
@@ -32,39 +32,39 @@ void setUp(void) {
 
 void tearDown(void) {}
 
-ErrorStatus CANbus_Custom_fake_bps(CANDATA_t* data, bool blocking, CAN_t bus){
+ErrorStatus CANbus_Custom_fake_bps(CanData* data, bool blocking, Can bus){
   *data = bps_trip_msg;
   return SUCCESS;
 }
 
-ErrorStatus CANbus_Custom_fake_bpscontactor(CANDATA_t* data, bool blocking, CAN_t bus){
+ErrorStatus CANbus_Custom_fake_bpscontactor(CanData* data, bool blocking, Can bus){
   *data = HV_Disable_Msg;
   return SUCCESS;
 }
 
 void test_UnitTest_bsptrip(void){
     Task_Init(NULL);
-    CANbus_Read_fake.custom_fake = CANbus_Custom_fake_bps;
-    Task_ReadCarCAN(NULL);
-    printf("\n\r%d\n\r", CANbus_Read_fake.call_count);
+    CanBusRead_fake.custom_fake = CANbus_Custom_fake_bps;
+    TaskReadCarCan(NULL);
+    printf("\n\r%d\n\r", CanBusRead_fake.call_count);
  //   
-    TEST_ASSERT_EQUAL(3, throwTaskError_fake.arg0_history[0]);
-    TEST_ASSERT_EQUAL(4, throwTaskError_fake.arg0_history[1]);
-    printf("%d", throwTaskError_fake.call_count);
-    TEST_ASSERT_EQUAL(false, UpdateDisplay_SetArray_fake.arg0_history[0]);
-    TEST_ASSERT_EQUAL(2, Display_Evac_fake.call_count);
+    TEST_ASSERT_EQUAL(3, ThrowTaskError_fake.arg0_history[0]);
+    TEST_ASSERT_EQUAL(4, ThrowTaskError_fake.arg0_history[1]);
+    printf("%d", ThrowTaskError_fake.call_count);
+    TEST_ASSERT_EQUAL(false, UpdateDisplaySetArray_fake.arg0_history[0]);
+    TEST_ASSERT_EQUAL(2, DisplayEvac_fake.call_count);
 }
 
 void test_UnitTest_bspcontactor(void){
     Task_Init(NULL);
-    CANbus_Read_fake.custom_fake = CANbus_Custom_fake_bpscontactor;
-    Task_ReadCarCAN(NULL);
-    printf("\n\r%d\n\r", CANbus_Read_fake.call_count);
+    CanBusRead_fake.custom_fake = CANbus_Custom_fake_bpscontactor;
+    TaskReadCarCan(NULL);
+    printf("\n\r%d\n\r", CanBusRead_fake.call_count);
  //   
-    TEST_ASSERT_EQUAL(3, throwTaskError_fake.arg0_history[0]);
-    //TEST_ASSERT_EQUAL(4, throwTaskError_fake.arg0_history[1]);
-    printf("%d", throwTaskError_fake.call_count);
-    TEST_ASSERT_EQUAL(false, UpdateDisplay_SetArray_fake.arg0_history[0]);
+    TEST_ASSERT_EQUAL(3, ThrowTaskError_fake.arg0_history[0]);
+    //TEST_ASSERT_EQUAL(4, ThrowTaskError_fake.arg0_history[1]);
+    printf("%d", ThrowTaskError_fake.call_count);
+    TEST_ASSERT_EQUAL(false, UpdateDisplaySetArray_fake.arg0_history[0]);
 }
 
 

@@ -26,9 +26,9 @@ DECLARE_FAKE_VOID_FUNC(Task_CommandLine, void*);
 void Task_CommandLine(void* p_arg);
 #endif
 
-DECLARE_FAKE_VOID_FUNC(TaskSwHook_Init);
+DECLARE_FAKE_VOID_FUNC(TaskSwHookInit);
 DECLARE_FAKE_VOID_FUNC(EmergencyContactorOpen);
-DECLARE_FAKE_VOID_FUNC(throwTaskError, error_code_t, callback_t, error_scheduler_lock_opt_t, error_recov_opt_t);
-DECLARE_FAKE_VOID_FUNC(_assertOSError, OS_ERR);
+DECLARE_FAKE_VOID_FUNC(ThrowTaskError, ErrorCode, Callback, ErrorSchedulerLockOpt, ErrorRecovOpt);
+DECLARE_FAKE_VOID_FUNC(AssertOsError, OS_ERR);
 
 #endif
