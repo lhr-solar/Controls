@@ -130,5 +130,5 @@ int16_t BspAdcGetMillivoltage(Adc hardware_device) {
     int16_t data = (int16_t)adc_results[hardware_device];
 
     // Convert to millivoltage
-    return (int16_t)((ADC_RANGE_MILLIVOLTS * data) >> BSP_ADC_PRECISION_BITS);
+    return (int16_t)((ADC_RANGE_MILLIVOLTS * data) >> ADC_PRECISION_BITS);
 }

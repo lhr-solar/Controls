@@ -73,7 +73,7 @@
 /**
  * @brief Threshold for the motor message counter
  */
-#define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD) / (FSM_PERIOD)
+#define MOTOR_MSG_COUNTER_THRESHOLD ((MOTOR_MSG_PERIOD) / (FSM_PERIOD))
 
 /**
  * @brief Maximum velocity of the car in rpm (unobtainable value)
@@ -840,7 +840,7 @@ void TaskSendTritium(void* p_arg) {
         // Delay of FSM_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE) {
-            assertOSError(err);
+            ASSERT_OS_ERROR(err);
         }
     }
 }

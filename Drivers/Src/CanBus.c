@@ -33,6 +33,8 @@
 
 #include "CanBus.h"
 
+#include "CanConfig.h"
+#include "Tasks.h"
 #include "config.h"
 #include "os.h"
 

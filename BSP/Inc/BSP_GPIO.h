@@ -37,7 +37,7 @@ void BspGpioInit(Port port, uint16_t mask, Direction direction);
  * @param   port port to read
  * @return  data in the port
  */
-uint16_t BSP_GPIO_Read(port_t port);
+uint16_t BspGpioRead(Port port);
 
 /**
  * @brief   Writes data to a specified port

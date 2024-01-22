@@ -11,8 +11,8 @@
 
 #include "BSP_CAN.h"
 
-#define CARCAN CAN_1  // convenience aliases for the CANbuses
-#define MOTORCAN CAN_3
+#define CARCAN kCan1  // convenience aliases for the CANbuses
+#define MOTORCAN kCan3
 
 /**
  * @brief This enum is used to signify the ID of the message you want to send.
