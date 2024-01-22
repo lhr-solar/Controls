@@ -206,6 +206,9 @@ TIDYCFLAGS += -m32
 tidy:
 	clang-tidy-17 $(TIDYFLAGS) $(CLANGINPUTS) --fix -- $(C_INCLUDES) $(TIDYCFLAGS)
 
+tidy-check:
+	clang-tidy-17 $(TIDYFLAGS) $(CLANGINPUTS) --warnings-as-errors=* -- $(C_INCLUDES) $(TIDYCFLAGS)
+
 #######################################
 # format
 #######################################
@@ -213,6 +216,9 @@ FORMATFLAGS = --config-file=../../.clang-format
 
 format:
 	clang-format-17 -i $(CLANGINPUTS)
+
+format-check:
+	clang-format-17 -i --Werror --dry-run $(CLANGINPUTS)
 
 #######################################
 # clean up
