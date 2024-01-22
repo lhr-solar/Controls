@@ -1,7 +1,7 @@
 /**
  * @file    BSP_GPIO.c
  * @details
-*/
+ */
 
 #include "BSP_GPIO.h"
 
@@ -20,7 +20,7 @@ static GPIO_TypeDef *gpioGetPort(Port port) {
  * @brief   Initializes a GPIO port
  * @param   port port to initialize
  * @param	mask pins
- * @param	direction input or output 
+ * @param	direction input or output
  * @return  None
  */
 
@@ -46,7 +46,7 @@ void BspGpioInit(Port port, uint16_t mask, Direction direction) {
  * @brief   Reads value of the specified port
  * @param   port port to read
  * @return  data in the port
- */ 
+ */
 
 uint16_t BspGpioRead(Port port) {
     GPIO_TypeDef *gpio_port = gpioGetPort(port);

@@ -1,7 +1,7 @@
 /**
  * @file fifo.h
- * @brief 
- * 
+ * @brief
+ *
  */
 
 /*
@@ -234,5 +234,3 @@ POPBACK(FIFO_TYPE_NAME *fifo, FIFO_TYPE *elem) {
 #undef POPBACK
 #undef CONCAT
 #undef _CONCAT
-
-

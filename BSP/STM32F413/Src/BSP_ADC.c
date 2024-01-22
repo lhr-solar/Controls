@@ -1,8 +1,9 @@
 /**
  * @file BSP_ADC.c
  * @details
- * Internally, we use DMA to continuously copy the ADC values into an array that is served out.
-*/
+ * Internally, we use DMA to continuously copy the ADC values into an array that
+ * is served out.
+ */
 
 #include "BSP_ADC.h"
 
@@ -110,9 +111,8 @@ void BspAdcInit(void) {
  * @brief   Provides the ADC value of the channel at the specified index
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  Raw ADC value without conversion
- */ 
+ */
 int16_t BspAdcGetValue(Adc hardware_device) {
-
     // Get ADC raw data
     uint16_t data = adc_results[hardware_device];
 
@@ -120,12 +120,12 @@ int16_t BspAdcGetValue(Adc hardware_device) {
 }
 
 /**
- * @brief   Provides the ADC value in millivolts of the channel at the specified index
+ * @brief   Provides the ADC value in millivolts of the channel at the specified
+ * index
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  ADC value in millivolts
- */ 
+ */
 int16_t BspAdcGetMillivoltage(Adc hardware_device) {
-
     // Get ADC raw data
     int16_t data = (int16_t)adc_results[hardware_device];
 

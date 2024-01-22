@@ -1,9 +1,10 @@
 /**
  * @file BSP_GPIO.h
- * @brief This module provides a low-level interface to the Leaderboard's GPIO ports, intended for 
- * switches and some lights. The code is fairly straightforward, and 
- * only slightly simplifies the [Minion](../Drivers/Minions.html).
- * 
+ * @brief This module provides a low-level interface to the Leaderboard's GPIO
+ * ports, intended for switches and some lights. The code is fairly
+ * straightforward, and only slightly simplifies the
+ * [Minion](../Drivers/Minions.html).
+ *
  */
 
 #ifndef BSP_GPIO_H
@@ -26,7 +27,7 @@ typedef enum { kInput = 0, kOutput } Direction;
  * @brief   Initializes a GPIO port
  * @param   port port to initialize
  * @param	mask pins
- * @param	direction input or output 
+ * @param	direction input or output
  * @return  None
  */
 void BspGpioInit(Port port, uint16_t mask, Direction direction);
@@ -35,7 +36,7 @@ void BspGpioInit(Port port, uint16_t mask, Direction direction);
  * @brief   Reads value of the specified port
  * @param   port port to read
  * @return  data in the port
- */ 
+ */
 uint16_t BSP_GPIO_Read(port_t port);
 
 /**

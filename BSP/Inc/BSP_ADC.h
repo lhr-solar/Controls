@@ -1,8 +1,8 @@
 /**
  * @file BSP_ADC.h
- * @brief This module provides a low-level interface to two ADC channels, 
+ * @brief This module provides a low-level interface to two ADC channels,
  * which are intended to be used for the accelerator and brake pedals.
- * 
+ *
  */
 
 #ifndef BSP_ADC_H
@@ -11,23 +11,24 @@
 #include "common.h"
 
 /**
- * @brief This macro represents the maximum number of ADC channels that can be used.
-*/
+ * @brief This macro represents the maximum number of ADC channels that can be
+ * used.
+ */
 #define MAX_CHANNELS 10
 
 /**
  * @brief This macro represents the number of bits of precision of the ADC.
-*/
+ */
 #define ADC_PRECISION_BITS 12
 
 /**
  * @brief This macro represents the range of the ADC in millivolts.
-*/
+ */
 #define ADC_RANGE_MILLIVOLTS 3300
 
 /**
  * @brief This enum represents the ADC channels that are available on the board.
-*/
+ */
 
 typedef enum { kCh10, kCh11, kNumCh } Adc;
 
@@ -54,6 +55,3 @@ int16_t BspAdcGetValue(Adc hardware_device);
 int16_t BspAdcGetMillivoltage(Adc hardware_device);
 
 #endif
-
-
-

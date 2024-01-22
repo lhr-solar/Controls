@@ -1,10 +1,11 @@
 /**
  * @file SendTritium.h
- * @brief Runs the car's State Machine and sends control messages to the Tritium motor controller. 
- * 
- * Starting the SendTritium task will start sending CAN messages 
+ * @brief Runs the car's State Machine and sends control messages to the Tritium
+ * motor controller.
+ *
+ * Starting the SendTritium task will start sending CAN messages
  * and running the state machine. For details on the state machine, see
- * 
+ *
  */
 #ifndef SENDTRITIUM_H
 #define SENDTRITIUM_H
@@ -43,52 +44,52 @@
 
 /**
  * Generate enum list for Gear_t
-*/
+ */
 #define FOREACH_GEAR(GEAR) \
     GEAR(kForwardGear), GEAR(kNeutralGear), GEAR(kReverseGear),
 
 /**
  * Gears
-*/
+ */
 typedef enum {
     FOREACH_GEAR(GENERATE_ENUM) kNumGears,
 } Gear;
 
 /**
  * States for the FSM
-*/
+ */
 typedef enum {
     /** Forward drive state */
-    kForwardDrive,   
+    kForwardDrive,
     /** Neutral drive state */
-    kNeutralDrive,   
+    kNeutralDrive,
     /** Reverse drive state */
-    kReverseDrive,   
+    kReverseDrive,
     /** Record velocity state (cruise) */
-    kRecordVelocity, 
+    kRecordVelocity,
     /** Powered cruise state (cruise) */
-    kPoweredCruise,  
+    kPoweredCruise,
     /** Coasting cruise state (cruise) */
-    kCoastingCruise, 
+    kCoastingCruise,
     /** Brake state */
-    kBrakeState,     
+    kBrakeState,
     /** One pedal state (regen) */
-    kOnePedal,        
+    kOnePedal,
     /** Accelerate cruise state (cruise) */
-    kAccelerateCruise   
+    kAccelerateCruise
 } TritiumStateName;
 
 /**
  * Struct containing the state name, state handler, and state decider
  * function for the Tritium FSM
-*/
+ */
 typedef struct TritiumState {
     /** Name of the state */
-    TritiumStateName name;   
-    /** Function pointer to the state handler */ 
+    TritiumStateName name;
+    /** Function pointer to the state handler */
     void (*stateHandler)(void);
-    /** Function pointer to the state decider */ 
-    void (*stateDecider)(void); 
+    /** Function pointer to the state decider */
+    void (*stateDecider)(void);
 } TritiumState;
 
 // Getter functions for static variables

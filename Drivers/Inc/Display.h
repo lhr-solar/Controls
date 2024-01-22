@@ -1,17 +1,17 @@
 /**
  * @file Display.h
- * @brief The display driver is responsible for all interactions with the display. 
- * It includes functions to reset the display and to send commands to it. 
- * It also defines a display command struct, from which a command string is assembled 
- * and then sent out to the display.
- * 
+ * @brief The display driver is responsible for all interactions with the
+ * display. It includes functions to reset the display and to send commands to
+ * it. It also defines a display command struct, from which a command string is
+ * assembled and then sent out to the display.
+ *
  */
 
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#include "common.h"	// common headers
-#include "Tasks.h"	// for os and fault error locs
+#include "Tasks.h"   // for os and fault error locs
+#include "common.h"  // common headers
 
 /**
  * @brief maximum number of arguments in a command packet

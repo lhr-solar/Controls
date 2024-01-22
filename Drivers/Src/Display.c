@@ -2,11 +2,17 @@
  * @file Display.c
  * @details
  * # Command Structure
- * A more detailed description of the command structure is given below. For more information on the command syntax, see the `Nextion Documentation <https://nextion.tech/instruction-set/>`_:
- * - ``char* compOrCmd`` — Either a component or a command, depending on the next few values
- * - ``char *attr`` — When the above is a component, the attribute of that component. Else, ``NULL``
- * - ``char *op`` — The operation when the above two are set, usually ``=``. Else, ``NULL``
- * - ``numArgs`` — The number of arguments the command takes. Should be 1 if setting component
+ * A more detailed description of the command structure is given below. For more
+ * information on the command syntax, see the `Nextion Documentation
+ * <https://nextion.tech/instruction-set/>`_:
+ * - ``char* compOrCmd`` — Either a component or a command, depending on the
+ * next few values
+ * - ``char *attr`` — When the above is a component, the attribute of that
+ * component. Else, ``NULL``
+ * - ``char *op`` — The operation when the above two are set, usually ``=``.
+ * Else, ``NULL``
+ * - ``numArgs`` — The number of arguments the command takes. Should be 1 if
+ * setting component
  * - ``argTypes[]`` — A list of the argument types to follow
  * - ``args`` — The actual arguments for the command (strings or ints)
  *

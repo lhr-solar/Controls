@@ -2,12 +2,13 @@
  * @file UpdateDisplay.h
  * @brief Maintains a queue of command structures, allowing other tasks to
  * submit commands and sending out commands to the display as time allows.
- * 
- * Once the UpdateDisplay task has been started, call any of the exposed UpdateDisplay 
- * functions to send a command to the display. Call UpdateDisplay_ClearQueue() to clear the queue.
- * The macros defined in Display.h can be used to set the values of some of the components with more
+ *
+ * Once the UpdateDisplay task has been started, call any of the exposed
+ * UpdateDisplay functions to send a command to the display. Call
+ * UpdateDisplay_ClearQueue() to clear the queue. The macros defined in
+ * Display.h can be used to set the values of some of the components with more
  * explicit naming.
- * 
+ *
  */
 
 #ifndef UPDATE_DISPLAY_H
@@ -18,55 +19,55 @@
 
 /**
  * @brief Error types for UpdateDisplay application
-*/
-typedef enum{
+ */
+typedef enum {
     /** No error */
-	kUpdateDisplayErrNone,
+    kUpdateDisplayErrNone,
     /** Error putting command in fifo */
-	kUpdateDisplayErrFifoPut,     
+    kUpdateDisplayErrFifoPut,
     /** Error popping command from fifo */
-	kUpdateDisplayErrFifoPop,     
+    kUpdateDisplayErrFifoPop,
     /** Error parsing component/val in SetComponent */
-	kUpdateDisplayErrParseComp,   
+    kUpdateDisplayErrParseComp,
     /** Driver call returned an error */
-	kUpdateDisplayErrDriver        
+    kUpdateDisplayErrDriver
 } UpdateDisplayError;
 
 /**
  * @brief Three states for display elements
-*/
+ */
 typedef enum { kState0 = 0, kState1 = 1, kState2 = 2 } TriState;
 
 // For cruise control and regen
 /**
  * @brief Disabled state for cruise control and regen
-*/
+ */
 #define DISP_DISABLED kState0
 
 /**
  * @brief Enabled state for cruise control and regen (able to be used)
-*/
-#define DISP_ENABLED kState1 
+ */
+#define DISP_ENABLED kState1
 
 /**
  * @brief Active state for cruise control and regen (currently being used)
-*/
+ */
 #define DISP_ACTIVE kState2
 
 // For gear changes
 /**
  * @brief Neutral state for gear changes
-*/
+ */
 #define DISP_NEUTRAL kState0
 
 /**
  * @brief Forward state for gear changes
-*/
+ */
 #define DISP_FORWARD kState1
 
 /**
  * @brief Reverse state for gear changes
-*/
+ */
 #define DISP_REVERSE kState2
 
 /**
@@ -148,10 +149,9 @@ UpdateDisplayError UpdateDisplaySetRegenState(TriState state);
 UpdateDisplayError UpdateDisplaySetCruiseState(TriState state);
 
 /**
- * @brief Clears the display message queue and sets the message counter semaphore value to 0
+ * @brief Clears the display message queue and sets the message counter
+ * semaphore value to 0
  */
 void UpdateDisplayClearQueue(void);
 
 #endif
-
-

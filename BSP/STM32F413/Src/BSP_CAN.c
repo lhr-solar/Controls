@@ -1,9 +1,9 @@
 /**
  * @file    BSP_CAN.c
- * @details 
- * The implementation allows for custom receive and transmit callbacks, which 
+ * @details
+ * The implementation allows for custom receive and transmit callbacks, which
  * aid in creating higher-level drivers (see [CANbus](../Drivers/CANbus.html)).
-*/
+ */
 
 #include "BSP_CAN.h"
 
@@ -43,11 +43,15 @@ void BspCan1Init(const uint16_t* id_whitelist, uint8_t id_whitelist_size);
 void BspCan3Init(const uint16_t* id_whitelist, uint8_t id_whitelist_size);
 
 /**
- * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
+ * @brief   Initializes the CAN module that communicates with the rest of the
+ * electrical system.
  * @param   bus : The bus to initialize. Should only be either CAN_1 or CAN_3.
- * @param   rxEvent : the function to execute when recieving a message. NULL for no action.
- * @param   txEnd : the function to execute after transmitting a message. NULL for no action.
- * @param   idWhitelist : the idWhitelist to use for message filtering. NULL for no filtering.
+ * @param   rxEvent : the function to execute when recieving a message. NULL for
+ * no action.
+ * @param   txEnd : the function to execute after transmitting a message. NULL
+ * for no action.
+ * @param   idWhitelist : the idWhitelist to use for message filtering. NULL for
+ * no filtering.
  * @param   idWhitelistSize : the size of the idWhitelist, if it is not NULL.
  * @return  None
  */

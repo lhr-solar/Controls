@@ -1,18 +1,31 @@
 /**
  * @file ReadCarCAN.c
- * 
+ *
  * # Ignition Sequence
- * ReadCarCAN handles precharge for both the array and motor. The ignition switch has four positions: OFF, LV_ON (low voltage on), ARR_ON (array on), and MOTOR_ON. 
- * - When turned to ARR_ON, BPS is meant to close their main HV Array Contactor, and ReadCarCAN will detect this change and start the precharge sequence for the Array. Array precharge is a delay of PRECHARGE_ARRAY_DELAY ms (see below).
- * - When turned to MOTOR_ON, ReadCarCAN will make sure that both HV+ and HV- contactors are closed and start the precharge sequence for the Motor. Motor precharge is a delay of PRECHARGE_PLUS_MINUS_DELAY ms (see below).
- * 
+ * ReadCarCAN handles precharge for both the array and motor. The ignition
+ * switch has four positions: OFF, LV_ON (low voltage on), ARR_ON (array on),
+ * and MOTOR_ON.
+ * - When turned to ARR_ON, BPS is meant to close their main HV Array Contactor,
+ * and ReadCarCAN will detect this change and start the precharge sequence for
+ * the Array. Array precharge is a delay of PRECHARGE_ARRAY_DELAY ms (see
+ * below).
+ * - When turned to MOTOR_ON, ReadCarCAN will make sure that both HV+ and HV-
+ * contactors are closed and start the precharge sequence for the Motor. Motor
+ * precharge is a delay of PRECHARGE_PLUS_MINUS_DELAY ms (see below).
+ *
  * # Other messages
- * We also expect to receive supplemental voltage (SBPV) and state of charge (SOC) messages from BPS. SOC is converted to an integer percent. Both SBPV and SOC are simply stored to show on the display.  
- * 
+ * We also expect to receive supplemental voltage (SBPV) and state of charge
+ * (SOC) messages from BPS. SOC is converted to an integer percent. Both SBPV
+ * and SOC are simply stored to show on the display.
+ *
  * # Implementation Details
- * The Read Car CAN task uses RTOS timers to make sure message timings remain appropriate. A watchdog is pet on receiving the BPS contactor state message to ensure that if communication is lost with BPS, the system disables the contactors.
- * In order to avoid charging in unsafe conditions, a saturation buffer is used to require that charge enable messages are sufficiently consistent.
- * 
+ * The Read Car CAN task uses RTOS timers to make sure message timings remain
+ * appropriate. A watchdog is pet on receiving the BPS contactor state message
+ * to ensure that if communication is lost with BPS, the system disables the
+ * contactors. In order to avoid charging in unsafe conditions, a saturation
+ * buffer is used to require that charge enable messages are sufficiently
+ * consistent.
+ *
  */
 
 #include "ReadCarCan.h"
@@ -40,13 +53,16 @@
 #define SOC_SCALER 1000000
 
 // Delay time in timer ticks for the CAN Watchdog Timer
-#define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
+#define CAN_WATCH_TMR_DLY_TMR_TS \
+    ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
 
 // Delay time in timer ticks for the Motor Precharge Bypass Timer
-#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS ((PRECHARGE_MOTOR_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
+#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS \
+    ((PRECHARGE_MOTOR_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
 
 // Delay time in timer ticks for the Array Precharge Bypass Timer
-#define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS ((PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) 
+#define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS \
+    ((PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
 
 // CAN watchdog timer variable
 static OS_TMR can_watch_timer;
@@ -322,8 +338,9 @@ void UpdatePrechargeContactors(void) {
 
 /**
  * @brief Task to read CAN messages from the BPS and update the display
- * @param p_arg pointer that is passed to the task when it is created. Used to pass the task number.
-*/
+ * @param p_arg pointer that is passed to the task when it is created. Used to
+ * pass the task number.
+ */
 void TaskReadCarCan(void *p_arg) {
     OS_ERR err = 0;
 

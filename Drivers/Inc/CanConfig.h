@@ -1,8 +1,8 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file CANConfig.h
- * @brief 
- * 
+ * @brief
+ *
  */
 #ifndef CAN_CONFIG
 #define CAN_CONFIG

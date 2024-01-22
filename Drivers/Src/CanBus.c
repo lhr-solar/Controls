@@ -2,26 +2,37 @@
  * @file CanBus.c
  * @details
  * # Data Types
- * 
- * CAN messages are sent from and received into `CANDATA_t`, which contains the CAN ID, idx byte, and up to 8 data bytes. 
- * Internally, the driver also uses the `CANLUT_T` type, which is the entry type of a lookup table used to determine the data types used by incoming messages. 
- * This lookup table can also be used to determine the length of incoming messages if it is needed.
+ *
+ * CAN messages are sent from and received into `CANDATA_t`, which contains the
+ * CAN ID, idx byte, and up to 8 data bytes. Internally, the driver also uses
+ * the `CANLUT_T` type, which is the entry type of a lookup table used to
+ * determine the data types used by incoming messages. This lookup table can
+ * also be used to determine the length of incoming messages if it is needed.
  * See `CANbus.h` and `CANConfig.c` for details.
- * 
+ *
  * # Implementation Details
- * 
- * The microcontroller's CAN hardware block includes three sending and three receiving mailboxes, which act as a small queue of CAN messages. 
- * The driver will write directly to the write mailboxes as long as they aren't full, and will block otherwise. 
- * 
- * The receive mailboxes are constantly emptied (by the CAN receive interrupt) 
- * into a software queue in the BSP layer in order to deepen the queue (we receive a lot of messages).
- * When reading, the driver will read directly from a software queue in the BSP layer. A non-blocking read will return an error if the queue is empty. A blocking read will block on a driver-layer semaphore, to be woken up when data is avilable.
- * Everytime the BSP software queue is posted to, a receive interrupt signals to a driver-layer semaphore that a message has been received. This allows any waiting tasks to wake up and read the message. 
- * This is done since tasks that read and write CAN messages don't usually have anything else to do while waiting, which makes blocking fairly efficient. 
- * 
+ *
+ * The microcontroller's CAN hardware block includes three sending and three
+ * receiving mailboxes, which act as a small queue of CAN messages. The driver
+ * will write directly to the write mailboxes as long as they aren't full, and
+ * will block otherwise.
+ *
+ * The receive mailboxes are constantly emptied (by the CAN receive interrupt)
+ * into a software queue in the BSP layer in order to deepen the queue (we
+ * receive a lot of messages). When reading, the driver will read directly from
+ * a software queue in the BSP layer. A non-blocking read will return an error
+ * if the queue is empty. A blocking read will block on a driver-layer
+ * semaphore, to be woken up when data is avilable. Everytime the BSP software
+ * queue is posted to, a receive interrupt signals to a driver-layer semaphore
+ * that a message has been received. This allows any waiting tasks to wake up
+ * and read the message. This is done since tasks that read and write CAN
+ * messages don't usually have anything else to do while waiting, which makes
+ * blocking fairly efficient.
+ *
  */
 
 #include "CanBus.h"
+
 #include "config.h"
 #include "os.h"
 

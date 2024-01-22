@@ -1,7 +1,7 @@
 /**
  * @file Tasks.h
- * @brief 
- * 
+ * @brief
+ *
  */
 
 #ifndef TASKS_H
@@ -173,5 +173,3 @@ void AssertOsError(OS_ERR err);
 #endif
 
 #endif
-
-

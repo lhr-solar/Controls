@@ -1,13 +1,13 @@
 /**
  * @file Contactors.c
  * @details
- * The contactors can be set using a blocking or non-blocking interface. 
- * The blocking interface will wait until the contactor can be set, while 
- * the non-blocking interface will return early if another thread is currently 
+ * The contactors can be set using a blocking or non-blocking interface.
+ * The blocking interface will wait until the contactor can be set, while
+ * the non-blocking interface will return early if another thread is currently
  * setting the contactor.
- * 
+ *
  * The contactors are controlled via GPIO writes to the contactors board.
- * 
+ *
  */
 
 #include "Contactors.h"
@@ -64,9 +64,10 @@ void ContactorsInit() {
 /**
  * @brief   Returns the current state of
  *          a specified contactor
- * @param   contactor MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR or ARRAY_PRECHARGE_BYPASS_CONTACTOR
+ * @param   contactor MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR or
+ * ARRAY_PRECHARGE_BYPASS_CONTACTOR
  * @return  Contactor state (ON/OFF)
- */ 
+ */
 bool ContactorsGet(Contactor contactor) {
     State state = OFF;
     switch (contactor) {
