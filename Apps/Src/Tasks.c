@@ -1,7 +1,17 @@
 /**
  * @file Tasks.c
- * @brief
- *
+ * 
+ * # Task Switch Hook Implementation Details
+ * The task switch hook is a function that is called every time the RTOS switches
+ * from one task to another. This is useful for debugging, as it allows us to
+ * see which tasks were running when a fault occurred.
+ * 
+ * This function will overwrite tasks that have been in the trace for a while, keeping only the 
+ * TASK_TRACE_LENGTH most recent tasks. It's essentially a fifo that loops in on itself, so wherever
+ * prev_tasks.index is pointing is the newest task in the trace, and the task at prev_tasks.index + 1
+ * is the oldest task in the trace.
+ * 
+ * @image xml TaskTraceDiagram.png
  */
 
 #include "Tasks.h"

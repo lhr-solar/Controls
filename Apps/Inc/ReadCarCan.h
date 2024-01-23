@@ -3,7 +3,7 @@
  * @brief Reads the car’s CAN bus for values relevant to Controls, and handles
  * ignition sequence logic.
  *
- * Call ChargeEnable_Get() to get whether regen braking / charging is enabled or
+ * Call ChargeEnableGet() to get whether regen braking / charging is enabled or
  * not. Starting the task will spawn the watchdog, handle the ignition sequence
  * logic in communication with BPS, and update the display with the State of
  * Charge and the Supplemental Voltage of the car.
