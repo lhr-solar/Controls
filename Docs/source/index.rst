@@ -25,9 +25,9 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    :caption: Apps
 
    Apps/Main
-   Apps/ReadCarCAN
+   Apps/ReadCarCan
    Apps/ReadTritium
-   Apps/SendCarCAN
+   Apps/SendCarCan
    Apps/UpdateDisplay
    Apps/SendTritium
    Apps/Tasks
@@ -41,7 +41,7 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    :maxdepth: 2
    :caption: Drivers
 
-   Drivers/CANbus
+   Drivers/CanBus
    Drivers/Contactors
    Drivers/Display
    Drivers/Minions

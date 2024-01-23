@@ -1,24 +1,23 @@
 ************
-Read Car CAN
+Send Car Can
 ************
-
-.. doxygenfile:: ReadCarCAN.h
-    :sections: briefdescription 
+.. doxygenfile:: SendCarCan.h
+    :sections: briefdescription
 
 =============
 Usage Details
-=============   
-.. doxygenfile:: ReadCarCAN.h
+============= 
+.. doxygenfile:: SendCarCan.h
     :sections: detaileddescription
 
 ==================
 Functional Details
 ==================
-.. doxygenfile:: ReadCarCAN.c
+.. doxygenfile:: SendCarCan.c
     :sections: detaileddescription
 
 ===
 API
 ===
-.. doxygenfile:: ReadCarCAN.h
+.. doxygenfile:: SendCarCan.h    
     :sections: define enum func typedef
