@@ -21,3 +21,12 @@ jobs:
       run: make clean
     - name: make leader
       run: make leader
+    # Check that format was ran and has no errors
+    - name: format-check
+      run: make format-check
+    # Apply format in case newline changes create tidy warnings (NOLINT comments change lines)
+    - name: format
+      run: make format
+    # Check that tidy was ran and has no errors
+    - name: tidy-check
+      run: make tidy-check

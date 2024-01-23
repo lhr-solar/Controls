@@ -18,19 +18,19 @@ void setUp(void) {}
 void tearDown(void) {}
 
 void test_UnitTestPedals_Init(void){
-    Pedals_Init(); 
+    PedalsInit(); 
 }
 
 void test_UnitTestPedals_Read(void){
     for(int x = 500; x < 1000; x+=100){
-        BSP_ADC_Get_Millivoltage_fake.return_val = x; 
-        Pedals_Read(ACCELERATOR); 
-        printf("\n\r%d\r", Pedals_Read(ACCELERATOR));
+        BspAdcGetMillivoltage_fake.return_val = x; 
+        PedalsRead(1); 
+        printf("\n\r%d\r", PedalsRead(1));
     }
 }
 
 void test_UnitTestPedals_Read_This_Will_Fail(void){
-   TEST_ASSERT_EQUAL(Pedals_Read(ACCELERATOR), 30); 
+   TEST_ASSERT_EQUAL(PedalsRead(1), 30); 
 }
 
 

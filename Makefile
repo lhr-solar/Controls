@@ -25,8 +25,9 @@ else
 endif
 
 #Check if unit test file exists (just to inform user if it isn't found)
-ifneq (,$(wildcard Tests/UnitTests/Test_$(TEST).c))
-	UNITTEST ?= Tests/UnitTests/Test_$(TEST).c
+#UNITTEST is solely used for echoing purposes
+ifneq (,$(wildcard Tests/UnitTests/Tests/Test_$(TEST).c))
+	UNITTEST ?= Tests/UnitTests/Tests/Test_$(TEST).c
 else
 	UNITTEST ?= no test found
 endif
@@ -74,4 +75,20 @@ clean:
 	rm -fR Tests/UnitTests/Objects
 	rm -fR Objects
 	rm -f *.out
-	rm -fr Docs/doxygen	
+	rm -fr Docs/doxygen
+	rm -fr Docs/build
+
+tidy:
+	$(MAKE) -C BSP -C STM32F413 tidy
+
+format:
+	$(MAKE) -C BSP -C STM32F413 format
+
+tidy-check:
+	$(MAKE) -C BSP -C STM32F413 tidy-check
+
+format-check:
+	$(MAKE) -C BSP -C STM32F413 format-check
+
+check: format-check format tidy-check
+

@@ -59,6 +59,9 @@ C_INCLUDES :=	\
 -I../../Apps/Inc	\
 -I../../Drivers/Inc	\
 -I../../BSP/Inc	\
+-I../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/Inc \
+-I../../CMSIS/Device/ST/STM32F4xx/Include	\
+-I../../CMSIS/Include	\
 -I../../Config/Inc	\
 -I../../Tests/UnitTests	\
 -I../../Tests/UnitTests/Unity	\
@@ -70,6 +73,12 @@ C_INCLUDES :=	\
 
 
 $(foreach src,$(C_INCLUDES),$(info --- $(src)))
+
+# C defines
+C_DEFS =  \
+-DSTM32F413_423xx
+
+CFLAGS += $(C_DEFS)
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g3 -gdwarf-2 -DDEBUG

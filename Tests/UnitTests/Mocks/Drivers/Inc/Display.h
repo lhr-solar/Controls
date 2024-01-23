@@ -8,10 +8,10 @@
 
 #include "fff.h"
 
-DECLARE_FAKE_VALUE_FUNC(DisplayError_t, Display_Send, DisplayCmd_t);
-DECLARE_FAKE_VALUE_FUNC(DisplayError_t, Display_Init);
-DECLARE_FAKE_VALUE_FUNC(DisplayError_t, Display_Reset);
-DECLARE_FAKE_VALUE_FUNC(DisplayError_t, Display_Error, error_code_t);
-DECLARE_FAKE_VALUE_FUNC(DisplayError_t, Display_Evac, uint8_t, uint32_t);
+DECLARE_FAKE_VALUE_FUNC(DisplayError, DisplaySend, DisplayCmd);
+DECLARE_FAKE_VALUE_FUNC(DisplayError, DisplayInit);
+DECLARE_FAKE_VALUE_FUNC(DisplayError, DisplayReset);
+DECLARE_FAKE_VALUE_FUNC(DisplayError, DisplayFault, ErrorCode);
+DECLARE_FAKE_VALUE_FUNC(DisplayError, DisplayEvac, uint8_t, uint32_t);
 
 #endif

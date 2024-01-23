@@ -2,8 +2,8 @@
 //////              MOCK               //////
 /////////////////////////////////////////////
 
-#include "SendCarCAN.h"
+#include "SendCarCan.h"
 
 DEFINE_FAKE_VOID_FUNC(Task_SendCarCAN, void*);
-DEFINE_FAKE_VOID_FUNC(SendCarCAN_Init);
-DEFINE_FAKE_VOID_FUNC(SendCarCAN_Put, CANDATA_t);
+DEFINE_FAKE_VOID_FUNC(SendCarCanInit);
+DEFINE_FAKE_VOID_FUNC(SendCarCanPut, CanData);
