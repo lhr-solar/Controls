@@ -8,20 +8,20 @@
 #include "ReadCarCan.h"
 #include "UpdateDisplay.h"
 
-// ErrorCode Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
-// ErrorCode Error_ReadTritium = T_NONE;  // Initialized to no error
-// ErrorCode Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
+ErrorCode error_read_car_can = kReadCarCanErrNone; 
+ErrorCode error_read_tritium = kNone;  // Initialized to no error
+ErrorCode error_update_display = kUpdateDisplayErrNone;
 
 #ifndef TEST_MAIN
-DEFINE_FAKE_VOID_FUNC(Task_Init, void*);
+DEFINE_FAKE_VOID_FUNC(TaskInit, void*);
 #endif
 
 #ifndef TEST_DEBUGDUMP
-DEFINE_FAKE_VOID_FUNC(Task_DebugDump, void*);
+DEFINE_FAKE_VOID_FUNC(TaskDebugDump, void*);
 #endif
 
 #ifndef TEST_COMMANDLINE
-DEFINE_FAKE_VOID_FUNC(Task_CommandLine, void*);
+DEFINE_FAKE_VOID_FUNC(TaskCommandLine, void*);
 #endif
 
 DEFINE_FAKE_VOID_FUNC(TaskSwHookInit);

@@ -4,5 +4,5 @@
 
 #include "Minions.h"
 
-DEFINE_FAKE_VOID_FUNC(Minions_Init);
-DEFINE_FAKE_VALUE_FUNC(bool, Minions_Read, Pin);
+DEFINE_FAKE_VOID_FUNC(MinionsInit);
+DEFINE_FAKE_VALUE_FUNC(bool, MinionsRead, Pin);

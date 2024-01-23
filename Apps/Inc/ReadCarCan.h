@@ -14,6 +14,11 @@
 #include "common.h"
 
 /**
+ * Task Prototype
+*/
+void TaskReadCarCan(void* p_arg);
+
+/**
  * Error types
  */
 typedef enum {

@@ -4,7 +4,7 @@
 
 #include "SendTritium.h"
 
-DEFINE_FAKE_VOID_FUNC(Task_SendTritium, void*);
+DEFINE_FAKE_VOID_FUNC(TaskSendTritium, void*);
 DEFINE_FAKE_VALUE_FUNC(bool, GetCruiseEnable);
 DEFINE_FAKE_VALUE_FUNC(bool, GetCruiseSet);
 DEFINE_FAKE_VALUE_FUNC(bool, GetOnePedalEnable);

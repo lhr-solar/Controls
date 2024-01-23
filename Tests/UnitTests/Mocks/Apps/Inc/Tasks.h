@@ -9,19 +9,19 @@
 #include "fff.h"
 
 #ifndef TEST_MAIN
-DECLARE_FAKE_VOID_FUNC(Task_Init, void *);
+DECLARE_FAKE_VOID_FUNC(TaskInit, void *);
 #else
-void Task_Init(void* p_arg);
+void TaskInit(void* p_arg);
 #endif
 
 #ifndef TEST_DEBUGDUMP
-DECLARE_FAKE_VOID_FUNC(Task_DebugDump, void*);
+DECLARE_FAKE_VOID_FUNC(TaskDebugDump, void*);
 #else
-void Task_DebugDump(void *p_arg);
+void TaskDebugDump(void *p_arg);
 #endif
 
 #ifndef TEST_COMMANDLINE
-DECLARE_FAKE_VOID_FUNC(Task_CommandLine, void*);
+DECLARE_FAKE_VOID_FUNC(TaskCommandLine, void*);
 #else
 void Task_CommandLine(void* p_arg);
 #endif

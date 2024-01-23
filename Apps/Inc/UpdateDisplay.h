@@ -48,7 +48,7 @@ typedef enum { kState0 = 0, kState1 = 1, kState2 = 2 } TriState;
 /**
  * Task Prototype
  */
-void Task_UpdateDisplay(void* p_arg);
+void TaskUpdateDisplay(void* p_arg);
 
 
 /**

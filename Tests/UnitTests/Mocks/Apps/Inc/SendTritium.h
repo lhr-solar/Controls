@@ -8,7 +8,7 @@
 
 #include "fff.h"
 
-DECLARE_FAKE_VOID_FUNC(Task_SendTritium, void*);
+DECLARE_FAKE_VOID_FUNC(TaskSendTritium, void*);
 
 // Getter functions for local variables in SendTritium.c
 DECLARE_FAKE_VALUE_FUNC(bool, GetCruiseEnable);

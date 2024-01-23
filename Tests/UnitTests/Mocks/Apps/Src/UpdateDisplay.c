@@ -4,10 +4,12 @@
 
 #include "UpdateDisplay.h"
 
+DEFINE_FAKE_VOID_FUNC(TaskUpdateDisplay, void*);
+
 DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplayInit);
 DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetPage, Page);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetSOC, uint8_t);
-DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetSBPV, uint32_t);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetSoc, uint8_t);
+DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetSbpv, uint32_t);
 DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetVelocity, uint32_t);
 DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetAccel, uint8_t);
 DEFINE_FAKE_VALUE_FUNC(UpdateDisplayError, UpdateDisplaySetArray, bool);

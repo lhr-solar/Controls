@@ -44,7 +44,7 @@ ErrorStatus CANbus_Custom_fake_bpscontactor(CanData* data, bool blocking, Can bu
 }
 
 void test_UnitTest_bsptrip(void){
-    Task_Init(NULL);
+    TaskInit(NULL);
     CanBusRead_fake.custom_fake = CANbus_Custom_fake_bps;
     TaskReadCarCan(NULL);
     printf("\n\r%d\n\r", CanBusRead_fake.call_count);
@@ -57,7 +57,7 @@ void test_UnitTest_bsptrip(void){
 }
 
 void test_UnitTest_bspcontactor(void){
-    Task_Init(NULL);
+    TaskInit(NULL);
     CanBusRead_fake.custom_fake = CANbus_Custom_fake_bpscontactor;
     TaskReadCarCan(NULL);
     printf("\n\r%d\n\r", CanBusRead_fake.call_count);

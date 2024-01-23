@@ -45,7 +45,7 @@ CPU_STK command_line_stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 // Variables to store error codes, stored and cleared in task error assert
 // functions
-ErrorCode error_read_car_can = 0;      // TODO: change this back to the error
+ErrorCode error_read_car_can = kReadCarCanErrNone; 
 ErrorCode error_read_tritium = kNone;  // Initialized to no error
 ErrorCode error_update_display = kUpdateDisplayErrNone;
 
