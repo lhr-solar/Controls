@@ -1,21 +1,26 @@
 /**
  * @file Tasks.h
- * @brief Contains the task definitions for the RTOS as well as relevant data structures and error handling functions
+ * @brief Contains the task definitions for the RTOS, relevant data
+ * structures, priority definitions for each task, OS related function
+ * definitions, and error handling functions.
  *
- * Use these definitions in main.c or a test file to initialize any of our RTOS tasks. The error handling functionality 
- * for our applications is explained in [Error Handling](./ErrorHandling.html).
- * 
- * See the [Micrium OS III documentation (page 77)](https://www.analog.com/media/en/dsp-documentation/software-manuals/Micrium-uCOS-III-UsersManual.pdf) 
+ * Use these definitions in main.c or a test file to initialize any of our RTOS
+ * tasks. The error handling functionality for our applications is explained in
+ * [Error Handling](./ErrorHandling.html).
+ *
+ * See the [Micrium OS III documentation (page
+ * 77)](https://www.analog.com/media/en/dsp-documentation/software-manuals/Micrium-uCOS-III-UsersManual.pdf)
  * for more information on tasks and task creation.
- * 
- * Call TaskSwHookInit() to initialize the task switch hook, which will store the last TASK_TRACE_LENGTH tasks that were run.
- * This allows us to inspect the task trace in the event of a fault, so that we can see the most recently running TASK_TRACE_LENGTH
- * tasks that were running before the fault.
- * 
- * The ASSERT_OS_ERROR macro is used to assert an error if an OS function call fails. This macro is defined differently depending on
- * whether or not DEBUG is defined. If DEBUG is defined, the macro will print the file and line number of the error. If DEBUG is not
- * defined, the macro will simply call AssertOsError(err). This macro is used in the RTOS driver functions, so that we can see where
- * the error occurred if DEBUG is defined, but we don't have to worry about the extra overhead of printing the file and line number.
+ *
+ * Call TaskSwHookInit() to initialize the task switch hook, which will store
+ * the last TASK_TRACE_LENGTH tasks that were run. This allows us to inspect the
+ * task trace in the event of a fault, so that we can see the most recently
+ * running TASK_TRACE_LENGTH tasks that were running before the fault.
+ *
+ * The ASSERT_OS_ERROR(err) macro is used to assert an error if an OS function
+ * call fails. Call ASSERT_OS_ERROR after every OS function call that returns an
+ * error (and pass in the returned error) in order to ensure that we take
+ * preventative measures.
  */
 
 #ifndef TASKS_H
@@ -163,7 +168,7 @@ void ThrowTaskError(ErrorCode error_code, Callback error_callback,
 
 /**
  * @brief   Assert Error if OS function call fails
- * @param   err OS Error that occurred
+ * @param   err OS Error that is returned by an OS function call
  */
 void AssertOsError(OS_ERR err);
 

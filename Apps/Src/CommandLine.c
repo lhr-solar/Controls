@@ -1,9 +1,9 @@
 /**
  * @file CommandLine.c
- * @brief This file contains the command line interface, which is used to send
- * commands to the car (and receive feedback) over UART. This is mainly useful
- * for **debugging purposes only**, which is why it isn't enabled by default in
- * [Init Task](./Main.html)
+ * @brief Contains the command line interface, which is used to send
+ * commands to the car (and receive feedback) over UART. Mainly for **debugging
+ * purposes only**, which is why it isn't enabled by default in [Init
+ * Task](./Main.html)
  *
  * The command line interface is a simple task that reads characters from the
  * serial port and parses them into commands. The commands are then executed by
@@ -30,19 +30,19 @@
  * string data as is on the determined line
  * >
  * > CANbus_Read (non)blocking motor/car - Reads a CAN message on the detemined
- * line
+ * > line
  * >
  * > Contactors_Get array_c/array_p/motor_c - Gets the status of determined
- * contactor
+ * > contactor
  * >
  * > Contactors_Set array_c/array_p/motor_c on/off (non)blocking - Sets the
- * determined contactor
+ * > determined contactor
  * >
  * > Contactors_Enable  array_c/array_p/motor_c - Enables the determined
- * contactor
+ * > contactor
  * >
  * > Contactors_Disable  array_c/array_p/motor_c - Disables the determined
- * contactor
+ * > contactor
  * >
  * > Minions_Read 'input' - Reads the current status of the input
  * >

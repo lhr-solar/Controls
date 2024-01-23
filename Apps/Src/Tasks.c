@@ -1,17 +1,25 @@
 /**
  * @file Tasks.c
- * 
+ *
  * # Task Switch Hook Implementation Details
- * The task switch hook is a function that is called every time the RTOS switches
- * from one task to another. This is useful for debugging, as it allows us to
- * see which tasks were running when a fault occurred.
- * 
- * This function will overwrite tasks that have been in the trace for a while, keeping only the 
- * TASK_TRACE_LENGTH most recent tasks. It's essentially a fifo that loops in on itself, so wherever
- * prev_tasks.index is pointing is the newest task in the trace, and the task at prev_tasks.index + 1
- * is the oldest task in the trace.
- * 
+ * The task switch hook is a function that is called every time the RTOS
+ * switches from one task to another. This is useful for debugging, as it allows
+ * us to see which tasks were running when a fault occurred.
+ *
+ * This function will overwrite tasks that have been in the trace for a while,
+ * keeping only the TASK_TRACE_LENGTH most recent tasks. It's essentially a fifo
+ * that loops in on itself, so wherever prev_tasks.index is pointing is the
+ * newest task in the trace, and the task at prev_tasks.index + 1 is the oldest
+ * task in the trace.
+ *
  * @image xml TaskTraceDiagram.png
+ *
+ * # Assert OS Error
+ * This macro is defined differently depending on whether or not
+ * DEBUG is defined. If DEBUG is defined, the macro will print the file and line
+ * number of the error. If DEBUG is not defined, the macro will simply call
+ * AssertOsError(err). If err is not OS_ERR_NONE, preventative measures will be
+ * taken (such as calling EmergencyContactorOpen()).
  */
 
 #include "Tasks.h"

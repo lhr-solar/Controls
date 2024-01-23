@@ -1,6 +1,6 @@
 /**
  * @file ReadTritium.c
- * 
+ *
  * ReadTritium forwards all messages from MotorCAN to CarCAN. It does this using
  * the FIFO defined in [SendCarCAN](./SendCarCAN.html). The task posts messages
  * to the queue, which are then read out by the SendCarCAN task.

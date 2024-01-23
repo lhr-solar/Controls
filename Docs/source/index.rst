@@ -21,10 +21,9 @@ Keep the docs clear and readable. Follow the style of the existing documentation
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
    :caption: Apps
 
-   Apps/Main
+   Apps/Initialization
    Apps/ReadCarCan
    Apps/ReadTritium
    Apps/SendCarCan
@@ -34,11 +33,9 @@ Keep the docs clear and readable. Follow the style of the existing documentation
    Apps/CommandLine
    Apps/DebugDump
    Apps/PedalToPercent
-   Apps/ErrorHandling
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
    :caption: Drivers
 
    Drivers/CanBus
@@ -49,7 +46,6 @@ Keep the docs clear and readable. Follow the style of the existing documentation
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
    :caption: BSP
 
    BSP/BSP_ADC

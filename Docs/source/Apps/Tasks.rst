@@ -1,8 +1,13 @@
-*****
-Tasks
-*****
+*******************
+Tasks Configuration
+*******************
 .. doxygenfile:: Tasks.h
     :sections: briefdescription
+
+.. toctree::
+    :hidden:
+    
+    ./ErrorHandling
 
 =============
 Usage Details
