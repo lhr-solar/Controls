@@ -13,6 +13,9 @@
 #include "Minions.h"
 #include "Pedals.h"
 #include "SendCarCan.h"
+#include "ReadCarCan.h"
+#include "ReadTritium.h"
+#include "SendTritium.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "common.h"
@@ -46,7 +49,7 @@ int main(void) {
     OSStart(&err);
     ASSERT_OS_ERROR(err);
 
-    while (1) {}
+    LOOP {}
 }
 
 void TaskInit(void *p_arg) {

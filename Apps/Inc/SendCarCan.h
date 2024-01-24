@@ -6,7 +6,7 @@
 /**
  * Task Prototype
  */
-void TaskSendCarCAN(void* p_arg);
+void TaskSendCarCan(void* p_arg);
 
 
 /**
