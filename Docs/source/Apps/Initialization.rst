@@ -3,4 +3,10 @@ Initialization
 **************
 
 .. doxygenfile:: main.c
-   :sections: briefdescription detaileddescription
+   :sections: briefdescription 
+   
+=======
+Details
+=======
+.. doxygenfile:: main.c
+   :sections: detaileddescription

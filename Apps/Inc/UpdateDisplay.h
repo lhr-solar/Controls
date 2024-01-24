@@ -5,7 +5,7 @@
  *
  * Once the UpdateDisplay task has been started, call any of the exposed
  * UpdateDisplay functions to send a command to the display. Call
- * UpdateDisplay_ClearQueue() to clear the queue. The macros defined in
+ * UpdateDisplayClearQueue() to clear the queue. The macros defined in
  * Display.h can be used to set the values of some of the components with more
  * explicit naming.
  *
@@ -152,6 +152,6 @@ UpdateDisplayError UpdateDisplaySetCruiseState(TriState state);
  * @brief Clears the display message queue and sets the message counter
  * semaphore value to 0
  */
-void UpdateDisplayClearQueue(void);
+void UpdateDisplayClearQueue();
 
 #endif

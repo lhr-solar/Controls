@@ -27,7 +27,7 @@
  * > Commands and their params are as follows:
  * >
  * > CANbus_Send (non)blocking motor/car 'string' - Sends a CAN message with the
- * string data as is on the determined line
+ * > string data as is on the determined line
  * >
  * > CANbus_Read (non)blocking motor/car - Reads a CAN message on the detemined
  * > line

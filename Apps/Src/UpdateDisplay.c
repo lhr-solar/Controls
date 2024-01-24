@@ -4,10 +4,9 @@
  * The task implements a queue of command structures. Tasks that wish to
  * write to the display call one of the wrapper functions exposed in the public
  * interface. Internally, all of these functions construct a command structure
- * and then call
- * ``UpdateDisplay_PutNext()``, which places the command structure in the queue
- * and notifies UpdateDisplay. Another internal function,
- * ``UpdateDisplay_PopNext()``, gets called by UpdateDisplay. It blocks on a
+ * and then call UpdateDisplayPutNext(), which places the command structure in
+ * the queue and notifies UpdateDisplay. Another internal function,
+ * UpdateDisplayPopNext(), gets called by UpdateDisplay. It blocks on a
  * semaphore until the queue is not empty, and then grabs the next command
  * structure. It then parses the command and sends it out over UART. Check these
  * functions in UpdateDisplay.c for more information.
