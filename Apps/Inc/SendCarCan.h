@@ -1,13 +1,14 @@
 /**
- * @file SendCarCAN.h
- * @brief Sends any CarCAN messages put in the queue via SendCarCAN_Put, and
+ * @file SendCarCan.h
+ * @brief Sends any CarCAN messages put in the queue via SendCarCanPut, and
  * handles transmitting the IO State of the car for telemetry & ignition
  * sequence.
  *
- * Call SendCarCAN_Init() to initialize the queue and semaphore. Call
- * SendCarCAN_Put() to put a message in the queue. Starting the SendCarCAN task
+ * Call SendCarCanInit() to initialize the queue and semaphore. Call
+ * SendCarCanPut() to put a message in the queue. Starting the SendCarCan task
  * will send any messages put in the queue, as well as spawn PutIOState task to
- * forward the IO state.
+ * forward the state of all inputs/outputs under the Controls system for
+ * telemetry.
  *
  */
 
@@ -29,8 +30,8 @@ void SendCarCanPut(CanData message);
 
 #ifdef DEBUG
 /**
- * @brief Return the space left in SendCarCAN_Q for debug purposes
- * @return the space left in SendCarCAN_Q
+ * @brief Return the space left in the queue for debug purposes
+ * @return the space left in the queue
  */
 uint8_t GetSendCarCanQueueSpace(void);
 #endif
