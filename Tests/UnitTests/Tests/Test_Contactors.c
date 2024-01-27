@@ -19,12 +19,13 @@ DEFINE_FFF_GLOBALS;
 // Special function required by Unity that will run before each test
 void setUp(void){
     // Reset the fakes' call and argument history between tests
+     // Would eventually like to make this part less tedious,
+     // but also you'll need to deal with all of these anyways    
     RESET_FAKE(BspGpioWritePin) // not really needed
     RESET_FAKE(BspGpioInit) // technically not needed since we only use this in one test
-    RESET_FAKE(BspGpioGetState) // same here
+    RESET_FAKE(BspGpioGetState) // ""
     RESET_FAKE(OSMutexPend) // ""
     RESET_FAKE(OSMutexPost) // ""
-    // Would like to make this part less tedious but also you'll need to deal with all of these anyways    
 }
 
 
@@ -66,17 +67,19 @@ static uint32_t count_instances_bool(bool match, bool* array, uint32_t numElems)
     return num;
 }
 
+
 // Tests
 void test_ContactorsInit(){
     ContactorsInit();
     // Check that BspGpioInit was called to initialize
     // Contactors port for Array and Motor Precharge pins to be outputs
-    TEST_ASSERT_EQUAL(1, BspGpioInit_fake.call_count);
-    TEST_ASSERT_EQUAL(CONTACTORS_PORT, BspGpioInit_fake.arg0_val);
+    TEST_ASSERT_EQUAL(1, BspGpioInit_fake.call_count); // Should have called BspGpioInit once
+    TEST_ASSERT_EQUAL(CONTACTORS_PORT, BspGpioInit_fake.arg0_val); 
     TEST_ASSERT_EQUAL((ARRAY_PRECHARGE_BYPASS_PIN | MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN), BspGpioInit_fake.arg1_val);
     TEST_ASSERT_EQUAL (1, BspGpioInit_fake.arg2_val);
 
     // Check that all pins were set to OFF
+    // Don't worry about order as long both pins show up in the last two call arguments
     TEST_ASSERT_EQUAL(BspGpioWritePin_fake.call_count, kNumContactors);
     TEST_ASSERT_EQUAL(kNumContactors, count_instances_int(CONTACTORS_PORT, (int *)BspGpioWritePin_fake.arg0_history, kNumContactors));
     TEST_ASSERT_EQUAL(1, count_instances_uint16(ARRAY_PRECHARGE_BYPASS_PIN, BspGpioWritePin_fake.arg1_history, kNumContactors));
@@ -85,7 +88,7 @@ void test_ContactorsInit(){
 }
 
 void test_ContactorsGet(){
-    // When BspGpio_Read is called with a certain pin, we want to make sure ContactorsGet returns the right thing
+    // Make sure ContactorsGet returns the right thing
     BspGpioGetState_fake.return_val = ON; // Test array and motor contactor when ON
     TEST_ASSERT_EQUAL(ON, ContactorsGet(kArrayPrechargeBypassContactor));
     TEST_ASSERT_EQUAL(ON, ContactorsGet(kMotorControllerPrechargeBypassContactor));
@@ -96,6 +99,7 @@ void test_ContactorsGet(){
     
     TEST_ASSERT_EQUAL(4, BspGpioGetState_fake.call_count);
 }
+
 
 void test_ContactorsSet(){
 
