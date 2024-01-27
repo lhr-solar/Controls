@@ -1,24 +1,24 @@
 ************
-Read Tritium
+Read Car Can
 ************
 
-.. doxygenfile:: ReadTritium.h
-    :sections: briefdescription
+.. doxygenfile:: ReadCarCan.h
+    :sections: briefdescription 
 
 =============
 Usage Details
-=============
-.. doxygenfile:: ReadTritium.h
+=============   
+.. doxygenfile:: ReadCarCan.h
     :sections: detaileddescription
 
 ==================
 Functional Details
 ==================
-.. doxygenfile:: ReadTritium.c
+.. doxygenfile:: ReadCarCan.c
     :sections: detaileddescription
 
 ===
 API
 ===
-.. doxygenfile:: ReadTritium.h
+.. doxygenfile:: ReadCarCan.h
     :sections: define enum func typedef

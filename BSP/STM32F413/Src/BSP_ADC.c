@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @file BSP_ADC.c
+ * @details
+ * Internally, we use DMA to continuously copy the ADC values into an array that
+ * is served out.
+ */
 
 #include "BSP_ADC.h"
 
@@ -42,9 +47,8 @@ static void adcInitDma(void) {
 }
 
 /**
- * @brief   Initializes the ADC module. This is to measure the hall effect
- * sensors on the Current Monitor Board.
- * @param   None
+ * @brief   Initialize the ADC module
+ * @param	None
  * @return  None
  */
 void BspAdcInit(void) {
@@ -104,9 +108,9 @@ void BspAdcInit(void) {
 }
 
 /**
- * @brief   Gets converted ADC value in units of mV.
- * @param   None
- * @return  millivoltage value ADC measurement
+ * @brief   Provides the ADC value of the channel at the specified index
+ * @param   hardwareDevice pedal enum that represents the specific device
+ * @return  Raw ADC value without conversion
  */
 int16_t BspAdcGetValue(Adc hardware_device) {
     // Get ADC raw data
@@ -116,14 +120,15 @@ int16_t BspAdcGetValue(Adc hardware_device) {
 }
 
 /**
- * @brief   Gets converted ADC value in units of mV.
- * @param   None
- * @return  millivoltage value ADC measurement
+ * @brief   Provides the ADC value in millivolts of the channel at the specified
+ * index
+ * @param   hardwareDevice pedal enum that represents the specific device
+ * @return  ADC value in millivolts
  */
 int16_t BspAdcGetMillivoltage(Adc hardware_device) {
     // Get ADC raw data
     int16_t data = (int16_t)adc_results[hardware_device];
 
     // Convert to millivoltage
-    return (int16_t)((ADC_RANGE_MILLIVOLTS * data) >> BSP_ADC_PRECISION_BITS);
+    return (int16_t)((ADC_RANGE_MILLIVOLTS * data) >> ADC_PRECISION_BITS);
 }

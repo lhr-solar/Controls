@@ -1,4 +1,9 @@
-/* Copyright (c) 2020 UT Longhorn Racing Solar */
+/**
+ * @file    BSP_UART.c
+ * @details The implementation uses receive and transmit FIFOs, as well as
+ * receive and transmit callbacks in order to be able to send and receive longer
+ * messages without losing any data.
+ */
 
 #include "BSP_UART.h"
 
@@ -154,19 +159,28 @@ static void bspUartInitInternal(Callback rx_callback, Callback tx_callback,
     }
 }
 
+/**
+ * @brief   Initializes the UART peripheral
+ * @param   usart which UART to initialize (2 or 3)
+ * @return  None
+ */
 void BspUartInit(Uart usart) {
     // Not using callbacks for now
     bspUartInitInternal(NULL, NULL, usart);
 }
 
 /**
- * @brief   Gets one line of ASCII text that was received. The '\n' and '\r'
- * characters will not be stored (tested on Putty on Windows)
- * @pre     str should be at least 128bytes long.
- * @param   str : pointer to buffer to store the string. This buffer should be
- * initialized before hand.
- * @param   usart : which usart to read from (2 or 3)
+ * @brief   Gets one line of ASCII text that was received
+ *          from a specified UART device
+ * @pre     str should be at least 128 bytes long.
+ * @param   usart device selected
+ * @param   str pointer to buffer string
  * @return  number of bytes that was read
+ *
+ * @note This function uses a fifo to buffer the write. If that
+ *       fifo is full, this function may block while waiting for
+ *       space to open up. Do not call from timing-critical
+ *       sections of code.
  */
 uint32_t BspUartRead(Uart usart, char *str) {
     char data = 0;
@@ -201,10 +215,12 @@ uint32_t BspUartRead(Uart usart, char *str) {
 }
 
 /**
- * @brief   Transmits data to through USART line
- * @param   str : pointer to buffer with data to send.
- * @param   len : size of buffer
- * @param   usart : which usart to read from (2 or 3)
+ * @brief   Transmits data to through a specific
+ *          UART device (represented as a line of data
+ *          in csv file).
+ * @param   usart device selected
+ * @param   str pointer to buffer with data to send.
+ * @param   len size of buffer
  * @return  number of bytes that were sent
  *
  * @note This function uses a fifo to buffer the write. If that

@@ -1,16 +1,14 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file UpdateDisplay.h
- * @brief Function prototypes for the display application.
+ * @brief Maintains a queue of command structures, allowing other tasks to
+ * submit commands and sending out commands to the display as time allows.
  *
- * This contains function prototypes relevant to the UpdateDisplay
- * application. Call assertUpdateDisplayError after calling any of the
- * functions in this application.
+ * Once the UpdateDisplay task has been started, call any of the exposed
+ * UpdateDisplay functions to send a command to the display. Call
+ * UpdateDisplayClearQueue() to clear the queue. The macros defined in
+ * Display.h can be used to set the values of some of the components with more
+ * explicit naming.
  *
- *
- * @defgroup UpdateDisplay
- * @addtogroup UpdateDisplay
- * @{
  */
 
 #ifndef UPDATE_DISPLAY_H
@@ -20,29 +18,56 @@
 #include "common.h"
 
 /**
- * Error types
+ * @brief Error types for UpdateDisplay application
  */
 typedef enum {
+    /** No error */
     kUpdateDisplayErrNone,
-    kUpdateDisplayErrFifoPut,    // Error putting command in fifo
-    kUpdateDisplayErrFifoPop,    // Error popping command from fifo
-    kUpdateDisplayErrParseComp,  // Error parsing component/val in SetComponent
-    kUpdateDisplayErrDriver      // Driver call returned an error
+    /** Error putting command in fifo */
+    kUpdateDisplayErrFifoPut,
+    /** Error popping command from fifo */
+    kUpdateDisplayErrFifoPop,
+    /** Error parsing component/val in SetComponent */
+    kUpdateDisplayErrParseComp,
+    /** Driver call returned an error */
+    kUpdateDisplayErrDriver
 } UpdateDisplayError;
 
 /**
- * For display elements with three states
+ * @brief Three states for display elements
  */
 typedef enum { kState0 = 0, kState1 = 1, kState2 = 2 } TriState;
 
 // For cruise control and regen
+/**
+ * @brief Disabled state for cruise control and regen
+ */
 #define DISP_DISABLED kState0
-#define DISP_ENABLED kState1  // Able to be used
-#define DISP_ACTIVE kState2   // Actively being used right now
+
+/**
+ * @brief Enabled state for cruise control and regen (able to be used)
+ */
+#define DISP_ENABLED kState1
+
+/**
+ * @brief Active state for cruise control and regen (currently being used)
+ */
+#define DISP_ACTIVE kState2
 
 // For gear changes
+/**
+ * @brief Neutral state for gear changes
+ */
 #define DISP_NEUTRAL kState0
+
+/**
+ * @brief Forward state for gear changes
+ */
 #define DISP_FORWARD kState1
+
+/**
+ * @brief Reverse state for gear changes
+ */
 #define DISP_REVERSE kState2
 
 /**
@@ -126,10 +151,7 @@ UpdateDisplayError UpdateDisplaySetCruiseState(TriState state);
 /**
  * @brief Clears the display message queue and sets the message counter
  * semaphore value to 0
- * @param none
- * @returns none
  */
-void UpdateDisplayClearQueue(void);
+void UpdateDisplayClearQueue();
 
 #endif
-/* @} */

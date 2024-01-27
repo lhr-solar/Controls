@@ -1,7 +1,30 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file ReadCarCAN.c
- * @brief
+ * @file ReadCarCan.c
+ *
+ * # Ignition Sequence
+ * ReadCarCan handles precharge for both the array and motor. The ignition
+ * switch has four positions: OFF, LV_ON (low voltage on), ARR_ON (array on),
+ * and MOTOR_ON.
+ * - When turned to ARR_ON, BPS is meant to close their main HV Array Contactor,
+ * and ReadCarCan will detect this change and start the precharge sequence for
+ * the Array. Array precharge is a delay of PRECHARGE_ARRAY_DELAY ms (see
+ * below).
+ * - When turned to MOTOR_ON, ReadCarCan will make sure that both HV+ and HV-
+ * contactors are closed and start the precharge sequence for the Motor. Motor
+ * precharge is a delay of PRECHARGE_PLUS_MINUS_DELAY ms (see below).
+ *
+ * # Other messages
+ * We also expect to receive supplemental voltage (SBPV) and state of charge
+ * (SOC) messages from BPS. SOC is converted to an integer percent. Both SBPV
+ * and SOC are simply stored to show on the display.
+ *
+ * # Implementation Details
+ * The Read Car Can task uses RTOS timers to make sure message timings remain
+ * appropriate. A watchdog is pet on receiving the BPS contactor state message
+ * to ensure that if communication is lost with BPS, the system disables the
+ * contactors. In order to avoid charging in unsafe conditions, a saturation
+ * buffer is used to require that charge enable messages are sufficiently
+ * consistent.
  *
  */
 
@@ -17,33 +40,6 @@
 #include "os.h"
 #include "os_cfg_app.h"
 
-// Length of the array and motor PBC saturation buffers
-#define SAT_BUF_LENGTH 5
-
-// The Array/Motor Controller Saturation Threshold is used to determine if
-// Controls has
-//      received a sufficient number of BPS's HV Array/Plus-Minus Enable
-//      Messages. BPS Array and Plus/Minus saturation threshold is halfway
-//      between 0 and max saturation value.
-#define ARRAY_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4)
-#define PLUS_MINUS_SATURATION_THRESHOLD \
-    (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4)
-
-// Timer delay constants
-#define CAN_WATCH_TMR_DLY_MS 500u  // 500 ms
-#define CAN_WATCH_TMR_DLY_TMR_TS                        \
-    ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / \
-     (1000u))  // 1000 for ms -> s conversion
-
-// Precharge Delay times in milliseconds
-#define PRECHARGE_PLUS_MINUS_DELAY \
-    100u  // 100 ms, as this the smallest time delay that the RTOS can work with
-#define PRECHARGE_ARRAY_DELAY 100u  // 100 ms
-#define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS \
-    ((PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
-#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS \
-    ((PRECHARGE_PLUS_MINUS_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
-
 // High Voltage BPS Contactor bit mapping
 #define HV_ARRAY_CONTACTOR_BIT 1  // 0b001
 #define HV_MINUS_CONTACTOR_BIT 2  // 0b010
@@ -56,6 +52,18 @@
 // State of Charge scalar to scale it to correct fixed point
 #define SOC_SCALER 1000000
 
+// Delay time in timer ticks for the CAN Watchdog Timer
+#define CAN_WATCH_TMR_DLY_TMR_TS \
+    ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
+
+// Delay time in timer ticks for the Motor Precharge Bypass Timer
+#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS \
+    ((PRECHARGE_MOTOR_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
+
+// Delay time in timer ticks for the Array Precharge Bypass Timer
+#define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS \
+    ((PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
+
 // CAN watchdog timer variable
 static OS_TMR can_watch_timer;
 
@@ -65,7 +73,7 @@ static OS_TMR array_pbc_dly_timer;
 // Motor controller precharge bypass contactor delay timer variable
 static OS_TMR motor_controller_pbc_dly_timer;
 
-// NOTE: This should not be written to anywhere other than ReadCarCAN. If the
+// NOTE: This should not be written to anywhere other than ReadCarCan. If the
 // need arises, a mutex to protect it must be added. Indicates whether or not
 // regenerative braking / charging is enabled.
 static bool charge_enable =
@@ -196,7 +204,7 @@ static void updateMCPBC(void) {
 }
 
 /**
- * @brief adds new messages by overwriting old messages in the saturation buffer
+ * @brief Adds new messages by overwriting old messages in the saturation buffer
  * and then updates saturation
  * @param messageState whether bps message was enable (1) or disable (-1)
  */
@@ -226,7 +234,7 @@ static void updateHVArraySaturation(int8_t message_state) {
 }
 
 /**
- * @brief adds new messages by overwriting old messages in the saturation buffer
+ * @brief Adds new messages by overwriting old messages in the saturation buffer
  * and then updates saturation
  * @param messageState whether bps message was  enable (1) or disable (-1)
  */
@@ -328,6 +336,11 @@ void UpdatePrechargeContactors(void) {
     mc_pbc_complete = false;
 }
 
+/**
+ * @brief Task to read CAN messages from the BPS and update the display
+ * @param p_arg pointer that is passed to the task when it is created. Used to
+ * pass the task number.
+ */
 void TaskReadCarCan(void *p_arg) {
     OS_ERR err = 0;
 

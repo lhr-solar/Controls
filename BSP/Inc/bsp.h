@@ -1,11 +1,9 @@
 /**
  * @file
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file bsp.h
  * @brief
  *
- * @defgroup bsp
- * @addtogroup bsp
- * @{
  */
 
 #ifndef BSP_H
@@ -19,5 +17,3 @@
 #include "BSP_UART.h"
 
 #endif
-
-/* @} */

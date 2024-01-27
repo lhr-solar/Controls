@@ -1,19 +1,60 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendTritium.c
- * @brief Function implementations for the SendTritium application.
  *
- * This contains functions relevant to updating the velocity and current
- * setpoitns of the Tritium motor controller. The implementation includes a
- * normal current controlled mode, a one-pedal driving mode (with regenerative
- * braking), and cruise control. The logic is determined through a finite state
- * machine implementation.
+ * SendTritium utilizes an FSM to coordinate what messages should be sent to the
+ * motor controller depending on a certain set of input variables. This FSM
+ * depends on data from across the system, such as the
+ * [Pedals](../Drivers/Pedals.html), the [Switches](../Drivers/Minions.html),
+ * and the CAN messages from BPS (indicating whether charging is enabled).
  *
+ * The FSM has three major modes of operation, which are:
+ * - "Normal" (Current Controlled) mode. This includes the Forward, Neutral, and
+ * Reverse states.
+ * - One Pedal Drive (Velocity Controlled) mode. This is the state where the
+ * driver is only using the accelerator pedal to control the car.
+ * - Cruise Control (Velocity Controlled) mode. This is the state where the
+ * driver is using the cruise control buttons to control the car. This includes
+ * the Record Velocity, Powered Cruise, Coasting Cruise, and Accelerate Cruise
+ * states. The FSM also includes the brake state, which disables One Pedal Drive
+ * or Cruise Control and puts the car in neutral to allow the physical brakes to
+ * be used.
+ *
+ * **Normal** mode allows the driver to control the car with the accelerator
+ * mapped directly to the current setpoint, and the brake pedal tied to the
+ * physical brake. This is similar to operation of a typical vehicle. This
+ * includes three states for the three gears: Forward, Neutral, and Reverse.
+ *
+ * **One Pedal** Drive mode allows the driver to control the car with the
+ * accelerator pedal only. A certain percentage of the pedal is mapped to
+ * regenerative braking, a certain percentage is mapped to coasting, and the
+ * rest is mapped to acceleration. This means that if the driver lifts their
+ * foot completely off the pedal, the car will come to a halt.
+ *
+ * **Cruise Control** mode allows the driver to control the car with the cruise
+ * control buttons. The driver can set the cruise control speed by pressing the
+ * *Cruise Set* button, and the car will maintain that speed until the driver
+ * presses the brake pedal. The driver can also accelerate or decelerate the car
+ * by pressing the accelerator pedal (this will enter the Accelerate Cruise
+ * state).
+ * - A concern with cruise control is that the vehicle operates in the motor
+ * controller's Velocity Controlled mode, which uses motor braking. Since the
+ * car has a one pedal drive, the use of motor braking in conjunction with
+ * physical braking can cause the car to spin out due to a force differential.
+ * To mitigate this, the Powered Cruise/Coasting Cruise distinction was made,
+ * where the car will coast if the observed velocity is greater than the
+ * setpoint (Coasting Cruise), and will use velocity control if the observed
+ * velocity is less than the setpoint (Powered Cruise).
+ *
+ * # Implementation Details
  * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including
- * SendTritium.h, relevant setters will be exposed as externs for unit testing
+ * `SendTritium.h`, relevant setters will be exposed as externs for unit testing
  * and hardware inputs won't be read and motor commands won't be sent over
  * MotorCAN. If the macro SENDTRITIUM_PRINT_MES is also defined prior to
- * including SendTritium.h, debug info will be printed via UART.
+ * including `SendTritium.h`, debug info will be printed via UART.
+ *
+ * # FSM Diagram
+ * @image xml SendTritiumFSM.png
+ *
  */
 
 #include "SendTritium.h"
@@ -29,24 +70,73 @@
 #include "common.h"
 
 // Macros
-#define MAX_VELOCITY 20000.0f  // rpm (unobtainable value)
+/**
+ * @brief Threshold for the motor message counter
+ */
+#define MOTOR_MSG_COUNTER_THRESHOLD ((MOTOR_MSG_PERIOD) / (FSM_PERIOD))
 
-#define MIN_CRUISE_VELOCITY MpsToRpm(20.0f)     // rpm
-#define MAX_GEARSWITCH_VELOCITY MpsToRpm(8.0f)  // rpm
+/**
+ * @brief Maximum velocity of the car in rpm (unobtainable value)
+ */
+#define MAX_VELOCITY 20000.0f
 
-#define BRAKE_PEDAL_THRESHOLD 50  // percent
-#define ACCEL_PEDAL_THRESHOLD 10  // percent
+// Velocity Limits
+/**
+ * @brief Minimum velocity of the car in rpm to enable cruise control
+ */
+#define MIN_CRUISE_VELOCITY MpsToRpm(20.0f)
 
-#define ONEPEDAL_BRAKE_THRESHOLD 25    // percent
-#define ONEPEDAL_NEUTRAL_THRESHOLD 35  // percent
+/**
+ * @brief Maximum velocity of the car in rpm to switch gears
+ */
+#define MAX_GEARSWITCH_VELOCITY MpsToRpm(8.0f)
 
-#define PEDAL_MIN 0         // percent
-#define PEDAL_MAX 100       // percent
-#define CURRENT_SP_MIN 0    // percent
-#define CURRENT_SP_MAX 100  // percent
+// Deadbands & Thresholds
+/**
+ * @brief Minimum brake pedal percentage to engage brake state
+ */
+#define BRAKE_PEDAL_DEADBAND 15
 
-#define GEAR_FAULT_THRESHOLD \
-    3  // number of times gear fault can occur before it is considered a fault
+/**
+ * @brief Minimum accelerator pedal percentage to engage acceleration in
+ * normal drive mode
+ */
+#define ACCEL_PEDAL_DEADBAND 10
+
+/**
+ * @brief One pedal drive mode upper limit for regenerative braking
+ */
+#define ONEPEDAL_BRAKE_THRESHOLD 25
+
+/**
+ * @brief One pedal drive mode upper limit for neutral
+ */
+#define ONEPEDAL_NEUTRAL_THRESHOLD 35
+
+/**
+ * @brief Minimum pedal percentage
+ */
+#define PEDAL_MIN 0
+
+/**
+ * @brief Maximum pedal percentage
+ */
+#define PEDAL_MAX 100
+
+/**
+ * @brief Minimum current setpoint percentage
+ */
+#define CURRENT_SP_MIN 0
+
+/**
+ * @brief Maximum current setpoint percentage
+ */
+#define CURRENT_SP_MAX 100
+
+/**
+ * @brief Number of times gear fault can occur before it is considered a fault
+ */
+#define GEAR_FAULT_THRESHOLD 3
 
 // Inputs
 static bool cruise_enable = false;
@@ -149,7 +239,6 @@ static const TritiumState kFsm[9] = {
     {kAccelerateCruise, &accelerateCruiseHandler, &accelerateCruiseDecider}};
 
 // Helper Functions
-
 /**
  * @brief Converts integer percentage to float percentage
  * @param percent integer percentage from 0-100
@@ -383,10 +472,11 @@ static void forwardDriveHandler() {
         UpdateDisplaySetRegenState(DISP_DISABLED);
         UpdateDisplaySetGear(DISP_FORWARD);
     }
+
     velocity_setpoint = MAX_VELOCITY;
     current_setpoint =
-        percentToFloat(map(accel_pedal_percent, ACCEL_PEDAL_THRESHOLD,
-                           PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+        percentToFloat(map(accel_pedal_percent, ACCEL_PEDAL_DEADBAND, PEDAL_MAX,
+                           CURRENT_SP_MIN, CURRENT_SP_MAX));
 }
 
 /**
@@ -394,7 +484,7 @@ static void forwardDriveHandler() {
  * forward drive state (brake, record velocity, one pedal, neutral drive).
  */
 static void forwardDriveDecider() {
-    if (brake_pedal_percent >= BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent >= BRAKE_PEDAL_DEADBAND) {
         state = kFsm[kBrakeState];
     } else if (cruise_set && cruise_enable &&
                velocity_observed >= MIN_CRUISE_VELOCITY) {
@@ -427,7 +517,7 @@ static void neutralDriveHandler() {
  * neutral drive state (brake, forward drive, reverse drive).
  */
 static void neutralDriveDecider() {
-    if (brake_pedal_percent >= BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent >= BRAKE_PEDAL_DEADBAND) {
         state = kFsm[kBrakeState];
     } else if (gear == kForwardGear &&
                velocity_observed >= -MAX_GEARSWITCH_VELOCITY) {
@@ -450,8 +540,8 @@ static void reverseDriveHandler() {
     }
     velocity_setpoint = -MAX_VELOCITY;
     current_setpoint =
-        percentToFloat(map(accel_pedal_percent, ACCEL_PEDAL_THRESHOLD,
-                           PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+        percentToFloat(map(accel_pedal_percent, ACCEL_PEDAL_DEADBAND, PEDAL_MAX,
+                           CURRENT_SP_MIN, CURRENT_SP_MAX));
     cruise_enable = false;
     one_pedal_enable = false;
 }
@@ -461,7 +551,7 @@ static void reverseDriveHandler() {
  * reverse drive state (brake, neutral drive).
  */
 static void reverseDriveDecider() {
-    if (brake_pedal_percent >= BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent >= BRAKE_PEDAL_DEADBAND) {
         state = kFsm[kBrakeState];
     } else if (gear == kNeutralGear || gear == kForwardGear) {
         state = kFsm[kNeutralDrive];
@@ -485,12 +575,12 @@ static void recordVelocityHandler() {
 }
 
 /**
- * @brief Record kVelocity State Decider. Determines transitions out of record
+ * @brief Record Velocity State Decider. Determines transitions out of record
  * velocity state (brake, neutral drive, one pedal, forward drive, powered
  * cruise).
  */
 static void recordVelocityDecider() {
-    if (brake_pedal_percent >= BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent >= BRAKE_PEDAL_DEADBAND) {
         state = kFsm[kBrakeState];
     } else if (gear == kNeutralGear || gear == kReverseGear) {
         state = kFsm[kNeutralDrive];
@@ -519,7 +609,7 @@ static void poweredCruiseHandler() {
  * velocity, accelerate cruise, coasting cruise).
  */
 static void poweredCruiseDecider() {
-    if (brake_pedal_percent >= BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent >= BRAKE_PEDAL_DEADBAND) {
         state = kFsm[kBrakeState];
     } else if (gear == kNeutralGear || gear == kReverseGear) {
         state = kFsm[kNeutralDrive];
@@ -530,7 +620,7 @@ static void poweredCruiseDecider() {
         state = kFsm[kForwardDrive];
     } else if (cruise_set && velocity_observed >= MIN_CRUISE_VELOCITY) {
         state = kFsm[kRecordVelocity];
-    } else if (accel_pedal_percent >= ACCEL_PEDAL_THRESHOLD) {
+    } else if (accel_pedal_percent >= ACCEL_PEDAL_DEADBAND) {
         state = kFsm[kAccelerateCruise];
     } else if (velocity_observed > cruise_vel_setpoint) {
         state = kFsm[kCoastingCruise];
@@ -553,7 +643,7 @@ static void coastingCruiseHandler() {
  * velocity, accelerate cruise, powered cruise).
  */
 static void coastingCruiseDecider() {
-    if (brake_pedal_percent >= BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent >= BRAKE_PEDAL_DEADBAND) {
         state = kFsm[kBrakeState];
     } else if (gear == kNeutralGear || gear == kReverseGear) {
         state = kFsm[kNeutralDrive];
@@ -564,7 +654,7 @@ static void coastingCruiseDecider() {
         state = kFsm[kForwardDrive];
     } else if (cruise_set && velocity_observed >= MIN_CRUISE_VELOCITY) {
         state = kFsm[kRecordVelocity];
-    } else if (accel_pedal_percent >= ACCEL_PEDAL_THRESHOLD) {
+    } else if (accel_pedal_percent >= ACCEL_PEDAL_DEADBAND) {
         state = kFsm[kAccelerateCruise];
     } else if (velocity_observed <= cruise_vel_setpoint) {
         state = kFsm[kPoweredCruise];
@@ -580,8 +670,8 @@ static void coastingCruiseDecider() {
 static void accelerateCruiseHandler() {
     velocity_setpoint = MAX_VELOCITY;
     current_setpoint =
-        percentToFloat(map(accel_pedal_percent, ACCEL_PEDAL_THRESHOLD,
-                           PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+        percentToFloat(map(accel_pedal_percent, ACCEL_PEDAL_DEADBAND, PEDAL_MAX,
+                           CURRENT_SP_MIN, CURRENT_SP_MAX));
 }
 
 /**
@@ -590,7 +680,7 @@ static void accelerateCruiseHandler() {
  * record velocity, coasting cruise).
  */
 static void accelerateCruiseDecider() {
-    if (brake_pedal_percent >= BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent >= BRAKE_PEDAL_DEADBAND) {
         state = kFsm[kBrakeState];
     } else if (gear == kNeutralGear || gear == kReverseGear) {
         state = kFsm[kNeutralDrive];
@@ -601,7 +691,7 @@ static void accelerateCruiseDecider() {
         state = kFsm[kForwardDrive];
     } else if (cruise_set && velocity_observed >= MIN_CRUISE_VELOCITY) {
         state = kFsm[kRecordVelocity];
-    } else if (accel_pedal_percent < ACCEL_PEDAL_THRESHOLD) {
+    } else if (accel_pedal_percent < ACCEL_PEDAL_DEADBAND) {
         state = kFsm[kCoastingCruise];
     }
 }
@@ -649,7 +739,7 @@ static void onePedalDriveHandler() {
  * drive state (brake, record velocity, neutral drive).
  */
 static void onePedalDriveDecider() {
-    if (brake_pedal_percent >= BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent >= BRAKE_PEDAL_DEADBAND) {
         state = kFsm[kBrakeState];
     } else if (cruise_set && cruise_enable &&
                velocity_observed >= MIN_CRUISE_VELOCITY) {
@@ -685,7 +775,7 @@ static void brakeHandler() {
  * (forward drive, neutral drive).
  */
 static void brakeDecider() {
-    if (brake_pedal_percent < BRAKE_PEDAL_THRESHOLD) {
+    if (brake_pedal_percent < BRAKE_PEDAL_DEADBAND) {
         if (gear == kForwardGear) {
             state = kFsm[kForwardDrive];
         } else if (gear == kNeutralGear || gear == kReverseGear) {
@@ -747,8 +837,8 @@ void TaskSendTritium(void* p_arg) {
 
         putControlModeCAN();
 
-        // Delay of MOTOR_MSG_PERIOD ms
-        OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
+        // Delay of FSM_PERIOD ms
+        OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE) {
             ASSERT_OS_ERROR(err);
         }

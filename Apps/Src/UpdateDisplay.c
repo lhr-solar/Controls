@@ -1,11 +1,15 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file UpdateDisplay.c
- * @brief Function implementations for the display application.
  *
- * This contains functions relevant to modifying states of specific
- * components on our HMI design. The HMI has the ability to indicate
- * relevant information about system status to the driver.
+ * The task implements a queue of command structures. Tasks that wish to
+ * write to the display call one of the wrapper functions exposed in the public
+ * interface. Internally, all of these functions construct a command structure
+ * and then call UpdateDisplayPutNext(), which places the command structure in
+ * the queue and notifies UpdateDisplay. Another internal function,
+ * UpdateDisplayPopNext(), gets called by UpdateDisplay. It blocks on a
+ * semaphore until the queue is not empty, and then grabs the next command
+ * structure. It then parses the command and sends it out over UART. Check these
+ * functions in UpdateDisplay.c for more information.
  *
  */
 
@@ -23,7 +27,7 @@
 #define NUM_COMP_STRINGS 15
 
 /**
- * Creates queue for display commands.
+ * @brief Size of the display queue
  */
 #define DISP_Q_SIZE 10
 
@@ -32,9 +36,10 @@
 #define FIFO_NAME DispFifo
 #include "fifo.h"
 
-// For fault handling
-#define RESTART_THRESHOLD \
-    3  // number of times to reset before displaying the fault screen
+/**
+ * @brief Number of times to reset before displaying the fault screen
+ */
+#define RESTART_THRESHOLD 3
 
 DispFifo msg_queue;
 
@@ -44,9 +49,12 @@ static OS_MUTEX display_q_mutex;  // mutex to ensure thread safety when
                                   // writing/reading to queue
 
 /**
- * Function prototypes
+ * @brief Check for a display error and assert it if it exists.
+ * Stores the error code, calls the main assertion function
+ * and runs a callback function as a handler to restart the display and clear
+ * the queue.
+ * @param   err variable with display error codes
  */
-// check for and assert errors in UpdateDisplay
 static void assertUpdateDisplayError(UpdateDisplayError err);
 
 /**

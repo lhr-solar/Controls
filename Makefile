@@ -76,4 +76,3 @@ format-check:
 	$(MAKE) -C BSP -C STM32F413 format-check
 
 check: format-check format tidy-check
-

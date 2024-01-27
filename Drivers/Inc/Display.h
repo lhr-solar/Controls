@@ -1,14 +1,10 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Display.h
- * @brief Function prototypes for the display driver.
+ * @brief The display driver is responsible for all interactions with the
+ * display. It includes functions to reset the display and to send commands to
+ * it. It also defines a display command struct, from which a command string is
+ * assembled and then sent out to the display.
  *
- * This contains function prototypes relevant to sending/receiving messages
- * to/from our Nextion HMI.
- *
- * @defgroup Display
- * @addtogroup Display
- * @{
  */
 
 #ifndef DISPLAY_H
@@ -17,10 +13,15 @@
 #include "Tasks.h"   // for os and fault error locs
 #include "common.h"  // common headers
 
-#define DISPLAY_CMD_MAX_ARGS 2  // maximum # of arguments in a command packet
+/**
+ * @brief maximum number of arguments in a command packet
+ */
+#define DISPLAY_CMD_MAX_ARGS 2
 
 /**
- * Error types
+ * @brief Error codes for display driver
+ * @note Currently only ERR_NONE and ERR_PARSE are used, since there is a bug
+ * where the nextion does not return errors properly to us.
  */
 typedef enum {  // Currently only ERR_NONE and ERR_PARSE are used
     kDisplayErrNone,
@@ -45,12 +46,13 @@ typedef enum {  // Currently only ERR_NONE and ERR_PARSE are used
 typedef enum { kStartup = 0, kInfo, kFault } Page;
 
 /**
- * Argument types
+ * @brief Argument types
  */
 typedef enum { kStrArg, kIntArg } Arg;
 
 /**
- * Packages relevant display command data
+ * @struct DisplayCmd_t
+ * @brief Packages relevant display command data
  */
 typedef struct {
     char* comp_or_cmd;
@@ -100,5 +102,3 @@ DisplayError DisplayFault(ErrorCode fault_code);
 DisplayError DisplayEvac(uint8_t soc_percent, uint32_t supp_mv);
 
 #endif
-
-/* @} */

@@ -1,12 +1,26 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file SendCarCAN.c
- * @brief Function implementations for the SendCarCAN application.
+ * @file SendCarCan.c
  *
- * This contains functions relevant to placing CAN messages in a CarCAN queue
- * and periodically sending those messages in the SendCarCAN task. This contains
- * functions relevant to placing CAN messages in a CarCAN queue and periodically
- * sending those messages in the SendCarCAN task.
+ * The SendCarCan task is a simple queue consumer task. Multiple
+ * tasks need to write to the CarCAN bus; in order to do this safely,
+ * they append their messages to a CAN queue. The SendCarCan task simply pends
+ * on this queue and forwards messages to the CarCAN bus when any arrive.
+ *
+ * The tasks that produce messages for the SendCarCAN queue include:
+ * - [ReadTritium](./ReadTritium.html) (all messages on MotorCAN bus are echoed
+ * across CarCAN bus)
+ * - [SendTritium](./SendTritium.html) (the current FSM state is echoed across
+ * CarCAN bus for logging)
+ * - PutIOState (the current IO state is echoed across CarCAN bus for logging
+ * and for the ignition sequence)
+ *
+ * # Put IO State Task
+ * The Put IO State task puts the current IO state on the CAN bus. It is used to
+ * send the IO state to Data Acquisition (for logging purposes) and the BPS (for
+ * ignition sequence purposes). Currently, it is written within SendCarCan.c. It
+ * is a separate task from SendCarCan (subject to change). The IO state includes
+ * pedal values, contactor states, all switches/buttons/lights, and a special
+ * bit to tell BPS whether to turn on the HV contactor (for ignition sequence).
  *
  */
 
@@ -21,6 +35,9 @@
 #include "common.h"
 #include "os_cfg_app.h"
 
+/**
+ * @brief Period of the IO state message in milliseconds
+ */
 #define IO_STATE_DLY_MS 250u
 
 #define SENDCARCAN_MSG_SKIP_CTR 3
@@ -29,7 +46,7 @@
 OS_TCB put_io_state_tcb;
 CPU_STK put_io_state_stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 
-// fifo
+// SendCarCAN Queue
 #define FIFO_TYPE CanData
 #define FIFO_SIZE 50
 #define FIFO_NAME Queue
@@ -136,6 +153,9 @@ void TaskSendCarCan(void *p_arg) {
     }
 }
 
+/**
+ * @brief Sends IO information over CarCAN
+ */
 static void putIOState(void) {
     CanData message;
     memset(&message, 0, sizeof message);
@@ -164,10 +184,11 @@ static void putIOState(void) {
 }
 
 /**
- * @brief sends IO information over CarCAN every IO_STATE_DLY_MS
+ * @brief Sends IO information over CarCAN every IO_STATE_DLY_MS
  */
 static void taskPutIoState(void *p_arg) {
     OS_ERR err = 0;
+
     while (1) {
         putIOState();
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
