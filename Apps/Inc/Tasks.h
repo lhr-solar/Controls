@@ -162,7 +162,7 @@ void AssertOsError(OS_ERR err);
 
 #if DEBUG == 1
 #define ASSERT_OS_ERROR(err)                                                \
-    if (err != OS_ERR_NONE) {                                               \
+    if ((err) != OS_ERR_NONE) {                                             \
         printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, \
                err);                                                        \
     }                                                                       \
