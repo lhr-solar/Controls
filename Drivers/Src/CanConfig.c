@@ -50,7 +50,7 @@ const CanLut kCanLut[kMaxCanId] = {
 
 CanId car_can_filter_list[NUM_CARCAN_FILTERS] = {
     kBpsTrip,
-    kBpsContactor,  // Bit 1 and 0 contain BPS HV Plus/Minus (associated Motor
+    kBpsContactor,  // Bit 1 and 0 contain BPS HV Plus-Minus (associated Motor
                     // Controller) Contactor and BPS HV Array Contactor,
                     // respectively
     kStateOfCharge, kSupplementalVoltage};

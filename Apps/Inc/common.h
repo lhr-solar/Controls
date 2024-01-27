@@ -1,7 +1,8 @@
 /**
  * @file common.h
- * @brief
- *
+ * @brief Includes common headers and defines common macros/functions.
+ * 
+ * 
  */
 
 #ifndef COMMON_H
@@ -23,6 +24,9 @@
 
 typedef void (*Callback)(void);
 
+/**
+ * 
+*/
 void PrintFloat(char *str, float value);
 
 #define SEC_PER_MIN 60

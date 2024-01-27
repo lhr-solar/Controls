@@ -415,7 +415,7 @@ void TaskReadCarCan(void *p_arg) {
                 bool hv_array_status =
                     (bool)(data_buf.data[0] & HV_ARRAY_CONTACTOR_BIT);
 
-                // Update HV Array and HV Plus/Minus saturations based on the
+                // Update HV Array and HV Plus-Minus saturations based on the
                 // respective statuses
                 hv_array_status ? updateHVArraySaturation(ENABLE_SATURATION_MSG)
                                 : disableArrayPrechargeBypassContactor();
