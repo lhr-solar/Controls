@@ -15,7 +15,7 @@
 
 /**
  * Task Prototype
-*/
+ */
 void TaskReadCarCan(void* p_arg);
 
 /**

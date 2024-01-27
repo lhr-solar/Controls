@@ -33,7 +33,7 @@ typedef enum {
 
 /**
  * Task Prototype
-*/
+ */
 void TaskReadTritium(void* p_arg);
 
 float MotorRpmGet();

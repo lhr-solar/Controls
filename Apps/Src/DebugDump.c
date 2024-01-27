@@ -24,7 +24,6 @@ void TaskDebugDump(void *p_arg) {
     OS_ERR err = 0;
 
     LOOP {
-
         // Get pedal information
         int8_t accel_pedal = PedalsRead(kAccelerator);
         printf("kAccelerator: %d\n\r", accel_pedal);

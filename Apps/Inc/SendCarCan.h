@@ -8,7 +8,6 @@
  */
 void TaskSendCarCan(void* p_arg);
 
-
 /**
  * @brief Initialize SendCarCAN
  */

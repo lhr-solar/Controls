@@ -320,9 +320,7 @@ void UpdateDisplayClearQueue() {
  * @brief Loops through the display queue and sends all messages
  */
 void TaskUpdateDisplay(void* p_arg) {
-    LOOP {
-        updateDisplayPopNext();
-    }
+    LOOP { updateDisplayPopNext(); }
 }
 
 /**

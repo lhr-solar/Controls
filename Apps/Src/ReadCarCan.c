@@ -376,9 +376,9 @@ void TaskReadCarCan(void *p_arg) {
         // BPS sent a message
         ErrorStatus status = CanBusRead(&data_buf, true, CARCAN);
         if (status != SUCCESS) {
-            #ifndef MOCKING
-                continue;
-            #endif
+#ifndef MOCKING
+            continue;
+#endif
         }
 
         switch (data_buf.id) {  // Switch case based on BPS msg received

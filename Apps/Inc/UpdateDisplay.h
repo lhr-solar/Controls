@@ -50,7 +50,6 @@ typedef enum { kState0 = 0, kState1 = 1, kState2 = 2 } TriState;
  */
 void TaskUpdateDisplay(void* p_arg);
 
-
 /**
  * @brief Initializes UpdateDisplay application
  * @returns UpdateDisplayError_t

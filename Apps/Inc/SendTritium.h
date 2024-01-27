@@ -49,9 +49,8 @@ typedef struct TritiumState {
 
 /**
  * Task Prototype
-*/
+ */
 void TaskSendTritium(void* p_arg);
-
 
 // Getter functions for static variables
 bool GetCruiseEnable(void);
