@@ -113,25 +113,25 @@ C_INCLUDES =  \
 -I../../RTOS/uCOS-III-STM32F4/uC-LIB/ \
 -I../../Tests/Inc/ \
 
+ifeq ($(DEBUG), 1)
+C_DEFS += -g3 -gdwarf-2 -DDEBUG
+endif
+
+ifeq ($(MOTOR_LOOPBACK), 1)
+C_DEFS += -DMOTOR_LOOPBACK
+endif
+
+ifeq ($(CAR_LOOPBACK), 1)
+C_DEFS += -DCAR_LOOPBACK
+endif
+
+# Not mocking -> LOOP = while(1)
+C_DEFS += -D'LOOP=while(1)'
+
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
 CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Werror -fdata-sections -ffunction-sections
-
-ifeq ($(DEBUG), 1)
-CFLAGS += -g3 -gdwarf-2 -DDEBUG
-endif
-
-ifeq ($(MOTOR_LOOPBACK), 1)
-CFLAGS += -DMOTOR_LOOPBACK
-endif
-
-ifeq ($(CAR_LOOPBACK), 1)
-CFLAGS += -DCAR_LOOPBACK
-endif
-
-# Not mocking -> LOOP = while(1)
-CFLAGS += -D'LOOP=while(1)'
 
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
