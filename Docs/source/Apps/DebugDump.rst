@@ -3,4 +3,10 @@ Debug Dump
 **********
 
 .. doxygenfile:: DebugDump.c
-    :sections: briefdescription detaileddescription
+    :sections: briefdescription
+
+=======
+Details
+=======
+.. doxygenfile:: DebugDump.c
+    :sections: detaileddescription

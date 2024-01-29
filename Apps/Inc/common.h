@@ -2,7 +2,6 @@
  * @file common.h
  * @brief Includes common headers and defines common macros/functions.
  * 
- * 
  */
 
 #ifndef COMMON_H
@@ -25,7 +24,9 @@
 typedef void (*Callback)(void);
 
 /**
- * 
+ * @brief Print a float to the console
+ * @param str string to print before the float
+ * @param value float to print
 */
 void PrintFloat(char *str, float value);
 

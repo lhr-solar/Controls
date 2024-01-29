@@ -1,10 +1,12 @@
 /**
  * @file PedalToPercent.c
- * @brief This file contains an array for converting a pedal percentage (the
- * index into the array) into a float between 0 and 1, inclusive. The mapping is
- * currently linear, but this can be changed. The file was created in order to
- * avoid costly floating point operations (since we've turned the floating point
- * unit off).
+ * @brief Contains an array for converting a pedal percentage (the
+ * index into the array) into a float between 0 and 1, inclusive. 
+ * 
+ * The mapping is currently linear, but this can be changed. The Micrium uCOS-III operating system
+ * had a bug where it would not be able to use the floating point unit (FPU). The array in this
+ * file is used to convert the pedal percentage to a float without using the FPU. You can index into
+ * 
  *
  */
 

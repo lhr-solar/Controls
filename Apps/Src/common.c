@@ -1,4 +1,7 @@
-
+/**
+ * @file common.c
+ * 
+*/
 
 #include "common.h"
 
