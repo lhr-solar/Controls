@@ -1,57 +1,61 @@
 /**
  * @file Pedals.c
- * @details **Note:** The brake pedal that is currently in the car isn't quite working, so 
- * it's been switched over to a GPIO pin. The Pedals driver is still used to access 
- * the brake pedal state, but it's now negative logic; a low pedal percentage means 
- * that the brake pedal is pressed down.
- * 
+ * @details **Note:** The brake pedal that is currently in the car isn't quite
+ * working, so it's been switched over to a GPIO pin. The Pedals driver is still
+ * used to access the brake pedal state, but it's now negative logic; a low
+ * pedal percentage means that the brake pedal is pressed down.
+ *
  */
 
 #include "Pedals.h"
 
 // Constants used to tune the pedals
-// Indexed using pedal_t
+// Indexed using Pedal
 // Refine in testing
-static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
-    400, // Accelerator lower bound
-    2100, // Brake lower bound
+static const int16_t kLowerBound[kNumberOfPedals] = {
+    400,   // Accelerator lower bound
+    2100,  // Brake lower bound
 };
 
-static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
-    900, // Accelerator upper bound
-    3300, // Brake upper bound
+static const int16_t kUpperBound[kNumberOfPedals] = {
+    900,   // Accelerator upper bound
+    3300,  // Brake upper bound
 };
 
 /**
- * @brief   Initializes the brake and accelerator by using the 
- *          BSP_ADC_Init function
+ * @brief   Initializes the brake and accelerator
  * @return  None
  */
-void Pedals_Init(){
-    BSP_ADC_Init();
-}
+void PedalsInit() { BspAdcInit(); }
 
 /**
- * @brief   Fetches the millivoltage value of the potentiomenter as provided 
+ * @brief   Fetches the millivoltage value of the potentiomenter as provided
  *          by the ADC channel of the requested pedal (Accelerator or Brake),
- *          converts it to a percentage of the total distance pressed using 
+ *          converts it to a percentage of the total distance pressed using
  *          data from calibration testing, and returns it
- * @param   pedal_t ACCELERATOR or BRAKE
+ * @param   Pedal, ACCELERATOR or BRAKE as defined in enum
  * @return  percent amount the pedal has been pressed in percentage
  */
-int8_t Pedals_Read(pedal_t pedal){
-    if (pedal >= NUMBER_OF_PEDALS) return 0;
-    int16_t millivoltsPedal = (int16_t) BSP_ADC_Get_Millivoltage(pedal);
+int8_t PedalsRead(Pedal pedal) {
+    if (pedal >= kNumberOfPedals) {
+        return 0;
+    }
+    int16_t millivolts_pedal =
+        (int16_t)BspAdcGetMillivoltage((pedal == kAccelerator) ? kCh10 : kCh11);
 
     int8_t percentage = 0;
-    
-    if (millivoltsPedal >= LowerBound[pedal]) {
-        percentage = (int8_t) ( (int32_t) (millivoltsPedal - LowerBound[pedal]) * 100 /
-         (UpperBound[pedal] - LowerBound[pedal]));
+
+    if (millivolts_pedal >= kLowerBound[pedal]) {
+        percentage = (int8_t)((int32_t)(millivolts_pedal - kLowerBound[pedal]) *
+                              100 / (kUpperBound[pedal] - kLowerBound[pedal]));
     }
 
-    if (percentage > 100) return 100;
-    if (percentage <   0) return   0;
+    if (percentage > 100) {
+        return 100;
+    }
+    if (percentage < 0) {
+        return 0;
+    }
 
     return percentage;
 }

@@ -1,12 +1,12 @@
 *************
-CANbus Driver
+CanBus Driver
 *************
 
-.. doxygenfile:: CANbus.h
+.. doxygenfile:: CanBus.h
    :sections: briefdescription
 
-.. doxygenfile:: CANbus.c
+.. doxygenfile:: CanBus.c
    :sections: detaileddescription
 
-.. doxygenfile:: CANbus.h
+.. doxygenfile:: CanBus.h
    :sections: define enum func typedef

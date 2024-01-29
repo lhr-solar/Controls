@@ -1,86 +1,84 @@
 /**
  * @file    BSP_GPIO.c
  * @details
-*/
+ */
 
 #include "BSP_GPIO.h"
+
 #include "Tasks.h"
+#include "common.h"
 
-static GPIO_TypeDef* GPIO_GetPort(port_t port){
- 	const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
+#define NUM_PORTS 4
 
-	return (GPIO_TypeDef *) gpio_mapping[port];
+static GPIO_TypeDef *gpioGetPort(Port port) {
+    const GPIO_TypeDef *gpio_mapping[NUM_PORTS] = {GPIOA, GPIOB, GPIOC, GPIOD};
 
+    return (GPIO_TypeDef *)gpio_mapping[port];
 }
-
 
 /**
  * @brief   Initializes a GPIO port
  * @param   port port to initialize
  * @param	mask pins
- * @param	direction input or output 
+ * @param	direction input or output
  * @return  None
- */ 
+ */
 
-void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction){
-	GPIO_InitTypeDef GPIO_InitStruct;
+void BspGpioInit(Port port, uint16_t mask, Direction direction) {
+    GPIO_InitTypeDef gpio_init_struct;
 
-	RCC_AHB1PeriphClockCmd(1 << port, ENABLE);
-	// Configure the pins to be generic GPIO
-    GPIO_InitStruct.GPIO_Pin   = mask;
-    GPIO_InitStruct.GPIO_Mode  = direction ? GPIO_Mode_OUT : GPIO_Mode_IN;
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Low_Speed;
-    GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_NOPULL;  // TODO: verify
-    
-	// Compute the offset for the port handle from the port passed in
-    GPIO_TypeDef *portHandle = GPIO_GetPort(port);
+    RCC_AHB1PeriphClockCmd(1 << port, ENABLE);
+    // Configure the pins to be generic GPIO
+    gpio_init_struct.GPIO_Pin = mask;
+    gpio_init_struct.GPIO_Mode = direction ? GPIO_Mode_OUT : GPIO_Mode_IN;
+    gpio_init_struct.GPIO_OType = GPIO_OType_PP;
+    gpio_init_struct.GPIO_Speed = GPIO_Low_Speed;
+    gpio_init_struct.GPIO_PuPd = GPIO_PuPd_NOPULL;  // TODO: verify
+
+    // Compute the offset for the port handle from the port passed in
+    GPIO_TypeDef *port_handle = gpioGetPort(port);
 
     // Initialize the GPIO
-    GPIO_Init(portHandle, &GPIO_InitStruct);
+    GPIO_Init(port_handle, &gpio_init_struct);
 }
-
 
 /**
  * @brief   Reads value of the specified port
  * @param   port port to read
  * @return  data in the port
- */ 
+ */
 
-uint16_t BSP_GPIO_Read(port_t port){
-	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+uint16_t BspGpioRead(Port port) {
+    GPIO_TypeDef *gpio_port = gpioGetPort(port);
 
-	return GPIO_ReadInputData(gpio_port);
+    return GPIO_ReadInputData(gpio_port);
 }
-
 
 /**
- * @brief   Writes data to a specified port 
+ * @brief   Writes data to a specified port
  * @param   port port to write to
- * @param   data data to write 
+ * @param   data data to write
  * @return  None
- */ 
+ */
 
-void BSP_GPIO_Write(port_t port, uint16_t data){
-	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+void BspGpioWrite(Port port, uint16_t data) {
+    GPIO_TypeDef *gpio_port = gpioGetPort(port);
 
-	GPIO_Write(gpio_port, data);
+    GPIO_Write(gpio_port, data);
 }
-
 
 /**
  * @brief   Reads data from a specified pin (not applicalbe to output pins)
  * @param   port The port to read from
  * @param   pinmask Mask from stm header file that says which pin to read from
  * @return  State of the pin
- */ 
-uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask){
-	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+ */
 
-	return GPIO_ReadInputDataBit(gpio_port, pinmask);
+uint8_t BspGpioReadPin(Port port, uint16_t pin_mask) {
+    GPIO_TypeDef *gpio_port = gpioGetPort(port);
+
+    return GPIO_ReadInputDataBit(gpio_port, pin_mask);
 }
-
-
 
 /**
  * @brief   Writes data to a specified pin
@@ -88,13 +86,12 @@ uint8_t BSP_GPIO_Read_Pin(port_t port, uint16_t pinmask){
  * @param   pinmask Mask from stm header file that says which pin to write too
  * @param   state true=ON or false=OFF
  * @return  None
- */ 
-void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state){
-	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
-	GPIO_WriteBit(gpio_port, pinmask, (state==ON)?Bit_SET:Bit_RESET);
+ */
+
+void BspGpioWritePin(Port port, uint16_t pin_mask, bool state) {
+    GPIO_TypeDef *gpio_port = gpioGetPort(port);
+    GPIO_WriteBit(gpio_port, pin_mask, (state == ON) ? Bit_SET : Bit_RESET);
 }
-
-
 
 /**
 
@@ -102,10 +99,10 @@ void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state){
  * @param   port The port to get state from
  * @param   pin The pin to get state from
  * @return  1 if pin is high, 0 if low
- */ 
+ */
 
-uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin){
-	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+uint8_t BspGpioGetState(Port port, uint16_t pin) {
+    GPIO_TypeDef *gpio_port = gpioGetPort(port);
 
-	return GPIO_ReadOutputDataBit(gpio_port, pin);	
+    return GPIO_ReadOutputDataBit(gpio_port, pin);
 }

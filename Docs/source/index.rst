@@ -13,35 +13,33 @@ Contributing to the docs
 
 Any change in functionality or interface should be reflected in the docs: out-of-date documentation can often be worse than no documentation at all! Try to update the docs while waiting for the rest of your pull request to get approved.
 
-To ensure all dependencies are installed, run `install.sh` in the `Embedded-Sharepoint <https://github.com/lhr-solar/Embedded-Sharepoint>` for the documentation_toolset package.
+To ensure all dependencies are installed, run ``install.sh`` in the `Embedded-Sharepoint <https://github.com/lhr-solar/Embedded-Sharepoint>`_ for the documentation_toolset package.
 
-To actually build the documentation, run ``make docs``. The resulting ``build/html/index.html`` can then be viewed in any browser. When your pull request is merged into the master branch, the documentation changes should be automatically visible on this website.
+To actually build the documentation, run ``make docs``. The resulting ``build/html/index.html`` can then be viewed in any browser or in the editor using this `VSCode extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server>`_ by navigating to the Controls/Docs/build/html directory. When your pull request is merged into the master branch, the documentation changes should be automatically visible on this website.  
 
 Keep the docs clear and readable. Follow the style of the existing documentation. If you're not sure how to document something, ask someone else on the team.
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
    :caption: Apps
 
-   Apps/Main
-   Apps/ReadCarCAN
+   Apps/Initialization
+   Apps/ReadCarCan
    Apps/ReadTritium
-   Apps/SendCarCAN
+   Apps/SendCarCan
    Apps/UpdateDisplay
    Apps/SendTritium
    Apps/Tasks
    Apps/CommandLine
    Apps/DebugDump
    Apps/PedalToPercent
-   Apps/ErrorHandling
+   Apps/Common
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
    :caption: Drivers
 
-   Drivers/CANbus
+   Drivers/CanBus
    Drivers/Contactors
    Drivers/Display
    Drivers/Minions
@@ -49,7 +47,6 @@ Keep the docs clear and readable. Follow the style of the existing documentation
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
    :caption: BSP
 
    BSP/BSP_ADC

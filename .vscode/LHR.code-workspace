@@ -18,9 +18,7 @@
         },
         "livePreview.defaultPreviewPath": "./Docs/build/html/",
         "C_Cpp.simplifyStructuredComments": false,
-        "files.associations": {
-            "stm32f4xx_gpio.h": "c"
-        },
+        "C_Cpp.autoAddFileAssociations": false
     },
     "tasks": {
         "version": "2.0.0",

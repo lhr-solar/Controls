@@ -1,10 +1,28 @@
-*****
-Tasks
-*****
+*******************
+Tasks Configuration
+*******************
+.. doxygenfile:: Tasks.h
+    :sections: briefdescription
 
-This file contains the storage for all general tasks related objects, including stacks, TCBs, mutexes, and semaphores. All task files include ``Tasks.h`` and thus have access to them.
+.. toctree::
+    :hidden:
+    
+    ./ErrorHandling
 
+=============
+Usage Details
+============= 
+.. doxygenfile:: Tasks.h
+    :sections: detaileddescription
+
+==================
+Functional Details
+==================
+.. doxygenfile:: Tasks.c
+    :sections: detaileddescription
+
+===
 API
 ===
-.. doxygenfile:: Tasks.h
-   
+.. doxygenfile:: Tasks.h    
+    :sections: define enum func typedef

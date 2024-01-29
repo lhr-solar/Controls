@@ -1,6 +1,12 @@
-*****************
-Command Line Task
-*****************
+************
+Command Line
+************
 
 .. doxygenfile:: CommandLine.c
-    :sections: briefdescription detaileddescription
+    :sections: briefdescription 
+    
+=======
+Details
+=======
+.. doxygenfile:: CommandLine.c
+    :sections: detaileddescription

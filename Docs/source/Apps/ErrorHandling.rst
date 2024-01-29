@@ -1,6 +1,6 @@
-****************
+**************
 Error Handling
-****************
+**************
 The Controls system deals with two types of errors: OS Errors and task errors. OS Errors are returned by OS function calls and immediately result in a shutdown of the Controls system. Task errors are thrown by applications as a result of undesirable conditions experienced by the car and are thrown by individual assertion functions local to apps.
 
 OS Errors
@@ -19,7 +19,7 @@ The errors asserted by applications include
 
 * :doc:`ReadTritium <ReadTritium>`: Motor controller errors
     * Errors sent from the motor controller are asserted by ReadTritium. These are typically nonrecoverable, with the exception of the motor watchdog and hall sensor errors.
-* :doc:`ReadCarCAN <ReadCarCAN>`: Contactor disable conditions
+* :doc:`ReadCarCan <ReadCarCan>`: Contactor disable conditions
     * These errors depend on BPS and include charge disable, contactor open, and BPS trip, as well as missed BPS messages.
 * :doc:`UpdateDisplay <UpdateDisplay>`: Display errors
     * While many display errors should exist, the Nextion fails to actually send us any messages. Consequently, the only display errors that can occur are FIFO and parse errors thrown manually in Controls code.

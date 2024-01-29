@@ -1,152 +1,125 @@
 /**
  * @file SendTritium.h
- * @brief The SendTritium task currently houses our velocity control code. 
- * It utilizes a FSM to coordinate what messages should be sent to the motor 
- * controller depending on a certain set of input variables. This FSM depends 
- * on data from across the system, such as the [Pedals](../Drivers/Pedals.html), 
- * the [Switches](../Drivers/Minions.html), and the CAN messages from 
- * BPS (indicating whether charging is enabled).
- * 
+ * @brief Runs the car's State Machine and sends control messages to the Tritium
+ * motor controller.
+ *
+ * Starting the SendTritium task will start sending CAN messages
+ * and running the state machine. For details on the state machine, see
+ *
  */
-#ifndef __SENDTRITIUM_H
-#define __SENDTRITIUM_H
+#ifndef SENDTRITIUM_H
+#define SENDTRITIUM_H
 
 #include "common.h"
 
 /**
- * @def SENDTRITIUM_PRINT_MES
- * @brief Print messages for SendTritium.c
+ * Print messages for SendTritium.c
  */
 // #define SENDTRITIUM_PRINT_MES
 
 /**
- * @def SENDTRITIUM_EXPOSE_VARS
- * @brief Expose variables for SendTritium.c
+ * Expose variables for SendTritium.c
  */
 // #define SENDTRITIUM_EXPOSE_VARS
 
 /**
- * @def MOTOR_MSG_PERIOD
- * @brief Period of the motor CAN message in milliseconds
+ * Expose variables for SendTritium.c
+ */
+// #define SENDTRITIUM_EXPOSE_VARS
+
+/**
+ * Period of the motor CAN message in milliseconds
  */
 #define MOTOR_MSG_PERIOD 100
 
 /**
- * @def FSM_PERIOD
- * @brief Period of the state machine in milliseconds
+ * Period of the state machine in milliseconds
  */
 #define FSM_PERIOD 100
 
 /**
- * @def DEBOUNCE_PERIOD
- * @brief Period of the debouncer in units of FSM_PERIOD
+ * Period of the debouncer in units of FSM_PERIOD
  */
 #define DEBOUNCE_PERIOD 2
 
 /**
  * Generate enum list for Gear_t
-*/
-#define FOREACH_Gear(GEAR) \
-        GEAR(FORWARD_GEAR),   \
-        GEAR(NEUTRAL_GEAR),  \
-        GEAR(REVERSE_GEAR),   \
+ */
+#define FOREACH_GEAR(GEAR) \
+    GEAR(kForwardGear), GEAR(kNeutralGear), GEAR(kReverseGear),
 
 /**
- * @enum Gear_t
- * @brief Enumerated list of gears
-*/
-typedef enum GEAR_ENUM {
-    FOREACH_Gear(GENERATE_ENUM)
-    NUM_GEARS,
-} Gear_t;
+ * Gears
+ */
+typedef enum {
+    FOREACH_GEAR(GENERATE_ENUM) kNumGears,
+} Gear;
 
 /**
- * @enum TritiumStateName_t
- * @brief Enumerated list of states for the FSM
-*/
-typedef enum{
+ * States for the FSM
+ */
+typedef enum {
     /** Forward drive state */
-    FORWARD_DRIVE,   
+    kForwardDrive,
     /** Neutral drive state */
-    NEUTRAL_DRIVE,   
+    kNeutralDrive,
     /** Reverse drive state */
-    REVERSE_DRIVE,   
+    kReverseDrive,
     /** Record velocity state (cruise) */
-    RECORD_VELOCITY, 
+    kRecordVelocity,
     /** Powered cruise state (cruise) */
-    POWERED_CRUISE,  
+    kPoweredCruise,
     /** Coasting cruise state (cruise) */
-    COASTING_CRUISE, 
+    kCoastingCruise,
     /** Brake state */
-    BRAKE_STATE,     
+    kBrakeState,
     /** One pedal state (regen) */
-    ONEPEDAL,        
+    kOnePedal,
     /** Accelerate cruise state (cruise) */
-    ACCELERATE_CRUISE   
-} TritiumStateName_t;
+    kAccelerateCruise
+} TritiumStateName;
 
 /**
- * @struct TritiumState_t
- * @brief Struct containing the state name, state handler, and state decider
+ * Struct containing the state name, state handler, and state decider
  * function for the Tritium FSM
-*/
-typedef struct TritiumState{
+ */
+typedef struct TritiumState {
     /** Name of the state */
-    TritiumStateName_t name;   
-    /** Function pointer to the state handler */ 
+    TritiumStateName name;
+    /** Function pointer to the state handler */
     void (*stateHandler)(void);
-    /** Function pointer to the state decider */ 
-    void (*stateDecider)(void); 
-} TritiumState_t;
+    /** Function pointer to the state decider */
+    void (*stateDecider)(void);
+} TritiumState;
+
+// Getter functions for static variables
+bool GetCruiseEnable(void);
+bool GetCruiseSet(void);
+bool GetOnePedalEnable(void);
+bool GetRegenEnable(void);
+uint8_t GetBrakePedalPercent(void);
+uint8_t GetAccelPedalPercent(void);
+Gear GetGear(void);
+TritiumState GetState(void);
+float GetVelocityObserved(void);
+float GetCruiseVelSetpoint(void);
+float GetCurrentSetpoint(void);
+float GetVelocitySetpoint(void);
 
 #ifdef SENDTRITIUM_EXPOSE_VARS
-// Inputs
-extern bool cruiseEnable;
-extern bool cruiseSet;
-extern bool onePedalEnable;
-extern bool regenEnable;
-
-extern uint8_t brakePedalPercent;
-extern uint8_t accelPedalPercent;
-
-extern Gear_t gear;
-
-extern TritiumState_t state;
-extern float velocityObserved;
-extern float cruiseVelSetpoint;
-#endif
-
-// Getter functions for local variables in SendTritium.c
-EXPOSE_GETTER(bool, cruiseEnable)
-EXPOSE_GETTER(bool, cruiseSet)
-EXPOSE_GETTER(bool, onePedalEnable)
-EXPOSE_GETTER(bool, regenEnable)
-EXPOSE_GETTER(uint8_t, brakePedalPercent)
-EXPOSE_GETTER(uint8_t, accelPedalPercent)
-EXPOSE_GETTER(Gear_t, gear)
-EXPOSE_GETTER(TritiumState_t, state)
-EXPOSE_GETTER(float, velocityObserved)
-EXPOSE_GETTER(float, cruiseVelSetpoint)
-EXPOSE_GETTER(float, currentSetpoint)
-EXPOSE_GETTER(float, velocitySetpoint)
-
-// Setter functions for local variables in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
-EXPOSE_SETTER(bool, cruiseEnable)
-EXPOSE_SETTER(bool, cruiseSet)
-EXPOSE_SETTER(bool, onePedalEnable)
-EXPOSE_SETTER(bool, regenEnable)
-EXPOSE_SETTER(uint8_t, brakePedalPercent)
-EXPOSE_SETTER(uint8_t, accelPedalPercent)
-EXPOSE_SETTER(Gear_t, gear)
-EXPOSE_SETTER(TritiumState_t, state)
-EXPOSE_SETTER(float, velocityObserved)
-EXPOSE_SETTER(float, cruiseVelSetpoint)
-EXPOSE_SETTER(float, currentSetpoint)
-EXPOSE_SETTER(float, velocitySetpoint)
+// Setter functions for static variables
+void SetCruiseEnable(bool value);
+void SetCruiseSet(bool value);
+void SetOnePedalEnable(bool value);
+void SetRegenEnable(bool value);
+void SetBrakePedalPercent(uint8_t value);
+void SetAccelPedalPercent(uint8_t value);
+void SetGear(Gear value);
+void SetState(TritiumState value);
+void SetVelocityObserved(float value);
+void SetCruiseVelSetpoint(float value);
+void SetCurrentSetpoint(float value);
+void SetVelocitySetpoint(float value);
 #endif
 
 #endif
-
-
-
