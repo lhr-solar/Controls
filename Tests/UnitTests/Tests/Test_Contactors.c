@@ -2,7 +2,8 @@
  * @copyright Copyright (c) 2018-2024 UT Longhorn Racing Solar
  * @file Test_Contactors.c
  * @brief An annotated example unit test written for the driver Contactors.c
- * 
+ * Thing tested: Contactors functions
+ * Mocks used: BSP, OS (though all things not tested are still mocked)
  */
 
 #include "unity.h" // Contains assertions for testing
@@ -19,13 +20,14 @@ DEFINE_FFF_GLOBALS;
 // Special function required by Unity that will run before each test
 void setUp(void){
     // Reset the fakes' call and argument history between tests
-     // Would eventually like to make this part less tedious,
-     // but also you'll need to deal with all of these anyways    
-    RESET_FAKE(BspGpioWritePin) // not really needed
-    RESET_FAKE(BspGpioInit) // technically not needed since we only use this in one test
-    RESET_FAKE(BspGpioGetState) // ""
-    RESET_FAKE(OSMutexPend) // ""
-    RESET_FAKE(OSMutexPost) // ""
+    // This is important if you'll be using this functions in multiple tests 
+    // In our case we don't need them since we don't use functions between tests,
+    // but this is what you would do:
+    RESET_FAKE(BspGpioWritePin)
+    RESET_FAKE(BspGpioInit)
+    RESET_FAKE(BspGpioGetState)
+    RESET_FAKE(OSMutexPend)
+    RESET_FAKE(OSMutexPost)
 }
 
 
@@ -35,7 +37,7 @@ void tearDown(void){
 }
 
 
-// Helper functions
+// **** Helper functions **** //
 static uint32_t count_instances_int(int match, int* array, uint32_t numElems) {
     uint32_t num = 0;
     for (uint16_t i = 0; i < numElems; i++) {
@@ -68,13 +70,15 @@ static uint32_t count_instances_bool(bool match, bool* array, uint32_t numElems)
 }
 
 
-// Tests
+
+// **** Tests ****//
+
 void test_ContactorsInit(){
     ContactorsInit();
     // Check that BspGpioInit was called to initialize
     // Contactors port for Array and Motor Precharge pins to be outputs
     TEST_ASSERT_EQUAL(1, BspGpioInit_fake.call_count); // Should have called BspGpioInit once
-    TEST_ASSERT_EQUAL(CONTACTORS_PORT, BspGpioInit_fake.arg0_val); 
+    TEST_ASSERT_EQUAL(CONTACTORS_PORT, BspGpioInit_fake.arg0_val); // First argument to BspGpioInit should be CONTACTORS_PORT
     TEST_ASSERT_EQUAL((ARRAY_PRECHARGE_BYPASS_PIN | MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN), BspGpioInit_fake.arg1_val);
     TEST_ASSERT_EQUAL (1, BspGpioInit_fake.arg2_val);
 
@@ -112,23 +116,27 @@ void test_ContactorsSet(){
                 
                 uint16_t pin_mask = 0;
                 
+                // Set which pin we should see targeted
                 if (contactor == kArrayPrechargeBypassContactor) {
                     pin_mask = ARRAY_PRECHARGE_BYPASS_PIN;
                 } else if (contactor == kMotorControllerPrechargeBypassContactor) {
                     pin_mask = MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN;
                 }
                 
+                // Run ContactorsSet and check that BspGpioWritePin was called with the correct parameters
                 ContactorsSet((Contactor)contactor, (bool)state, (bool)blocking);
                 TEST_ASSERT_EQUAL(CONTACTORS_PORT, BspGpioWritePin_fake.arg0_val);
                 TEST_ASSERT_EQUAL(pin_mask, BspGpioWritePin_fake.arg1_val);
                 TEST_ASSERT_EQUAL(state, BspGpioWritePin_fake.arg2_val);
 
+                // Check if the call followed the blocking/non-blocking parameter value
                 if (blocking){
-                    TEST_ASSERT_EQUAL(OS_OPT_PEND_BLOCKING, OSMutexPend_fake.arg1_val);    
+                    TEST_ASSERT_EQUAL(OS_OPT_PEND_BLOCKING, OSMutexPend_fake.arg2_val);    
                 } else {
-                    TEST_ASSERT_EQUAL(OS_OPT_PEND_BLOCKING, OSMutexPend_fake.arg1_val);
+                    TEST_ASSERT_EQUAL(OS_OPT_PEND_NON_BLOCKING, OSMutexPend_fake.arg2_val);
                 }
 
+                // Check that we pended and posted to a mutex
                 mutex_calls++;
                 TEST_ASSERT_EQUAL(mutex_calls, OSMutexPend_fake.call_count);
                 TEST_ASSERT_EQUAL(mutex_calls, OSMutexPost_fake.call_count);
@@ -137,6 +145,7 @@ void test_ContactorsSet(){
         }
     }
     
+    // Check that BspGpioWritePin was called once for each call to ContactorsSet
     TEST_ASSERT_EQUAL(kNumContactors * BOOL_STATES * BOOL_STATES, BspGpioWritePin_fake.call_count);
 }
 
