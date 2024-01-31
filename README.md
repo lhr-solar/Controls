@@ -83,7 +83,7 @@ make clean
 
 ### Usage
 
-Follow our [documentation](https://utexas.sharepoint.com/:w:/s/ENGR-LonghornRacing/EUx6dS9swT1Js18ZlOrAfJIBKsM_7dLuQ818EnGZKrpbAQ?e=PyRIyh) to set up the Controls test rig, power the board with 12V, and use ```make flash``` to flash the board with your ```Objects/controls-leader.elf``` executable, either built from source using ```make leader``` or placed in the Objects folder from your intended release.
+Follow our [integration documentation](https://utexas.sharepoint.com/:w:/s/ENGR-LonghornRacing/EUx6dS9swT1Js18ZlOrAfJIBKsM_7dLuQ818EnGZKrpbAQ?e=PyRIyh) to set up the Controls test rig, power the board with 12V, and use ```make flash``` to flash the board with your ```Objects/controls-leader.elf``` executable, either built from source using ```make leader``` or placed in the Objects folder from your intended release.
 
 ### Running Tests
 
