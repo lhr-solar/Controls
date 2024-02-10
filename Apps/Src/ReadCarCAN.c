@@ -256,8 +256,8 @@ static void updateHVPlusMinusSaturation(int8_t messageState){
 */
  void updatePrechargeContactors(void){
 
-    arrIgnStatus = (!Minions_Read(IGN_1));
-    mcIgnStatus = (!Minions_Read(IGN_2));
+    arrIgnStatus = (Minions_Read(IGN_1));
+    mcIgnStatus = (Minions_Read(IGN_2));
 
     // Logic helper in cases both are off or (impossible) on 
     bool bothStatusOff = !mcIgnStatus && !arrIgnStatus;
