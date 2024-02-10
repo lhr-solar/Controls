@@ -34,9 +34,8 @@ void TaskDebugDump(void *p_arg) {
         // Get minion information
         for (Pin pin = 0; pin < kNumPins; pin++) {
             bool pin_state = MinionsRead(pin);
-            // Ignition pins are negative logic, special-case them
             printf("%s: %s\n\r", minionpin_string[pin],
-                   pin_state ^ (pin == kIgn1 || pin == kIgn2) ? "on" : "off");
+                   pin_state ? "on" : "off");
         }
 
         // Get contactor info
