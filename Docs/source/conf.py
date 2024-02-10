@@ -205,12 +205,19 @@ breathe_doxygen_config_options = {'QUIET': 'YES', 'WARNINGS': 'NO'} # did this s
 autosectionlabel_prefix_document = True
 
 confluence_space_key = 'LHRSOLAR'
-confluence_parent_page = 'Controls API Docs'
+confluence_parent_page = 'Controls Software'
 confluence_server_url = 'https://wikis.utexas.edu'
-confluence_server_user = 'iud58'
+# confluence_server_user = 'iud58'
 # confluence_ask_password = True
 # confluence_publish_dryrun = True
 confluence_editor = 'v2'
-confluence_ask_user = True
+# confluence_ask_user = True
+confluence_page_hierarchy = True
 confluence_publish = True
-confluence_publish_token = 'OTEzMTYwNTk5NTExOoaKYqFQTGtE1P3yqSRHYlvEIBBU'
+confluence_publish_prefix = 'Controls APIDoc 22-24: '
+
+import os
+confluence_publish_token = os.environ['CONFLUENCE_PAT']#'OTEzMTYwNTk5NTExOoaKYqFQTGtE1P3yqSRHYlvEIBBU'
+
+confluence_cleanup_search_mode = 'search'
+confluence_cleanup_purge = True
