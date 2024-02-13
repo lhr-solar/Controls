@@ -62,7 +62,6 @@ Please review [Setting Up an Embedded Development Environment](https://wikis.ute
     * stlink-tools
     * Renode Simulator
     * Documentation Tools (Sphinx, Doxygen, and Breathe)
-
 The script will prompt for installation of each of these packages.
 
 1. Add ```source /path/to/Controls/Scripts/load_env_vars.sh``` to the end of your ```~/.bashrc``` file in order to load the necessary environment variables on shell startup. A typical example: ```source /${HOME}/LHR/Controls/Scripts/load_env_vars.sh```
