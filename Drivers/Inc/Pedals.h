@@ -32,7 +32,7 @@ void PedalsInit(void);
  * @param   pedal_t pedal, ACCELERATOR or BRAKE as defined in enum
  * @return  distance the pedal has been pressed in percentage
  */
-int8_t PedalsRead(Pedal pedal);
+uint8_t PedalsRead(Pedal pedal);
 
 #endif
 
