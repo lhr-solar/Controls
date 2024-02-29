@@ -57,10 +57,8 @@ uint8_t PedalsRead(Pedal pedal) {
     uint8_t percentage = 0;
 
     // Converts from millivolts to percent using pedal bounds
-    if (millivolts_pedal > kLowerBound[pedal]) {
-        percentage = (uint8_t)((millivolts_pedal - kLowerBound[pedal]) * 100) /
-                     (kUpperBound[pedal] - kLowerBound[pedal]);
-    }
+    percentage = (uint8_t)((millivolts_pedal - kLowerBound[pedal]) * 100) /
+                 (kUpperBound[pedal] - kLowerBound[pedal]);
 
     return percentage;
 }
