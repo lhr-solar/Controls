@@ -31,7 +31,7 @@ void Task1(){
 int main(){
     OS_ERR err;
     OSInit(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 
     OSTaskCreate(
         (OS_TCB*)&Task1_TCB,
@@ -48,8 +48,8 @@ int main(){
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_STK_CHK),
         (OS_ERR*)&err
     );
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
     
     OSStart(&err);
-    assertOSError(OS_MAIN_LOC, err);
+    assertOSError(err);
 }

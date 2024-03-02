@@ -13,9 +13,6 @@ typedef enum {OFF = 0, ON} State;
 // Wheel diameter in meters
 #define WHEEL_CIRCUMFERENCE 3.35145104  // m
 
-#define PRECHARGE_MOTOR_DELAY 7     // 7 Seconds
-#define PRECHARGE_ARRAY_DELAY 2     // 2 Seconds
-
 // Used by the system for errors
 #ifndef __STM32F4xx_H
 typedef enum {ERROR = 0, SUCCESS = !ERROR} ErrorStatus;

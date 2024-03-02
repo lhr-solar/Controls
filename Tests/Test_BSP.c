@@ -210,11 +210,11 @@ int main() {
             printf("MOTOR PRECHARGE STATE SET TO: ON \n");
             break;
         case 2:
-            BSP_Precharge_Write(ARRAY_PRECHARGE, OFF);
+            BSP_Precharge_Write(ARRAY_PRECHARGE_BYPASS_CONTACTOR, OFF);
             printf("ARRAY PRECHARGE STATE SET TO: OFF\n");
             break;
         case 3:
-            BSP_Precharge_Write(ARRAY_PRECHARGE, ON);
+            BSP_Precharge_Write(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON);
             printf("ARRAY PRECHARGE STATE SET TO: ON \n");
             break;
         default:

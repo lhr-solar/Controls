@@ -1,20 +1,19 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Tasks.h
- * @brief 
- * 
+ * @brief
+ *
  * @defgroup Tasks
  * @addtogroup Tasks
  * @{
  */
 
-
-#ifndef __TASKS_H
-#define __TASKS_H
+#ifndef TASKS_H
+#define TASKS_H
 
 #include "common.h"
-#include "os.h"
 #include "config.h"
+#include "os.h"
 
 /**
  * Task initialization macro
@@ -27,183 +26,154 @@
 /**
  * Priority Definitions
  */
-#define TASK_FAULT_STATE_PRIO               1
-#define TASK_INIT_PRIO                      2
-#define TASK_READ_TRITIUM_PRIO              3
-#define TASK_SEND_TRITIUM_PRIO              4
-#define TASK_READ_CAR_CAN_PRIO              5
-#define TASK_UPDATE_DISPLAY_PRIO            6
-#define TASK_SEND_CAR_CAN_PRIO              8
-#define TASK_TELEMETRY_PRIO                 9
-#define TASK_DEBUG_DUMP_PRIO                10
-#define TASK_COMMAND_LINE_PRIO              11
+#define TASK_INIT_PRIO 2
+#define TASK_READ_TRITIUM_PRIO 3
+#define TASK_SEND_TRITIUM_PRIO 4
+#define TASK_READ_CAR_CAN_PRIO 5
+#define TASK_SEND_CAR_CAN_PRIO 6
+#define TASK_PUT_IOSTATE_PRIO 7
+#define TASK_UPDATE_DISPLAY_PRIO 8
+#define TASK_DEBUG_DUMP_PRIO 9
+#define TASK_COMMAND_LINE_PRIO 10
 
 /**
  * Stack Sizes
  */
-#define DEFAULT_STACK_SIZE                  256
-#define WATERMARK_STACK_LIMIT               DEFAULT_STACK_SIZE/2
+#define DEFAULT_STACK_SIZE 256
+#define WATERMARK_STACK_LIMIT (DEFAULT_STACK_SIZE / 2)
 
-#define TASK_FAULT_STATE_STACK_SIZE         DEFAULT_STACK_SIZE
-#define TASK_INIT_STACK_SIZE                DEFAULT_STACK_SIZE
-#define TASK_SEND_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_READ_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_UPDATE_DISPLAY_STACK_SIZE      DEFAULT_STACK_SIZE
-#define TASK_READ_TRITIUM_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
-#define TASK_TELEMETRY_STACK_SIZE           DEFAULT_STACK_SIZE
-#define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
-#define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
+#define TASK_INIT_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_SEND_TRITIUM_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_READ_CAR_CAN_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_UPDATE_DISPLAY_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_READ_TRITIUM_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_SEND_CAR_CAN_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_DEBUG_DUMP_STACK_SIZE DEFAULT_STACK_SIZE
+#define TASK_COMMAND_LINE_STACK_SIZE DEFAULT_STACK_SIZE
 
+/**
+ * Task error variable type
+ */
+typedef uint16_t ErrorCode;
 
 /**
  * Task Prototypes
  */
-void Task_FaultState(void* p_arg);
-
-void Task_Init(void* p_arg);
-
-void Task_SendTritium(void* p_arg);
-
-void Task_ReadCarCAN(void* p_arg);
-
-void Task_UpdateDisplay(void* p_arg);
-
-void Task_ReadTritium(void* p_arg);
-
-void Task_SendCarCAN(void* p_arg);
-
-void Task_Telemetry(void* p_arg);
-
-void Task_DebugDump(void *p_arg);
-
-void Task_CommandLine(void* p_arg);
+void TaskInit(void* p_arg);
+void TaskSendTritium(void* p_arg);
+void TaskReadCarCan(void* p_arg);
+void TaskUpdateDisplay(void* p_arg);
+void TaskReadTritium(void* p_arg);
+void TaskSendCarCan(void* p_arg);
+void TaskDebugDump(void* p_arg);
+void TaskCommandLine(void* p_arg);
 
 /**
  * TCBs
  */
-extern OS_TCB FaultState_TCB;
-extern OS_TCB Init_TCB;
-extern OS_TCB SendTritium_TCB;
-extern OS_TCB ReadCarCAN_TCB;
-extern OS_TCB UpdateDisplay_TCB;
-extern OS_TCB ReadTritium_TCB;
-extern OS_TCB SendCarCAN_TCB;
-extern OS_TCB Telemetry_TCB;
-extern OS_TCB DebugDump_TCB;
-extern OS_TCB CommandLine_TCB;
-
+extern OS_TCB init_tcb;
+extern OS_TCB send_tritium_tcb;
+extern OS_TCB read_car_can_tcb;
+extern OS_TCB update_display_tcb;
+extern OS_TCB read_tritium_tcb;
+extern OS_TCB send_car_can_tcb;
+extern OS_TCB debug_dump_tcb;
+extern OS_TCB command_line_tcb;
 
 /**
  * Stacks
  */
-extern CPU_STK FaultState_Stk[TASK_FAULT_STATE_STACK_SIZE];
-extern CPU_STK Init_Stk[TASK_INIT_STACK_SIZE];
-extern CPU_STK SendTritium_Stk[TASK_SEND_TRITIUM_STACK_SIZE];
-extern CPU_STK ReadCarCAN_Stk[TASK_READ_CAR_CAN_STACK_SIZE];
-extern CPU_STK UpdateDisplay_Stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
-extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
-extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
-extern CPU_STK Telemetry_Stk[TASK_TELEMETRY_STACK_SIZE];
-extern CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
-extern CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
+extern CPU_STK init_stk[TASK_INIT_STACK_SIZE];
+extern CPU_STK send_tritium_stk[TASK_SEND_TRITIUM_STACK_SIZE];
+extern CPU_STK read_car_can_stk[TASK_READ_CAR_CAN_STACK_SIZE];
+extern CPU_STK update_display_stk[TASK_UPDATE_DISPLAY_STACK_SIZE];
+extern CPU_STK read_tritium_stk[TASK_READ_TRITIUM_STACK_SIZE];
+extern CPU_STK send_car_can_stk[TASK_SEND_CAR_CAN_STACK_SIZE];
+extern CPU_STK debug_dump_stk[TASK_DEBUG_DUMP_STACK_SIZE];
+extern CPU_STK command_line_stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 /**
  * Queues
  */
-extern OS_Q CANBus_MsgQ;
-
-/**
- * Semaphores
- */
-extern OS_SEM FaultState_Sem4;
+extern OS_Q can_bus_msg_q;
 
 /**
  * @brief Initialize the task switch hook
  * Registers the hook with the RTOS
  */
-void TaskSwHook_Init(void);
-
-
-/**
- * Global Variables
- */
-
-
-/**
- * OS Error States
- * 
- * Stores error data to indicate which part of the code
- * an error is coming from.
- */
-typedef enum{
-    OS_NONE_LOC = 0x000,
-    OS_ARRAY_LOC = 0x001,
-    OS_READ_CAN_LOC = 0x002,
-    OS_READ_TRITIUM_LOC = 0x004,
-    OS_SEND_CAN_LOC = 0x008,
-    OS_SEND_TRITIUM_LOC = 0x010,
-    OS_UPDATE_VEL_LOC = 0x020,
-    OS_CONTACTOR_LOC = 0x080,
-    OS_MINIONS_LOC = 0x100,
-    OS_MAIN_LOC = 0x200,
-    OS_CANDRIVER_LOC = 0x400,
-    OS_MOTOR_CONNECTION_LOC = 0x800,
-    OS_DISPLAY_LOC = 0x1000
-} os_error_loc_t;
-
-/**
- * Fault Enum
- * 
- * Different fault states that need to be handled by the FaultState task
- */
-typedef enum{
-    FAULT_NONE = 0x00,      // No fault
-    FAULT_OS = 0x01,         // for OS faults
-    FAULT_UNREACH = 0x02,    // for unreachable conditions
-    FAULT_TRITIUM = 0x04,      // for errors sent from the tritium
-    FAULT_READBPS = 0x08,    // for unsuccessfully reading from BPS CAN
-    FAULT_DISPLAY = 0x10,    // for display faults
-    FAULT_BPS = 0x20,       // for if BPS trips
-} fault_bitmap_t;
+void TaskSwHookInit(void);
 
 /**
  * Task trace
- * 
+ *
  * Stores the last TASK_TRACE_LENGTH tasks that were run
  * The most recent task is at tasks[index], the one before at tasks[index-1],
  * wrapping back around at the beginnning
- * 
+ *
  */
 #define TASK_TRACE_LENGTH 8
 typedef struct {
-    OS_TCB *tasks[TASK_TRACE_LENGTH];
+    OS_TCB* tasks[TASK_TRACE_LENGTH];
     uint32_t index;
-} task_trace_t;
+} TaskTrace;
 
-extern task_trace_t PrevTasks;
+extern TaskTrace prev_tasks;
+
+// Store error codes that are set in task error assertion functions
+extern ErrorCode error_read_tritium;
+extern ErrorCode error_read_car_can;
+extern ErrorCode error_update_display;
 
 /**
- * Error variables
+ * Error-handling option enums
  */
-extern fault_bitmap_t FaultBitmap;
-extern os_error_loc_t OSErrLocBitmap;
+
+// Scheduler lock parameter option for asserting a task error
+typedef enum { kOptNoLockSched, kOptLockSched } ErrorSchedulerLockOpt;
+
+// Recoverable/nonrecoverable parameter option for asserting a task error
+typedef enum { kOptRecov, kOptNonrecov } ErrorRecovOpt;
+
+/**
+ * @brief For use in error handling: opens array and motor precharge bypass
+ * contactor and turns on additional brakelight to signal that a critical error
+ * happened.
+ */
+void EmergencyContactorOpen();
+
+/**
+ * @brief Assert a task error by setting the location variable and optionally
+ * locking the scheduler, displaying a fault screen (if nonrecoverable), jumping
+ * to a callback function, and entering an infinite loop. Called by
+ * task-specific error-assertion functions that are also responsible for setting
+ * the error variable.
+ * @param errorCode the enum for the specific error that happened
+ * @param errorCallback a callback function to a handler for that specific
+ * error,
+ * @param lockSched whether or not to lock the scheduler to ensure the error is
+ * handled immediately
+ * @param nonrecoverable whether or not to kill the motor, display the fault
+ * screen, and enter an infinite while loop
+ */
+void ThrowTaskError(ErrorCode error_code, Callback error_callback,
+                    ErrorSchedulerLockOpt lock_sched,
+                    ErrorRecovOpt nonrecoverable);
 
 /**
  * @brief   Assert Error if OS function call fails
- * @param   OS_err_loc Where OS error occured (driver level)
  * @param   err OS Error that occurred
  */
-void _assertOSError(uint16_t OS_err_loc, OS_ERR err); //TODO: This should be changed to enforce only enum usage
+void AssertOsError(OS_ERR err);
 
 #if DEBUG == 1
-#define assertOSError(OS_err_loc,err) \
-        if (err != OS_ERR_NONE) { \
-            printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, err); \
-        } \
-        _assertOSError(OS_err_loc,err);
+#define ASSERT_OS_ERROR(err)                                                \
+    if (err != OS_ERR_NONE) {                                               \
+        printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, \
+               err);                                                        \
+    }                                                                       \
+    AssertOsError(err);
 #else
-#define assertOSError(OS_err_loc,err) _assertOSError(OS_err_loc,err);
+#define ASSERT_OS_ERROR(err) AssertOsError(err);
 #endif
 
 #endif

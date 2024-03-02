@@ -1,0 +1,51 @@
+$bin?=$ORIGIN/../Objects/controls-leader.elf
+$platform=$ORIGIN/stm32f413.repl
+
+EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.DMA.STM32DMA"
+include $ORIGIN/STM32DMA_Fix.cs
+    
+EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.Analog.STM32_ADC"
+include $ORIGIN/STM32_ADC_Fix.cs
+
+EnsureTypeIsLoaded "Antmicro.Renode.Peripherals.UART.STM32_UART"
+include $ORIGIN/STM32_UART_Fix.cs
+
+macro reset
+"""
+    sysbus LoadELF $bin
+"""
+
+macro show_uart_leader
+"""
+    emulation CreateServerSocketTerminal $uart2_telnet "ldr-uart-con" false
+    connector Connect sysbus.usart2 ldr-uart-con
+"""
+
+macro show_uart_display
+"""
+    emulation CreateServerSocketTerminal $uart3_telnet "disp-uart-con" false
+    connector Connect sysbus.usart3 disp-uart-con
+"""
+
+macro create_leader
+"""
+    mach create "ctrl-leader"
+    mach set "ctrl-leader"
+    machine LoadPlatformDescription $platform
+    sysbus LoadELF $bin
+    logLevel 3
+    runMacro $show_uart_leader
+    runMacro $show_uart_display
+    machine StartGdbServer 3333 true
+    connector Connect sysbus.can1 carCan
+    connector Connect sysbus.can3 motorCan
+"""
+
+emulation CreateCANHub "carCan"
+emulation CreateCANHub "motorCan"
+emulation SetGlobalAdvanceImmediately true
+
+runMacro $create_leader
+
+mach set "ctrl-leader"
+string Renode Simulator is now active

@@ -13,5 +13,3 @@ The motor controller driver is responsible for communicating with the motor over
 ``float MotorController_ReadVelocity(void)`` — The motor controller driver returns the latest cached velocity value obtained by a ``MotorController_Read`` call. As such, the obtained value is only as new as the last time the read call obtained a velocity value.
 
 ``float MotorController_ReadRPM(void)`` — The motor controller driver returns the latest cached RPM value obtained by a ``MotorController_Read`` call. As such, the obtained value is only as new as the last time the read call obtained an RPM value.
-
-``void MotorController_Restart(void)`` — Used to restart the motor controller after a recoverable fault. This is currently only used during after a motor controller initialization fault or a hall sensor fault. **DO NOT** call this function otherwise.

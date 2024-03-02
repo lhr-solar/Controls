@@ -2,13 +2,12 @@
 Contactors Driver
 *****************
 
-The contactor driver is responsible for communication with the array and motor contactors. In essence, it controls whether the solar array and the motor are electrically connected to the rest of the car. The public interface of the driver is as follows:
+The contactor driver is responsible for communication with the array and motor controller precharge bypass contactors. In essence, it controls whether the solar array and the motor controller are electrically connected to the rest of the car after their respective precharge processes. The public interface of the driver is as follows:
 
 The contactors are refered to by the type ``contactor_t``, defined below::
 
     typedef enum {
-        ARRAY_CONTACTOR = 0,
-        ARRAY_PRECHARGE,
+        ARRAY_PRECHARGE = 0,
         MOTOR_CONTACTOR,
         NUM_CONTACTORS
     } contactor_t
