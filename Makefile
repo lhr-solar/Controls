@@ -20,9 +20,13 @@ export CAR_LOOPBACK
 # Check if test file exists for the leader.
 ifneq (,$(wildcard Tests/Test_$(TEST).c))
 	TEST_LEADER ?= Tests/Test_$(TEST).c
+	FILE = $(TEST)
+	
 else
 	TEST_LEADER ?= Apps/Src/main.c
+	FILE = MAIN
 endif
+export FILE
 
 #Check if unit test file exists (just to inform user if it isn't found)
 #UNITTEST is solely used for echoing purposes

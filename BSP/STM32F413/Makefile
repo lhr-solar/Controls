@@ -125,6 +125,9 @@ ifeq ($(CAR_LOOPBACK), 1)
 C_DEFS += -DCAR_LOOPBACK
 endif
 
+FILETOTEST = $(shell echo '$(FILE)' | tr '[:lower:]' '[:upper:]') Uses shell to make TEST file uppercase to define a macro
+C_DEFS += -DDEBUG_$(FILETOTEST) #Defines a macro DEBUG_<FILENAME>
+
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
