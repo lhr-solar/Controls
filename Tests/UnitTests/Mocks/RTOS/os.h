@@ -4,7 +4,6 @@
 
 #ifndef   OS_H
 #define   OS_H
-#include "os_type.h"
 
 
 /*
@@ -24,13 +23,12 @@
 */
 #include "fff.h"
 #include <os_cfg.h>
-//#include <os_cfg_app.h>
 #include <cpu_core.h>
 #include <lib_def.h>
 #include "os_type.h"
-//#include <os_cpu.h>
+#include <os_cpu.h>
 #if     (defined(TRACE_CFG_EN) && (TRACE_CFG_EN == DEF_ENABLED))
-//#include <trace_os.h>
+#include <trace_os.h>
 #endif
 
 
