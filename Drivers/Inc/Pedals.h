@@ -14,8 +14,7 @@
 #include "BSP_ADC.h"
 
 /**
- * @brief Stuff
- *
+ * @brief Pedal enums
  */
 typedef enum { kAccelerator, kBrake, kNumberOfPedals } Pedal;
 
