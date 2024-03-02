@@ -56,7 +56,7 @@ extern const PinInfo
  * Error assertion-related functions
  */
 void AssertOsError(volatile OS_ERR err) {
-    OS_ERR err2;
+    OS_ERR err2 = 0;
     if (err != OS_ERR_NONE) {
         OSSchedLock(&err2);
         EmergencyContactorOpen();  // Turn off contactors and turn on the
