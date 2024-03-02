@@ -72,7 +72,6 @@ help:
 
 
 clean:
-	rm -fR Tests/UnitTests/Objects
 	rm -fR Objects
 	rm -f *.out
 	rm -fr Docs/doxygen

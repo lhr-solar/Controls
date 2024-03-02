@@ -11,7 +11,7 @@ YELLOW=\033[0;33m
 NC=\033[0m # No Color
 
 # Build path
-BUILD_DIR = Objects
+BUILD_DIR = ../../Objects
 
 ######################################
 # source
@@ -46,9 +46,6 @@ SF = st-flash
 #######################################
 # C_INCLUDES
 #######################################
-
-#-iquote: used to stop the compiler from searching the current directory first. Another effect: -Idirs before it are only searched for "" files
-# Whatever I put after iquote doesn't seem to be found, but putting it in twice works. This will break #include-next, though
 C_INCLUDES :=	\
 -I-	\
 -I../../Tests/Inc/	\
