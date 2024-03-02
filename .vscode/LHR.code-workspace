@@ -17,24 +17,6 @@
                 "args": ["-i"]
             },   
         },
-        "files.associations": {
-            "*.db": "sql",
-            "contactors.h": "c",
-            "pedals.h": "c",
-            "bsp_adc.h": "c",
-            "config.h": "c",
-            "unity.h": "c",
-            "fff.h": "c",
-            "common.h": "c",
-            "stdio.h": "c",
-            "stm32f4xx.h": "c",
-            "bsp_gpio.h": "c",
-            "os.h": "c",
-            "tasks.h": "c",
-            "canbus.h": "c",
-            "readcarcan.h": "c",
-            "minions.h": "c"
-        },
     },
     "tasks": {
         "version": "2.0.0",
