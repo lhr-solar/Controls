@@ -45,7 +45,7 @@ uint8_t PedalsRead(Pedal pedal) {
     uint16_t millivolts_pedal =
         BspAdcGetMillivoltage((pedal == kAccelerator) ? kCh10 : kCh11);
 
-    // Handle case if above bound
+    // Handle cases if above and below bounds
     if (millivolts_pedal >= kUpperBound[pedal]) {
         return 100;
     }
