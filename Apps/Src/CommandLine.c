@@ -106,7 +106,7 @@ void TaskCommandLine(void *p_arg) {
     // output welcome/help screen
     printf("%s", help);
 
-    while(1) {
+    while (1) {
         printf("> ");
         BspUartRead(kUart2, input);
         printf("\n\r");
@@ -122,9 +122,9 @@ void TaskCommandLine(void *p_arg) {
         ASSERT_OS_ERROR(err);
     }
 
-    #ifdef MOCKING
+#ifdef MOCKING
     break;
-    #endif
+#endif
 }
 
 // Function Implementations

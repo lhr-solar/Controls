@@ -61,10 +61,9 @@ void AssertOsError(volatile OS_ERR err) {
                                    // brakelight to indicate an emergency
         DisplayFault(err);         // Display the location and error code
         printf("%d\n\r", err);
-        #ifndef MOCKING
-        while(1) {}  // nonrecoverable
-        #endif
-        
+#ifndef MOCKING
+        while (1) {}  // nonrecoverable
+#endif
     }
 }
 
@@ -116,9 +115,9 @@ void ThrowTaskError(ErrorCode error_code, Callback error_callback,
     }
 
     if (nonrecoverable == kOptNonrecov) {  // Enter an infinite while loop
-        #ifndef MOCKING
-            while(1){};
-        #endif
+#ifndef MOCKING
+        while (1) {}
+#endif
     }
 
     if (lock_sched == kOptLockSched) {  // Only happens on recoverable errors

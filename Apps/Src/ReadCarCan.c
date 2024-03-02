@@ -368,7 +368,7 @@ void TaskReadCarCan(void *p_arg) {
     memset(hv_plus_minus_charge_msg_buffer, DISABLE_SATURATION_MSG,
            sizeof(hv_plus_minus_charge_msg_buffer));
 
-    while(1) {
+    while (1) {
         UpdatePrechargeContactors();  // Sets array and motor controller PBC if
                                       // all conditions (PBC Status, Threshold,
                                       // Precharge Complete) permit
@@ -429,9 +429,9 @@ void TaskReadCarCan(void *p_arg) {
             }
         }
 
-        #ifdef MOCKING
+#ifdef MOCKING
         break;
-        #endif
+#endif
     }
 }
 
@@ -457,9 +457,9 @@ static void handlerReadCarCanChargeDisable(void) {
     if (ret) {  // Contactor failed to turn off; display the evac screen and
                 // infinite loop
         DisplayEvac(soc, sbpv);
-        #ifndef MOCKING
-        while(1);
-        #endif
+#ifndef MOCKING
+        while (1) {}
+#endif
     }
 }
 
@@ -495,9 +495,9 @@ static void handlerReadCarCanContactorsDisable(void) {
     if (ret) {  // Contactor failed to turn off; display the evac screen and
                 // infinite loop
         DisplayEvac(soc, sbpv);
-        #ifndef MOCKING
-        while(1);
-        #endif
+#ifndef MOCKING
+        while (1) {}
+#endif
     }
 }
 

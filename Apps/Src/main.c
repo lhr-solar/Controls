@@ -49,10 +49,9 @@ int main(void) {
     OSStart(&err);
     ASSERT_OS_ERROR(err);
 
-    #ifndef MOCKING
-    while(1) {}
-    #endif
-    
+#ifndef MOCKING
+    while (1) {}
+#endif
 }
 
 void TaskInit(void *p_arg) {

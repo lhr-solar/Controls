@@ -23,7 +23,7 @@ static const char *gear_string[] = {FOREACH_GEAR(GENERATE_STRING)};
 void TaskDebugDump(void *p_arg) {
     OS_ERR err = 0;
 
-    while(1) {
+    while (1) {
         // Get pedal information
         int8_t accel_pedal = PedalsRead(kAccelerator);
         printf("kAccelerator: %d\n\r", accel_pedal);
@@ -66,8 +66,8 @@ void TaskDebugDump(void *p_arg) {
             ASSERT_OS_ERROR(err);
         }
 
-        #ifdef MOCKING
+#ifdef MOCKING
         break;
-        #endif
+#endif
     }
 }

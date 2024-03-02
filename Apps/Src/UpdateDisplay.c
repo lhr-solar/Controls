@@ -320,12 +320,12 @@ void UpdateDisplayClearQueue() {
  * @brief Loops through the display queue and sends all messages
  */
 void TaskUpdateDisplay(void* p_arg) {
-    while(1) { 
-        updateDisplayPopNext(); 
+    while (1) {
+        updateDisplayPopNext();
 
-        #ifdef MOCKING
+#ifdef MOCKING
         break;
-        #endif
+#endif
     }
 }
 

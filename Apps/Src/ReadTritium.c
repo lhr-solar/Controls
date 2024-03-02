@@ -46,7 +46,7 @@ void TaskReadTritium(void *p_arg) {
     // Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
     static bool watchdog_created = false;
 
-    while(1) {
+    while (1) {
         ErrorStatus status = CanBusRead(&data_buf, true, MOTORCAN);
 
         if (status == SUCCESS) {
@@ -105,9 +105,9 @@ void TaskReadTritium(void *p_arg) {
 
             SendCarCanPut(data_buf);  // Forward message on CarCAN for telemetry
         }
-        #ifdef MOCKING
+#ifdef MOCKING
         break;
-        #endif
+#endif
     }
 }
 
