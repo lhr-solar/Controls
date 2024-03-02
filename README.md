@@ -89,7 +89,7 @@ Follow our [integration documentation](https://utexas.sharepoint.com/:w:/s/ENGR-
 
 WIP: A formal test framework has yet to be defined for the Controls system. 
 
-For now, ```make leader TEST=TestName``` should build the Controls system excluding **Apps/Src/main.c** and including **Tests/Test_TestName.c**.
+For now, ```make leader TEST=TestName``` should build the Controls system excluding **Apps/Src/main.c** and including **Tests/Test_TestName.c**. A macro DEBUG_TESTNAME is also defined which can be used for debug dumps and more! An example of this can be found in Test_HelloWorld. 
 
 ### Debugging
 OpenOCD is a debugger program that is open source and compatible with the STM32F413. GDB is a debugger program that can be used to step through a program as it is being run on the board. To use, you need two terminals open, as well as a USB connection to the ST-Link programmer (as if you were going to flash the program to the board). 
