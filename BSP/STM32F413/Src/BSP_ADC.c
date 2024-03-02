@@ -108,11 +108,11 @@ void BspAdcInit(void) {
  * @param   None
  * @return  millivoltage value ADC measurement
  */
-int16_t BspAdcGetValue(Adc hardware_device) {
+uint16_t BspAdcGetValue(Adc hardware_device) {
     // Get ADC raw data
     uint16_t data = adc_results[hardware_device];
 
-    return (int16_t)data;
+    return data;
 }
 
 /**
@@ -120,10 +120,10 @@ int16_t BspAdcGetValue(Adc hardware_device) {
  * @param   None
  * @return  millivoltage value ADC measurement
  */
-int16_t BspAdcGetMillivoltage(Adc hardware_device) {
+uint16_t BspAdcGetMillivoltage(Adc hardware_device) {
     // Get ADC raw data
-    int16_t data = (int16_t)adc_results[hardware_device];
+    uint16_t data = adc_results[hardware_device];
 
     // Convert to millivoltage
-    return (int16_t)((ADC_RANGE_MILLIVOLTS * data) >> BSP_ADC_PRECISION_BITS);
+    return (uint16_t)((ADC_RANGE_MILLIVOLTS * data) >> BSP_ADC_PRECISION_BITS);
 }

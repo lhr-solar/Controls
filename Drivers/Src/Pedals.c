@@ -37,26 +37,28 @@ void PedalsInit() { BspAdcInit(); }
  * @param   Pedal, ACCELERATOR or BRAKE as defined in enum
  * @return  percent amount the pedal has been pressed in percentage
  */
-int8_t PedalsRead(Pedal pedal) {
+uint8_t PedalsRead(Pedal pedal) {
     if (pedal >= kNumberOfPedals) {
         return 0;
     }
-    int16_t millivolts_pedal =
-        (int16_t)BspAdcGetMillivoltage((pedal == kAccelerator) ? kCh10 : kCh11);
 
-    int8_t percentage = 0;
+    uint16_t millivolts_pedal =
+        BspAdcGetMillivoltage((pedal == kAccelerator) ? kCh10 : kCh11);
 
-    if (millivolts_pedal >= kLowerBound[pedal]) {
-        percentage = (int8_t)((int32_t)(millivolts_pedal - kLowerBound[pedal]) *
-                              100 / (kUpperBound[pedal] - kLowerBound[pedal]));
-    }
-
-    if (percentage > 100) {
+    // Handle cases if above and below bounds
+    if (millivolts_pedal >= kUpperBound[pedal]) {
         return 100;
     }
-    if (percentage < 0) {
+
+    if (millivolts_pedal <= kLowerBound[pedal]) {
         return 0;
     }
+
+    uint8_t percentage = 0;
+
+    // Converts from millivolts to percent using pedal bounds
+    percentage = (uint8_t)(((millivolts_pedal - kLowerBound[pedal]) * 100) /
+                           (kUpperBound[pedal] - kLowerBound[pedal]));
 
     return percentage;
 }

@@ -25,10 +25,10 @@ void TaskDebugDump(void *p_arg) {
 
     while (1) {
         // Get pedal information
-        int8_t accel_pedal = PedalsRead(kAccelerator);
+        uint8_t accel_pedal = PedalsRead(kAccelerator);
         printf("kAccelerator: %d\n\r", accel_pedal);
 
-        int8_t brake_pedal = PedalsRead(kBrake);
+        uint8_t brake_pedal = PedalsRead(kBrake);
         printf("kBrake: %d\n\r", brake_pedal);
 
         // Get minion information

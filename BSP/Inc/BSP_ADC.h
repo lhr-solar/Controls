@@ -29,7 +29,7 @@ void BspAdcInit(void);
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  Raw ADC value without conversion
  */
-int16_t BspAdcGetValue(Adc hardware_device);
+uint16_t BspAdcGetValue(Adc hardware_device);
 
 /**
  * @brief   Provides the ADC value in millivolts of the channel at the specified
@@ -37,7 +37,7 @@ int16_t BspAdcGetValue(Adc hardware_device);
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  ADC value in millivolts
  */
-int16_t BspAdcGetMillivoltage(Adc hardware_device);
+uint16_t BspAdcGetMillivoltage(Adc hardware_device);
 
 #endif
 
