@@ -19,6 +19,12 @@ DEFINE_FFF_GLOBALS;
 
 // Special function required by Unity that will run before each test
 void setUp(void){
+    // Left blank because we don't need it
+}
+
+
+// Another required function from Unity that will run after each test
+void tearDown(void){
     // Reset the fakes' call and argument history between tests
     // This is important if you'll be using this functions in multiple tests 
     // In our case we don't need them since we don't use functions between tests,
@@ -28,12 +34,6 @@ void setUp(void){
     RESET_FAKE(BspGpioGetState)
     RESET_FAKE(OSMutexPend)
     RESET_FAKE(OSMutexPost)
-}
-
-
-// Another required function from Unity that will run after each test
-void tearDown(void){
-    // Left blank because we don't need it
 }
 
 
