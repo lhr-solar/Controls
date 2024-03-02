@@ -715,7 +715,7 @@ void TaskSendTritium(void* p_arg) {
     };
 #endif
 
-    LOOP {
+    while(1) {
         prev_state = state;
 
         state.stateHandler();  // do what the current state does
@@ -752,5 +752,9 @@ void TaskSendTritium(void* p_arg) {
         if (err != OS_ERR_NONE) {
             ASSERT_OS_ERROR(err);
         }
+
+        #ifdef MOCKING
+        break;
+        #endif
     }
 }

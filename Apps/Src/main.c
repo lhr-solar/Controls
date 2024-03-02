@@ -49,7 +49,10 @@ int main(void) {
     OSStart(&err);
     ASSERT_OS_ERROR(err);
 
-    LOOP {}
+    #ifndef MOCKING
+    while(1) {}
+    #endif
+    
 }
 
 void TaskInit(void *p_arg) {

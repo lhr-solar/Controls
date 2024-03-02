@@ -125,9 +125,6 @@ ifeq ($(CAR_LOOPBACK), 1)
 C_DEFS += -DCAR_LOOPBACK
 endif
 
-# Not mocking -> LOOP = while(1)
-C_DEFS += -D'LOOP=while(1)'
-
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
