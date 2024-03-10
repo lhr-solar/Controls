@@ -161,7 +161,7 @@ static void putIOState(void) {
     }
 
     // Tell BPS if the array contactor should be on
-    message.data[3] |= (!MinionsRead(kIgn1) || !MinionsRead(kIgn2)) << 2;
+    message.data[3] |= (MinionsRead(kIgn1) || MinionsRead(kIgn2)) << 2;
 
     CanBusSend(message, true, CARCAN);
 }

@@ -22,6 +22,11 @@ void MinionsInit(void) {
 
 bool MinionsRead(Pin pin) {
     if ((kPininfoLut[pin].direction == kInput)) {
+        // Ignition pins are negative logic, special-case them
+        if (pin == kIgn1 || pin == kIgn2) {
+            return !((bool)BspGpioReadPin(kPininfoLut[pin].port,
+                                          kPininfoLut[pin].pin_mask));
+        }
         return (bool)BspGpioReadPin(kPininfoLut[pin].port,
                                     kPininfoLut[pin].pin_mask);
     }
