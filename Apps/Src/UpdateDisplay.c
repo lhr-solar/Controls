@@ -322,6 +322,10 @@ void UpdateDisplayClearQueue() {
 void TaskUpdateDisplay(void* p_arg) {
     while (1) {
         updateDisplayPopNext();
+
+#ifdef MOCKING
+        break;
+#endif
     }
 }
 

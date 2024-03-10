@@ -1,0 +1,8 @@
+/////////////////////////////////////////////
+//////              MOCK               //////
+/////////////////////////////////////////////
+
+#include "Pedals.h"
+
+DEFINE_FAKE_VOID_FUNC(PedalsInit);
+DEFINE_FAKE_VALUE_FUNC(int8_t, PedalsRead, Pedal);

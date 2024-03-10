@@ -46,6 +46,11 @@ typedef enum { kState0 = 0, kState1 = 1, kState2 = 2 } TriState;
 #define DISP_REVERSE kState2
 
 /**
+ * Task Prototype
+ */
+void TaskUpdateDisplay(void* p_arg);
+
+/**
  * @brief Initializes UpdateDisplay application
  * @returns UpdateDisplayError_t
  */

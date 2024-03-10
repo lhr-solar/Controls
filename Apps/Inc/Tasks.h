@@ -60,11 +60,6 @@ typedef uint16_t ErrorCode;
  * Task Prototypes
  */
 void TaskInit(void* p_arg);
-void TaskSendTritium(void* p_arg);
-void TaskReadCarCan(void* p_arg);
-void TaskUpdateDisplay(void* p_arg);
-void TaskReadTritium(void* p_arg);
-void TaskSendCarCan(void* p_arg);
 void TaskDebugDump(void* p_arg);
 void TaskCommandLine(void* p_arg);
 
@@ -167,7 +162,7 @@ void AssertOsError(OS_ERR err);
 
 #if DEBUG == 1
 #define ASSERT_OS_ERROR(err)                                                \
-    if (err != OS_ERR_NONE) {                                               \
+    if ((err) != OS_ERR_NONE) {                                             \
         printf("Error asserted at %s, line %d: %d\n\r", __FILE__, __LINE__, \
                err);                                                        \
     }                                                                       \

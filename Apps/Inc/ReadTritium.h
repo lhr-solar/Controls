@@ -31,6 +31,11 @@ typedef enum {
     kNone = 0x00,
 } TritiumErrorCode;
 
+/**
+ * Task Prototype
+ */
+void TaskReadTritium(void* p_arg);
+
 float MotorRpmGet();
 float MotorVelocityGet();
 

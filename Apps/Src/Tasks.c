@@ -45,7 +45,7 @@ CPU_STK command_line_stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 // Variables to store error codes, stored and cleared in task error assert
 // functions
-ErrorCode error_read_car_can = 0;      // TODO: change this back to the error
+ErrorCode error_read_car_can = kReadCarCanErrNone;
 ErrorCode error_read_tritium = kNone;  // Initialized to no error
 ErrorCode error_update_display = kUpdateDisplayErrNone;
 
@@ -63,7 +63,9 @@ void AssertOsError(volatile OS_ERR err) {
                                    // brakelight to indicate an emergency
         DisplayFault(err);         // Display the location and error code
         printf("%d\n\r", err);
+#ifndef MOCKING
         while (1) {}  // nonrecoverable
+#endif
     }
 }
 
@@ -115,7 +117,9 @@ void ThrowTaskError(ErrorCode error_code, Callback error_callback,
     }
 
     if (nonrecoverable == kOptNonrecov) {  // Enter an infinite while loop
+#ifndef MOCKING
         while (1) {}
+#endif
     }
 
     if (lock_sched == kOptLockSched) {  // Only happens on recoverable errors

@@ -105,6 +105,9 @@ void TaskReadTritium(void *p_arg) {
 
             SendCarCanPut(data_buf);  // Forward message on CarCAN for telemetry
         }
+#ifdef MOCKING
+        break;
+#endif
     }
 }
 

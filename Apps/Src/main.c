@@ -12,7 +12,10 @@
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
+#include "ReadCarCan.h"
+#include "ReadTritium.h"
 #include "SendCarCan.h"
+#include "SendTritium.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "common.h"
@@ -46,7 +49,9 @@ int main(void) {
     OSStart(&err);
     ASSERT_OS_ERROR(err);
 
+#ifndef MOCKING
     while (1) {}
+#endif
 }
 
 void TaskInit(void *p_arg) {

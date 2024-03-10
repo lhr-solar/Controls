@@ -428,6 +428,10 @@ void TaskReadCarCan(void *p_arg) {
                 break;  // Unhandled CAN message IDs, do nothing
             }
         }
+
+#ifdef MOCKING
+        break;
+#endif
     }
 }
 
@@ -453,7 +457,9 @@ static void handlerReadCarCanChargeDisable(void) {
     if (ret) {  // Contactor failed to turn off; display the evac screen and
                 // infinite loop
         DisplayEvac(soc, sbpv);
+#ifndef MOCKING
         while (1) {}
+#endif
     }
 }
 
@@ -489,7 +495,9 @@ static void handlerReadCarCanContactorsDisable(void) {
     if (ret) {  // Contactor failed to turn off; display the evac screen and
                 // infinite loop
         DisplayEvac(soc, sbpv);
+#ifndef MOCKING
         while (1) {}
+#endif
     }
 }
 

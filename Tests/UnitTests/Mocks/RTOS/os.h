@@ -1,0 +1,215 @@
+/////////////////////////////////////////////
+//////              MOCK               //////
+/////////////////////////////////////////////
+
+#pragma once
+
+/*
+************************************************************************************************************************
+*                                               uC/OS-III VERSION NUMBER
+************************************************************************************************************************
+*/
+
+#define  OS_VERSION  30405u                       /* Version of uC/OS-III (Vx.yy.zz mult. by 10000)                   */
+
+/*        
+
+/*
+************************************************************************************************************************
+*                                                 INCLUDE HEADER FILES
+************************************************************************************************************************
+*/
+#include "fff.h"
+#include_next "os.h"
+#include <os_cfg.h>
+#include <cpu_core.h>
+#include <lib_def.h>
+#include "os_type.h"
+#include <os_cpu.h>
+#if     (defined(TRACE_CFG_EN) && (TRACE_CFG_EN == DEF_ENABLED))
+#include <trace_os.h>
+#endif
+
+/****** EVENT FLAGS *******/ 
+
+DECLARE_FAKE_VOID_FUNC(OSFlagCreate, OS_FLAG_GRP*, CPU_CHAR*, OS_FLAGS, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSFlagDel, OS_FLAG_GRP*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_FLAGS, OSFlagPend, OS_FLAG_GRP*, OS_FLAGS, OS_TICK, OS_OPT, CPU_TS*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSFlagPendAbort, OS_FLAG_GRP*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_FLAGS, OSFlagPendGetFlagsRdy, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_FLAGS, OSFlagPost, OS_FLAG_GRP*, OS_FLAGS, OS_OPT, OS_ERR*);
+
+/****** FIXED SIZE MEMORY BLOCK MANAGEMENT ******/
+
+DECLARE_FAKE_VOID_FUNC(OSMemCreate, OS_MEM*, CPU_CHAR*, void*, OS_MEM_QTY, OS_MEM_SIZE, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(void*, OSMemGet, OS_MEM*, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSMemPut, OS_MEM*, void*, OS_ERR*);
+
+/****** MUTUAL EXCLUSION SEMAPHORES ******/
+
+DECLARE_FAKE_VOID_FUNC(OSMutexCreate, OS_MUTEX*, char* , OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSMutexDel, OS_MUTEX*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSMutexPend, OS_MUTEX*, OS_TICK, OS_OPT, CPU_TS*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSMutexPendAbort, OS_MUTEX*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSMutexPost, OS_MUTEX*, OS_OPT, OS_ERR*);
+
+/****** MULTI PEND ******/
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSPendMulti, OS_PEND_DATA*, OS_OBJ_QTY, OS_TICK, OS_OPT, OS_ERR*);
+
+/****** MESSAGE QUEUES ******/
+
+DECLARE_FAKE_VOID_FUNC(OSQCreate, OS_Q*, CPU_CHAR*, OS_MSG_QTY, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSQDel, OS_Q*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_MSG_QTY, OSQFlush, OS_Q*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(void*, OSQPend, OS_Q*, OS_TICK, OS_OPT, OS_MSG_SIZE*, CPU_TS*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSQPendAbort, OS_Q*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSQPost, OS_Q*, void*, OS_MSG_SIZE, OS_OPT, OS_ERR*);
+
+/****** SEMAPHORES ******/
+
+DECLARE_FAKE_VOID_FUNC(OSSemCreate, OS_SEM*, CPU_CHAR*, OS_SEM_CTR, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSSemDel, OS_SEM*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_SEM_CTR, OSSemPend, OS_SEM*, OS_TICK, OS_OPT, CPU_TS*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_OBJ_QTY, OSSemPendAbort, OS_SEM*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_SEM_CTR, OSSemPost, OS_SEM*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSSemSet, OS_SEM*, OS_SEM_CTR, OS_ERR*);
+
+/****** TASK MANAGEMENT ******/
+
+DECLARE_FAKE_VOID_FUNC(OSTaskChangePrio, OS_TCB*, OS_PRIO, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskCreate, OS_TCB*, CPU_CHAR*, OS_TASK_PTR, void*, OS_PRIO, CPU_STK*, CPU_STK_SIZE, CPU_STK_SIZE, OS_MSG_QTY, OS_TICK, void*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskDel, OS_TCB*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_MSG_QTY, OSTaskQFlush, OS_TCB*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(void*, OSTaskQPend, OS_TICK, OS_OPT, OS_MSG_SIZE*, CPU_TS*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(CPU_BOOLEAN, OSTaskQPendAbort, OS_TCB*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskQPost, OS_TCB*, void*, OS_MSG_SIZE, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_REG, OSTaskRegGet, OS_TCB*, OS_REG_ID, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_REG_ID, OSTaskRegGetID, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskRegSet, OS_TCB*, OS_REG_ID, OS_REG, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskResume, OS_TCB*, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskSuspend, OS_TCB*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_SEM_CTR, OSTaskSemPend, OS_TICK, OS_OPT, CPU_TS*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(CPU_BOOLEAN, OSTaskSemPendAbort, OS_TCB*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_SEM_CTR, OSTaskSemPost, OS_TCB*, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_SEM_CTR, OSTaskSemSet, OS_TCB*, OS_SEM_CTR, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskStkChk, OS_TCB*, CPU_STK_SIZE*, CPU_STK_SIZE*, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskTimeQuantaSet, OS_TCB*, OS_TICK, OS_ERR*);
+
+/****** TASK LOCAL STORAGE (TLS) SUPPORT *******/
+
+// Not currently used
+
+/****** TIME MANAGEMENT ******/
+
+DECLARE_FAKE_VOID_FUNC(OSTimeDly, OS_TICK, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTimeDlyHMSM, CPU_INT16U, CPU_INT16U, CPU_INT16U, CPU_INT32U, OS_OPT, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTimeDlyResume, OS_TCB*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_TICK, OSTimeGet, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTimeSet, OS_TICK, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSTimeTick);
+
+/****** TIMER MANAGEMENT ******/
+
+DECLARE_FAKE_VOID_FUNC(OSTmrCreate, OS_TMR*, CPU_CHAR*, OS_TICK, OS_TICK, OS_OPT, OS_TMR_CALLBACK_PTR, void*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(CPU_BOOLEAN, OSTmrDel, OS_TMR*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_TICK, OSTmrRemainGet, OS_TMR*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(CPU_BOOLEAN, OSTmrStart, OS_TMR*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(OS_STATE, OSTmrStateGet, OS_TMR*, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(CPU_BOOLEAN, OSTmrStop, OS_TMR*, OS_OPT, void*, OS_ERR*);
+
+/****** MISCELLANEOUS ******/
+
+DECLARE_FAKE_VOID_FUNC(OSInit, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSIntEnter);
+
+DECLARE_FAKE_VOID_FUNC(OSIntExit);
+
+DECLARE_FAKE_VOID_FUNC(OSSafetyCriticalStart);
+
+DECLARE_FAKE_VOID_FUNC(OSSchedRoundRobinCfg, CPU_BOOLEAN, OS_TICK, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSSchedRoundRobinYield, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSSched);
+
+DECLARE_FAKE_VOID_FUNC(OSSchedLock, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSSchedUnlock, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSStart, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSStatReset, OS_ERR*);
+
+DECLARE_FAKE_VOID_FUNC(OSStatTaskCPUUsageInit, OS_ERR*);
+
+DECLARE_FAKE_VALUE_FUNC(CPU_INT16U, OSVersion, OS_ERR*);
+
+/****** T A R G E T   S P E C I F I C   F U N C T I O N S ******/
+
+DECLARE_FAKE_VOID_FUNC(OSInitHook);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskCreateHook, OS_TCB*);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskDelHook, OS_TCB*);
+
+DECLARE_FAKE_VOID_FUNC(OSIdleTaskHook);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskReturnHook, OS_TCB*);
+
+DECLARE_FAKE_VOID_FUNC(OSStatTaskHook);
+
+DECLARE_FAKE_VALUE_FUNC(CPU_STK*, OSTaskStkInit, OS_TASK_PTR, void*, CPU_STK*, CPU_STK*, CPU_STK_SIZE, OS_OPT);
+
+DECLARE_FAKE_VOID_FUNC(OSTaskSwHook);
+
+DECLARE_FAKE_VOID_FUNC(OSTimeTickHook);

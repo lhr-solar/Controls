@@ -133,6 +133,9 @@ void TaskSendCarCan(void *p_arg) {
         if (res) {
             CanBusSend(message, true, CARCAN);
         }
+#ifdef MOCKING
+        break;
+#endif
     }
 }
 
@@ -172,5 +175,8 @@ static void taskPutIoState(void *p_arg) {
         putIOState();
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
         ASSERT_OS_ERROR(err);
+#ifdef MOCKING
+        break;
+#endif
     }
 }

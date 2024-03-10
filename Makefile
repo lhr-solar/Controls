@@ -20,8 +20,20 @@ export CAR_LOOPBACK
 # Check if test file exists for the leader.
 ifneq (,$(wildcard Tests/Test_$(TEST).c))
 	TEST_LEADER ?= Tests/Test_$(TEST).c
+	FILE = $(TEST)
+	
 else
 	TEST_LEADER ?= Apps/Src/main.c
+	FILE = MAIN
+endif
+export FILE
+
+#Check if unit test file exists (just to inform user if it isn't found)
+#UNITTEST is solely used for echoing purposes
+ifneq (,$(wildcard Tests/UnitTests/Tests/Test_$(TEST).c))
+	UNITTEST ?= Tests/UnitTests/Tests/Test_$(TEST).c
+else
+	UNITTEST ?= no test found
 endif
 
 LEADER = controls-leader
@@ -36,6 +48,12 @@ stm32f413:
 	@echo "${YELLOW}Compiling for leader...${NC}"
 	$(MAKE) -C BSP -C STM32F413 -j TARGET=$(LEADER) TEST=$(TEST_LEADER)
 	@echo "${BLUE}Compiled for leader! Jolly Good!${NC}"
+
+unittest:
+	@echo "${YELLOW}Compiling unit test...${NC}"
+	@echo "$(UNITTEST)"	
+	$(MAKE) -C Tests -C UnitTests -j TARGET=$(LEADER) TEST=$(TEST)	
+	@echo "${BLUE}Compiled unit test! Jolly Good!${NC}"
 
 flash:
 	$(MAKE) -C BSP -C STM32F413 flash
