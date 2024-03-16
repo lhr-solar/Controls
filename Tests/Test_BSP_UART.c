@@ -1,10 +1,7 @@
 /**
  * Test file for library to interact with UART
  * 
- * Run this test in conjunction with the simulator
- * GUI. As this generates randomized values, the display
- * will update the values accordingly to show that the
- * display is reading the UART properly
+ * 
  */
 
 #include "common.h"
@@ -13,13 +10,24 @@
 
 #define TX_SIZE 128
 
-int main(void) {
-    // BSP_UART_Init(UART_2);
-    BSP_UART_Init(UART_3);
-    const char* testStr = "\xff\xff\xffpage 2\xff\xff\xff";
-    BSP_UART_Write(UART_3, (char*) testStr , strlen(testStr));
-    while (1) {volatile int x=0; x++;}
+void TEST_UART_2_Read_Write(){
+    BSP_UART_Init(UART_2);
+    const char* testStr = "Enter your favorite number:\n\r";
+    BSP_UART_Write(UART_2, (char*) testStr , strlen(testStr));
+    
+    char input[128];
+    BSP_UART_Read(UART_2, input);
 
+    BSP_UART_Write(UART_2, "\n", 1);
+    BSP_UART_Write(UART_2, input, 4);
+}
+
+int main(void) {
+
+    TEST_UART_2_Read_Write();
+    
+
+    while(1);
         // char out[2][TX_SIZE];
         // BSP_UART_Read(UART_2, out[UART_2]);
         // BSP_UART_Read(UART_3, out[UART_3]);
