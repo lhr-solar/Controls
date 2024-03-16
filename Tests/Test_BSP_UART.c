@@ -38,11 +38,19 @@ void Test_UART_2_Printf_Scanf(){
     printf("\n\r%d", num + 1);
 }
 
+void Test_UART_3_Write(){
+    const uint32_t test = 0xdeadbeef;
+    BSP_UART_Write(UART_3, (char*) &test , 4);
+}
+
 int main(void) {
     BSP_UART_Init(UART_2);
 
     //Test_UART_2_Read_Write();
     //Test_UART_2_Printf_Scanf();
+
+    BSP_UART_Init(UART_3);
+    Test_UART_3_Write();
 
     while(1);
 
