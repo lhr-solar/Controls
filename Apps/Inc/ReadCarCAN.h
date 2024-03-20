@@ -14,16 +14,24 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
-
 #include "CANbus.h"
 
-#define SAT_BUF_LENGTH 5
+/**
+ * Error types
+ */
+typedef enum{
+	READCARCAN_ERR_NONE,			    		
+	READCARCAN_ERR_CHARGE_DISABLE,   			// Received a charge disable msg
+	READCARCAN_ERR_MISSED_MSG,					// Didn't receive a BPS charge msg in time
+	READCARCAN_ERR_DISABLE_CONTACTORS_MSG,   	// Ignition is turned to neither (off due to LV) or both at the same time (impossible) are on at 
+	READCARCAN_ERR_BPS_TRIP		    		    // Received a BPS trip msg (0 or 1)
+} ReadCarCAN_error_code_t;
 
 /**
  * @brief Returns whether regen braking / charging is enabled or not
  * @return  Whether regen braking / charging is enabled or not
 */
-bool ChargeEnable_Get();
+bool ChargeEnable_Get(void);
 
 #endif
 

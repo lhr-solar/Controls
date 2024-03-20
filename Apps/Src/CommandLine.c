@@ -115,7 +115,7 @@ void Task_CommandLine(void* p_arg) {
     // Delay of 1 seconds
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     if (err != OS_ERR_NONE){
-        assertOSError(OS_NONE_LOC, err);
+        assertOSError(err);
     }
 }
 
@@ -196,7 +196,7 @@ static bool cmd_CANbus_Read(void){
 	}
 
 	if(CANbus_Read(&msg, blocking, bus) == SUCCESS){
-		printf("msg recieved on %s (%s)\n\r", busInput, blockInput);
+		printf("msg received on %s (%s)\n\r", busInput, blockInput);
 		printf("ID: %d, Data: ", msg.ID);
 		for(int i = 0; i < 8; i++){
 			printf("[%d] %x \n\r", i, msg.data[i]);
@@ -210,14 +210,11 @@ static bool cmd_CANbus_Read(void){
 static bool cmd_Contactors_Get(void){
 	char *contactorInput = strtok_r(NULL, " ", &save);
 	contactor_t contactor;
-	if(strcmp(contactorInput, "array_c") == 0){
-		contactor = ARRAY_CONTACTOR;
+	if(strcmp(contactorInput, "array_p") == 0){
+		contactor = ARRAY_PRECHARGE_BYPASS_CONTACTOR;
 	}
-	else if(strcmp(contactorInput, "array_p") == 0){
-		contactor = ARRAY_PRECHARGE;
-	}
-	else if(strcmp(contactorInput, "motor_c") == 0){
-		contactor = MOTOR_CONTACTOR;
+	else if(strcmp(contactorInput, "motor_p") == 0){
+		contactor = MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR;
 	}
 	else{
 		return false;
@@ -230,14 +227,11 @@ static bool cmd_Contactors_Get(void){
 static bool cmd_Contactors_Set(void){
 	char *contactorInput = strtok_r(NULL, " ", &save);
 	contactor_t contactor;
-	if(strcmp(contactorInput, "array_c") == 0){
-		contactor = ARRAY_CONTACTOR;
+	if(strcmp(contactorInput, "array_p") == 0){
+		contactor = ARRAY_PRECHARGE_BYPASS_CONTACTOR;
 	}
-	else if(strcmp(contactorInput, "array_p") == 0){
-		contactor = ARRAY_PRECHARGE;
-	}
-	else if(strcmp(contactorInput, "motor_c") == 0){
-		contactor = MOTOR_CONTACTOR;
+	else if(strcmp(contactorInput, "motor_p") == 0){
+		contactor = MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR;
 	}
 	else{
 		return false;

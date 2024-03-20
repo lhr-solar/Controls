@@ -168,7 +168,7 @@ uint32_t BSP_UART_Read(UART_t usart, char *str) {
     bool *line_recvd = lineRecvd[usart];
     
     while(*line_recvd == false){
-        BSP_UART_Write(usart, "", 0);   // needs to be in. Otherwise, usbLineRecieved will not update
+        BSP_UART_Write(usart, "", 0);   // needs to be in. Otherwise, usbLineReceived will not update
     }
 
     USART_TypeDef *usart_handle = handles[usart];

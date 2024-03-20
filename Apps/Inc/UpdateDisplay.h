@@ -27,11 +27,11 @@
  * Error types
  */
 typedef enum{
-	UPDATEDISPLAY_ERR_NONE			= 0,
-	UPDATEDISPLAY_ERR_FIFO_PUT		=-1,	// Error putting command in fifo
-	UPDATEDISPLAY_ERR_FIFO_POP		=-2,	// Error popping command from fifo
-	UPDATEDISPLAY_ERR_PARSE_COMP	=-3,	// Error parsing component/val in SetComponent
-	UPDATEDISPLAY_ERR_NO_CHANGE	=-4,		// No change in component value
+	UPDATEDISPLAY_ERR_NONE,
+	UPDATEDISPLAY_ERR_FIFO_PUT,     // Error putting command in fifo
+	UPDATEDISPLAY_ERR_FIFO_POP,     // Error popping command from fifo
+	UPDATEDISPLAY_ERR_PARSE_COMP,   // Error parsing component/val in SetComponent
+	UPDATEDISPLAY_ERR_DRIVER        // Driver call returned an error
 } UpdateDisplayError_t;
 
 /**
@@ -130,6 +130,12 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
  */
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 
-#endif
+/**
+ * @brief Clears the display message queue and sets the message counter semaphore value to 0
+ * @param none
+ * @returns none
+*/
+void UpdateDisplay_ClearQueue(void);
 
+#endif
 /* @} */

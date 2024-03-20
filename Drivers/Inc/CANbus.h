@@ -29,12 +29,9 @@
  */
 typedef enum { 
 	BPS_TRIP						= 0x002,
-	BPS_ALL_CLEAR					= 0x101,
-	BPS_CONTACTOR_STATE				= 0x102,
+	BPS_CONTACTOR					= 0x102,
 	STATE_OF_CHARGE 				= 0x106,
-	WDOG_TRIGGERED					= 0x107,
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
-	CHARGE_ENABLE 					= 0x10C,
 	MOTOR_DRIVE 					= 0x221,
 	MOTOR_POWER						= 0x222,
 	MOTOR_RESET 					= 0x223,
@@ -48,8 +45,10 @@ typedef enum {
 	TEMPERATURE 					= 0x24B,
 	ODOMETER_AMPHOURS 				= 0x24E,
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
-	CARDATA 						= 0x581,
-	NUM_CAN_IDS
+    SLIP_SPEED                      = 0x257,
+	CONTROL_MODE                    = 0x580,
+    IO_STATE 						= 0x581,
+	MAX_CAN_ID
 } CANId_t;
 
 /**
@@ -106,7 +105,7 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
 
 /**
  * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers.
- * @param   data 		pointer to where to store the CAN id of the recieved msg
+ * @param   data 		pointer to where to store the CAN id of the received msg
  * @param   blocking 	Whether or not this read should be a blocking read
  * @param   bus 		The bus to use. This should either be CARCAN or MOTORCAN.
  * @returns ERROR if read failed, SUCCESS otherwise

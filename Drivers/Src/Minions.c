@@ -26,7 +26,11 @@ void Minions_Init(void){
 
 bool Minions_Read(pin_t pin){
     if((PININFO_LUT[pin].direction == INPUT)){
-        return (bool) BSP_GPIO_Read_Pin(PININFO_LUT[pin].port, PININFO_LUT[pin].pinMask);
+        if (pin == IGN_1 || pin == IGN_2) {
+            return !((bool) BSP_GPIO_Read_Pin(PININFO_LUT[pin].port, PININFO_LUT[pin].pinMask));
+        } else {
+            return (bool) BSP_GPIO_Read_Pin(PININFO_LUT[pin].port, PININFO_LUT[pin].pinMask);
+        }
     } else{
         return (bool)BSP_GPIO_Get_State(PININFO_LUT[pin].port, PININFO_LUT[pin].pinMask);
     }

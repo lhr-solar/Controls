@@ -15,20 +15,17 @@ static OS_MUTEX contactorsMutex;
  * @brief   Helper function for setting contactors without mutex.
  *          Should only be called if mutex is held and struct contactor has been checked
  * @param   contactor the contactor
- *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
+ *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @param   state the state to set (ON/OFF)
  * @return  None
  */ 
 static void setContactor(contactor_t contactor, bool state) {
     switch (contactor) {
-        case ARRAY_CONTACTOR :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN, state);
+        case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, state);
             break;
-        case ARRAY_PRECHARGE :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN, state);
-            break;
-        case MOTOR_CONTACTOR :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN, state);
+        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
+            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, state);
             break;
         default:
             break;
@@ -41,10 +38,9 @@ static void setContactor(contactor_t contactor, bool state) {
  * @return  None
  */ 
 void Contactors_Init() {
-    BSP_GPIO_Init(CONTACTORS_PORT, 
-                 (ARRAY_CONTACTOR_PIN) | 
-                 (ARRAY_PRECHARGE_PIN) |
-                 (MOTOR_CONTACTOR_PIN), 
+    BSP_GPIO_Init(CONTACTORS_PORT,  
+                 (ARRAY_PRECHARGE_BYPASS_PIN) |
+                 (MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN), 
                   1);
 
     // start disabled
@@ -55,27 +51,25 @@ void Contactors_Init() {
     // initialize mutex
     OS_ERR err;
     OSMutexCreate(&contactorsMutex, "Contactors lock", &err);
-    assertOSError(OS_CONTACTOR_LOC, err);
+    assertOSError(err);
 }
 
 /**
  * @brief   Returns the current state of 
  *          a specified contactor
  * @param   contactor the contactor
- *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
+ *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @return  The contactor's state (ON/OFF)
  */ 
 bool Contactors_Get(contactor_t contactor) {
     State state = OFF;
     switch (contactor) {
-        case ARRAY_CONTACTOR :
-            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_CONTACTOR_PIN);
+        
+        case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
+            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN);
             break;
-        case ARRAY_PRECHARGE :
-            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_PIN);
-            break;
-        case MOTOR_CONTACTOR :
-            state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTACTOR_PIN);
+        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
+            state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN);
             break;
         default:
             break;
@@ -86,7 +80,7 @@ bool Contactors_Get(contactor_t contactor) {
 /**
  * @brief   Sets the state of a specified contactor
  * @param   contactor the contactor
- *              (MOTOR_PRECHARGE/ARRAY_PRECHARGE/ARRAY_CONTACTOR)
+ *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @param   state the state to set (ON/OFF)
  * @param   blocking whether or not this should be a blocking call
  * @return  Whether or not the contactor was successfully set
@@ -102,7 +96,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     if(err == OS_ERR_PEND_WOULD_BLOCK){
         return ERROR;
     }
-    assertOSError(OS_CONTACTOR_LOC, err);
+    assertOSError(err);
 
     // change contactor to match state and make sure it worked
     setContactor(contactor, state);
@@ -111,7 +105,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
 
     // release lock
     OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
-    assertOSError(OS_CONTACTOR_LOC, err);
+    assertOSError(err);
 
     return result;
 }
