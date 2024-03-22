@@ -19,4 +19,6 @@ int main() {
         printf("Accelerator: %5.1d\tBrake: %5.1d\r", 
             BSP_ADC_Get_Millivoltage(Accelerator_ADC), BSP_ADC_Get_Millivoltage(Brake_ADC));
     }
+
+    return 0;
 }
