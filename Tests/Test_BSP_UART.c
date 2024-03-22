@@ -14,7 +14,7 @@
  * Read a line using UART
  * Print the first 4 chars using UART
  */
-void TEST_UART_2_Read_Write(){
+void Test_UART_2_Read_Write(){
     const char* testStr = "Enter your favorite number:\n\r";
     BSP_UART_Write(UART_2, (char*) testStr , strlen(testStr));
     
@@ -38,6 +38,10 @@ void Test_UART_2_Printf_Scanf(){
     printf("\n\r%d", num + 1);
 }
 
+/**
+ * Write a 32 bit number to UART 3 and read it back
+ * on a logic analyzer
+*/
 void Test_UART_3_Write(){
     const uint32_t test = 0xdeadbeef;
     BSP_UART_Write(UART_3, (char*) &test , 4);
@@ -45,11 +49,10 @@ void Test_UART_3_Write(){
 
 int main(void) {
     BSP_UART_Init(UART_2);
-
-    //Test_UART_2_Read_Write();
-    //Test_UART_2_Printf_Scanf();
-
     BSP_UART_Init(UART_3);
+
+    Test_UART_2_Read_Write();
+    Test_UART_2_Printf_Scanf();
     Test_UART_3_Write();
 
     while(1);
