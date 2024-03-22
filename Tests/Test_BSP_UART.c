@@ -1,6 +1,9 @@
 /**
- * Test file for library to interact with UART
- * 
+ * Test file for UART
+ * Simply turn on the board and connect serial (UART2) through PUTTY 
+ * to interact with UART2.
+ * For UART3, connect a logic analyzer to the UART3 output line and
+ * use Saleae Logic 2 to analyze that the signal is being sent correctly.
  * 
  */
 
