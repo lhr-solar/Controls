@@ -93,7 +93,8 @@ bool ChargeEnable_Get(void){
  * @param p_arg pointer to the argument passed by timer
 */
 static void callbackCANWatchdog(void *p_tmr, void *p_arg){
-   assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+   //assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+   return;
 }
 
 /**
@@ -340,7 +341,7 @@ void Task_ReadCarCAN(void *p_arg){
 
     while(1){
               
-        updatePrechargeContactors(); // Sets array and motor controller PBC if all conditions (PBC Status, Threshold, Precharge Complete) permit
+        // updatePrechargeContactors(); // Sets array and motor controller PBC if all conditions (PBC Status, Threshold, Precharge Complete) permit
 
         // BPS sent a message
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);

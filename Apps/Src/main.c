@@ -111,7 +111,7 @@ void Task_Init(void *p_arg){
     );
     assertOSError(err);
 
-    // Initialize ReadCarCAN
+    //Initialize ReadCarCAN
     OSTaskCreate(
         (OS_TCB*)&ReadCarCAN_TCB,
         (CPU_CHAR*)"ReadCarCAN",
