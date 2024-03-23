@@ -28,29 +28,35 @@ void Task1(void *p_arg) {
 
     CANbus_Init(CARCAN, carCANFilterList, NUM_CARCAN_FILTERS);
 
-    dataBuf.ID = SLIP_SPEED;
+    dataBuf.ID = BPS_TRIP;
     memcpy(&dataBuf.data, &data, sizeof data);
 
     // First, send a value that we want to be able to receive
     assert(CANbus_Send(dataBuf, true, CARCAN) == SUCCESS);
+    for(int i = 0; i < 999999; i++);
     assert(CANbus_Read(&resultBuf, true, CARCAN) == SUCCESS);
     assert(memcmp(&dataBuf, &resultBuf, sizeof dataBuf) == 0);
 
     dataBuf.ID = ODOMETER_AMPHOURS; // Now, send a message that we shouldn't receive
     assert(CANbus_Send(dataBuf, true, CARCAN) == SUCCESS);
+    for(int i = 0; i < 999999; i++);
     assert(CANbus_Read(&resultBuf, false, CARCAN) == ERROR); // check that no can message is read
 
     // Now send a bunch of messages that should be ignored, followed by those that shouldn't
     for (int i=0; i<10; i++) {
         assert(CANbus_Send(dataBuf, true, CARCAN) == SUCCESS);
+        for(int i = 0; i < 999999; i++);
     }
 
     dataBuf.ID = BPS_TRIP;
     assert(CANbus_Send(dataBuf, true, CARCAN) == SUCCESS);
+    for(int i = 0; i < 999999; i++);
     dataBuf.ID = STATE_OF_CHARGE;
     assert(CANbus_Send(dataBuf, true, CARCAN) == SUCCESS);
+    for(int i = 0; i < 999999; i++);
     dataBuf.ID = SUPPLEMENTAL_VOLTAGE;
     assert(CANbus_Send(dataBuf, true, CARCAN) == SUCCESS);
+    for(int i = 0; i < 999999; i++);
 
     // Make sure that only three messages make it through
     assert(CANbus_Read(&resultBuf, true, CARCAN) == SUCCESS);
@@ -65,6 +71,7 @@ void Task1(void *p_arg) {
     while(1) {}
 }
 
+//May take 5 seconds to get a result from the test
 int main(void) {
     OS_ERR err = 0;
 
