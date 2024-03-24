@@ -14,7 +14,6 @@ static CPU_STK Task1_Stk[STACK_SIZE];
 static OS_TCB Task1_TCB;
 
 void Task1(void) {
-    OS_ERR err = 0;
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
@@ -22,13 +21,15 @@ void Task1(void) {
     BSP_UART_Init(UART_2);
     Contactors_Init();
 
+    printf("We did a thing\n\r");
+
     while(1) {
         bool set = Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
         printf("Turning contactors %s\r\n", set ? "off" : "on");
         Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, !set, true);
         Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, !set, true);
 
-        OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        //for(int i = 0; i < 999999; i++);
     }
 }
 
