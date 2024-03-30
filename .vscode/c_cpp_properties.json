@@ -25,7 +25,6 @@
                 "STM32F413_423xx",
                 "USE_STDPERIPH_DRIVER"
             ],
-            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "intelliSenseMode": "clang-x64"
         }
