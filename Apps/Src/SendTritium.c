@@ -656,13 +656,13 @@ void Task_SendTritium(void *p_arg){
     #endif
 
     while(1){
-        prevState = state;
 
         state.stateHandler();    // do what the current state does
         #ifndef SENDTRITIUM_EXPOSE_VARS
         readInputs();   // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
         #endif
+        prevState = state;
         state.stateDecider();    // decide what the next state is
 
         // Disable velocity controlled mode by always overwriting velocity to the maximum
