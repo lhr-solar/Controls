@@ -6,6 +6,7 @@
  */
 
 #include "ReadTritium.h"
+#include "SendTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
@@ -75,7 +76,12 @@ void Task_ReadTritium(void *p_arg){
 
 					//Car Velocity (in m/s) is in bytes 4-7
 					Motor_Velocity = *((float*)(&dataBuf.data[4]));
-					uint32_t Car_Velocity = Motor_Velocity;
+
+					int32_t Car_Velocity = Motor_Velocity;
+					if (Car_Velocity < 0) Car_Velocity = -Car_Velocity; // Fix speed in reverse
+					if (get_state().name == REVERSE_DRIVE) {
+						Car_Velocity = -Car_Velocity;
+					}
 					
 					Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
 					Car_Velocity = ((Car_Velocity / 160934) * 10); //Converting from m/h to mph, multiplying by 10 to make value "larger" for displaying
