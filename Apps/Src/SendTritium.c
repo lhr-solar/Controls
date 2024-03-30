@@ -31,7 +31,7 @@
 
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f) // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
-#define MAX_REVERSE_VELOCITY mpsToRpm(8.0f) // rpm - 17.9 mi/hr
+#define MAX_REVERSE_VELOCITY mpsToRpm(-15.0f) // rpm - 17.9 mi/hr
 
 #define BRAKE_PEDAL_THRESHOLD 50  // percent
 #define ACCEL_PEDAL_THRESHOLD 10 // percent
@@ -407,7 +407,7 @@ static void ReverseDriveHandler(){
     }
     velocitySetpoint = -MAX_VELOCITY;
 
-    uint8_t currentSetpointMax = (velocityObserved >= MAX_REVERSE_VELOCITY) ? 0 : CURRENT_SP_MAX; // cutoff current to motor if velocity is too high
+    uint8_t currentSetpointMax = (velocityObserved <= MAX_REVERSE_VELOCITY) ? 10 : CURRENT_SP_MAX; // cutoff current to motor if velocity is too high
     currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, currentSetpointMax));  
 
     cruiseEnable = false;
