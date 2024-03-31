@@ -63,7 +63,7 @@ float cruiseVelSetpoint = 0;
 
 // Current observed velocity
 static float velocityObserved = 0;
-
+#ifndef SENDTRITIUM_EXPOSE_VARS
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 
@@ -78,7 +78,7 @@ static bool onePedalPrevious = false;
 
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
-
+#endif
 // FSM
 static TritiumState_t prevState; // Previous state
 static TritiumState_t state; // Current state
