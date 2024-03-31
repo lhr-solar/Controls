@@ -19,7 +19,6 @@
 
 #include "Tasks.h"
 #include "CANbus.h"
-#include "CAN_Queue.h"
 #include "ReadCarCAN.h"
 #include "Contactors.h"
 #include "CANConfig.h"
@@ -329,6 +328,12 @@ void Task1(){
             #endif 
             OS_ERR err;
             #ifdef TEST_HARDWARE_HV_ARRAY_ON
+            /*
+                OFF     -  OFF
+                LV      -  OFF
+                ARR     -  ARR ON
+                MOTOR   -  ARR ON , MOTOR OFF
+            */
                 while(1){
                     CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN); // HV Array messages
                     printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
@@ -339,6 +344,12 @@ void Task1(){
             #endif
 
             #ifdef TEST_HARDWARE_HV_PLUS_MINUS_ON
+            /*
+                OFF     -  OFF
+                LV      -  OFF
+                ARR     -  ARR OFF
+                MOTOR   -  ARR OFF
+            */
                 while(1){
                     CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN); // HV Motor Controller messages
                     printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
@@ -350,6 +361,12 @@ void Task1(){
 
             #ifdef TEST_HARDWARE_HV_CONTACTORS_BOTH_ON
                 while(1){
+            /*
+                OFF     -  OFF
+                LV      -  OFF
+                ARR     -  ARR ON
+                MOTOR   -  ARR ON, MOTOR ON
+            */
                     CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); // HV Enable messages
                     printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
                     printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
@@ -359,6 +376,12 @@ void Task1(){
             #endif
 
             #ifdef TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
+            /*
+                OFF     -  OFF
+                LV      -  OFF
+                ARR     -  ARR OFF
+                MOTOR   -  ARR OFF
+            */
                 while(1){
                     CANbus_Send(HV_Disable_Msg, CAN_BLOCKING, CARCAN); // Disable messages
                     printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));

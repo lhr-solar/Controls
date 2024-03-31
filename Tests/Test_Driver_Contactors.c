@@ -26,8 +26,8 @@ void Task1(void) {
     while(1) {
         bool set = Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
         printf("Turning contactors %s\r\n", set ? "off" : "on");
-        Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, !set, true);
-        Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, !set, true);
+        Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, true, true);
+        Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true, true);
 
         //for(int i = 0; i < 999999; i++);
     }
