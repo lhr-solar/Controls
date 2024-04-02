@@ -602,6 +602,44 @@ void Task1(void *arg)
     }
 };
 
+void Task2(void *arg) {
+    OS_ERR err;
+
+    CPU_Init();
+    BSP_UART_Init(UART_2);
+    Pedals_Init();
+    CANbus_Init(MOTORCAN);
+    Minions_Init();
+    UpdateDisplay_Init();
+
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+    regenEnable = ON;
+
+    OSTaskCreate(
+        (OS_TCB*)&SendTritium_TCB,
+        (CPU_CHAR*)"SendTritium",
+        (OS_TASK_PTR)Task_SendTritium,
+        (void*) NULL,
+        (OS_PRIO)TASK_SEND_TRITIUM_PRIO,
+        (CPU_STK*)SendTritium_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT/10,
+        (CPU_STK_SIZE)TASK_SEND_TRITIUM_STACK_SIZE,
+        (OS_MSG_QTY) 0,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+
+    printf("\n\r============ Testing Reverse Speed Limit ============\n\r");
+    while (1) {
+        // Make sure to put motor in reverse!
+        printf("Current Velocity: %d", get_velocityObserved); // Should max out at 8rpm or 17.9 mi/hr
+        OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err); // Delay for one second
+    }
+    
+}
+
 int main()
 {
     OS_ERR err;
@@ -645,6 +683,7 @@ int main()
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
     assertOSError(err);
+
 
     OSStart(&err);
 }
