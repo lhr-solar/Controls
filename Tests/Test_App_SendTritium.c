@@ -10,16 +10,17 @@
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
+#define BRAKE_TEST_VAL 60
 
 void stateBuffer(){
     OS_ERR err;
-    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &err);
+    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &err); // Just want enough time for SendTritium to run a cycle (but not delay)
     assertOSError(err);
 }
 
 void goToBrakeState(){
     // Brake State
-    set_brakePedalPercent(15);
+    set_brakePedalPercent(BRAKE_TEST_VAL);
     stateBuffer();
     while(get_state().name != BRAKE_STATE){}
 }
@@ -130,9 +131,26 @@ void Task1(void *arg)
     Pedals_Init();
     CANbus_Init(MOTORCAN, NULL, 0);
     Minions_Init();
+    Display_Init();
 
     UpdateDisplay_Init();
     set_regenEnable(ON);
+    
+    OSTaskCreate(
+        (OS_TCB *)&UpdateDisplay_TCB,
+        (CPU_CHAR *)"UpdateDisplay_TCB",
+        (OS_TASK_PTR)Task_UpdateDisplay,
+        (void *)NULL,
+        (OS_PRIO)13,
+        (CPU_STK *)UpdateDisplay_Stk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void *)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR *)&err);
+    assertOSError(err);
 
     OSTaskCreate(
         (OS_TCB*)&SendTritium_TCB,
@@ -149,7 +167,7 @@ void Task1(void *arg)
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
-    //assertOSError(err);
+    assertOSError(err);
     /**
      * ======= Forward Drive ==========
      * State Transitions: 
@@ -160,7 +178,7 @@ void Task1(void *arg)
     // Forward Drive to Brake
     printf("\n\rTesting: Forward Drive -> Brake\n\r");
     goToForwardDrive();
-    set_brakePedalPercent(15);
+    set_brakePedalPercent(BRAKE_TEST_VAL);
     stateBuffer();
     while(get_state().name != BRAKE_STATE){}
 
@@ -210,7 +228,7 @@ void Task1(void *arg)
     // Neutral Drive to Brake
     printf("\n\rTesting: Neutral Drive -> Brake\n\r");
     goToNeutralDrive();
-    set_brakePedalPercent(15);
+    set_brakePedalPercent(BRAKE_TEST_VAL);
     stateBuffer();
     while(get_state().name != BRAKE_STATE){}
 
@@ -244,7 +262,7 @@ void Task1(void *arg)
     // Reverse Drive to Brake
     printf("\n\rTesting: Reverse Drive -> Brake\n\r");
     goToReverseDrive();
-    set_brakePedalPercent(15);
+    set_brakePedalPercent(BRAKE_TEST_VAL);
     stateBuffer();
     while(get_state().name != BRAKE_STATE){}
 
@@ -276,7 +294,7 @@ void Task1(void *arg)
     // Record Velocity to Brake State
     printf("\n\rTesting: Record Velocity -> Brake\n\r");
     goToRecordVelocity();
-    set_brakePedalPercent(15);
+    set_brakePedalPercent(BRAKE_TEST_VAL);
     stateBuffer();
     while(get_state().name != BRAKE_STATE){}
 
@@ -329,7 +347,7 @@ void Task1(void *arg)
     // // Powered Cruise to Brake State
     // printf("\n\rTesting: Powered Cruise -> Brake\n\r");
     // goToPoweredCruise();
-    // set_brakePedalPercent(15);
+    // set_brakePedalPercent(BRAKE_TEST_VAL);
     // stateBuffer();
     // while(get_state().name != BRAKE_STATE){}
 
@@ -398,7 +416,7 @@ void Task1(void *arg)
     // // Coasting Cruise to Brake State
     // printf("\n\rTesting: Coasting Cruise -> Brake\n\r");
     // goToCoastingCruise();
-    // set_brakePedalPercent(15);
+    // set_brakePedalPercent(BRAKE_TEST_VAL);
     // stateBuffer();
     // while(get_state().name != BRAKE_STATE){}
 
@@ -467,7 +485,7 @@ void Task1(void *arg)
     // // Accelerate Cruise to Brake State
     // printf("\n\rTesting: Accelerate Cruise -> Brake\n\r");
     // goToAccelerateCruise();
-    // set_brakePedalPercent(15);
+    // set_brakePedalPercent(BRAKE_TEST_VAL);
     // stateBuffer();
     // while(get_state().name != BRAKE_STATE){}
 
@@ -528,7 +546,7 @@ void Task1(void *arg)
     // One Pedal Drive to Brake
     printf("\n\rTesting: One Pedal Drive -> Brake\n\r");
     goToOnePedalDrive();
-    set_brakePedalPercent(15);
+    set_brakePedalPercent(BRAKE_TEST_VAL);
     stateBuffer();
     while(get_state().name != BRAKE_STATE){}
 

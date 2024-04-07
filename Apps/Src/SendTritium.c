@@ -323,6 +323,7 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
  * @brief Put the CONTROL_MODE message onto the CarCAN bus, detailing
  * the current mode of control.
 */
+#ifndef SENDTRITIUM_EXPOSE_VARS
 static void putControlModeCAN(){
     CANDATA_t message;
     memset(&message, 0, sizeof(message));
@@ -331,6 +332,7 @@ static void putControlModeCAN(){
 
     SendCarCAN_Put(message);
 }
+#endif
 
 // State Handlers & Deciders
 
@@ -682,9 +684,12 @@ void Task_SendTritium(void *p_arg){
         }else{
             motorMsgCounter++;
         }
+
+        putControlModeCAN();   
+
         #endif
 
-        putControlModeCAN();        
+             
 
         // Delay of MOTOR_MSG_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, MOTOR_MSG_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
