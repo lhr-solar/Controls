@@ -13,7 +13,7 @@
 #include "common.h"
 
 //#define SENDTRITIUM_PRINT_MES
-#define SENDTRITIUM_EXPOSE_VARS
+//#define SENDTRITIUM_EXPOSE_VARS
 
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
