@@ -57,7 +57,7 @@ void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
     function(STATE_2); // DISP_ACTIVE & DISP_REVERSE
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    function(STATE_0);
+    function(STATE_0); // DISP_DISABLED & DISP_NEUTRAL
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
 }
@@ -93,24 +93,28 @@ void Task1(void *arg)
 
     OSTimeDlyHMSM(0, 0, 7, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
+    //Cycle through all gear settings
     testTriStateComp(&UpdateDisplay_SetGear);
     
+
+    //Cycle through various velocities
     UpdateDisplay_SetVelocity(12);
-    
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
     UpdateDisplay_SetVelocity(345);
-    
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
     UpdateDisplay_SetVelocity(6789);
-    
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
 
+    //Cycle through the tritium statuses
     testTriStateComp(&UpdateDisplay_SetCruiseState);
     testTriStateComp(&UpdateDisplay_SetRegenState);
+
+    //Set Boolean statuses
     testBoolComp(&UpdateDisplay_SetMotor);
     testBoolComp(&UpdateDisplay_SetArray);
-    testPercentageComp(&UpdateDisplay_SetSOC);
 
+    //Various Other Tests
+    testPercentageComp(&UpdateDisplay_SetSOC);
     UpdateDisplay_SetSBPV(12);
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
@@ -120,7 +124,6 @@ void Task1(void *arg)
     UpdateDisplay_SetSBPV(6789);
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-
     testPercentageComp(&UpdateDisplay_SetAccel);
 
     Display_Error((error_code_t)error); // Testing Display_Error

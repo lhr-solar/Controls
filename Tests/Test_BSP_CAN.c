@@ -1,45 +1,48 @@
-#include "common.h"
-#include "CANbus.h"
-#include "config.h"
+/**
+ * Test file for BSP_CAN
+ * 
+ * Use test_send to send and test_read to read
+ * 
+ * Parameter for the test is the bus you want to test on
+*/
 
-int generalTest(void){
-   // Tests sending and receiving messages
-   uint32_t ids[10] = {0x242, 0x243, 0x244, 0x245, 0x246, 0x247, 0x24B, 0x24E, 0x580, CHARGE_ENABLE};
-   uint8_t buffer[8];
+#include "BSP_CAN.h"
 
-   CANData_t data;
-   data.d = 0x87654321;
+void test_send(CAN_t bus);
+void test_read(CAN_t bus);
 
-   CANPayload_t payload;
-   payload.data = data;
-   payload.bytes = 4;
-
-   for(int i=0; i<sizeof(ids)/sizeof(ids[0]); i++){
-      CANbus_Send(ids[i], payload,CAN_BLOCKING);
-      printf("Sent ID: 0x%x - Success(1)/Failure(0): %d\n", ids[i], CANbus_Read(buffer,CAN_BLOCKING));
-   }
-
-   exit(0);
+int main(void) {
+    // test_send(CAN_1);
+    test_read(CAN_1);
+    while(1) { }
 }
 
-int Charge_Enable_Test(void){
-   // Tests receiving the MOTOR_DISABLE message
+void test_send(CAN_t bus) {
+    BSP_CAN_Init(bus, NULL, NULL, NULL, 0);
 
-   uint8_t buffer[8];
+    uint8_t data[8] = {1, 2, 3, 4, 5, 6, 7, 8};
 
-   while(true){
-      if(CANbus_Read(buffer,CAN_BLOCKING)==SUCCESS){
-         printf("CHARGE_ENABLE Command Received");
-      }
-   }
-
-
+    BSP_CAN_Write(bus, 0x001, data, 8);
 }
 
-int main(void){
-   CANbus_Init();
-   // generalTest();
-   Charge_Enable_Test();
+void test_read(CAN_t bus) {
+    BSP_CAN_Init(bus, NULL, NULL, NULL, 0);
+    BSP_UART_Init(UART_2);
 
+    uint8_t tx_data[8] = {1, 2, 3, 4, 5, 6, 7, 8};
 
+    BSP_CAN_Write(bus, 0x001, tx_data, 8);
+
+    uint32_t rx_id;
+    uint8_t rx_data[8];
+
+    for(int i = 0; i < 999999; i++) {} // delay for hardware of read hardware to update
+
+    BSP_CAN_Read(bus, &rx_id, rx_data);
+    
+    printf("%ld\n\r", rx_id);
+    for(int i = 0; i < 8; i++) {
+        printf("%x ", rx_data[i]);
+    }
+    printf("\n\r");
 }

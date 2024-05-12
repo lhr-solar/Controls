@@ -1,38 +1,20 @@
 /**
- * @file Test_DisplayDriver.c
- * @author Nathaniel Delgado (nathaniel.delgado@utexas.edu)
- * @brief Tests the driver code for display
- * @version 0.1
- * @date 2022-10-00
- *
- * @copyright Copyright (c) 2022
- *
- */
+ * Test for Display
+*/
 
-// #include "common.h"
-// #include "config.h"
-// #include "os.h"
-#include "Tasks.h"
-// #include "Display.h"
-// #include "bsp.h"
-// #include "Contactors.h"
 #include "Display.h"
 
-// Stolen from UpdateDisplay.c
 /**
  * Enum and corresponding array for easy component selection.
+ * 
+ * Stolen from UpdateDisplay.c
  */
-typedef enum
-{
+typedef enum{
 	// Boolean components
-	LEFT = 0,
-	HEAD,
-	RIGHT,
-	HZD,
-	ARRAY,
+	ARRAY=0,
 	MOTOR,
 	// Non-boolean components
-	VELOCITY,
+	VELOCITY_DISPLAY,
 	ACCEL_METER,
 	SOC,
 	SUPP_BATT,
@@ -44,42 +26,36 @@ typedef enum
 	FAULT_CODE
 } Component_t;
 
-static char *compStrings[15] = {
-		// Boolean components
-		"ltime",
-		"head",
-		"rtime",
-		"hzd",
-		"arr",
-		"mot",
-		// Non-boolean components
-		"vel",
-		"accel",
-		"soc",
-		"supp",
-		"cruiseSt",
-		"rbsSt",
-		"gear",
-		// Fault code components
-		"oserr",
-		"faulterr"};
+char* test_compStrings[15]= {
+	// Boolean components
+	"arr",
+	"mot",
+	// Non-boolean components
+	"vel",
+	"accel",
+	"soc",
+	"supp",
+	"cruiseSt",
+	"rbsSt",
+	"gear",
+	// Fault code components
+	"oserr",
+	"faulterr"
+};
 
 // Delay; Don't know how long
-void delay(void)
-{
+void delay(void) {
 	volatile int j;
-	for (j = 0; j < 9999999; j++)
-	{
+	for (j = 0; j < 9999999; j++) {
 		continue;
 	}
 }
 
-int main()
-{
-	DisplayError_t err;
+int main(void) {
+	DisplayError_t err = 0;
 
 	err = Display_Init();
-	assertDisplayError(err);
+	if(err) printf("%d", err);
 	delay();
 
 	// Display the fault page
@@ -91,7 +67,7 @@ int main()
 			.argTypes = {true},
 			{{.num = FAULT}}};
 	err = Display_Send(pgCmd);
-	//assertDisplayError(err);
+	if(err) printf("%d", err);
 	delay();
 
 	// Display the info page
@@ -103,7 +79,7 @@ int main()
 			.argTypes = {true},
 			{{.num = INFO}}};
 	err = Display_Send(pgCmd);
-	//assertDisplayError(err);
+	if(err) printf("%d", err);
 	delay();
 
 	// Show the array icon
@@ -113,9 +89,9 @@ int main()
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[ARRAY]}, {.num = 1}}};
+			{{.str = test_compStrings[ARRAY]}, {.num = 1}}};
 	err = Display_Send(toggleCmd);
-	//assertDisplayError(err);
+	if(err) printf("%d", err);
 	delay();
 
 	// Don't show the array icon
@@ -125,17 +101,15 @@ int main()
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[ARRAY]}, {.num = 0}}};
+			{{.str = test_compStrings[ARRAY]}, {.num = 0}}};
 	err = Display_Send(toggleCmd);
-	//assertDisplayError(err);
+	if(err) printf("%d", err);
 	delay();
 
 	// Test the fault screen
 	error_code_t faultCode = 0x69;
 	err = Display_Error(faultCode);
-	//assertDisplayError(err);
+	if(err) printf("%d", err);
 
-	while (1)
-	{
-	}
+	while(1) {}
 }

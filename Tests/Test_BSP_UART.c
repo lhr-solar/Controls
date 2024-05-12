@@ -1,10 +1,10 @@
 /**
- * Test file for library to interact with UART
+ * Test file for UART
+ * Simply turn on the board and connect serial (UART2) through PUTTY 
+ * to interact with UART2.
+ * For UART3, connect a logic analyzer to the UART3 output line and
+ * use Saleae Logic 2 to analyze that the signal is being sent correctly.
  * 
- * Run this test in conjunction with the simulator
- * GUI. As this generates randomized values, the display
- * will update the values accordingly to show that the
- * display is reading the UART properly
  */
 
 #include "common.h"
@@ -13,22 +13,51 @@
 
 #define TX_SIZE 128
 
-int main(void) {
-    // BSP_UART_Init(UART_2);
-    BSP_UART_Init(UART_3);
-    const char* testStr = "\xff\xff\xffpage 2\xff\xff\xff";
-    BSP_UART_Write(UART_3, (char*) testStr , strlen(testStr));
-    while (1) {volatile int x=0; x++;}
+/**
+ * Read a line using UART
+ * Print the first 4 chars using UART
+ */
+void Test_UART_2_Read_Write(){
+    const char* testStr = "Enter your favorite number:\n\r";
+    BSP_UART_Write(UART_2, (char*) testStr , strlen(testStr));
+    
+    //128 is the minimum buffer size for BSP_UART_Read
+    char input[128];
+    BSP_UART_Read(UART_2, input);
 
-        // char out[2][TX_SIZE];
-        // BSP_UART_Read(UART_2, out[UART_2]);
-        // BSP_UART_Read(UART_3, out[UART_3]);
-        // out[UART_2][strlen(out[UART_2])-1] = 0; // remove the newline, so we can print both in one line for now
-        // out[UART_3][strlen(out[UART_3])-1] = 0;
-        // printf("UART 2: %s\tUART 3: %s\r", out[UART_2], out[UART_3]);
-        // /*
-        //  * If a long message is sent before a short message, the messages will overlap
-        //  * on the display. This is not an issue with UART_2, but just a consequence of
-        //  * how these tests must be structured and outputted.
-        //  */
+    //Print the first 4 characters of the input
+    BSP_UART_Write(UART_2, "\n\r", 2);
+    BSP_UART_Write(UART_2, input, 4);
+}
+
+/**
+ * Read a number using UART through scanf
+ * Print that number using UART printf
+*/
+void Test_UART_2_Printf_Scanf(){
+    int num;
+    printf("Enter a Number and I'll add one to it!\n\r");
+    scanf("%d", &num);
+    printf("\n\r%d", num + 1);
+}
+
+/**
+ * Write a 32 bit number to UART 3 and read it back
+ * on a logic analyzer
+*/
+void Test_UART_3_Write(){
+    const uint32_t test = 0xdeadbeef;
+    BSP_UART_Write(UART_3, (char*) &test , 4);
+}
+
+int main(void) {
+    BSP_UART_Init(UART_2);
+    BSP_UART_Init(UART_3);
+
+    Test_UART_2_Read_Write();
+    Test_UART_2_Printf_Scanf();
+    Test_UART_3_Write();
+
+    while(1);
+
 }

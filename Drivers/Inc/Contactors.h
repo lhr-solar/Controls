@@ -17,9 +17,11 @@
 #include "stm32f4xx_gpio.h"
 
 
-#define CONTACTORS_PORT                                 PORTC
-#define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_10
-#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_12     
+#define ARRAY_CONTACTOR_PORT                                 PORTC
+#define MCONT_CONTACTOR_PORT                                 PORTD
+
+#define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_11
+#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_2     
 
 #define FOREACH_contactor(contactor) \
         contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR),  \

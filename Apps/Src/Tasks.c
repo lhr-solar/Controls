@@ -135,8 +135,8 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 */
 void EmergencyContactorOpen() {
     // Array motor kill
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, OFF);
+    BSP_GPIO_Write_Pin(MCONT_CONTACTOR_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, OFF);
+    BSP_GPIO_Write_Pin(ARRAY_CONTACTOR_PORT, ARRAY_PRECHARGE_BYPASS_PIN, OFF);
 
     // Turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);

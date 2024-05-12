@@ -16,9 +16,9 @@ int _write(int fd, char *buffer, unsigned int len) {
 
 int _read(int const fd, char *buffer, unsigned const len) {
     if(buffer != NULL) {
-        
+        BSP_UART_Read(UART_2, buffer);
     }
-    return 1;
+    return len;
 }
 
 int _close(int file)

@@ -13,6 +13,7 @@
 #include "common.h"
 
 //#define SENDTRITIUM_PRINT_MES
+//#define SENDTRITIUM_EXPOSE_VARS
 
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
@@ -49,22 +50,22 @@ typedef struct TritiumState{
     void (*stateDecider)(void);
 } TritiumState_t;
 
-#ifdef SENDTRITIUM_EXPOSE_VARS
-// Inputs
-extern bool cruiseEnable;
-extern bool cruiseSet;
-extern bool onePedalEnable;
-extern bool regenEnable;
+// #ifdef SENDTRITIUM_EXPOSE_VARS
+// // Inputs
+// extern bool cruiseEnable;
+// extern bool cruiseSet;
+// extern bool onePedalEnable;
+// extern bool regenEnable;
 
-extern uint8_t brakePedalPercent;
-extern uint8_t accelPedalPercent;
+// extern uint8_t brakePedalPercent;
+// extern uint8_t accelPedalPercent;
 
-extern Gear_t gear;
+// extern Gear_t gear;
 
-extern TritiumState_t state;
-extern float velocityObserved;
-extern float cruiseVelSetpoint;
-#endif
+// extern TritiumState_t state;
+// extern float velocityObserved;
+// extern float cruiseVelSetpoint;
+// #endif
 
 // Getter functions for local variables in SendTritium.c
 EXPOSE_GETTER(bool, cruiseEnable)
