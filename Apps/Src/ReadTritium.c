@@ -75,10 +75,9 @@ void Task_ReadTritium(void *p_arg){
 
 					//Car Velocity (in m/s) is in bytes 4-7
 					Motor_Velocity = *((float*)(&dataBuf.data[4]));
-					uint32_t Car_Velocity = Motor_Velocity;
+					float Car_Velocity = Motor_Velocity * 1000;
 					
-					Car_Velocity = ((Car_Velocity * 100) * 3600); //Converting from m/s to m/h, using fixed point factor of 100
-					Car_Velocity = ((Car_Velocity / 160934) * 10); //Converting from m/h to mph, multiplying by 10 to make value "larger" for displaying
+					Car_Velocity = (Car_Velocity * 223694) / 10000000;
 
 					UpdateDisplay_SetVelocity(Car_Velocity);
 
