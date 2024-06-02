@@ -19,7 +19,7 @@
 
 #define CONTACTORS_PORT                                 PORTC
 #define ARRAY_PRECHARGE_BYPASS_PIN                      GPIO_Pin_10
-#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_12     
+#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN           GPIO_Pin_11
 
 #define FOREACH_contactor(contactor) \
         contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR),  \
