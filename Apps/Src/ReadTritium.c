@@ -1,7 +1,21 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file ReadTritium.c
- * @brief
+ *
+ * ReadTritium forwards all messages from MotorCAN to CarCAN. It does this using
+ * the FIFO defined in [SendCarCAN](./SendCarCAN.html). The task posts messages
+ * to the queue, which are then read out by the SendCarCAN task.
+ *
+ * ReadTritium also facilitates reading velocity and error information in from
+ * the motor controller. Velocity is put on the display, and error information
+ * is used to determine if the motor controller has detected an error. Depending
+ * on the frequency and severity of the error, the task will either attempt to
+ * reset the motor controller or set the car to a fault state.
+ *
+ * # Error Handling
+ * The motor controller can detect a variety of errors. These are enumerated in
+ * #tritium_error_code_t. The task will attempt to restart the motor controller
+ * for hall sensor errors. All other errors will result in the task locking the
+ * scheduler and entering a nonrecoverable fault state.
  *
  */
 
@@ -33,7 +47,11 @@ static OS_TMR motor_watchdog;
 // Function prototypes
 static void assertTritiumError(TritiumErrorCode motor_err);
 
-// Callback for motor watchdog
+/**
+ * @brief Callback function for the motor watchdog timer
+ * @param tmr Pointer to the timer
+ * @param p_arg unused
+ */
 static void motorWatchdog(void *tmr, void *p_arg) {
     // Attempt to restart 3 times, then fail
     assertTritiumError(kMotorWatchdogTrip);
@@ -108,6 +126,9 @@ void TaskReadTritium(void *p_arg) {
     }
 }
 
+/**
+ * @brief Restarts the motor controller by sending a reset message
+ */
 static void restartMotorController(void) {
     CanData resetmsg = {0};
     resetmsg.id = kMotorReset;

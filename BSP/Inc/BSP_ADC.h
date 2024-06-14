@@ -1,12 +1,8 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file BSP_ADC.h
- * @brief Header file for the library to interact
- * with the Analog to Digital Converter (ADC)
+ * @brief This module provides a low-level interface to two ADC channels,
+ * which are intended to be used for the accelerator and brake pedals.
  *
- * @defgroup BSP_ADC
- * @addtogroup BSP_ADC
- * @{
  */
 
 #ifndef BSP_ADC_H
@@ -14,12 +10,31 @@
 
 #include "common.h"
 
-#define BSP_ADC_PRECISION_BITS 12
+/**
+ * @brief This macro represents the maximum number of ADC channels that can be
+ * used.
+ */
+#define MAX_CHANNELS 10
+
+/**
+ * @brief This macro represents the number of bits of precision of the ADC.
+ */
+#define ADC_PRECISION_BITS 12
+
+/**
+ * @brief This macro represents the range of the ADC in millivolts.
+ */
+#define ADC_RANGE_MILLIVOLTS 3300
+
+/**
+ * @brief This enum represents the ADC channels that are available on the board.
+ */
 
 typedef enum { kCh10, kCh11, kNumCh } Adc;
 
 /**
  * @brief   Initialize the ADC module
+ * @param   None
  * @return  None
  */
 void BspAdcInit(void);
@@ -40,5 +55,3 @@ int16_t BspAdcGetValue(Adc hardware_device);
 int16_t BspAdcGetMillivoltage(Adc hardware_device);
 
 #endif
-
-/* @} */

@@ -1,49 +1,94 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file SendTritium.h
- * @brief
+ * @brief Runs the car's State Machine and sends control messages to the Tritium
+ * motor controller.
  *
- * @defgroup SendTritium
- * @addtogroup SendTritium
- * @{
+ * Starting the SendTritium task will start sending CAN messages
+ * and running the state machine. For details on the state machine, see
+ *
  */
 #ifndef SENDTRITIUM_H
 #define SENDTRITIUM_H
 
 #include "common.h"
 
-#define SENDTRITIUM_PRINT_MES
-#define SENDTRITIUM_EXPOSE_VARS
+/**
+ * Print messages for SendTritium.c
+ */
+// #define SENDTRITIUM_PRINT_MES
 
-#define MOTOR_MSG_PERIOD 100  // in ms
-#define FSM_PERIOD 100        // in ms
-#define DEBOUNCE_PERIOD 2     // in units of FSM_PERIOD
-#define MOTOR_MSG_COUNTER_THRESHOLD ((MOTOR_MSG_PERIOD) / (FSM_PERIOD))
+/**
+ * Expose variables for SendTritium.c
+ */
+// #define SENDTRITIUM_EXPOSE_VARS
 
+/**
+ * Expose variables for SendTritium.c
+ */
+// #define SENDTRITIUM_EXPOSE_VARS
+
+/**
+ * Period of the motor CAN message in milliseconds
+ */
+#define MOTOR_MSG_PERIOD 100
+
+/**
+ * Period of the state machine in milliseconds
+ */
+#define FSM_PERIOD 100
+
+/**
+ * Period of the debouncer in units of FSM_PERIOD
+ */
+#define DEBOUNCE_PERIOD 2
+
+/**
+ * Generate enum list for Gear_t
+ */
 #define FOREACH_GEAR(GEAR) \
     GEAR(kForwardGear), GEAR(kNeutralGear), GEAR(kReverseGear),
 
+/**
+ * Gears
+ */
 typedef enum {
     FOREACH_GEAR(GENERATE_ENUM) kNumGears,
 } Gear;
 
-// State Names
+/**
+ * States for the FSM
+ */
 typedef enum {
+    /** Forward drive state */
     kForwardDrive,
+    /** Neutral drive state */
     kNeutralDrive,
+    /** Reverse drive state */
     kReverseDrive,
+    /** Record velocity state (cruise) */
     kRecordVelocity,
+    /** Powered cruise state (cruise) */
     kPoweredCruise,
+    /** Coasting cruise state (cruise) */
     kCoastingCruise,
+    /** Brake state */
     kBrakeState,
+    /** One pedal state (regen) */
     kOnePedal,
+    /** Accelerate cruise state (cruise) */
     kAccelerateCruise
 } TritiumStateName;
 
-// State Struct for FSM
+/**
+ * Struct containing the state name, state handler, and state decider
+ * function for the Tritium FSM
+ */
 typedef struct TritiumState {
+    /** Name of the state */
     TritiumStateName name;
+    /** Function pointer to the state handler */
     void (*stateHandler)(void);
+    /** Function pointer to the state decider */
     void (*stateDecider)(void);
 } TritiumState;
 
@@ -78,5 +123,3 @@ void SetVelocitySetpoint(float value);
 #endif
 
 #endif
-
-/* @} */

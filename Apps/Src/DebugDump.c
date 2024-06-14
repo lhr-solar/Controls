@@ -1,3 +1,18 @@
+/**
+ * @file DebugDump.c
+ * @brief This file contains the Debug Dump Task, which dumps the current state
+ * of the vehicle to UART. This is mainly useful for **debugging purposes
+ * only**, which is why it isn't enabled by default in [Main](Main.html).
+ *
+ * This can be used as a simpler version of the Command Line Interface to view
+ * periodic reads from each input to the MCU. This includes:
+ *
+ * - Pedals (see [Pedals](../Drivers/Pedals.html))
+ * - Switches, Buttons, and Lights (see [Minions](../Drivers/Minions.html))
+ * - Contactors (see [Contactors](../Drivers/Contactors.html))
+ * - FSM Mode Information (see [SendTritium](SendTritium.html))
+ */
+
 #include <errno.h>
 
 #include "CanBus.h"
@@ -8,7 +23,6 @@
 #include "Tasks.h"
 #include "bsp.h"
 #include "common.h"
-#include "os.h"
 
 static const char *minionpin_string[] = {FOREACH_PIN(GENERATE_STRING)};
 static const char *contactor_string[] = {FOREACH_CONTACTOR(GENERATE_STRING)};

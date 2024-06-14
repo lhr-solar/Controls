@@ -1,4 +1,7 @@
-/* Copyright (c) 2021 UT Longhorn Racing Solar */
+/**
+ * @file    BSP_GPIO.c
+ * @details
+ */
 
 #include "BSP_GPIO.h"
 
@@ -15,9 +18,9 @@ static GPIO_TypeDef *gpioGetPort(Port port) {
 
 /**
  * @brief   Initializes a GPIO port
- * @param   port - port to initialize
- * @param	mask - pins
- * @param	direction - input or output
+ * @param   port port to initialize
+ * @param	mask pins
+ * @param	direction input or output
  * @return  None
  */
 
@@ -41,8 +44,8 @@ void BspGpioInit(Port port, uint16_t mask, Direction direction) {
 
 /**
  * @brief   Reads value of the specified port
- * @param   port to read
- * @return  data of the port
+ * @param   port port to read
+ * @return  data in the port
  */
 
 uint16_t BspGpioRead(Port port) {
@@ -65,10 +68,9 @@ void BspGpioWrite(Port port, uint16_t data) {
 }
 
 /**
- * @brief   Reads data from a specified input pin (not applicable to output
- * pins)
+ * @brief   Reads data from a specified pin (not applicalbe to output pins)
  * @param   port The port to read from
- * @param   pin The pin to read from
+ * @param   pinmask Mask from stm header file that says which pin to read from
  * @return  State of the pin
  */
 
@@ -81,7 +83,7 @@ uint8_t BspGpioReadPin(Port port, uint16_t pin_mask) {
 /**
  * @brief   Writes data to a specified pin
  * @param   port The port to write to
- * @param   pin The pin to write to
+ * @param   pinmask Mask from stm header file that says which pin to write too
  * @param   state true=ON or false=OFF
  * @return  None
  */

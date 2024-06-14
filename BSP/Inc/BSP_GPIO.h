@@ -1,12 +1,10 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file BSP_GPIO.h
- * @brief Header file for the library to interact
- * with the GPIO ports
+ * @brief This module provides a low-level interface to the Leaderboard's GPIO
+ * ports, intended for switches and some lights. The code is fairly
+ * straightforward, and only slightly simplifies the
+ * [Minion](../Drivers/Minions.html).
  *
- * @defgroup BSP_GPIO
- * @addtogroup BSP_GPIO
- * @{
  */
 
 #ifndef BSP_GPIO_H
@@ -15,22 +13,29 @@
 #include "common.h"
 #include "stm32f4xx_gpio.h"
 
+/**
+ * @brief GPIO ports
+ */
 typedef enum { kPortA = 0, kPortB, kPortC, kPortD, kNumPorts } Port;
+
+/**
+ * @brief GPIO direction
+ */
 typedef enum { kInput = 0, kOutput } Direction;
 
 /**
  * @brief   Initializes a GPIO port
- * @param   port - port to initialize
- * @param	mask - pins
- * @param	direction - input or output
+ * @param   port port to initialize
+ * @param	mask pins
+ * @param	direction input or output
  * @return  None
  */
 void BspGpioInit(Port port, uint16_t mask, Direction direction);
 
 /**
  * @brief   Reads value of the specified port
- * @param   port to read
- * @return  data of the port
+ * @param   port port to read
+ * @return  data in the port
  */
 uint16_t BspGpioRead(Port port);
 
@@ -68,5 +73,3 @@ void BspGpioWritePin(Port port, uint16_t pin_mask, bool state);
 uint8_t BspGpioGetState(Port port, uint16_t pin);
 
 #endif
-
-/* @} */

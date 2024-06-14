@@ -1,11 +1,10 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Pedals.h
- * @brief Header file for the Pedals driver
+ * @brief The Pedals driver is a thin wrapper over the ADC interface exposed by
+ * the BSP. It calibrates the ADC output in order to get sensible values for the
+ * pedals. These calibration parameters are provided in the c file, and can be
+ * easily changed if the pedal wiring changes or if further tuning is required.
  *
- * @defgroup Pedals
- * @addtogroup Pedals
- * @{
  */
 
 #ifndef PEDALS_H
@@ -14,26 +13,23 @@
 #include "BSP_ADC.h"
 
 /**
- * @brief Stuff
- *
+ * @brief Used to index the LowerBound and UpperBound arrays
  */
 typedef enum { kAccelerator, kBrake, kNumberOfPedals } Pedal;
 
 /**
- * @brief   Initialize the pedals
- * @param   None
- * @return  None
+ * @brief   Initializes the pedals
  */
 void PedalsInit(void);
 
 /**
- * @brief   Provides the pedal distance pressed in percetage (accelerator or
- * brake)
- * @param   pedal_t pedal, ACCELERATOR or BRAKE as defined in enum
- * @return  distance the pedal has been pressed in percentage
+ * @brief   Fetches the millivoltage value of the potentiomenter as provided
+ *          by the ADC channel of the requested pedal (Accelerator or Brake),
+ *          converts it to a percentage of the total distance pressed using
+ *          data from calibration testing, and returns it
+ * @param   pedal ACCELERATOR or BRAKE
+ * @return  percent amount the pedal has been pressed in percentage
  */
 int8_t PedalsRead(Pedal pedal);
 
 #endif
-
-/* @} */

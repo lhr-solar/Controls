@@ -1,11 +1,7 @@
 /**
- * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file common.h
  * @brief
  *
- * @defgroup common
- * @addtogroup common
- * @{
  */
 
 #ifndef COMMON_H
@@ -41,5 +37,3 @@ inline float MpsToRpm(float velocity_mps) {
 }
 
 #endif
-
-/* @} */

@@ -1,12 +1,12 @@
 *************
-Pedals Driver
+CanBus Driver
 *************
 
-.. doxygenfile:: Pedals.h
+.. doxygenfile:: CanBus.h
    :sections: briefdescription
 
-.. doxygenfile:: Pedals.c
+.. doxygenfile:: CanBus.c
    :sections: detaileddescription
 
-.. doxygenfile:: Pedals.h
+.. doxygenfile:: CanBus.h
    :sections: define enum func typedef

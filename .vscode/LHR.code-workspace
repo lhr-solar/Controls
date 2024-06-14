@@ -8,7 +8,6 @@
         }
     ],
     "settings": {
-        "liveServer.settings.multiRootWorkspaceName": "renode",
         "terminal.integrated.defaultProfile.linux": "bash",
         "terminal.integrated.profiles.linux": {
             "bash": {
@@ -17,6 +16,9 @@
                 "args": ["-i"]
             },   
         },
+        "livePreview.defaultPreviewPath": "./Docs/build/html/",
+        "C_Cpp.simplifyStructuredComments": false,
+        "C_Cpp.autoAddFileAssociations": false
     },
     "tasks": {
         "version": "2.0.0",
@@ -292,5 +294,4 @@
             "waderyan.gitblame"                     // For tracking commit history and authors within code
         ]
     }
-
 }

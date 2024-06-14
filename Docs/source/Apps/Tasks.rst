@@ -1,24 +1,28 @@
-************
-Read Tritium
-************
-
-.. doxygenfile:: ReadTritium.h
+*******************
+Tasks Configuration
+*******************
+.. doxygenfile:: Tasks.h
     :sections: briefdescription
+
+.. toctree::
+    :hidden:
+    
+    ./ErrorHandling
 
 =============
 Usage Details
-=============
-.. doxygenfile:: ReadTritium.h
+============= 
+.. doxygenfile:: Tasks.h
     :sections: detaileddescription
 
 ==================
 Functional Details
 ==================
-.. doxygenfile:: ReadTritium.c
+.. doxygenfile:: Tasks.c
     :sections: detaileddescription
 
 ===
 API
 ===
-.. doxygenfile:: ReadTritium.h
+.. doxygenfile:: Tasks.h    
     :sections: define enum func typedef

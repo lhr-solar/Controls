@@ -35,12 +35,6 @@ release = u''
 #
 # needs_sphinx = '1.0'
 
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
-extensions = [
-    
-]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -59,7 +53,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -81,12 +75,14 @@ html_theme = 'sphinx_book_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    "show_navbar_depth": 4
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["../../img"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -173,8 +169,36 @@ epub_title = project
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
-# Breathe configurations
-extensions = ['breathe']
-breathe_projects = {"doxygen": "../doxygen/xml/"}
-breathe_default_project = "doxygen"
+
+import os
+stdperiph_dir = "../../BSP/STM32F413/STM32F4xx_StdPeriph_Driver/"
+stdperiph_srcs = []
+
+for file in os.listdir(stdperiph_dir + 'Src'):
+    stdperiph_srcs.append('Src/'+file)
+
+# Add any Sphinx extension module names here, as strings. They can be
+# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
+# ones.
+extensions = [
+    'breathe',
+    'sphinx.ext.autosectionlabel'
+]
+
+breathe_domain_by_extension = {
+    "h": "c"
+}
+
+breathe_projects = {"controls_docs": "../doxygen/xml/"}
+breathe_projects_source = {
+    "stdperiph_docs": (
+        stdperiph_dir, stdperiph_srcs
+    )
+}
+
+breathe_implementation_filename_extensions = ['.c']
+breathe_default_project = "controls_docs"
 breathe_show_define_initializer = True
+breathe_doxygen_config_options = {'QUIET': 'YES', 'WARNINGS': 'NO'} # did this so that it would stop complaining about the stdperiph files,
+                                                    # but it would be nice to get rid of the warnings in the future
+autosectionlabel_prefix_document = True

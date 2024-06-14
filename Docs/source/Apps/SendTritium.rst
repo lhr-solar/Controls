@@ -1,16 +1,23 @@
-.. _velocity:
+************
+Send Tritium
+************
+.. doxygenfile:: SendTritium.h
+   :sections: briefdescription
 
-********************
-SendTritium Task
-********************
+=============
+Usage Details
+=============
+.. doxygenfile:: SendTritium.h
+   :sections: detaileddescription
 
-The SendTritium task currently houses our velocity control code. 
-It utilizes a FSM to coordinate what messages should be sent to the motor controller depending on a certain set of input variables.
-This FSM depends on data from across the system, such as:
-- The Pedals
-- The switches
-- The CAN messages from BPS (indicates whether we can regen brake or not)
+==================
+Functional Details
+==================
+.. doxygenfile:: SendTritium.c
+   :sections: detaileddescription
 
-.. doxygengroup:: SendTritium
-   :project: doxygen
-   :path: "/doxygen/xml/group__SendTritium.xml"
+===
+API
+===
+.. doxygenfile:: SendTritium.h
+   :sections: define enum func typedef
