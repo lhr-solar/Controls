@@ -72,7 +72,7 @@ UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page);
  * @param percent charge as a percent (0 digits of precision)
  * @returns UpdateDisplayError_t
  */
-UpdateDisplayError_t UpdateDisplay_SetSOC(uint8_t percent);
+UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent);
 
 /**
  * @brief Sets the supplemental battery pack voltage value on the display

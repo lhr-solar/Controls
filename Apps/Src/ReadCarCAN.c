@@ -42,7 +42,7 @@
 #define ENABLE_SATURATION_MSG 1
 
 // State of Charge scalar to scale it to correct fixed point
-#define SOC_SCALER 1000000
+#define SOC_SCALER 1000
 
 // CAN watchdog timer variable
 static OS_TMR canWatchTimer;
@@ -76,7 +76,7 @@ static bool arrPBCComplete = false;
 static bool mcPBCComplete = false;
 
 // State of Charge (SOC) and supplemental battery pack voltage (SBPV) value intialization
-static uint8_t SOC = 0;
+static uint32_t SOC = 0;
 static uint32_t SBPV = 0;
 
 // Error assertion function prototype
@@ -373,12 +373,12 @@ void Task_ReadCarCAN(void *p_arg){
             }
 
             case SUPPLEMENTAL_VOLTAGE: {
-                SBPV = (*(uint16_t *) &dataBuf.data);
+                SBPV = dataBuf.data[0] << 8 | dataBuf.data[1];
                 UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
-                SOC = (*(uint32_t*) &dataBuf.data)/(SOC_SCALER);  // Convert to integer percent
+                SOC = (dataBuf.data[0] << 24 | dataBuf.data[1] << 16 | dataBuf.data[2] << 8 | dataBuf.data[3])/(SOC_SCALER);
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }

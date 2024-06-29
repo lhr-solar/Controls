@@ -242,7 +242,7 @@ UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page){
 }
 
 /* WRAPPERS */
-UpdateDisplayError_t UpdateDisplay_SetSOC(uint8_t percent){	// Integer percentage from 0-100
+UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent){	// Integer percentage from 0-100
 
 	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SOC, percent);
 	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
