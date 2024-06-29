@@ -345,7 +345,11 @@ static void ForwardDriveHandler(){
         UpdateDisplay_SetGear(DISP_FORWARD);
     }
     velocitySetpoint = MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+    // printf("accelPedalPercent: %d\n\r", accelPedalPercent);
+    uint8_t after_map = map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+    // printf("map(accelPedalPercent): %d\n\r", after_map);
+    currentSetpoint = percentToFloat(after_map);
+    // print_float("float(map(accelPedalPercent)): %d\n\r", currentSetpoint);
 }
 
 /**
