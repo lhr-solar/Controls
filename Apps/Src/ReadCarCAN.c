@@ -373,12 +373,12 @@ void Task_ReadCarCAN(void *p_arg){
             }
 
             case SUPPLEMENTAL_VOLTAGE: {
-                SBPV = dataBuf.data[0] << 8 | dataBuf.data[1];
+                SBPV = *(uint16_t *)dataBuf.data;
                 UpdateDisplay_SetSBPV(SBPV); // Receive value in mV
                 break;
             }
             case STATE_OF_CHARGE:{
-                SOC = (dataBuf.data[0] << 24 | dataBuf.data[1] << 16 | dataBuf.data[2] << 8 | dataBuf.data[3])/(SOC_SCALER);
+                SOC = (*(uint32_t *) dataBuf.data)/(SOC_SCALER); // Convert to integer percent
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }
