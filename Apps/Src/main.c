@@ -40,10 +40,10 @@ int main(void) {
     // Disable interrupts
     __disable_irq();
 
-    IdleInit();
 
     OS_ERR err;
     OSInit(&err);
+    IdleInit();
     TaskSwHook_Init();
 
     assertOSError(err);
