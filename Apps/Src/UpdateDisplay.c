@@ -13,31 +13,14 @@
 #include "Minions.h"
 #include <math.h>
 
-/**
- * Creates queue for display commands.
- */
-#define DISP_Q_SIZE 10
-
-#define FIFO_TYPE DisplayCmd_t
-#define FIFO_SIZE DISP_Q_SIZE
-#define FIFO_NAME disp_fifo
-#include "fifo.h"
-
 // For fault handling
 #define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
-
-disp_fifo_t msg_queue;
-
-static OS_SEM DisplayQ_Sem4;    // counting semaphore for queue message availability
-static OS_MUTEX DisplayQ_Mutex; // mutex to ensure thread safety when writing/reading to queue
-
 
 /**
  * Function prototypes
 */
 // check for and assert errors in UpdateDisplay
-static void assertUpdateDisplayError(UpdateDisplayError_t err); 
-
+static void assertUpdateDisplayError(UpdateDisplayError_t err);
 
 /**
  * Enum and corresponding array for easy component selection.
@@ -53,11 +36,18 @@ typedef enum{
 	SUPP_BATT,
 	CRUISE_ST,
 	REGEN_ST,
+    PACK_VOLTAGE,
+    PACK_CURRENT,
+    PACK_TEMP,
+    HEARTBEAT,
 	GEAR,
 	// Fault code components
 	OS_CODE,
-	FAULT_CODE
+	FAULT_CODE,
+    NUM_COMPONENTS
 } Component_t;
+
+static uint32_t componentVals[NUM_COMPONENTS] = {0};
 
 const char* compStrings[15]= {
 	// Boolean components
@@ -71,6 +61,9 @@ const char* compStrings[15]= {
 	"cruiseSt",
 	"rbsSt",
 	"gear",
+    "pv",
+    "pc",
+    "pt",
 	// Fault code components
 	"oserr",
 	"faulterr"
@@ -78,78 +71,12 @@ const char* compStrings[15]= {
 
 UpdateDisplayError_t UpdateDisplay_Init(){
 	OS_ERR err;
-	disp_fifo_renew(&msg_queue);
-	OSMutexCreate(&DisplayQ_Mutex, "Display mutex", &err);
-	assertOSError(err);
-	OSSemCreate(&DisplayQ_Sem4, "Display sem4", 0, &err);
-	assertOSError(err);
-	
+
 	UpdateDisplayError_t ret = UpdateDisplay_SetPage(INFO);
     OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, &err); // Wait >215ms so errors will show on the display
     assertOSError(err);
-	return ret;
-}
-
-/**
- * @brief Pops the next display message from the queue and passes
- * it to the display driver. Pends on semaphore and mutex to ensure that:
- *  1) queue has messages to send (signaled by semaphore)
- *  2) queue is not currently being written to by a separate thread (mutex)
- * @returns UpdateDisplayError_t
- */
-static UpdateDisplayError_t UpdateDisplay_PopNext(){
-    DisplayCmd_t cmd;
-
-    OS_ERR err;
-    CPU_TS ticks;
-
-    OSSemPend(&DisplayQ_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(err);
-		
-    OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(err);
-
-    bool result = disp_fifo_get(&msg_queue, &cmd);
-    OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
-    assertOSError(err);
-
-    if(!result){
-			assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_POP);
-			return UPDATEDISPLAY_ERR_FIFO_POP;
-		}
-		
-		// Assert a display driver error code if the send fails, else assert that there's no error
-		assertUpdateDisplayError(Display_Send(cmd) ? UPDATEDISPLAY_ERR_DRIVER : UPDATEDISPLAY_ERR_NONE);
-		return UPDATEDISPLAY_ERR_NONE;
-}
-
-/**
- * @brief Puts a new display message in the queue. Pends on mutex to ensure
- * threadsafe memory access and signals semaphore upon successful fifo_put.
- * @returns UpdateDisplayError_t
- */
-static UpdateDisplayError_t UpdateDisplay_PutNext(DisplayCmd_t cmd){
-	CPU_TS ticks;
-	OS_ERR err;
-
-	OSMutexPend(&DisplayQ_Mutex, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
-	assertOSError(err);
 	
-	bool success = disp_fifo_put(&msg_queue, cmd);
-
-	OSMutexPost(&DisplayQ_Mutex, OS_OPT_POST_ALL, &err);
-	assertOSError(err);
-
-	if(success){
-		OSSemPost(&DisplayQ_Sem4, OS_OPT_POST_ALL, &err);
-		assertOSError(err);
-	}
-	else{
-		assertUpdateDisplayError(UPDATEDISPLAY_ERR_FIFO_PUT);
-		return UPDATEDISPLAY_ERR_FIFO_PUT;
-	}
-
-	return UPDATEDISPLAY_ERR_NONE;
+    return ret;
 }
 
 /**
@@ -171,8 +98,8 @@ static UpdateDisplayError_t UpdateDisplay_Refresh(){
 		}
 	};
 
-	UpdateDisplayError_t ret = UpdateDisplay_PutNext(refreshCmd);
-	return ret;
+	Display_Send(refreshCmd);
+	return UPDATEDISPLAY_ERR_NONE;
 }
 
 /**
@@ -182,11 +109,11 @@ static UpdateDisplayError_t UpdateDisplay_Refresh(){
  * @param val value
  * @return UpdateDisplayError_t
  */
-static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_t val){
+static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp){
 	UpdateDisplayError_t ret = UPDATEDISPLAY_ERR_NONE;
 	
 	// For components that are on/off
-	if(comp <= MOTOR && val <= 1){
+	if(comp <= MOTOR && componentVals[comp] <= 1){
 		DisplayCmd_t visCmd = {
 			.compOrCmd = "vis",
 			.attr = NULL,
@@ -195,11 +122,11 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 			.argTypes = {STR_ARG,INT_ARG},
 			{
 				{.str=(char*)compStrings[comp]},
-				{.num=val}
+				{.num=componentVals[comp]}
 			}
 		};
 		
-		ret = UpdateDisplay_PutNext(visCmd);
+		ret = Display_Send(visCmd);
 		return ret;
 	}
 	// For components that have a non-boolean value
@@ -211,11 +138,11 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp, uint32_
 			.numArgs = 1,
 			.argTypes = {INT_ARG},
 			{
-				{.num=val}
+				{.num=componentVals[comp]}
 			}
 		};
 
-		ret = UpdateDisplay_PutNext(setCmd);
+		ret = Display_Send(setCmd);
 		return ret;
 	}
 	else{
@@ -237,99 +164,105 @@ UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page){
 		}
 	};
 
-	UpdateDisplayError_t ret = UpdateDisplay_PutNext(pgCmd);
-	return ret;
+    Display_Send(pgCmd);
+	
+	return UPDATEDISPLAY_ERR_NONE;
 }
 
 /* WRAPPERS */
 UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent){	// Integer percentage from 0-100
-
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SOC, percent);
-	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
-
-	ret = UpdateDisplay_Refresh();
-	return ret;
+	componentVals[SOC] = percent;
+    
+    return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv){
-	
-    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(SUPP_BATT, mv/100);
-	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
-
-	ret = UpdateDisplay_Refresh();
-	return ret;
+	componentVals[SUPP_BATT] = mv;
+    
+    return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
-	
-    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(VELOCITY, mphTenths);
-	return ret;
+	componentVals[VELOCITY] = mphTenths;
+
+    return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
-
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ACCEL_METER, percent);
-	return ret;
+    componentVals[ACCEL_METER] = percent;
+    
+    return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetArray(bool state){
-	
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(ARRAY, (state)?1:0);
-	return ret;
+	componentVals[ARRAY] = state;
+
+    return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetMotor(bool state){
-	
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(MOTOR, (state)?1:0);
-	return ret;
+	componentVals[MOTOR] = state;
+
+    return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear){
+    componentVals[GEAR] = gear;
 	
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(GEAR, (uint32_t)gear);
-	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
-
-	ret = UpdateDisplay_Refresh();
-	return ret;
+    return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state){
-	
-	UpdateDisplayError_t ret = UpdateDisplay_SetComponent(REGEN_ST, (uint32_t)state);
-	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
-	
-	ret = UpdateDisplay_Refresh();
-	return ret;
+	componentVals[REGEN_ST] = state;
+
+	return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
+    componentVals[CRUISE_ST] = state;
 	
-    UpdateDisplayError_t ret = UpdateDisplay_SetComponent(CRUISE_ST, (uint32_t)state);
-	if(ret != UPDATEDISPLAY_ERR_NONE) return ret;
-    
-	ret = UpdateDisplay_Refresh();
-    return ret;
+    return UPDATEDISPLAY_ERR_NONE;
 }
 
-/**
- * @brief Clears the display message queue and sets the message counter semaphore value to 0
-*/
-void UpdateDisplay_ClearQueue(){
-    OS_ERR err;
-    OSSemSet(&DisplayQ_Sem4, 0, &err); // Set the message queue semaphore value to 0
-    if (err != OS_ERR_TASK_WAITING) {
-        assertOSError(err); // Don't fault if UpdateDisplay is waiting
-    }
-    disp_fifo_renew(&msg_queue); // Clear the message queue
-    
+UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t val){
+    componentVals[PACK_VOLTAGE] = val;
+	
+    return UPDATEDISPLAY_ERR_NONE;
 }
+
+UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val){
+	componentVals[PACK_TEMP] = val;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetBattCurrent(uint32_t val){
+    componentVals[PACK_CURRENT] = val;
+	
+    return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val){
+    componentVals[HEARTBEAT] = val;
+
+    return UPDATEDISPLAY_ERR_NONE;
+}
+
 
 /**
  * @brief Loops through the display queue and sends all messages
  */
 void Task_UpdateDisplay(void *p_arg) {
+    OS_ERR err;
     while (1) {
-		UpdateDisplay_PopNext();
+		for(Component_t comp = ARRAY; comp <= GEAR; comp++){
+            UpdateDisplay_SetComponent(comp);
+        }
+
+        UpdateDisplay_Refresh();
+
+        // Delay of 250 ms
+        OSTimeDlyHMSM(0, 0, 0, 250, OS_OPT_TIME_HMSM_STRICT, &err);
+        assertOSError(err);
     }
 }
 
@@ -343,7 +276,6 @@ void Task_UpdateDisplay(void *p_arg) {
  * used if we haven't reached the restart limit and encounter an error
  */ 
 static void handler_UpdateDisplay_Restart() {
-    UpdateDisplay_ClearQueue(); // Clear the message queue
     Display_Reset(); // Try resetting to fix the display error
 }
 

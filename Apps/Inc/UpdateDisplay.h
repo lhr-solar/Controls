@@ -130,6 +130,14 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
  */
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 
+UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t val);
+
+UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val);
+
+UpdateDisplayError_t UpdateDisplay_SetBattCurrent(uint32_t val);
+
+UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val);
+
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0
  * @param none

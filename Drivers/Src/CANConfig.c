@@ -22,6 +22,8 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[BPS_CONTACTOR]		        	= {NOIDX, DOUBLE}, /**	   BPS_CONTACTOR		           **/
 	[STATE_OF_CHARGE] 				= {NOIDX, DOUBLE}, /**     STATE_OF_CHARGE                 **/
 	[SUPPLEMENTAL_VOLTAGE] 			= {NOIDX, DOUBLE}, /**     SUPPLEMENTAL_VOLTAGE            **/
+    [VOLTAGE_SUMMARY]               = {NOIDX, DOUBLE},
+    [TEMPERATURE_SUMMARY]           = {NOIDX, DOUBLE},
 	[MOTOR_DRIVE] 					= {NOIDX, DOUBLE}, /**     MOTOR_DRIVE                     **/
 	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
 	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
@@ -52,7 +54,9 @@ CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
     BPS_TRIP, 
 	BPS_CONTACTOR,			// Bit 1 and 0 contain BPS HV Plus/Minus (associated Motor Controller) Contactor and BPS HV Array Contactor, respectively
     STATE_OF_CHARGE,	
-    SUPPLEMENTAL_VOLTAGE
+    SUPPLEMENTAL_VOLTAGE,
+    VOLTAGE_SUMMARY,
+    TEMPERATURE_SUMMARY
 };
 
 CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {

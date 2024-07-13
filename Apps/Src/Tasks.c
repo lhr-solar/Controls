@@ -89,7 +89,6 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
         EmergencyContactorOpen();
         Display_Error(errorCode); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
-        UpdateDisplay_ClearQueue(); // Clear message queue to ensure no other commands overwrite the error screen
     }
 
 

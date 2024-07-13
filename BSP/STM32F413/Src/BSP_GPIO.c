@@ -3,7 +3,7 @@
 #include "BSP_GPIO.h"
 #include "Tasks.h"
 
-static GPIO_TypeDef* GPIO_GetPort(port_t port){
+GPIO_TypeDef* GPIO_GetPort(port_t port){
  	const GPIO_TypeDef* gpio_mapping[4] = {GPIOA, GPIOB, GPIOC, GPIOD};
 
 	return (GPIO_TypeDef *) gpio_mapping[port];
