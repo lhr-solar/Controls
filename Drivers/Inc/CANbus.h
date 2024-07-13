@@ -30,8 +30,11 @@
 typedef enum { 
 	BPS_TRIP						= 0x002,
 	BPS_CONTACTOR					= 0x102,
+    CURRENT_DATA                    = 0x103,
 	STATE_OF_CHARGE 				= 0x106,
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
+    VOLTAGE_SUMMARY                 = 0x10D,
+    TEMPERATURE_SUMMARY             = 0x10E,
 	MOTOR_DRIVE 					= 0x221,
 	MOTOR_POWER						= 0x222,
 	MOTOR_RESET 					= 0x223,

@@ -79,6 +79,7 @@ static bool mcPBCComplete = false;
 static uint32_t SOC = 0;
 static uint32_t SBPV = 0;
 
+
 // Error assertion function prototype
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
@@ -382,6 +383,19 @@ void Task_ReadCarCAN(void *p_arg){
                 UpdateDisplay_SetSOC(SOC);
                 break;
             }
+            case VOLTAGE_SUMMARY: {
+                UpdateDisplay_SetBattVoltage((*((uint32_t *)dataBuf.data)) >> 8); //uint24_t
+                break;
+            }
+            case TEMPERATURE_SUMMARY: {
+                UpdateDisplay_SetBattTemperature((*((uint32_t *)dataBuf.data)) >> 8); //uint24_t
+                break;
+            }
+            case CURRENT_DATA: {
+                UpdateDisplay_SetBattCurrent((*(uint32_t *)dataBuf.data)); //uint32_t
+                break;
+            }
+
         default: {  
             break; // Unhandled CAN message IDs, do nothing
             }   

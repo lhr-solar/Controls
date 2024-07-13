@@ -36,6 +36,10 @@ typedef enum{
 	SUPP_BATT,
 	CRUISE_ST,
 	REGEN_ST,
+    PACK_VOLTAGE,
+    PACK_CURRENT,
+    PACK_TEMP,
+    HEARTBEAT,
 	GEAR,
 	// Fault code components
 	OS_CODE,
@@ -207,12 +211,36 @@ UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear){
 
 UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state){
 	componentVals[REGEN_ST] = state;
+    
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
     componentVals[CRUISE_ST] = state;
 	
+    return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t val){
+    componentVals[PACK_VOLTAGE] = val;
+	
+    return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val){
+	componentVals[PACK_TEMP] = val;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetBattCurrent(uint32_t val){
+    componentVals[PACK_CURRENT] = val;
+	
+    return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val){
+    componentVals[HEARTBEAT] = val;
+
     return UPDATEDISPLAY_ERR_NONE;
 }
 
