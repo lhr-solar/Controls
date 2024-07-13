@@ -61,10 +61,10 @@ const char* compStrings[15]= {
 	"supp",
 	"cruiseSt",
 	"rbsSt",
-	"gear",
     "pv",
     "pc",
     "pt",
+	"gear",
 	// Fault code components
 	"oserr",
 	"faulterr"
@@ -172,7 +172,7 @@ UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page){
 
 /* WRAPPERS */
 UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent){	// Integer percentage from 0-100
-	componentVals[SOC] = percent;
+	componentVals[SOC] = (percent/1000000);
     
     return UPDATEDISPLAY_ERR_NONE;
 }
@@ -232,13 +232,13 @@ UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t mv){
 }
 
 UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val){
-	componentVals[PACK_TEMP] = val;
+	componentVals[PACK_TEMP] = (val/100);
 
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetBattCurrent(uint32_t val){
-    componentVals[PACK_CURRENT] = val;
+    componentVals[PACK_CURRENT] = (val/100);
 	
     return UPDATEDISPLAY_ERR_NONE;
 }

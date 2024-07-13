@@ -39,17 +39,21 @@ def rec():
 
         # print('EN HVARR CONTACTOR: ' + str(ign_val))
 
-batt_voltage = 0
-batt_current = 0
-batt_
-
 def send():
     global ign_val
     while 1:
         out = 'T1021' + ('07' if ign_val else '06') + chr(13)
         ser.write(out.encode('ascii'))
+        print(out)
 
-        print('SENDING ' + str(ign_val))
+        out = 'T1021' + ('07' if ign_val else '06') + chr(13)
+        ser.write(out.encode('ascii'))
+        print(out)
+
+        out = 'T1021' + ('07' if ign_val else '06') + chr(13)
+        ser.write(out.encode('ascii'))
+        print(out)
+        
         time.sleep(0.25)
     
 threading.Thread(target=rec).start()
