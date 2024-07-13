@@ -388,7 +388,7 @@ void Task_ReadCarCAN(void *p_arg){
                 break;
             }
             case TEMPERATURE_SUMMARY: {
-                UpdateDisplay_SetBattTemperature((*((uint32_t *)dataBuf.data)) >> 8); //uint24_t
+                UpdateDisplay_SetBattTemperature((*((int32_t *)dataBuf.data)) >> 8); //uint24_t
                 break;
             }
             case CURRENT_DATA: {
