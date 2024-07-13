@@ -62,7 +62,7 @@ typedef struct{
 	char* attr;
 	char* op;
 	uint8_t numArgs;
-	Arg_e argTypes[MAX_ARGS];	// TRUE for integers, FALSE for strings
+	Arg_e argTypes[MAX_ARGS];
 	union{
 		char* str;
 		uint32_t num;
