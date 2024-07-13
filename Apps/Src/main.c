@@ -22,32 +22,17 @@
 
 void IdleTaskHook(void)
 {
-    static int toggle = 0;
-    GPIO_TypeDef *gpio_port = (GPIO_TypeDef *)GPIO_GetPort(PORTB);
+    static bool toggle = false;
     while(1){
-        GPIO_WriteBit(gpio_port, GPIO_Pin_6, toggle);
-        toggle = toggle ? 0 : 1;
+        BSP_GPIO_Write_Pin(PORTB, GPIO_Pin_6, toggle);
+        toggle = !toggle;
         for(int i = 0; i < 999999; i = i + 1) {} // delay
     }
 }
 
 void IdleInit(void)
 {
-    GPIO_InitTypeDef GPIO_InitStruct;
-    port_t port = PORTB;
-    uint16_t mask = GPIO_Pin_6;
-    direction_t direction = OUTPUT;
-    
-    RCC_AHB1PeriphClockCmd(1 << port, ENABLE);
-    GPIO_InitStruct.GPIO_Pin   = mask;
-    GPIO_InitStruct.GPIO_Mode  = direction ? GPIO_Mode_OUT : GPIO_Mode_IN;
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Low_Speed;
-    GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_DOWN;
-
-    GPIO_TypeDef *portHandle = (GPIO_TypeDef *)GPIO_GetPort(port);
-    GPIO_Init(portHandle, &GPIO_InitStruct);
-
+    BSP_GPIO_Init(PORTB, GPIO_Pin_6, OUTPUT);
     OS_AppIdleTaskHookPtr = &IdleTaskHook;
 }
 
