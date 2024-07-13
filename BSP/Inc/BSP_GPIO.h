@@ -21,6 +21,8 @@
 typedef enum {PORTA = 0, PORTB, PORTC, PORTD, NUM_PORTS} port_t; 
 typedef enum {INPUT = 0, OUTPUT} direction_t;
 
+GPIO_TypeDef* GPIO_GetPort(port_t port);
+
 /**
  * @brief   Initializes a GPIO port
  * @param   port - port to initialize
