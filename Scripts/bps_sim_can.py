@@ -39,6 +39,10 @@ def rec():
 
         # print('EN HVARR CONTACTOR: ' + str(ign_val))
 
+batt_voltage = 0
+batt_current = 0
+batt_
+
 def send():
     global ign_val
     while 1:

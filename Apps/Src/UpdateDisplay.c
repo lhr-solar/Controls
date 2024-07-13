@@ -28,6 +28,7 @@ static void assertUpdateDisplayError(UpdateDisplayError_t err);
 typedef enum{
 	// Boolean components
 	ARRAY=0,
+    HEARTBEAT,
 	MOTOR,
 	// Non-boolean components
 	VELOCITY,
@@ -39,7 +40,6 @@ typedef enum{
     PACK_VOLTAGE,
     PACK_CURRENT,
     PACK_TEMP,
-    HEARTBEAT,
 	GEAR,
 	// Fault code components
 	OS_CODE,
@@ -52,6 +52,7 @@ static uint32_t componentVals[NUM_COMPONENTS] = {0};
 const char* compStrings[15]= {
 	// Boolean components
 	"arr",
+    "hb",
 	"mot",
 	// Non-boolean components
 	"vel",
@@ -196,7 +197,7 @@ UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
 
 UpdateDisplayError_t UpdateDisplay_SetArray(bool state){
 	componentVals[ARRAY] = state;
-
+    
     return UPDATEDISPLAY_ERR_NONE;
 }
 
@@ -224,14 +225,15 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
     return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t val){
-    componentVals[PACK_VOLTAGE] = val;
+UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t mv){
+    componentVals[PACK_VOLTAGE] = (mv/100); // mv to tenths of a volt
 	
     return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val){
 	componentVals[PACK_TEMP] = val;
+
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
@@ -257,6 +259,8 @@ void Task_UpdateDisplay(void *p_arg) {
 		for(Component_t comp = ARRAY; comp <= GEAR; comp++){
             UpdateDisplay_SetComponent(comp);
         }
+
+        componentVals[HEARTBEAT] = (componentVals[HEARTBEAT]?0:1);
 
         UpdateDisplay_Refresh();
 
