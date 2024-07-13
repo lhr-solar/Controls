@@ -18,9 +18,29 @@
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 
+#include "BSP_GPIO.h"
+
+void IdleTaskHook(void)
+{
+    static bool toggle = false;
+    while(1){
+        BSP_GPIO_Write_Pin(PORTB, GPIO_Pin_6, toggle);
+        toggle = !toggle;
+        for(int i = 0; i < 999999; i = i + 1) {} // delay
+    }
+}
+
+void IdleInit(void)
+{
+    BSP_GPIO_Init(PORTB, GPIO_Pin_6, OUTPUT);
+    OS_AppIdleTaskHookPtr = &IdleTaskHook;
+}
+
 int main(void) {
     // Disable interrupts
     __disable_irq();
+
+    IdleInit();
 
     OS_ERR err;
     OSInit(&err);
