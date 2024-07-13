@@ -61,6 +61,9 @@ const char* compStrings[15]= {
 	"cruiseSt",
 	"rbsSt",
 	"gear",
+    "pv",
+    "pc",
+    "pt",
 	// Fault code components
 	"oserr",
 	"faulterr"
@@ -211,7 +214,7 @@ UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear){
 
 UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state){
 	componentVals[REGEN_ST] = state;
-    
+
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
