@@ -42,7 +42,7 @@
 #define ENABLE_SATURATION_MSG 1
 
 // State of Charge scalar to scale it to correct fixed point
-#define SOC_SCALER 1000
+#define SOC_SCALER 1000000
 
 // CAN watchdog timer variable
 static OS_TMR canWatchTimer;

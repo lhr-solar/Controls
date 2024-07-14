@@ -20,13 +20,26 @@
 
 #include "BSP_GPIO.h"
 
+int idle_time_ctr = 0;
+int last_tick_cnt = 0;
+int current_tick_cnt = 0;
+
 void IdleTaskHook(void)
 {
+    static OS_ERR err;
     static bool toggle = false;
     while(1){
-        BSP_GPIO_Write_Pin(PORTB, GPIO_Pin_6, toggle);
-        toggle = !toggle;
-        for(int i = 0; i < 999999; i = i + 1) {} // delay
+        current_tick_cnt = OSTimeGet(&err);
+        
+        if(last_tick_cnt != current_tick_cnt){
+            idle_time_ctr++;
+            last_tick_cnt = current_tick_cnt;
+
+            if(current_tick_cnt % 50 == 0){
+                BSP_GPIO_Write_Pin(PORTB, GPIO_Pin_6, toggle);
+                toggle = !toggle;
+            }
+        }
     }
 }
 
