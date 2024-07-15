@@ -134,7 +134,7 @@ UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val);
 
-UpdateDisplayError_t UpdateDisplay_SetBattCurrent(uint32_t val);
+UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val);
 

@@ -392,7 +392,7 @@ void Task_ReadCarCAN(void *p_arg){
                 break;
             }
             case CURRENT_DATA: {
-                UpdateDisplay_SetBattCurrent((*(uint32_t *)dataBuf.data)); //uint32_t
+                UpdateDisplay_SetBattCurrent((*(int32_t *)dataBuf.data)); //int32_t
                 break;
             }
 

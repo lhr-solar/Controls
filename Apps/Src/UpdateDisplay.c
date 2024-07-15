@@ -29,6 +29,7 @@ typedef enum{
 	// Boolean components
 	ARRAY=0,
     HEARTBEAT,
+    PACK_CURR_SIGN,
 	MOTOR,
 	// Non-boolean components
 	VELOCITY,
@@ -49,10 +50,11 @@ typedef enum{
 
 static uint32_t componentVals[NUM_COMPONENTS] = {0};
 
-const char* compStrings[15]= {
+const char* compStrings[16]= {
 	// Boolean components
 	"arr",
     "hb",
+    "cs",
 	"mot",
 	// Non-boolean components
 	"vel",
@@ -237,9 +239,9 @@ UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val){
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetBattCurrent(uint32_t val){
-    componentVals[PACK_CURRENT] = (val/100);
-	
+UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val){
+    componentVals[PACK_CURRENT] = (((uint32_t)((val<0)?-val:val))/100);
+    componentVals[PACK_CURR_SIGN] = (val < 0)?1:0;
     return UPDATEDISPLAY_ERR_NONE;
 }
 
