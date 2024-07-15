@@ -41,6 +41,7 @@ typedef enum{
     PACK_VOLTAGE,
     PACK_CURRENT,
     PACK_TEMP,
+	HEAT_SINK_TEMP,
 	GEAR,
 	// Fault code components
 	OS_CODE,
@@ -50,7 +51,7 @@ typedef enum{
 
 static uint32_t componentVals[NUM_COMPONENTS] = {0};
 
-const char* compStrings[16]= {
+const char* compStrings[NUM_COMPONENTS]= {
 	// Boolean components
 	"arr",
     "hb",
@@ -66,6 +67,7 @@ const char* compStrings[16]= {
     "pv",
     "pc",
     "pt",
+	"heatsink",
 	"gear",
 	// Fault code components
 	"oserr",
@@ -247,6 +249,12 @@ UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val){
 
 UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val){
     componentVals[HEARTBEAT] = val;
+
+    return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val){
+    componentVals[HEAT_SINK_TEMP] = val;
 
     return UPDATEDISPLAY_ERR_NONE;
 }

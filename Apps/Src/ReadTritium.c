@@ -83,6 +83,10 @@ void Task_ReadTritium(void *p_arg){
 
 				}
 
+				case TEMPERATURE:{
+					UpdateDisplay_SetHeatSinkTemp(*(float *)(&dataBuf.data[4]));
+				}
+
 				default:{
 					break; //for cases not handled currently
 				}
