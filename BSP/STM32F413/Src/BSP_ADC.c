@@ -46,10 +46,14 @@ void BSP_ADC_Init(void) {
 	ADC_InitDMA();
 
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;	// Using pin PC0 and PC1
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0;	// Using pin PC0
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;	// Analog Input
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // High impedence
 	GPIO_Init(GPIOC,&GPIO_InitStruct);
+
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1;	// Using pin PC1
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN; // Pull down
+	GPIO_Init(GPIOC,&GPIO_InitStruct);    
 
 	// ADC Common Init
 	ADC_CommonInitTypeDef ADC_CommonStruct;
