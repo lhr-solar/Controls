@@ -267,7 +267,9 @@ void Task_UpdateDisplay(void *p_arg) {
     OS_ERR err;
     while (1) {
 		for(Component_t comp = ARRAY; comp <= GEAR; comp++){
-            UpdateDisplay_SetComponent(comp);
+			if (comp != REGEN_ST && comp != CRUISE_ST){
+				UpdateDisplay_SetComponent(comp);
+			}
         }
 
         componentVals[HEARTBEAT] = (componentVals[HEARTBEAT]?0:1);
