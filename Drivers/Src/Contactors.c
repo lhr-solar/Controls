@@ -41,7 +41,8 @@ void Contactors_Init() {
     BSP_GPIO_Init(CONTACTORS_PORT,  
                  (ARRAY_PRECHARGE_BYPASS_PIN) |
                  (MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN), 
-                  1);
+                  1,
+                  false);
 
     // start disabled
     for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {

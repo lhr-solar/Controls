@@ -30,7 +30,7 @@ GPIO_TypeDef* GPIO_GetPort(port_t port);
  * @param	direction - input or output 
  * @return  None
  */ 
-void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction);
+void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction, bool pull_down);
 
 /**
  * @brief   Reads value of the specified port

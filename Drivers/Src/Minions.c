@@ -20,7 +20,7 @@ const pinInfo_t PININFO_LUT[NUM_PINS] = {
 
 void Minions_Init(void){
     for(uint8_t i = 0; i < NUM_PINS; i++){
-        BSP_GPIO_Init(PININFO_LUT[i].port, PININFO_LUT[i].pinMask, PININFO_LUT[i].direction);
+        BSP_GPIO_Init(PININFO_LUT[i].port, PININFO_LUT[i].pinMask, PININFO_LUT[i].direction, false);
     }
 }
 

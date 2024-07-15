@@ -19,7 +19,7 @@ GPIO_TypeDef* GPIO_GetPort(port_t port){
  * @return  None
  */ 
 
-void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction){
+void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction, bool pull_down){
 	GPIO_InitTypeDef GPIO_InitStruct;
 
 	RCC_AHB1PeriphClockCmd(1 << port, ENABLE);
@@ -28,7 +28,7 @@ void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction){
     GPIO_InitStruct.GPIO_Mode  = direction ? GPIO_Mode_OUT : GPIO_Mode_IN;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_Speed = GPIO_Low_Speed;
-    GPIO_InitStruct.GPIO_PuPd  = GPIO_PuPd_NOPULL;  // TODO: verify
+    GPIO_InitStruct.GPIO_PuPd  = (pull_down)?GPIO_PuPd_DOWN:GPIO_PuPd_NOPULL;  // TODO: verify
     
 	// Compute the offset for the port handle from the port passed in
     GPIO_TypeDef *portHandle = GPIO_GetPort(port);

@@ -45,7 +45,7 @@ void IdleTaskHook(void)
 
 void IdleInit(void)
 {
-    BSP_GPIO_Init(PORTB, GPIO_Pin_6, OUTPUT);
+    BSP_GPIO_Init(PORTB, GPIO_Pin_6, OUTPUT, false);
     OS_AppIdleTaskHookPtr = &IdleTaskHook;
 }
 
