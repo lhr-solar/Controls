@@ -75,15 +75,7 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
     // initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
     // initialize tx
     OS_ERR err;
-    idWhitelist = whitelist_validator(idWhitelist, idWhitelistSize);
-    if(bus==CAN_1){
-        BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1, (uint16_t*)idWhitelist, idWhitelistSize);
-    } else if (bus==CAN_3){
-        BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3, (uint16_t*)idWhitelist, idWhitelistSize);
-    } else {
-        return ERROR;
-    }
-
+    
     OSMutexCreate(&(CANbus_TxMutex[bus]), (bus == CAN_1 ? "CAN TX Lock 1":"CAN TX Lock 3"), &err);
     assertOSError(err);
 
@@ -95,6 +87,15 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
 
     OSSemCreate(&(CANBus_ReceiveSem4[bus]), (bus == CAN_1 ? "CAN Received Msg Queue Ctr 1":"CAN Received Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
     assertOSError(err);
+
+    idWhitelist = whitelist_validator(idWhitelist, idWhitelistSize);
+    if(bus==CAN_1){
+        BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1, (uint16_t*)idWhitelist, idWhitelistSize);
+    } else if (bus==CAN_3){
+        BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3, (uint16_t*)idWhitelist, idWhitelistSize);
+    } else {
+        return ERROR;
+    }
 
     return SUCCESS;
 }

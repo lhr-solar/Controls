@@ -26,6 +26,8 @@ static float Motor_Velocity = 0;
 static float Motor_BusVoltage = 0;
 static float Motor_BusCurrent = 0;
 
+CANDATA_t motorstatusmsg = {0};
+
 static OS_TMR MotorWatchdog;
 
 // Function prototypes
@@ -69,7 +71,9 @@ void Task_ReadTritium(void *p_arg){
 				case MOTOR_STATUS:{
 					// motor status error flags is in bytes 4-5
 					Motor_FaultBitmap = (*((uint16_t*)(&dataBuf.data[4])) & 0x1FE); //Storing error flags into Motor_FaultBitmap
-					assertTritiumError(Motor_FaultBitmap);
+                    motorstatusmsg = dataBuf;
+
+                    // assertTritiumError(Motor_FaultBitmap);
 					break;
 				}
 				
@@ -149,7 +153,7 @@ static void assertTritiumError(tritium_error_code_t motor_err){
 	static uint8_t motor_fault_cnt = 0;
 
 	Error_ReadTritium = (error_code_t)motor_err; // Store error codes for inspection info
-	if(motor_err == T_NONE) return; // No error, return
+	if(motor_err == T_NONE || motor_err == T_WATCHDOG_LAST_RESET_ERR) return; // No error, return
                                                                                     // NOTE: If we had >1 recoverable errors,
     // Hall sensor error is the only recoverable error, so any other error          // make sure a combination of them wouldn't 
     // or combination of errors includes at least one that is nonrecoverable        // accidentally fall into this nonrecoverable bucket
