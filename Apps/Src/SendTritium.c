@@ -232,7 +232,7 @@ static void readInputs(){
     
     if(brakeSaturationCt < 3){
         if(latest_pedal == 100) brakeSaturationCt++;
-        else if(latest_pedal == 0) brakeSaturationCt = 0;
+        else if(latest_pedal == 0 && brakeSaturationCt != 0) brakeSaturationCt--;
         
         brakePedalPercent = 0;
     }
@@ -342,20 +342,6 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
         uint8_t offset_out = out_min;
         return (offset_in * out_range)/in_range + offset_out;   // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
     }
-}
-
-
-/**
- * @brief Put the CONTROL_MODE message onto the CarCAN bus, detailing
- * the current mode of control.
-*/
-static void putControlModeCAN(){
-    CANDATA_t message;
-    memset(&message, 0, sizeof(message));
-    message.ID = CONTROL_MODE;
-    message.data[0] = state.name;
-
-    SendCarCAN_Put(message);
 }
 
 // State Handlers & Deciders
@@ -719,9 +705,7 @@ void Task_SendTritium(void *p_arg){
         }else{
             motorMsgCounter++;
         }
-        #endif
-
-        putControlModeCAN();        
+        #endif 
 
         // Delay of FSM_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);

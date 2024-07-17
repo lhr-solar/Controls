@@ -126,7 +126,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp){
 	UpdateDisplayError_t ret = UPDATEDISPLAY_ERR_NONE;
 	
 	// For components that are on/off
-	if(comp <= MOTOR && componentVals[comp] <= 1){
+	if(comp <= MOTOR){
 		DisplayCmd_t visCmd = {
 			.compOrCmd = "vis",
 			.attr = NULL,
@@ -157,10 +157,6 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp){
 
 		ret = Display_Send(setCmd);
 		return ret;
-	}
-	else{
-		assertUpdateDisplayError(UPDATEDISPLAY_ERR_PARSE_COMP);
-		return UPDATEDISPLAY_ERR_PARSE_COMP;
 	}
 	return UPDATEDISPLAY_ERR_NONE;
 }
@@ -250,7 +246,7 @@ UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val){
 }
 
 UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val){
-    componentVals[PACK_CURRENT] = (((uint32_t)((val<0)?-val:val))/100);
+    componentVals[PACK_CURRENT] = (((val<0)?-val:val)/100);
     componentVals[PACK_CURR_SIGN] = (val < 0)?1:0;
     return UPDATEDISPLAY_ERR_NONE;
 }
@@ -261,7 +257,7 @@ UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts){
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetMCCurrent(uint32_t val){
+UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val){
 	componentVals[MC_BUS_CURRENT] = (val<0)?-val:val;
     componentVals[MC_CURR_SIGN] = (val < 0)?1:0;
     return UPDATEDISPLAY_ERR_NONE;
@@ -298,7 +294,7 @@ void Task_UpdateDisplay(void *p_arg) {
 			}
         }
 
-        componentVals[HEARTBEAT] = (componentVals[HEARTBEAT]?0:1);
+        UpdateDisplay_SetHearbeat(componentVals[HEARTBEAT]?0:1);
 
         UpdateDisplay_Refresh();
 
