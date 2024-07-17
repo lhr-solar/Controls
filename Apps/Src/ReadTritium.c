@@ -23,6 +23,8 @@
 tritium_error_code_t Motor_FaultBitmap = T_NONE; //initialized to no error, changed when the motor asserts an error
 static float Motor_RPM = 0;
 static float Motor_Velocity = 0;
+static float Motor_BusVoltage = 0;
+static float Motor_BusCurrent = 0;
 
 static OS_TMR MotorWatchdog;
 
@@ -57,9 +59,16 @@ void Task_ReadTritium(void *p_arg){
             }
 
 			switch(dataBuf.ID){
+				case MC_BUS:{
+					Motor_BusVoltage = *((float*)&dataBuf.data[0]);
+					Motor_BusCurrent = *((float*)&dataBuf.data[4]);
+
+					UpdateDisplay_SetMCVoltage(Motor_BusVoltage*10);
+					UpdateDisplay_SetMCCurrent(Motor_BusCurrent*10);
+				}
 				case MOTOR_STATUS:{
 					// motor status error flags is in bytes 4-5
-					Motor_FaultBitmap = *((uint16_t*)(&dataBuf.data[4])); //Storing error flags into Motor_FaultBitmap
+					Motor_FaultBitmap = (*((uint16_t*)(&dataBuf.data[4])) & 0x1FE); //Storing error flags into Motor_FaultBitmap
 					assertTritiumError(Motor_FaultBitmap);
 					break;
 				}

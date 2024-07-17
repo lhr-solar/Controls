@@ -30,6 +30,8 @@ typedef enum{
 	ARRAY=0,
     HEARTBEAT,
     PACK_CURR_SIGN,
+	MC_CURR_SIGN,
+	BRAKE,
 	MOTOR,
 	// Non-boolean components
 	VELOCITY,
@@ -41,6 +43,8 @@ typedef enum{
     PACK_VOLTAGE,
     PACK_CURRENT,
     PACK_TEMP,
+	MC_BUS_VOLTAGE,
+	MC_BUS_CURRENT,
 	HEAT_SINK_TEMP,
 	GEAR,
 	// Fault code components
@@ -56,6 +60,8 @@ const char* compStrings[NUM_COMPONENTS]= {
 	"arr",
     "hb",
     "cs",
+	"mcs",
+	"brake",
 	"mot",
 	// Non-boolean components
 	"vel",
@@ -67,6 +73,8 @@ const char* compStrings[NUM_COMPONENTS]= {
     "pv",
     "pc",
     "pt",
+	"mcv",
+	"mcc",
 	"heatsink",
 	"gear",
 	// Fault code components
@@ -194,7 +202,7 @@ UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
 }
 
 UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
-    componentVals[ACCEL_METER] = percent;
+    componentVals[ACCEL_METER] = (percent > 100)?100:percent;
     
     return UPDATEDISPLAY_ERR_NONE;
 }
@@ -245,6 +253,24 @@ UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val){
     componentVals[PACK_CURRENT] = (((uint32_t)((val<0)?-val:val))/100);
     componentVals[PACK_CURR_SIGN] = (val < 0)?1:0;
     return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts){
+	componentVals[MC_BUS_VOLTAGE] = (volts);
+
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetMCCurrent(uint32_t val){
+	componentVals[MC_BUS_CURRENT] = (val<0)?-val:val;
+    componentVals[MC_CURR_SIGN] = (val < 0)?1:0;
+    return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetBrake(bool state){
+	componentVals[BRAKE] = (state)?1:0;
+
+	return UPDATEDISPLAY_ERR_NONE;
 }
 
 UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val){

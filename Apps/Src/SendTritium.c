@@ -33,7 +33,7 @@
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
 #define BRAKE_PEDAL_THRESHOLD 50  // percent
-#define ACCEL_PEDAL_THRESHOLD 10 // percent
+#define ACCEL_PEDAL_THRESHOLD 8 // percent
 
 #define ONEPEDAL_BRAKE_THRESHOLD 25 // percent
 #define ONEPEDAL_NEUTRAL_THRESHOLD 35 // percent
@@ -68,9 +68,9 @@ static float velocityObserved = 0;
 static uint8_t motorMsgCounter = 0;
 
 // Debouncing counters
-static uint8_t onePedalCounter = 0;
-static uint8_t cruiseEnableCounter = 0;
-static uint8_t cruiseSetCounter = 0;
+// static uint8_t onePedalCounter = 0;
+// static uint8_t cruiseEnableCounter = 0;
+// static uint8_t cruiseSetCounter = 0;
 
 // Button states
 static bool onePedalButton = false;
@@ -226,21 +226,37 @@ static void dumpInfo(){
 static void readInputs(){
 
     // Update pedals
-    brakePedalPercent = Pedals_Read(BRAKE);
+    static uint32_t brakeSaturationCt = 0;
+    
+    uint32_t latest_pedal = Pedals_Read(BRAKE);
+    
+    if(brakeSaturationCt < 3){
+        if(latest_pedal == 100) brakeSaturationCt++;
+        else if(latest_pedal == 0) brakeSaturationCt = 0;
+        
+        brakePedalPercent = 0;
+    }
+    else if(brakeSaturationCt >= 3){
+        brakePedalPercent = 100;
+
+        if(latest_pedal == 0) brakeSaturationCt = 0;
+    }
+
     accelPedalPercent = Pedals_Read(ACCELERATOR);
     
     // Update regen enable
-    regenEnable = ChargeEnable_Get();
+    //regenEnable = ChargeEnable_Get();
+    regenEnable = false;
 
     // Update buttons
-    if(Minions_Read(REGEN_SW) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
-    else if(onePedalCounter > 0){onePedalCounter--;}
+    // if(Minions_Read(REGEN_SW) && onePedalCounter < DEBOUNCE_PERIOD){onePedalCounter++;}
+    // else if(onePedalCounter > 0){onePedalCounter--;}
 
-    if(Minions_Read(CRUZ_EN) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
-    else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
+    // if(Minions_Read(CRUZ_EN) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
+    // else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
 
-    if(Minions_Read(CRUZ_ST) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
-    else if(cruiseSetCounter > 0){cruiseSetCounter--;}
+    // if(Minions_Read(CRUZ_ST) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
+    // else if(cruiseSetCounter > 0){cruiseSetCounter--;}
     
     // Update gears
     bool forwardSwitch = Minions_Read(FOR_SW);
@@ -265,24 +281,34 @@ static void readInputs(){
     else if(forwardGear) gear = FORWARD_GEAR;
     else if(reverseGear) gear = REVERSE_GEAR;
     else gear = NEUTRAL_GEAR;
+    
+    if(gear == NEUTRAL_GEAR) UpdateDisplay_SetGear(DISP_NEUTRAL);
+    else if(gear == FORWARD_GEAR) UpdateDisplay_SetGear(DISP_FORWARD);
+    else if(gear == REVERSE_GEAR) UpdateDisplay_SetGear(DISP_REVERSE);
 
     // Debouncing
-    if(onePedalCounter == DEBOUNCE_PERIOD){onePedalButton = true;}
-    else if(onePedalCounter == 0){onePedalButton = false;}
+    onePedalButton = false;
+    cruiseEnableButton = false;
+    cruiseSet = false;
+    // if(onePedalCounter == DEBOUNCE_PERIOD){onePedalButton = true;}
+    // else if(onePedalCounter == 0){onePedalButton = false;}
 
-    if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
-    else if(cruiseEnableCounter == 0){cruiseEnableButton = false;}
+    // if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
+    // else if(cruiseEnableCounter == 0){cruiseEnableButton = false;}
 
-    if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSet = true;}
-    else if(cruiseSetCounter == 0){cruiseSet = false;}
+    // if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSet = true;}
+    // else if(cruiseSetCounter == 0){cruiseSet = false;}
 
     // Toggle
-    if(onePedalButton != onePedalPrevious && onePedalPrevious){onePedalEnable = !onePedalEnable;}
-    if(!regenEnable) onePedalEnable = false;
-    onePedalPrevious = onePedalButton;
+    // if(onePedalButton != onePedalPrevious && onePedalPrevious){onePedalEnable = !onePedalEnable;}
+    // if(!regenEnable) onePedalEnable = false;
+    // onePedalPrevious = onePedalButton;
+    onePedalEnable = false;
+    onePedalPrevious = false;
     
-    if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious){cruiseEnable = !cruiseEnable;}
-    cruiseEnablePrevious = cruiseEnableButton;
+    // if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious){cruiseEnable = !cruiseEnable;}
+    // cruiseEnablePrevious = cruiseEnableButton;
+    cruiseEnablePrevious = false;
     
     // Get observed velocity
     velocityObserved = Motor_RPM_Get();
@@ -342,7 +368,6 @@ static void ForwardDriveHandler(){
     if(prevState.name != state.name){
         UpdateDisplay_SetCruiseState(DISP_DISABLED);
         UpdateDisplay_SetRegenState(DISP_DISABLED);
-        UpdateDisplay_SetGear(DISP_FORWARD);
     }
     velocitySetpoint = MAX_VELOCITY;
     // printf("accelPedalPercent: %d\n\r", accelPedalPercent);
@@ -375,7 +400,6 @@ static void NeutralDriveHandler(){
     if(prevState.name != state.name){
         UpdateDisplay_SetCruiseState(DISP_DISABLED);
         UpdateDisplay_SetRegenState(DISP_DISABLED);
-        UpdateDisplay_SetGear(DISP_NEUTRAL);
     }
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = 0.0f;
@@ -406,7 +430,6 @@ static void ReverseDriveHandler(){
     if(prevState.name != state.name){
         UpdateDisplay_SetCruiseState(DISP_DISABLED);
         UpdateDisplay_SetRegenState(DISP_DISABLED);
-        UpdateDisplay_SetGear(DISP_REVERSE);
     }
     velocitySetpoint = -MAX_VELOCITY;
     currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
@@ -435,7 +458,6 @@ static void RecordVelocityHandler(){
     if(prevState.name != state.name){
         UpdateDisplay_SetCruiseState(DISP_ACTIVE);
         UpdateDisplay_SetRegenState(DISP_DISABLED);
-        UpdateDisplay_SetGear(DISP_FORWARD);
     }
     // put car in neutral while recording velocity (while button is held)
     velocitySetpoint = MAX_VELOCITY;
@@ -570,7 +592,6 @@ static void AccelerateCruiseDecider(){
 static void OnePedalDriveHandler(){
     if(prevState.name != state.name){
         UpdateDisplay_SetCruiseState(DISP_DISABLED);
-        UpdateDisplay_SetGear(DISP_FORWARD);
     }
     if(accelPedalPercent <= ONEPEDAL_BRAKE_THRESHOLD){
         // Regen brake: Map 0 -> brake to 100 -> 0
@@ -618,13 +639,15 @@ static void BrakeHandler(){
     if(prevState.name != state.name){
         UpdateDisplay_SetCruiseState(DISP_DISABLED);
         UpdateDisplay_SetRegenState(DISP_DISABLED);
-        UpdateDisplay_SetGear(DISP_FORWARD);
     }
+    
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = 0;
     cruiseEnable = false;
     onePedalEnable = false;
+
     Minions_Write(BRAKELIGHT, true);
+    UpdateDisplay_SetBrake(true);
 }
 
 /**
@@ -633,9 +656,19 @@ static void BrakeHandler(){
 */
 static void BrakeDecider(){
     if(brakePedalPercent < BRAKE_PEDAL_THRESHOLD){
-        if(gear == FORWARD_GEAR) state = FSM[FORWARD_DRIVE];
-        else if(gear == NEUTRAL_GEAR || gear == REVERSE_GEAR) state = FSM[NEUTRAL_DRIVE];
-        Minions_Write(BRAKELIGHT, false);
+        if(gear == FORWARD_GEAR){
+            state = FSM[FORWARD_DRIVE];
+            Minions_Write(BRAKELIGHT, false);
+            UpdateDisplay_SetBrake(false);
+        } else if(gear == NEUTRAL_GEAR){
+            state = FSM[NEUTRAL_DRIVE];
+            Minions_Write(BRAKELIGHT, false);
+            UpdateDisplay_SetBrake(false);
+        } else if(gear == REVERSE_GEAR){
+            state = FSM[REVERSE_DRIVE];
+            Minions_Write(BRAKELIGHT, false);
+            UpdateDisplay_SetBrake(false);
+        }
     }
 }
 
@@ -690,7 +723,7 @@ void Task_SendTritium(void *p_arg){
 
         putControlModeCAN();        
 
-        // Delay of MOTOR_MSG_PERIOD ms
+        // Delay of FSM_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
         if (err != OS_ERR_NONE){
             assertOSError(err);

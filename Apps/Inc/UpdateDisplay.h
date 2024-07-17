@@ -140,6 +140,12 @@ UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val);
 
+UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts);
+
+UpdateDisplayError_t UpdateDisplay_SetMCCurrent(uint32_t val);
+
+UpdateDisplayError_t UpdateDisplay_SetBrake(bool state);
+
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0
  * @param none
