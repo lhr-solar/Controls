@@ -89,10 +89,9 @@ DisplayError_t Display_Reset(void);
 
 /**
  * @brief Overwrites any processing commands and triggers the display fault screen
- * @param faultCode the application's fault code (will be displayed in hex)
  * @returns DisplayError_t
  */
-DisplayError_t Display_Error(error_code_t faultCode);
+DisplayError_t Display_Error();
 
 /**
  * @brief Overwrites any processing commands and triggers the evacuation screen

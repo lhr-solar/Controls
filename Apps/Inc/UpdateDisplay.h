@@ -142,7 +142,7 @@ UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts);
 
-UpdateDisplayError_t UpdateDisplay_SetMCCurrent(uint32_t val);
+UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetBrake(bool state);
 

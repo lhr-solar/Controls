@@ -401,9 +401,9 @@ static void NeutralDriveHandler(){
 static void NeutralDriveDecider(){
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD){
         state = FSM[BRAKE_STATE];
-    }else if(gear == FORWARD_GEAR && velocityObserved >= -MAX_GEARSWITCH_VELOCITY){
+    }else if(gear == FORWARD_GEAR){
         state = FSM[FORWARD_DRIVE];
-    }else if(gear == REVERSE_GEAR && velocityObserved <= MAX_GEARSWITCH_VELOCITY){
+    }else if(gear == REVERSE_GEAR){
         state = FSM[REVERSE_DRIVE];
     }
 }

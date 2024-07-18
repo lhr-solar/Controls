@@ -20,7 +20,7 @@
  * Function prototypes
 */
 // check for and assert errors in UpdateDisplay
-static void assertUpdateDisplayError(UpdateDisplayError_t err);
+// static void assertUpdateDisplayError(UpdateDisplayError_t err);
 
 /**
  * Enum and corresponding array for easy component selection.
@@ -294,7 +294,7 @@ void Task_UpdateDisplay(void *p_arg) {
 			}
         }
 
-        UpdateDisplay_SetHearbeat(componentVals[HEARTBEAT]?0:1);
+        UpdateDisplay_SetHeartbeat(componentVals[HEARTBEAT]?0:1);
 
         UpdateDisplay_Refresh();
 
@@ -313,9 +313,9 @@ void Task_UpdateDisplay(void *p_arg) {
  * @brief A handler callback function run by the main throwTaskError function
  * used if we haven't reached the restart limit and encounter an error
  */ 
-static void handler_UpdateDisplay_Restart() {
-    Display_Reset(); // Try resetting to fix the display error
-}
+// static void handler_UpdateDisplay_Restart() {
+//     Display_Reset(); // Try resetting to fix the display error
+// }
 
 /**
  * @brief Check for a display error and assert it if it exists.
@@ -323,13 +323,13 @@ static void handler_UpdateDisplay_Restart() {
  * and runs a callback function as a handler to restart the display and clear the queue.
  * @param   err variable with display error codes
  */
- static void assertUpdateDisplayError(UpdateDisplayError_t err){
-	Error_UpdateDisplay = (error_code_t)err; // Store the error code for inspection
+//  static void assertUpdateDisplayError(UpdateDisplayError_t err){
+// 	Error_UpdateDisplay = (error_code_t)err; // Store the error code for inspection
 
-	if (err == UPDATEDISPLAY_ERR_NONE) return; // No error, return
+// 	if (err == UPDATEDISPLAY_ERR_NONE) return; // No error, return
 
-    // Otherwise try resetting the display using the restart callback
-    throwTaskError(Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
+//     // Otherwise try resetting the display using the restart callback
+//     throwTaskError(Error_UpdateDisplay, handler_UpdateDisplay_Restart,OPT_NO_LOCK_SCHED, OPT_RECOV);
 
-    Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
-}
+//     Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE; // Clear the error after handling it
+// }

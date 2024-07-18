@@ -134,6 +134,7 @@ extern task_trace_t PrevTasks;
 extern error_code_t Error_ReadTritium; 
 extern error_code_t Error_ReadCarCAN;
 extern error_code_t Error_UpdateDisplay;
+extern error_code_t Error_OS;
 
 /**
  * Error-handling option enums

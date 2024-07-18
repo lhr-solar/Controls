@@ -44,9 +44,10 @@ CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 // Variables to store error codes, stored and cleared in task error assert functions
-error_code_t Error_ReadCarCAN = /*READCARCAN_ERR_NONE*/ 0; // TODO: change this back to the error 
+error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
+OS_ERR       Error_OS = OS_ERR_NONE;
 
 extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
@@ -58,8 +59,9 @@ void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
+        Error_OS = err;
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
-        Display_Error(err); // Display the location and error code
+        Display_Error(); // Display the location and error code
         while(1){;} //nonrecoverable
     }
 }
@@ -87,7 +89,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 
     if (nonrecoverable == OPT_NONRECOV) {
         EmergencyContactorOpen();
-        Display_Error(errorCode); // Needs to happen before callback so that tasks can change the screen
+        Display_Error(); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
     }
 

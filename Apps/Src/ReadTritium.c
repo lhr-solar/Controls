@@ -73,7 +73,7 @@ void Task_ReadTritium(void *p_arg){
 					Motor_FaultBitmap = (*((uint16_t*)(&dataBuf.data[4])) & 0x1FE); //Storing error flags into Motor_FaultBitmap
                     motorstatusmsg = dataBuf;
 
-                    // assertTritiumError(Motor_FaultBitmap);
+                    assertTritiumError(Motor_FaultBitmap);
 					break;
 				}
 				

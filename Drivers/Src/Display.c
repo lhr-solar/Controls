@@ -24,6 +24,7 @@ static const char *TERMINATOR = "\xff\xff\xff";
 
 DisplayError_t Display_Init(){
 	BSP_UART_Init(DISP_OUT);
+    
 	return Display_Reset();
 }
 
@@ -91,7 +92,7 @@ DisplayError_t Display_Reset(){
 	return Display_Send(restCmd);
 }
 
-DisplayError_t Display_Error(error_code_t faultCode){
+DisplayError_t Display_Error(){
 
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
 
@@ -99,9 +100,26 @@ DisplayError_t Display_Error(error_code_t faultCode){
 	BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
-	char setFaultCode[20];
-	sprintf(setFaultCode, "%s\"%04x\"", "faulterr.txt=", (uint16_t)faultCode);
-	BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
+    char setFaultCode[20];
+    
+    sprintf(setFaultCode, "%s%d", "oserr.val=", (uint16_t)Error_OS);
+    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
+    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
+
+    sprintf(setFaultCode, "%s%d", "rccerr.val=", (uint16_t)Error_ReadCarCAN);
+    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
+    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
+
+    sprintf(setFaultCode, "%s%d", "merr.val=", (uint16_t)Error_ReadTritium);
+    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
+    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
+
+    sprintf(setFaultCode, "%s%d", "disperr.val=", (uint16_t)Error_UpdateDisplay);
+    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
+    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
+	
+	
+	// BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	return DISPLAY_ERR_NONE;

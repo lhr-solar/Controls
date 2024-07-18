@@ -149,7 +149,7 @@ static void updateArrayPrechargeBypassContactor(void){
 
 
 /**
- * @brief Turns array PBC on if conditional meets ignition status, saturation threshold, motor PBC to be off, 
+ * @brief Turns motor PBC on if conditional meets ignition status, saturation threshold, motor PBC to be off, 
  *          and a non-running precharge delay timer.
  * @param None
 */
