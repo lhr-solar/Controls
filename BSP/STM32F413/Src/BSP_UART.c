@@ -9,10 +9,10 @@
 
 // Initialize the FIFOs
 
-#define FFIFO_TYPE char
-#define FFIFO_SIZE TX_SIZE
-#define FFIFO_NAME txfifo
-#include "fastfifo.h"
+#define FIFO_TYPE char
+#define FIFO_SIZE TX_SIZE
+#define FIFO_NAME txfifo
+#include "fifo.h"
 static txfifo_t usbTxFifo;
 static txfifo_t displayTxFifo;
 
@@ -37,7 +37,7 @@ static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceive
 static USART_TypeDef *handles[NUM_UART] = {USART2, USART3};
 
 static void USART_DISPLAY_Init() {
-    txfifo_renew(&displayTxFifo);
+    displayTxFifo = txfifo_new();
     displayRxFifo = rxfifo_new();
 
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -84,7 +84,7 @@ static void USART_DISPLAY_Init() {
 }
 
 static void USART_USB_Init() {
-    txfifo_renew(&usbTxFifo);
+    usbTxFifo = txfifo_new();
     usbRxFifo = rxfifo_new();
 
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -208,22 +208,24 @@ uint32_t BSP_UART_Write(UART_t usart, char *str, uint32_t len) {
 
     USART_TypeDef *usart_handle = handles[usart];
 
-    txfifo_t *fifo = tx_fifos[usart];
-    
-    // wait for enough space to send
-    volatile uint32_t space;    // volatile as ISR pulls from fifo
-    do {
-        // nasty hack to make sure fifo len is up to date
-        space = TX_SIZE - *((volatile int *)&(fifo->len));
-    } while (len > space);
+    USART_ITConfig(usart_handle, USART_IT_TC, RESET);
 
-    // add to fifo and enable interrupt -- disable first to prevent race
-    USART_ITConfig(usart_handle, USART_IT_TXE, RESET);
-    if (USART_GetITStatus(usart_handle, USART_IT_TXE) != RESET) {
-        while (1);
+    txfifo_t *fifo = tx_fifos[usart];
+
+    while(sent < len) {
+        if(!txfifo_put(fifo, str[sent])) {
+            // Allow the interrupt to fire
+            USART_ITConfig(usart_handle, USART_IT_TC, SET);
+            // Wait for space to open up
+            while(txfifo_is_full(fifo));
+            // Disable the interrupt again
+            USART_ITConfig(usart_handle, USART_IT_TC, RESET);
+        } else {
+            sent++;  
+        }
     }
-    txfifo_put(fifo, str, len);
-    USART_ITConfig(usart_handle, USART_IT_TXE, SET);
+
+    USART_ITConfig(usart_handle, USART_IT_TC, SET);
 
     return sent;
 }
@@ -262,12 +264,12 @@ void USART2_IRQHandler(void) {
             USART2->DR = data;
         }
     }
-    if(USART_GetITStatus(USART2, USART_IT_TXE) != RESET) {
+    if(USART_GetITStatus(USART2, USART_IT_TC) != RESET) {
         // If getting data from fifo fails i.e. the tx fifo is empty, then turn off the TX interrupt
-        if(!txfifo_get(&usbTxFifo, (char*)&(USART2->DR), 1)) {
-            USART_ITConfig(USART2, USART_IT_TXE, RESET);
+        if(!txfifo_get(&usbTxFifo, (char*)&(USART2->DR))) {
+            USART_ITConfig(USART2, USART_IT_TC, RESET); // Turn off the interrupt
             if(usbTxCallback != NULL)
-                usbTxCallback();
+                usbTxCallback();    // Callback
         }
     }
     if(USART_GetITStatus(USART2, USART_IT_ORE) != RESET);
@@ -307,10 +309,10 @@ void USART3_IRQHandler(void) {
             USART3->DR = data;
         }
     }
-    if(USART_GetITStatus(USART3, USART_IT_TXE) != RESET) {
+    if(USART_GetITStatus(USART3, USART_IT_TC) != RESET) {
         // If getting data from fifo fails i.e. the tx fifo is empty, then turn off the TX interrupt
-        if(!txfifo_get(&usbTxFifo, (char*)&(USART3->DR), 1)) {
-            USART_ITConfig(USART3, USART_IT_TXE, RESET);
+        if(!txfifo_get(&displayTxFifo, (char*)&(USART3->DR))) {
+            USART_ITConfig(USART3, USART_IT_TC, RESET);
             if(displayTxCallback != NULL)
                 displayTxCallback();
         }
