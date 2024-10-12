@@ -15,12 +15,12 @@ static const char *MINIONPIN_STRING[] = {
     FOREACH_PIN(GENERATE_STRING)
 };
 
-static const char *CONTACTOR_STRING[] = {
-    FOREACH_contactor(GENERATE_STRING)
+static const char *GEAR_STRING[] = {
+    FOREACH_GEAR(GENERATE_STRING)
 };
 
-static const char *GEAR_STRING[] = {
-    FOREACH_Gear(GENERATE_STRING)
+static const char *CONTACTOR_STRING[] = {
+    FOREACH_contactor(GENERATE_STRING)
 };
 
 // Need to keep this in sync with Task.h
@@ -54,10 +54,10 @@ void Task_DebugDump(void* p_arg) {
         } 
 
         // Send Tritium variables
-        printf("Pedal Brake Percent: %d\n\r", get_brakePedalPercent());
-        printf("Pedal Accel Percent: %d\n\r", get_accelPedalPercent());
-        printf("Current Gear: %s\n\r", GEAR_STRING[get_gear()]);
-        print_float("Current Setpoint: ", get_currentSetpoint());
+        printf("Pedal Brake Percent: %d\n\r", GetBrakePedalPercent());
+        printf("Pedal Accel Percent: %d\n\r", GetAccelPedalPercent());
+        printf("Current Gear: %s\n\r", GEAR_STRING[GetGear()]);
+        print_float("Current Setpoint: ", GetCurrentSetpoint());
 
         printf("\n\r");
 
