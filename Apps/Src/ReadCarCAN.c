@@ -132,7 +132,10 @@ static void disableArrayPrechargeBypassContactor(void)
     if (ret)
     { // Contactor failed to turn off; display the evac screen and infinite loop
         Display_Evac(SOC, SBPV);
-        while (1) {;}
+        while (1)
+        {
+            ;
+        }
     }
     else
     {
@@ -320,6 +323,85 @@ void updatePrechargeContactors(void)
     mcPBCComplete = false;
 }
 
+/**
+ * @brief error handler callback for disabling charging,
+ * kills contactor and turns off display
+ */
+static void handler_ReadCarCAN_chargeDisable(void)
+{
+    // Fills buffers with disable messages
+    memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
+
+    // mark regen as disabled and update saturation
+    updateHVArraySaturation(DISABLE_SATURATION_MSG);
+
+    // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
+
+    // Check that the contactor was successfully turned off
+    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
+
+    if (ret)
+    { // Contactor failed to turn off; display the evac screen and infinite loop
+        Display_Evac(SOC, SBPV);
+        while (1)
+        {
+            ;
+        }
+    }
+}
+
+/**
+ * @brief error handler callback for disabling charging,
+ * kills contactor and turns off display
+ */
+static void handler_ReadCarCAN_contactorsDisable(void)
+{
+
+    // Mark regen as disabled and update saturation
+    updateHVArraySaturation(DISABLE_SATURATION_MSG);
+    updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
+
+    // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
+    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, false);
+
+    // Fills buffers with disable messages
+    memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
+    memset(HVPlusMinusChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVPlusMinusChargeMsgBuffer));
+
+    // Updates the saturation with disable
+    updateHVArraySaturation(DISABLE_SATURATION_MSG);
+    updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
+
+    // Check that the contactor was successfully turned off
+    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) || (bool)Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
+
+    if (ret)
+    { // Contactor failed to turn off; display the evac screen and infinite loop
+        Display_Evac(SOC, SBPV);
+        while (1)
+        {
+            ;
+        }
+    }
+    else
+    {
+        UpdateDisplay_SetArray(true);
+        UpdateDisplay_SetMotor(true);
+    }
+}
+
+/**
+ * @brief error handler function to display the evac screen if we get a BPS trip message.
+ * Callbacks happen after displaying the fault, so this screen won't get overwritten
+ */
+static void handler_ReadCarCAN_BPSTrip(void)
+{
+    chargeEnable = false;    // Not really necessary but makes inspection less confusing
+    Display_Evac(SOC, SBPV); // Display evacuation screen
+}
+
 void Task_ReadCarCAN(void *p_arg)
 {
     OS_ERR err;
@@ -447,85 +529,6 @@ void Task_ReadCarCAN(void *p_arg)
         }
         }
     }
-}
-
-/**
- * @brief error handler callback for disabling charging,
- * kills contactor and turns off display
- */
-static void handler_ReadCarCAN_chargeDisable(void)
-{
-    // Fills buffers with disable messages
-    memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
-
-    // mark regen as disabled and update saturation
-    updateHVArraySaturation(DISABLE_SATURATION_MSG);
-
-    // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
-
-    // Check that the contactor was successfully turned off
-    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
-
-    if (ret)
-    { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
-        while (1)
-        {
-            ;
-        }
-    }
-}
-
-/**
- * @brief error handler callback for disabling charging,
- * kills contactor and turns off display
- */
-static void handler_ReadCarCAN_contactorsDisable(void)
-{
-
-    // Mark regen as disabled and update saturation
-    updateHVArraySaturation(DISABLE_SATURATION_MSG);
-    updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
-
-    // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, false);
-
-    // Fills buffers with disable messages
-    memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
-    memset(HVPlusMinusChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVPlusMinusChargeMsgBuffer));
-
-    // Updates the saturation with disable
-    updateHVArraySaturation(DISABLE_SATURATION_MSG);
-    updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
-
-    // Check that the contactor was successfully turned off
-    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) || (bool)Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
-
-    if (ret)
-    { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
-        while (1)
-        {
-            ;
-        }
-    }
-    else
-    {
-        UpdateDisplay_SetArray(true);
-        UpdateDisplay_SetMotor(true);
-    }
-}
-
-/**
- * @brief error handler function to display the evac screen if we get a BPS trip message.
- * Callbacks happen after displaying the fault, so this screen won't get overwritten
- */
-static void handler_ReadCarCAN_BPSTrip(void)
-{
-    chargeEnable = false;    // Not really necessary but makes inspection less confusing
-    Display_Evac(SOC, SBPV); // Display evacuation screen
 }
 
 /**
