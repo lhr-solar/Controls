@@ -49,7 +49,7 @@ typedef enum{
 #define DISP_ACTIVE STATE_2	// Actively being used right now
 
 // For gear changes
-#define DISP_NEUTRAL STATE_0
+#define DISP_PARK STATE_0
 #define DISP_FORWARD STATE_1
 #define DISP_REVERSE STATE_2
 
