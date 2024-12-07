@@ -60,11 +60,6 @@ static float velocityObserved = 0;
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 
-// Debouncing counters
-// static uint8_t onePedalCounter = 0;
-// static uint8_t cruiseEnableCounter = 0;
-// static uint8_t cruiseSetCounter = 0;
-
 // FSM
 static TritiumState_t prevState; // Previous state
 static TritiumState_t state;     // Current state
@@ -336,7 +331,7 @@ static void ParkHandler()
  */
 static void ParkDecider()
 {
-    // Switch for FORWARD_DRIVE/REVERSE_DRIVE if in FORWARD_GEAR/REVERSE_GEAR & speed is less than MAX_GEARSWITCH_VELOCITY
+    // Switch to FORWARD_DRIVE/REVERSE_DRIVE if in FORWARD_GEAR/REVERSE_GEAR & speed is less than MAX_GEARSWITCH_VELOCITY
     if (gear == FORWARD_GEAR && (velocityObserved < 0 ? (velocityObserved >= -MAX_GEARSWITCH_VELOCITY) : (velocityObserved <= MAX_GEARSWITCH_VELOCITY)))
     {
         state = FSM[FORWARD_DRIVE];
@@ -399,6 +394,7 @@ void Task_SendTritium(void *p_arg)
     // Initialize current state to PARK_STATE
     state = FSM[PARK_STATE];
     prevState = FSM[PARK_STATE];
+    UpdateDisplay_SetGear(PARK_GEAR);
 
     // Initialize Regen & Cruise disabled
     // NOTE: Regen & Display stay disabled on Daybreak MVP
@@ -430,6 +426,7 @@ void Task_SendTritium(void *p_arg)
         prevState = state;
         state.stateDecider(); // decide what the next state is
 
+        // This ONLY works for MVP (since Cruise has velocity control)
         // Disable velocity controlled mode by always overwriting velocity to the maximum
         // in the appropriate direction.
         velocitySetpoint = (velocitySetpoint > 0) ? MAX_VELOCITY : -MAX_VELOCITY;

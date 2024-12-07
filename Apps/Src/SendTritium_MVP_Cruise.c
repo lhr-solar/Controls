@@ -65,8 +65,8 @@ static float velocityObserved = 0;
 static uint8_t motorMsgCounter = 0;
 
 // Debouncing counters
-// static uint8_t cruiseEnableCounter = 0;
-// static uint8_t cruiseSetCounter = 0;
+static uint8_t cruiseEnableCounter = 0;
+static uint8_t cruiseSetCounter = 0;
 
 // Button states
 static bool cruiseEnableButton = false;
@@ -231,11 +231,12 @@ static void readInputs()
     accelPedalPercent = Pedals_Read(ACCELERATOR);
 
     // Update buttons
-    // if(Minions_Read(CRUZ_EN) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
-    // else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
+    // TODO
+    if(Minions_Read(CRUZ_EN) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
+    else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
 
-    // if(Minions_Read(CRUZ_ST) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
-    // else if(cruiseSetCounter > 0){cruiseSetCounter--;}
+    if(Minions_Read(CRUZ_ST) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
+    else if(cruiseSetCounter > 0){cruiseSetCounter--;}
 
     // Update gears
     bool forwardSwitch = Minions_Read(FOR_SW);
@@ -277,18 +278,22 @@ static void readInputs()
         UpdateDisplay_SetGear(DISP_REVERSE);
 
     // Debouncing
+    // TODO
     cruiseEnableButton = false;
     cruiseSet = false;
-    // if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
-    // else if(cruiseEnableCounter == 0){cruiseEnableButton = false;}
+    if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
+    else if(cruiseEnableCounter == 0){cruiseEnableButton = false;}
 
-    // if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSet = true;}
-    // else if(cruiseSetCounter == 0){cruiseSet = false;}
+    if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSet = true;}
+    else if(cruiseSetCounter == 0){cruiseSet = false;}
 
     // Toggle
-    // if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious){cruiseEnable = !cruiseEnable;}
-    // cruiseEnablePrevious = cruiseEnableButton;
-    cruiseEnablePrevious = false;
+    if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious) // Falling edge CRUZ_EN detection
+    {
+        cruiseEnable = !cruiseEnable;
+    }
+    cruiseEnablePrevious = cruiseEnableButton;
+    // cruiseEnablePrevious = false;
 
     // Get observed velocity
     velocityObserved = Motor_RPM_Get();
@@ -361,6 +366,8 @@ static void ForwardDriveHandler()
         Minions_Write(BRAKELIGHT, false);
         UpdateDisplay_SetBrake(false);
     }
+
+    cruiseEnable = false;
 }
 
 /**
@@ -463,48 +470,6 @@ static void ReverseDriveDecider()
     // Otherwise, stays in REVERSE_DRIVE
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * @brief Record Velocity State. While pressing the cruise set button,
  * the car will record the observed velocity into velocitySetpoint.
@@ -523,27 +488,21 @@ static void RecordVelocityHandler()
 
 /**
  * @brief Record Velocity State Decider. Determines transitions out of record velocity
- * state (brake, neutral drive, one pedal, forward drive, powered cruise).
+ * state (park, forward drive, powered cruise).
  */
 static void RecordVelocityDecider()
 {
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
+    // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
+    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_STATE || gear == REVERSE_GEAR)
     {
-        state = FSM[BRAKE_STATE];
+        state = FSM[PARK_STATE];
     }
-    else if (gear == NEUTRAL_GEAR || gear == REVERSE_GEAR)
-    {
-        state = FSM[NEUTRAL_DRIVE];
-    }
-    else if (onePedalEnable)
-    {
-        cruiseEnable = false;
-        state = FSM[ONEPEDAL];
-    }
+    // If cruise has been disabled, return to forward drive
     else if (!cruiseEnable)
     {
         state = FSM[FORWARD_DRIVE];
     }
+    // In cruise. Once the cruise set button has been unpressed, enter POWERED_CRUISE.
     else if (cruiseEnable && !cruiseSet)
     {
         state = FSM[POWERED_CRUISE];
@@ -562,28 +521,22 @@ static void PoweredCruiseHandler()
 
 /**
  * @brief Powered Cruise State Decider. Determines transitions out of powered
- * cruise state (brake, neutral drive, one pedal, forward drive, record velocity,
- * accelerate cruise, coasting cruise).
+ * cruise state (park, forward drive, record velocity, accelerate cruise, 
+ * coasting cruise).
  */
 static void PoweredCruiseDecider()
 {
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
+    // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
+    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_STATE || gear == REVERSE_GEAR)
     {
-        state = FSM[BRAKE_STATE];
+        state = FSM[PARK_STATE];
     }
-    else if (gear == NEUTRAL_GEAR || gear == REVERSE_GEAR)
-    {
-        state = FSM[NEUTRAL_DRIVE];
-    }
-    else if (onePedalEnable)
-    {
-        cruiseEnable = false;
-        state = FSM[ONEPEDAL];
-    }
+    // If cruise has been disabled, return to forward drive
     else if (!cruiseEnable)
     {
         state = FSM[FORWARD_DRIVE];
     }
+    // If CRUISE_SET to a different velocity, return to RECORD_VELOCITY
     else if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
     {
         state = FSM[RECORD_VELOCITY];
@@ -616,23 +569,17 @@ static void CoastingCruiseHandler()
  */
 static void CoastingCruiseDecider()
 {
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
+    // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
+    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_STATE || gear == REVERSE_GEAR)
     {
-        state = FSM[BRAKE_STATE];
+        state = FSM[PARK_STATE];
     }
-    else if (gear == NEUTRAL_GEAR || gear == REVERSE_GEAR)
-    {
-        state = FSM[NEUTRAL_DRIVE];
-    }
-    else if (onePedalEnable)
-    {
-        cruiseEnable = false;
-        state = FSM[ONEPEDAL];
-    }
+    // If cruise has been disabled, return to forward drive
     else if (!cruiseEnable)
     {
         state = FSM[FORWARD_DRIVE];
     }
+    // If CRUISE_SET to a different velocity, return to RECORD_VELOCITY
     else if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
     {
         state = FSM[RECORD_VELOCITY];
@@ -665,23 +612,17 @@ static void AccelerateCruiseHandler()
  */
 static void AccelerateCruiseDecider()
 {
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
+    // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
+    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_STATE || gear == REVERSE_GEAR)
     {
-        state = FSM[BRAKE_STATE];
+        state = FSM[PARK_STATE];
     }
-    else if (gear == NEUTRAL_GEAR || gear == REVERSE_GEAR)
-    {
-        state = FSM[NEUTRAL_DRIVE];
-    }
-    else if (onePedalEnable)
-    {
-        cruiseEnable = false;
-        state = FSM[ONEPEDAL];
-    }
+    // If cruise has been disabled, return to forward drive
     else if (!cruiseEnable)
     {
         state = FSM[FORWARD_DRIVE];
     }
+    // If CRUISE_SET to a different velocity, return to RECORD_VELOCITY
     else if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
     {
         state = FSM[RECORD_VELOCITY];
@@ -701,9 +642,10 @@ void Task_SendTritium(void *p_arg)
 {
     OS_ERR err;
 
-    // Initialize current state to FORWARD_DRIVE
-    state = FSM[NEUTRAL_DRIVE];
-    prevState = FSM[NEUTRAL_DRIVE];
+    // Initialize current state to PARK_STATE
+    state = FSM[PARK_STATE];
+    prevState = FSM[PARK_STATE];
+    UpdateDisplay_SetGear(PARK_GEAR);
 
     // Initialize Regen & Cruise disabled
     // NOTE: Regen stays disabled on Daybreak MVP
@@ -735,9 +677,10 @@ void Task_SendTritium(void *p_arg)
         prevState = state;
         state.stateDecider(); // decide what the next state is
 
-        // Disable velocity controlled mode by always overwriting velocity to the maximum
-        // in the appropriate direction.
-        velocitySetpoint = (velocitySetpoint > 0) ? MAX_VELOCITY : -MAX_VELOCITY;
+        // This ONLY works for MVP (since Cruise has velocity control)
+        // // Disable velocity controlled mode by always overwriting velocity to the maximum
+        // // in the appropriate direction.
+        // velocitySetpoint = (velocitySetpoint > 0) ? MAX_VELOCITY : -MAX_VELOCITY;
 
 // Drive
 #ifdef SENDTRITIUM_PRINT_MES
