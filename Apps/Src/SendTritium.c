@@ -799,6 +799,7 @@ void Task_SendTritium(void *p_arg)
     // Initialize current state to FORWARD_DRIVE
     state = FSM[NEUTRAL_DRIVE];
     prevState = FSM[NEUTRAL_DRIVE];
+    UpdateDisplay_SetGear(DISP_NEUTRAL);
 
 #ifndef SENDTRITIUM_EXPOSE_VARS
     CANDATA_t driveCmd = {
