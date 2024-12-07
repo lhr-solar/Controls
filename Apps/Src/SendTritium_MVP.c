@@ -36,9 +36,6 @@
 #define BRAKE_PEDAL_THRESHOLD 50 // percent
 #define ACCEL_PEDAL_THRESHOLD 15 // percent
 
-#define ONEPEDAL_BRAKE_THRESHOLD 25   // percent
-#define ONEPEDAL_NEUTRAL_THRESHOLD 35 // percent
-
 #define PEDAL_MIN 0        // percent
 #define PEDAL_MAX 100      // percent
 #define CURRENT_SP_MIN 0   // percent
@@ -57,6 +54,9 @@ float currentSetpoint = 0;
 float velocitySetpoint = 0;
 float busCurrentSetPoint = 69.0f; // why is this float and not int?
 
+// Current observed velocity
+static float velocityObserved = 0;
+
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 
@@ -74,6 +74,7 @@ GETTER(uint8_t, brakePedalPercent)
 GETTER(uint8_t, accelPedalPercent)
 GETTER(Gear_t, gear)
 GETTER(TritiumState_t, state)
+GETTER(float, velocityObserved)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
 
@@ -83,6 +84,7 @@ SETTER(uint8_t, brakePedalPercent)
 SETTER(uint8_t, accelPedalPercent)
 SETTER(Gear_t, gear)
 SETTER(TritiumState_t, state)
+SETTER(float, velocityObserved)
 SETTER(float, currentSetpoint)
 SETTER(float, velocitySetpoint)
 #endif
@@ -90,8 +92,8 @@ SETTER(float, velocitySetpoint)
 // Handler & Decider Declarations
 static void ForwardDriveHandler(void);
 static void ForwardDriveDecider(void);
-static void ParkDriveHandler(void);
-static void ParkDriveDecider(void);
+static void ParkHandler(void);
+static void ParkDecider(void);
 static void ReverseDriveHandler(void);
 static void ReverseDriveDecider(void);
 
@@ -153,6 +155,7 @@ static void dumpInfo()
     printf("gear: %d\n\r", (uint8_t)gear);
     print_float("currentSetpoint: ", currentSetpoint);
     print_float("velocitySetpoint: ", velocitySetpoint);
+    print_float("velocityObserved: ", velocityObserved);
     printf("-------------------\n\r");
 }
 #endif
@@ -226,6 +229,9 @@ static void readInputs()
         UpdateDisplay_SetGear(DISP_FORWARD);
     else if (gear == REVERSE_GEAR)
         UpdateDisplay_SetGear(DISP_REVERSE);
+
+    // Get observed velocity
+    velocityObserved = Motor_RPM_Get();
 }
 #endif
 
@@ -273,63 +279,73 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
  */
 static void ForwardDriveHandler()
 {
-    velocitySetpoint = MAX_VELOCITY;
-    // printf("accelPedalPercent: %d\n\r", accelPedalPercent);
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
-    // print_float("float(map(accelPedalPercent)): %d\n\r", currentSetpoint);
+    // If braking, set current to 0. Otherwise, set current based on accel
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
+        velocitySetpoint = MAX_VELOCITY;
+        currentSetpoint = 0;
+    } else {
+        velocitySetpoint = MAX_VELOCITY;
+        currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+    }
+
+    // Turn brakelight on/off
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
+        Minions_Write(BRAKELIGHT, true);
+        UpdateDisplay_SetBrake(true);
+    } else {
+        Minions_Write(BRAKELIGHT, false);
+        UpdateDisplay_SetBrake(false);
+    }
 }
 
 /**
  * @brief Forward Drive State Decider. Determines transitions out of
- * forward drive state (brake, record velocity, one pedal, neutral drive).
+ * forward drive state (park).
  */
 static void ForwardDriveDecider()
 {
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
+    // Go to PARK_STATE if you're in another gear
+    if (gear == PARK_GEAR || gear == REVERSE_GEAR)
     {
         state = FSM[PARK_STATE];
-        Minions_Write(BRAKELIGHT, true);
-    }
-    else if (gear == REVERSE_GEAR)
-    {
-        state = FSM[PARK_STATE]; // transitions to PARK_STATE to then transition to REVERSE_DRIVE
-        Minions_Write(BRAKELIGHT, false);
     }
     // Otherwise, stays in FORWARD_DRIVE
 }
 
 /**
- * @brief Neutral Drive State Handler. No current is sent to the motor.
+ * @brief Park State Handler. No current is sent to the motor.
  */
 static void ParkHandler()
 {
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = 0.0f;
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
-        Minions_Write(BRAKELIGHT, true);    
+
+    // Turn brakelight on/off
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
+        Minions_Write(BRAKELIGHT, true);
+        UpdateDisplay_SetBrake(true);
+    } else {
+        Minions_Write(BRAKELIGHT, false);
+        UpdateDisplay_SetBrake(false);
+    }
 }
 
 /**
- * @brief Neutral Drive State Decider. Determines transitions out of
- * neutral drive state (brake, forward drive, reverse drive).
+ * @brief Park State Decider. Determines transitions out of
+ * neutral drive state (forward drive, reverse drive).
  */
 static void ParkDecider()
 {
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
-    {
-        state = FSM[PARK_STATE];
-        Minions_Write(BRAKELIGHT, true);
-    }
-    else if (gear == FORWARD_GEAR)
+    // Switch for FORWARD_DRIVE/REVERSE_DRIVE if in FORWARD_GEAR/REVERSE_GEAR & speed is less than MAX_GEARSWITCH_VELOCITY
+    if (gear == FORWARD_GEAR && (velocityObserved < 0 ? (velocityObserved >= -MAX_GEARSWITCH_VELOCITY) : (velocityObserved <= MAX_GEARSWITCH_VELOCITY)))
     {
         state = FSM[FORWARD_DRIVE];
-        Minions_Write(BRAKELIGHT, false);
     }
-    else if (gear == REVERSE_GEAR)
+    else if (gear == REVERSE_GEAR && (velocityObserved < 0 ? (velocityObserved >= -MAX_GEARSWITCH_VELOCITY) : (velocityObserved <=MAX_GEARSWITCH_VELOCITY)))
     {
         state = FSM[REVERSE_DRIVE];
-        Minions_Write(BRAKELIGHT, false);
     }
+    // Otherwise, remain in PARK_STATE
 }
 
 /**
@@ -338,27 +354,35 @@ static void ParkDecider()
  */
 static void ReverseDriveHandler()
 {
-    velocitySetpoint = -MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
-        Minions_Write(BRAKELIGHT, true);    
+    // If braking, set current to 0. Otherwise, set current based on accel
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
+        velocitySetpoint = MAX_VELOCITY;
+        currentSetpoint = 0;
+    } else {
+        velocitySetpoint = -MAX_VELOCITY;
+        currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+    }
+
+    // Turn brakelight on/off
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
+        Minions_Write(BRAKELIGHT, true);
+        UpdateDisplay_SetBrake(true);
+    } else {
+        Minions_Write(BRAKELIGHT, false);
+        UpdateDisplay_SetBrake(false);
+    }  
 }
 
 /**
  * @brief Reverse Drive State Decider. Determines transitions out of
- * reverse drive state (brake, neutral drive).
+ * reverse drive state (park).
  */
 static void ReverseDriveDecider()
 {
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
+    // Go to PARK_STATE if you're in another gear or if you're braking
+    if (gear == PARK_GEAR || gear == FORWARD_GEAR)
     {
         state = FSM[PARK_STATE];
-        Minions_Write(BRAKELIGHT, true);
-    }
-    else if (gear == FORWARD_GEAR)
-    {
-        state = FSM[PARK_STATE]; // transitions to PARK_STATE to then transition to FORWARD_DRIVE
-        Minions_Write(BRAKELIGHT, false);
     }
     // Otherwise, stays in REVERSE_DRIVE
 }
@@ -375,6 +399,11 @@ void Task_SendTritium(void *p_arg)
     // Initialize current state to PARK_STATE
     state = FSM[PARK_STATE];
     prevState = FSM[PARK_STATE];
+
+    // Initialize Regen & Cruise disabled
+    // NOTE: Regen & Display stay disabled on Daybreak MVP
+    UpdateDisplay_SetRegenState(DISP_DISABLED);
+    UpdateDisplay_SetCruiseState(DISP_DISABLED);
 
 #ifndef SENDTRITIUM_EXPOSE_VARS
     CANDATA_t driveCmd = {

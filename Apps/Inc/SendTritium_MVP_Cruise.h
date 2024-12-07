@@ -21,7 +21,7 @@
 
 #define FOREACH_Gear(GEAR) \
         GEAR(FORWARD_GEAR),   \
-        GEAR(NEUTRAL_GEAR),  \
+        GEAR(PARK_GEAR),  \
         GEAR(REVERSE_GEAR),   \
 
 typedef enum GEAR_ENUM {
@@ -32,13 +32,11 @@ typedef enum GEAR_ENUM {
 // State Names
 typedef enum{
     FORWARD_DRIVE,
-    NEUTRAL_DRIVE,
+    PARK_STATE,
     REVERSE_DRIVE,
     RECORD_VELOCITY,
     POWERED_CRUISE,
     COASTING_CRUISE,
-    BRAKE_STATE,
-    ONEPEDAL,
     ACCELERATE_CRUISE
 } TritiumStateName_t;
 
@@ -53,8 +51,6 @@ typedef struct TritiumState{
 // Inputs
 extern bool cruiseEnable;
 extern bool cruiseSet;
-extern bool onePedalEnable;
-extern bool regenEnable;
 
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
@@ -69,8 +65,6 @@ extern float cruiseVelSetpoint;
 // Getter functions for local variables in SendTritium.c
 EXPOSE_GETTER(bool, cruiseEnable)
 EXPOSE_GETTER(bool, cruiseSet)
-EXPOSE_GETTER(bool, onePedalEnable)
-EXPOSE_GETTER(bool, regenEnable)
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
 EXPOSE_GETTER(Gear_t, gear)
@@ -84,8 +78,6 @@ EXPOSE_GETTER(float, velocitySetpoint)
 #ifdef SENDTRITIUM_EXPOSE_VARS
 EXPOSE_SETTER(bool, cruiseEnable)
 EXPOSE_SETTER(bool, cruiseSet)
-EXPOSE_SETTER(bool, onePedalEnable)
-EXPOSE_SETTER(bool, regenEnable)
 EXPOSE_SETTER(uint8_t, brakePedalPercent)
 EXPOSE_SETTER(uint8_t, accelPedalPercent)
 EXPOSE_SETTER(Gear_t, gear)

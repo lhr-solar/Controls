@@ -8,8 +8,8 @@
 #include "common.h"
 #include <errno.h> 
 #include "Tasks.h"
-#include "SendTritium.h"
-
+// #include "SendTritium.h"
+#include "SendTritium_MVP.h"
 
 static const char *MINIONPIN_STRING[] = {
     FOREACH_PIN(GENERATE_STRING)
@@ -54,10 +54,10 @@ void Task_DebugDump(void* p_arg) {
         } 
 
         // Send Tritium variables
-        printf("Cruise Enable: %s\n\r", get_cruiseEnable() ? "true" : "false");
-        printf("Cruise Set: %s\n\r", get_cruiseSet() ? "true" : "false");
-        printf("One Pedal Enable: %s\n\r", get_onePedalEnable() ? "true" : "false");
-        printf("Regen Enable: %s\n\r", get_regenEnable() ? "true" : "false");
+        // printf("Cruise Enable: %s\n\r", get_cruiseEnable() ? "true" : "false");
+        // printf("Cruise Set: %s\n\r", get_cruiseSet() ? "true" : "false");
+        // printf("One Pedal Enable: %s\n\r", get_onePedalEnable() ? "true" : "false");
+        // printf("Regen Enable: %s\n\r", get_regenEnable() ? "true" : "false");
         printf("Pedal Brake Percent: %d\n\r", get_brakePedalPercent());
         printf("Pedal Accel Percent: %d\n\r", get_accelPedalPercent());
         printf("Current Gear: %s\n\r", GEAR_STRING[get_gear()]);

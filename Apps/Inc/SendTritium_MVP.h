@@ -52,8 +52,7 @@ extern Gear_t gear;
 extern TritiumState_t state;
 
 // Outputs
-extern float currentSetpoint;
-extern float velocitySetpoint;
+extern float velocityObserved;
 #endif
 
 // Getter functions for local variables in SendTritium.c
@@ -61,6 +60,7 @@ EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
 EXPOSE_GETTER(Gear_t, gear)
 EXPOSE_GETTER(TritiumState_t, state)
+EXPOSE_GETTER(float, velocityObserved)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
 
@@ -70,6 +70,7 @@ EXPOSE_SETTER(uint8_t, brakePedalPercent)
 EXPOSE_SETTER(uint8_t, accelPedalPercent)
 EXPOSE_SETTER(Gear_t, gear)
 EXPOSE_SETTER(TritiumState_t, state)
+EXPOSE_SETTER(float, velocityObserved)
 EXPOSE_SETTER(float, currentSetpoint)
 EXPOSE_SETTER(float, velocitySetpoint)
 #endif
