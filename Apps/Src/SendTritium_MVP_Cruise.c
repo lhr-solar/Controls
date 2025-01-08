@@ -27,21 +27,7 @@
 
 #include "SendTritium_MVP_Cruise.h"
 
-// Macros
-#define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
 
-#define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)    // rpm
-#define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
-
-#define BRAKE_PEDAL_THRESHOLD 50 // percent
-#define ACCEL_PEDAL_THRESHOLD 15 // percent
-
-#define PEDAL_MIN 0        // percent
-#define PEDAL_MAX 100      // percent
-#define CURRENT_SP_MIN 0   // percent
-#define CURRENT_SP_MAX 100 // percent
-
-#define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
 // Inputs
 static bool cruiseEnable = false;
@@ -231,12 +217,18 @@ static void readInputs()
     accelPedalPercent = Pedals_Read(ACCELERATOR);
 
     // Update buttons
-    // TODO
-    if(Minions_Read(CRUZ_EN) && cruiseEnableCounter < DEBOUNCE_PERIOD){cruiseEnableCounter++;}
-    else if(cruiseEnableCounter > 0){cruiseEnableCounter--;}
-
-    if(Minions_Read(CRUZ_ST) && cruiseSetCounter < DEBOUNCE_PERIOD){cruiseSetCounter++;}
-    else if(cruiseSetCounter > 0){cruiseSetCounter--;}
+    if(Minions_Read(CRUZ_EN)) { 
+        if(cruiseEnableCounter < DEBOUNCE_PERIOD) cruiseEnableCounter++;
+    }
+    else {
+        if(cruiseEnableCounter > 0) cruiseEnableCounter--;
+    }
+    if(Minions_Read(CRUZ_ST)) {
+        if(cruiseSetCounter < DEBOUNCE_PERIOD) cruiseSetCounter++;
+    }
+    else {
+        if(cruiseSetCounter > 0) cruiseSetCounter--;
+    } 
 
     // Update gears
     bool forwardSwitch = Minions_Read(FOR_SW);
@@ -278,7 +270,6 @@ static void readInputs()
         UpdateDisplay_SetGear(DISP_REVERSE);
 
     // Debouncing
-    // TODO
     cruiseEnableButton = false;
     cruiseSet = false;
     if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
@@ -288,7 +279,7 @@ static void readInputs()
     else if(cruiseSetCounter == 0){cruiseSet = false;}
 
     // Toggle
-    if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious) // Falling edge CRUZ_EN detection
+    if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious) // Falling edge toggle/CRUZ_EN detection
     {
         cruiseEnable = !cruiseEnable;
     }
@@ -367,7 +358,7 @@ static void ForwardDriveHandler()
         UpdateDisplay_SetBrake(false);
     }
 
-    cruiseEnable = false;
+    cruiseEnable = false; // Doesn't affect operation of cruiseEnable, as readInputs() happens after stateHandler
 }
 
 /**
@@ -408,7 +399,7 @@ static void ParkHandler()
         UpdateDisplay_SetBrake(false);
     }
 
-    cruiseEnable = false;
+    cruiseEnable = false; // Doesn't affect operation of cruiseEnable, as readInputs() happens after stateHandler
 }
 
 /**
@@ -453,7 +444,7 @@ static void ReverseDriveHandler()
         UpdateDisplay_SetBrake(false);
     }  
 
-    cruiseEnable = false;
+    cruiseEnable = false; // Doesn't affect operation of cruiseEnable, as readInputs() happens after stateHandler
 }
 
 /**
@@ -480,6 +471,16 @@ static void RecordVelocityHandler()
     {
         UpdateDisplay_SetCruiseState(DISP_ACTIVE);
     }
+
+    // Turn brakelight on/off (in decider, this'll also cause you to exit to PARK_STATE)
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
+        Minions_Write(BRAKELIGHT, true);
+        UpdateDisplay_SetBrake(true);
+    } else {
+        Minions_Write(BRAKELIGHT, false);
+        UpdateDisplay_SetBrake(false);
+    }
+
     // put car in neutral while recording velocity (while button is held)
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = 0;
@@ -648,7 +649,7 @@ void Task_SendTritium(void *p_arg)
     UpdateDisplay_SetGear(PARK_GEAR);
 
     // Initialize Regen & Cruise disabled
-    // NOTE: Regen stays disabled on Daybreak MVP
+    // NOTE: Regen stays disabled on Daybreak MVP + Cruise
     UpdateDisplay_SetRegenState(DISP_DISABLED);
     UpdateDisplay_SetCruiseState(DISP_DISABLED);
 

@@ -27,21 +27,7 @@
 
 #include "SendTritium_MVP.h"
 
-// Macros
-#define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
 
-#define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)    // rpm
-#define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
-
-#define BRAKE_PEDAL_THRESHOLD 50 // percent
-#define ACCEL_PEDAL_THRESHOLD 15 // percent
-
-#define PEDAL_MIN 0        // percent
-#define PEDAL_MAX 100      // percent
-#define CURRENT_SP_MIN 0   // percent
-#define CURRENT_SP_MAX 100 // percent
-
-#define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
 // Inputs
 static uint8_t brakePedalPercent = 0;
@@ -336,7 +322,7 @@ static void ParkDecider()
     {
         state = FSM[FORWARD_DRIVE];
     }
-    else if (gear == REVERSE_GEAR && (velocityObserved < 0 ? (velocityObserved >= -MAX_GEARSWITCH_VELOCITY) : (velocityObserved <=MAX_GEARSWITCH_VELOCITY)))
+    else if (gear == REVERSE_GEAR && (velocityObserved < 0 ? (velocityObserved >= -MAX_GEARSWITCH_VELOCITY) : (velocityObserved <= MAX_GEARSWITCH_VELOCITY)))
     {
         state = FSM[REVERSE_DRIVE];
     }
@@ -426,7 +412,7 @@ void Task_SendTritium(void *p_arg)
         prevState = state;
         state.stateDecider(); // decide what the next state is
 
-        // This ONLY works for MVP (since Cruise has velocity control)
+        // NOTE: This ONLY works for MVP (since Cruise has velocity control)
         // Disable velocity controlled mode by always overwriting velocity to the maximum
         // in the appropriate direction.
         velocitySetpoint = (velocitySetpoint > 0) ? MAX_VELOCITY : -MAX_VELOCITY;

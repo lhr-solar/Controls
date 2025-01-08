@@ -7,8 +7,8 @@
  * @addtogroup SendTritium
  * @{
  */
-#ifndef __SENDTRITIUM_H
-#define __SENDTRITIUM_H
+#ifndef __SENDTRITIUM_MVP_CRUISE_H
+#define __SENDTRITIUM_MVP_CRUISE_H
 
 #include "common.h"
 
@@ -18,6 +18,24 @@
 #define FSM_PERIOD 100 // in ms
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
+
+
+// Macros
+#define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
+
+#define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)    // rpm
+#define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
+
+#define BRAKE_PEDAL_THRESHOLD 50 // percent
+#define ACCEL_PEDAL_THRESHOLD 15 // percent
+
+#define PEDAL_MIN 0        // percent
+#define PEDAL_MAX 100      // percent
+#define CURRENT_SP_MIN 0   // percent
+#define CURRENT_SP_MAX 100 // percent
+
+#define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
+
 
 #define FOREACH_Gear(GEAR) \
         GEAR(FORWARD_GEAR),   \
