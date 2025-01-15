@@ -1,10 +1,10 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file SendTritium.h
+ * @file SendTritium_MVP_Crusie.h
  * @brief 
  * 
- * @defgroup SendTritium
- * @addtogroup SendTritium
+ * @defgroup SendTritium_MVP_Cruise
+ * @addtogroup SendTritium_MVP_Cruise
  * @{
  */
 #ifndef __SENDTRITIUM_MVP_CRUISE_H
@@ -12,7 +12,7 @@
 
 #include "common.h"
 
-//#define SENDTRITIUM_PRINT_MES
+//#define SENDTRITIUM_MVP_CRUISE_PRINT_MES
 
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
@@ -65,7 +65,7 @@ typedef struct TritiumState{
     void (*stateDecider)(void);
 } TritiumState_t;
 
-#ifdef SENDTRITIUM_EXPOSE_VARS
+#ifdef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
 // Inputs
 extern bool cruiseEnable;
 extern bool cruiseSet;
@@ -74,13 +74,13 @@ extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
 
 extern Gear_t gear;
-
 extern TritiumState_t state;
+
 extern float velocityObserved;
 extern float cruiseVelSetpoint;
 #endif
 
-// Getter functions for local variables in SendTritium.c
+// Getter functions for local variables in SendTritium_MVP_Cruise.c
 EXPOSE_GETTER(bool, cruiseEnable)
 EXPOSE_GETTER(bool, cruiseSet)
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
@@ -92,8 +92,8 @@ EXPOSE_GETTER(float, cruiseVelSetpoint)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
 
-// Setter functions for local variables in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
+// Setter functions for local variables in SendTritium_MVP_Cruise.c
+#ifdef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
 EXPOSE_SETTER(bool, cruiseEnable)
 EXPOSE_SETTER(bool, cruiseSet)
 EXPOSE_SETTER(uint8_t, brakePedalPercent)
@@ -104,6 +104,24 @@ EXPOSE_SETTER(float, velocityObserved)
 EXPOSE_SETTER(float, cruiseVelSetpoint)
 EXPOSE_SETTER(float, currentSetpoint)
 EXPOSE_SETTER(float, velocitySetpoint)
+#endif
+
+// Caller functions for state handlers & deciders in SendTritium_MVP_Cruise.c
+#ifdef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+void callForwardDriveHandler(void);
+void callForwardDriveDecider(void);
+void callParkHandler(void);
+void callParkDecider(void);
+void callReverseDriveHandler(void);
+void callReverseDriveDecider(void);
+void callRecordVelocityHandler(void);
+void callRecordVelocityDecider(void);
+void callPoweredCruiseHandler(void);
+void callPoweredCruiseDecider(void);
+void callCoastingCruiseHandler(void);
+void callCoastingCruiseDecider(void);
+void callAccelerateCruiseHandler(void);
+void callAccelerateCruiseDecider(void);
 #endif
 
 #endif

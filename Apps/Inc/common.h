@@ -45,7 +45,7 @@
 #define SETTER(type, name) \
     void set_##name(type val){ \
         name = val; \
-    } \
+    } 
 
 #define EXPOSE_SETTER(type, name) \
     void set_##name(type val); \

@@ -1,10 +1,10 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file SendTritium.h
+ * @file SendTritium_MVP.h
  * @brief 
  * 
- * @defgroup SendTritium
- * @addtogroup SendTritium
+ * @defgroup SendTritium_MVP
+ * @addtogroup SendTritium_MVP
  * @{
  */
 #ifndef __SENDTRITIUM_MVP_H
@@ -12,7 +12,7 @@
 
 #include "common.h"
 
-//#define SENDTRITIUM_PRINT_MES
+//#define SENDTRITIUM_MVP_PRINT_MES
 
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
@@ -58,7 +58,7 @@ typedef struct TritiumState{
     void (*stateDecider)(void);
 } TritiumState_t;
 
-#ifdef SENDTRITIUM_EXPOSE_VARS
+#ifdef SENDTRITIUM_MVP_EXPOSE_VARS
 // Inputs
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
@@ -70,7 +70,7 @@ extern TritiumState_t state;
 extern float velocityObserved;
 #endif
 
-// Getter functions for local variables in SendTritium.c
+// Getter functions for local variables in SendTritium_MVP.c
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
 EXPOSE_GETTER(Gear_t, gear)
@@ -79,8 +79,8 @@ EXPOSE_GETTER(float, velocityObserved)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
 
-// Setter functions for local variables in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
+// Setter functions for local variables in SendTritium_MVP.c
+#ifdef SENDTRITIUM_MVP_EXPOSE_VARS
 EXPOSE_SETTER(uint8_t, brakePedalPercent)
 EXPOSE_SETTER(uint8_t, accelPedalPercent)
 EXPOSE_SETTER(Gear_t, gear)
@@ -88,6 +88,16 @@ EXPOSE_SETTER(TritiumState_t, state)
 EXPOSE_SETTER(float, velocityObserved)
 EXPOSE_SETTER(float, currentSetpoint)
 EXPOSE_SETTER(float, velocitySetpoint)
+#endif
+
+// Caller functions for state handlers & deciders in SendTritium_MVP.c
+#ifdef SENDTRITIUM_MVP_EXPOSE_VARS
+void callForwardDriveHandler(void);
+void callForwardDriveDecider(void);
+void callParkHandler(void);
+void callParkDecider(void);
+void callReverseDriveHandler(void);
+void callReverseDriveDecider(void);
 #endif
 
 #endif

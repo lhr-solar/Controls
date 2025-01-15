@@ -1,17 +1,18 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file SendTritium.c
- * @brief Function implementations for the SendTritium application.
+ * @file SendTritium_MVP.c
+ * @brief Function implementations for the SendTritium application for the MVP control
+ * mode (normal current control).
  *
- * This contains functions relevant to updating the velocity and current setpoitns
- * of the Tritium motor controller. The implementation includes a normal current
- * controlled mode, a one-pedal driving mode (with regenerative braking), and cruise control.
- * The logic is determined through a finite state machine implementation.
+ * This contains functions relevant to updating the velocity and current setpoints
+ * of the Tritium motor controller. The implementation includes only the normal current
+ * control mode, not one pedal driving, regenerative braking, and cruise control capabilities/
+ * modes. The logic is determined through a finite state machine implementation.
  *
- * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including SendTritium.h,
- * relevant setters will be exposed as externs for unit testing
- * and hardware inputs won't be read and motor commands won't be sent over MotorCAN.
- * If the macro SENDTRITIUM_PRINT_MES is also defined prior to including SendTritium.h,
+ * If the macro SENDTRITIUM_MVP_EXPOSE_VARS is defined prior to including SendTritium_MVP.h,
+ * relevant setters will be exposed as externs for unit testing and hardware inputs 
+ * won't be read and motor commands won't be sent over MotorCAN.
+ * If the macro SENDTRITIUM_MVP_PRINT_MES is also defined prior to including SendTritium_MVP.h,
  * debug info will be printed via UART.
  */
 
@@ -27,8 +28,6 @@
 
 #include "SendTritium_MVP.h"
 
-
-
 // Inputs
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
@@ -36,35 +35,34 @@ static uint8_t accelPedalPercent = 0;
 static Gear_t gear = PARK_GEAR;
 
 // Outputs
-float currentSetpoint = 0;
-float velocitySetpoint = 0;
-float busCurrentSetPoint = 69.0f; // why is this float and not int?
+static float currentSetpoint = 0.0f;
+static float velocitySetpoint = 0.0f;
+static float busCurrentSetPoint = 69.0f; // why is this float and not int?
 
 // Current observed velocity
-static float velocityObserved = 0;
+static float velocityObserved = 0.0f;
 
 // Counter for sending setpoints to motor
 static uint8_t motorMsgCounter = 0;
 
 // FSM
-static TritiumState_t prevState; // Previous state
 static TritiumState_t state;     // Current state
 
-// Getter functions for local variables in SendTritium.c
+// Getter functions for local variables in SendTritium_MVP.c
 GETTER(uint8_t, brakePedalPercent)
 GETTER(uint8_t, accelPedalPercent)
 GETTER(Gear_t, gear)
-GETTER(TritiumState_t, state)
+TritiumStateName_t get_state(void) {return state.name;}
 GETTER(float, velocityObserved)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
 
-// Setter functions for local variables in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
+// Setter functions for local variables in SendTritium_MVP.c
+#ifdef SENDTRITIUM_MVP_EXPOSE_VARS
 SETTER(uint8_t, brakePedalPercent)
 SETTER(uint8_t, accelPedalPercent)
 SETTER(Gear_t, gear)
-SETTER(TritiumState_t, state)
+void set_state(TritiumStateName_t stateName) {state = FSM[stateName];}
 SETTER(float, velocityObserved)
 SETTER(float, currentSetpoint)
 SETTER(float, velocitySetpoint)
@@ -78,14 +76,24 @@ static void ParkDecider(void);
 static void ReverseDriveHandler(void);
 static void ReverseDriveDecider(void);
 
+// Caller functions for state handlers & deciders in SendTritium_MVP.c
+#ifdef SENDTRITIUM_MVP_EXPOSE_VARS
+void callForwardDriveHandler(void)  {ForwardDriveHandler();}
+void callForwardDriveDecider(void)  {ForwardDriveDecider();}
+void callParkHandler(void)          {ParkHandler();}
+void callParkDecider(void)          {ParkDecider();}
+void callReverseDriveHandler(void); {ReverseDriveHandler();}
+void callReverseDriveDecider(void); {ReverseDriveDecider();}
+#endif
+
 // FSM
 static const TritiumState_t FSM[9] = {
     {FORWARD_DRIVE, &ForwardDriveHandler, &ForwardDriveDecider},
     {PARK_STATE, &ParkHandler, &ParkDecider},
     {REVERSE_DRIVE, &ReverseDriveHandler, &ReverseDriveDecider}};
 
-// Helper Functions
 
+// Helper Functions
 /**
  * @brief Converts integer percentage to float percentage
  * @param percent integer percentage from 0-100
@@ -101,7 +109,7 @@ static float percentToFloat(uint8_t percent)
     return pedalToPercent[percent];
 }
 
-#ifdef SENDTRITIUM_PRINT_MES
+#ifdef SENDTRITIUM_MVP_PRINT_MES
 /**
  * @brief Dumps info to UART during testing
  */
@@ -141,7 +149,7 @@ static void dumpInfo()
 }
 #endif
 
-#ifndef SENDTRITIUM_EXPOSE_VARS
+#ifndef SENDTRITIUM_MVP_EXPOSE_VARS
 /**
  * @brief Reads inputs from the system
  */
@@ -263,7 +271,7 @@ static void ForwardDriveHandler()
     // If braking, set current to 0. Otherwise, set current based on accel
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
         velocitySetpoint = MAX_VELOCITY;
-        currentSetpoint = 0;
+        currentSetpoint = 0.0f;
     } else {
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
@@ -338,7 +346,7 @@ static void ReverseDriveHandler()
     // If braking, set current to 0. Otherwise, set current based on accel
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
         velocitySetpoint = MAX_VELOCITY;
-        currentSetpoint = 0;
+        currentSetpoint = 0.0f;
     } else {
         velocitySetpoint = -MAX_VELOCITY;
         currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
@@ -373,13 +381,12 @@ static void ReverseDriveDecider()
 /**
  * @brief Follows the FSM to update the velocity of the car
  */
-void Task_SendTritium(void *p_arg)
+void Task_SendTritium_MVP(void *p_arg)
 {
     OS_ERR err;
 
     // Initialize current state to PARK_STATE
     state = FSM[PARK_STATE];
-    prevState = FSM[PARK_STATE];
     UpdateDisplay_SetGear(PARK_GEAR);
 
     // Initialize Regen & Cruise disabled
@@ -387,7 +394,7 @@ void Task_SendTritium(void *p_arg)
     UpdateDisplay_SetRegenState(DISP_DISABLED);
     UpdateDisplay_SetCruiseState(DISP_DISABLED);
 
-#ifndef SENDTRITIUM_EXPOSE_VARS
+#ifndef SENDTRITIUM_MVP_EXPOSE_VARS
     CANDATA_t driveCmd = {
         .ID = MOTOR_DRIVE,
         .idx = 0,
@@ -405,23 +412,22 @@ void Task_SendTritium(void *p_arg)
         memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float));
         CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN); //<-------
         state.stateHandler();                          // do what the current state does
-#ifndef SENDTRITIUM_EXPOSE_VARS
+#ifndef SENDTRITIUM_MVP_EXPOSE_VARS
         readInputs(); // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
 #endif
-        prevState = state;
         state.stateDecider(); // decide what the next state is
 
         // NOTE: This ONLY works for MVP (since Cruise has velocity control)
-        // Disable velocity controlled mode by always overwriting velocity to the maximum
-        // in the appropriate direction.
-        velocitySetpoint = (velocitySetpoint > 0) ? MAX_VELOCITY : -MAX_VELOCITY;
+        // Disable velocity controlled mode (though this should never be needed, but just in 
+        //case) by always overwriting velocity to the maximum in the appropriate direction.
+        velocitySetpoint = (velocitySetpoint >= 0) ? MAX_VELOCITY : -MAX_VELOCITY;
 
 // Drive
-#ifdef SENDTRITIUM_PRINT_MES
+#ifdef SENDTRITIUM_MVP_PRINT_MES
         dumpInfo();
 #endif
-#ifndef SENDTRITIUM_EXPOSE_VARS
+#ifndef SENDTRITIUM_MVP_EXPOSE_VARS
         if (MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter)
         {
             memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
