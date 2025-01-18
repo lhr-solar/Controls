@@ -161,7 +161,10 @@ static void assertTritiumError(tritium_error_code_t motor_err)
 	static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
 	static uint8_t motor_fault_cnt = 0;
 
-	Error_ReadTritium = (error_code_t)motor_err; // Store error codes for inspection info
+	// Store error codes for inspection info
+	Error_ReadTritium = (error_code_t)motor_err; 
+	ErrMsg_ReadTritium = ENUM_TO_STRING(motor_err);
+
 	if (motor_err == T_NONE || motor_err == T_WATCHDOG_LAST_RESET_ERR)
 		return; // No error, return
 				// NOTE: If we had >1 recoverable errors,

@@ -52,6 +52,9 @@
 #define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
 #define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
 
+// Macro for enum name -> string conversion
+#define ENUM_TO_STRING(ENUM) #ENUM
+
 /**
  * Task error variable type
 */
@@ -135,6 +138,11 @@ extern error_code_t Error_ReadTritium;
 extern error_code_t Error_ReadCarCAN;
 extern error_code_t Error_UpdateDisplay;
 extern error_code_t Error_OS;
+
+extern char* ErrMsg_ReadTritium;
+extern char* ErrMsg_ReadCarCAN;
+extern char* ErrMsg_UpdateDisplay;
+extern char* ErrMsg_OS;
 
 /**
  * Error-handling option enums

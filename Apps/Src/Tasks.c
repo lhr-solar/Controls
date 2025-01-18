@@ -49,6 +49,12 @@ error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 OS_ERR       Error_OS = OS_ERR_NONE;
 
+// Display error messages for readability
+char* ErrMsg_ReadCarCAN = "";
+char* ErrMsg_ReadTritium = "";
+char* ErrMsg_UpdateDisplay = "";
+char* ErrMsg_OS = "";
+
 extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
@@ -60,6 +66,7 @@ void _assertOSError(OS_ERR err)
     if (err != OS_ERR_NONE)
     {
         Error_OS = err;
+        ErrMsg_OS = ENUM_TO_STRING(err);
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
         Display_Error(); // Display the location and error code
         while(1){;} //nonrecoverable
