@@ -25,6 +25,7 @@
 #include "UpdateDisplay.h"
 #include "CANConfig.h"
 #include "common.h"
+#include "Tasks.h"
 
 #include "SendTritium_MVP.h"
 
@@ -85,6 +86,9 @@ void callParkDecider(void)          {ParkDecider();}
 void callReverseDriveHandler(void); {ReverseDriveHandler();}
 void callReverseDriveDecider(void); {ReverseDriveDecider();}
 #endif
+
+// Function prototypes
+static void assertSendTritiumMVPError(SendTritium_MVP_error_code_t stmvperr);
 
 // FSM
 static const TritiumState_t FSM[9] = {
@@ -180,6 +184,9 @@ static void readInputs()
 
     accelPedalPercent = Pedals_Read(ACCELERATOR);
 
+    // Protect from both brake and accel being pressed
+    if (brakePedalPercent == 100 && accelPedalPercent == 100) accelPedalPercent = 0;
+    
     // Update gears
     bool forwardSwitch = Minions_Read(FOR_SW);
     bool reverseSwitch = Minions_Read(REV_SW);
@@ -194,7 +201,7 @@ static void readInputs()
     {
         // Fault behavior
         if (gearFaultCnt > GEAR_FAULT_THRESHOLD)
-            state = FSM[PARK_STATE];
+            assertSendTritiumMVPError(SENDTRITIUM_MVP_ERR_GEAR_FAULT);
         else
             gearFaultCnt++;
     }
@@ -212,11 +219,12 @@ static void readInputs()
     else
         gear = PARK_GEAR;
 
-    if (gear == PARK_GEAR)
+    // Display is state-based, not gear based, to account for gearswitch constraints in state changes
+    if (state.name == PARK_STATE)
         UpdateDisplay_SetGear(DISP_PARK);
-    else if (gear == FORWARD_GEAR)
+    else if (state.name == FORWARD_DRIVE)
         UpdateDisplay_SetGear(DISP_FORWARD);
-    else if (gear == REVERSE_GEAR)
+    else if (state.name == REVERSE_DRIVE)
         UpdateDisplay_SetGear(DISP_REVERSE);
 
     // Get observed velocity
@@ -257,6 +265,24 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
         uint8_t out_range = out_max - out_min; // Output range
         uint8_t offset_out = out_min;
         return (offset_in * out_range) / in_range + offset_out; // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
+    }
+}
+
+void assertSendTritiumMVPError(SendTritium_MVP_error_code_t stmvp_err) {
+    
+    Error_SendTritium_MVP = (error_code_t) stmvp_err;
+    
+    switch (stmvp_err) 
+    {
+        case SENDTRITIUM_MVP_ERR_NONE:
+            break;
+
+        case SENDTRITIUM_MVP_ERR_GEAR_FAULT:
+            throwTaskError(Error_SendTritium_MVP, , OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
+        
+        default:
+            break;
     }
 }
 
@@ -448,4 +474,20 @@ void Task_SendTritium_MVP(void *p_arg)
             assertOSError(err);
         }
     }
+}
+
+static void assertSendTritiumMVPError(SendTritium_MVP_error_code_t stmvperr) 
+{
+    Error_SendTritium_MVP = (error_code_t) stmvperr;
+
+    switch(stmvperr)
+    {
+        case SENDTRITIUM_MVP_ERR_NONE:
+            break;
+        case SENDTRITIUM_MVP_ERR_GEAR_FAULT:
+            // Assert a nonrecoverable error that will kill the motor, turn off contactors, display a fault screen, & infinite loop
+            throwTaskError(Error_SendTritium_MVP, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+    }
+
+    Error_SendTritium_MVP = SENDTRITIUM_MVP_ERR_NONE;
 }

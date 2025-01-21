@@ -131,6 +131,8 @@ typedef struct {
 extern task_trace_t PrevTasks;
 
 // Store error codes that are set in task error assertion functions
+extern error_code_t Error_SendTritium_MVP;
+extern error_code_t Error_SendTritium_MVP_Cruise;
 extern error_code_t Error_ReadTritium; 
 extern error_code_t Error_ReadCarCAN;
 extern error_code_t Error_UpdateDisplay;

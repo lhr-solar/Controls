@@ -95,24 +95,8 @@ void goToReverseDrive(float velocityObserved){
     set_velocityObserved(velocityObserved);
 }
 
-void goToRecordVelocity(float velocityObserved, uint8_t brakePedalPercent, uint8_t accelPedalPercent){
-    // Set record velocity state & gear
-    set_state(RECORD_VELOCITY);
-    set_gear(FORWARD_GEAR);
-
-    // Set cruise buttons
-    set_cruiseEnable(true);
-    set_cruiseSet(true);
-
-    // Set relevant state properties
-    set_velocityObserved(velocityObserved);
-    set_cruiseVelSetpoint(velocityObserved);
-    set_brakePedalPercent(brakePedalPercent);
-    set_accelPedalPercent(accelPedalPercent);
-}
-
 void goToPoweredCruise(float velocityObserved, float cruiseVelSetpoint, uint8_t brakePedalPercent, uint8_t accelPedalPercent){
-    // Set power cruise state & gear
+    // Set powered cruise state & gear
     set_state(POWERED_CRUISE);
     set_gear(FORWARD_GEAR);
 
@@ -193,16 +177,15 @@ void Task1(void *arg)
     /**
      * ======= Forward Drive ==========
      * State Transitions: 
-     * Record Velocity, Park, Reverse Drive
+     * Powered Cruise, Park, Reverse Drive
     */
     printf("\n\r============ Testing Forward Drive State ============\n\r");
 
-    // Forward Drive to Record Velocity
-    printf("\n\rTesting: Forward Drive -> Record Velocity\n\r");
-    goToForwardDrive();
+    // Forward Drive to Powered Cruise
+    printf("\n\rTesting: Forward Drive -> Powered Cruise\n\r");
+    goToForwardDrive(VEL_BELOW_MIN_CRUISE_THRESH);
     set_cruiseEnable(true);
     set_cruiseSet(true);
-    set_velocityObserved(VEL_BELOW_MIN_CRUISE_THRESH);
     stateDecider();
     while(get_state().name != FORWARD_DRIVE){}
     set_velocityObserved(VEL_EXCEED_MIN_CRUISE_THRESH);
@@ -295,55 +278,9 @@ void Task1(void *arg)
     while(get_state().name != PARK_STATE){}
 
     /**
-     * ======= Record Velocity ==========
-     * State Transitions: 
-     * Forward Drive, Park, Reverse Drive, Powered Cruise
-    */
-    printf("\n\r============ Testing Record Velocity State ============\n\r");
-
-    // Record Velocity to Forward Normal Drive
-    printf("\n\rTesting: Record Velocity -> Forward Drive\n\r");
-    goToRecordVelocity(VEL_EXCEED_MIN_CRUISE_THRESH, BRAKE_UNPRESSED, ACCEL_UNPRESSED); // Velocity doesn't matter, gear-based transition
-    set_cruiseEnable(false);
-    stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
-
-    // Record Velocity to Park State
-    printf("\n\rTesting: Record Velocity -> Park\n\r");
-    goToRecordVelocity(VEL_EXCEED_MIN_CRUISE_THRESH, BRAKE_UNPRESSED, ACCEL_UNPRESSED); // Velocity doesn't matter, gear-based transition
-    set_gear(PARK_GEAR);
-    stateDecider();
-    while(get_state().name != PARK_STATE){}
-    goToRecordVelocity(VEL_EXCEED_MIN_CRUISE_THRESH, BRAKE_PRESSED, ACCEL_UNPRESSED); // Velocity doesn't matter, pedal-based transition
-    stateDecider();
-    while(get_state().name != PARK_STATE){}
-
-    // Record Velocity to Reverse Drive
-    printf("\n\rTesting: Record Velocity -> Reverse Drive\n\r");
-    goToRecordVelocity(VEL_EXCEED_MIN_CRUISE_THRESH, BRAKE_UNPRESSED, ACCEL_UNPRESSED); // Min Cruise Vel > Max Gearswitch Vel
-    set_gear(REVERSE_GEAR);
-    stateDecider();
-    stateDecider();
-    while(get_state().name != PARK_STATE){}
-    goToRecordVelocity(VEL_EXCEED_MIN_CRUISE_THRESH, BRAKE_UNPRESSED, ACCEL_UNPRESSED);
-    set_gear(REVERSE_GEAR);
-    stateDecider();
-    set_velocityObserved(VEL_WITHIN_GEARSWITCH_THRESH);
-    stateDecider();
-    while(get_state().name != REVERSE_DRIVE){}
-    
-    // Record Velocity to Powered Cruise
-    printf("\n\rTesting: Record Velocity -> Powered Cruise\n\r");
-    goToRecordVelocity(VEL_EXCEED_MIN_CRUISE_THRESH, BRAKE_UNPRESSED, ACCEL_UNPRESSED);
-    set_cruiseEnable(true);
-    set_cruiseSet(false);
-    stateDecider();
-    while(get_state().name != POWERED_CRUISE){}
-
-    /**
      * ======= Powered Cruise ==========
      * State Transitions: 
-     * Forward Drive, Park, Reverse Drive, Record Velocity, Accelerate Cruise, Coasting Cruise
+     * Forward Drive, Park, Reverse Drive, Accelerate Cruise, Coasting Cruise
     */
     printf("\n\r============ Testing Powered Cruise State ============\n\r");
 
@@ -378,17 +315,6 @@ void Task1(void *arg)
     stateDecider();
     while(get_state().name != REVERSE_DRIVE){}
 
-    // Powered Cruise to Record Velocity
-    printf("\n\rTesting: Powered Cruise -> Record Velocity\n\r");
-    goToPoweredCruise(VEL_EXCEED_GEARSWITCH_THRESH, VEL_EXCEED_GEARSWITCH_THRESH - 1.0f, BRAKE_UNPRESSED, ACCEL_UNPRESSED); // Velocity doesn't matter, button-controlled transition
-    set_cruiseSet(true);
-    stateDecider();
-    while(get_state().name != RECORD_VELOCITY){}
-    goToPoweredCruise(VEL_BELOW_MIN_CRUISE_THRESH, VEL_EXCEED_GEARSWITCH_THRESH, BRAKE_UNPRESSED, ACCEL_UNPRESSED); 
-    set_cruiseSet(true);
-    stateDecider();
-    while(get_state().name != POWERED_CRUISE){}
-
     // Powered Cruise to Accelerate Cruise
     printf("\n\rTesting: Powered Cruise -> Accelerate Cruise\n\r");
     goToPoweredCruise(VEL_EXCEED_GEARSWITCH_THRESH, VEL_EXCEED_GEARSWITCH_THRESH - 1.0f, BRAKE_UNPRESSED, ACCEL_PRESSED); // Velocity doesn't matter, pedal-controlled transition
@@ -404,7 +330,7 @@ void Task1(void *arg)
     /**
      * ======= Coasting Cruise ==========
      * State Transitions: 
-     * Forward Drive, Park, Reverse Drive, Record Velocity, Accelerate Cruise, Powered Cruise
+     * Forward Drive, Park, Reverse Drive, Accelerate Cruise, Powered Cruise
     */
     printf("\n\r============ Testing Coasting Cruise State ============\n\r");
 
@@ -439,17 +365,6 @@ void Task1(void *arg)
     stateDecider();
     while(get_state().name != REVERSE_DRIVE){}
 
-    // Coasting Cruise to Record Velocity
-    printf("\n\rTesting: Coasting Cruise -> Record Velocity\n\r");
-    goToCoastingCruise(VEL_EXCEED_GEARSWITCH_THRESH, VEL_EXCEED_GEARSWITCH_THRESH - 1.0f, BRAKE_UNPRESSED, ACCEL_UNPRESSED); // Velocity doesn't matter, button-controlled transition
-    set_cruiseSet(true);
-    stateDecider();
-    while(get_state().name != RECORD_VELOCITY){}
-    goToCoastingCruise(VEL_BELOW_MIN_CRUISE_THRESH, VEL_EXCEED_GEARSWITCH_THRESH, BRAKE_UNPRESSED, ACCEL_UNPRESSED); 
-    set_cruiseSet(true);
-    stateDecider();
-    while(get_state().name != POWERED_CRUISE){}
-
     // Coasting Cruise to Accelerate Cruise
     printf("\n\rTesting: Powered Cruise -> Accelerate Cruise\n\r");
     goToCoastingCruise(VEL_EXCEED_GEARSWITCH_THRESH, VEL_EXCEED_GEARSWITCH_THRESH - 1.0f, BRAKE_UNPRESSED, ACCEL_PRESSED); // Velocity doesn't matter, pedal-controlled transition
@@ -464,7 +379,7 @@ void Task1(void *arg)
 
     /**
      * ======= Accelerate Cruise State ==========
-     * State Transitions: Forward Drive, Park, Coasting Cruise, Record Velocity
+     * State Transitions: Forward Drive, Park, Coasting Cruise
     */
     printf("\n\r============ Testing Accelerate Cruise State ============\n\r");
 
@@ -500,17 +415,6 @@ void Task1(void *arg)
     stateDecider();
     while(get_state().name != REVERSE_DRIVE){}
 
-    // Accelerate Cruise to Record Velocity
-    printf("\n\rTesting: Accelerate Cruise -> Record Velocity\n\r");
-    goToAccelerateCruise(VEL_EXCEED_GEARSWITCH_THRESH, VEL_EXCEED_GEARSWITCH_THRESH - 1.0f, BRAKE_UNPRESSED, ACCEL_PRESSED); // Velocity doesn't matter, button-controlled transition
-    set_cruiseSet(true);
-    stateDecider();
-    while(get_state().name != RECORD_VELOCITY){}
-    goToAccelerateCruise(VEL_BELOW_MIN_CRUISE_THRESH, VEL_EXCEED_GEARSWITCH_THRESH, BRAKE_UNPRESSED, ACCEL_PRESSED); 
-    set_cruiseSet(true);
-    stateDecider();
-    while(get_state().name != ACCELERATE_CRUISE){}
-
     // Accelerate Cruise to Coasting Cruise
     printf("\n\rTesting: Accelerate Cruise -> Coasting Cruise\n\r");
     goToPoweredCruise(VEL_EXCEED_GEARSWITCH_THRESH, VEL_EXCEED_GEARSWITCH_THRESH - 1.0f, BRAKE_UNPRESSED, ACCEL_UNPRESSED); // Velocity doesn't matter, pedal-based transition
@@ -519,6 +423,7 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_GEARSWITCH_THRESH - 1.0f, VEL_EXCEED_GEARSWITCH_THRESH, BRAKE_UNPRESSED, ACCEL_UNPRESSED); // Velocity doesn't matter, pedal-based transition
     stateDecider();
     while(get_state().name != COASTING_CRUISE){}
+
 
     OS_TaskSuspend(&SendTritium_TCB, &err);
     assertOSError(err);

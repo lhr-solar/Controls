@@ -16,6 +16,9 @@
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 
+#include "SendTritium_MVP.h"
+#include "SendTritium_MVP_Cruise.h"
+
 
 /**
  * TCBs
@@ -45,6 +48,8 @@ CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 // Variables to store error codes, stored and cleared in task error assert functions
 error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
+error_code_t Error_SendTritium_MVP = SENDTRITIUM_MVP_ERR_NONE;
+error_code_t Error_SendTritium_MVP_Cruise = SENDTRITIUM_MVP_CRUISE_ERR_NONE;
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 OS_ERR       Error_OS = OS_ERR_NONE;

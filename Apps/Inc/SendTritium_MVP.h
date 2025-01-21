@@ -58,6 +58,16 @@ typedef struct TritiumState{
     void (*stateDecider)(void);
 } TritiumState_t;
 
+/**
+ * Error types
+ * 
+ */
+typedef enum
+{
+    SENDTRITIUM_MVP_ERR_NONE,
+    SENDTRITIUM_MVP_ERR_GEAR_FAULT,     // Received multiple or no gear inputs (e.g. FOR_SW, REV_SW)
+} SendTritium_MVP_error_code_t;
+
 #ifdef SENDTRITIUM_MVP_EXPOSE_VARS
 // Inputs
 extern uint8_t brakePedalPercent;
@@ -74,7 +84,7 @@ extern float velocityObserved;
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
 EXPOSE_GETTER(Gear_t, gear)
-EXPOSE_GETTER(TritiumState_t, state)
+EXPOSE_GETTER(TritiumStateName_t, state)
 EXPOSE_GETTER(float, velocityObserved)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
@@ -84,7 +94,7 @@ EXPOSE_GETTER(float, velocitySetpoint)
 EXPOSE_SETTER(uint8_t, brakePedalPercent)
 EXPOSE_SETTER(uint8_t, accelPedalPercent)
 EXPOSE_SETTER(Gear_t, gear)
-EXPOSE_SETTER(TritiumState_t, state)
+EXPOSE_SETTER(TritiumStateName_t, state)
 EXPOSE_SETTER(float, velocityObserved)
 EXPOSE_SETTER(float, currentSetpoint)
 EXPOSE_SETTER(float, velocitySetpoint)

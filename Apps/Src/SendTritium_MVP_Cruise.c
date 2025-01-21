@@ -26,6 +26,7 @@
 #include "UpdateDisplay.h"
 #include "CANConfig.h"
 #include "common.h"
+#include "Tasks.h"
 
 #include "SendTritium_MVP_Cruise.h"
 
@@ -59,6 +60,14 @@ static uint8_t cruiseSetCounter = 0;
 // Button states
 static bool cruiseEnableButton = false;
 static bool cruiseEnablePrevious = false;
+static bool cruiseSetButton = false;
+static bool cruiseSetPrevious = false;
+
+// Allows cruiseSet to toggle on for a single loop of the SendTritium_MVP_Cruise task
+static bool cruiseSetAllow = true;
+
+// Accel pedal states (used only for hysteresis)
+static bool accelPressed = false;
 
 // FSM
 static TritiumState_t prevState; // Previous state
@@ -97,8 +106,6 @@ static void ParkHandler(void);
 static void ParkDecider(void);
 static void ReverseDriveHandler(void);
 static void ReverseDriveDecider(void);
-static void RecordVelocityHandler(void);
-static void RecordVelocityDecider(void);
 static void PoweredCruiseHandler(void);
 static void PoweredCruiseDecider(void);
 static void CoastingCruiseHandler(void);
@@ -114,8 +121,6 @@ void callParkHandler(void)              {ParkHandler();}
 void callParkDecider(void)              {ParkDecider();}
 void callReverseDriveHandler(void)      {ReverseDriveHandler();}
 void callReverseDriveDecider(void)      {ReverseDriveDecider();}
-void callRecordVelocityHandler(void)    {RecordVelocityHandler();}
-void callRecordVelocityDecider(void)    {RecordVelocityDecider();}
 void callPoweredCruiseHandler(void)     {PoweredCruiseHandler();}
 void callPoweredCruiseDecider(void)     {PoweredCruiseDecider();}
 void callCoastingCruiseHandler(void)    {CoastingCruiseHandler();}
@@ -124,12 +129,14 @@ void callAccelerateCruiseHandler(void)  {AccelerateCruiseHandler();}
 void callAccelerateCruiseDecider(void)  {AccelerateCruiseDecider();}
 #endif
 
+// Function prototypes
+static void assertSendTritiumMVPCruiseError(SendTritium_MVP_Cruise_error_code_t stmvpcerr);
+
 // FSM
-static const TritiumState_t FSM[9] = {
+static const TritiumState_t FSM[6] = {
     {FORWARD_DRIVE, &ForwardDriveHandler, &ForwardDriveDecider},
     {PARK_STATE, &ParkHandler, &ParkDecider},
     {REVERSE_DRIVE, &ReverseDriveHandler, &ReverseDriveDecider},
-    {RECORD_VELOCITY, &RecordVelocityHandler, &RecordVelocityDecider},
     {POWERED_CRUISE, &PoweredCruiseHandler, &PoweredCruiseDecider},
     {COASTING_CRUISE, &CoastingCruiseHandler, &CoastingCruiseDecider},
     {ACCELERATE_CRUISE, &AccelerateCruiseHandler, &AccelerateCruiseDecider}};
@@ -151,6 +158,19 @@ static float percentToFloat(uint8_t percent)
     return pedalToPercent[percent];
 }
 
+/**
+ * @brief Updates the brakelight and brake indication on display
+ */
+static void brakeUpdate(){
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
+        Minions_Write(BRAKELIGHT, true);
+        UpdateDisplay_SetBrake(true);
+    } else {
+        Minions_Write(BRAKELIGHT, false);
+        UpdateDisplay_SetBrake(false);
+    }
+}
+
 #ifdef SENDTRITIUM_MVP_CRUISE_PRINT_MES
 /**
  * @brief Dumps info to UART during testing
@@ -167,9 +187,6 @@ static void getName(char *nameStr, uint8_t stateNameNum)
         break;
     case REVERSE_DRIVE:
         strcpy(nameStr, "REVERSE_DRIVE");
-        break;
-    case RECORD_VELOCITY:
-        strcpy(nameStr, "RECORD_VELOCITY");
         break;
     case POWERED_CRUISE:
         strcpy(nameStr, "POWERED_CRUISE");
@@ -214,6 +231,7 @@ static void readInputs()
 
     // Update pedals
     static uint32_t brakeSaturationCt = 0;
+    static uint32_t accelSaturationCt = 0;
 
     uint32_t latest_pedal = Pedals_Read(BRAKE);
 
@@ -235,6 +253,25 @@ static void readInputs()
     }
 
     accelPedalPercent = Pedals_Read(ACCELERATOR);
+    // Used for accel hysteresis to prevent abrupt switches to/from ACCELERATE_CRUISE state
+    if(accelSaturationCt < 3) {
+        if(accelPedalPercent >= ACCEL_PEDAL_PRESSED_THRESHOLD)
+            accelSaturationCt++;
+        else if (accelSaturationCt != 0)
+            accelSaturationCt--;
+
+        if(accelSaturationCt == 0)
+            accelPressed = false;
+    }
+    else if (accelSaturationCt >= 3) {
+        if(accelPedalPercent <= ACCEL_PEDAL_UNPRESSED_THRESHOLD)
+            accelSaturationCt--;
+        
+        accelPressed = true;
+    }
+
+    // Protect from both brake and accel being pressed
+    if (brakePedalPercent == 100 && accelPedalPercent == 100) accelPedalPercent = 0;
 
     // Update buttons
     if(Minions_Read(CRUZ_EN)) { 
@@ -264,7 +301,7 @@ static void readInputs()
     {
         // Fault behavior
         if (gearFaultCnt > GEAR_FAULT_THRESHOLD)
-            state = FSM[PARK_GEAR];
+            assertSendTritiumMVPCruiseError(SENDTRITIUM_MVP_CRUISE_ERR_GEAR_FAULT);
         else
             gearFaultCnt++;
     }
@@ -282,21 +319,22 @@ static void readInputs()
     else
         gear = PARK_GEAR;
 
-    if (gear == PARK_GEAR)
+    // Display is state-based, not gear based, to account for gearswitch constraints in state changes
+    if (state.name == PARK_STATE)
         UpdateDisplay_SetGear(DISP_PARK);
-    else if (gear == FORWARD_GEAR)
+    else if (state.name == FORWARD_DRIVE || POWERED_CRUISE || COASTING_CRUISE || ACCELERATE_CRUISE)
         UpdateDisplay_SetGear(DISP_FORWARD);
-    else if (gear == REVERSE_GEAR)
+    else if (state.name == REVERSE_DRIVE)
         UpdateDisplay_SetGear(DISP_REVERSE);
 
     // Debouncing
     cruiseEnableButton = false;
-    cruiseSet = false;
+    cruiseSetButton = false;
     if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
     else if(cruiseEnableCounter == 0){cruiseEnableButton = false;}
 
-    if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSet = true;}
-    else if(cruiseSetCounter == 0){cruiseSet = false;}
+    if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSetButton = true;}
+    else if(cruiseSetCounter == 0){cruiseSetButton = false; cruiseSetAllow = true;}
 
     // Toggle CRUZ_EN
     if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious) // Falling edge toggle/CRUZ_EN detection
@@ -305,6 +343,18 @@ static void readInputs()
     }
     cruiseEnablePrevious = cruiseEnableButton;
     // cruiseEnablePrevious = false;
+
+    // Allow CRUZ_SET on for just one loop of the SendTritium_MVP_Cruise task
+    if(cruiseSet) 
+    {
+        cruiseSet = false;
+        cruiseSetAllow = false;
+    }
+    if (!cruiseSetPrevious && cruiseSetButton && cruiseSetAllow) 
+    {
+        cruiseSet = true;
+    }
+    cruiseSetPrevious = cruiseSetButton;
 
     // Get observed velocity
     velocityObserved = Motor_RPM_Get();
@@ -370,20 +420,14 @@ static void ForwardDriveHandler()
     }
 
     // Turn brakelight on/off
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
-        Minions_Write(BRAKELIGHT, true);
-        UpdateDisplay_SetBrake(true);
-    } else {
-        Minions_Write(BRAKELIGHT, false);
-        UpdateDisplay_SetBrake(false);
-    }
+    brakeUpdate();
 
     cruiseEnable = false; // Doesn't affect operation of cruiseEnable, as readInputs() happens after stateHandler
 }
 
 /**
  * @brief Forward Drive State Decider. Determines transitions out of
- * forward drive state (park, record velocity).
+ * forward drive state (park, powered cruise).
  */
 static void ForwardDriveDecider()
 {
@@ -393,7 +437,8 @@ static void ForwardDriveDecider()
         state = FSM[PARK_STATE];
     }
     else if (cruiseEnable && cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY) {
-        state = FSM[RECORD_VELOCITY];
+        state = FSM[POWERED_CRUISE];
+        cruiseVelSetpoint = velocityObserved;
     }
     // Otherwise, stays in FORWARD_DRIVE
 }
@@ -411,13 +456,7 @@ static void ParkHandler()
     currentSetpoint = 0.0f;
 
     // Turn brakelight on/off
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
-        Minions_Write(BRAKELIGHT, true);
-        UpdateDisplay_SetBrake(true);
-    } else {
-        Minions_Write(BRAKELIGHT, false);
-        UpdateDisplay_SetBrake(false);
-    }
+    brakeUpdate();
 
     cruiseEnable = false; // Doesn't affect operation of cruiseEnable, as readInputs() happens after stateHandler
 }
@@ -456,13 +495,7 @@ static void ReverseDriveHandler()
     }
 
     // Turn brakelight on/off
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
-        Minions_Write(BRAKELIGHT, true);
-        UpdateDisplay_SetBrake(true);
-    } else {
-        Minions_Write(BRAKELIGHT, false);
-        UpdateDisplay_SetBrake(false);
-    }  
+    brakeUpdate();
 
     cruiseEnable = false; // Doesn't affect operation of cruiseEnable, as readInputs() happens after stateHandler
 }
@@ -482,67 +515,31 @@ static void ReverseDriveDecider()
 }
 
 /**
- * @brief Record Velocity State. While pressing the cruise set button,
- * the car will record the observed velocity into velocitySetpoint.
- */
-static void RecordVelocityHandler()
-{
-    if (prevState.name != state.name)
-    {
-        UpdateDisplay_SetCruiseState(DISP_ACTIVE);
-    }
-
-    // Turn brakelight on/off (in decider, this'll also cause you to exit to PARK_STATE)
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
-        Minions_Write(BRAKELIGHT, true);
-        UpdateDisplay_SetBrake(true);
-    } else {
-        Minions_Write(BRAKELIGHT, false);
-        UpdateDisplay_SetBrake(false);
-    }
-
-    // put car in neutral while recording velocity (while button is held)
-    velocitySetpoint = MAX_VELOCITY;
-    currentSetpoint = 0.0f;
-    cruiseVelSetpoint = velocityObserved;
-}
-
-/**
- * @brief Record Velocity State Decider. Determines transitions out of record velocity
- * state (park, forward drive, powered cruise).
- */
-static void RecordVelocityDecider()
-{
-    // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_STATE || gear == REVERSE_GEAR)
-    {
-        state = FSM[PARK_STATE];
-    }
-    // If cruise has been disabled, return to forward drive
-    else if (!cruiseEnable)
-    {
-        state = FSM[FORWARD_DRIVE];
-    }
-    // In cruise. Once the cruise set button has been unpressed, enter POWERED_CRUISE.
-    else if (cruiseEnable && !cruiseSet)
-    {
-        state = FSM[POWERED_CRUISE];
-    }
-}
-
-/**
  * @brief Powered Cruise State. Continue to travel at the recorded velocity as long as
  * Observed Velocity <= Velocity Setpoint
  */
 static void PoweredCruiseHandler()
 {
+    if (prevState.name == FORWARD_DRIVE)
+    {
+        UpdateDisplay_SetCruiseState(DISP_ACTIVE);
+    }
     velocitySetpoint = cruiseVelSetpoint;
     currentSetpoint = 1.0f;
+
+    // Turn brakelight on/off
+    brakeUpdate();
+
+    // Set new cruiseVelSetpoint if cruise set is pressed
+    if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
+    {
+        cruiseVelSetpoint = velocityObserved;
+    }
 }
 
 /**
  * @brief Powered Cruise State Decider. Determines transitions out of powered
- * cruise state (park, forward drive, record velocity, accelerate cruise, 
+ * cruise state (park, forward drive, accelerate cruise, 
  * coasting cruise).
  */
 static void PoweredCruiseDecider()
@@ -557,12 +554,7 @@ static void PoweredCruiseDecider()
     {
         state = FSM[FORWARD_DRIVE];
     }
-    // If CRUISE_SET to a different velocity, return to RECORD_VELOCITY
-    else if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
-    {
-        state = FSM[RECORD_VELOCITY];
-    }
-    else if (accelPedalPercent >= ACCEL_PEDAL_THRESHOLD)
+    else if (accelPressed)
     {
         state = FSM[ACCELERATE_CRUISE];
     }
@@ -581,6 +573,15 @@ static void CoastingCruiseHandler()
 {
     velocitySetpoint = cruiseVelSetpoint;
     currentSetpoint = 0.0f;
+
+    // Turn brakelight on/off
+    brakeUpdate();
+
+    // Set new cruiseVelSetpoint if cruise set is pressed
+    if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
+    {
+        cruiseVelSetpoint = velocityObserved;
+    }
 }
 
 /**
@@ -600,12 +601,7 @@ static void CoastingCruiseDecider()
     {
         state = FSM[FORWARD_DRIVE];
     }
-    // If CRUISE_SET to a different velocity, return to RECORD_VELOCITY
-    else if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
-    {
-        state = FSM[RECORD_VELOCITY];
-    }
-    else if (accelPedalPercent >= ACCEL_PEDAL_THRESHOLD)
+    else if (accelPressed)
     {
         state = FSM[ACCELERATE_CRUISE];
     }
@@ -624,6 +620,15 @@ static void AccelerateCruiseHandler()
 {
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+
+    // Turn brakelight on/off
+    brakeUpdate();
+
+    // Set new cruiseVelSetpoint if cruise set is pressed
+    if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
+    {
+        cruiseVelSetpoint = velocityObserved;
+    }
 }
 
 /**
@@ -643,12 +648,7 @@ static void AccelerateCruiseDecider()
     {
         state = FSM[FORWARD_DRIVE];
     }
-    // If CRUISE_SET to a different velocity, return to RECORD_VELOCITY
-    else if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
-    {
-        state = FSM[RECORD_VELOCITY];
-    }
-    else if (accelPedalPercent < ACCEL_PEDAL_THRESHOLD)
+    else if (!accelPressed)
     {
         state = FSM[COASTING_CRUISE];
     }
@@ -728,4 +728,20 @@ void Task_SendTritium_MVP_Cruise(void *p_arg)
             assertOSError(err);
         }
     }
+}
+
+static void assertSendTritiumMVPCruiseError(SendTritium_MVP_Cruise_error_code_t stmvpcerr)
+{
+    Error_SendTritium_MVP_Cruise = (error_code_t) stmvpcerr;
+
+    switch(stmvpcerr)
+    {
+        case SENDTRITIUM_MVP_CRUISE_ERR_NONE:
+            break;
+        case SENDTRITIUM_MVP_CRUISE_ERR_GEAR_FAULT:
+            // Assert a nonrecoverable error that will kill the motor, turn off contactors, display a fault screen, & infinite loop
+            throwTaskError(Error_SendTritium_MVP_Cruise, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+    }
+
+    Error_SendTritium_MVP_Cruise = SENDTRITIUM_MVP_CRUISE_ERR_NONE;
 }
