@@ -110,11 +110,7 @@ DisplayError_t Display_Error(){
     BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
     memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
 
-    sprintf(setFaultCode, "%s%d", "stmvperr.val=", (uint16_t)Error_SendTritium_MVP);
-    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-
-    sprintf(setFaultCode, "%s%d", "stmvpcerr.val=", (uint16_t)Error_SendTritium_MVP_Cruise);
+    sprintf(setFaultCode, "%s%d", "sterr.val=", (uint16_t)Error_SendTritium);
     BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
     memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
 

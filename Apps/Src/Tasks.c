@@ -12,12 +12,10 @@
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
+#include "SendTritium.h"
 #include "ReadTritium.h"
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
-
-#include "SendTritium_MVP.h"
-#include "SendTritium_MVP_Cruise.h"
 
 
 /**
@@ -48,8 +46,7 @@ CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 
 // Variables to store error codes, stored and cleared in task error assert functions
 error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
-error_code_t Error_SendTritium_MVP = SENDTRITIUM_MVP_ERR_NONE;
-error_code_t Error_SendTritium_MVP_Cruise = SENDTRITIUM_MVP_CRUISE_ERR_NONE;
+error_code_t Error_SendTritium = SENDTRITIUM_ERR_NONE;
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 OS_ERR       Error_OS = OS_ERR_NONE;
@@ -114,6 +111,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
                 // // Print the errors for each applications with error data
                 // printf("\n\rAll application errors:\n\r");
                 // printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
+                // printf("Error_SendTritium: 0x%04x\n\r", Error_SendTritium);
                 // printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
                 // printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
 

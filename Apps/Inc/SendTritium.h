@@ -1,18 +1,18 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file SendTritium_MVP_Crusie.h
+ * @file SendTritium.h
  * @brief 
  * 
- * @defgroup SendTritium_MVP_Cruise
- * @addtogroup SendTritium_MVP_Cruise
+ * @defgroup SendTritium
+ * @addtogroup SendTritium
  * @{
  */
-#ifndef __SENDTRITIUM_MVP_CRUISE_H
-#define __SENDTRITIUM_MVP_CRUISE_H
+#ifndef __SENDTRITIUM_H
+#define __SENDTRITIUM_H
 
 #include "common.h"
 
-//#define SENDTRITIUM_MVP_CRUISE_PRINT_MES
+//#define SENDTRITIUM_PRINT_MES
 
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
@@ -75,11 +75,11 @@ typedef struct TritiumState{
  */
 typedef enum
 {
-    SENDTRITIUM_MVP_CRUISE_ERR_NONE,
-    SENDTRITIUM_MVP_CRUISE_ERR_GEAR_FAULT,     // Received multiple or no gear inputs (e.g. FOR_SW, REV_SW)
-} SendTritium_MVP_Cruise_error_code_t;
+    SENDTRITIUM_ERR_NONE,
+    SENDTRITIUM_ERR_GEAR_FAULT,     // Received multiple or no gear inputs (e.g. FOR_SW, REV_SW)
+} SendTritium_error_code_t;
 
-#ifdef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+#ifdef SENDTRITIUM_EXPOSE_VARS
 // Inputs
 extern bool cruiseEnable;
 extern bool cruiseSet;
@@ -94,7 +94,7 @@ extern float velocityObserved;
 extern float cruiseVelSetpoint;
 #endif
 
-// Getter functions for local variables in SendTritium_MVP_Cruise.c
+// Getter functions for local variables in SendTritium.c
 EXPOSE_GETTER(bool, cruiseEnable)
 EXPOSE_GETTER(bool, cruiseSet)
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
@@ -106,8 +106,8 @@ EXPOSE_GETTER(float, cruiseVelSetpoint)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
 
-// Setter functions for local variables in SendTritium_MVP_Cruise.c
-#ifdef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+// Setter functions for local variables in SendTritium.c
+#ifdef SENDTRITIUM_EXPOSE_VARS
 EXPOSE_SETTER(bool, cruiseEnable)
 EXPOSE_SETTER(bool, cruiseSet)
 EXPOSE_SETTER(uint8_t, brakePedalPercent)
@@ -120,8 +120,8 @@ EXPOSE_SETTER(float, currentSetpoint)
 EXPOSE_SETTER(float, velocitySetpoint)
 #endif
 
-// Caller functions for state handlers & deciders in SendTritium_MVP_Cruise.c
-#ifdef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+// Caller functions for state handlers & deciders in SendTritium.c
+#ifdef SENDTRITIUM_EXPOSE_VARS
 void callForwardDriveHandler(void);
 void callForwardDriveDecider(void);
 void callParkHandler(void);

@@ -1,20 +1,20 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file SendTritium_MVP_Cruise.c
- * @brief Function implementations for the SendTritium application MVP with cruise control
- * abilities.
+ * @file SendTritium.c
+ * @brief Function implementations for the SendTritium application minimum viable
+ * product with cruise control abilities.
  *
  * This contains functions relevant to updating the velocity and current setpoints
  * of the Tritium motor controller. The implementation includes a normal current
- * controlled mode and a cruise control mode, but doesn't include a one pedal mode or 
- * regenerative braking capabilities. The logic is determined through a finite state 
- * machine implementation.
+ * controlled mode and a cruise control mode, but doesn't include a one pedal mode/regen 
+ * braking capabilities. The logic is determined through a finite state machine 
+ * implementation.
  *
- * If the macro SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS is defined prior to including 
- * SendTritium_MVP_Cruise.h, relevant setters will be exposed as externs for unit testing
+ * If the macro SENDTRITIUM_EXPOSE_VARS is defined prior to including 
+ * SendTritium.h, relevant setters will be exposed as externs for unit testing
  * and hardware inputs won't be read and motor commands won't be sent over MotorCAN.
- * If the macro SENDTRITIUM_MVP_CRUISE_PRINT_MES is also defined prior to including 
- * SendTritium_MVP_Cruise.h, debug info will be printed via UART.
+ * If the macro SENDTRITIUM_PRINT_MES is also defined prior to including 
+ * SendTritium.h, debug info will be printed via UART.
  */
 
 #include "Pedals.h"
@@ -27,8 +27,7 @@
 #include "CANConfig.h"
 #include "common.h"
 #include "Tasks.h"
-
-#include "SendTritium_MVP_Cruise.h"
+#include "SendTritium.h"
 
 
 
@@ -63,7 +62,7 @@ static bool cruiseEnablePrevious = false;
 static bool cruiseSetButton = false;
 static bool cruiseSetPrevious = false;
 
-// Allows cruiseSet to toggle on for a single loop of the SendTritium_MVP_Cruise task
+// Allows cruiseSet to toggle on for a single loop of the SendTritium task
 static bool cruiseSetAllow = true;
 
 // Accel pedal states (used only for hysteresis)
@@ -73,7 +72,7 @@ static bool accelPressed = false;
 static TritiumState_t prevState; // Previous state
 static TritiumState_t state;     // Current state
 
-// Getter functions for local variables in SendTritium_MVP_Cruise.c
+// Getter functions for local variables in SendTritium.c
 GETTER(bool, cruiseEnable)
 GETTER(bool, cruiseSet)
 GETTER(uint8_t, brakePedalPercent)
@@ -85,8 +84,8 @@ GETTER(float, cruiseVelSetpoint)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
 
-// Setter functions for local variables in SendTritium_MVP_Cruise.c
-#ifdef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+// Setter functions for local variables in SendTritium.c
+#ifdef SENDTRITIUM_EXPOSE_VARS
 SETTER(bool, cruiseEnable)
 SETTER(bool, cruiseSet)
 SETTER(uint8_t, brakePedalPercent)
@@ -113,8 +112,8 @@ static void CoastingCruiseDecider(void);
 static void AccelerateCruiseHandler(void);
 static void AccelerateCruiseDecider(void);
 
-// Caller functions for state handlers & deciders in SendTritium_MVP_Cruise.c
-#ifdef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+// Caller functions for state handlers & deciders in SendTritium.c
+#ifdef SENDTRITIUM_EXPOSE_VARS
 void callForwardDriveHandler(void)      {ForwardDriveHandler();}
 void callForwardDriveDecider(void)      {ForwardDriveDecider();}
 void callParkHandler(void)              {ParkHandler();}
@@ -130,7 +129,7 @@ void callAccelerateCruiseDecider(void)  {AccelerateCruiseDecider();}
 #endif
 
 // Function prototypes
-static void assertSendTritiumMVPCruiseError(SendTritium_MVP_Cruise_error_code_t stmvpcerr);
+static void assertSendTritiumError(SendTritium_error_code_t sterr);
 
 // FSM
 static const TritiumState_t FSM[6] = {
@@ -171,7 +170,7 @@ static void brakeUpdate(){
     }
 }
 
-#ifdef SENDTRITIUM_MVP_CRUISE_PRINT_MES
+#ifdef SENDTRITIUM_PRINT_MES
 /**
  * @brief Dumps info to UART during testing
  */
@@ -222,7 +221,7 @@ static void dumpInfo()
 }
 #endif
 
-#ifndef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+#ifndef SENDTRITIUM_EXPOSE_VARS
 /**
  * @brief Reads inputs from the system
  */
@@ -301,7 +300,7 @@ static void readInputs()
     {
         // Fault behavior
         if (gearFaultCnt > GEAR_FAULT_THRESHOLD)
-            assertSendTritiumMVPCruiseError(SENDTRITIUM_MVP_CRUISE_ERR_GEAR_FAULT);
+            assertSendTritiumError(SENDTRITIUM_ERR_GEAR_FAULT);
         else
             gearFaultCnt++;
     }
@@ -344,7 +343,7 @@ static void readInputs()
     cruiseEnablePrevious = cruiseEnableButton;
     // cruiseEnablePrevious = false;
 
-    // Allow CRUZ_SET on for just one loop of the SendTritium_MVP_Cruise task
+    // Allow CRUZ_SET on for just one loop of the SendTritium task
     if(cruiseSet) 
     {
         cruiseSet = false;
@@ -659,7 +658,7 @@ static void AccelerateCruiseDecider()
 /**
  * @brief Follows the FSM to update the velocity of the car
  */
-void Task_SendTritium_MVP_Cruise(void *p_arg)
+void Task_SendTritium(void *p_arg)
 {
     OS_ERR err;
 
@@ -669,11 +668,11 @@ void Task_SendTritium_MVP_Cruise(void *p_arg)
     UpdateDisplay_SetGear(PARK_GEAR);
 
     // Initialize Regen & Cruise disabled
-    // NOTE: Regen stays disabled on Daybreak MVP + Cruise
+    // NOTE: No regen on Daybreak
     UpdateDisplay_SetRegenState(DISP_DISABLED);
     UpdateDisplay_SetCruiseState(DISP_DISABLED);
 
-#ifndef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+#ifndef SENDTRITIUM_EXPOSE_VARS
     CANDATA_t driveCmd = {
         .ID = MOTOR_DRIVE,
         .idx = 0,
@@ -691,23 +690,18 @@ void Task_SendTritium_MVP_Cruise(void *p_arg)
         memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float));
         CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN); //<-------
         state.stateHandler();                          // do what the current state does
-#ifndef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+#ifndef SENDTRITIUM_EXPOSE_VARS
         readInputs(); // read inputs from the system
         UpdateDisplay_SetAccel(accelPedalPercent);
 #endif
         prevState = state;
         state.stateDecider(); // decide what the next state is
 
-        // This ONLY works for MVP (since Cruise has velocity control)
-        // // Disable velocity controlled mode by always overwriting velocity to the maximum
-        // // in the appropriate direction.
-        // velocitySetpoint = (velocitySetpoint > 0) ? MAX_VELOCITY : -MAX_VELOCITY;
-
 // Drive
-#ifdef SENDTRITIUM_MVP_CRUISE_PRINT_MES
+#ifdef SENDTRITIUM_PRINT_MES
         dumpInfo();
 #endif
-#ifndef SENDTRITIUM_MVP_CRUISE_EXPOSE_VARS
+#ifndef SENDTRITIUM_EXPOSE_VARS
         if (MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter)
         {
             memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
@@ -730,18 +724,18 @@ void Task_SendTritium_MVP_Cruise(void *p_arg)
     }
 }
 
-static void assertSendTritiumMVPCruiseError(SendTritium_MVP_Cruise_error_code_t stmvpcerr)
+static void assertSendTritiumError(SendTritium_error_code_t sterr)
 {
-    Error_SendTritium_MVP_Cruise = (error_code_t) stmvpcerr;
+    Error_SendTritium = (error_code_t) sterr;
 
-    switch(stmvpcerr)
+    switch(sterr)
     {
-        case SENDTRITIUM_MVP_CRUISE_ERR_NONE:
+        case SENDTRITIUM_ERR_NONE:
             break;
-        case SENDTRITIUM_MVP_CRUISE_ERR_GEAR_FAULT:
+        case SENDTRITIUM_ERR_GEAR_FAULT:
             // Assert a nonrecoverable error that will kill the motor, turn off contactors, display a fault screen, & infinite loop
-            throwTaskError(Error_SendTritium_MVP_Cruise, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(Error_SendTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
     }
 
-    Error_SendTritium_MVP_Cruise = SENDTRITIUM_MVP_CRUISE_ERR_NONE;
+    Error_SendTritium = SENDTRITIUM_ERR_NONE;
 }
