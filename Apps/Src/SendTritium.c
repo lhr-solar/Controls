@@ -99,34 +99,18 @@ SETTER(float, velocitySetpoint)
 #endif
 
 // Handler & Decider Declarations
-static void ForwardDriveHandler(void);
-static void ForwardDriveDecider(void);
-static void ParkHandler(void);
-static void ParkDecider(void);
-static void ReverseDriveHandler(void);
-static void ReverseDriveDecider(void);
-static void PoweredCruiseHandler(void);
-static void PoweredCruiseDecider(void);
-static void CoastingCruiseHandler(void);
-static void CoastingCruiseDecider(void);
-static void AccelerateCruiseHandler(void);
-static void AccelerateCruiseDecider(void);
-
-// Caller functions for state handlers & deciders in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
-void callForwardDriveHandler(void)      {ForwardDriveHandler();}
-void callForwardDriveDecider(void)      {ForwardDriveDecider();}
-void callParkHandler(void)              {ParkHandler();}
-void callParkDecider(void)              {ParkDecider();}
-void callReverseDriveHandler(void)      {ReverseDriveHandler();}
-void callReverseDriveDecider(void)      {ReverseDriveDecider();}
-void callPoweredCruiseHandler(void)     {PoweredCruiseHandler();}
-void callPoweredCruiseDecider(void)     {PoweredCruiseDecider();}
-void callCoastingCruiseHandler(void)    {CoastingCruiseHandler();}
-void callCoastingCruiseDecider(void)    {CoastingCruiseDecider();}
-void callAccelerateCruiseHandler(void)  {AccelerateCruiseHandler();}
-void callAccelerateCruiseDecider(void)  {AccelerateCruiseDecider();}
-#endif
+void ForwardDriveHandler(void);
+void ForwardDriveDecider(void);
+void ParkHandler(void);
+void ParkDecider(void);
+void ReverseDriveHandler(void);
+void ReverseDriveDecider(void);
+void PoweredCruiseHandler(void);
+void PoweredCruiseDecider(void);
+void CoastingCruiseHandler(void);
+void CoastingCruiseDecider(void);
+void AccelerateCruiseHandler(void);
+void AccelerateCruiseDecider(void);
 
 // Function prototypes
 static void assertSendTritiumError(SendTritium_error_code_t sterr);
@@ -402,7 +386,7 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
  * @brief Forward Drive State Handler. Accelerator is mapped directly
  * to current setpoint at positive velocity.
  */
-static void ForwardDriveHandler()
+void ForwardDriveHandler()
 {
     if (prevState.name != state.name)
     {
@@ -428,7 +412,7 @@ static void ForwardDriveHandler()
  * @brief Forward Drive State Decider. Determines transitions out of
  * forward drive state (park, powered cruise).
  */
-static void ForwardDriveDecider()
+void ForwardDriveDecider()
 {
     // Go to PARK_STATE if you're in another gear
     if (gear == PARK_GEAR || gear == REVERSE_GEAR)
@@ -445,7 +429,7 @@ static void ForwardDriveDecider()
 /**
  * @brief Park State Handler. No current is sent to the motor.
  */
-static void ParkHandler()
+void ParkHandler()
 {
     if (prevState.name != state.name)
     {
@@ -464,7 +448,7 @@ static void ParkHandler()
  * @brief Park State Decider. Determines transitions out of
  * neutral drive state (forward drive, reverse drive).
  */
-static void ParkDecider()
+void ParkDecider()
 {
     // Switch for FORWARD_DRIVE/REVERSE_DRIVE if in FORWARD_GEAR/REVERSE_GEAR & speed is less than MAX_GEARSWITCH_VELOCITY
     if (gear == FORWARD_GEAR && (velocityObserved < 0 ? (velocityObserved >= -MAX_GEARSWITCH_VELOCITY) : (velocityObserved <= MAX_GEARSWITCH_VELOCITY)))
@@ -482,7 +466,7 @@ static void ParkDecider()
  * @brief Reverse Drive State Handler. Accelerator is mapped directly to
  * current setpoint (at negative velocity).
  */
-static void ReverseDriveHandler()
+void ReverseDriveHandler()
 {
     // If braking, set current to 0. Otherwise, set current based on accel
     if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) {
@@ -503,7 +487,7 @@ static void ReverseDriveHandler()
  * @brief Reverse Drive State Decider. Determines transitions out of
  * reverse drive state (brake).
  */
-static void ReverseDriveDecider()
+void ReverseDriveDecider()
 {
     // Go to PARK_STATE if you're in another gear or if you're braking
     if (gear == PARK_GEAR || gear == FORWARD_GEAR)
@@ -517,7 +501,7 @@ static void ReverseDriveDecider()
  * @brief Powered Cruise State. Continue to travel at the recorded velocity as long as
  * Observed Velocity <= Velocity Setpoint
  */
-static void PoweredCruiseHandler()
+void PoweredCruiseHandler()
 {
     if (prevState.name == FORWARD_DRIVE)
     {
@@ -541,10 +525,10 @@ static void PoweredCruiseHandler()
  * cruise state (park, forward drive, accelerate cruise, 
  * coasting cruise).
  */
-static void PoweredCruiseDecider()
+void PoweredCruiseDecider()
 {
     // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_STATE || gear == REVERSE_GEAR)
+    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_GEAR || gear == REVERSE_GEAR)
     {
         state = FSM[PARK_STATE];
     }
@@ -568,7 +552,7 @@ static void PoweredCruiseDecider()
  * in cruise control mode due to safety issues. Coast the motor (go into neutral)
  * if we want to slow down.
  */
-static void CoastingCruiseHandler()
+void CoastingCruiseHandler()
 {
     velocitySetpoint = cruiseVelSetpoint;
     currentSetpoint = 0.0f;
@@ -588,10 +572,10 @@ static void CoastingCruiseHandler()
  * cruise state (brake, neutral drive, one pedal, forward drive, record velocity,
  * accelerate cruise, powered cruise).
  */
-static void CoastingCruiseDecider()
+void CoastingCruiseDecider()
 {
     // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_STATE || gear == REVERSE_GEAR)
+    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_GEAR || gear == REVERSE_GEAR)
     {
         state = FSM[PARK_STATE];
     }
@@ -615,7 +599,7 @@ static void CoastingCruiseDecider()
  * mode, we will accelerate to the pedal percentage. Upon release of the accelerator
  * pedal, we will return to cruise mode at the previously recorded velocity.
  */
-static void AccelerateCruiseHandler()
+void AccelerateCruiseHandler()
 {
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
@@ -635,10 +619,10 @@ static void AccelerateCruiseHandler()
  * cruise state (brake, neutral drive, one pedal, forward drive, record velocity,
  * coasting cruise).
  */
-static void AccelerateCruiseDecider()
+void AccelerateCruiseDecider()
 {
     // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_STATE || gear == REVERSE_GEAR)
+    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD || gear == PARK_GEAR || gear == REVERSE_GEAR)
     {
         state = FSM[PARK_STATE];
     }

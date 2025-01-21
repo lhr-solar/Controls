@@ -40,12 +40,12 @@ void stateBuffer(){
 void stateDecider() {
     TritiumStateName_t stateName = get_state();
     switch (stateName) {
-        case FORWARD_DRIVE: callForwardDriveDecider();
-        case PARK_STATE: callParkDecider();
-        case REVERSE_DRIVE: callReverseDriveDecider();
-        case POWERED_CRUISE: callPoweredCruiseDecider();
-        case COASTING_CRUISE: callCoastingCruiseDecider();
-        case ACCELERATE_CRUISE: callAccelerateCruiseDecider();
+        case FORWARD_DRIVE: ForwardDriveDecider();
+        case PARK_STATE: ParkDecider();
+        case REVERSE_DRIVE: ReverseDriveDecider();
+        case POWERED_CRUISE: PoweredCruiseDecider();
+        case COASTING_CRUISE: CoastingCruiseDecider();
+        case ACCELERATE_CRUISE: AccelerateCruiseDecider();
     }    
 }
 
