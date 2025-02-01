@@ -15,10 +15,11 @@
 #include "config.h"
 #include "BSP_GPIO.h"
 #include "stm32f4xx_gpio.h"
+#include "daybreak_pins.h"
 
-#define CONTACTORS_PORT PORTC
-#define ARRAY_PRECHARGE_BYPASS_PIN                 GPIO_Pin_11
-#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN    GPIO_Pin_10
+#define CONTACTORS_PORT PORTA
+#define ARRAY_PRECHARGE_BYPASS_PIN                 GPIO_Pin_0
+#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN    GPIO_Pin_1
 
 #define FOREACH_contactor(contactor)             \
     contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR), \

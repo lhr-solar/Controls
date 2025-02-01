@@ -5,6 +5,7 @@
  * 
  */
 #include "Minions.h"
+#include "daybreak_pins.h"
 
 /* Should be in sync with enum in Minions.h */
 const pinInfo_t PININFO_LUT[NUM_PINS] = {

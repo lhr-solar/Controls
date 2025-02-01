@@ -16,7 +16,6 @@
 #include "common.h"
 #include <stdbool.h>
 #include "BSP_GPIO.h"
-#include "daybreak_pins.h"
 
 // used to index into lookup table
 // if changed, PINS_LOOKARR should be changed in Minions.c

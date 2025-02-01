@@ -5,6 +5,9 @@
  * 
  */
 
+// (TODO) Status LEDs
+
+
 #include "common.h"
 #include "config.h"
 #include "Tasks.h"
@@ -36,7 +39,7 @@ void IdleTaskHook(void)
             last_tick_cnt = current_tick_cnt;
 
             if(current_tick_cnt % 50 == 0){
-                BSP_GPIO_Write_Pin(PORTB, GPIO_Pin_6, toggle);
+                BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, toggle);
                 toggle = !toggle;
             }
         }
