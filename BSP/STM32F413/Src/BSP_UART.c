@@ -56,8 +56,8 @@ static void USART_DISPLAY_Init() {
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
     GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_UART4);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_UART4);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF11_UART4);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF11_UART4);
 
     //Initialize UART4
     UART_InitStruct.USART_BaudRate = 115200;
