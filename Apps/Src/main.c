@@ -7,7 +7,6 @@
 
 // (TODO) Status LEDs
 
-
 #include "common.h"
 #include "config.h"
 #include "Tasks.h"

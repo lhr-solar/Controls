@@ -8,6 +8,7 @@
 #include "Contactors.h"
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
+#include "daybreak_pins.h"
 
 
 static OS_MUTEX contactorsMutex;

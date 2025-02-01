@@ -15,7 +15,6 @@
 #include "config.h"
 #include "BSP_GPIO.h"
 #include "stm32f4xx_gpio.h"
-#include "daybreak_pins.h"
 
 #define CONTACTORS_PORT PORTA
 #define ARRAY_PRECHARGE_BYPASS_PIN                 GPIO_Pin_0
