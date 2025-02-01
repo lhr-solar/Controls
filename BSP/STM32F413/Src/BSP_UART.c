@@ -277,6 +277,8 @@ void USART2_IRQHandler(void) {
 
 }
 
+
+// (TODO) This should be UART4 IRQ Handler???? IDK BSP HELPPPPP
 void USART3_IRQHandler(void) {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();

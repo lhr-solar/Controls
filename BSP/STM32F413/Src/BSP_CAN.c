@@ -293,7 +293,7 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
         }
     }
 
-    // CAN_SlaveStartBank(CAN1, 0);
+    // CAN_SlaveStartBank(CAN2, 0);
 
     /* Transmit Structure preparation */
     gTxMessage[1].ExtId = 0x5;
@@ -348,7 +348,7 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
         gTxMessage[bus].Data[i] = data[i];
     }
 
-    uint8_t retVal = (CAN_Transmit(bus == CAN_2 ? CAN1 : CAN3, &gTxMessage[bus]) != 0);
+    uint8_t retVal = (CAN_Transmit(bus == CAN_2 ? CAN2 : CAN3, &gTxMessage[bus]) != 0);
     if (retVal == CAN_TxStatus_NoMailBox)
     {
         return ERROR;
@@ -422,7 +422,7 @@ void CAN3_RX0_IRQHandler()
     OSIntExit(); // Signal to uC/OS
 }
 
-void CAN1_RX0_IRQHandler(void)
+void CAN2_RX0_IRQHandler(void)
 {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
@@ -430,9 +430,9 @@ void CAN1_RX0_IRQHandler(void)
     CPU_CRITICAL_EXIT();
 
     // Take any pending messages into a queue
-    while (CAN_MessagePending(CAN1, CAN_FIFO0))
+    while (CAN_MessagePending(CAN2, CAN_FIFO0))
     {
-        CAN_Receive(CAN1, CAN_FIFO0, &gRxMessage[0]);
+        CAN_Receive(CAN2, CAN_FIFO0, &gRxMessage[0]);
 
         msg_t rxMsg;
         rxMsg.id = gRxMessage[0].StdId;
@@ -474,14 +474,14 @@ void CAN3_TX_IRQHandler(void)
     OSIntExit(); // Signal to uC/OS
 }
 
-void CAN1_TX_IRQHandler(void)
+void CAN2_TX_IRQHandler(void)
 {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
     // Call the function provided
-    CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
+    CAN_ClearFlag(CAN2, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
     gTxEnd[0]();
 
     OSIntExit(); // Signal to uC/OS

@@ -93,7 +93,7 @@ typedef struct {
  * @param   bus The bus to initialize. You can either use CAN_2, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
  * @param   idWhitelist A list of CAN IDs that we want to receive. If NULL, we will receive all messages.
  * @param   idWhitelistSize The size of the whitelist.
- * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
+ * @return  ERROR if bus != CAN2 or CAN3, SUCCESS otherwise
  */
 ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize);
 

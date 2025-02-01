@@ -117,25 +117,53 @@
 // No extra_uart_init (TODO)
 
 // USB - USART2 - PA2_TX PA3_RX
+#define USB_PORT PORTA
+#define USB_TX   GPIO_Pin_2
+#define USB_RX   GPIO_Pin_3
+
 // DISPLAY UART4 - PA11_RX PA12_TX
+#define DISPLAY_PORT PORTA
+#define DISPLAY_TX   GPIO_Pin_12
+#define DISPLAY_RX   GPIO_Pin_11
+
 // EXTRA_UART UART5 - PB12_RX PB13_TX
+#define ExtraUART_PORT PORTB
+#define ExtraUART_TX   GPIO_Pin_13
+#define ExtraUART_RX   GPIO_Pin_12
 
 // ADC
 
-// Pins did not change
 // no extra_adc_init (TODO)
 
 // ACCEL_POT PC0
+#define ACCEL_POT_PORT PORTC
+#define ACCEL_POT GPIO_Pin_0
+
 // BRAKE_POT PC1
+#define BRAKE_POT_PORT PORTC
+#define BRAKE_POT GPIO_Pin_1
+
 // EXTRA_ADC1 PC2
+#define ExtraADC1_PORT PORTC
+#define ExtraADC1 GPIO_Pin_2
+
 // EXTRA_ADC2 PC3
+#define ExtraADC1_PORT PORTC
+#define ExtraADC1 GPIO_Pin_3
 
 // CAN
 
 // The pins have been changed in the BSP
 
 // CarCan - CAN3 PB3_RX PB4_TX
+#define CAN_PORT PORTB
+#define CAN_TX GPIO_Pin_4
+#define CAN_RX GPIO_Pin_3
+
 // MotorCan - CAN2 PB5_RX PB6_TX
+#define MotorCAN_PORT PORTB
+#define MotorCAN_TX GPIO_Pin_6
+#define MotorCAN_RX GPIO_Pin_5
 
 
 
