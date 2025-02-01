@@ -104,7 +104,7 @@ void Task_CommandLine(void* p_arg) {
 	
 	while(1){
 		printf("> ");
-		BSP_UART_Read(UART_2, input);
+		BSP_UART_Read(USB, input);
 		printf("\n\r");
 
 		if (!executeCommand(input)) { // If command failed, error

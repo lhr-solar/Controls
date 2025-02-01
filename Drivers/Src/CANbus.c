@@ -41,11 +41,11 @@ void CANbus_TxHandler(CAN_t bus)
 }
 
 //wrapper functions for the interrupt customized for each bus
-void CANbus_TxHandler_1(){
+void CANbus_TxHandler_2(){
     CANbus_TxHandler(CAN_2);
 }
 
-void CANbus_RxHandler_1(){
+void CANbus_RxHandler_2(){
     CANbus_RxHandler(CAN_2);
 }
 void CANbus_TxHandler_3(){
@@ -93,7 +93,7 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
 
     idWhitelist = whitelist_validator(idWhitelist, idWhitelistSize);
     if(bus==CAN_2){
-        BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1, (uint16_t*)idWhitelist, idWhitelistSize);
+        BSP_CAN_Init(bus,&CANbus_RxHandler_2,&CANbus_TxHandler_2, (uint16_t*)idWhitelist, idWhitelistSize);
     } else if (bus==CAN_3){
         BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3, (uint16_t*)idWhitelist, idWhitelistSize);
     } else {
