@@ -36,6 +36,7 @@ static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &displayTxFifo};
 static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceived};
 static USART_TypeDef *handles[NUM_UART] = {USART2, USART3};
 
+// Originally, used USART3, now uses UART4 for Daybreak (hopefully display doesn't need USART)
 static void USART_DISPLAY_Init() {
     displayTxFifo = txfifo_new();
     displayRxFifo = rxfifo_new();
@@ -44,39 +45,36 @@ static void USART_DISPLAY_Init() {
     USART_InitTypeDef UART_InitStruct = {0};
 
     // Initialize clocks
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,  ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,  ENABLE);
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,  ENABLE);
 
     // Initialize pins
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-    GPIO_Init(GPIOB, &GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;
-    GPIO_Init(GPIOC, &GPIO_InitStruct);
+    GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
-    GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_USART3);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_UART4);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_UART4);
 
-    //Initialize UART3
+    //Initialize UART4
     UART_InitStruct.USART_BaudRate = 115200;
     UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     UART_InitStruct.USART_Parity = USART_Parity_No;
     UART_InitStruct.USART_StopBits = USART_StopBits_1;
     UART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_Init(USART3, &UART_InitStruct);
+    USART_Init(UART4, &UART_InitStruct);
 
     // Enable interrupts
 
-    USART_Cmd(USART3, ENABLE);
+    USART_Cmd(UART4, ENABLE);
 
     // Enable NVIC
     NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;

@@ -113,9 +113,12 @@
 
 // UART/USART
 
-// USB - USART2
-// DISPLAY UART4
-// EXTRA_UART UART5
+// The pins have been changed in BSP_UART.C (hopefully correctly)
+// No extra_uart init exists (TODO)
+
+// USB - USART2 - PA2_TX PA3_RX
+// DISPLAY UART4 - PA11_RX PA12_TX
+// EXTRA_UART UART5 - PB12_RX PB13_TX
 
 // ADC
 
