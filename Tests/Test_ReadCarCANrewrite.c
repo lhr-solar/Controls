@@ -191,7 +191,7 @@ void Task1(){
     CANbus_Init(CARCAN, NULL, 0);
     Display_Init();
     UpdateDisplay_Init();
-    BSP_UART_Init(USB);
+    BSP_UART_Init(UART_2);
     
     OSTaskCreate(
         (OS_TCB*)&ReadCarCAN_TCB,

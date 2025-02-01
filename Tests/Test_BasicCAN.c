@@ -13,7 +13,7 @@ void Task1(void *p_arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
-    BSP_UART_Init(USB);
+    BSP_UART_Init(UART_2);
 
     CANDATA_t msg, out;
     msg.ID = VELOCITY;

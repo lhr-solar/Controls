@@ -97,7 +97,7 @@ void Task_Init(void *p_arg){
     
     // Initialize drivers
     Pedals_Init();
-    BSP_UART_Init(USB);
+    BSP_UART_Init(UART_2);
     CANbus_Init(CARCAN, carCANFilterList, NUM_CARCAN_FILTERS);
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();

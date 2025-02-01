@@ -308,7 +308,7 @@ int main(void)
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
 
     CPU_Init();
-    BSP_UART_Init(USB);
+    BSP_UART_Init(UART_2);
     Pedals_Init();
     CANbus_Init(CARCAN, NULL, NUM_CARCAN_FILTERS);      // CarCAN filter list is normally (CANId_t*)carCANFilterList
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);  // but for testing, we'd like to receive all messages

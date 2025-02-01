@@ -12,7 +12,7 @@
 #include "bsp.h"   // for writing to UART
 #include "Tasks.h" // for os and fault error codes
 
-#define DISP_OUT DISPLAY
+#define DISP_OUT UART_3
 #define MAX_MSG_LEN 32
 #define MAX_ARG_LEN 16
 // Assignment commands have only 1 arg, an operator, and an attribute

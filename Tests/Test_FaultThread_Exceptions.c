@@ -504,7 +504,7 @@ void createOSErrorTask(void) {
 int main(void) {
 
     OS_ERR err;
-    BSP_UART_Init(USB);
+    BSP_UART_Init(UART_2);
 
     OSInit(&err);
 

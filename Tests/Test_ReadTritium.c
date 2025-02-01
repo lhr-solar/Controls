@@ -16,7 +16,7 @@ void Task1(void *p_arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(MOTORCAN, NULL, sizeof motorCANFilterList);
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
-    BSP_UART_Init(USB);
+    BSP_UART_Init(UART_2);
     
     OSTaskCreate(
         (OS_TCB*)&ReadTritium_TCB,
