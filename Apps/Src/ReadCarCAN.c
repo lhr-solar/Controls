@@ -71,6 +71,9 @@ static uint8_t HVPlusMinusMotorOldestMsgIdx = 0;
 static bool arrIgnStatus = false;
 static bool mcIgnStatus = false;
 
+// Array ignition visited bool to ensure ignition switch goes through each state
+static bool arrIgnVisited = false;
+
 // Boolean to indicate precharge status for Array Precharge Bypass Contactor (PBC) and Motor Controller PBC
 static bool arrPBCComplete = false;
 static bool mcPBCComplete = false;
@@ -298,23 +301,27 @@ void updatePrechargeContactors(void)
 
     if (bothStatusOff || bothStatusOn)
     {
+        arrIgnVisited = false;
         assertReadCarCANError(READCARCAN_ERR_DISABLE_CONTACTORS_MSG); // Turn Array and Motor Controller PBC off using error assert
     }
     else if (!mcIgnStatus && arrIgnStatus)
     {
+        arrIgnVisited = true;
         attemptTurnArrayPBCOn();     // Turn Array PBC On, if permitted
         turnMotorControllerPBCOff(); // Turn Motor Controller PBC Off
     }
     else if (mcIgnStatus && !arrIgnStatus)
     {
-        attemptTurnArrayPBCOn(); // Turn Array PBC On, if permitted
-        if (HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD)
-        { // Turn Motor Controller PBC On, if threshold is reached
-            attemptTurnMotorControllerPBCOn();
-        }
-        else
-        {
-            turnMotorControllerPBCOff();
+        if (arrIgnVisited) {
+            attemptTurnArrayPBCOn(); // Turn Array PBC On, if permitted. This should have happened by now, but just in case the ignition switch was flipped quickly.
+            if (HVPlusMinusChargeMsgSaturation >= PLUS_MINUS_SATURATION_THRESHOLD)
+            { // Turn Motor Controller PBC On, if threshold is reached
+                attemptTurnMotorControllerPBCOn();
+            }
+            else
+            {
+                turnMotorControllerPBCOff();
+            }
         }
     }
 
