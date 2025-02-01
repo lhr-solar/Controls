@@ -34,13 +34,6 @@ typedef enum
 void BSP_ADC_Init(void);
 
 /**
- * @brief   Initialize the Extra ADCs
- * @return  None
- */ 
-void BSP_ExtraADC_Init(void);
-
-
-/**
  * @brief   Provides the ADC value of the channel at the specified index
  * @param   hardwareDevice pedal enum that represents the specific device
  * @return  Raw ADC value without conversion
