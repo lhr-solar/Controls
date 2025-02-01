@@ -82,9 +82,9 @@ int main() {
         }
 
         uint32_t id;
-        BSP_CAN_Write(CAN_1, 0x221, txData, LEN);
+        BSP_CAN_Write(CAN_2, 0x221, txData, LEN);
         
-        uint8_t len = BSP_CAN_Read(CAN_1, &id, rxData);
+        uint8_t len = BSP_CAN_Read(CAN_2, &id, rxData);
 
         // printf("ID: 0x%x\nData: ", id);
         // for (uint8_t i = 0; i < len; i++) {

@@ -151,7 +151,7 @@ static bool cmd_CANbus_Send(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = CAN_1;
+		bus = CAN_2;
 	}
 	else if(strcmp(busInput, "car") == 0){
 		bus = CAN_3;
@@ -186,7 +186,7 @@ static bool cmd_CANbus_Read(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = CAN_1;
+		bus = CAN_2;
 	}
 	else if(strcmp(busInput, "car") == 0){
 		bus = CAN_3;

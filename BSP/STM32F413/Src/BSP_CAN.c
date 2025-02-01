@@ -348,7 +348,7 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
         gTxMessage[bus].Data[i] = data[i];
     }
 
-    uint8_t retVal = (CAN_Transmit(bus == CAN_1 ? CAN1 : CAN3, &gTxMessage[bus]) != 0);
+    uint8_t retVal = (CAN_Transmit(bus == CAN_2 ? CAN1 : CAN3, &gTxMessage[bus]) != 0);
     if (retVal == CAN_TxStatus_NoMailBox)
     {
         return ERROR;

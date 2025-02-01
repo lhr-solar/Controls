@@ -42,11 +42,11 @@ void CANbus_TxHandler(CAN_t bus)
 
 //wrapper functions for the interrupt customized for each bus
 void CANbus_TxHandler_1(){
-    CANbus_TxHandler(CAN_1);
+    CANbus_TxHandler(CAN_2);
 }
 
 void CANbus_RxHandler_1(){
-    CANbus_RxHandler(CAN_1);
+    CANbus_RxHandler(CAN_2);
 }
 void CANbus_TxHandler_3(){
     CANbus_TxHandler(CAN_3);
@@ -79,20 +79,20 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
     // initialize tx
     OS_ERR err;
     
-    OSMutexCreate(&(CANbus_TxMutex[bus]), (bus == CAN_1 ? "CAN TX Lock 1":"CAN TX Lock 3"), &err);
+    OSMutexCreate(&(CANbus_TxMutex[bus]), (bus == CAN_2 ? "CAN TX Lock 1":"CAN TX Lock 3"), &err);
     assertOSError(err);
 
-    OSMutexCreate(&(CANbus_RxMutex[bus]), (bus == CAN_1 ? "CAN RX Lock 1":"CAN RX Lock 3"), &err);
+    OSMutexCreate(&(CANbus_RxMutex[bus]), (bus == CAN_2 ? "CAN RX Lock 1":"CAN RX Lock 3"), &err);
     assertOSError(err);
 
-    OSSemCreate(&(CANMail_Sem4[bus]), (bus == CAN_1 ? "CAN Mailbox Semaphore 1":"CAN Mailbox Semaphore 3"), 3, &err); // there's 3 hardware mailboxes on the board, so 3 software mailboxes
+    OSSemCreate(&(CANMail_Sem4[bus]), (bus == CAN_2 ? "CAN Mailbox Semaphore 1":"CAN Mailbox Semaphore 3"), 3, &err); // there's 3 hardware mailboxes on the board, so 3 software mailboxes
     assertOSError(err);
 
-    OSSemCreate(&(CANBus_ReceiveSem4[bus]), (bus == CAN_1 ? "CAN Received Msg Queue Ctr 1":"CAN Received Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
+    OSSemCreate(&(CANBus_ReceiveSem4[bus]), (bus == CAN_2 ? "CAN Received Msg Queue Ctr 1":"CAN Received Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
     assertOSError(err);
 
     idWhitelist = whitelist_validator(idWhitelist, idWhitelistSize);
-    if(bus==CAN_1){
+    if(bus==CAN_2){
         BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1, (uint16_t*)idWhitelist, idWhitelistSize);
     } else if (bus==CAN_3){
         BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3, (uint16_t*)idWhitelist, idWhitelistSize);

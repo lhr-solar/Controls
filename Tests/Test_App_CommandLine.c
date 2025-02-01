@@ -10,7 +10,7 @@
 
 int main(void){
     BSP_UART_Init(UART_2);
-    CANbus_Init(CAN_1, NULL, 0);
+    CANbus_Init(CAN_2, NULL, 0);
     Contactors_Init();
     Minions_Init();
     Pedals_Init();
