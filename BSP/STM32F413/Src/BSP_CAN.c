@@ -31,7 +31,7 @@ static CanRxMsg gRxMessage[2];
 static callback_t gRxEvent[2];
 static callback_t gTxEnd[2];
 
-void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
+void BSP_CAN2_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
 void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
 
 /**
@@ -47,9 +47,9 @@ void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idW
     gRxEvent[bus] = rxEvent;
     gTxEnd[bus] = txEnd;
 
-    if (bus == CAN_1)
+    if (bus == CAN_2)
     {
-        BSP_CAN1_Init(idWhitelist, idWhitelistSize);
+        BSP_CAN2_Init(idWhitelist, idWhitelistSize);
     }
     else
     {
@@ -57,7 +57,7 @@ void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idW
     }
 }
 
-void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+void BSP_CAN2_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
@@ -69,23 +69,23 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     /* CAN GPIOs configuration **************************************************/
 
     /* Enable GPIO clock */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
     // Alternate Function 9
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_CAN1);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_CAN1);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource5, GPIO_AF_CAN2);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_CAN2);
 
     /* Configure CAN RX and TX pins */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN2, ENABLE);
 
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
@@ -108,7 +108,7 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     CAN_InitStruct.CAN_BS1 = CAN_BS1_3tq;
     CAN_InitStruct.CAN_BS2 = CAN_BS2_4tq;
     CAN_InitStruct.CAN_Prescaler = 16;
-    CAN_Init(CAN1, &CAN_InitStruct);
+    CAN_Init(CAN2, &CAN_InitStruct);
 
     /* CAN filter init 
      * Initializes hardware filter banks to be used for filtering CAN IDs (whitelist)
@@ -124,7 +124,7 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
         CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
         CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
         CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-        CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+        CAN_FilterInit(CAN2, &CAN_FilterInitStruct);
     } else{
         // Filter CAN IDs
         // So far, if we shift whatever id we need by 5, it works
@@ -148,19 +148,19 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
             validIDCounter++;
 
             if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
-                CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+                CAN_FilterInit(CAN2, &CAN_FilterInitStruct);
             }
             else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
                 for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
                     *(FilterStructPtr + j) = 0x0000;
 
-                CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+                CAN_FilterInit(CAN2, &CAN_FilterInitStruct);
             }
             else if(validIDCounter > 112){ //All filter banks are to be filled and there is no point in filtering
                 for(uint8_t filter = 0; filter < 28; filter++){//Therefore, let all IDs through (no filtering)
                     CAN_FilterInitStruct.CAN_FilterNumber = filter;
                     CAN_FilterInitStruct.CAN_FilterActivation = DISABLE;
-                    CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+                    CAN_FilterInit(CAN2, &CAN_FilterInitStruct);
                 } 
             }
         }
@@ -180,10 +180,10 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     gRxMessage[0].FMI = 0;
 
     /* Enable FIFO 0 message pending Interrupt */
-    CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
+    CAN_ITConfig(CAN2, CAN_IT_FMP0, ENABLE);
 
     // Enable Rx interrupts
-    NVIC_InitStruct.NVIC_IRQChannel = CAN1_RX0_IRQn; // TODO: CHECK IRQ CHANNELS
+    NVIC_InitStruct.NVIC_IRQChannel = CAN2_RX0_IRQn; // TODO: CHECK IRQ CHANNELS
     NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -191,8 +191,8 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
 
     if(NULL != gTxEnd[0]) {
         // Enable Tx Interrupts
-        CAN_ITConfig(CAN1, CAN_IT_TME, ENABLE);
-        NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn; 
+        CAN_ITConfig(CAN2, CAN_IT_TME, ENABLE);
+        NVIC_InitStruct.NVIC_IRQChannel = CAN2_TX_IRQn; 
         NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
         NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
         NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -213,19 +213,19 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     /* CAN GPIOs configuration **************************************************/
 
     /* Enable GPIO clock */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
     // Alternate Function 9
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource15, GPIO_AF11_CAN3);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF11_CAN3);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource3, GPIO_AF11_CAN3);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource4, GPIO_AF11_CAN3);
 
     /* Configure CAN RX and TX pins */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_8;
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */

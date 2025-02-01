@@ -29,8 +29,7 @@ int main() {
     BSP_ADC_Init(Accelerator_ADC);
     BSP_ADC_Init(Brake_ADC);
 
-    BSP_CAN_Init(CAN_1);
-    //BSP_CAN_Init(CAN_2);
+    BSP_CAN_Init(CAN_2);
 
     BSP_Contactors_Init(MOTOR);
     BSP_Contactors_Init(ARRAY);

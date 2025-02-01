@@ -16,7 +16,7 @@
 #include "config.h"
 #include <bsp.h>
 
-typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
+typedef enum {CAN_2=0, CAN_3, NUM_CAN} CAN_t;
 
 /**
  * @brief   Initializes the CAN module that communicates with the rest of the electrical system.

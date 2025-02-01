@@ -114,7 +114,7 @@
 // UART/USART
 
 // The pins have been changed in BSP_UART.C (hopefully correctly)
-// No extra_uart init exists (TODO)
+// No extra_uart_init (TODO)
 
 // USB - USART2 - PA2_TX PA3_RX
 // DISPLAY UART4 - PA11_RX PA12_TX
@@ -122,10 +122,22 @@
 
 // ADC
 
+// Pins did not change
+// no extra_adc_init (TODO)
+
 // ACCEL_POT PC0
 // BRAKE_POT PC1
 // EXTRA_ADC1 PC2
 // EXTRA_ADC2 PC3
+
+// CAN
+
+// The pins have been changed in the BSP
+
+// CarCan - CAN3 PB3_RX PB4_TX
+// MotorCan - CAN2 PB5_RX PB6_TX
+
+
 
 
 
