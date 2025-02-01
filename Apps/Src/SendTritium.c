@@ -319,7 +319,7 @@ static void readInputs()
     else
         gear = PARK_GEAR;
 
-    // Display is state-based, not gear based, to account for gearswitch constraints in state changes
+    // Display is state-based
     if (state.name == PARK_STATE)
     {
         UpdateDisplay_SetGear(DISP_PARK);
@@ -473,17 +473,14 @@ void ParkHandler()
  */
 void ParkDecider()
 {
-    // Switch to FORWARD_DRIVE if we're not rapidly moving backward (gearswitch protection) & are in FORWARD_GEAR
     if (gear == FORWARD_GEAR) // Protect from 
     {
         state = FSM[FORWARD_DRIVE];
     }
-    // Switch to REVERSE_DRIVE if we're not rapidly moving forward (gearswitch protection) & are in REVERSE_GEAR
     else if (gear == REVERSE_GEAR) 
     {
         state = FSM[REVERSE_DRIVE];
     }
-    // Otherwise, remain in PARK_STATE
 }
 
 /**
@@ -511,12 +508,10 @@ void ReverseDriveHandler()
  */
 void ReverseDriveDecider()
 {
-    // Go to PARK_STATE if you're in another gear or if you're braking
     if (gear == PARK_GEAR || gear == FORWARD_GEAR)
     {
         state = FSM[PARK_STATE];
     }
-    // Otherwise, stays in REVERSE_DRIVE
 }
 
 /**

@@ -61,7 +61,7 @@ typedef enum{
     REVERSE_DRIVE,
     POWERED_CRUISE,
     COASTING_CRUISE,
-    ACCELERATE_CRUISE
+    ACCELERATE_CRUISE,
 } TritiumStateName_t;
 
 // State Struct for FSM
