@@ -34,7 +34,7 @@ static callback_t displayTxCallback = NULL;
 static rxfifo_t *rx_fifos[NUM_UART]     = {&usbRxFifo, &displayRxFifo};
 static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &displayTxFifo};
 static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceived};
-static USART_TypeDef *handles[NUM_UART] = {USART2, USART3};
+static USART_TypeDef *handles[NUM_UART] = {USART2, UART4};
 
 // Originally, used USART3, now uses UART4 for Daybreak (hopefully display doesn't need USART)
 static void USART_DISPLAY_Init() {
@@ -279,14 +279,15 @@ void USART2_IRQHandler(void) {
 
 
 // (TODO) This should be UART4 IRQ Handler???? IDK BSP HELPPPPP
-void USART3_IRQHandler(void) {
+// This was USART3_IRQHandler... I tried some stuff, likely to be wrong
+void UART4_IRQHandler(void) {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
 
-    if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) {
-        uint8_t data = USART3->DR;
+    if(USART_GetITStatus(UART4, USART_IT_RXNE) != RESET) {
+        uint8_t data = UART4->DR;
         bool removeSuccess = 1;
         if(data == '\r'){
             displayLineReceived = true;
@@ -306,18 +307,18 @@ void USART3_IRQHandler(void) {
             removeSuccess = rxfifo_popback(&displayRxFifo, &junk);
         }
         if(removeSuccess) {
-            USART3->DR = data;
+            UART4->DR = data;
         }
     }
-    if(USART_GetITStatus(USART3, USART_IT_TC) != RESET) {
+    if(USART_GetITStatus(UART4, USART_IT_TC) != RESET) {
         // If getting data from fifo fails i.e. the tx fifo is empty, then turn off the TX interrupt
-        if(!txfifo_get(&displayTxFifo, (char*)&(USART3->DR))) {
-            USART_ITConfig(USART3, USART_IT_TC, RESET);
+        if(!txfifo_get(&displayTxFifo, (char*)&(UART4->DR))) {
+            USART_ITConfig(UART4, USART_IT_TC, RESET);
             if(displayTxCallback != NULL)
                 displayTxCallback();
         }
     }
-    if(USART_GetITStatus(USART3, USART_IT_ORE) != RESET);
+    if(USART_GetITStatus(UART4, USART_IT_ORE) != RESET);
 
     OSIntExit();
 }
