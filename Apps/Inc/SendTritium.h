@@ -108,7 +108,7 @@ EXPOSE_SETTER(float, velocitySetpoint)
  * @param out_max maximum value of output range
  * @returns float value from (out_min / 100.0) to (out_max / 100.0)
  */
-static float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_min, uint8_t out_max);
+float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_min, uint8_t out_max);
 
 
 /* @} */

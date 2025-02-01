@@ -19,7 +19,6 @@ void Task1(void *p_arg) {
     CPU_Init();
     // OS_CPU_SysTickInit();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    OS_ERR err;
 
     // These test cases are based on the actual uses of mapToPercent in SendTritium.c
     printf("\n\r============ Testing mapToPercent ============\n\r");
