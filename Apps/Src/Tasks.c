@@ -15,6 +15,7 @@
 #include "ReadTritium.h"
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
+#include "daybreak_pins.h"
 
 
 /**

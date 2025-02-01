@@ -12,6 +12,7 @@
 #include "os.h"
 #include "os_cfg_app.h"
 #include "Display.h"
+#include "daybreak_pins.h"
 
 // Length of the array and motor PBC saturation buffers
 #define SAT_BUF_LENGTH 5
