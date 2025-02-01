@@ -22,10 +22,10 @@ static OS_MUTEX contactorsMutex;
 static void setContactor(contactor_t contactor, bool state) {
     switch (contactor) {
         case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, state);
+            BSP_GPIO_Write_Pin(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, state);
             break;
         case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
-            BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, state);
+            BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, state);
             break;
         default:
             break;
@@ -38,9 +38,9 @@ static void setContactor(contactor_t contactor, bool state) {
  * @return  None
  */ 
 void Contactors_Init() {
-    BSP_GPIO_Init(CONTACTORS_PORT,  
-                 (ARRAY_PRECHARGE_BYPASS_PIN) |
-                 (MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN), 
+    BSP_GPIO_Init(),  
+                 (ARRAY_PRCHG_BYPASS) |
+                 (MOTOR_PRCHG_BYPASS), 
                   1,
                   false);
 
@@ -67,10 +67,10 @@ bool Contactors_Get(contactor_t contactor) {
     switch (contactor) {
         
         case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
-            state = BSP_GPIO_Get_State(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN);
+            state = BSP_GPIO_Get_State(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS);
             break;
         case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
-            state = BSP_GPIO_Get_State(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN);
+            state = BSP_GPIO_Get_State(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS);
             break;
         default:
             break;
