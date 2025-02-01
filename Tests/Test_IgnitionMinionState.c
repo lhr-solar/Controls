@@ -2,7 +2,7 @@
 #include "Minions.h"
 int main(void){
     Minion_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     Minion_Error_t e;
 
     while(1){

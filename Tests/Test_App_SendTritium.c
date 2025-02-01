@@ -126,7 +126,7 @@ void Task1(void *arg)
     OS_ERR err;
 
     CPU_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     Pedals_Init();
     CANbus_Init(MOTORCAN, NULL, 0);
     Minions_Init();

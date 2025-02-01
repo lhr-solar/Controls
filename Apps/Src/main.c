@@ -5,6 +5,8 @@
  * 
  */
 
+// (TODO) Status LEDs
+
 #include "common.h"
 #include "config.h"
 #include "Tasks.h"
@@ -17,7 +19,7 @@
 #include "Pedals.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
-
+#include "daybreak_pins.h"
 #include "BSP_GPIO.h"
 
 int idle_time_ctr = 0;
@@ -36,7 +38,7 @@ void IdleTaskHook(void)
             last_tick_cnt = current_tick_cnt;
 
             if(current_tick_cnt % 50 == 0){
-                BSP_GPIO_Write_Pin(PORTB, GPIO_Pin_6, toggle);
+                BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, toggle);
                 toggle = !toggle;
             }
         }
@@ -45,7 +47,7 @@ void IdleTaskHook(void)
 
 void IdleInit(void)
 {
-    BSP_GPIO_Init(PORTB, GPIO_Pin_6, OUTPUT, false);
+    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT, OUTPUT, false);
     OS_AppIdleTaskHookPtr = &IdleTaskHook;
 }
 
@@ -97,7 +99,7 @@ void Task_Init(void *p_arg){
     
     // Initialize drivers
     Pedals_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     CANbus_Init(CARCAN, carCANFilterList, NUM_CARCAN_FILTERS);
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();

@@ -24,7 +24,7 @@ void Task1(){
     CANbus_Init(CARCAN, &carCANFilterList, CARCAN_FILTER_SIZE);
     Display_Init();
     UpdateDisplay_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     
     OSTaskCreate(
         (OS_TCB*)&ReadCarCAN_TCB,

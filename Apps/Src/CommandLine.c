@@ -104,7 +104,7 @@ void Task_CommandLine(void* p_arg) {
 	
 	while(1){
 		printf("> ");
-		BSP_UART_Read(UART_2, input);
+		BSP_UART_Read(USB, input);
 		printf("\n\r");
 
 		if (!executeCommand(input)) { // If command failed, error
@@ -151,7 +151,7 @@ static bool cmd_CANbus_Send(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = CAN_1;
+		bus = CAN_2;
 	}
 	else if(strcmp(busInput, "car") == 0){
 		bus = CAN_3;
@@ -186,7 +186,7 @@ static bool cmd_CANbus_Read(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = CAN_1;
+		bus = CAN_2;
 	}
 	else if(strcmp(busInput, "car") == 0){
 		bus = CAN_3;
