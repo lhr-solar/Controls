@@ -17,7 +17,7 @@
 #include "Pedals.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
-
+#include "daybreak_pins.h"
 #include "BSP_GPIO.h"
 
 int idle_time_ctr = 0;
@@ -45,7 +45,7 @@ void IdleTaskHook(void)
 
 void IdleInit(void)
 {
-    BSP_GPIO_Init(PORTB, GPIO_Pin_6, OUTPUT, false);
+    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT, OUTPUT, false);
     OS_AppIdleTaskHookPtr = &IdleTaskHook;
 }
 

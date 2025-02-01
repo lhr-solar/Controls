@@ -44,7 +44,7 @@ void Pedals_Init(){
  */
 int8_t Pedals_Read(pedal_t pedal){
     if (pedal == BRAKE){
-        return (BSP_GPIO_Read_Pin(PORTC, GPIO_Pin_15))?100:0;
+        return (BSP_GPIO_Read_Pin(BRAKE_SW_PORT, BRAKE_SW))?100:0;
     }
     
     if (pedal >= NUMBER_OF_PEDALS) return 0;
