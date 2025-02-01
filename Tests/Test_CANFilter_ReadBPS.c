@@ -40,7 +40,7 @@ int main(void){ //initialize things and spawn task
         printf("OS error code %d\n\r",err);
     }
 
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
 
     OSTaskCreate(
         (OS_TCB*)&Task1_TCB,

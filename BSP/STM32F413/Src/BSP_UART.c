@@ -130,12 +130,12 @@ static void USART_USB_Init() {
  */
 static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback, UART_t uart) {
     switch(uart){
-    case UART_2: // their UART_USB
+    case USB: // their UART_USB
         USART_USB_Init();
         usbRxCallback = rxCallback;
         usbTxCallback = txCallback;
         break;
-    case UART_3: // their UART_DISPLAY
+    case DISPLAY: // their UART_DISPLAY
         USART_DISPLAY_Init();
         displayRxCallback = rxCallback;
         displayTxCallback = txCallback;
@@ -256,7 +256,7 @@ void USART2_IRQHandler(void) {
             // Delete the last entry!
             removeSuccess = rxfifo_popback(&usbRxFifo, &junk); 
 
-            USART_SendData(UART_2, 0x7F);   // TODO: Not sure if the backspace works. Need to test
+            USART_SendData(USB, 0x7F);   // TODO: Not sure if the backspace works. Need to test
         }
         if(removeSuccess) {
             USART2->DR = data;

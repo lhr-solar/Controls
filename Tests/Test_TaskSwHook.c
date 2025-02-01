@@ -28,7 +28,7 @@ void Task1(void *p_arg) {
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
 
     expect("No Task");
     dumpTrace();

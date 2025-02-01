@@ -3,7 +3,7 @@
 #include <bsp.h>
 
 int main(void){
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     printf("Hello World\n");
 
     while(1){}
