@@ -18,7 +18,7 @@ int main() {
     Pedals_Init();
 
     while(1) {
-        printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\r", 
+        printf("Accelerator: %5.1u%%\tBrake: %5.1u%%\r", 
             Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
     }
 }

@@ -19,7 +19,6 @@
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
-
 // Macros
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
 
@@ -27,12 +26,15 @@
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
 #define ACCEL_PEDAL_THRESHOLD 15 // percent
-#define BRAKE_PEDAL_THRESHOLD 50 // percent
+#define BRAKE_UNPRESSED 100 // percent - the switch is digital
+#define BRAKE_PRESSED 0 // percent
 
 // Accel deadbands (for stability of ACCELERATE_CRUISE entry/exit)
-// NOTE: brake deadbands are unneeded
+// NOTE: brake deadbands are unneeded, as they're digital & they have saturation checks in SendTritium.c
 #define ACCEL_PEDAL_UNPRESSED_THRESHOLD 10 // percent
 #define ACCEL_PEDAL_PRESSED_THRESHOLD 25 // percent
+
+#define ACCEL_BRAKE_THROTTLE_OVERRIDE_THRESHOLD
 
 #define PEDAL_MIN 0        // percent
 #define PEDAL_MAX 100      // percent
@@ -118,22 +120,6 @@ EXPOSE_SETTER(float, velocityObserved)
 EXPOSE_SETTER(float, cruiseVelSetpoint)
 EXPOSE_SETTER(float, currentSetpoint)
 EXPOSE_SETTER(float, velocitySetpoint)
-#endif
-
-// Caller functions for state handlers & deciders in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
-void callForwardDriveHandler(void);
-void callForwardDriveDecider(void);
-void callParkHandler(void);
-void callParkDecider(void);
-void callReverseDriveHandler(void);
-void callReverseDriveDecider(void);
-void callPoweredCruiseHandler(void);
-void callPoweredCruiseDecider(void);
-void callCoastingCruiseHandler(void);
-void callCoastingCruiseDecider(void);
-void callAccelerateCruiseHandler(void);
-void callAccelerateCruiseDecider(void);
 #endif
 
 #endif

@@ -34,11 +34,11 @@ void Task_DebugDump(void* p_arg) {
     while(1){
 
         // Get pedal information
-        int8_t accelPedal = Pedals_Read(ACCELERATOR);
-        printf("ACCELERATOR: %d\n\r", accelPedal);
+        uint8_t accelPedal = Pedals_Read(ACCELERATOR);
+        printf("ACCELERATOR: %u\n\r", accelPedal);
 
-        int8_t brakePedal = Pedals_Read(BRAKE);
-        printf("BRAKE: %d\n\r", brakePedal);
+        uint8_t brakePedal = Pedals_Read(BRAKE);
+        printf("BRAKE: %u\n\r", brakePedal);
 
         // Get minion information
         for(pin_t pin = 0; pin < NUM_PINS; pin++){
@@ -58,8 +58,8 @@ void Task_DebugDump(void* p_arg) {
         printf("Cruise Set: %s\n\r", get_cruiseSet() ? "true" : "false");
         // printf("One Pedal Enable: %s\n\r", get_onePedalEnable() ? "true" : "false");
         // printf("Regen Enable: %s\n\r", get_regenEnable() ? "true" : "false");
-        printf("Pedal Brake Percent: %d\n\r", get_brakePedalPercent());
-        printf("Pedal Accel Percent: %d\n\r", get_accelPedalPercent());
+        printf("Pedal Brake Percent: %u\n\r", get_brakePedalPercent());
+        printf("Pedal Accel Percent: %u\n\r", get_accelPedalPercent());
         printf("Current Gear: %s\n\r", GEAR_STRING[get_gear()]);
         print_float("Current Setpoint: ", get_currentSetpoint());
         print_float("Velocity Setpoint: %s\n\r", get_velocitySetpoint()); // velocitySetpoint 

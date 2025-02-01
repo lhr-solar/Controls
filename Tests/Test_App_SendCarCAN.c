@@ -280,8 +280,8 @@ void Task1(void *arg)
 
         // Print IO State
         printf("\n\r---- IO State ----");
-        printf("\n\rAccelerator: %d", Pedals_Read(ACCELERATOR));
-        printf("\n\rBrake: %d", Pedals_Read(BRAKE));
+        printf("\n\rAccelerator: %u", Pedals_Read(ACCELERATOR));
+        printf("\n\rBrake: %u", Pedals_Read(BRAKE));
         uint8_t pins = 0;
         for(pin_t pin = 0; pin < NUM_PINS; pin++){
             bool pinState = Minions_Read(pin);
