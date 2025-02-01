@@ -148,8 +148,8 @@
 #define ExtraADC1 GPIO_Pin_2
 
 // EXTRA_ADC2 PC3
-#define ExtraADC1_PORT PORTC
-#define ExtraADC1 GPIO_Pin_3
+#define ExtraADC2_PORT PORTC
+#define ExtraADC2 GPIO_Pin_3
 
 // CAN
 
