@@ -96,8 +96,6 @@ EXPOSE_SETTER(float, currentSetpoint)
 EXPOSE_SETTER(float, velocitySetpoint)
 #endif
 
-#endif
-
 /**
  * @brief Linearly map range of integers to another range of integers, and provide the pecentage result.
  * in_min to in_max is mapped to out_min to out_max.
@@ -110,5 +108,6 @@ EXPOSE_SETTER(float, velocitySetpoint)
  */
 float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_min, uint8_t out_max);
 
+#endif
 
 /* @} */
