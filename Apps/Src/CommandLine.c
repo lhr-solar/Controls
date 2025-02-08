@@ -151,10 +151,10 @@ static bool cmd_CANbus_Send(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = CAN_2;
+		bus = motor;
 	}
 	else if(strcmp(busInput, "car") == 0){
-		bus = CAN_3;
+		bus = car;
 	}
 	else{
 		return false;
@@ -186,10 +186,10 @@ static bool cmd_CANbus_Read(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = CAN_2;
+		bus = motor;
 	}
 	else if(strcmp(busInput, "car") == 0){
-		bus = CAN_3;
+		bus = car;
 	}
 	else{
 		return false;
@@ -279,13 +279,13 @@ static bool cmd_Minions_Read(void){
 		pin = IGN_2;
 	}
 	else if(strcmp(pinInput, "regen_sw") == 0){
-		pin = REGEN_SW;
+		pin = BPS_HAZ;
 	}
 	else if(strcmp(pinInput, "for_sw") == 0){
-		pin = FOR_SW;
+		pin = FWD;
 	}
 	else if(strcmp(pinInput, "rev_sw") == 0){
-		pin = REV_SW;
+		pin = REV;
 	}
 	else if(strcmp(pinInput, "cruz_en") == 0){
 		pin = CRUZ_EN;
