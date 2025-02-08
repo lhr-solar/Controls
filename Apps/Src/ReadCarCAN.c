@@ -12,6 +12,7 @@
 #include "os.h"
 #include "os_cfg_app.h"
 #include "Display.h"
+#include "daybreak_pins.h"
 
 // Length of the array and motor PBC saturation buffers
 #define SAT_BUF_LENGTH 5
@@ -336,7 +337,7 @@ static void handler_ReadCarCAN_chargeDisable(void)
     updateHVArraySaturation(DISABLE_SATURATION_MSG);
 
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
+    BSP_GPIO_Write_Pin(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, false);
 
     // Check that the contactor was successfully turned off
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
@@ -365,8 +366,8 @@ static void handler_ReadCarCAN_contactorsDisable(void)
     updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
 
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, false);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, false);
+    BSP_GPIO_Write_Pin(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, false);
+    BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, false);
 
     // Fills buffers with disable messages
     memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));

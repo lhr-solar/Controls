@@ -18,7 +18,7 @@
 
 int main() {
     BSP_ADC_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     
     /* INDIVIDUAL TESTS FOR EACH FUNCTION
     printf("TESTS\n");

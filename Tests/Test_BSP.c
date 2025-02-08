@@ -29,14 +29,13 @@ int main() {
     BSP_ADC_Init(Accelerator_ADC);
     BSP_ADC_Init(Brake_ADC);
 
-    BSP_CAN_Init(CAN_1);
-    //BSP_CAN_Init(CAN_2);
+    BSP_CAN_Init(CAN_2);
 
     BSP_Contactors_Init(MOTOR);
     BSP_Contactors_Init(ARRAY);
 
-    BSP_UART_Init(UART_3);
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(DISPLAY);
+    BSP_UART_Init(USB);
 
     BSP_Switches_Init();
 
@@ -83,9 +82,9 @@ int main() {
         }
 
         uint32_t id;
-        BSP_CAN_Write(CAN_1, 0x221, txData, LEN);
+        BSP_CAN_Write(CAN_2, 0x221, txData, LEN);
         
-        uint8_t len = BSP_CAN_Read(CAN_1, &id, rxData);
+        uint8_t len = BSP_CAN_Read(CAN_2, &id, rxData);
 
         // printf("ID: 0x%x\nData: ", id);
         // for (uint8_t i = 0; i < len; i++) {
@@ -155,18 +154,18 @@ int main() {
         char str1[TX_SIZE];
         sprintf(str1, "%f, %d, %d, %d, %d", speed1, cruiseEn1, cruiseSet1, regenEn1, CANerr1);
 
-        BSP_UART_Write(UART_2, str , TX_SIZE);
-        BSP_UART_Write(UART_3, str1, TX_SIZE);
+        BSP_UART_Write(USB, str , TX_SIZE);
+        BSP_UART_Write(DISPLAY, str1, TX_SIZE);
 
         char out[2][TX_SIZE];
-        BSP_UART_Read(UART_3, out[UART_3]);
-        BSP_UART_Read(UART_2, out[UART_2]);
-        out[UART_3][strlen(out[UART_3])-1] = 0; // remove the newline, so we can print both in one line for now
-        out[UART_2][strlen(out[UART_2])-1] = 0;
+        BSP_UART_Read(DISPLAY, out[DISPLAY]);
+        BSP_UART_Read(USB, out[USB]);
+        out[DISPLAY][strlen(out[DISPLAY])-1] = 0; // remove the newline, so we can print both in one line for now
+        out[USB][strlen(out[USB])-1] = 0;
 
         printf("        SPEED  CRS_EN  CRS_SET REGEN CAN_ERROR\n");
-        printf("UART 1: %s\n", out[UART_3]);
-        printf("UART 2: %s\n", out[UART_2]);
+        printf("UART 1: %s\n", out[DISPLAY]);
+        printf("UART 2: %s\n", out[USB]);
 
         //BSP_Contactors -----------------------------------------------------
         //NOTE: The contactors test file requires input from the user in the original test

@@ -16,11 +16,11 @@
 #include "config.h"
 #include <bsp.h>
 
-typedef enum {CAN_1=0, CAN_3, NUM_CAN} CAN_t;
+typedef enum {motor=0, car, NUM_CAN} CAN_t;
 
 /**
  * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
- * @param   bus : The bus to initialize. Should only be either CAN_1 or CAN_3.
+ * @param   bus : The bus to initialize. Should only be either CAN_2 or CAN_3.
  * @param   rxEvent : the function to execute when recieving a message. NULL for no action.
  * @param   txEnd : the function to execute after transmitting a message. NULL for no action.
  * @param   idWhitelist : the idWhitelist to use for message filtering. NULL for no filtering.

@@ -5,17 +5,18 @@
  * 
  */
 #include "Minions.h"
+#include "daybreak_pins.h"
 
 /* Should be in sync with enum in Minions.h */
 const pinInfo_t PININFO_LUT[NUM_PINS] = {
-    {GPIO_Pin_1, PORTA, INPUT},
-    {GPIO_Pin_0, PORTA, INPUT},
-    {GPIO_Pin_4, PORTA, INPUT},
-    {GPIO_Pin_5, PORTA, INPUT},
-    {GPIO_Pin_6, PORTA, INPUT},
-    {GPIO_Pin_7, PORTA, INPUT},
-    {GPIO_Pin_4, PORTB, INPUT},
-    {GPIO_Pin_5, PORTB, OUTPUT}
+    {IG1,           IG1_PORT,           INPUT},
+    {IG2,           IG1_PORT,           INPUT},
+    {BPS_HAZARD,    BPS_HAZARD_PORT,    INPUT},
+    {FORWARD,       FORWARD_PORT,       INPUT},
+    {REVERSE,       REVERSE_PORT,       INPUT},
+    {CRUISE_ENABLE, CRUISE_ENABLE_PORT, INPUT},
+    {CRUISE_SET,    CRUISE_SET_PORT,    INPUT},
+    {BRAKE_LIGHT,   BRAKE_LIGHT_PORT,   OUTPUT}
 };
 
 void Minions_Init(void){

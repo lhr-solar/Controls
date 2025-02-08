@@ -3,6 +3,7 @@
 #include "BSP_UART.h"
 #include "stm32f4xx.h"
 #include "os.h"
+#include "daybreak_pins.h"
 
 #define TX_SIZE     128
 #define RX_SIZE     64
@@ -34,8 +35,9 @@ static callback_t displayTxCallback = NULL;
 static rxfifo_t *rx_fifos[NUM_UART]     = {&usbRxFifo, &displayRxFifo};
 static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &displayTxFifo};
 static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceived};
-static USART_TypeDef *handles[NUM_UART] = {USART2, USART3};
+static USART_TypeDef *handles[NUM_UART] = {USART2, UART4};
 
+// Originally, used USART3, now uses UART4 for Daybreak (hopefully display doesn't need USART)
 static void USART_DISPLAY_Init() {
     displayTxFifo = txfifo_new();
     displayRxFifo = rxfifo_new();
@@ -44,39 +46,36 @@ static void USART_DISPLAY_Init() {
     USART_InitTypeDef UART_InitStruct = {0};
 
     // Initialize clocks
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,  ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,  ENABLE);
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+    RCC_APB1PeriphClockCmd(DISPLAY_APB1_UART, ENABLE);
+    RCC_AHB1PeriphClockCmd(DISPLAY_AHB1_GPIO,  ENABLE);
 
     // Initialize pins
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStruct.GPIO_Pin = DISPLAY_RX | DISPLAY_TX;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-    GPIO_Init(GPIOB, &GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;
-    GPIO_Init(GPIOC, &GPIO_InitStruct);
+    GPIO_Init(DISPLAY_GPIO, &GPIO_InitStruct);
 
-    GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
-    GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_USART3);
+    GPIO_PinAFConfig(DISPLAY_GPIO, DISPLAY_RX_Pinsource, DISPLAY_AF);
+    GPIO_PinAFConfig(DISPLAY_GPIO, DISPLAY_TX_Pinsource, DISPLAY_AF);
 
-    //Initialize UART3
+    //Initialize UART4
     UART_InitStruct.USART_BaudRate = 115200;
     UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     UART_InitStruct.USART_Parity = USART_Parity_No;
     UART_InitStruct.USART_StopBits = USART_StopBits_1;
     UART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_Init(USART3, &UART_InitStruct);
+    USART_Init(DISPLAY_UART, &UART_InitStruct);
 
     // Enable interrupts
 
-    USART_Cmd(USART3, ENABLE);
+    USART_Cmd(DISPLAY_UART, ENABLE);
 
     // Enable NVIC
     NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = DISPLAY_IRQ;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -91,19 +90,19 @@ static void USART_USB_Init() {
     USART_InitTypeDef UART_InitStruct = {0};
 
     // Initialize clocks
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,  ENABLE);
+    RCC_APB1PeriphClockCmd(USB_APB1_UART, ENABLE);
+    RCC_AHB1PeriphClockCmd(USB_AHB1_GPIO,  ENABLE);
 
     // Initialize pins
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+    GPIO_InitStruct.GPIO_Pin = USB_TX | USB_RX;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_Init(USB_GPIO, &GPIO_InitStruct);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+    GPIO_PinAFConfig(USB_GPIO, USB_TX_Pinsource, USB_AF);
+    GPIO_PinAFConfig(USB_GPIO, USB_RX_Pinsource, USB_AF);
 
     //Initialize UART2
     UART_InitStruct.USART_BaudRate = 115200;
@@ -112,15 +111,15 @@ static void USART_USB_Init() {
     UART_InitStruct.USART_Parity = USART_Parity_No;
     UART_InitStruct.USART_StopBits = USART_StopBits_1;
     UART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_Init(USART2, &UART_InitStruct);
+    USART_Init(USB_UART, &UART_InitStruct);
 
-    USART_Cmd(USART2, ENABLE);
+    USART_Cmd(USB_UART, ENABLE);
 
     // Enable NVIC
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = USB_IRQ;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
@@ -132,12 +131,12 @@ static void USART_USB_Init() {
  */
 static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback, UART_t uart) {
     switch(uart){
-    case UART_2: // their UART_USB
+    case USB: // their UART_USB
         USART_USB_Init();
         usbRxCallback = rxCallback;
         usbTxCallback = txCallback;
         break;
-    case UART_3: // their UART_DISPLAY
+    case DISPLAY: // their UART_DISPLAY
         USART_DISPLAY_Init();
         displayRxCallback = rxCallback;
         displayTxCallback = txCallback;
@@ -258,7 +257,7 @@ void USART2_IRQHandler(void) {
             // Delete the last entry!
             removeSuccess = rxfifo_popback(&usbRxFifo, &junk); 
 
-            USART_SendData(UART_2, 0x7F);   // TODO: Not sure if the backspace works. Need to test
+            USART_SendData(USB, 0x7F);   // TODO: Not sure if the backspace works. Need to test
         }
         if(removeSuccess) {
             USART2->DR = data;
@@ -279,14 +278,17 @@ void USART2_IRQHandler(void) {
 
 }
 
-void USART3_IRQHandler(void) {
+
+// (TODO) This should be UART4 IRQ Handler???? IDK BSP HELPPPPP
+// This was USART3_IRQHandler... I tried some stuff, likely to be wrong
+void UART4_IRQHandler(void) {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
 
-    if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) {
-        uint8_t data = USART3->DR;
+    if(USART_GetITStatus(UART4, USART_IT_RXNE) != RESET) {
+        uint8_t data = UART4->DR;
         bool removeSuccess = 1;
         if(data == '\r'){
             displayLineReceived = true;
@@ -306,18 +308,18 @@ void USART3_IRQHandler(void) {
             removeSuccess = rxfifo_popback(&displayRxFifo, &junk);
         }
         if(removeSuccess) {
-            USART3->DR = data;
+            UART4->DR = data;
         }
     }
-    if(USART_GetITStatus(USART3, USART_IT_TC) != RESET) {
+    if(USART_GetITStatus(UART4, USART_IT_TC) != RESET) {
         // If getting data from fifo fails i.e. the tx fifo is empty, then turn off the TX interrupt
-        if(!txfifo_get(&displayTxFifo, (char*)&(USART3->DR))) {
-            USART_ITConfig(USART3, USART_IT_TC, RESET);
+        if(!txfifo_get(&displayTxFifo, (char*)&(UART4->DR))) {
+            USART_ITConfig(UART4, USART_IT_TC, RESET);
             if(displayTxCallback != NULL)
                 displayTxCallback();
         }
     }
-    if(USART_GetITStatus(USART3, USART_IT_ORE) != RESET);
+    if(USART_GetITStatus(UART4, USART_IT_ORE) != RESET);
 
     OSIntExit();
 }

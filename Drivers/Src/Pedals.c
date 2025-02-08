@@ -6,6 +6,7 @@
  */
 
 #include "Pedals.h"
+#include "daybreak_pins.h"
 #include "stm32f4xx_gpio.h"
 
 // Constants used to tune the pedals
@@ -30,7 +31,7 @@ static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
  */
 void Pedals_Init(){
     BSP_ADC_Init();
-    BSP_GPIO_Init(PORTC, GPIO_Pin_15, INPUT, true);
+    BSP_GPIO_Init(BRAKE_SW_PORT, BRAKE_SW, INPUT, true);
 }
 
 /**
@@ -43,7 +44,7 @@ void Pedals_Init(){
  */
 int8_t Pedals_Read(pedal_t pedal){
     if (pedal == BRAKE){
-        return (BSP_GPIO_Read_Pin(PORTC, GPIO_Pin_15))?100:0;
+        return (BSP_GPIO_Read_Pin(BRAKE_SW_PORT, BRAKE_SW))?100:0;
     }
     
     if (pedal >= NUMBER_OF_PEDALS) return 0;

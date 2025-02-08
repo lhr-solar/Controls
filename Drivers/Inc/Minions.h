@@ -22,7 +22,7 @@
 #define FOREACH_PIN(PIN) \
         PIN(IGN_1),   \
         PIN(IGN_2),  \
-        PIN(REGEN_SW),   \
+        PIN(BPS_HAZ),   \
         PIN(FOR_SW),  \
         PIN(REV_SW),  \
         PIN(CRUZ_EN),  \

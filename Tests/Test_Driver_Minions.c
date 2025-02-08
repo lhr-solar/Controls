@@ -16,7 +16,7 @@ void Task1(void *arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     Minion_Init();
 
     OS_ERR err;
