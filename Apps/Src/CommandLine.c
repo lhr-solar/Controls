@@ -282,10 +282,10 @@ static bool cmd_Minions_Read(void){
 		pin = BPS_HAZ;
 	}
 	else if(strcmp(pinInput, "for_sw") == 0){
-		pin = FWD;
+		pin = FOR_SW;
 	}
 	else if(strcmp(pinInput, "rev_sw") == 0){
-		pin = REV;
+		pin = REV_SW;
 	}
 	else if(strcmp(pinInput, "cruz_en") == 0){
 		pin = CRUZ_EN;

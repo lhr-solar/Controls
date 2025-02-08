@@ -23,8 +23,8 @@
         PIN(IGN_1),   \
         PIN(IGN_2),  \
         PIN(BPS_HAZ),   \
-        PIN(FWD),  \
-        PIN(REV),  \
+        PIN(FOR_SW),  \
+        PIN(REV_SW),  \
         PIN(CRUZ_EN),  \
         PIN(CRUZ_ST),  \
         PIN(BRAKELIGHT),  \
