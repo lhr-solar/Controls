@@ -54,7 +54,7 @@ void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idW
     }
     else
     {
-        BSP_carCAN_Init(idWhitelist, idWhitelistSize);
+        BSP_CarCAN_Init(idWhitelist, idWhitelistSize);
     }
 }
 
@@ -73,8 +73,8 @@ void BSP_MotorCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     RCC_AHB1PeriphClockCmd(MotorCAN_AHB1_GPIO, ENABLE);
 
     // Alternate Function 9
-    GPIO_PinAFConfig(MotorCAN_PORT, MotorCAN_RX_Pinsource, MotorCAN_AF);
-    GPIO_PinAFConfig(MotorCAN_PORT, MotorCAN_TX_Pinsource, MotorCAN_AF);
+    GPIO_PinAFConfig(MotorCAN_GPIO, MotorCAN_RX_Pinsource, MotorCAN_AF);
+    GPIO_PinAFConfig(MotorCAN_GPIO, MotorCAN_TX_Pinsource, MotorCAN_AF);
 
     /* Configure CAN RX and TX pins */
     GPIO_InitStruct.GPIO_Pin = MotorCAN_RX | MotorCAN_TX;
@@ -86,7 +86,7 @@ void BSP_MotorCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
-    RCC_APB1PeriphClockCmd(MotorCAN_AHB1_CAN, ENABLE);
+    RCC_APB1PeriphClockCmd(MotorCAN_APB1_CAN, ENABLE);
 
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
@@ -217,8 +217,8 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     RCC_AHB1PeriphClockCmd(CarCAN_AHB1_GPIO, ENABLE);
 
     // Alternate Function 9
-    GPIO_PinAFConfig(CarCAN_PORT, CarCAN_RX_Pinsource, CarCAN_AF);
-    GPIO_PinAFConfig(CarCAN_PORT, CarCAN_TX_Pinsource, CarCAN_AF);
+    GPIO_PinAFConfig(CarCAN_GPIO, CarCAN_RX_Pinsource, CarCAN_AF);
+    GPIO_PinAFConfig(CarCAN_GPIO, CarCAN_TX_Pinsource, CarCAN_AF);
 
     /* Configure CAN RX and TX pins */
     GPIO_InitStruct.GPIO_Pin = CarCAN_RX | CarCAN_TX;
@@ -230,7 +230,7 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
-    RCC_APB1PeriphClockCmd(CarCAN_AHB1_CAN, ENABLE);
+    RCC_APB1PeriphClockCmd(CarCAN_APB1_CAN, ENABLE);
 
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;

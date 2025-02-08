@@ -157,27 +157,29 @@
 
 // CarCan - CAN3 PB3_RX PB4_TX
 #define CarCAN_PORT PORTB
+#define CarCAN_GPIO GPIOB
 #define CarCAN CAN3
 #define CarCAN_AHB1_GPIO RCC_AHB1Periph_GPIOB
-#define CarCAN_AHB1_CAN RCC_AHB1Periph_CAN3
+#define CarCAN_APB1_CAN RCC_APB1Periph_CAN3
 #define CarCAN_AF GPIO_AF11_CAN3
-#define CarCAN_TX_Pinsource GPIO_Pinsource4
+#define CarCAN_TX_Pinsource GPIO_PinSource4
 #define CarCAN_TX GPIO_Pin_4
 #define CarCAN_TX_IRQ CAN3_TX_IRQn
-#define CarCAN_RX_Pinsource GPIO_Pinsource3
+#define CarCAN_RX_Pinsource GPIO_PinSource3
 #define CarCAN_RX GPIO_Pin_3
 #define CarCAN_RX_IRQ CAN3_RX0_IRQn
 
 // MotorCan - CAN2 PB5_RX PB6_TX
 #define MotorCAN_PORT PORTB
+#define MotorCAN_GPIO GPIOB
 #define MotorCAN CAN2
 #define MotorCAN_AHB1_GPIO RCC_AHB1Periph_GPIOB
-#define MotorCAN_AHB1_CAN RCC_AHB1Periph_CAN2
+#define MotorCAN_APB1_CAN RCC_APB1Periph_CAN2
 #define MotorCAN_AF GPIO_AF_CAN2
-#define MotorCAN_TX_Pinsource GPIO_Pinsource6
+#define MotorCAN_TX_Pinsource GPIO_PinSource6
 #define MotorCAN_TX GPIO_Pin_6
 #define MotorCAN_TX_IRQ CAN2_TX_IRQn
-#define MotorCAN_RX_Pinsource GPIO_Pinsource5
+#define MotorCAN_RX_Pinsource GPIO_PinSource5
 #define MotorCAN_RX GPIO_Pin_5
 #define MotorCAN_RX_IRQ CAN2_RX0_IRQn
 
