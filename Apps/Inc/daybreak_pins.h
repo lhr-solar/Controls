@@ -24,11 +24,11 @@
 #define BRAKE_SW_PORT           PORTC
 #define BRAKE_SW                GPIO_Pin_15
 
-#define ARRAY_PRCHG_BYPASS_PORT PORTA
-#define ARRAY_PRCHG_BYPASS      GPIO_Pin_0
-
 #define MOTOR_PRCHG_BYPASS_PORT PORTA
-#define MOTOR_PRCHG_BYPASS      GPIO_Pin_1
+#define MOTOR_PRCHG_BYPASS      GPIO_Pin_0
+
+#define ARRAY_PRCHG_BYPASS_PORT PORTA
+#define ARRAY_PRCHG_BYPASS      GPIO_Pin_1
 
 #define BRAKE_LIGHT_PORT        PORTA
 #define BRAKE_LIGHT             GPIO_Pin_4
@@ -72,8 +72,8 @@
 #define HEARTBEAT_PORT          PORTC
 #define HEARTBEAT               GPIO_Pin_7
 
-#define PC8_PORT                PORTC
-#define PC8                     GPIO_Pin_8
+#define CRUISE_IND_PORT         PORTC
+#define CRUISE_IND              GPIO_Pin_8
 
 #define PC9_PORT                PORTC
 #define PC9                     GPIO_Pin_9
@@ -81,11 +81,11 @@
 #define PA8_PORT                PORTA
 #define PA8                     GPIO_Pin_8
 
-#define PA9_PORT                PORTA
-#define PA9                     GPIO_Pin_9
+#define MOTOR_C_SENSE_PORT      PORTA
+#define MOTOR_C_SENSE           GPIO_Pin_9
 
-#define PA10_PORT               PORTA
-#define PA10                    GPIO_Pin_10
+#define MOTOR_CONTACTOR_PORT    PORTA
+#define MOTOR_CONTACTOR         GPIO_Pin_10
 
 #define PA15_PORT               PORTA
 #define PA15                    GPIO_Pin_15
@@ -105,11 +105,11 @@
 #define PB7_PORT                PORTB
 #define PB7                     GPIO_Pin_7
 
-#define PB8_PORT                PORTB
-#define PB8                     GPIO_Pin_8
+#define ARRAY_PBC_SENSE_PORT    PORTB
+#define ARRAY_PBC_SENSE         GPIO_Pin_8
 
-#define PB9_PORT                PORTB
-#define PB9                     GPIO_Pin_9
+#define MOTOR_PBC_SENSE_PORT    PORTB
+#define MOTOR_PBC_SENSE         GPIO_Pin_9
 
 // UART/USART
 
