@@ -40,7 +40,7 @@ static void setContactor(contactor_t contactor, bool state) {
  * @return  None
  */ 
 void Contactors_Init() {
-    BSP_GPIO_Init(CONTACTORS_PORT,  
+    BSP_GPIO_Init(ARRAY_PRCHG_BYPASS_PORT,  
                  (ARRAY_PRCHG_BYPASS) |
                  (MOTOR_PRCHG_BYPASS), 
                   1,
