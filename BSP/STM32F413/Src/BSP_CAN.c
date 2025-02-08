@@ -82,7 +82,7 @@ void BSP_MotorCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(MotorCAN_PORT, &GPIO_InitStruct);
+    GPIO_Init(MotorCAN_GPIO, &GPIO_InitStruct);
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
@@ -226,7 +226,7 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(CarCAN_PORT, &GPIO_InitStruct);
+    GPIO_Init(CarCAN_GPIO, &GPIO_InitStruct);
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
