@@ -15,15 +15,6 @@
 
 // GPIO
 
-#define PC13_PORT               PORTC
-#define PC13                    GPIO_Pin_13
-
-#define PC14_PORT               PORTC
-#define PC14                    GPIO_Pin_14
-
-#define BRAKE_SW_PORT           PORTC
-#define BRAKE_SW                GPIO_Pin_15
-
 #define MOTOR_PRCHG_BYPASS_PORT PORTA
 #define MOTOR_PRCHG_BYPASS      GPIO_Pin_0
 
@@ -42,11 +33,17 @@
 #define CRUISE_SET_PORT         PORTA
 #define CRUISE_SET              GPIO_Pin_7
 
-#define CONTROLS_FAULT_PORT     PORTC
-#define CONTROLS_FAULT          GPIO_Pin_4
+#define PA8_PORT                PORTA
+#define PA8                     GPIO_Pin_8
 
-#define CRUISE_ENABLE_PORT      PORTC
-#define CRUISE_ENABLE           GPIO_Pin_5
+#define MOTOR_C_SENSE_PORT      PORTA
+#define MOTOR_C_SENSE           GPIO_Pin_9
+
+#define MOTOR_CONTACTOR_PORT    PORTA
+#define MOTOR_CONTACTOR         GPIO_Pin_10
+
+#define PA15_PORT               PORTA
+#define PA15                    GPIO_Pin_15
 
 #define BPS_FAULT_PORT          PORTB
 #define BPS_FAULT               GPIO_Pin_0
@@ -57,6 +54,15 @@
 #define FORWARD_PORT            PORTB
 #define FORWARD                 GPIO_Pin_2
 
+#define PB7_PORT                PORTB
+#define PB7                     GPIO_Pin_7
+
+#define ARRAY_PBC_SENSE_PORT    PORTB
+#define ARRAY_PBC_SENSE         GPIO_Pin_8
+
+#define MOTOR_PBC_SENSE_PORT    PORTB
+#define MOTOR_PBC_SENSE         GPIO_Pin_9
+
 #define IG2_PORT                PORTB
 #define IG2                     GPIO_Pin_10
 
@@ -65,6 +71,12 @@
 
 #define REVERSE_PORT            PORTB
 #define REVERSE                 GPIO_Pin_15
+
+#define CONTROLS_FAULT_PORT     PORTC
+#define CONTROLS_FAULT          GPIO_Pin_4
+
+#define CRUISE_ENABLE_PORT      PORTC
+#define CRUISE_ENABLE           GPIO_Pin_5
 
 #define TIMER_CLK_PORT          PORTC
 #define TIMER_CLK               GPIO_Pin_6
@@ -78,18 +90,6 @@
 #define PC9_PORT                PORTC
 #define PC9                     GPIO_Pin_9
 
-#define PA8_PORT                PORTA
-#define PA8                     GPIO_Pin_8
-
-#define MOTOR_C_SENSE_PORT      PORTA
-#define MOTOR_C_SENSE           GPIO_Pin_9
-
-#define MOTOR_CONTACTOR_PORT    PORTA
-#define MOTOR_CONTACTOR         GPIO_Pin_10
-
-#define PA15_PORT               PORTA
-#define PA15                    GPIO_Pin_15
-
 #define PC10_PORT               PORTC
 #define PC10                    GPIO_Pin_10
 
@@ -99,17 +99,17 @@
 #define PC12_PORT               PORTC
 #define PC12                    GPIO_Pin_12
 
+#define PC13_PORT               PORTC
+#define PC13                    GPIO_Pin_13
+
+#define PC14_PORT               PORTC
+#define PC14                    GPIO_Pin_14
+
+#define BRAKE_SW_PORT           PORTC
+#define BRAKE_SW                GPIO_Pin_15
+
 #define PD2_PORT                PORTD
 #define PD2                     GPIO_Pin_2
-
-#define PB7_PORT                PORTB
-#define PB7                     GPIO_Pin_7
-
-#define ARRAY_PBC_SENSE_PORT    PORTB
-#define ARRAY_PBC_SENSE         GPIO_Pin_8
-
-#define MOTOR_PBC_SENSE_PORT    PORTB
-#define MOTOR_PBC_SENSE         GPIO_Pin_9
 
 // UART/USART
 
