@@ -149,12 +149,18 @@
 
 // no extra_adc_init (TODO)
 
+#define ADC1_APB1 RCC_APB2Periph_ADC1
+#define ADC1_AHB1_GPIO RCC_AHB1Periph_GPIOC
+#define ADC1_GPIO GPIOC
+
 // ACCEL_POT PC0
 #define ACCEL_POT_PORT PORTC
+#define ACCEL_POT_CHANNEL ADC_Channel_10
 #define ACCEL_POT GPIO_Pin_0
 
 // BRAKE_POT PC1
 #define BRAKE_POT_PORT PORTC
+#define BRAKE_POT_CHANNEL ADC_Channel_11
 #define BRAKE_POT GPIO_Pin_1
 
 // EXTRA_ADC1 PC2

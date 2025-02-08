@@ -2,6 +2,7 @@
 
 #include "BSP_ADC.h"
 #include "stm32f4xx.h"
+#include "daybreak_pins.h"
 
 static volatile uint16_t ADCresults[2];
 
@@ -40,20 +41,20 @@ static void ADC_InitDMA(void) {
  * @return  None
  */
 void BSP_ADC_Init(void) {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	// Enable the ADC clock
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	// Enable the PC clock for port C
+    RCC_APB2PeriphClockCmd(ADC1_APB1, ENABLE);	// Enable the ADC clock
+	RCC_AHB1PeriphClockCmd(ADC1_AHB1_GPIO, ENABLE);	// Enable the PC clock for port C
 
 	ADC_InitDMA();
 
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0;	// Using pin PC0
+	GPIO_InitStruct.GPIO_Pin = ACCEL_POT;	// Using pin PC0
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;	// Analog Input
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // High impedence
-	GPIO_Init(GPIOC,&GPIO_InitStruct);
+	GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
 
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1;	// Using pin PC1
+	GPIO_InitStruct.GPIO_Pin = BRAKE_POT;	// Using pin PC1
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN; // Pull down
-	GPIO_Init(GPIOC,&GPIO_InitStruct);    
+	GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);    
 
 	// ADC Common Init
 	ADC_CommonInitTypeDef ADC_CommonStruct;
@@ -78,8 +79,8 @@ void BSP_ADC_Init(void) {
 	// Configure the channels
 	// Apparently channel 2 has priority, or is at least read first.
 	// If you change the priorities, be prepared to have the order in the array change.
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_480Cycles);	// Accelerator
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_480Cycles);	// Brake
+	ADC_RegularChannelConfig(ADC1, ACCEL_POT_CHANNEL, 1, ADC_SampleTime_480Cycles);	// Accelerator
+	ADC_RegularChannelConfig(ADC1, BRAKE_POT_CHANNEL, 2, ADC_SampleTime_480Cycles);	// Brake
 
 	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
 
