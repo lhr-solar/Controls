@@ -43,7 +43,7 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-
+// NOTE: Park behaves the exact same as neutral in a normal car
 #define FOREACH_Gear(GEAR) \
         GEAR(FORWARD_GEAR),   \
         GEAR(PARK_GEAR),  \
@@ -55,6 +55,7 @@ typedef enum GEAR_ENUM {
 } Gear_t;
 
 // State Names
+// NOTE: Park is equivalent to Neutral
 typedef enum{
     FORWARD_DRIVE,
     PARK_STATE,

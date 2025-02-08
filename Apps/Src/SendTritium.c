@@ -135,9 +135,7 @@ extern const float pedalToPercent[];
 static float percentToFloat(uint8_t percent)
 {
     if (percent > 100)
-    {
         return 1.0f;
-    }
     return pedalToPercent[percent];
 }
 
@@ -145,10 +143,13 @@ static float percentToFloat(uint8_t percent)
  * @brief Updates the brakelight and brake indication on display
  */
 static void brakeUpdate(){
-    if(brakePedalPercent == BRAKE_PRESSED) {
+    if(brakePedalPercent == BRAKE_PRESSED) 
+    {
         Minions_Write(BRAKELIGHT, true);
         UpdateDisplay_SetBrake(true);
-    } else {
+    } 
+    else 
+    {
         Minions_Write(BRAKELIGHT, false);
         UpdateDisplay_SetBrake(false);
     }
@@ -160,17 +161,14 @@ static void brakeUpdate(){
  */
 static void cruiseVelCheckUpdate() {
     if (cruiseSet && velocityObserved >= MIN_CRUISE_VELOCITY)
-    {
         cruiseVelSetpoint = velocityObserved;
-    }
 }
 
 static bool bothPedalsPressed() {
     // Protect from both brake and accel being pressed (checks the smallest of ACCEL_PEDAL_PRESSED_THRESHOLD & 
     // ACCEL_PEDAL_THRESHOLD) to make sure we're never accelerating/sending current & also braking
-    if (brakePedalPercent == BRAKE_PRESSED && accelPedalPercent >= ACCEL_BRAKE_THROTTLE_OVERRIDE_THRESHOLD)  {
+    if (brakePedalPercent == BRAKE_PRESSED && accelPedalPercent >= ACCEL_BRAKE_THROTTLE_OVERRIDE_THRESHOLD)
         return true;
-    }
     return false;
 }
 
@@ -215,7 +213,7 @@ static void dumpInfo()
     printf("State: %s\n\r", stateName);
     printf("cruiseEnable: %d\n\r", cruiseEnable);
     printf("cruiseSet: %d\n\r", cruiseSet);
-    printf("brakePedalPercent: %d\n\r", brakePedalPercent);
+    printf("brakePedalPercent: %u\n\r", brakePedalPercent);
     printf("accelPedalPercent: %u\n\r", accelPedalPercent);
     printf("gear: %d\n\r", (uint8_t)gear);
     print_float("currentSetpoint: ", currentSetpoint);
@@ -241,9 +239,9 @@ static void readInputs()
     if (brakeSaturationCt < 3)
     {
         if (latest_pedal == 100) 
-            {brakeSaturationCt++;}
+            brakeSaturationCt++;
         else if (latest_pedal == 0 && brakeSaturationCt != 0)
-            {brakeSaturationCt--;}
+            brakeSaturationCt--;
         brakePedalPercent = BRAKE_UNPRESSED;
     }
     else if (brakeSaturationCt >= 3)
@@ -251,40 +249,45 @@ static void readInputs()
         brakePedalPercent = BRAKE_PRESSED;
 
         if (latest_pedal == 0)
-            {brakeSaturationCt = 0;}
+            brakeSaturationCt = 0;
     }
 
     accelPedalPercent = Pedals_Read(ACCELERATOR);
     // Used for accel hysteresis to prevent abrupt switches to/from ACCELERATE_CRUISE state
     if(accelSaturationCt < 3) {
         if(accelPedalPercent >= ACCEL_PEDAL_PRESSED_THRESHOLD)
-            {accelSaturationCt++;}
+            accelSaturationCt++;
         else if (accelSaturationCt != 0)
-            {accelSaturationCt--;}
+            accelSaturationCt--;
 
         if(accelSaturationCt == 0)
-            {accelPressed = false;}
+            accelPressed = false;
     }
     else if (accelSaturationCt >= 3) {
         if(accelPedalPercent <= ACCEL_PEDAL_UNPRESSED_THRESHOLD)
-            {accelSaturationCt--;}
+            accelSaturationCt--;
         
         accelPressed = true;
     }
 
     // Update buttons
     if(Minions_Read(CRUZ_EN)) { // Toggle button
-        if(cruiseEnableCounter < DEBOUNCE_PERIOD) {cruiseEnableCounter++;}
+        if(cruiseEnableCounter < DEBOUNCE_PERIOD) 
+            cruiseEnableCounter++;
     }
-    else {
-        if(cruiseEnableCounter > 0) {cruiseEnableCounter--;}
+    else 
+    {
+        if(cruiseEnableCounter > 0) 
+            cruiseEnableCounter--;
     }
     if(Minions_Read(CRUZ_ST)) { // When cruiseSetCounter reaches DEBOUNCE_PERIOD, cruiseSet will be on for one task 
                                 // cycle (only after being completely off, as determined by cruiseSetAllow being previously off)
-        if(cruiseSetCounter < DEBOUNCE_PERIOD) {cruiseSetCounter++;}
+        if(cruiseSetCounter < DEBOUNCE_PERIOD) 
+            cruiseSetCounter++;
     }
     else {
-        if(cruiseSetCounter > 0) {cruiseSetCounter--;}
+        if(cruiseSetCounter > 0) 
+            cruiseSetCounter--;
     } 
 
     // Update gears
@@ -301,9 +304,9 @@ static void readInputs()
     {
         // Fault behavior
         if (gearFaultCnt > GEAR_FAULT_THRESHOLD)
-            {assertSendTritiumError(SENDTRITIUM_ERR_GEAR_FAULT);}
+            assertSendTritiumError(SENDTRITIUM_ERR_GEAR_FAULT);
         else
-            {gearFaultCnt++;}
+            gearFaultCnt++;
     }
     else
     {
@@ -336,11 +339,24 @@ static void readInputs()
     // Debouncing
     cruiseEnableButton = false;
     cruiseSetButton = false;
-    if(cruiseEnableCounter == DEBOUNCE_PERIOD){cruiseEnableButton = true;}
-    else if(cruiseEnableCounter == 0){cruiseEnableButton = false;}
+    if(cruiseEnableCounter == DEBOUNCE_PERIOD) 
+    {
+        cruiseEnableButton = true;
+    }
+    else if(cruiseEnableCounter == 0)
+    {
+        cruiseEnableButton = false;
+    }
 
-    if(cruiseSetCounter == DEBOUNCE_PERIOD){cruiseSetButton = true;}
-    else if(cruiseSetCounter == 0){cruiseSetButton = false; cruiseSetAllow = true;} // Debounce & reset to allow cruise to be set again
+    if(cruiseSetCounter == DEBOUNCE_PERIOD) 
+    {
+        cruiseSetButton = true;
+    }
+    else if(cruiseSetCounter == 0) 
+    { // Debounce & reset to allow cruise to be set again
+        cruiseSetButton = false; 
+        cruiseSetAllow = true;
+    } 
 
     // Toggle CRUZ_EN
     if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious) // Falling edge toggle/CRUZ_EN detection
@@ -418,10 +434,13 @@ void ForwardDriveHandler()
     }
 
     // If braking, set current to 0. Otherwise, set current based on accel
-    if(brakePedalPercent == BRAKE_PRESSED || bothPedalsPressed()) {
+    if (brakePedalPercent == BRAKE_PRESSED || bothPedalsPressed()) 
+    {
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = 0.0f;
-    } else {
+    } 
+    else 
+    {
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
     }
@@ -476,7 +495,7 @@ void ParkDecider()
     if (gear == FORWARD_GEAR) // Protect from 
     {
         state = FSM[FORWARD_DRIVE];
-    }
+    } 
     else if (gear == REVERSE_GEAR) 
     {
         state = FSM[REVERSE_DRIVE];
@@ -490,10 +509,13 @@ void ParkDecider()
 void ReverseDriveHandler()
 {
     // If braking, set current to 0. Otherwise, set current based on accel
-    if(brakePedalPercent == BRAKE_PRESSED || bothPedalsPressed()) {
+    if(brakePedalPercent == BRAKE_PRESSED || bothPedalsPressed()) 
+    {
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = 0.0f;
-    } else {
+    } 
+    else 
+    {
         velocitySetpoint = -MAX_VELOCITY;
         currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
     }
@@ -542,15 +564,16 @@ void PoweredCruiseHandler()
 void PoweredCruiseDecider()
 {
     // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
-    if (brakePedalPercent == BRAKE_PRESSED || gear == PARK_GEAR || gear == REVERSE_GEAR)
+    if (gear == PARK_GEAR || gear == REVERSE_GEAR)
     {
         state = FSM[PARK_STATE];
         cruiseEnable = false;
     }
     // If cruise has been disabled, return to forward drive
-    else if (!cruiseEnable)
+    else if (!cruiseEnable || brakePedalPercent == BRAKE_PRESSED)
     {
         state = FSM[FORWARD_DRIVE];
+        cruiseEnable = false;
     }
     else if (accelPressed)
     {
@@ -587,14 +610,16 @@ void CoastingCruiseHandler()
 void CoastingCruiseDecider()
 {
     // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
-    if (brakePedalPercent == BRAKE_PRESSED || gear == PARK_GEAR || gear == REVERSE_GEAR)
+    if (gear == PARK_GEAR || gear == REVERSE_GEAR)
     {
         state = FSM[PARK_STATE];
+        cruiseEnable = false;
     }
     // If cruise has been disabled, return to forward drive
-    else if (!cruiseEnable)
+    else if (!cruiseEnable || brakePedalPercent == BRAKE_PRESSED)
     {
         state = FSM[FORWARD_DRIVE];
+        cruiseEnable = false;
     }
     else if (accelPressed)
     {
@@ -631,14 +656,16 @@ void AccelerateCruiseHandler()
 void AccelerateCruiseDecider()
 {
     // If you're no longer in FORWARD_GEAR or you're braking, exit cruise
-    if (brakePedalPercent == BRAKE_PRESSED || gear == PARK_GEAR || gear == REVERSE_GEAR)
+    if (gear == PARK_GEAR || gear == REVERSE_GEAR)
     {
         state = FSM[PARK_STATE];
+        cruiseEnable = false;
     }
     // If cruise has been disabled, return to forward drive
-    else if (!cruiseEnable)
+    else if (!cruiseEnable || brakePedalPercent == BRAKE_PRESSED)
     {
         state = FSM[FORWARD_DRIVE];
+        cruiseEnable = false;
     }
     else if (!accelPressed)
     {
@@ -701,7 +728,7 @@ void Task_SendTritium(void *p_arg)
             memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
             CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
             motorMsgCounter = 0;
-        }
+        } 
         else
         {
             motorMsgCounter++;
