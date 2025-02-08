@@ -3,6 +3,7 @@
 #include "BSP_UART.h"
 #include "stm32f4xx.h"
 #include "os.h"
+#include "daybreak_pins.h"
 
 #define TX_SIZE     128
 #define RX_SIZE     64
@@ -45,19 +46,19 @@ static void USART_DISPLAY_Init() {
     USART_InitTypeDef UART_InitStruct = {0};
 
     // Initialize clocks
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,  ENABLE);
+    RCC_APB1PeriphClockCmd(DISPLAY_APB1_UART, ENABLE);
+    RCC_AHB1PeriphClockCmd(DISPLAY_AHB1_GPIO,  ENABLE);
 
     // Initialize pins
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
+    GPIO_InitStruct.GPIO_Pin = DISPLAY_RX | DISPLAY_TX;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_Init(DISPLAY_GPIO, &GPIO_InitStruct);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF11_UART4);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF11_UART4);
+    GPIO_PinAFConfig(DISPLAY_GPIO, DISPLAY_RX_Pinsource, DISPLAY_AF);
+    GPIO_PinAFConfig(DISPLAY_GPIO, DISPLAY_TX_Pinsource, DISPLAY_AF);
 
     //Initialize UART4
     UART_InitStruct.USART_BaudRate = 115200;
@@ -66,15 +67,15 @@ static void USART_DISPLAY_Init() {
     UART_InitStruct.USART_Parity = USART_Parity_No;
     UART_InitStruct.USART_StopBits = USART_StopBits_1;
     UART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_Init(UART4, &UART_InitStruct);
+    USART_Init(DISPLAY_UART, &UART_InitStruct);
 
     // Enable interrupts
 
-    USART_Cmd(UART4, ENABLE);
+    USART_Cmd(DISPLAY_UART, ENABLE);
 
     // Enable NVIC
     NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = DISPLAY_IRQ;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -89,19 +90,19 @@ static void USART_USB_Init() {
     USART_InitTypeDef UART_InitStruct = {0};
 
     // Initialize clocks
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,  ENABLE);
+    RCC_APB1PeriphClockCmd(USB_APB1_UART, ENABLE);
+    RCC_AHB1PeriphClockCmd(USB_AHB1_GPIO,  ENABLE);
 
     // Initialize pins
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+    GPIO_InitStruct.GPIO_Pin = USB_TX | USB_RX;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_Init(USB_GPIO, &GPIO_InitStruct);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+    GPIO_PinAFConfig(USB_GPIO, USB_TX_Pinsource, USB_AF);
+    GPIO_PinAFConfig(USB_GPIO, USB_RX_Pinsource, USB_AF);
 
     //Initialize UART2
     UART_InitStruct.USART_BaudRate = 115200;
@@ -110,15 +111,15 @@ static void USART_USB_Init() {
     UART_InitStruct.USART_Parity = USART_Parity_No;
     UART_InitStruct.USART_StopBits = USART_StopBits_1;
     UART_InitStruct.USART_WordLength = USART_WordLength_8b;
-    USART_Init(USART2, &UART_InitStruct);
+    USART_Init(USB_UART, &UART_InitStruct);
 
-    USART_Cmd(USART2, ENABLE);
+    USART_Cmd(USB_UART, ENABLE);
 
     // Enable NVIC
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = USB_IRQ;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 

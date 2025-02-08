@@ -117,13 +117,27 @@
 // No extra_uart_init (TODO)
 
 // USB - USART2 - PA2_TX PA3_RX
-#define USB_PORT PORTA
+#define USB_GPIO GPIOA
+#define USB_UART USART2
+#define USB_IRQ USART2_IRQn
+#define USB_AF GPIO_AF_USART2
+#define USB_APB1_UART RCC_APB1Periph_USART2
+#define USB_AHB1_GPIO RCC_AHB1Periph_GPIOA
+#define USB_TX_Pinsource GPIO_PinSource2
 #define USB_TX   GPIO_Pin_2
+#define USB_RX_Pinsource GPIO_PinSource3
 #define USB_RX   GPIO_Pin_3
 
 // DISPLAY UART4 - PA11_RX PA12_TX
-#define DISPLAY_PORT PORTA
+#define DISPLAY_GPIO GPIOA
+#define DISPLAY_UART UART4
+#define DISPLAY_IRQ UART4_IRQn
+#define DISPLAY_AF GPIO_AF11_UART4
+#define DISPLAY_APB1_UART RCC_APB1Periph_UART4
+#define DISPLAY_AHB1_GPIO RCC_AHB1Periph_GPIOA
+#define DISPLAY_TX_Pinsource GPIO_PinSource12
 #define DISPLAY_TX   GPIO_Pin_12
+#define DISPLAY_RX_Pinsource GPIO_PinSource11
 #define DISPLAY_RX   GPIO_Pin_11
 
 // EXTRA_UART UART5 - PB12_RX PB13_TX
