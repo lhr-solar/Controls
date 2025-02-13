@@ -24,7 +24,9 @@
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)    // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
+// Used to define threshold for when to start powering the motor for movement
 #define ACCEL_PEDAL_THRESHOLD 15 // percent
+
 #define BRAKE_UNPRESSED 100 // percent - the switch is digital
 #define BRAKE_PRESSED 0 // percent
 
@@ -38,7 +40,9 @@
 #define ACCEL_PEDAL_UNPRESSED_THRESHOLD 10 // percent
 #define ACCEL_PEDAL_PRESSED_THRESHOLD 25 // percent
 
-#define ACCEL_BRAKE_THROTTLE_OVERRIDE_THRESHOLD
+// When pressing both accel and brake, this defines threshold amount the accel pedal can be pressed before 
+// we cut off current to the motor (thereby only braking - applies mostly to Daybreak's mechanical brakes)
+#define ACCEL_BRAKE_OVERRIDE_THRESHOLD 25  // percent
 
 #define PEDAL_MIN 0        // percent
 #define PEDAL_MAX 100      // percent

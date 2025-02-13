@@ -167,7 +167,7 @@ static void cruiseVelCheckUpdate() {
 static bool bothPedalsPressed() {
     // Protect from both brake and accel being pressed (checks the smallest of ACCEL_PEDAL_PRESSED_THRESHOLD & 
     // ACCEL_PEDAL_THRESHOLD) to make sure we're never accelerating/sending current & also braking
-    if (brakePedalPercent == BRAKE_PRESSED && accelPedalPercent >= ACCEL_BRAKE_THROTTLE_OVERRIDE_THRESHOLD)
+    if (brakePedalPercent == BRAKE_PRESSED && accelPedalPercent >= ACCEL_BRAKE_OVERRIDE_THRESHOLD)
         return true;
     return false;
 }
