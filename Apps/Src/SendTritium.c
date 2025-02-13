@@ -44,7 +44,7 @@ static Gear_t gear = PARK_GEAR;
 static float currentSetpoint = 0.0f;
 static float velocitySetpoint = 0.0f;
 static float cruiseVelSetpoint = 0.0f;
-static float busCurrentSetPoint = 69.0f; // why is this float and not int?
+static float busCurrentSetPoint = CONT_MOCO_BATTERY_CURRENT / MAX_MOCO_CURRENT; // why is this float and not int?
 
 // Current observed velocity
 static float velocityObserved = 0.0f;
@@ -477,13 +477,12 @@ void ParkHandler()
     {
         UpdateDisplay_SetCruiseState(DISP_DISABLED);
     }
+
     velocitySetpoint = MAX_VELOCITY;
     currentSetpoint = 0.0f;
 
     // Turn brakelight on/off
     brakeUpdate();
-
-    cruiseEnable = false; // Doesn't affect operation of cruiseEnable, as readInputs() happens after stateHandler
 }
 
 /**
@@ -511,7 +510,7 @@ void ReverseDriveHandler()
     // If braking, set current to 0. Otherwise, set current based on accel
     if(brakePedalPercent == BRAKE_PRESSED || bothPedalsPressed()) 
     {
-        velocitySetpoint = MAX_VELOCITY;
+        velocitySetpoint = -MAX_VELOCITY;
         currentSetpoint = 0.0f;
     } 
     else 
@@ -546,6 +545,7 @@ void PoweredCruiseHandler()
     {
         UpdateDisplay_SetCruiseState(DISP_ACTIVE);
     }
+    
     velocitySetpoint = cruiseVelSetpoint;
     currentSetpoint = 1.0f;
 

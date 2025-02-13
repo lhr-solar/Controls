@@ -14,20 +14,24 @@
 
 //#define SENDTRITIUM_PRINT_MES
 
+// Macros
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
-// Macros
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
-
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)    // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
 #define ACCEL_PEDAL_THRESHOLD 15 // percent
 #define BRAKE_UNPRESSED 100 // percent - the switch is digital
 #define BRAKE_PRESSED 0 // percent
+
+// Motor Controller current values. Current is in Amps (A)
+#define MAX_MOCO_BATTERY_CURRENT 64.0f  // NOTE: Provided only for reference. This 64A max for daybreak, anticipated to be 135 for next-gen
+#define CONT_MOCO_BATTERY_CURRENT 30.0f // Continuous 
+#define MAX_MOCO_CURRENT 122.0f
 
 // Accel deadbands (for stability of ACCELERATE_CRUISE entry/exit)
 // NOTE: brake deadbands are unneeded, as they're digital & they have saturation checks in SendTritium.c
