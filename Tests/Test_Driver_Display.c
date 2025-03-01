@@ -17,6 +17,10 @@
 // #include "bsp.h"
 // #include "Contactors.h"
 #include "Display.h"
+#include "bsp.h"   // for writing to UART
+#define DISP_OUT UART_3
+// static const char *TERMINATOR = "\xff\xff\xff";
+
 
 // Stolen from UpdateDisplay.c
 /**
@@ -79,8 +83,27 @@ int main()
 	DisplayError_t err;
 
 	err = Display_Init();
-	assertDisplayError(err);
+	//assertDisplayError(err);
+	DisplayCmd_t setCmd = {
+		.compOrCmd = (char*)"faulterr",
+		.attr = "val",
+		.op = "=",
+		.numArgs = 1,
+		.argTypes = {INT_ARG},
+		{
+			{.num="1200"}
+		}
+	};
+	Display_Send(setCmd);
 	delay();
+	Display_Send(setCmd);
+
+
+
+	// char* faultMsg = "";
+	// faultMsg = "vel.val=12";
+    // BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
+	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	// Display the fault page
 	DisplayCmd_t pgCmd = {
@@ -92,7 +115,15 @@ int main()
 			{{.num = FAULT}}};
 	err = Display_Send(pgCmd);
 	//assertDisplayError(err);
+	// BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
+	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	Display_Send(setCmd);
 	delay();
+
+	// BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
+	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	Display_Send(setCmd);
+
 
 	// Display the info page
 	pgCmd = (DisplayCmd_t){
@@ -103,8 +134,11 @@ int main()
 			.argTypes = {true},
 			{{.num = INFO}}};
 	err = Display_Send(pgCmd);
+	Display_Send(setCmd);
 	//assertDisplayError(err);
 	delay();
+	Display_Send(setCmd);
+
 
 	// Show the array icon
 	DisplayCmd_t toggleCmd = {
@@ -117,6 +151,8 @@ int main()
 	err = Display_Send(toggleCmd);
 	//assertDisplayError(err);
 	delay();
+	Display_Send(setCmd);
+
 
 	// Don't show the array icon
 	toggleCmd = (DisplayCmd_t){
@@ -129,11 +165,17 @@ int main()
 	err = Display_Send(toggleCmd);
 	//assertDisplayError(err);
 	delay();
+	//assertDisplayError(err);
+	Display_Send(setCmd);
 
-	// Test the fault screen
+
+	//Test the fault screen
 	error_code_t faultCode = 0x69;
 	err = Display_Error(faultCode);
-	//assertDisplayError(err);
+	printf("%x\n", err);
+	Display_Send(setCmd);
+
+
 
 	while (1)
 	{

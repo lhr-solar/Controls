@@ -106,34 +106,40 @@ DisplayError_t Display_Error(){
 
 	// Combine two strings (code and message) before sending to display, in order to use one UART write
 	// OS Error
-    sprintf(setFaultCode, "%s%d\n", "oserr.val=", (uint16_t)Error_OS);
+    sprintf(setFaultCode, "%s%d\n", "oserr.val=", (uint16_t) 0x12);
 	sprintf(setFaultMsg, "%s", (char *)ErrMsg_OS);
 	faultMsg = strcat(setFaultCode, setFaultMsg);
     BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
     memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
 	memset(setFaultMsg, 0, strlen(setFaultMsg) * sizeof(char));
 
+
 	// ReadCarCAN Error
-    sprintf(setFaultCode, "%s%d\n", "rccerr.val=", (uint16_t)Error_ReadCarCAN);
+    sprintf(setFaultCode, "%s%d\n", "rccerr.val=", (uint16_t) 0x12);
 	sprintf(setFaultMsg, "%s", (char *)ErrMsg_ReadCarCAN);
 	faultMsg = strcat(setFaultCode, setFaultMsg);
     BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
     memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
 	memset(setFaultMsg, 0, strlen(setFaultMsg) * sizeof(char));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+
 
 	// Motor Controller Error
-    sprintf(setFaultCode, "%s%d\n", "merr.val=", (uint16_t)Error_ReadTritium);
+    sprintf(setFaultCode, "%s%d\n", "merr.val=", (uint16_t) 0x12);
 	sprintf(setFaultMsg, "%s", (char *)ErrMsg_ReadTritium);
 	faultMsg = strcat(setFaultCode, setFaultMsg);
     BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
     memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
 	memset(setFaultMsg, 0, strlen(setFaultMsg) * sizeof(char));
+	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+
 
 	// Display Error
 	// TODO: Display error messages are taken care in UpdateDisplay?
-    sprintf(setFaultCode, "%s%d", "disperr.val=", (uint16_t)Error_UpdateDisplay);
+    sprintf(setFaultCode, "%s%d", "disperr.val=", (uint16_t) 0x12);
     BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
+    memset(setFaultCode, 0x12, strlen(setFaultCode) * sizeof(char));
 	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	return DISPLAY_ERR_NONE;
