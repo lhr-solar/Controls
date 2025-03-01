@@ -15,7 +15,7 @@
 #include "common.h"
 #include <bsp.h>
 
-typedef enum {USB, DISPLAY, ExtraUART, NUM_UART} UART_t;
+typedef enum {USB, DISPLAY, NUM_UART} UART_t;
 /**
  * @brief   Initializes the UART peripheral
  */
