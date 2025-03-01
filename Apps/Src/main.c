@@ -60,7 +60,7 @@ int main(void) {
     OSInit(&err);
     IdleInit();
     TaskSwHook_Init();
-    StatusLED_Init();
+    Task_StatusLED_Init();
 
     assertOSError(err);
 
@@ -92,7 +92,7 @@ int main(void) {
     while(1);
 }
 
-void StatusLED_Init(void) {
+void Task_StatusLED_Init(void) {
     BSP_GPIO_Init(OS_FAULT_PORT, OS_FAULT, OUTPUT, false);
     BSP_GPIO_Init(IG1_PORT, IG1, OUTPUT, false);
     BSP_GPIO_Init(IG2_PORT, IG2, OUTPUT, false);
