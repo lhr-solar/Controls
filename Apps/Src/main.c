@@ -60,6 +60,7 @@ int main(void) {
     OSInit(&err);
     IdleInit();
     TaskSwHook_Init();
+    StatusLED_Init();
 
     assertOSError(err);
 
@@ -89,6 +90,19 @@ int main(void) {
     assertOSError(err);
 
     while(1);
+}
+
+void StatusLED_Init(void) {
+    BSP_GPIO_Init(OS_FAULT_PORT, OS_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(IG1_PORT, IG1, OUTPUT, false);
+    BSP_GPIO_Init(IG2_PORT, IG2, OUTPUT, false);
+    BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false);
+    BSP_GPIO_Init(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, OUTPUT, false);
+    BSP_GPIO_Init(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, OUTPUT, false);
+    BSP_GPIO_Init(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(BPS_FAULT_PORT, BPS_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(CRUISE_IND_PORT, CRUISE_IND, OUTPUT, false);
 }
 
 void Task_Init(void *p_arg){

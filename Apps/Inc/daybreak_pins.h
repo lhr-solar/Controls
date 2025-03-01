@@ -113,8 +113,6 @@
 
 // UART/USART
 
-// No extra_uart_init (TODO)
-
 // USB - USART2 - PA2_TX PA3_RX
 #define USB_GPIO GPIOA
 #define USB_UART USART2
@@ -157,8 +155,6 @@
 #define ExtraUART_RX   GPIO_Pin_12
 
 // ADC
-
-// no extra_adc_init (TODO)
 
 #define ADC1_APB1 RCC_APB2Periph_ADC1
 #define ADC1_AHB1_GPIO RCC_AHB1Periph_GPIOC
