@@ -377,7 +377,7 @@ void UART4_IRQHandler(void) {
     OSIntExit();
 }
 
-void UART4_IRQHandler(void) {
+void UART5_IRQHandler(void) {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();

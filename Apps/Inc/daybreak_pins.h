@@ -146,9 +146,9 @@
 #define ExtraUART_AF GPIO_AF11_UART5
 #define ExtraUART_APB1_UART RCC_APB1Periph_UART5
 #define ExtraUART_AHB1_GPIO RCC_AHB1Periph_GPIOB
-#define ExtraUART_TX_Pinsource GPIO_Pinsource13
+#define ExtraUART_TX_Pinsource GPIO_PinSource13
 #define ExtraUART_TX GPIO_Pin_13
-#define ExtraUART_RX_Pinsource GPIO_Pinsource12
+#define ExtraUART_RX_Pinsource GPIO_PinSource12
 #define ExtraUART_RX GPIO_Pin_12
 
 

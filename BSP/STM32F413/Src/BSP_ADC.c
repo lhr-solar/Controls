@@ -58,11 +58,11 @@ void BSP_ADC_Init(void) {
     
     GPIO_InitStruct.GPIO_Pin = ExtraADC_1;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
-    GPIO_INIT(ADC1_GPIO,&GPIO_InitStruct);
+    GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
 
     GPIO_InitStruct.GPIO_Pin = ExtraADC_2;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
-    GPIO_INIT(ADC1_GPIO,&GPIO_InitStruct);
+    GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
 
 	// ADC Common Init
 	ADC_CommonInitTypeDef ADC_CommonStruct;
