@@ -16,6 +16,7 @@
 #include "fifo.h"
 static txfifo_t usbTxFifo;
 static txfifo_t displayTxFifo;
+static txfifo_t extraTxFifo;
 
 #define FIFO_TYPE char
 #define FIFO_SIZE RX_SIZE
@@ -23,19 +24,23 @@ static txfifo_t displayTxFifo;
 #include "fifo.h"
 static rxfifo_t usbRxFifo;
 static rxfifo_t displayRxFifo;
+static rxfifo_t extraRxFifo;
 
 static bool usbLineReceived = false;
 static bool displayLineReceived = false;
+static bool extraLineReceived = false;
 
 static callback_t usbRxCallback = NULL;
 static callback_t usbTxCallback = NULL;
 static callback_t displayRxCallback = NULL;
 static callback_t displayTxCallback = NULL;
+static callback_t extraRxCallback = NULL;
+static callback_t extraTxCallback = NULL;
 
-static rxfifo_t *rx_fifos[NUM_UART]     = {&usbRxFifo, &displayRxFifo};
-static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &displayTxFifo};
-static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceived};
-static USART_TypeDef *handles[NUM_UART] = {USART2, UART4};
+static rxfifo_t *rx_fifos[NUM_UART]     = {&usbRxFifo, &displayRxFifo, &extraRxFifo};
+static txfifo_t *tx_fifos[NUM_UART]     = {&usbTxFifo, &displayTxFifo, &extraTxFifo};
+static bool     *lineRecvd[NUM_UART]    = {&usbLineReceived, &displayLineReceived, &extraLineReceived};
+static USART_TypeDef *handles[NUM_UART] = {USB_UART, DISPLAY_UART, ExtraUART_UART};
 
 // Originally, used USART3, now uses UART4 for Daybreak (hopefully display doesn't need USART)
 static void USART_DISPLAY_Init() {
@@ -126,6 +131,50 @@ static void USART_USB_Init() {
     setvbuf(stdout, NULL, _IONBF, 0);
 }
 
+static void Extra_UART_Init() {
+    extraTxFifo = txfifo_new();
+    extraRxFifo = rxfifo_new();
+
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    USART_InitTypeDef UART_InitStruct = {0};
+
+    // Initialize clocks
+    RCC_APB1PeriphClockCmd(ExtraUART_APB1_UART, ENABLE);
+    RCC_AHB1PeriphClockCmd(ExtraUART_AHB1_GPIO,  ENABLE);
+
+    // Initialize pins
+    GPIO_InitStruct.GPIO_Pin = ExtraUART_RX | ExtraUART_TX;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_25MHz;
+    GPIO_Init(ExtraUART_GPIO, &GPIO_InitStruct);
+
+    GPIO_PinAFConfig(ExtraUART_GPIO, ExtraUART_RX_Pinsource, ExtraUART_AF);
+    GPIO_PinAFConfig(ExtraUART_GPIO, ExtraUART_TX_Pinsource, ExtraUART_AF);
+
+    //Initialize UART4
+    UART_InitStruct.USART_BaudRate = 115200;
+    UART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    UART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+    UART_InitStruct.USART_Parity = USART_Parity_No;
+    UART_InitStruct.USART_StopBits = USART_StopBits_1;
+    UART_InitStruct.USART_WordLength = USART_WordLength_8b;
+    USART_Init(ExtraUART_UART, &UART_InitStruct);
+
+    // Enable interrupts
+
+    USART_Cmd(ExtraUART_UART, ENABLE);
+
+    // Enable NVIC
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = ExtraUART_IRQ;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
 /**
  * @brief   Initializes the UART peripheral
  */
@@ -141,6 +190,10 @@ static void BSP_UART_Init_Internal(callback_t rxCallback, callback_t txCallback,
         displayRxCallback = rxCallback;
         displayTxCallback = txCallback;
         break;
+    case ExtraUART:
+        Extra_UART_Init();
+        extraRxCallback = rxCallback;
+        extraTxCallback = txCallback;
     default:
         // Error
         break;
@@ -320,6 +373,49 @@ void UART4_IRQHandler(void) {
         }
     }
     if(USART_GetITStatus(UART4, USART_IT_ORE) != RESET);
+
+    OSIntExit();
+}
+
+void UART4_IRQHandler(void) {
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    OSIntEnter();
+    CPU_CRITICAL_EXIT();
+
+    if(USART_GetITStatus(UART5, USART_IT_RXNE) != RESET) {
+        uint8_t data = UART5->DR;
+        bool removeSuccess = 1;
+        if(data == '\r'){
+            extraLineReceived = true;
+            if(extraRxCallback != NULL)
+                extraRxCallback();
+        }
+        // Check if it was a backspace.
+        // '\b' for minicmom
+        // '\177' for putty
+        if(data != '\b' && data != '\177') rxfifo_put(&extraRxFifo, data);
+        // Sweet, just a "regular" key. Put it into the fifo
+        // Doesn't matter if it fails. If it fails, then the data gets thrown away
+        // and the easiest solution for this is to increase RX_SIZE
+        else {
+            char junk;
+            // Delete the last entry!
+            removeSuccess = rxfifo_popback(&extraRxFifo, &junk);
+        }
+        if(removeSuccess) {
+            UART5->DR = data;
+        }
+    }
+    if(USART_GetITStatus(UART5, USART_IT_TC) != RESET) {
+        // If getting data from fifo fails i.e. the tx fifo is empty, then turn off the TX interrupt
+        if(!txfifo_get(&extraTxFifo, (char*)&(UART5->DR))) {
+            USART_ITConfig(UART5, USART_IT_TC, RESET);
+            if(extraTxCallback != NULL)
+                extraTxCallback();
+        }
+    }
+    if(USART_GetITStatus(UART5, USART_IT_ORE) != RESET);
 
     OSIntExit();
 }

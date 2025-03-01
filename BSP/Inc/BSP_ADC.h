@@ -22,6 +22,8 @@
 
 typedef enum 
 {
+    Extra1,
+    Extra2,
     Accelerator_ADC, 
     Brake_ADC,
     NUMBER_OF_CHANNELS
