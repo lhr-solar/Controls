@@ -113,7 +113,6 @@
 
 // UART/USART
 
-// The pins have been changed in BSP_UART.C (hopefully correctly)
 // No extra_uart_init (TODO)
 
 // USB - USART2 - PA2_TX PA3_RX
@@ -141,6 +140,18 @@
 #define DISPLAY_RX   GPIO_Pin_11
 
 // EXTRA_UART UART5 - PB12_RX PB13_TX
+#define ExtraUART_GPIO GPIOB
+#define ExtraUART_UART UART5
+#define ExtraUART_IRQ UART5_IRQn
+#define ExtraUART_AF GPIO_AF11_UART5
+#define ExtraUART_APB1_UART RCC_APB1Periph_UART5
+#define ExtraUART_AHB1_GPIO RCC_AHB1Periph_GPIOB
+#define ExtraUART_TX_Pinsource GPIO_Pinsource13
+#define ExtraUART_TX GPIO_Pin_13
+#define ExtraUART_RX_Pinsource GPIO_Pinsource12
+#define ExtraUART_RX GPIO_Pin_12
+
+
 #define ExtraUART_PORT PORTB
 #define ExtraUART_TX   GPIO_Pin_13
 #define ExtraUART_RX   GPIO_Pin_12
@@ -164,12 +175,14 @@
 #define BRAKE_POT GPIO_Pin_1
 
 // EXTRA_ADC1 PC2
-#define ExtraADC1_PORT PORTC
-#define ExtraADC1 GPIO_Pin_2
+#define ExtraADC_1_PORT PORTC
+#define ExtraADC_1_CHANNEL ADC_Channel_12
+#define ExtraADC_1 GPIO_Pin_2
 
 // EXTRA_ADC2 PC3
-#define ExtraADC2_PORT PORTC
-#define ExtraADC2 GPIO_Pin_3
+#define ExtraADC_2_PORT PORTC
+#define ExtraADC_2_CHANNEL ADC_Channel_13
+#define ExtraADC_2 GPIO_Pin_3
 
 // CAN
 
