@@ -541,7 +541,7 @@ void Task_ReadCarCAN(void *p_arg)
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
 {
     Error_ReadCarCAN = (error_code_t)rcc_err; // Store error code for inspection
-    ErrMsg_ReadCarCAN = ENUM_TO_STRING(rcc_err);    // Store error message for inspection
+    SET_ERR_MSG_HEX("RCC", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
     
     switch (rcc_err)
     {

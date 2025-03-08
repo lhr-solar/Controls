@@ -15,6 +15,7 @@
 #include "common.h"
 #include "os.h"
 #include "config.h"
+// #include "Display.h"
 
 /**
  * Task initialization macro
@@ -52,12 +53,27 @@
 #define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
 #define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
 
-// Macro for enum name -> string conversion
-#define ENUM_TO_STRING(ENUM) #ENUM
+/**
+ * Macro for adding error id to the error 
+ * message array for desplaiying the fault.
+ * Error id is a 16 bit number, so it is
+ * split into 4 hex characters.
+ */
+
+// uOS_ERR_XXXX
+#define ERR_MSG_OFFSET 9
+#define SET_ERR_MSG_HEX(prefix, arr, err) do { \
+    arr[0] = '\"'; \
+    strncpy(arr + 1, prefix, 4); \
+    strncpy(arr + 4, "_ERR_", 6); \
+    snprintf(arr + ERR_MSG_OFFSET, 5, "%04X", (err) & 0xFFFF); \
+    arr[ERR_MSG_OFFSET + 4] = '\"'; \
+    arr[ERR_MSG_OFFSET + 5] = '\0'; \
+} while(0)
 
 /**
  * Task error variable type
-*/
+ */
 typedef uint16_t error_code_t;
 
 /**
@@ -139,14 +155,17 @@ extern error_code_t Error_ReadCarCAN;
 extern error_code_t Error_UpdateDisplay;
 extern error_code_t Error_OS;
 
-extern char* ErrMsg_ReadTritium;
-extern char* ErrMsg_ReadCarCAN;
-extern char* ErrMsg_UpdateDisplay;
-extern char* ErrMsg_OS;
+// Define the length of the error code message
+#define ERR_CODE_LEN 16
+
+extern char ErrMsg_ReadTritium[ERR_CODE_LEN];
+extern char ErrMsg_ReadCarCAN[ERR_CODE_LEN];
+extern char ErrMsg_UpdateDisplay[ERR_CODE_LEN];
+extern char ErrMsg_OS[ERR_CODE_LEN];
 
 /**
  * Error-handling option enums
-*/
+ */
 
 // Scheduler lock parameter option for asserting a task error
 typedef enum {
@@ -163,7 +182,7 @@ typedef enum {
 /**
  * @brief For use in error handling: opens array and motor precharge bypass contactor
  * and turns on additional brakelight to signal that a critical error happened.
-*/
+ */
 void EmergencyContactorOpen();
 
 /**
@@ -174,7 +193,7 @@ void EmergencyContactorOpen();
  * @param errorCallback a callback function to a handler for that specific error, 
  * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
-*/
+ */
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable);
 
 /**

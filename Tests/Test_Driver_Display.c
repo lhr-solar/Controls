@@ -17,6 +17,7 @@
 // #include "bsp.h"
 // #include "Contactors.h"
 #include "Display.h"
+#include "ReadTritium.h"
 #include "bsp.h"   // for writing to UART
 #define DISP_OUT UART_3
 // static const char *TERMINATOR = "\xff\xff\xff";
@@ -48,31 +49,31 @@ typedef enum
 	FAULT_CODE
 } Component_t;
 
-static char *compStrings[15] = {
-		// Boolean components
-		"ltime",
-		"head",
-		"rtime",
-		"hzd",
-		"arr",
-		"mot",
-		// Non-boolean components
-		"vel",
-		"accel",
-		"soc",
-		"supp",
-		"cruiseSt",
-		"rbsSt",
-		"gear",
-		// Fault code components
-		"oserr",
-		"faulterr"};
+// static char *compStrings[15] = {
+// 		// Boolean components
+// 		"ltime",
+// 		"head",
+// 		"rtime",
+// 		"hzd",
+// 		"arr",
+// 		"mot",
+// 		// Non-boolean components
+// 		"vel",
+// 		"accel",
+// 		"soc",
+// 		"supp",
+// 		"cruiseSt",
+// 		"rbsSt",
+// 		"gear",
+// 		// Fault code components
+// 		"oserr",
+// 		"faulterr"};
 
 // Delay; Don't know how long
 void delay(void)
 {
 	volatile int j;
-	for (j = 0; j < 9999999; j++)
+	for (j = 0; j < 1000000; j++)
 	{
 		continue;
 	}
@@ -84,26 +85,26 @@ int main()
 
 	err = Display_Init();
 	//assertDisplayError(err);
-	DisplayCmd_t setCmd = {
-		.compOrCmd = (char*)"faulterr",
-		.attr = "val",
-		.op = "=",
-		.numArgs = 1,
-		.argTypes = {INT_ARG},
-		{
-			{.num="1200"}
-		}
-	};
-	Display_Send(setCmd);
-	delay();
-	Display_Send(setCmd);
+	// DisplayCmd_t setCmd = {
+	// 	.compOrCmd = (char*)"faulterr",
+	// 	.attr = "val",
+	// 	.op = "=",
+	// 	.numArgs = 1,
+	// 	.argTypes = {STR_ARG},
+	// 	{
+	// 		{.str="1200"}
+	// 	}
+	// };
+	// Display_Send(setCmd);
+	// delay();
+	// Display_Send(setCmd);
 
 
 
-	// char* faultMsg = "";
-	// faultMsg = "vel.val=12";
-    // BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
-	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	// // char* faultMsg = "";
+	// // faultMsg = "vel.val=12";
+    // // BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
+	// // BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	// Display the fault page
 	DisplayCmd_t pgCmd = {
@@ -113,67 +114,75 @@ int main()
 			.numArgs = 1,
 			.argTypes = {true},
 			{{.num = FAULT}}};
-	err = Display_Send(pgCmd);
-	//assertDisplayError(err);
-	// BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
-	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-	Display_Send(setCmd);
-	delay();
+	
+	// //assertDisplayError(err);
+	// // BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
+	// // BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	// Display_Send(setCmd);
+	// delay();
 
-	// BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
-	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-	Display_Send(setCmd);
-
-
-	// Display the info page
-	pgCmd = (DisplayCmd_t){
-			.compOrCmd = "page",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 1,
-			.argTypes = {true},
-			{{.num = INFO}}};
-	err = Display_Send(pgCmd);
-	Display_Send(setCmd);
-	//assertDisplayError(err);
-	delay();
-	Display_Send(setCmd);
+	// // BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
+	// // BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	// Display_Send(setCmd);
 
 
-	// Show the array icon
-	DisplayCmd_t toggleCmd = {
-			.compOrCmd = "vis",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 2,
-			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[ARRAY]}, {.num = 1}}};
-	err = Display_Send(toggleCmd);
-	//assertDisplayError(err);
-	delay();
-	Display_Send(setCmd);
+	// // Display the info page
+	// pgCmd = (DisplayCmd_t){
+	// 		.compOrCmd = "page",
+	// 		.attr = NULL,
+	// 		.op = NULL,
+	// 		.numArgs = 1,
+	// 		.argTypes = {true},
+	// 		{{.num = INFO}}};
+	// err = Display_Send(pgCmd);
+	// Display_Send(setCmd);
+	// //assertDisplayError(err);
+	// delay();
+	// Display_Send(setCmd);
 
 
-	// Don't show the array icon
-	toggleCmd = (DisplayCmd_t){
-			.compOrCmd = "vis",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 2,
-			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[ARRAY]}, {.num = 0}}};
-	err = Display_Send(toggleCmd);
-	//assertDisplayError(err);
-	delay();
-	//assertDisplayError(err);
-	Display_Send(setCmd);
+	// // Show the array icon
+	// DisplayCmd_t toggleCmd = {
+	// 		.compOrCmd = "vis",
+	// 		.attr = NULL,
+	// 		.op = NULL,
+	// 		.numArgs = 2,
+	// 		.argTypes = {STR_ARG, INT_ARG},
+	// 		{{.str = compStrings[ARRAY]}, {.num = 1}}};
+	// err = Display_Send(toggleCmd);
+	// //assertDisplayError(err);
+	// delay();
+	// Display_Send(setCmd);
+
+
+	// // Don't show the array icon
+	// toggleCmd = (DisplayCmd_t){
+	// 		.compOrCmd = "vis",
+	// 		.attr = NULL,
+	// 		.op = NULL,
+	// 		.numArgs = 2,
+	// 		.argTypes = {STR_ARG, INT_ARG},
+	// 		{{.str = compStrings[ARRAY]}, {.num = 0}}};
+	// err = Display_Send(toggleCmd);
+	// //assertDisplayError(err);
+	// delay();
+	// //assertDisplayError(err);
+	// Display_Send(setCmd);
 
 
 	//Test the fault screen
-	error_code_t faultCode = 0x69;
-	err = Display_Error(faultCode);
+	// error_code_t faultCode = 0x69;
+
+	//delay();
+	delay();
+	assertOSError(OS_ERR_X);
+	// assertTritiumError(T_WATCHDOG_LAST_RESET_ERR);
+	// Display_Error();
+	
+	//_assertOSError(OS_ERR_X);
+	//err = Display_Error();
 	printf("%x\n", err);
-	Display_Send(setCmd);
+	// Display_Send(setCmd);
 
 
 

@@ -19,6 +19,13 @@
 
 #define MAX_ARGS 2	// maximum # of arguments in a command packet
 
+#define DISP_OUT UART_3
+#define MAX_MSG_LEN 32
+#define MAX_ARG_LEN 16
+
+#define NUM_COMPONENTS 21
+extern const char* DISPLAY_COMP_STR[NUM_COMPONENTS];
+
 /**
  * Error types
  */
@@ -40,10 +47,11 @@ typedef enum{ // Currently only ERR_NONE and ERR_PARSE are used
 /**
  * All three pages on the HMI 
  */
-typedef enum{
-	STARTUP	=0,
-	INFO,
-	FAULT
+typedef enum Page {
+	STARTUP	= (uint32_t) 0,
+	INFO 	= (uint32_t) 1,
+	FAULT 	= (uint32_t) 2,
+	EVAC    = (uint32_t) 3
 } Page_t;
 
 /**
@@ -98,7 +106,7 @@ DisplayError_t Display_Error();
  * @param SOC_percent the state of charge of the battery in percent
  * @param supp_mv the voltage of the battery in millivolts
  * @returns DisplayError_t
-*/
+ */
 DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
 
 #endif
