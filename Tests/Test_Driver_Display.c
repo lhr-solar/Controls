@@ -18,36 +18,14 @@
 // #include "Contactors.h"
 #include "Display.h"
 #include "ReadTritium.h"
+#include "UpdateDisplay.h"
+#include "ReadCarCAN.h"
 #include "bsp.h"   // for writing to UART
 #define DISP_OUT UART_3
 // static const char *TERMINATOR = "\xff\xff\xff";
 
-
-// Stolen from UpdateDisplay.c
-/**
- * Enum and corresponding array for easy component selection.
- */
-typedef enum
-{
-	// Boolean components
-	LEFT = 0,
-	HEAD,
-	RIGHT,
-	HZD,
-	ARRAY,
-	MOTOR,
-	// Non-boolean components
-	VELOCITY,
-	ACCEL_METER,
-	SOC,
-	SUPP_BATT,
-	CRUISE_ST,
-	REGEN_ST,
-	GEAR,
-	// Fault code components
-	OS_CODE,
-	FAULT_CODE
-} Component_t;
+static OS_TCB Task1_TCB;
+static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 
 // static char *compStrings[15] = {
 // 		// Boolean components
@@ -70,17 +48,12 @@ typedef enum
 // 		"faulterr"};
 
 // Delay; Don't know how long
-void delay(void)
-{
+void delay(void) {
 	volatile int j;
-	for (j = 0; j < 1000000; j++)
-	{
-		continue;
-	}
+	for (j = 0; j < 2000000; j++) continue;
 }
 
-int main()
-{
+void Task1() {
 	DisplayError_t err;
 
 	err = Display_Init();
@@ -107,13 +80,13 @@ int main()
 	// // BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
 
 	// Display the fault page
-	DisplayCmd_t pgCmd = {
-			.compOrCmd = "page",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 1,
-			.argTypes = {true},
-			{{.num = FAULT}}};
+	// DisplayCmd_t pgCmd = {
+	// 		.compOrCmd = "page",
+	// 		.attr = NULL,
+	// 		.op = NULL,
+	// 		.numArgs = 1,
+	// 		.argTypes = {true},
+	// 		{{.num = FAULT}}};
 	
 	// //assertDisplayError(err);
 	// // BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
@@ -175,18 +148,49 @@ int main()
 
 	//delay();
 	delay();
-	assertOSError(OS_ERR_X);
-	// assertTritiumError(T_WATCHDOG_LAST_RESET_ERR);
+	//assertOSError(OS_ERR_X);
+	//delay();
+	Display_Error();
+
+	// assertReadCarCANError(READCARCAN_ERR_CHARGE_DISABLE);
+	//assertTritiumError(T_MOTOR_WATCHDOG_TRIP);
 	// Display_Error();
 	
-	//_assertOSError(OS_ERR_X);
 	//err = Display_Error();
 	printf("%x\n", err);
 	// Display_Send(setCmd);
 
 
 
-	while (1)
-	{
-	}
+	while (1) {;}
+}
+
+int main() {
+    OS_ERR err;
+    OSInit(&err);
+
+    if(err != OS_ERR_NONE){
+        printf("OS error code %d\n",err);
+    }
+    OSTaskCreate(
+        (OS_TCB*)&Task1_TCB,
+        (CPU_CHAR*)"Task1",
+        (OS_TASK_PTR)Task1,
+        (void*)NULL,
+        (OS_PRIO)13,
+        (CPU_STK*)Task1_Stk,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE/10,
+        (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)NULL,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR*)&err
+    );
+    assertOSError(err);
+
+    OSStart(&err);
+    assertOSError(err);
+
+    while(1){};
 }

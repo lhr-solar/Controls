@@ -34,6 +34,8 @@ typedef enum
  */
 bool ChargeEnable_Get(void);
 
+void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
+
 #endif
 
 /* @} */

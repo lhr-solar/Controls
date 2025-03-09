@@ -23,6 +23,39 @@
 
 static const char *TERMINATOR = "\xff\xff\xff";
 
+// /**
+//  * Enum and corresponding array for easy component selection.
+//  */
+// typedef enum{
+// 	// Boolean components
+// 	ARRAY=0,
+// 	HEARTBEAT,
+// 	PACK_CURR_SIGN,
+// 	MC_CURR_SIGN,
+// 	BRAKE,
+// 	MOTOR,
+// 	// Non-boolean components
+// 	VELOCITY,
+// 	ACCEL_METER,
+// 	SOC,
+// 	SUPP_BATT,
+// 	CRUISE_ST,
+// 	REGEN_ST,
+// 	PACK_VOLTAGE,
+// 	PACK_CURRENT,
+// 	PACK_TEMP,
+// 	MC_BUS_VOLTAGE,
+// 	MC_BUS_CURRENT,
+// 	HEAT_SINK_TEMP,
+// 	GEAR,
+// 	// Fault code components
+// 	OS_CODE,
+// 	FAULT_CODE,
+// } Component_t;
+
+// uint32_t DISPLAY_COMP_VALS[NUM_COMPONENTS] = {0};
+extern uint32_t DISPLAY_COMP_VALS[NUM_COMPONENTS];
+
 const char* DISPLAY_COMP_STR[NUM_COMPONENTS] = {
 	// Boolean components
 	"arr",
@@ -140,19 +173,17 @@ DisplayError_t Display_Error() {
 	Display_Send(err_pg_cmd);
 
 	// Display OS error if there is one
-	if (Error_OS != OS_ERR_NONE) {
-		DisplayCmd_t os_flt_cmd = {
-			.compOrCmd = (char*) DISPLAY_COMP_STR[19], // "oserr"
-			.attr = "txt",
-			.op = "=",
-			.numArgs = 1,
-			.argTypes = {STR_ARG},
-			{{.str=ErrMsg_OS}}
-		};
-		Display_Send(os_flt_cmd);
-		strncpy(ErrMsg_OS, "\"N/A\"", 6);
-		memset(&Error_OS, 0, sizeof(error_code_t));
-	}
+	DisplayCmd_t os_flt_cmd = {
+		.compOrCmd = (char*) DISPLAY_COMP_STR[19], // "oserr"
+		.attr = "txt",
+		.op = "=",
+		.numArgs = 1,
+		.argTypes = {STR_ARG},
+		{{.str=ErrMsg_OS}}
+	};
+	Display_Send(os_flt_cmd);
+	strncpy(ErrMsg_OS, "\"N/A\"", 6);
+	memset(&Error_OS, 0, sizeof(error_code_t));
 	
 	// Display other errors if there are any.
 	// Prioritized errors in order of importance:
@@ -198,54 +229,39 @@ DisplayError_t Display_Error() {
 		strncpy(ErrMsg_UpdateDisplay, "\"N/A\"", 6);
 		memset(&Error_UpdateDisplay, 0, sizeof(error_code_t));
 	}
+	else {
+		DisplayCmd_t no_flt_cmd = {
+			.compOrCmd = (char*) DISPLAY_COMP_STR[20], // "faulterr"
+			.attr = "txt",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {STR_ARG},
+			{{.str="\"N/A\""}}
+		};
+		Display_Send(no_flt_cmd);
+	}
 
+	// Update pack current vars (value and sign)
+	DisplayCmd_t packcurr_cmd = {
+		.compOrCmd = (char*) DISPLAY_COMP_STR[13], // "pc"
+		.attr = "val",
+		.op = "=",
+		.numArgs = 1,
+		.argTypes = {INT_ARG},
+		{{.num=DISPLAY_COMP_VALS[13]}}
+	};
+	Display_Send(packcurr_cmd);
 
-	// char faultPage[7] = "page 2";
-	// BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
-	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-
-	// char setFaultCode[20];
-	// char* setFaultMsg = "";
-	// char* faultMsg = "";
-	
-
-	// Combine two strings (code and message) before sending to display, in order to use one UART write
-	// OS Error
-	// sprintf(setFaultCode, "%s%d\n", "oserr.val=", (uint16_t) 0x12);
-	// sprintf(setFaultMsg, "%s", (char *)ErrMsg_OS);
-	// faultMsg = strcat(setFaultCode, setFaultMsg);
-	// BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
-	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-	// memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-	// memset(setFaultMsg, 0, strlen(setFaultMsg) * sizeof(char));
-
-
-	// ReadCarCAN Error
-	// sprintf(setFaultCode, "%s%d\n", "rccerr.val=", (uint16_t) 0x12);
-	// sprintf(setFaultMsg, "%s", (char *)ErrMsg_ReadCarCAN);
-	// faultMsg = strcat(setFaultCode, setFaultMsg);
-	// BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
-	// memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-	// memset(setFaultMsg, 0, strlen(setFaultMsg) * sizeof(char));
-	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-
-
-	// // Motor Controller Error
-	// sprintf(setFaultCode, "%s%d\n", "merr.val=", (uint16_t) 0x12);
-	// sprintf(setFaultMsg, "%s", (char *)ErrMsg_ReadTritium);
-	// faultMsg = strcat(setFaultCode, setFaultMsg);
-	// BSP_UART_Write(DISP_OUT, faultMsg, strlen(faultMsg));
-	// memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-	// memset(setFaultMsg, 0, strlen(setFaultMsg) * sizeof(char));
-	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-
-
-	// // Display Error
-	// // TODO: Display error messages are taken care in UpdateDisplay?
-	// sprintf(setFaultCode, "%s%d", "disperr.val=", (uint16_t) 0x12);
-	// BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-	// memset(setFaultCode, 0x12, strlen(setFaultCode) * sizeof(char));
-	// BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+	DisplayCmd_t packcurr_sign_cmd = {
+		.compOrCmd = "vis", 
+		.attr = NULL,
+		.op = NULL,
+		.numArgs = 2,
+		.argTypes = {STR_ARG, INT_ARG},
+		{{.str = (char*)DISPLAY_COMP_STR[13]}, {.num = 1/*DISPLAY_COMP_VALS[13]*/}} // "cs"
+		
+	};
+	Display_Send(packcurr_sign_cmd);
 
 	return DISPLAY_ERR_NONE;
 }
@@ -268,7 +284,7 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
 	DisplayCmd_t soc_cmd = {
 		.compOrCmd = (char*) DISPLAY_COMP_STR[8], // "soc"
 		.attr = "val",
-		.op = NULL,
+		.op = "=",
 		.numArgs = 1,
 		.argTypes = {INT_ARG},
 		{{.num=SOC_percent}}
@@ -278,12 +294,33 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
 	DisplayCmd_t supp_cmd = {
 		.compOrCmd = (char*) DISPLAY_COMP_STR[9], // "supp"
 		.attr = "val",
-		.op = NULL,
+		.op = "=",
 		.numArgs = 1,
 		.argTypes = {INT_ARG},
 		{{.num=supp_mv}}
 	};
 	Display_Send(supp_cmd);
+
+	DisplayCmd_t packcurr_cmd = {
+		.compOrCmd = (char*) DISPLAY_COMP_STR[13], // "pc"
+		.attr = "val",
+		.op = "=",
+		.numArgs = 1,
+		.argTypes = {INT_ARG},
+		{{.num=DISPLAY_COMP_VALS[13]}}
+	};
+	Display_Send(packcurr_cmd);
+
+	DisplayCmd_t packcurr_sign_cmd = {
+		.compOrCmd = "vis", 
+		.attr = NULL,
+		.op = NULL,
+		.numArgs = 2,
+		.argTypes = {STR_ARG, INT_ARG},
+		{{.str = (char*)DISPLAY_COMP_STR[13]}, {.num = DISPLAY_COMP_VALS[13]}} // "cs"
+		
+	};
+	Display_Send(packcurr_sign_cmd);
 	
 	// char evacPage[7] = "page 3";
 	// BSP_UART_Write(DISP_OUT, evacPage, strlen(evacPage));

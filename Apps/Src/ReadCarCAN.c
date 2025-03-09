@@ -80,7 +80,7 @@ static uint32_t SOC = 0;
 static uint32_t SBPV = 0;
 
 // Error assertion function prototype
-static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
+// static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
 // Getter function for charge enable, indicating that battery charging is allowed
 bool ChargeEnable_Get(void)
@@ -538,7 +538,7 @@ void Task_ReadCarCAN(void *p_arg)
  * Stores the error code and calls assertTaskError with the appropriate parameters and callback handler
  * @param  rcc_err error code to specify the issue encountered
  */
-static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
+void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
 {
     Error_ReadCarCAN = (error_code_t)rcc_err; // Store error code for inspection
     SET_ERR_MSG_HEX("RCC", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
