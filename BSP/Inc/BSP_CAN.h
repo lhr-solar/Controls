@@ -15,7 +15,6 @@
 #include "common.h"
 #include "config.h"
 #include <bsp.h>
-#include "daybreak_pins.h"
 
 
 typedef enum {CAN_1=0, CAN_2, CAN_3, NUM_CAN} CAN_t;

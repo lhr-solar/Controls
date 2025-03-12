@@ -3,6 +3,8 @@
 #include "BSP_CAN.h"
 #include "stm32f4xx.h"
 #include "os.h"
+#include "daybreak_pins.h"
+#include "CANbus.h"
 
 // The message information that we care to receive
 typedef struct _msg
