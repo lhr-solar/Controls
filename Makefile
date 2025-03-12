@@ -28,7 +28,6 @@ LEADER = controls-leader
 
 all:
 	@echo "${RED}Not enough arguments. Call: ${ORANGE}make help${NC}"
-	
 .PHONY: leader
 leader: stm32f413
 
