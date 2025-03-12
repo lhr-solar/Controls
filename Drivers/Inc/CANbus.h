@@ -12,12 +12,14 @@
 #define CAN_H__
 
 #include "BSP_CAN.h"
+#include "daybreak_pins.h"
+
 
 #define CARCAN CAN_3
 #define MOTORCAN CAN_2
 
-_Static_assert(CARCAN != MOTORCAN, "Error: CARCAN cannot be the same CAN peripheral as MOTOR CAN!");
 
+_Static_assert(CARCAN!=MOTORCAN, "Error: CARCAN cannot be the same CAN peripheral as MOTOR CAN!");
 
 /**
  * This enum is used to signify the ID of the message you want to send. 
@@ -31,30 +33,30 @@ _Static_assert(CARCAN != MOTORCAN, "Error: CARCAN cannot be the same CAN periphe
  * (the enum is sorted in ascending order on purpose), and then add an entry to the lookup table.
  */
 typedef enum { 
-    BPS_TRIP						= 0x002,
-    BPS_CONTACTOR					= 0x102,
+	BPS_TRIP						= 0x002,
+	BPS_CONTACTOR					= 0x102,
     CURRENT_DATA                    = 0x103,
-    STATE_OF_CHARGE 				= 0x106,
-    SUPPLEMENTAL_VOLTAGE 			= 0x10B,
+	STATE_OF_CHARGE 				= 0x106,
+	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
     VOLTAGE_SUMMARY                 = 0x10D,
     TEMPERATURE_SUMMARY             = 0x10E,
-    MOTOR_DRIVE 					= 0x221,
-    MOTOR_POWER						= 0x222,
-    MOTOR_RESET 					= 0x223,
-    MOTOR_STATUS 					= 0x241,
-    MC_BUS 							= 0x242,
-    VELOCITY 						= 0x243,
-    MC_PHASE_CURRENT 				= 0x244,
-    VOLTAGE_VEC 					= 0x245,
-    CURRENT_VEC 					= 0x246,
-    BACKEMF 						= 0x247,
-    TEMPERATURE 					= 0x24B,
-    ODOMETER_AMPHOURS 				= 0x24E,
-    ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
+	MOTOR_DRIVE 					= 0x221,
+	MOTOR_POWER						= 0x222,
+	MOTOR_RESET 					= 0x223,
+	MOTOR_STATUS 					= 0x241,
+	MC_BUS 							= 0x242,
+	VELOCITY 						= 0x243,
+	MC_PHASE_CURRENT 				= 0x244,
+	VOLTAGE_VEC 					= 0x245,
+	CURRENT_VEC 					= 0x246,
+	BACKEMF 						= 0x247,
+	TEMPERATURE 					= 0x24B,
+	ODOMETER_AMPHOURS 				= 0x24E,
+	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
     SLIP_SPEED                      = 0x257,
-    CONTROL_MODE                    = 0x580,
+	CONTROL_MODE                    = 0x580,
     IO_STATE 						= 0x581,
-    MAX_CAN_ID
+	MAX_CAN_ID
 } CANId_t;
 
 /**
@@ -63,8 +65,8 @@ typedef enum {
  * @param size Size of message's data. Should be a maximum of eight (in decimal).
  */
 typedef struct {
-    bool idxEn: 1;
-    unsigned int size: 7;
+	bool idxEn: 1;
+	unsigned int size: 7;
 } CANLUT_T;
 
 /**
@@ -75,9 +77,9 @@ typedef struct {
  * @param data 	data of the message
 */
 typedef struct {
-    CANId_t ID; 		
-    uint8_t idx; 		
-    uint8_t data[8]; 
+	CANId_t ID; 		
+	uint8_t idx; 		
+	uint8_t data[8]; 
 } CANDATA_t;
 
 /**
