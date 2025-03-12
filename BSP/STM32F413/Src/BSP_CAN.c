@@ -48,11 +48,11 @@ void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idW
     gRxEvent[bus] = rxEvent;
     gTxEnd[bus] = txEnd;
 
-    if (bus == motor)
+    if (bus == MOTORCAN)
     {
         BSP_MotorCAN_Init(idWhitelist, idWhitelistSize);
     }
-    else
+    else if(bus == CARCAN)
     {
         BSP_CarCAN_Init(idWhitelist, idWhitelistSize);
     }
@@ -349,7 +349,7 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
         gTxMessage[bus].Data[i] = data[i];
     }
 
-    uint8_t retVal = (CAN_Transmit(bus == motor ? MotorCAN : CarCAN, &gTxMessage[bus]) != 0);
+    uint8_t retVal = (CAN_Transmit(bus == MOTORCAN ? MotorCAN : CarCAN, &gTxMessage[bus]) != 0);
     if (retVal == CAN_TxStatus_NoMailBox)
     {
         return ERROR;

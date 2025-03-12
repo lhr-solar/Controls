@@ -13,8 +13,14 @@
 
 #include "BSP_CAN.h"
 
-#define CARCAN motor //convenience aliases for the CANBuses
-#define MOTORCAN car
+#define DAYBREAK_2025
+
+#ifdef DAYBREAK_2025
+#define CARCAN CAN_3
+#define MOTORCAN CAN_2
+#endif
+
+_Static_assert(CARCAN==MOTORCAN, "Error: CARCAN cannot be the same CAN peripheral as MOTOR CAN!");
 
 /**
  * This enum is used to signify the ID of the message you want to send. 

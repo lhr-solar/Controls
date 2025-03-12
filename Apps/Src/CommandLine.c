@@ -151,10 +151,10 @@ static bool cmd_CANbus_Send(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = motor;
+		bus = MOTORCAN;
 	}
 	else if(strcmp(busInput, "car") == 0){
-		bus = car;
+		bus = CARCAN;
 	}
 	else{
 		return false;
@@ -186,10 +186,10 @@ static bool cmd_CANbus_Read(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = motor;
+		bus = MOTORCAN;
 	}
 	else if(strcmp(busInput, "car") == 0){
-		bus = car;
+		bus = CARCAN;
 	}
 	else{
 		return false;

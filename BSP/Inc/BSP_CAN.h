@@ -15,8 +15,10 @@
 #include "common.h"
 #include "config.h"
 #include <bsp.h>
+#include "daybreak_pins.h"
 
-typedef enum {motor=0, car, NUM_CAN} CAN_t;
+
+typedef enum {CAN_1=0, CAN_2, CAN_3, NUM_CAN} CAN_t;
 
 /**
  * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
