@@ -212,9 +212,4 @@
 #define MotorCAN_RX GPIO_Pin_5
 #define MotorCAN_RX_IRQ CAN2_RX0_IRQn
 
-
-
-
-
-
 #endif

@@ -56,23 +56,6 @@ void MotorCAN_RxHandler(){
     CANbus_RxHandler(MOTORCAN);
 }
 
-
-
-// //wrapper functions for the interrupt customized for each bus
-// void CANbus_TxHandler_2(){
-//     CANbus_TxHandler(motor);
-// }
-
-// void CANbus_RxHandler_2(){
-//     CANbus_RxHandler(motor);
-// }
-// // void CANbus_TxHandler_3(){
-// //     CANbus_TxHandler(car);
-// // }
-// void CANbus_RxHandler_3(){
-//     CANbus_RxHandler(car);
-// }
-
 /**
  * @brief Checks each CAN ID. If an ID is not in CANLUT, set that ID to NULL
  * @param wlist The whitelist containing the IDs to be checked
@@ -111,9 +94,6 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
 
     idWhitelist = whitelist_validator(idWhitelist, idWhitelistSize);
 
-    /*
-    TODO: NEED TO CHANGE THIS FOR THE PROPER HANDLER
-    */
     callback_t rxEvent, txEnd;
     switch(bus){
         case CARCAN:
