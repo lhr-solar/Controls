@@ -13,8 +13,8 @@
 
 #include "BSP_CAN.h"
 
-#define CARCAN motor //convenience aliases for the CANBuses
-#define MOTORCAN car
+#define CARCAN car //convenience aliases for the CANBuses
+#define MOTORCAN motor
 
 /**
  * This enum is used to signify the ID of the message you want to send. 

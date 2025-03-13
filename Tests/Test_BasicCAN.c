@@ -1,6 +1,7 @@
 #include "Tasks.h"
 #include "CANbus.h"
 #include "CANConfig.h"
+#include "daybreak_pins.h"
 
 OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
@@ -12,18 +13,25 @@ static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 void Task1(void *p_arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+
+    BSP_GPIO_Init(OS_FAULT_PORT, OS_FAULT, OUTPUT, false); // use OS_FAULT pin as debug pin
+    BSP_GPIO_Init(BPS_FAULT_PORT, BPS_FAULT, OUTPUT, false); 
+    BSP_GPIO_Init(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, OUTPUT, false);
+    
+
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
-    BSP_UART_Init(USB);
 
     CANDATA_t msg, out;
     msg.ID = VELOCITY;
     msg.idx = 0;
     memset(&msg.data, 0xa5, sizeof msg.data);
+    BSP_GPIO_Write_Pin(OS_FAULT_PORT, OS_FAULT, ON);
 
     while (1) {
-        CANbus_Send(msg, true, CARCAN);
-        CANbus_Read(&out, true, CARCAN);
-        printf("Read stuff\n\r");
+        ErrorStatus sendError = CANbus_Send(msg, true, CARCAN);
+        BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, sendError == SUCCESS ? ON : OFF);
+        CANbus_Read(&out, false, CARCAN);
+        BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, ON);
     }
 }
 
