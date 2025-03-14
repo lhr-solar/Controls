@@ -214,23 +214,23 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     /* CAN GPIOs configuration **************************************************/
 
     /* Enable GPIO clock */
-    RCC_AHB1PeriphClockCmd(CarCAN_AHB1_GPIO, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
     // Alternate Function 9
-    GPIO_PinAFConfig(CarCAN_GPIO, CarCAN_RX_Pinsource, CarCAN_AF);
-    GPIO_PinAFConfig(CarCAN_GPIO, CarCAN_TX_Pinsource, CarCAN_AF);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource15, GPIO_AF11_CAN3);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF11_CAN3);
 
     /* Configure CAN RX and TX pins */
-    GPIO_InitStruct.GPIO_Pin = CarCAN_RX | CarCAN_TX;
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_8;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(CarCAN_GPIO, &GPIO_InitStruct);
+    GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
-    RCC_APB1PeriphClockCmd(CarCAN_APB1_CAN, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN3, ENABLE);
 
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
@@ -253,7 +253,7 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     CAN_InitStruct.CAN_BS1 = CAN_BS1_3tq;
     CAN_InitStruct.CAN_BS2 = CAN_BS2_4tq;
     CAN_InitStruct.CAN_Prescaler = 16;
-    CAN_Init(CarCAN, &CAN_InitStruct);
+    CAN_Init(CAN3, &CAN_InitStruct);
 
     /* CAN filter init 
      * Initializes hardware filter banks to be used for filtering CAN IDs (whitelist)
@@ -269,7 +269,7 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
         CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
         CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
         CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-        CAN_FilterInit(CarCAN, &CAN_FilterInitStruct);
+        CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
     } else{
         // Filter CAN IDs
         CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList; //list mode
@@ -283,18 +283,18 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
             *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i];
 
             if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
-                CAN_FilterInit(CarCAN, &CAN_FilterInitStruct);
+                CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
             }
             else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
                 for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
                     *(FilterStructPtr + j) = 0x0000;
 
-                CAN_FilterInit(CarCAN, &CAN_FilterInitStruct);
+                CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
             }
         }
     }
 
-    // CAN_SlaveStartBank(CAN2, 0);
+    // CAN_SlaveStartBank(CAN1, 0);
 
     /* Transmit Structure preparation */
     gTxMessage[1].ExtId = 0x5;
@@ -310,11 +310,11 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     gRxMessage[1].FMI = 0;
 
     /* Enable FIFO 0 message pending Interrupt */
-    CAN_ITConfig(CarCAN, CAN_IT_FMP0, ENABLE);
+    CAN_ITConfig(CAN3, CAN_IT_FMP0, ENABLE);
 
     //TODO: Double check preemption priority and subpriority
     // Enable Rx interrupts
-    NVIC_InitStruct.NVIC_IRQChannel = CarCAN_RX_IRQ;
+    NVIC_InitStruct.NVIC_IRQChannel = CAN3_RX0_IRQn;
     NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -322,8 +322,8 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
 
     // Enable Tx interrupts
     if(NULL != gTxEnd[1]){ 
-        CAN_ITConfig(CarCAN,CAN_IT_TME,ENABLE);
-        NVIC_InitStruct.NVIC_IRQChannel = CarCAN_TX_IRQ; 
+        CAN_ITConfig(CAN3,CAN_IT_TME,ENABLE);
+        NVIC_InitStruct.NVIC_IRQChannel = CAN3_TX_IRQn; 
         NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00; 
         NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
         NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;

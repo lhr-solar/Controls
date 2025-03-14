@@ -32,7 +32,7 @@ void Task1(void *p_arg) {
     while (1) {
         ErrorStatus sendError = CANbus_Send(msg, true, CARCAN);
         BSP_GPIO_Write_Pin(CONTROLS_FAULT_PORT, CONTROLS_FAULT, sendError == SUCCESS ? ON : OFF);
-        ErrorStatus readError = CANbus_Read(&out, true, CARCAN);
+        ErrorStatus readError = CANbus_Read(&out, false, CARCAN);
         BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
         BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, ON);
     }
