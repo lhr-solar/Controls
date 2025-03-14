@@ -17,8 +17,8 @@ export MOTOR_LOOPBACK
 CAR_LOOPBACK ?= 0
 export CAR_LOOPBACK
 
-$(info MOTOR_LOOPBACK: $(if $(filter 1,$(MOTOR_LOOPBACK)),on,off))
-$(info CAR_LOOPBACK: $(if $(filter 1,$(CAR_LOOPBACK)),on,off))
+$(info Motor CAN Loopback: $(if $(filter 1,$(MOTOR_LOOPBACK)),on,off))
+$(info Car CAN Loopback: $(if $(filter 1,$(CAR_LOOPBACK)),on,off))
 
 
 # Check if test file exists for the leader.
