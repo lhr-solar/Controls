@@ -20,8 +20,7 @@ void Task1(void *p_arg) {
     BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
     
 
-    CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
-    CANbus_Init(MOTORCAN, motorCANFilterList, sizeof motorCANFilterList);
+    CANbus_Init(CARCAN, NULL, 0);
 
     CANDATA_t msg, out;
     msg.ID = BPS_TRIP;
@@ -32,7 +31,7 @@ void Task1(void *p_arg) {
     while (1) {
         ErrorStatus sendError = CANbus_Send(msg, true, CARCAN);
         BSP_GPIO_Write_Pin(CONTROLS_FAULT_PORT, CONTROLS_FAULT, sendError == SUCCESS ? ON : OFF);
-        ErrorStatus readError = CANbus_Read(&out, false, CARCAN);
+        ErrorStatus readError = CANbus_Read(&out, true, CARCAN);
         BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
         BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, ON);
     }
