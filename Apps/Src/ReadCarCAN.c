@@ -342,12 +342,14 @@ static void handler_ReadCarCAN_chargeDisable(void)
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
 
     if (ret)
-    { // Contactor failed to turn off; display the evac screen and infinite loop
+    { // Contactor failed to turn off; display the evac screen and infinite l
         Display_Evac(SOC, SBPV);
         while (1)
         {
             ;
         }
+    }else{
+        UpdateDisplay_SetArray(false);
     }
 }
 
@@ -387,8 +389,8 @@ static void handler_ReadCarCAN_contactorsDisable(void)
     }
     else
     {
-        UpdateDisplay_SetArray(true);
-        UpdateDisplay_SetMotor(true);
+        UpdateDisplay_SetArray(false);
+        UpdateDisplay_SetMotor(false);
     }
 }
 

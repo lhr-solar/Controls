@@ -126,18 +126,6 @@ static const TritiumState_t FSM[6] = {
 
 
 // Helper Functions
-/**
- * @brief Converts integer percentage to float percentage
- * @param percent integer percentage from 0-100
- * @returns float percentage from 0.0-1.0
- */
-extern const float pedalToPercent[];
-static float percentToFloat(uint8_t percent)
-{
-    if (percent > 100)
-        return 1.0f;
-    return pedalToPercent[percent];
-}
 
 /**
  * @brief Updates the brakelight and brake indication on display
@@ -384,16 +372,16 @@ static void readInputs()
 #endif
 
 /**
- * @brief Linearly map range of integers to another range of integers.
+ * @brief Linearly map range of integers to another range of integers, and provide the pecentage result.
  * in_min to in_max is mapped to out_min to out_max.
  * @param input input integer value
  * @param in_min minimum value of input range
  * @param in_max maximum value of input range
  * @param out_min minimum value of output range
  * @param out_max maximum value of output range
- * @returns integer value from out_min to out_max
+ * @returns float value from (out_min / 100.0) to (out_max / 100.0)
  */
-static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_min, uint8_t out_max)
+float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_min, uint8_t out_max)
 {
     if (in_min >= in_max)
     {
@@ -402,12 +390,12 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
     if (input <= in_min)
     {
         // Lower bound the input to the minimum possible output
-        return out_min;
+        return out_min / 100.0;
     }
     else if (input >= in_max)
     {
         // Upper bound the input to the maximum output
-        return out_max;
+        return out_max / 100.0;
     }
     else
     {
@@ -416,7 +404,7 @@ static uint8_t map(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
         uint8_t in_range = in_max - in_min;    // Input range
         uint8_t out_range = out_max - out_min; // Output range
         uint8_t offset_out = out_min;
-        return (offset_in * out_range) / in_range + offset_out; // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
+        return ((offset_in * out_range) / in_range + offset_out) / 100.0; // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
     }
 }
 
@@ -442,7 +430,7 @@ void ForwardDriveHandler()
     else 
     {
         velocitySetpoint = MAX_VELOCITY;
-        currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+        currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
     }
 
     // Turn brakelight on/off
@@ -516,7 +504,7 @@ void ReverseDriveHandler()
     else 
     {
         velocitySetpoint = -MAX_VELOCITY;
-        currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+        currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
     }
 
     // Turn brakelight on/off
@@ -639,7 +627,7 @@ void CoastingCruiseDecider()
 void AccelerateCruiseHandler()
 {
     velocitySetpoint = MAX_VELOCITY;
-    currentSetpoint = percentToFloat(map(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
+    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
 
     // Turn brakelight on/off
     brakeUpdate();
