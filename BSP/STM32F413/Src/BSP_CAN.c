@@ -280,7 +280,7 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
         uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
         for(uint8_t i = 0; i < idWhitelistSize; i++){
             CAN_FilterInitStruct.CAN_FilterNumber = i / NUM_FILTER_REGS; //determines filter number based on CAN ID
-            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i];
+            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i] << 5;
 
             if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
                 CAN_FilterInit(CAN3, &CAN_FilterInitStruct);

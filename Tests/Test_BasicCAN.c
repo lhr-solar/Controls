@@ -20,10 +20,10 @@ void Task1(void *p_arg) {
     BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
     
 
-    CANbus_Init(CARCAN, NULL, 0);
-
-    CANDATA_t msg, out;
-    msg.ID = BPS_TRIP;
+    CANbus_Init(CARCAN, (CANId_t *) carCANFilterList, NUM_CARCAN_FILTERS);
+                                
+    CANDATA_t msg, out;         
+    msg.ID = BPS_TRIP;          
     msg.idx = 0;
     memset(&msg.data, 0xa5, sizeof msg.data);
     BSP_GPIO_Write_Pin(OS_FAULT_PORT, OS_FAULT, ON);
@@ -63,3 +63,8 @@ int main(){
     OSStart(&err);
     assertOSError(err);
 }
+
+/*
+Note: CAN2 start filter bank number n is configurable by writing 
+          CAN2SB[5:0] bits in the CAN_FMR register
+*/
