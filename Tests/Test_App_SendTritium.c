@@ -9,6 +9,12 @@
 
 #include "SendTritium.h"
 
+/**
+ * NOTE: This test does not and SHOULD NOT run readInputs() & shouldn't send CAN on the 
+ * test. If we're testing with inputs and CAN messages, it should just be done on the 
+ * actual car. 
+ */
+
 // Macros
 #define VEL_EXCEED_CRUISE_THRESH (MIN_CRUISE_VELOCITY + 2.0f)
 #define VEL_BELOW_CRUISE_THRESH 0.0f
