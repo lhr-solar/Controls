@@ -20,18 +20,19 @@ void Task1(void *p_arg) {
     BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
     
 
-    CANbus_Init(CARCAN, (CANId_t *) carCANFilterList, NUM_CARCAN_FILTERS);
+    //CANbus_Init(CARCAN, (CANId_t *) carCANFilterList, NUM_CARCAN_FILTERS);
+    CANbus_Init(MOTORCAN, (CANId_t *) motorCANFilterList, NUM_MOTORCAN_FILTERS);
                                 
     CANDATA_t msg, out;         
-    msg.ID = BPS_TRIP;          
+    msg.ID = VELOCITY;          
     msg.idx = 0;
     memset(&msg.data, 0xa5, sizeof msg.data);
     BSP_GPIO_Write_Pin(OS_FAULT_PORT, OS_FAULT, ON);
 
     while (1) {
-        ErrorStatus sendError = CANbus_Send(msg, true, CARCAN);
+        ErrorStatus sendError = CANbus_Send(msg, true, MOTORCAN);
         BSP_GPIO_Write_Pin(CONTROLS_FAULT_PORT, CONTROLS_FAULT, sendError == SUCCESS ? ON : OFF);
-        ErrorStatus readError = CANbus_Read(&out, true, CARCAN);
+        ErrorStatus readError = CANbus_Read(&out, true, MOTORCAN);
         BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
         BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, ON);
     }

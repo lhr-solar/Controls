@@ -199,11 +199,14 @@
 #define CarCAN_RX_IRQ CAN3_RX0_IRQn
 
 // MotorCan - CAN2 PB5_RX PB6_TX
+// CAN2 uses CAN1 as master
 #define MotorCAN_PORT PORTB
 #define MotorCAN_GPIO GPIOB
 #define MotorCAN CAN2
+#define MotorCANMaster CAN1 // CAN1 and CAN2 use dual CAN setup
 #define MotorCAN_AHB1_GPIO RCC_AHB1Periph_GPIOB
 #define MotorCAN_APB1_CAN RCC_APB1Periph_CAN2
+#define MotorCANMaster_APB1_CAN RCC_APB1Periph_CAN1 // CAN1 is master
 #define MotorCAN_AF GPIO_AF_CAN2
 #define MotorCAN_TX_Pinsource GPIO_PinSource6
 #define MotorCAN_TX GPIO_Pin_6
