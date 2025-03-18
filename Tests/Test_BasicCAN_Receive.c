@@ -13,8 +13,8 @@ void Task1(void *p_arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
-    BSP_GPIO_Init(PORTC, GPIO_Pin_13, OUTPUT, true); // use UART2 TP (J25) as IO
-    BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_13, OFF);
+    // BSP_GPIO_Init(PORTC, GPIO_Pin_13, OUTPUT, true); // use UART2 TP (J25) as IO
+    // BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_13, OFF);
     // BSP_GPIO_Init(PORTA, GPIO_Pin_3, OUTPUT, false); 
     // BSP_GPIO_Init(PORTA, GPIO_Pin_14, OUTPUT, false); 
     
@@ -25,15 +25,19 @@ void Task1(void *p_arg) {
     CANDATA_t msg, out;         
     msg.ID = BPS_TRIP;          
     msg.idx = 0;
-    memset(&msg.data, 0xa5, sizeof msg.data);
+    memset(&msg.data, 0xff, sizeof msg.data);
+    msg.ID = IO_STATE;          
+    msg.idx = 0;
+    memset(&msg.data, 0x00, sizeof msg.data);
     // BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_2, OFF);
     // BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_3, OFF);
     // BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_14, OFF);
 
     while (1) {
         CANbus_Send(msg, true, CARCAN);
-        ErrorStatus readError = CANbus_Read(&out, true, CARCAN);
-        BSP_GPIO_Write_Pin(RCC_AHB1Periph_GPIOA, GPIO_Pin_3, readError == SUCCESS ? ON : OFF);
+        CANbus_Send(out, true, CARCAN);
+      //  ErrorStatus readError = CANbus_Read(&out, true, CARCAN);
+      //  BSP_GPIO_Write_Pin(RCC_AHB1Periph_GPIOA, GPIO_Pin_3, readError == SUCCESS ? ON : OFF);
         //BSP_GPIO_Write_Pin(RCC_AHB1Periph_GPIOA, GPIO_Pin_3, ON);
         //BSP_GPIO_Write_Pin(RCC_AHB1Periph_GPIOA, GPIO_Pin_14, ON);
     }
