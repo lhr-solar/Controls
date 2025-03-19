@@ -15,15 +15,22 @@ void Task1(void *p_arg) {
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
     BSP_UART_Init(UART_2);
 
-    CANDATA_t msg, out;
-    msg.ID = VELOCITY;
-    msg.idx = 0;
-    memset(&msg.data, 0xa5, sizeof msg.data);
+    // CANDATA_t msg, out;
+    // msg.ID = BPS_TRIP;
+    // msg.idx = 0;
+    // memset(&msg.data, 0xa5, sizeof msg.data);
+
+    CANDATA_t carMsg = {
+        .ID=BPS_TRIP,
+        .idx=0,
+        .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE }, // Bytes 4-5 store error flags and must be empty
+    };
+    
 
     while (1) {
-        CANbus_Send(msg, true, CARCAN);
-        CANbus_Read(&out, true, CARCAN);
-        printf("Read stuff\n\r");
+        CANbus_Send(carMsg, true, CARCAN);
+        //CANbus_Read(&out, true, CARCAN);
+        //printf("Read stuff\n\r");
     }
 }
 
