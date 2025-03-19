@@ -139,6 +139,7 @@ void Task_SendCarCAN(void *p_arg){
     }
 }
 
+/*
 static void putIOState(void){
     CANDATA_t message;
     memset(&message, 0, sizeof message);
@@ -164,7 +165,19 @@ static void putIOState(void){
     message.data[3] |= (Minions_Read(IGN_1) || Minions_Read(IGN_2)) << 2;
 
     CANbus_Send(message, true, CARCAN);
+}*/
+static void putIOState(void){
+    CANDATA_t message;
+    memset(&message, 0, sizeof message);
+    message.ID = IO_STATE;
+    
+    // Set dummy data to 0xABCD
+    message.data[0] = 0xAB;
+    message.data[1] = 0xCD;
+    
+    CANbus_Send(message, true, CARCAN);
 }
+
 
 /**
  * @brief sends IO information over CarCAN every IO_STATE_DLY_MS
