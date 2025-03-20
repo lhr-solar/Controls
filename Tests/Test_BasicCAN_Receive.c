@@ -5,7 +5,7 @@
 
 OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
-bool toggle = false;
+volatile bool toggle = true;
 /*
  * Run this test with MotorCAN in loopback mode!
  */
@@ -15,20 +15,19 @@ void Task1(void *p_arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
     BSP_GPIO_Init(IG1_PORT, IG1, OUTPUT, false);
-
-
-    CANDATA_t carMsg = {
-        .ID=BPS_TRIP,
-        .idx=0,
-        .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE },
-    };
     
 
     while (1) {
+        volatile uint8_t bullshit = toggle ? 0xFF : 0x00;
+        CANDATA_t carMsg = {
+            .ID=IO_STATE,
+            .idx=0,
+            .data={bullshit,bullshit,bullshit,bullshit,bullshit,bullshit,bullshit,bullshit},
+        };
+
         CANbus_Send(carMsg, false, CARCAN);
         BSP_GPIO_Write_Pin(IG1_PORT, IG1,toggle);
-        for(int i = 0; i < 999999; i++){
-        }
+        for(volatile int i = 0; i < 999999; i++) {}
         toggle = !toggle;
     }
 }
