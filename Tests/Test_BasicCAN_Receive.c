@@ -14,15 +14,16 @@ void Task1(void *p_arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
+    CANbus_Init(MotorCAN, carCANFilterList, sizeof carCANFilterList);
+
     BSP_GPIO_Init(IG1_PORT, IG1, OUTPUT, false);
     
-
     while (1) {
-        volatile uint8_t bullshit = /*0xFF;*/toggle ? 0xFF : 0x00;
+        volatile uint8_t data̠byte = /*0xFF;*/toggle ? 0xFF : 0x00;
         CANDATA_t carMsg = {
-            .ID=BPS_FAULT,
-            .idx=0,
-            .data={bullshit,bullshit,bullshit,bullshit,bullshit,bullshit,bullshit,bullshit},
+            .ID = BPS_TRIP,
+            .idx = 0,
+            .data = {data̠byte,data̠byte,data̠byte,data̠byte,data̠byte,data̠byte,data̠byte,data̠byte}
         };
 
         CANbus_Send(carMsg, false, CARCAN);
