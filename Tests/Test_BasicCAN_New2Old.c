@@ -14,9 +14,10 @@ void Task1(void *p_arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
-    CANbus_Init(MotorCAN, carCANFilterList, sizeof carCANFilterList);
+    CANbus_Init(MOTORCAN, motorCANFilterList, sizeof motorCANFilterList);
 
     BSP_GPIO_Init(IG1_PORT, IG1, OUTPUT, false);
+    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT, OUTPUT, false);
     
     while (1) {
         volatile uint8_t data̠byte = /*0xFF;*/toggle ? 0xFF : 0x00;
@@ -28,6 +29,7 @@ void Task1(void *p_arg) {
 
         CANbus_Send(carMsg, false, CARCAN);
         BSP_GPIO_Write_Pin(IG1_PORT, IG1,toggle);
+        BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT,toggle);
         for(volatile int i = 0; i < 999999; i++) {}
         toggle = !toggle;
     }
