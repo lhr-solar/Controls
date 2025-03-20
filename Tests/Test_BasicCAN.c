@@ -4,7 +4,7 @@
 
 OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
-
+bool toggle = false;
 /*
  * Run this test with MotorCAN in loopback mode!
  */
@@ -14,23 +14,21 @@ void Task1(void *p_arg) {
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
     BSP_UART_Init(UART_2);
-
-    // CANDATA_t msg, out;
-    // msg.ID = BPS_TRIP;
-    // msg.idx = 0;
-    // memset(&msg.data, 0xa5, sizeof msg.data);
+    BSP_GPIO_Init(PORTC, GPIO_Pin_13, OUTPUT, false);
 
     CANDATA_t carMsg = {
         .ID=BPS_TRIP,
         .idx=0,
-        .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE }, // Bytes 4-5 store error flags and must be empty
+        .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE },
     };
     
 
     while (1) {
-        CANbus_Send(carMsg, true, CARCAN);
-        //CANbus_Read(&out, true, CARCAN);
-        //printf("Read stuff\n\r");
+        CANbus_Send(carMsg, false, CARCAN);
+        BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_13, toggle);
+        for(int i = 0; i < 999999; i++){
+        }
+        toggle = !toggle;
     }
 }
 
