@@ -29,13 +29,13 @@ void Task1(void *p_arg) {
 
        /*ErrorStatus readError = */CANbus_Read(&out, false, CARCAN);
        
-       if(out.ID == BPS_TRIP){
-            BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
-         //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
-       }else{
-         //  BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
-         BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, OFF);
-       }
+        if(out.ID == IO_STATE && out.data[0]) {
+                BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
+            //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
+        } else{
+            //  BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
+            BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, OFF);
+        }
 
         BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_13, toggle);
         for(int i = 0; i < 999999; i++){
