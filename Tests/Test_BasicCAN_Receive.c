@@ -24,12 +24,21 @@ void Task1(void *p_arg) {
     // };
     CANDATA_t out;
 
+    BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
+    for(int i = 0; i < 999999; i++){
+    }
+
     while (1) {
        // CANbus_Send(carMsg, false, CARCAN);
 
        /*ErrorStatus readError = */CANbus_Read(&out, false, CARCAN);
+
+        volatile bool consensus = false;
+        for (int i = 0; i < 8; i++) {consensus |= out.data[i];}
+        //BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
        
-        if (out.ID == IO_STATE && out.data[0] != 0x0) {
+        if (//out.ID == IO_STATE &&
+            consensus) {
             BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
             //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
         } else{
