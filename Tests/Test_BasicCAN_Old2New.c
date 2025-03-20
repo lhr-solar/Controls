@@ -16,14 +16,22 @@ void Task1(void *p_arg) {
     BSP_UART_Init(UART_2);
     BSP_GPIO_Init(PORTC, GPIO_Pin_13, OUTPUT, false);
 
-    CANDATA_t carMsg = {
-        .ID=BPS_TRIP,
-        .idx=0,
-        .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE },
-    };
+    // CANDATA_t carMsg = {
+    //     .ID=BPS_TRIP,
+    //     .idx=0,
+    //     .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE },
+    // };
     
 
     while (1) {
+
+        volatile uint8_t data̠byte = /*0xFF;*/toggle ? 0xFF : 0x00;
+        CANDATA_t carMsg = {
+            .ID = BPS_TRIP,
+            .idx = 0,
+            .data = {data̠byte,data̠byte,data̠byte,data̠byte,data̠byte,data̠byte,data̠byte,data̠byte}
+        };
+
         CANbus_Send(carMsg, false, CARCAN);
         BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_13, toggle);
         for(int i = 0; i < 999999; i++){
