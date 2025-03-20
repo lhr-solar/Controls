@@ -4,42 +4,42 @@
 
 OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
-
+bool toggle = false;
 /*
- * Run this test with CarCAN in loopback mode!
+ * Run this test with MotorCAN in loopback mode!
  */
 
 void Task1(void *p_arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+    CANbus_Init(CARCAN, carCANFilterList, sizeof carCANFilterList);
+    BSP_UART_Init(UART_2);
+    BSP_GPIO_Init(PORTC, GPIO_Pin_13, OUTPUT, false);
+    BSP_GPIO_Init(PORTC, GPIO_Pin_14, OUTPUT, false);
 
-    // BSP_GPIO_Init(PORTC, GPIO_Pin_13, OUTPUT, true); // use UART2 TP (J25) as IO
-    // BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_13, OFF);
-    // BSP_GPIO_Init(PORTA, GPIO_Pin_3, OUTPUT, false); 
-    // BSP_GPIO_Init(PORTA, GPIO_Pin_14, OUTPUT, false); 
-    
-
-    CANbus_Init(CARCAN, NULL, 0);
-    //CANbus_Init(MOTORCAN, (CANId_t *) motorCANFilterList, NUM_MOTORCAN_FILTERS);
-                                
-    CANDATA_t msg, out;         
-    msg.ID = BPS_TRIP;          
-    msg.idx = 0;
-    memset(&msg.data, 0xff, sizeof msg.data);
-    msg.ID = IO_STATE;          
-    msg.idx = 0;
-    memset(&msg.data, 0x00, sizeof msg.data);
-    // BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_2, OFF);
-    // BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_3, OFF);
-    // BSP_GPIO_Write_Pin(PORTA, GPIO_Pin_14, OFF);
+    CANDATA_t carMsg = {
+        .ID=BPS_TRIP,
+        .idx=0,
+        .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE },
+    };
+    CANDATA_t out;
 
     while (1) {
-        CANbus_Send(msg, true, CARCAN);
-        CANbus_Send(out, true, CARCAN);
-      //  ErrorStatus readError = CANbus_Read(&out, true, CARCAN);
-      //  BSP_GPIO_Write_Pin(RCC_AHB1Periph_GPIOA, GPIO_Pin_3, readError == SUCCESS ? ON : OFF);
-        //BSP_GPIO_Write_Pin(RCC_AHB1Periph_GPIOA, GPIO_Pin_3, ON);
-        //BSP_GPIO_Write_Pin(RCC_AHB1Periph_GPIOA, GPIO_Pin_14, ON);
+       // CANbus_Send(carMsg, false, CARCAN);
+
+       ErrorStatus readError = CANbus_Read(&out, false, CARCAN);
+       if(out.ID == BPS_TRIP){
+           BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
+         //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
+       }else{
+         //  BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
+         BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, OFF);
+       }
+
+        BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_13, toggle);
+        for(int i = 0; i < 999999; i++){
+        }
+        toggle = !toggle;
     }
 }
 
@@ -69,8 +69,3 @@ int main(){
     OSStart(&err);
     assertOSError(err);
 }
-
-/*
-Note: CAN2 start filter bank number n is configurable by writing 
-          CAN2SB[5:0] bits in the CAN_FMR register
-*/
