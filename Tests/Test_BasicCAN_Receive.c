@@ -29,8 +29,8 @@ void Task1(void *p_arg) {
 
        /*ErrorStatus readError = */CANbus_Read(&out, false, CARCAN);
        
-        if(out.ID == IO_STATE && out.data[0]) {
-                BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
+        if (out.ID == IO_STATE && out.data[0] != 0x0) {
+            BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
             //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
         } else{
             //  BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
