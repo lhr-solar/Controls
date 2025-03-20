@@ -6,6 +6,8 @@
 OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 
+bool toggle = true;
+
 void Task1(void *p_arg) {
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
@@ -14,16 +16,20 @@ void Task1(void *p_arg) {
     BSP_GPIO_Init(BPS_FAULT_PORT, BPS_FAULT, OUTPUT, false); 
     BSP_GPIO_Init(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, OUTPUT, false);
     BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT, OUTPUT, false);
+    BSP_GPIO_Init(IG1_PORT, IG1, OUTPUT, false);
+
 
 
     CANbus_Init(CARCAN, (CANId_t *) carCANFilterList, NUM_CARCAN_FILTERS);
     CANbus_Init(MOTORCAN, (CANId_t *) motorCANFilterList, NUM_MOTORCAN_FILTERS);
 
-    CANDATA_t carMsg = {
-        .ID=IO_STATE,
-        .idx=0,
-        .data={0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF}, // Bytes 4-5 store error flags and must be empty
-    };
+    CANDATA_t out;
+    // CANDATA_t carMsg = {
+    //     .ID=IO_STATE,
+    //     .idx=0,
+    //     .data={0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF}, // Bytes 4-5 store error flags and must be empty
+    // };
     
     // msg.idx = 1;
     // memset(&msg.data, 0xad, sizeof msg.data);
@@ -37,11 +43,25 @@ void Task1(void *p_arg) {
     BSP_GPIO_Write_Pin(OS_FAULT_PORT, OS_FAULT, ON);
 
     while (1) {
-        ErrorStatus sendError = CANbus_Send(carMsg, true, CARCAN);
+       // ErrorStatus sendError = CANbus_Send(carMsg, true, CARCAN);
         //BSP_GPIO_Write_Pin(CONTROLS_FAULT_PORT, CONTROLS_FAULT, sendError == SUCCESS ? ON : OFF);
-        // ErrorStatus readError = CANbus_Read(&out, true, bus);
-        BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, sendError == SUCCESS ? ON : OFF);
-        // BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, ON);
+        //BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, ON);
+
+        ErrorStatus readError = CANbus_Read(&out, false, CARCAN);
+        BSP_GPIO_Write_Pin(IG1_PORT, IG1,toggle);
+        BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, toggle);
+        if(out.ID == BPS_TRIP){
+            BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
+            BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, OFF);
+          //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
+        }else{
+          //  BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
+            BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, ON);
+        }
+        
+            for(int i = 0; i < 999999;i++){
+            }
+            toggle = !toggle;
     }
 }
 
