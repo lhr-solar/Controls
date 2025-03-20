@@ -31,7 +31,7 @@ void Task1(void *p_arg) {
        volatile bool consensus = false;
        for (int i = 0; i < 8; i++) {consensus |= out.data[i];}
       
-        ErrorStatus readError = CANbus_Read(&out, false, CARCAN);
+        CANbus_Read(&out, false, CARCAN);
         BSP_GPIO_Write_Pin(IG1_PORT, IG1,toggle);
         BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, toggle);
         if(out.ID == BPS_TRIP&&
