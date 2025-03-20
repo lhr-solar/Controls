@@ -20,7 +20,7 @@ void Task1(void *p_arg) {
     while (1) {
         volatile uint8_t bullshit = /*0xFF;*/toggle ? 0xFF : 0x00;
         CANDATA_t carMsg = {
-            .ID=IO_STATE,
+            .ID=BPS_FAULT,
             .idx=0,
             .data={bullshit,bullshit,bullshit,bullshit,bullshit,bullshit,bullshit,bullshit},
         };
