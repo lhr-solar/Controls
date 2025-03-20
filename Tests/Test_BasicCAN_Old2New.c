@@ -25,37 +25,20 @@ void Task1(void *p_arg) {
     CANbus_Init(MOTORCAN, (CANId_t *) motorCANFilterList, NUM_MOTORCAN_FILTERS);
 
     CANDATA_t out;
-    // CANDATA_t carMsg = {
-    //     .ID=IO_STATE,
-    //     .idx=0,
-    //     .data={0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF}, // Bytes 4-5 store error flags and must be empty
-    // };
-    
-    // msg.idx = 1;
-    // memset(&msg.data, 0xad, sizeof msg.data);
-
-
-    //bus = CARCAN;
-   // msg.ID = BPS_TRIP;         
-    // bus = CARCAN;
-    // msg.ID = BPS_TRIP;
-
     BSP_GPIO_Write_Pin(OS_FAULT_PORT, OS_FAULT, ON);
 
     while (1) {
-       // ErrorStatus sendError = CANbus_Send(carMsg, true, CARCAN);
-        //BSP_GPIO_Write_Pin(CONTROLS_FAULT_PORT, CONTROLS_FAULT, sendError == SUCCESS ? ON : OFF);
-        //BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, ON);
-
+       volatile bool consensus = false;
+       for (int i = 0; i < 8; i++) {consensus |= out.data[i];}
+      
         ErrorStatus readError = CANbus_Read(&out, false, CARCAN);
         BSP_GPIO_Write_Pin(IG1_PORT, IG1,toggle);
         BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, toggle);
-        if(out.ID == BPS_TRIP){
-            BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
+        if(out.ID == BPS_TRIP&&
+            consensus) {
+            BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, ON);
             BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, OFF);
-          //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
         }else{
-          //  BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
             BSP_GPIO_Write_Pin(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, ON);
         }
         
