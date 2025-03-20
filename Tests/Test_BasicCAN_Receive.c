@@ -37,7 +37,7 @@ void Task1(void *p_arg) {
         for (int i = 0; i < 8; i++) {consensus |= out.data[i];}
         //BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
        
-        if (out.ID == IO_STATE &&
+        if (out.ID == BPS_TRIP &&
             consensus) {
             BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
             //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
