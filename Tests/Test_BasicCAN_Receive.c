@@ -17,19 +17,20 @@ void Task1(void *p_arg) {
     BSP_GPIO_Init(PORTC, GPIO_Pin_13, OUTPUT, false);
     BSP_GPIO_Init(PORTC, GPIO_Pin_14, OUTPUT, false);
 
-    CANDATA_t carMsg = {
-        .ID=BPS_TRIP,
-        .idx=0,
-        .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE },
-    };
+    // CANDATA_t carMsg = {
+    //     .ID=BPS_TRIP,
+    //     .idx=0,
+    //     .data={0xC, 0xA, 0xF, 0xE, 0xB, 0xA, 0xB, 0xE },
+    // };
     CANDATA_t out;
 
     while (1) {
        // CANbus_Send(carMsg, false, CARCAN);
 
-       ErrorStatus readError = CANbus_Read(&out, false, CARCAN);
+       /*ErrorStatus readError = */CANbus_Read(&out, false, CARCAN);
+       
        if(out.ID == BPS_TRIP){
-           BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
+            BSP_GPIO_Write_Pin(PORTC, GPIO_Pin_14, ON);
          //  BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, ON);
        }else{
          //  BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, readError == SUCCESS ? ON : OFF);
