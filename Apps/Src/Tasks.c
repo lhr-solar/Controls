@@ -48,7 +48,7 @@ CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
-OS_ERR       Error_OS = OS_ERR_NONE;
+error_code_t Error_OS = OS_ERR_NONE;
 
 extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
