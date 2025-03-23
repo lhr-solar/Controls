@@ -37,22 +37,15 @@
         else if(IGN_IS_ARRAY(motor_state, array_state)){
             return IGN_ARR;
         }
-        // else if(IGN_IS_OFF(motor_state, array_state)){
-        //     // possible in an off state
-        //     goto FILTER_OFF_STATE;
-        // }
     }
     else{
         // the ignition state has not been reset and is at the array or motor position
         if(!IGN_IS_OFF(motor_state, array_state)){
             return IGN_OFF;
         }
-        // else{
-        //     goto FILTER_OFF_STATE;
-        // }
     }
-    // return IGN_ERROR;
-    // is possibly at the off state
+
+    // Need to confirm if Ignition is actually off or in a floating state
     uint8_t off_counter = 0;
     while(off_counter < IGN_OFF_THRESHOLD){
         array_state = BSP_GPIO_Read_Pin(ARRAY_IGNITION_PORT, ARRAY_IGNITION_PIN);
