@@ -14,7 +14,7 @@ typedef enum{
     IGN_ERROR
 }ignition_state_t;
 
-
+#define IGNITION_BUFFER_SIZE 10
 
 #define ARRAY_IGNITION_PORT IG1_PORT
 #define ARRAY_IGNITION_PIN  IG1
