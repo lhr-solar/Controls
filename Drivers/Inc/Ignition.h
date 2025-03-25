@@ -29,7 +29,7 @@ typedef enum{
 void Ignition_Init(void);
 
 /**
- * @brief   Toggles a status led
+ * @brief   Gets the state of the ignition switch
  * @return  state of the ignition switch
  */ 
 ignition_state_t Get_Ignition_State(void);

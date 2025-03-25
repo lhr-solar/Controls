@@ -17,7 +17,7 @@ void Status_Leds_Init(void){
 
 /**
  * @brief   Writes data to a specified pin
- * @param   led The led to write too
+ * @param   led The led to write to
  * @param   state true=ON or false=OFF
  * @return  None
  */ 
@@ -29,7 +29,7 @@ void Status_Leds_Write(status_led_t led, bool state){
         case MOTOR_CONTACTOR_LED:
             BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, state);
             break;
-        case MOTOR_PRECHARGE_CONTACTOR_lED:
+        case MOTOR_PRECHARGE_CONTACTOR_LED:
             BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, state);
             break;
         case ARRAY_PRECHARGE_CONTACTOR_LED:
@@ -65,7 +65,7 @@ void Status_Leds_Toggle(status_led_t led){
         case MOTOR_CONTACTOR_LED:
             BSP_GPIO_Toggle_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR);
             break;
-        case MOTOR_PRECHARGE_CONTACTOR_lED:
+        case MOTOR_PRECHARGE_CONTACTOR_LED:
             BSP_GPIO_Toggle_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS);
             break;
         case ARRAY_PRECHARGE_CONTACTOR_LED:

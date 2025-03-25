@@ -11,7 +11,7 @@
  {
     MOTOR_CONTACTOR_LED = 0,
     ARRAY_PRECHARGE_CONTACTOR_LED,
-    MOTOR_PRECHARGE_CONTACTOR_lED,
+    MOTOR_PRECHARGE_CONTACTOR_LED,
     OS_FAULT_LED,
     CONTROLS_FAULT_LED,
     BPS_FAULT_LED,
@@ -31,7 +31,7 @@ void Status_Leds_Init(void);
 
 /**
  * @brief   Writes data to a specified pin
- * @param   led The led to write too
+ * @param   led The led to write to
  * @param   state true=ON or false=OFF
  * @return  None
  */ 
