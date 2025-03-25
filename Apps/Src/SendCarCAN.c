@@ -122,7 +122,7 @@ void Task_SendCarCAN(void *p_arg){
     assertOSError(err);
 
     while (1) {
-          
+
         // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
         OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
         assertOSError(err);
@@ -141,12 +141,18 @@ void Task_SendCarCAN(void *p_arg){
 
 static void putIOState(void){
     CANDATA_t message;
+    CANDATA_t boost_enable;
+
     memset(&message, 0, sizeof message);
     message.ID = IO_STATE;
+    boost_enable.ID = MPPTA_BOOST_EN;
+
     
     // Get pedal information
     message.data[0] = Pedals_Read(ACCELERATOR);
     message.data[1] = Pedals_Read(BRAKE);
+
+    boost_enable.data[0] = 0;
 
     // Get minion information
     for(pin_t pin = 0; pin < NUM_PINS; pin++){
@@ -164,6 +170,7 @@ static void putIOState(void){
     message.data[3] |= (Minions_Read(IGN_1) || Minions_Read(IGN_2)) << 2;
 
     CANbus_Send(message, true, CARCAN);
+    CANbus_Send(boost_enable, true, CARCAN);
 }
 
 /**
