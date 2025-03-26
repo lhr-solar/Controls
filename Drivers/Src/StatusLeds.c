@@ -13,6 +13,10 @@ void Status_Leds_Init(void){
     BSP_GPIO_Init(BPS_FAULT_PORT, BPS_FAULT, OUTPUT, false);
     BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
     BSP_GPIO_Init(CRUISE_IND_PORT, CRUISE_IND, OUTPUT, false);
+    
+    // both LEDs are on the Dashboard
+    BSP_GPIO_Init(BPS_HAZARD_PORT, BPS_HAZARD, OUTPUT, false);
+    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT, OUTPUT, false);
 } 
 
 /**
@@ -47,6 +51,10 @@ void Status_Leds_Write(status_led_t led, bool state){
         case CRUISE_IND_LED:
             BSP_GPIO_Write_Pin(CRUISE_IND_PORT, CRUISE_IND, state);
             break;
+        case DASH_BPS_HAZ_LED:
+            BSP_GPIO_Write_Pin(BPS_HAZARD_PORT, BPS_HAZARD, state);
+        case DASH_HEARTBEAT_LED:
+            BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, state);
         default:
             break;
     }
@@ -83,6 +91,10 @@ void Status_Leds_Toggle(status_led_t led){
         case CRUISE_IND_LED:
             BSP_GPIO_Toggle_Pin(CRUISE_IND_PORT, CRUISE_IND);
             break;
+        case DASH_BPS_HAZ_LED:
+            BSP_GPIO_Toggle_Pin(BPS_HAZARD_PORT, BPS_HAZARD);
+        case DASH_HEARTBEAT_LED:
+            BSP_GPIO_Toggle_Pin(HEARTBEAT_PORT, HEARTBEAT);
         default:
             break;
     }

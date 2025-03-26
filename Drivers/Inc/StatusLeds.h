@@ -17,12 +17,12 @@
     BPS_FAULT_LED,
     MOTOR_CONTROLLER_FAULT_LED,
     CRUISE_IND_LED,
+    DASH_BPS_HAZ_LED,
+    DASH_HEARTBEAT_LED,
     NUM_STATUS_LED,
  } status_led_t;
 
  
-
-
 /**
  * @brief Initializes Status LED pins
  * 
