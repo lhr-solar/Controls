@@ -62,9 +62,6 @@ static bool cruiseEnablePrevious = false;
 static bool cruiseSetButton = false;
 static bool cruiseSetPrevious = false;
 
-// Allows cruiseSet to toggle on for a single loop of the SendTritium task
-static bool cruiseSetAllow = true;
-
 // Accel pedal states (used only for hysteresis)
 static bool accelPressed = false;
 
@@ -131,7 +128,7 @@ static const TritiumState_t FSM[6] = {
  * @brief Updates the brakelight and brake indication on display
  */
 static void brakeUpdate(){
-    if(brakePedalPercent == BRAKE_PRESSED) 
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) 
     {
         Minions_Write(BRAKELIGHT, true);
         UpdateDisplay_SetBrake(true);
@@ -143,6 +140,7 @@ static void brakeUpdate(){
     }
 }
 
+
 /**
  * @brief Sets new cruiseVelSetpoint if cruise set is pressed.
  * This function is only called while in the cruise states.
@@ -152,13 +150,6 @@ static void cruiseVelCheckUpdate() {
         cruiseVelSetpoint = velocityObserved;
 }
 
-static bool bothPedalsPressed() {
-    // Protect from both brake and accel being pressed (checks the smallest of ACCEL_PEDAL_PRESSED_THRESHOLD & 
-    // ACCEL_PEDAL_THRESHOLD) to make sure we're never accelerating/sending current & also braking
-    if (brakePedalPercent == BRAKE_PRESSED && accelPedalPercent >= ACCEL_BRAKE_OVERRIDE_THRESHOLD)
-        return true;
-    return false;
-}
 
 #ifdef SENDTRITIUM_PRINT_MES
 /**
@@ -219,26 +210,9 @@ static void readInputs()
 {
 
     // Update pedals
-    static uint8_t brakeSaturationCt = 0;
     static uint8_t accelSaturationCt = 0;
 
-    uint8_t latest_pedal = Pedals_Read(BRAKE);
-
-    if (brakeSaturationCt < 3)
-    {
-        if (latest_pedal == 100) 
-            brakeSaturationCt++;
-        else if (latest_pedal == 0 && brakeSaturationCt != 0)
-            brakeSaturationCt--;
-        brakePedalPercent = BRAKE_UNPRESSED;
-    }
-    else if (brakeSaturationCt >= 3)
-    {
-        brakePedalPercent = BRAKE_PRESSED;
-
-        if (latest_pedal == 0)
-            brakeSaturationCt = 0;
-    }
+    brakePedalPercent = Pedals_Read(BRAKE);
 
     accelPedalPercent = Pedals_Read(ACCELERATOR);
     // Used for accel hysteresis to prevent abrupt switches to/from ACCELERATE_CRUISE state
@@ -268,8 +242,7 @@ static void readInputs()
         if(cruiseEnableCounter > 0) 
             cruiseEnableCounter--;
     }
-    if(Minions_Read(CRUZ_ST)) { // When cruiseSetCounter reaches DEBOUNCE_PERIOD, cruiseSet will be on for one task 
-                                // cycle (only after being completely off, as determined by cruiseSetAllow being previously off)
+    if(Minions_Read(CRUZ_ST)) { 
         if(cruiseSetCounter < DEBOUNCE_PERIOD) 
             cruiseSetCounter++;
     }
@@ -341,14 +314,14 @@ static void readInputs()
         cruiseSetButton = true;
     }
     else if(cruiseSetCounter == 0) 
-    { // Debounce & reset to allow cruise to be set again
+    {
         cruiseSetButton = false; 
-        cruiseSetAllow = true;
     } 
 
     // Toggle CRUZ_EN
-    if(cruiseEnableButton != cruiseEnablePrevious && cruiseEnablePrevious) // Falling edge toggle/CRUZ_EN detection
+    if((cruiseEnableButton != cruiseEnablePrevious) && cruiseEnablePrevious) // Falling edge toggle/CRUZ_EN detection
     {
+        // Falling edge detection -> if we previously had (debounced) cruiseEnable on and now we don't, toggle on/off
         cruiseEnable = !cruiseEnable;
     }
     cruiseEnablePrevious = cruiseEnableButton;
@@ -357,11 +330,13 @@ static void readInputs()
     // Allow CRUZ_SET on for just one loop of the SendTritium task
     if(cruiseSet) 
     {
+        // If cruiseSet was on for the previous task cycle, immediately turn it off, thereby ensuring its on for only one cycle
         cruiseSet = false;
-        cruiseSetAllow = false; // Can't set cruise again until it's recorded as unpressed
     }
-    if (!cruiseSetPrevious && cruiseSetButton && cruiseSetAllow) 
+    if ((!cruiseSetPrevious && cruiseSetButton))
     {
+        // If cruiseSet was previously off and now it's on, turn on cruiseSet (this preserves CRUZ_SET only be on for on task cycle
+        // because cruiseSetPrevious and cruiseSetButton are based on debounced values)
         cruiseSet = true;
     }
     cruiseSetPrevious = cruiseSetButton;
@@ -422,7 +397,7 @@ void ForwardDriveHandler()
     }
 
     // If braking, set current to 0. Otherwise, set current based on accel
-    if (brakePedalPercent == BRAKE_PRESSED || bothPedalsPressed()) 
+    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) 
     {
         velocitySetpoint = MAX_VELOCITY;
         currentSetpoint = 0.0f;
@@ -448,7 +423,7 @@ void ForwardDriveDecider()
     {
         state = FSM[PARK_STATE];
     }
-    else if (cruiseEnable && cruiseSet && (velocityObserved >= MIN_CRUISE_VELOCITY) && (brakePedalPercent == BRAKE_UNPRESSED)) 
+    else if (cruiseEnable && cruiseSet && (velocityObserved >= MIN_CRUISE_VELOCITY) && (brakePedalPercent <= BRAKE_PEDAL_THRESHOLD)) 
     {
         state = FSM[POWERED_CRUISE];
         cruiseVelSetpoint = velocityObserved;
@@ -479,7 +454,7 @@ void ParkHandler()
  */
 void ParkDecider()
 {
-    if (gear == FORWARD_GEAR) // Protect from 
+    if (gear == FORWARD_GEAR) 
     {
         state = FSM[FORWARD_DRIVE];
     } 
@@ -496,7 +471,7 @@ void ParkDecider()
 void ReverseDriveHandler()
 {
     // If braking, set current to 0. Otherwise, set current based on accel
-    if(brakePedalPercent == BRAKE_PRESSED || bothPedalsPressed()) 
+    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) 
     {
         velocitySetpoint = -MAX_VELOCITY;
         currentSetpoint = 0.0f;
@@ -558,7 +533,7 @@ void PoweredCruiseDecider()
         cruiseEnable = false;
     }
     // If cruise has been disabled, return to forward drive
-    else if (!cruiseEnable || brakePedalPercent == BRAKE_PRESSED)
+    else if (!cruiseEnable || brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
     {
         state = FSM[FORWARD_DRIVE];
         cruiseEnable = false;
@@ -604,7 +579,7 @@ void CoastingCruiseDecider()
         cruiseEnable = false;
     }
     // If cruise has been disabled, return to forward drive
-    else if (!cruiseEnable || brakePedalPercent == BRAKE_PRESSED)
+    else if (!cruiseEnable || brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
     {
         state = FSM[FORWARD_DRIVE];
         cruiseEnable = false;
@@ -650,7 +625,7 @@ void AccelerateCruiseDecider()
         cruiseEnable = false;
     }
     // If cruise has been disabled, return to forward drive
-    else if (!cruiseEnable || brakePedalPercent == BRAKE_PRESSED)
+    else if (!cruiseEnable || brakePedalPercent >= BRAKE_PEDAL_THRESHOLD)
     {
         state = FSM[FORWARD_DRIVE];
         cruiseEnable = false;
@@ -743,6 +718,7 @@ static void assertSendTritiumError(SendTritium_error_code_t sterr)
         case SENDTRITIUM_ERR_GEAR_FAULT:
             // Assert a nonrecoverable error that will kill the motor, turn off contactors, display a fault screen, & infinite loop
             throwTaskError(Error_SendTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
     }
 
     Error_SendTritium = SENDTRITIUM_ERR_NONE;

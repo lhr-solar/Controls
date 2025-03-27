@@ -24,11 +24,10 @@
 #define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)    // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
-// Used to define threshold for when to start powering the motor for movement
+// Used to define thresholds for when to start/stop powering the motor for movement, respectively
+// TODO: Test these thresholds
 #define ACCEL_PEDAL_THRESHOLD 15 // percent
-
-#define BRAKE_UNPRESSED 100 // percent - the switch is digital
-#define BRAKE_PRESSED 0 // percent
+#define BRAKE_PEDAL_THRESHOLD 15 // percent
 
 // Motor Controller current values. Current is in Amps (A)
 #define MAX_MOCO_BATTERY_CURRENT 64.0f  // NOTE: Provided only for reference. This 64A max for daybreak, anticipated to be 135 for next-gen
@@ -36,13 +35,10 @@
 #define MAX_MOCO_CURRENT 122.0f
 
 // Accel deadbands (for stability of ACCELERATE_CRUISE entry/exit)
-// NOTE: brake deadbands are unneeded, as they're digital & they have saturation checks in SendTritium.c
+// NOTE: Brake deadbands are unneeded, as brake won't cause rapid transitions between states (needing to 
+// explicitly re-press cruiseSet upon exit POWERED_CRUISE to FORWARD_DRIVE guarantees this)
 #define ACCEL_PEDAL_UNPRESSED_THRESHOLD 10 // percent
 #define ACCEL_PEDAL_PRESSED_THRESHOLD 25 // percent
-
-// When pressing both accel and brake, this defines threshold amount the accel pedal can be pressed before 
-// we cut off current to the motor (thereby only braking - applies mostly to Daybreak's mechanical brakes)
-#define ACCEL_BRAKE_OVERRIDE_THRESHOLD 25  // percent
 
 #define PEDAL_MIN 0        // percent
 #define PEDAL_MAX 100      // percent
