@@ -202,18 +202,18 @@ void Task1(void *arg)
     set_cruiseEnable(true);
     set_cruiseSet(true);
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
     // Ensure no switch when brake is pressed
     stateHandler();
     set_velocityObserved(VEL_EXCEED_CRUISE_THRESH);
     set_brakePedalPercent(BRAKE_PRESSED);
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
     // Ensure switch when all conditions are met
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
     stateDecider();
-    while(get_state().name != POWERED_CRUISE){}
+    while(get_state() != POWERED_CRUISE){}
 
     // Forward Drive to Park
     printf("\n\rTesting: Forward Drive -> Park\n\r");
@@ -222,7 +222,7 @@ void Task1(void *arg)
     stateHandler();
     set_gear(PARK_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}
+    while(get_state() != PARK_STATE){}
 
     // Forward Drive to Reverse Drive
     printf("\n\rTesting: Forward Drive -> Reverse Drive\n\r");
@@ -233,7 +233,7 @@ void Task1(void *arg)
     stateDecider();
     stateHandler();
     stateDecider();
-    while(get_state().name != REVERSE_DRIVE){}
+    while(get_state() != REVERSE_DRIVE){}
 
     /**
      * ======= Park ==========
@@ -250,7 +250,7 @@ void Task1(void *arg)
     stateHandler();
     set_gear(FORWARD_GEAR);
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
 
     // Park to Reverse Drive
     printf("\n\rTesting: Park -> Reverse Drive\n\r");
@@ -259,7 +259,7 @@ void Task1(void *arg)
     stateHandler(); 
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state().name != REVERSE_DRIVE){}
+    while(get_state() != REVERSE_DRIVE){}
 
     /**
      * ======= Reverse Drive ==========
@@ -276,7 +276,7 @@ void Task1(void *arg)
     stateHandler();
     set_gear(PARK_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}
+    while(get_state() != PARK_STATE){}
 
     // Reverse Drive to Forward Drive
     printf("\n\rTesting: Reverse Drive -> Forward Drive\n\r");
@@ -287,7 +287,7 @@ void Task1(void *arg)
     stateDecider();
     stateHandler();
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
 
     /**
      * ======= Powered Cruise ==========
@@ -305,14 +305,14 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_cruiseEnable(false);
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
     // Ensure change when brake is pressed
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_PRESSED);
     set_accelPedalPercent(ACCEL_UNPRESSED);
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
 
 
     // Powered Cruise to Park State
@@ -324,7 +324,7 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_gear(PARK_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}
+    while(get_state() != PARK_STATE){}
     // Ensure change when reverse gear is set
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
@@ -332,7 +332,7 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}   
+    while(get_state() != PARK_STATE){}   
 
     // Powered Cruise to Reverse Drive
     printf("\n\rTesting: Powered Cruise -> Reverse Drive\n\r");
@@ -343,10 +343,10 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}   
+    while(get_state() != PARK_STATE){}   
     stateHandler();
     stateDecider();
-    while(get_state().name != REVERSE_DRIVE){}
+    while(get_state() != REVERSE_DRIVE){}
 
     // Powered Cruise to Accelerate Cruise
     printf("\n\rTesting: Powered Cruise -> Accelerate Cruise\n\r");
@@ -356,7 +356,7 @@ void Task1(void *arg)
     set_brakePedalPercent(BRAKE_UNPRESSED);
     set_accelPedalPercent(ACCEL_PRESSED);  
     stateDecider();
-    while(get_state().name != ACCELERATE_CRUISE){}
+    while(get_state() != ACCELERATE_CRUISE){}
 
     // Powered Cruise to Coasting Cruise
     printf("\n\rTesting: Powered Cruise -> Coasting Cruise\n\r");
@@ -366,7 +366,7 @@ void Task1(void *arg)
     set_brakePedalPercent(BRAKE_UNPRESSED);
     set_accelPedalPercent(ACCEL_UNPRESSED);  
     stateDecider();
-    while(get_state().name != COASTING_CRUISE){}
+    while(get_state() != COASTING_CRUISE){}
 
     // Powered Cruise modifying cruiseVelSetpoint
     printf("\n\rTesting: Powered Cruise - Setting new cruise velocity\n\r");
@@ -393,14 +393,14 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED); 
     set_cruiseEnable(false);
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
     // Testing brake pedal transition
     goToCoastingCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH - 1.0f); 
     stateHandler();
     set_brakePedalPercent(BRAKE_PRESSED);
     set_accelPedalPercent(ACCEL_UNPRESSED); 
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
 
     // Coasting Cruise to Park
     printf("\n\rTesting: Coasting Cruise -> Park\n\r");
@@ -411,7 +411,7 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED); 
     set_gear(PARK_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}
+    while(get_state() != PARK_STATE){}
     // Ensure change when reverse gear is set
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH - 1.0f);
     stateHandler();
@@ -419,7 +419,7 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}   
+    while(get_state() != PARK_STATE){}   
 
     // Coasting Cruise to Reverse Drive
     printf("\n\rTesting: Coasting Cruise -> Reverse Drive\n\r");
@@ -430,10 +430,10 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}   
+    while(get_state() != PARK_STATE){}   
     stateHandler();
     stateDecider();
-    while(get_state().name != REVERSE_DRIVE){}
+    while(get_state() != REVERSE_DRIVE){}
 
     // Coasting Cruise to Accelerate Cruise
     printf("\n\rTesting: Powered Cruise -> Accelerate Cruise\n\r");
@@ -443,7 +443,7 @@ void Task1(void *arg)
     set_brakePedalPercent(BRAKE_UNPRESSED);
     set_accelPedalPercent(ACCEL_PRESSED);
     stateDecider();
-    while(get_state().name != ACCELERATE_CRUISE){}
+    while(get_state() != ACCELERATE_CRUISE){}
 
     // Coasting Cruise to Powered Cruise
     printf("\n\rTesting: Coasting Cruise -> Powered Cruise\n\r");
@@ -452,7 +452,7 @@ void Task1(void *arg)
     set_brakePedalPercent(BRAKE_UNPRESSED);
     set_accelPedalPercent(ACCEL_UNPRESSED);
     stateDecider();
-    while(get_state().name != POWERED_CRUISE){}
+    while(get_state() != POWERED_CRUISE){}
 
     // Coasting Cruise modifying cruiseVelSetpoint
     printf("\n\rTesting: Coasting Cruise - Setting new cruise velocity\n\r");
@@ -477,14 +477,14 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_cruiseEnable(false);
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
     // Testing brake pedal transition
     goToAccelerateCruise(VEL_EXCEED_CRUISE_THRESH + 1.0f, VEL_EXCEED_CRUISE_THRESH); 
     stateHandler();
     set_brakePedalPercent(BRAKE_PRESSED);
     set_accelPedalPercent(ACCEL_UNPRESSED); 
     stateDecider();
-    while(get_state().name != FORWARD_DRIVE){}
+    while(get_state() != FORWARD_DRIVE){}
 
     // Accelerate Cruise to Park
     printf("\n\rTesting: Accelerate Cruise -> Park\n\r");
@@ -495,7 +495,7 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_gear(PARK_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}
+    while(get_state() != PARK_STATE){}
     // Ensure change when reverse gear is set
     goToAccelerateCruise(VEL_EXCEED_CRUISE_THRESH + 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
@@ -503,7 +503,7 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){} 
+    while(get_state() != PARK_STATE){} 
 
 
     // Accelerate Cruise to Reverse Drive
@@ -515,10 +515,10 @@ void Task1(void *arg)
     set_accelPedalPercent(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state().name != PARK_STATE){}   
+    while(get_state() != PARK_STATE){}   
     stateHandler();
     stateDecider();
-    while(get_state().name != REVERSE_DRIVE){}
+    while(get_state() != REVERSE_DRIVE){}
 
     // Accelerate Cruise to Coasting Cruise
     printf("\n\rTesting: Accelerate Cruise -> Coasting Cruise\n\r");
@@ -528,11 +528,11 @@ void Task1(void *arg)
     set_brakePedalPercent(BRAKE_UNPRESSED);
     set_accelPedalPercent(ACCEL_PRESSED);
     stateDecider();
-    while(get_state().name != ACCELERATE_CRUISE){}
+    while(get_state() != ACCELERATE_CRUISE){}
     stateHandler();
     set_accelPedalPercent(ACCEL_UNPRESSED);
     stateDecider();
-    while(get_state().name != COASTING_CRUISE){}
+    while(get_state() != COASTING_CRUISE){}
 
     // Accelerate Cruise modifying cruiseVelSetpoint
     printf("\n\rTesting: Accelerate Cruise - Setting new cruise velocity\n\r");
