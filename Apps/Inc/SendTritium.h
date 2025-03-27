@@ -94,6 +94,8 @@ extern bool cruiseSet;
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
 
+extern bool accelPressed;
+
 extern Gear_t gear;
 extern TritiumState_t state;
 
@@ -106,6 +108,7 @@ EXPOSE_GETTER(bool, cruiseEnable)
 EXPOSE_GETTER(bool, cruiseSet)
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
+EXPOSE_GETTER(bool, accelPressed)
 EXPOSE_GETTER(Gear_t, gear)
 EXPOSE_GETTER(TritiumStateName_t, state)
 EXPOSE_GETTER(float, velocityObserved)
@@ -119,6 +122,7 @@ EXPOSE_SETTER(bool, cruiseEnable)
 EXPOSE_SETTER(bool, cruiseSet)
 EXPOSE_SETTER(uint8_t, brakePedalPercent)
 EXPOSE_SETTER(uint8_t, accelPedalPercent)
+EXPOSE_SETTER(bool, accelPressed)
 EXPOSE_SETTER(Gear_t, gear)
 EXPOSE_SETTER(TritiumStateName_t, state)
 EXPOSE_SETTER(float, velocityObserved)

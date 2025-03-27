@@ -19,8 +19,10 @@
 #define VEL_EXCEED_CRUISE_THRESH (MIN_CRUISE_VELOCITY + 2.0f)
 #define VEL_BELOW_CRUISE_THRESH 0.0f
 
-#define ACCEL_UNPRESSED 0
-#define ACCEL_PRESSED 100
+// Used to set accelPressed variable, which is used instead of accelPedalPercent due to
+// cruise hysteresis (ensuring we don't change too rapidly between cruise states)
+#define ACCEL_UNPRESSED false
+#define ACCEL_PRESSED true
 
 #define BRAKE_UNPRESSED 0
 #define BRAKE_PRESSED 100
@@ -197,7 +199,6 @@ void Task1(void *arg)
     // Ensure no switch when velocity < cruise threshold
     goToForwardDrive(VEL_BELOW_CRUISE_THRESH); 
     stateHandler();
-    set_accelPedalPercent(ACCEL_PRESSED);
     set_brakePedalPercent(BRAKE_UNPRESSED);
     set_cruiseEnable(true);
     set_cruiseSet(true);
@@ -302,7 +303,7 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_cruiseEnable(false);
     stateDecider();
     while(get_state() != FORWARD_DRIVE){}
@@ -310,7 +311,7 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_PRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     stateDecider();
     while(get_state() != FORWARD_DRIVE){}
 
@@ -321,7 +322,7 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_gear(PARK_GEAR);
     stateDecider();
     while(get_state() != PARK_STATE){}
@@ -329,7 +330,7 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
     while(get_state() != PARK_STATE){}   
@@ -340,10 +341,9 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state() != PARK_STATE){}   
     stateHandler();
     stateDecider();
     while(get_state() != REVERSE_DRIVE){}
@@ -354,7 +354,7 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH  - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_PRESSED);  
+    set_accelPressed(ACCEL_PRESSED);
     stateDecider();
     while(get_state() != ACCELERATE_CRUISE){}
 
@@ -364,14 +364,14 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH  - 1.0f);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);  
+    set_accelPressed(ACCEL_UNPRESSED);  
     stateDecider();
     while(get_state() != COASTING_CRUISE){}
 
     // Powered Cruise modifying cruiseVelSetpoint
     printf("\n\rTesting: Powered Cruise - Setting new cruise velocity\n\r");
     cruiseVelTestVar = VEL_EXCEED_CRUISE_THRESH; 
-    goToPoweredCruise(cruiseVelTestVar, VEL_EXCEED_CRUISE_THRESH + 1.0f);
+    goToPoweredCruise(cruiseVelTestVar, VEL_EXCEED_CRUISE_THRESH + 6.0f);
     set_cruiseSet(true);
     stateHandler();
     while(get_cruiseVelSetpoint() != cruiseVelTestVar) {};
@@ -390,7 +390,7 @@ void Task1(void *arg)
     goToCoastingCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH - 1.0f);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED); 
+    set_accelPressed(ACCEL_UNPRESSED); 
     set_cruiseEnable(false);
     stateDecider();
     while(get_state() != FORWARD_DRIVE){}
@@ -398,7 +398,7 @@ void Task1(void *arg)
     goToCoastingCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH - 1.0f); 
     stateHandler();
     set_brakePedalPercent(BRAKE_PRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED); 
+    set_accelPressed(ACCEL_UNPRESSED); 
     stateDecider();
     while(get_state() != FORWARD_DRIVE){}
 
@@ -408,7 +408,7 @@ void Task1(void *arg)
     goToCoastingCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH - 1.0f); 
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED); 
+    set_accelPressed(ACCEL_UNPRESSED); 
     set_gear(PARK_GEAR);
     stateDecider();
     while(get_state() != PARK_STATE){}
@@ -416,7 +416,7 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH - 1.0f);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
     while(get_state() != PARK_STATE){}   
@@ -427,10 +427,9 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH - 1.0f);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
-    stateDecider();
-    while(get_state() != PARK_STATE){}   
+    stateDecider(); 
     stateHandler();
     stateDecider();
     while(get_state() != REVERSE_DRIVE){}
@@ -441,7 +440,7 @@ void Task1(void *arg)
     goToCoastingCruise(VEL_EXCEED_CRUISE_THRESH, VEL_EXCEED_CRUISE_THRESH - 1.0f);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_PRESSED);
+    set_accelPressed(ACCEL_PRESSED);
     stateDecider();
     while(get_state() != ACCELERATE_CRUISE){}
 
@@ -450,7 +449,7 @@ void Task1(void *arg)
     goToCoastingCruise(VEL_EXCEED_CRUISE_THRESH - 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     stateDecider();
     while(get_state() != POWERED_CRUISE){}
 
@@ -474,7 +473,7 @@ void Task1(void *arg)
     goToAccelerateCruise(VEL_EXCEED_CRUISE_THRESH + 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_cruiseEnable(false);
     stateDecider();
     while(get_state() != FORWARD_DRIVE){}
@@ -482,7 +481,7 @@ void Task1(void *arg)
     goToAccelerateCruise(VEL_EXCEED_CRUISE_THRESH + 1.0f, VEL_EXCEED_CRUISE_THRESH); 
     stateHandler();
     set_brakePedalPercent(BRAKE_PRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED); 
+    set_accelPressed(ACCEL_UNPRESSED); 
     stateDecider();
     while(get_state() != FORWARD_DRIVE){}
 
@@ -492,7 +491,7 @@ void Task1(void *arg)
     goToAccelerateCruise(VEL_EXCEED_CRUISE_THRESH + 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_gear(PARK_GEAR);
     stateDecider();
     while(get_state() != PARK_STATE){}
@@ -500,7 +499,7 @@ void Task1(void *arg)
     goToAccelerateCruise(VEL_EXCEED_CRUISE_THRESH + 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
     while(get_state() != PARK_STATE){} 
@@ -512,10 +511,9 @@ void Task1(void *arg)
     goToAccelerateCruise(VEL_EXCEED_CRUISE_THRESH + 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     set_gear(REVERSE_GEAR);
     stateDecider();
-    while(get_state() != PARK_STATE){}   
     stateHandler();
     stateDecider();
     while(get_state() != REVERSE_DRIVE){}
@@ -526,11 +524,11 @@ void Task1(void *arg)
     goToPoweredCruise(VEL_EXCEED_CRUISE_THRESH + 1.0f, VEL_EXCEED_CRUISE_THRESH);
     stateHandler();
     set_brakePedalPercent(BRAKE_UNPRESSED);
-    set_accelPedalPercent(ACCEL_PRESSED);
+    set_accelPressed(ACCEL_PRESSED);
     stateDecider();
     while(get_state() != ACCELERATE_CRUISE){}
     stateHandler();
-    set_accelPedalPercent(ACCEL_UNPRESSED);
+    set_accelPressed(ACCEL_UNPRESSED);
     stateDecider();
     while(get_state() != COASTING_CRUISE){}
 
