@@ -13,8 +13,8 @@
 
 #include "BSP_CAN.h"
 
-#define CARCAN CAN_1 //convenience aliases for the CANBuses
-#define MOTORCAN CAN_3
+#define CARCAN motor //convenience aliases for the CANBuses
+#define MOTORCAN car
 
 /**
  * This enum is used to signify the ID of the message you want to send. 
@@ -90,10 +90,10 @@ typedef struct {
 
 /**
  * @brief   Initializes the CAN system for a given bus
- * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
+ * @param   bus The bus to initialize. You can either use CAN_2, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
  * @param   idWhitelist A list of CAN IDs that we want to receive. If NULL, we will receive all messages.
  * @param   idWhitelistSize The size of the whitelist.
- * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
+ * @return  ERROR if bus != CAN2 or CAN3, SUCCESS otherwise
  */
 ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize);
 

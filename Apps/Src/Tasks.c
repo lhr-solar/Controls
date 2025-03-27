@@ -16,6 +16,7 @@
 #include "ReadTritium.h"
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
+#include "daybreak_pins.h"
 
 
 /**
@@ -49,7 +50,7 @@ error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back t
 error_code_t Error_SendTritium = SENDTRITIUM_ERR_NONE;
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
-OS_ERR       Error_OS = OS_ERR_NONE;
+error_code_t Error_OS = OS_ERR_NONE;
 
 extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
@@ -139,8 +140,8 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 */
 void EmergencyContactorOpen() {
     // Array motor kill
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, MOTOR_CONTROLLER_PRECHARGE_BYPASS_PIN, OFF);
-    BSP_GPIO_Write_Pin(CONTACTORS_PORT, ARRAY_PRECHARGE_BYPASS_PIN, OFF);
+    BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, OFF);
+    BSP_GPIO_Write_Pin(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, OFF);
 
     // Turn additional brakelight on to indicate critical error
     BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);

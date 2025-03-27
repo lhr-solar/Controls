@@ -3,6 +3,7 @@
 #include "BSP_CAN.h"
 #include "stm32f4xx.h"
 #include "os.h"
+#include "daybreak_pins.h"
 
 // The message information that we care to receive
 typedef struct _msg
@@ -31,8 +32,8 @@ static CanRxMsg gRxMessage[2];
 static callback_t gRxEvent[2];
 static callback_t gTxEnd[2];
 
-void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
-void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
+void BSP_MotorCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
+void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize);
 
 /**
  * @brief   Initializes the CAN module that communicates with the rest of the electrical system.
@@ -47,17 +48,17 @@ void BSP_CAN_Init(CAN_t bus, callback_t rxEvent, callback_t txEnd, uint16_t* idW
     gRxEvent[bus] = rxEvent;
     gTxEnd[bus] = txEnd;
 
-    if (bus == CAN_1)
+    if (bus == motor)
     {
-        BSP_CAN1_Init(idWhitelist, idWhitelistSize);
+        BSP_MotorCAN_Init(idWhitelist, idWhitelistSize);
     }
     else
     {
-        BSP_CAN3_Init(idWhitelist, idWhitelistSize);
+        BSP_CarCAN_Init(idWhitelist, idWhitelistSize);
     }
 }
 
-void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
+void BSP_MotorCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
     NVIC_InitTypeDef NVIC_InitStruct;
@@ -69,23 +70,23 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     /* CAN GPIOs configuration **************************************************/
 
     /* Enable GPIO clock */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(MotorCAN_AHB1_GPIO, ENABLE);
 
     // Alternate Function 9
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_CAN1);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_CAN1);
+    GPIO_PinAFConfig(MotorCAN_GPIO, MotorCAN_RX_Pinsource, MotorCAN_AF);
+    GPIO_PinAFConfig(MotorCAN_GPIO, MotorCAN_TX_Pinsource, MotorCAN_AF);
 
     /* Configure CAN RX and TX pins */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
+    GPIO_InitStruct.GPIO_Pin = MotorCAN_RX | MotorCAN_TX;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_Init(MotorCAN_GPIO, &GPIO_InitStruct);
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
+    RCC_APB1PeriphClockCmd(MotorCAN_APB1_CAN, ENABLE);
 
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
@@ -94,7 +95,7 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
     CAN_InitStruct.CAN_TXFP = ENABLE;
-    #ifdef CAR_LOOPBACK
+    #ifdef MOTOR_LOOPBACK
     CAN_InitStruct.CAN_Mode = CAN_Mode_LoopBack;
     #else
     CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
@@ -108,7 +109,7 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     CAN_InitStruct.CAN_BS1 = CAN_BS1_3tq;
     CAN_InitStruct.CAN_BS2 = CAN_BS2_4tq;
     CAN_InitStruct.CAN_Prescaler = 16;
-    CAN_Init(CAN1, &CAN_InitStruct);
+    CAN_Init(MotorCAN, &CAN_InitStruct);
 
     /* CAN filter init 
      * Initializes hardware filter banks to be used for filtering CAN IDs (whitelist)
@@ -124,7 +125,7 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
         CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
         CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
         CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-        CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+        CAN_FilterInit(MotorCAN, &CAN_FilterInitStruct);
     } else{
         // Filter CAN IDs
         // So far, if we shift whatever id we need by 5, it works
@@ -148,19 +149,19 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
             validIDCounter++;
 
             if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
-                CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+                CAN_FilterInit(MotorCAN, &CAN_FilterInitStruct);
             }
             else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
                 for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
                     *(FilterStructPtr + j) = 0x0000;
 
-                CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+                CAN_FilterInit(MotorCAN, &CAN_FilterInitStruct);
             }
             else if(validIDCounter > 112){ //All filter banks are to be filled and there is no point in filtering
                 for(uint8_t filter = 0; filter < 28; filter++){//Therefore, let all IDs through (no filtering)
                     CAN_FilterInitStruct.CAN_FilterNumber = filter;
                     CAN_FilterInitStruct.CAN_FilterActivation = DISABLE;
-                    CAN_FilterInit(CAN1, &CAN_FilterInitStruct);
+                    CAN_FilterInit(MotorCAN, &CAN_FilterInitStruct);
                 } 
             }
         }
@@ -180,10 +181,10 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     gRxMessage[0].FMI = 0;
 
     /* Enable FIFO 0 message pending Interrupt */
-    CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
+    CAN_ITConfig(MotorCAN, CAN_IT_FMP0, ENABLE);
 
     // Enable Rx interrupts
-    NVIC_InitStruct.NVIC_IRQChannel = CAN1_RX0_IRQn; // TODO: CHECK IRQ CHANNELS
+    NVIC_InitStruct.NVIC_IRQChannel = MotorCAN_RX_IRQ; // TODO: CHECK IRQ CHANNELS
     NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -191,8 +192,8 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
 
     if(NULL != gTxEnd[0]) {
         // Enable Tx Interrupts
-        CAN_ITConfig(CAN1, CAN_IT_TME, ENABLE);
-        NVIC_InitStruct.NVIC_IRQChannel = CAN1_TX_IRQn; 
+        CAN_ITConfig(MotorCAN, CAN_IT_TME, ENABLE);
+        NVIC_InitStruct.NVIC_IRQChannel = MotorCAN_TX_IRQ; 
         NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x0; // TODO: assess both of these priority settings
         NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x0;
         NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -200,7 +201,7 @@ void BSP_CAN1_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
     }
 }
 
-void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
+void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
     CAN_InitTypeDef CAN_InitStruct;
@@ -213,23 +214,23 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     /* CAN GPIOs configuration **************************************************/
 
     /* Enable GPIO clock */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(CarCAN_AHB1_GPIO, ENABLE);
 
     // Alternate Function 9
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource15, GPIO_AF11_CAN3);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF11_CAN3);
+    GPIO_PinAFConfig(CarCAN_GPIO, CarCAN_RX_Pinsource, CarCAN_AF);
+    GPIO_PinAFConfig(CarCAN_GPIO, CarCAN_TX_Pinsource, CarCAN_AF);
 
     /* Configure CAN RX and TX pins */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_8;
+    GPIO_InitStruct.GPIO_Pin = CarCAN_RX | CarCAN_TX;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_Init(CarCAN_GPIO, &GPIO_InitStruct);
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN3, ENABLE);
+    RCC_APB1PeriphClockCmd(CarCAN_APB1_CAN, ENABLE);
 
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
@@ -238,7 +239,7 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     CAN_InitStruct.CAN_NART = DISABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
     CAN_InitStruct.CAN_TXFP = ENABLE;
-    #ifdef MOTOR_LOOPBACK
+    #ifdef CAR_LOOPBACK
     CAN_InitStruct.CAN_Mode = CAN_Mode_LoopBack;
     #else
     CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
@@ -252,7 +253,7 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     CAN_InitStruct.CAN_BS1 = CAN_BS1_3tq;
     CAN_InitStruct.CAN_BS2 = CAN_BS2_4tq;
     CAN_InitStruct.CAN_Prescaler = 16;
-    CAN_Init(CAN3, &CAN_InitStruct);
+    CAN_Init(CarCAN, &CAN_InitStruct);
 
     /* CAN filter init 
      * Initializes hardware filter banks to be used for filtering CAN IDs (whitelist)
@@ -268,7 +269,7 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
         CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
         CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
         CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-        CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
+        CAN_FilterInit(CarCAN, &CAN_FilterInitStruct);
     } else{
         // Filter CAN IDs
         CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdList; //list mode
@@ -282,18 +283,18 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
             *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i];
 
             if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
-                CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
+                CAN_FilterInit(CarCAN, &CAN_FilterInitStruct);
             }
             else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
                 for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
                     *(FilterStructPtr + j) = 0x0000;
 
-                CAN_FilterInit(CAN3, &CAN_FilterInitStruct);
+                CAN_FilterInit(CarCAN, &CAN_FilterInitStruct);
             }
         }
     }
 
-    // CAN_SlaveStartBank(CAN1, 0);
+    // CAN_SlaveStartBank(CAN2, 0);
 
     /* Transmit Structure preparation */
     gTxMessage[1].ExtId = 0x5;
@@ -309,11 +310,11 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     gRxMessage[1].FMI = 0;
 
     /* Enable FIFO 0 message pending Interrupt */
-    CAN_ITConfig(CAN3, CAN_IT_FMP0, ENABLE);
+    CAN_ITConfig(CarCAN, CAN_IT_FMP0, ENABLE);
 
     //TODO: Double check preemption priority and subpriority
     // Enable Rx interrupts
-    NVIC_InitStruct.NVIC_IRQChannel = CAN3_RX0_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannel = CarCAN_RX_IRQ;
     NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -321,8 +322,8 @@ void BSP_CAN3_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
 
     // Enable Tx interrupts
     if(NULL != gTxEnd[1]){ 
-        CAN_ITConfig(CAN3,CAN_IT_TME,ENABLE);
-        NVIC_InitStruct.NVIC_IRQChannel = CAN3_TX_IRQn; 
+        CAN_ITConfig(CarCAN,CAN_IT_TME,ENABLE);
+        NVIC_InitStruct.NVIC_IRQChannel = CarCAN_TX_IRQ; 
         NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00; 
         NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
         NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
@@ -348,7 +349,7 @@ ErrorStatus BSP_CAN_Write(CAN_t bus, uint32_t id, uint8_t data[8], uint8_t lengt
         gTxMessage[bus].Data[i] = data[i];
     }
 
-    uint8_t retVal = (CAN_Transmit(bus == CAN_1 ? CAN1 : CAN3, &gTxMessage[bus]) != 0);
+    uint8_t retVal = (CAN_Transmit(bus == motor ? MotorCAN : CarCAN, &gTxMessage[bus]) != 0);
     if (retVal == CAN_TxStatus_NoMailBox)
     {
         return ERROR;
@@ -422,7 +423,7 @@ void CAN3_RX0_IRQHandler()
     OSIntExit(); // Signal to uC/OS
 }
 
-void CAN1_RX0_IRQHandler(void)
+void CAN2_RX0_IRQHandler(void)
 {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
@@ -430,9 +431,9 @@ void CAN1_RX0_IRQHandler(void)
     CPU_CRITICAL_EXIT();
 
     // Take any pending messages into a queue
-    while (CAN_MessagePending(CAN1, CAN_FIFO0))
+    while (CAN_MessagePending(CAN2, CAN_FIFO0))
     {
-        CAN_Receive(CAN1, CAN_FIFO0, &gRxMessage[0]);
+        CAN_Receive(CAN2, CAN_FIFO0, &gRxMessage[0]);
 
         msg_t rxMsg;
         rxMsg.id = gRxMessage[0].StdId;
@@ -474,14 +475,14 @@ void CAN3_TX_IRQHandler(void)
     OSIntExit(); // Signal to uC/OS
 }
 
-void CAN1_TX_IRQHandler(void)
+void CAN2_TX_IRQHandler(void)
 {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     OSIntEnter();
     CPU_CRITICAL_EXIT();
     // Call the function provided
-    CAN_ClearFlag(CAN1, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
+    CAN_ClearFlag(CAN2, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
     gTxEnd[0]();
 
     OSIntExit(); // Signal to uC/OS

@@ -31,7 +31,7 @@ void Task1(void *p_arg){
 
     Display_Init();
     UpdateDisplay_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
 
 
     while(1){
@@ -48,7 +48,7 @@ int main(void){ //startup OS stuff, spawn test task
         printf("OS error code %d\n",err);
     }
 
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
 
     OSTaskCreate( // Create test task
         (OS_TCB*)&Task1_TCB,
