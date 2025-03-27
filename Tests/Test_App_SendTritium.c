@@ -22,6 +22,9 @@
 #define ACCEL_UNPRESSED 0
 #define ACCEL_PRESSED 100
 
+#define BRAKE_UNPRESSED 0
+#define BRAKE_PRESSED 100
+
 // SendTritium.h has BRAKE_UNPRESSED & BRAKE_PRESSED already defined
 
 static OS_TCB Task1TCB;
