@@ -16,49 +16,8 @@
 // For fault handling
 #define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
 
-/**
- * Function prototypes
- */
-// check for and assert errors in UpdateDisplay
-// static void assertUpdateDisplayError(UpdateDisplayError_t err);
-
-/**
- * Enum and corresponding array for easy component selection.
- */
-typedef enum{
-	// Boolean components
-	ARRAY=0,
-	HEARTBEAT,
-	PACK_CURR_SIGN,
-	MC_CURR_SIGN,
-	BRAKE,
-	MOTOR,
-	// Non-boolean components
-	VELOCITY,
-	ACCEL_METER,
-	SOC,
-	SUPP_BATT,
-	CRUISE_ST,
-	REGEN_ST,
-	PACK_VOLTAGE,
-	PACK_CURRENT,
-	PACK_TEMP,
-	MC_BUS_VOLTAGE,
-	MC_BUS_CURRENT,
-	HEAT_SINK_TEMP,
-	GEAR,
-	// Fault code components
-	OS_CODE,
-	FAULT_CODE,
-} Component_t;
-
-uint32_t DISPLAY_COMP_VALS[NUM_COMPONENTS] = {0};
-
-// extern const char **compStrings;
-
-UpdateDisplayError_t UpdateDisplay_Init(){
+UpdateDisplayError_t UpdateDisplay_Init() {
 	OS_ERR err;
-
 	UpdateDisplayError_t ret = UpdateDisplay_SetPage(INFO);
 	OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, &err); // Wait >215ms so errors will show on the display
 	assertOSError(err);
@@ -72,7 +31,7 @@ UpdateDisplayError_t UpdateDisplay_Init(){
  * blinkers, gear selector, cruise control and regen braking indicator.
  * @returns UpdateDisplayError_t
  */
-static UpdateDisplayError_t UpdateDisplay_Refresh(){
+static UpdateDisplayError_t UpdateDisplay_Refresh() {
 	DisplayCmd_t refreshCmd = {
 		.compOrCmd = "click",
 		.attr = NULL,
@@ -96,11 +55,11 @@ static UpdateDisplayError_t UpdateDisplay_Refresh(){
  * @param val value
  * @return UpdateDisplayError_t
  */
-static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp){
+static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 	UpdateDisplayError_t ret = UPDATEDISPLAY_ERR_NONE;
 	
 	// For components that are on/off
-	if(comp <= MOTOR){
+	if (comp <= DISP_MOTOR) {
 		DisplayCmd_t visCmd = {
 			.compOrCmd = "vis",
 			.attr = NULL,
@@ -109,7 +68,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp){
 			.argTypes = {STR_ARG,INT_ARG},
 			{
 				{.str=(char*)DISPLAY_COMP_STR[comp]},
-				{.num=DISPLAY_COMP_VALS[comp]}
+				{.num=g_display_comp_vals[comp]}
 			}
 		};
 		
@@ -117,7 +76,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp){
 		return ret;
 	}
 	// For components that have a non-boolean value
-	else if(comp > MOTOR){
+	else if (comp > DISP_MOTOR) {
 		DisplayCmd_t setCmd = {
 			.compOrCmd = (char*)DISPLAY_COMP_STR[comp],
 			.attr = "val",
@@ -125,7 +84,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp){
 			.numArgs = 1,
 			.argTypes = {INT_ARG},
 			{
-				{.num=DISPLAY_COMP_VALS[comp]}
+				{.num=g_display_comp_vals[comp]}
 			}
 		};
 
@@ -135,7 +94,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp){
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page){
+UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page) {
 	DisplayCmd_t pgCmd = {
 		.compOrCmd = "page",
 		.attr = NULL,
@@ -153,105 +112,93 @@ UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page){
 }
 
 /* WRAPPERS */
-UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent){	// Integer percentage from 0-100
-	DISPLAY_COMP_VALS[SOC] = (percent);
+UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent) {	// Integer percentage from 0-100
+	g_display_comp_vals[DISP_SOC] = (percent);
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv) {
+	g_display_comp_vals[DISP_SUPP_BATT] = mv;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths) {
+	g_display_comp_vals[DISP_VELOCITY] = mphTenths;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent) {
+	g_display_comp_vals[DISP_ACCEL_METER] = (percent > 100) ? 100 : percent;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetArray(bool state) {
+	g_display_comp_vals[DISP_ARRAY] = state;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetMotor(bool state) {
+	g_display_comp_vals[DISP_MOTOR] = state;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear) {
+	g_display_comp_vals[DISP_GEAR] = gear;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state) {
+	g_display_comp_vals[DISP_REGEN_ST] = state;
+	return UPDATEDISPLAY_ERR_NONE;
+}
+
+UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state) {
+	g_display_comp_vals[DISP_CRUISE_ST] = state;
 	
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv){
-	DISPLAY_COMP_VALS[SUPP_BATT] = mv;
+UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t mv) {
+	g_display_comp_vals[DISP_PACK_VOLTAGE] = (mv / 100); // mv to tenths of a volt
 	
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths){
-	DISPLAY_COMP_VALS[VELOCITY] = mphTenths;
+UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val) {
+	g_display_comp_vals[DISP_PACK_TEMP] = (val / 100);
 
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent){
-	DISPLAY_COMP_VALS[ACCEL_METER] = (percent > 100)?100:percent;
-	
+UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val) {
+	g_display_comp_vals[DISP_PACK_CURRENT]   = (((val < 0) ? -val : val) / 100);
+	g_display_comp_vals[DISP_PACK_CURR_SIGN] = (val < 0) ? 1 : 0;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetArray(bool state){
-	DISPLAY_COMP_VALS[ARRAY] = state;
-	
+UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts) {
+	g_display_comp_vals[DISP_MC_BUS_VOLTAGE] = volts;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetMotor(bool state){
-	DISPLAY_COMP_VALS[MOTOR] = state;
-
+UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val) {
+	g_display_comp_vals[DISP_MC_BUS_CURRENT] = (val < 0) ? -val : val;
+	g_display_comp_vals[DISP_MC_CURR_SIGN]   = (val < 0) ? 1    : 0;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear){
-	DISPLAY_COMP_VALS[GEAR] = gear;
-	
+UpdateDisplayError_t UpdateDisplay_SetBrake(bool state) {
+	g_display_comp_vals[DISP_BRAKE] = (state) ? 1 : 0;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state){
-	DISPLAY_COMP_VALS[REGEN_ST] = state;
-
+UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val) {
+	g_display_comp_vals[DISP_HEARTBEAT] = val;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state){
-	DISPLAY_COMP_VALS[CRUISE_ST] = state;
-	
-	return UPDATEDISPLAY_ERR_NONE;
-}
-
-UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t mv){
-	DISPLAY_COMP_VALS[PACK_VOLTAGE] = (mv/100); // mv to tenths of a volt
-	
-	return UPDATEDISPLAY_ERR_NONE;
-}
-
-UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val){
-	DISPLAY_COMP_VALS[PACK_TEMP] = (val/100);
-
-	return UPDATEDISPLAY_ERR_NONE;
-}
-
-UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val){
-	DISPLAY_COMP_VALS[PACK_CURRENT] = (((val<0)?-val:val)/100);
-	DISPLAY_COMP_VALS[PACK_CURR_SIGN] = (val < 0)?1:0;
-	return UPDATEDISPLAY_ERR_NONE;
-}
-
-UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts){
-	DISPLAY_COMP_VALS[MC_BUS_VOLTAGE] = (volts);
-
-	return UPDATEDISPLAY_ERR_NONE;
-}
-
-UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val){
-	DISPLAY_COMP_VALS[MC_BUS_CURRENT] = (val<0)?-val:val;
-	DISPLAY_COMP_VALS[MC_CURR_SIGN] = (val < 0)?1:0;
-	return UPDATEDISPLAY_ERR_NONE;
-}
-
-UpdateDisplayError_t UpdateDisplay_SetBrake(bool state){
-	DISPLAY_COMP_VALS[BRAKE] = (state)?1:0;
-
-	return UPDATEDISPLAY_ERR_NONE;
-}
-
-UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val){
-	DISPLAY_COMP_VALS[HEARTBEAT] = val;
-
-	return UPDATEDISPLAY_ERR_NONE;
-}
-
-UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val){
-	DISPLAY_COMP_VALS[HEAT_SINK_TEMP] = val;
-
+UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val) {
+	g_display_comp_vals[DISP_HEAT_SINK_TEMP] = val;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
@@ -262,17 +209,17 @@ UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val){
 void Task_UpdateDisplay(void *p_arg) {
 	OS_ERR err;
 	while (1) {
-		for(Component_t comp = ARRAY; comp <= GEAR; comp++){
-			if (comp != REGEN_ST && comp != CRUISE_ST){
+		for (Component_t comp = DISP_ARRAY; comp <= DISP_GEAR; comp++) {
+			if (comp != DISP_REGEN_ST && comp != DISP_CRUISE_ST) {
 				UpdateDisplay_SetComponent(comp);
 			}
 		}
 
-		UpdateDisplay_SetHeartbeat(DISPLAY_COMP_VALS[HEARTBEAT]?0:1);
+		UpdateDisplay_SetHeartbeat(g_display_comp_vals[DISP_HEARTBEAT] ? 0 : 1);
 
 		UpdateDisplay_Refresh();
 
-		// Delay of 250 ms
+				// Delay of 250 ms
 		OSTimeDlyHMSM(0, 0, 0, 250, OS_OPT_TIME_HMSM_STRICT, &err);
 		assertOSError(err);
 	}

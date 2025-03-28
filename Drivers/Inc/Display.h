@@ -14,7 +14,7 @@
 #ifndef __DISPLAY_H
 #define __DISPLAY_H
 
-#include "common.h"	// common headers
+// #include "common.h"	// common headers
 #include "Tasks.h"	// for os and fault error locs
 
 #define MAX_ARGS 2	// maximum # of arguments in a command packet
@@ -23,8 +23,42 @@
 #define MAX_MSG_LEN 32
 #define MAX_ARG_LEN 16
 
-#define NUM_COMPONENTS 21
-extern const char* DISPLAY_COMP_STR[NUM_COMPONENTS];
+/**
+ * Enum and corresponding array for easy component selection.
+ */
+typedef enum{
+	// Boolean components
+	DISP_ARRAY=0,
+	DISP_HEARTBEAT,
+	DISP_PACK_CURR_SIGN,
+	DISP_MC_CURR_SIGN,
+	DISP_BRAKE,
+	DISP_MOTOR,
+	// Non-boolean components
+	DISP_VELOCITY,
+	DISP_ACCEL_METER,
+	DISP_SOC,
+	DISP_SUPP_BATT,
+	DISP_CRUISE_ST,
+	DISP_REGEN_ST,
+	DISP_PACK_VOLTAGE,
+	DISP_PACK_CURRENT,
+	DISP_PACK_TEMP,
+	DISP_MC_BUS_VOLTAGE,
+	DISP_MC_BUS_CURRENT,
+	DISP_HEAT_SINK_TEMP,
+	DISP_GEAR,
+	// Fault code components
+	DISP_OS_CODE,
+	DISP_FAULT_CODE,
+	DISP_NUM_COMPONENTS
+} Component_t;
+
+/**
+ * Values corresponding to the component enum.
+ */
+extern uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS];
+extern const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS];
 
 /**
  * Error types
@@ -99,7 +133,7 @@ DisplayError_t Display_Reset(void);
  * @brief Overwrites any processing commands and triggers the display fault screen
  * @returns DisplayError_t
  */
-DisplayError_t Display_Error();
+DisplayError_t Display_Error(void);
 
 /**
  * @brief Overwrites any processing commands and triggers the evacuation screen

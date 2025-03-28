@@ -15,7 +15,6 @@
 #include "common.h"
 #include "os.h"
 #include "config.h"
-// #include "Display.h"
 
 /**
  * Task initialization macro
@@ -55,11 +54,10 @@
 
 /**
  * Macro for adding error id to the error 
- * message array for desplaiying the fault.
+ * message array for displaying the fault.
  * Error id is a 16 bit number, so it is
  * split into 4 hex characters.
  */
-
 // uOS_ERR_XXXX
 #define ERR_MSG_OFFSET 9
 #define SET_ERR_MSG_HEX(prefix, arr, err) do { \
@@ -70,6 +68,8 @@
     arr[ERR_MSG_OFFSET + 4] = '\"'; \
     arr[ERR_MSG_OFFSET + 5] = '\0'; \
 } while(0)
+
+#define DISP_NA_STR_LITERAL "\"N/A\""
 
 /**
  * Task error variable type
@@ -138,7 +138,7 @@ void TaskSwHook_Init(void);
  * 
  * Stores the last TASK_TRACE_LENGTH tasks that were run
  * The most recent task is at tasks[index], the one before at tasks[index-1],
- * wrapping back around at the beginnning
+ * wrapping back around at the beginning
  * 
  */
 #define TASK_TRACE_LENGTH 8

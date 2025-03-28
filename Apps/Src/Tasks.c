@@ -50,10 +50,10 @@ error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 OS_ERR       Error_OS = OS_ERR_NONE;
 
 // Display error messages for readability
-char ErrMsg_ReadCarCAN[ERR_CODE_LEN] = "\"N/A\"";
-char ErrMsg_ReadTritium[ERR_CODE_LEN] = "\"N/A\"";
-char ErrMsg_UpdateDisplay[ERR_CODE_LEN] = "\"N/A\"";
-char ErrMsg_OS[ERR_CODE_LEN] = "\"N/A\"";
+char ErrMsg_ReadCarCAN[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_ReadTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_UpdateDisplay[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_OS[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 
 
 extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.

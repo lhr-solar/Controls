@@ -26,7 +26,11 @@
 
 static const char *TERMINATOR = "\xff\xff\xff";
 
-const char *DISPLAY_COMP_STR[NUM_COMPONENTS] = {
+// Hold component values for display
+uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS] = {0};
+
+// Strings for each component id
+const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
     // Boolean components
     "arr", "hb", "cs", "mcs", "brake", "mot",
     // Non-boolean components
@@ -35,8 +39,6 @@ const char *DISPLAY_COMP_STR[NUM_COMPONENTS] = {
     // Fault code components
     "oserr", "faulterr"
 };
-
-extern uint32_t DISPLAY_COMP_VALS[NUM_COMPONENTS];
 
 
 /**
@@ -54,7 +56,7 @@ DisplayError_t Display_Init() {
  * @returns DisplayError_t
  */
 DisplayError_t Display_Send(DisplayCmd_t cmd) {
-    char msgArgs[MAX_MSG_LEN];
+    char msgArgs[MAX_MSG_LEN] = {0}; // Initialize to avoid garbage values
 
     if (IS_ASSIGN_CMD(cmd)) {
         if (cmd.argTypes[0] == INT_ARG) {
@@ -148,7 +150,7 @@ DisplayError_t Display_Error() {
 
     // Display OS error if there is one
     DisplayCmd_t os_flt_cmd = {
-        .compOrCmd = (char*) DISPLAY_COMP_STR[19], // "oserr"
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_OS_CODE], // "oserr"
         .attr = "txt",
         .op = "=",
         .numArgs = 1,
@@ -158,7 +160,7 @@ DisplayError_t Display_Error() {
         }
     };
     Display_Send(os_flt_cmd);
-    strncpy(ErrMsg_OS, "\"N/A\"", 6);
+    strncpy(ErrMsg_OS, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
     memset(&Error_OS, 0, sizeof(error_code_t));
 
     // Display other errors if there are any.
@@ -168,7 +170,7 @@ DisplayError_t Display_Error() {
     // 3. UpdateDisplay
     if (Error_ReadTritium != T_NONE) {
         DisplayCmd_t moco_flt_cmd = {
-            .compOrCmd = (char*) DISPLAY_COMP_STR[20], // "faulterr"
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
             .attr = "txt",
             .op = "=",
             .numArgs = 1,
@@ -178,11 +180,11 @@ DisplayError_t Display_Error() {
             }
         };
         Display_Send(moco_flt_cmd);
-        strncpy(ErrMsg_ReadTritium, "\"N/A\"", 6);
+        strncpy(ErrMsg_ReadTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
         memset(&Error_ReadTritium, 0, sizeof(error_code_t));
     } else if (Error_ReadCarCAN != READCARCAN_ERR_NONE) {
         DisplayCmd_t rcc_flt_cmd = {
-            .compOrCmd = (char*) DISPLAY_COMP_STR[20], // "faulterr"
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
             .attr = "txt",
             .op = "=",
             .numArgs = 1,
@@ -192,11 +194,11 @@ DisplayError_t Display_Error() {
             }
         };
         Display_Send(rcc_flt_cmd);
-        strncpy(ErrMsg_ReadCarCAN, "\"N/A\"", 6);
+        strncpy(ErrMsg_ReadCarCAN, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
         memset(&Error_ReadCarCAN, 0, sizeof(error_code_t));
     } else if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE) {
         DisplayCmd_t disp_flt_cmd = {
-            .compOrCmd = (char*) DISPLAY_COMP_STR[20], // "faulterr"
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
             .attr = "txt",
             .op = "=",
             .numArgs = 1,
@@ -206,17 +208,17 @@ DisplayError_t Display_Error() {
             }
         };
         Display_Send(disp_flt_cmd);
-        strncpy(ErrMsg_UpdateDisplay, "\"N/A\"", 6);
+        strncpy(ErrMsg_UpdateDisplay, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
         memset(&Error_UpdateDisplay, 0, sizeof(error_code_t));
     } else {
         DisplayCmd_t no_flt_cmd = {
-            .compOrCmd = (char*) DISPLAY_COMP_STR[20], // "faulterr"
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
             .attr = "txt",
             .op = "=",
             .numArgs = 1,
             .argTypes = {STR_ARG},
             {
-                {.str = "\"N/A\""}
+                {.str = (char*)DISP_NA_STR_LITERAL}
             }
         };
         Display_Send(no_flt_cmd);
@@ -224,13 +226,13 @@ DisplayError_t Display_Error() {
 
     // Update pack current vars (value and sign)
     DisplayCmd_t packcurr_cmd = {
-        .compOrCmd = (char*) DISPLAY_COMP_STR[13], // "pc"
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_PACK_CURRENT], // "pc"
         .attr = "val",
         .op = "=",
         .numArgs = 1,
         .argTypes = {INT_ARG},
         {
-            {.num = DISPLAY_COMP_VALS[13]}
+            {.num = g_display_comp_vals[DISP_PACK_CURRENT]}
         }
     };
     Display_Send(packcurr_cmd);
@@ -242,8 +244,8 @@ DisplayError_t Display_Error() {
         .numArgs = 2,
         .argTypes = {STR_ARG, INT_ARG},
         {
-            {.str = (char*) DISPLAY_COMP_STR[2]},  // "cs"
-            {.num = DISPLAY_COMP_VALS[2]}
+            {.str = (char*) DISPLAY_COMP_STR[DISP_PACK_CURR_SIGN]},  // "cs"
+            {.num = g_display_comp_vals[DISP_PACK_CURR_SIGN]}
         }
     };
     Display_Send(packcurr_sign_cmd);
@@ -276,7 +278,7 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
 
     // Send SOC and SBPV values
     DisplayCmd_t soc_cmd = {
-        .compOrCmd = (char*) DISPLAY_COMP_STR[8], // "soc"
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_SOC], // "soc"
         .attr = "val",
         .op = "=",
         .numArgs = 1,
@@ -288,7 +290,7 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
     Display_Send(soc_cmd);
 
     DisplayCmd_t supp_cmd = {
-        .compOrCmd = (char*) DISPLAY_COMP_STR[9], // "supp"
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_SUPP_BATT], // "supp"
         .attr = "val",
         .op = "=",
         .numArgs = 1,
@@ -300,13 +302,13 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
     Display_Send(supp_cmd);
 
     DisplayCmd_t packcurr_cmd = {
-        .compOrCmd = (char*) DISPLAY_COMP_STR[13], // "pc"
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_PACK_CURRENT], // "pc"
         .attr = "val",
         .op = "=",
         .numArgs = 1,
         .argTypes = {INT_ARG},
         {
-            {.num = DISPLAY_COMP_VALS[13]}
+            {.num = g_display_comp_vals[DISP_PACK_CURRENT]}
         }
     };
     Display_Send(packcurr_cmd);
@@ -318,8 +320,8 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
         .numArgs = 2,
         .argTypes = {STR_ARG, INT_ARG},
         { 
-            {.str = (char*) DISPLAY_COMP_STR[2]}, // "cs"
-            {.num = DISPLAY_COMP_VALS[2]}
+            {.str = (char*) DISPLAY_COMP_STR[DISP_PACK_CURR_SIGN]}, // "cs"
+            {.num = g_display_comp_vals[DISP_PACK_CURR_SIGN]}
         } 
     };
     Display_Send(packcurr_sign_cmd);
