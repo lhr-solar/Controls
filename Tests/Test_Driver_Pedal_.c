@@ -18,8 +18,14 @@ int main() {
     Pedals_Init();
 
     while(1) {
-        printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\r", 
-            Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
+        printf("Brake Percent: %hhd", Pedals_Read(BRAKE));
+        printf("Accel Percent: %hhd", Pedals_Read(ACCELERATOR));
+        for(int i = 0; i < 9999; i++){}
     }
+
+    // while(1) {
+    //     printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\r", 
+    //         Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
+    // }
 }
 
