@@ -12,24 +12,27 @@
 #include "config.h"
 #include "Pedals.h"
 #include "StatusLeds.h"
+#include "BSP_GPIO.h"
 #include <bsp.h>
 
 
 int main() {
     Pedals_Init();
     Status_Leds_Init();
+    BSP_GPIO_Init(BRAKE_SW_PORT, BRAKE_SW, INPUT, true);
+    // BSP_GPIO_Init(BRAKE_POT_PORT, BRAKE_POT, INPUT, true);
+    // BSP_GPIO_Init(ACCEL_POT_PORT, ACCEL_POT, INPUT, true);
     BSP_UART_Init(USB);
 
-    // while(1) {
-    //     Status_Leds_Toggle(CRUISE_IND_LED);
-    //     for(int i = 0; i < 100; i++) {}
-    // }
-    
-
     while(1) {
-        printf("Brake Percent: %d\n\r", (int16_t) BSP_ADC_Get_Millivoltage(BRAKE));
-        // printf("Brake Percent: %d\n\r", Pedals_Read(BRAKE));
-        printf("Brake Percent: %d\n\r", Pedals_Read(BRAKE));
+        // uint8_t brake_gpio = BSP_GPIO_Read_Pin(BRAKE_POT_PORT, BRAKE_POT);
+        // printf("Brake Digital Val: %d\n\r", (brake_gpio));
+        int16_t brake_adc = BSP_ADC_Get_Value(BRAKE);
+        printf("Brake Raw ADC Val: %d\n\r", brake_adc);
+        int16_t brake_mV = BSP_ADC_Get_Millivoltage(BRAKE);
+        printf("Brake mV: %d\n\r", brake_mV);
+        int8_t brake_percent = Pedals_Read(BRAKE);
+        printf("Brake Percent: %d\n\r", brake_percent);
         for(int i = 0; i < 500000; i++){}
     }
 

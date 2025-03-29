@@ -55,7 +55,7 @@ void BSP_ADC_Init(void) {
 
 	GPIO_InitStruct.GPIO_Pin = BRAKE_POT;	// Using pin PC1
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;	// Analog Input
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN; // Pull down
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Pull down
 	GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
     
     GPIO_InitStruct.GPIO_Pin = ExtraADC_1;
@@ -89,8 +89,8 @@ void BSP_ADC_Init(void) {
 	// Configure the channels
 	// Apparently channel 2 has priority, or is at least read first.
 	// If you change the priorities, be prepared to have the order in the array change.
-    ADC_RegularChannelConfig(ADC1, ExtraADC_1_CHANNEL,1, ADC_SampleTime_480Cycles); // Extra 1
-    ADC_RegularChannelConfig(ADC1, ExtraADC_2_CHANNEL,2, ADC_SampleTime_480Cycles); // Extra 2
+    ADC_RegularChannelConfig(ADC1, ExtraADC_1_CHANNEL, 1, ADC_SampleTime_480Cycles); // Extra 1
+    ADC_RegularChannelConfig(ADC1, ExtraADC_2_CHANNEL, 2, ADC_SampleTime_480Cycles); // Extra 2
 	ADC_RegularChannelConfig(ADC1, ACCEL_POT_CHANNEL, 3, ADC_SampleTime_480Cycles);	// Accelerator - Used to be priority 1, now 2
 	ADC_RegularChannelConfig(ADC1, BRAKE_POT_CHANNEL, 4, ADC_SampleTime_480Cycles);	// Brake - Used to be priority 2, now 3
     // (TODO) HELLLLP... I kept the extra ADCs at lower numbers assuming priorities are higher the bigger the number?
