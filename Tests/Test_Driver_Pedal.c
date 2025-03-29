@@ -11,16 +11,26 @@
 #include "common.h"
 #include "config.h"
 #include "Pedals.h"
+#include "StatusLeds.h"
 #include <bsp.h>
 
 
 int main() {
     Pedals_Init();
+    Status_Leds_Init();
+    BSP_UART_Init(USB);
+
+    // while(1) {
+    //     Status_Leds_Toggle(CRUISE_IND_LED);
+    //     for(int i = 0; i < 100; i++) {}
+    // }
+    
 
     while(1) {
-        printf("Brake Percent: %hhd", Pedals_Read(BRAKE));
-        printf("Accel Percent: %hhd", Pedals_Read(ACCELERATOR));
-        for(int i = 0; i < 9999; i++){}
+        printf("Brake Percent: %d\n\r", (int16_t) BSP_ADC_Get_Millivoltage(BRAKE));
+        // printf("Brake Percent: %d\n\r", Pedals_Read(BRAKE));
+        printf("Brake Percent: %d\n\r", Pedals_Read(BRAKE));
+        for(int i = 0; i < 500000; i++){}
     }
 
     // while(1) {

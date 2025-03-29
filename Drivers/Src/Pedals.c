@@ -31,7 +31,8 @@ static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
  */
 void Pedals_Init(){
     BSP_ADC_Init();
-    BSP_GPIO_Init(BRAKE_SW_PORT, BRAKE_SW, INPUT, true);
+    BSP_GPIO_Init(BRAKE_POT_PORT, BRAKE_POT, INPUT, true);
+    BSP_GPIO_Init(ACCEL_POT_PORT, ACCEL_POT, INPUT, true);
 }
 
 /**
