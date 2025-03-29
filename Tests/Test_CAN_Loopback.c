@@ -37,9 +37,9 @@ int main(){
 
     while(1){
         ErrorStatus sendError = CANbus_Send(msg, true, bus);
-        Status_Leds_Write(CONTROLS_FAULT_LED);
+        Status_Leds_Write(CONTROLS_FAULT_LED, sendError == SUCCESS ? ON : OFF);
         ErrorStatus readError = CANbus_Read(&out, true, bus);
-        Status_Leds_Write(BPS_FAULT_LED);
-        Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED);
+        Status_Leds_Write(BPS_FAULT_LED, readError == SUCCESS ? ON : OFF);
+        Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, ON);
     }
 }
