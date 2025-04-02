@@ -19,7 +19,7 @@
 int main() {
     Pedals_Init();
     Status_Leds_Init();
-    BSP_GPIO_Init(BRAKE_SW_PORT, BRAKE_SW, INPUT, true);
+    // BSP_GPIO_Init(PORTC, 0x0, INPUT, true);
     // BSP_GPIO_Init(BRAKE_POT_PORT, BRAKE_POT, INPUT, true);
     // BSP_GPIO_Init(ACCEL_POT_PORT, ACCEL_POT, INPUT, true);
     BSP_UART_Init(USB);
