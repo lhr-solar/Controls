@@ -27,13 +27,18 @@ int main() {
     while(1) {
         // uint8_t brake_gpio = BSP_GPIO_Read_Pin(BRAKE_POT_PORT, BRAKE_POT);
         // printf("Brake Digital Val: %d\n\r", (brake_gpio));
-        int16_t brake_adc = BSP_ADC_Get_Value(BRAKE);
+        int16_t brake_adc = ADC_GetConversionValue(ADC1);//BSP_ADC_Get_Value(BRAKE);
         printf("Brake Raw ADC Val: %d\n\r", brake_adc);
         int16_t brake_mV = BSP_ADC_Get_Millivoltage(BRAKE);
         printf("Brake mV: %d\n\r", brake_mV);
         int8_t brake_percent = Pedals_Read(BRAKE);
         printf("Brake Percent: %d\n\r", brake_percent);
-        for(int i = 0; i < 500000; i++){}
+        
+        for(int i = 0; i < NUM_STATUS_LED; i++){
+            Status_Leds_Toggle(i);
+            volatile uint32_t waitTime = 0;
+            while (waitTime <= 99999) waitTime++;
+        }
     }
 
     // while(1) {
