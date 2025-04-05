@@ -19,31 +19,31 @@
 int main() {
     Pedals_Init();
     Status_Leds_Init();
-    // BSP_GPIO_Init(PORTC, 0x0, INPUT, true);
-    // BSP_GPIO_Init(BRAKE_POT_PORT, BRAKE_POT, INPUT, true);
-    // BSP_GPIO_Init(ACCEL_POT_PORT, ACCEL_POT, INPUT, true);
     BSP_UART_Init(USB);
 
     while(1) {
-        // uint8_t brake_gpio = BSP_GPIO_Read_Pin(BRAKE_POT_PORT, BRAKE_POT);
-        // printf("Brake Digital Val: %d\n\r", (brake_gpio));
-        int16_t brake_adc = ADC_GetConversionValue(ADC1);//BSP_ADC_Get_Value(BRAKE);
-        printf("Brake Raw ADC Val: %d\n\r", brake_adc);
-        int16_t brake_mV = BSP_ADC_Get_Millivoltage(BRAKE);
-        printf("Brake mV: %d\n\r", brake_mV);
-        int8_t brake_percent = Pedals_Read(BRAKE);
-        printf("Brake Percent: %d\n\r", brake_percent);
-        
+        // Status LEDs
         for(int i = 0; i < NUM_STATUS_LED; i++){
             Status_Leds_Toggle(i);
             volatile uint32_t waitTime = 0;
             while (waitTime <= 99999) waitTime++;
         }
-    }
 
-    // while(1) {
-    //     printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\r", 
-    //         Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
-    // }
+        // Actual Test
+        printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\n\r", 
+        Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
+        printf("BSP Get Millivoltage Accel: %5.1dmV\tBSP Get Millivoltage Brake:%5.1dmV\n\r", 
+            BSP_ADC_Get_Millivoltage(Accelerator_ADC),BSP_ADC_Get_Millivoltage(Brake_ADC));
+
+        // Uncomment if testing ADC/DMA
+        // volatile uint16_t *ADCresults_test = getADCResults();
+        // printf("ADC Results Entry Accelerator_ADC: %5.1d\n\r", ADCresults_test[Extra1] );
+        // printf("ADC Results Entry Brake_ADC: %5.1d\n\r", ADCresults_test[Extra2] );
+        // printf("ADC Results Entry Extra1: %5.1d\n\r", ADCresults_test[Accelerator_ADC] );
+        // printf("ADC Results Entry Extra2: %5.1d\n\r", ADCresults_test[Brake_ADC] );
+
+        for(volatile int i = 0; i < 200000; i++) {
+        }
+    }
 }
 
