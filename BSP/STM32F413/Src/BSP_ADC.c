@@ -2,8 +2,9 @@
 
 #include "BSP_ADC.h"
 #include "stm32f4xx.h"
+#include "daybreak_pins.h"
 
-static volatile uint16_t ADCresults[2];
+static volatile uint16_t ADCresults[NUMBER_OF_CHANNELS];
 
 static void ADC_InitDMA(void) {
 	// Start the clock for the DMA
@@ -16,7 +17,7 @@ static void ADC_InitDMA(void) {
 	DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)&(ADC1->DR);
 	DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &ADCresults;
 	DMA_InitStruct.DMA_DIR = DMA_DIR_PeripheralToMemory;
-	DMA_InitStruct.DMA_BufferSize = 2;
+	DMA_InitStruct.DMA_BufferSize = 4; // Changed this to fit the numebr of channels - more changes needed?
 	DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
@@ -40,20 +41,30 @@ static void ADC_InitDMA(void) {
  * @return  None
  */
 void BSP_ADC_Init(void) {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	// Enable the ADC clock
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	// Enable the PC clock for port C
+    RCC_APB2PeriphClockCmd(ADC1_APB1, ENABLE);	// Enable the ADC clock
+	RCC_AHB1PeriphClockCmd(ADC1_AHB1_GPIO, ENABLE);	// Enable the PC clock for port C
 
 	ADC_InitDMA();
 
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0;	// Using pin PC0
+	GPIO_InitStruct.GPIO_Pin = ACCEL_POT;	// Using pin PC0
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;	// Analog Input
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // High impedence
-	GPIO_Init(GPIOC,&GPIO_InitStruct);
+	// GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN; // Pull down
+	GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
 
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1;	// Using pin PC1
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN; // Pull down
-	GPIO_Init(GPIOC,&GPIO_InitStruct);    
+	GPIO_InitStruct.GPIO_Pin = BRAKE_POT;	// Using pin PC1
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;	// Analog Input
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; // Pull down
+	GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
+    
+    GPIO_InitStruct.GPIO_Pin = ExtraADC_1;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
+
+    GPIO_InitStruct.GPIO_Pin = ExtraADC_2;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
 
 	// ADC Common Init
 	ADC_CommonInitTypeDef ADC_CommonStruct;
@@ -71,15 +82,20 @@ void BSP_ADC_Init(void) {
 	ADC_InitStruct.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
 	ADC_InitStruct.ADC_ExternalTrigConv = DISABLE;
 	ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStruct.ADC_NbrOfConversion = 2;							// We have two channels that we need to read
+	ADC_InitStruct.ADC_NbrOfConversion = NUMBER_OF_CHANNELS;							// We have four channels (including extras) that we need to read
 
 	ADC_Init(ADC1, &ADC_InitStruct);
 
 	// Configure the channels
 	// Apparently channel 2 has priority, or is at least read first.
 	// If you change the priorities, be prepared to have the order in the array change.
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_480Cycles);	// Accelerator
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_480Cycles);	// Brake
+    ADC_RegularChannelConfig(ADC1, ExtraADC_1_CHANNEL, 4, ADC_SampleTime_480Cycles); // Extra 1
+    ADC_RegularChannelConfig(ADC1, ExtraADC_2_CHANNEL, 3, ADC_SampleTime_480Cycles); // Extra 2
+	ADC_RegularChannelConfig(ADC1, ACCEL_POT_CHANNEL, 1, ADC_SampleTime_480Cycles);	// Accelerator - Used to be priority 1, now 2
+	ADC_RegularChannelConfig(ADC1, BRAKE_POT_CHANNEL, 2, ADC_SampleTime_480Cycles);	// Brake - Used to be priority 2, now 3
+    // (TODO) HELLLLP... I kept the extra ADCs at lower numbers assuming priorities are higher the bigger the number?
+    //  IDK if thats correct, someone who knows BSP pls help
+    //  I changed the ordering in the enum as well to match
 
 	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
 
