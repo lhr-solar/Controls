@@ -18,16 +18,16 @@
 
 int main() {
     Pedals_Init();
-    Status_Leds_Init();
+    // Status_Leds_Init();
     BSP_UART_Init(USB);
 
     while(1) {
         // Status LEDs
-        for(int i = 0; i < NUM_STATUS_LED; i++){
-            Status_Leds_Toggle(i);
-            volatile uint32_t waitTime = 0;
-            while (waitTime <= 99999) waitTime++;
-        }
+        // for(int i = 0; i < NUM_STATUS_LED; i++){
+        //     Status_Leds_Toggle(i);
+        //     volatile uint32_t waitTime = 0;
+        //     while (waitTime <= 99999) waitTime++;
+        // }
 
         // Actual Test
         printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\n\r", 
@@ -36,13 +36,13 @@ int main() {
             BSP_ADC_Get_Millivoltage(Accelerator_ADC),BSP_ADC_Get_Millivoltage(Brake_ADC));
 
         // Uncomment if testing ADC/DMA
-        // volatile uint16_t *ADCresults_test = getADCResults();
-        // printf("ADC Results Entry Accelerator_ADC: %5.1d\n\r", ADCresults_test[Extra1] );
-        // printf("ADC Results Entry Brake_ADC: %5.1d\n\r", ADCresults_test[Extra2] );
-        // printf("ADC Results Entry Extra1: %5.1d\n\r", ADCresults_test[Accelerator_ADC] );
-        // printf("ADC Results Entry Extra2: %5.1d\n\r", ADCresults_test[Brake_ADC] );
+        volatile uint16_t *ADCresults_test = getADCResults();
+        printf("ADC Results Entry Accelerator_ADC: %5.1d\n\r", ADCresults_test[Accelerator_ADC] );
+        printf("ADC Results Entry Brake_ADC: %5.1d\n\r", ADCresults_test[Brake_ADC] );
+        printf("ADC Results Entry Extra1: %5.1d\n\r", ADCresults_test[Extra1] );
+        printf("ADC Results Entry Extra2: %5.1d\n\r", ADCresults_test[Extra2] );
 
-        for(volatile int i = 0; i < 200000; i++) {
+        for(volatile int i = 0; i < 150000; i++) {
         }
     }
 }
