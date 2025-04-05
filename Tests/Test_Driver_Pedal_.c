@@ -19,11 +19,19 @@ int main() {
     BSP_UART_Init(UART_2);
 
     while(1) {
-        for(int i = 0; i < 99999; i++) {
-            if(i == 0) {
-                printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\n\r", 
-                Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
-            }
+        printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\n\r", 
+                    Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
+
+        printf("Accelerator: %5.1dmV\tBrake: %5.1dmV\n\r", 
+                BSP_ADC_Get_Millivoltage(Accelerator_ADC),BSP_ADC_Get_Millivoltage(Brake_ADC));
+
+        volatile uint16_t *ADCresults_test = getADCResults();
+        printf("ADC Results Entry Accelerator_ADC: %5.1d\n\r", ADCresults_test[Accelerator_ADC] );
+        printf("ADC Results Entry Brake_ADC: %5.1d\n\r", ADCresults_test[Brake_ADC] );
+        printf("ADC Results Entry Extra1: %5.1d\n\r", ADCresults_test[Extra1] );
+        printf("ADC Results Entry Extra2: %5.1d\n\r", ADCresults_test[Extra2] );
+            
+        for(volatile int i = 0; i < 150000; i++) {
         }
     }
 }

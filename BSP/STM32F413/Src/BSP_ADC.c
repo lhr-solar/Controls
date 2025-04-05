@@ -6,6 +6,10 @@
 
 static volatile uint16_t ADCresults[NUMBER_OF_CHANNELS];
 
+volatile uint16_t *getADCResults(void) {
+	return ADCresults;
+}
+
 static void ADC_InitDMA(void) {
 	// Start the clock for the DMA
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);

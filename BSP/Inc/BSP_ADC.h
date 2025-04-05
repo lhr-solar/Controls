@@ -23,12 +23,14 @@
 
 typedef enum 
 {
-    Extra1,
-    Extra2,
     Accelerator_ADC, 
     Brake_ADC,
+    Extra1,
+    Extra2,
     NUMBER_OF_CHANNELS
 } ADC_t;
+
+volatile uint16_t *getADCResults(void);
 
 /**
  * @brief   Initialize the ADC module
