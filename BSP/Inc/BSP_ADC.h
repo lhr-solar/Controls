@@ -15,6 +15,7 @@
 #include "bsp.h"
 #include "common.h"
 #include "config.h"
+#include "daybreak_pins.h"
 
 #define MAX_CHANNELS 10
 #define ADC_PRECISION_BITS 12
