@@ -16,10 +16,14 @@
 
 int main() {
     Pedals_Init();
+    BSP_UART_Init(UART_2);
 
     while(1) {
-        printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\r", 
-            Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
+        for(int i = 0; i < 99999; i++) {
+            if(i == 0) {
+                printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\n\r", 
+                Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
+            }
+        }
     }
 }
-

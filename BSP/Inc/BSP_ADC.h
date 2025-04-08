@@ -15,6 +15,7 @@
 #include "bsp.h"
 #include "common.h"
 #include "config.h"
+#include "daybreak_pins.h"
 
 #define MAX_CHANNELS 10
 #define ADC_PRECISION_BITS 12
@@ -22,6 +23,8 @@
 
 typedef enum 
 {
+    Extra1,
+    Extra2,
     Accelerator_ADC, 
     Brake_ADC,
     NUMBER_OF_CHANNELS
@@ -48,6 +51,3 @@ int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
 int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
 
 #endif
-
-
-/* @} */
