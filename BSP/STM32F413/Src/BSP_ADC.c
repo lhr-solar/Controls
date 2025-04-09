@@ -62,13 +62,13 @@ void BSP_ADC_Init(void) {
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
     
-  GPIO_InitStruct.GPIO_Pin = ExtraADC_1;
-  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
-  GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
+	GPIO_InitStruct.GPIO_Pin = ExtraADC_1;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
 
-  GPIO_InitStruct.GPIO_Pin = ExtraADC_2;
-  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
-  GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
+	GPIO_InitStruct.GPIO_Pin = ExtraADC_2;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_Init(ADC1_GPIO,&GPIO_InitStruct);
 
 	// ADC Common Init
 	ADC_CommonInitTypeDef ADC_CommonStruct;
@@ -95,7 +95,7 @@ void BSP_ADC_Init(void) {
 	// If you change the priorities, be prepared to have the order in the array change.
 	ADC_RegularChannelConfig(ADC1, ACCEL_POT_CHANNEL, 1, ADC_SampleTime_480Cycles);
 	ADC_RegularChannelConfig(ADC1, BRAKE_POT_CHANNEL, 2, ADC_SampleTime_480Cycles);
-  ADC_RegularChannelConfig(ADC1, ExtraADC_2_CHANNEL, 3, ADC_SampleTime_480Cycles);
+	ADC_RegularChannelConfig(ADC1, ExtraADC_2_CHANNEL, 3, ADC_SampleTime_480Cycles);
 	ADC_RegularChannelConfig(ADC1, ExtraADC_1_CHANNEL, 4, ADC_SampleTime_480Cycles);
 
 	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
