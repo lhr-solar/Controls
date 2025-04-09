@@ -17,11 +17,12 @@
 // #include "common.h"	// common headers
 #include "Tasks.h"	// for os and fault error locs
 
-#define MAX_ARGS 2	// maximum # of arguments in a command packet
 
-#define DISP_OUT UART_3
+// #define DISP_OUT DISPLAY
 #define MAX_MSG_LEN 32
 #define MAX_ARG_LEN 16
+
+#define MAX_ARGS 2	// maximum # of arguments in a command packet
 
 /**
  * Enum and corresponding array for easy component selection.

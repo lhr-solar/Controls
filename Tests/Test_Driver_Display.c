@@ -21,7 +21,6 @@
 #include "UpdateDisplay.h"
 #include "ReadCarCAN.h"
 #include "bsp.h"   // for writing to UART
-#define DISP_OUT UART_3
 // static const char *TERMINATOR = "\xff\xff\xff";
 
 static OS_TCB Task1_TCB;
@@ -148,11 +147,11 @@ void Task1() {
 
 	//delay();
 	delay();
-	//assertOSError(OS_ERR_X);
+	assertOSError(OS_ERR_X);
 	//delay();
-	Display_Error();
+	//Display_Error();
 
-	// assertReadCarCANError(READCARCAN_ERR_CHARGE_DISABLE);
+	//assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
 	//assertTritiumError(T_MOTOR_WATCHDOG_TRIP);
 	// Display_Error();
 	

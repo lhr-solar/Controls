@@ -22,7 +22,30 @@ void testBoolComp(UpdateDisplayError_t(*function)(bool)){
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
 }
 
-void testPercentageComp(UpdateDisplayError_t(*function)(uint8_t)){
+void testPercentageCompAccel(UpdateDisplayError_t(*function)(uint8_t)){
+    OS_ERR e;
+
+    function(0);
+    
+    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    function(25);
+    
+    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    function(50);
+    
+    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    function(75);
+    
+    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    function(100);
+    
+    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    function(0);
+    
+    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+}
+
+void testPercentageCompSOC(UpdateDisplayError_t(*function)(uint32_t)){
     OS_ERR e;
 
     function(0);
@@ -64,10 +87,8 @@ void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
 
 void Task1(void *arg)
 {   
-    DisplayError_t error;
-
     CPU_Init();
-    error = Display_Init();
+    Display_Init();
     UpdateDisplay_Init();
     
 
@@ -109,7 +130,7 @@ void Task1(void *arg)
     testTriStateComp(&UpdateDisplay_SetRegenState);
     testBoolComp(&UpdateDisplay_SetMotor);
     testBoolComp(&UpdateDisplay_SetArray);
-    testPercentageComp(&UpdateDisplay_SetSOC);
+    testPercentageCompSOC(&UpdateDisplay_SetSOC);
 
     UpdateDisplay_SetSBPV(12);
     
@@ -121,9 +142,9 @@ void Task1(void *arg)
     
     OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
 
-    testPercentageComp(&UpdateDisplay_SetAccel);
+    testPercentageCompAccel(&UpdateDisplay_SetAccel);
 
-    Display_Error((error_code_t)error); // Testing Display_Error
+    Display_Error();
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     Display_Reset();

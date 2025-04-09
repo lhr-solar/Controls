@@ -16,10 +16,6 @@
 #include "ReadTritium.h"
 #include "UpdateDisplay.h"
 
-#define DISP_OUT DISPLAY
-#define MAX_MSG_LEN 32
-#define MAX_ARG_LEN 16
-
 // Assignment commands have only 1 arg, an operator, and an attribute
 #define IS_ASSIGN_CMD(cmd)                              \
     (cmd.compOrCmd != NULL && cmd.op != NULL &&         \
@@ -50,7 +46,7 @@ const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
  * @returns DisplayError_t
  */
 DisplayError_t Display_Init() {
-    BSP_UART_Init(DISP_OUT);
+    BSP_UART_Init(DISPLAY);
     return Display_Reset();
 }
 
@@ -71,10 +67,10 @@ DisplayError_t Display_Send(DisplayCmd_t cmd) {
             sprintf(msgArgs, "%s", cmd.args[0].str);
         }
 
-        BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
-        BSP_UART_Write(DISP_OUT, ".", 1);
-        BSP_UART_Write(DISP_OUT, cmd.attr, strlen(cmd.attr));
-        BSP_UART_Write(DISP_OUT, cmd.op, strlen(cmd.op));
+        BSP_UART_Write(DISPLAY, cmd.compOrCmd, strlen(cmd.compOrCmd));
+        BSP_UART_Write(DISPLAY, ".", 1);
+        BSP_UART_Write(DISPLAY, cmd.attr, strlen(cmd.attr));
+        BSP_UART_Write(DISPLAY, cmd.op, strlen(cmd.op));
     } else if (IS_OP_CMD(cmd)) {
         if (cmd.numArgs > MAX_ARGS) return DISPLAY_ERR_OTHER;
 
@@ -97,7 +93,7 @@ DisplayError_t Display_Send(DisplayCmd_t cmd) {
             }
         }
 
-        BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
+        BSP_UART_Write(DISPLAY, cmd.compOrCmd, strlen(cmd.compOrCmd));
     } 
     else { // Error parsing command struct
         return DISPLAY_ERR_PARSE;
@@ -105,10 +101,10 @@ DisplayError_t Display_Send(DisplayCmd_t cmd) {
 
     // If there are arguments, write them
     if (cmd.numArgs >= 1) { 
-        BSP_UART_Write(DISP_OUT, msgArgs, strlen(msgArgs));
+        BSP_UART_Write(DISPLAY, msgArgs, strlen(msgArgs));
     }
 
-    BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    BSP_UART_Write(DISPLAY, (char *)TERMINATOR, strlen(TERMINATOR));
 
     return DISPLAY_ERR_NONE;
 }
@@ -126,7 +122,7 @@ DisplayError_t Display_Reset() {
     };
 
     // Terminates any in progress command
-    BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    BSP_UART_Write(DISPLAY, (char *)TERMINATOR, strlen(TERMINATOR));
 
     return Display_Send(restCmd);
 }
@@ -137,7 +133,7 @@ DisplayError_t Display_Reset() {
  */
 DisplayError_t Display_Error() {
     // Terminates any in progress command
-    BSP_UART_Write(DISP_OUT, (char*) TERMINATOR, strlen(TERMINATOR)); 
+    BSP_UART_Write(DISPLAY, (char*) TERMINATOR, strlen(TERMINATOR)); 
 
     // Switch to fault page
     DisplayCmd_t err_pg_cmd = {
@@ -265,7 +261,7 @@ DisplayError_t Display_Error() {
  */
 DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
     // Terminates any in progress command
-    BSP_UART_Write(DISP_OUT, (char*) TERMINATOR, strlen(TERMINATOR));
+    BSP_UART_Write(DISPLAY, (char*) TERMINATOR, strlen(TERMINATOR));
 
     // Switch to evac page
     DisplayCmd_t evac_pg_cmd = {
