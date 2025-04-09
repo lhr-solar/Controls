@@ -16,7 +16,7 @@
 
 int main() {
     Pedals_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
 
     while(1) {
         for(int i = 0; i < 99999; i++) {
@@ -27,4 +27,3 @@ int main() {
         }
     }
 }
-

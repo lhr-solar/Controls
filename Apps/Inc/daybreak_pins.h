@@ -82,7 +82,7 @@
 #define TIMER_CLK               GPIO_Pin_6
 
 #define HEARTBEAT_PORT          PORTC
-#define HEARTBEAT               GPIO_Pin_7
+#define HEARTBEAT_PIN           GPIO_Pin_7
 
 #define CRUISE_IND_PORT         PORTC
 #define CRUISE_IND              GPIO_Pin_8

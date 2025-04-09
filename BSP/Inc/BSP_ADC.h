@@ -51,6 +51,3 @@ int16_t BSP_ADC_Get_Value(ADC_t hardwareDevice);
 int16_t BSP_ADC_Get_Millivoltage(ADC_t hardwareDevice);
 
 #endif
-
-
-/* @} */
