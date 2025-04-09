@@ -24,7 +24,7 @@ int main() {
         printf("Accelerator: %5.1d%%\tBrake: %5.1d%%\n\r", 
         Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE));
         printf("BSP Get Millivoltage Accel: %5.1dmV\tBSP Get Millivoltage Brake:%5.1dmV\n\r", 
-            BSP_ADC_Get_Millivoltage(Accelerator_ADC),BSP_ADC_Get_Millivoltage(Brake_ADC));
+        BSP_ADC_Get_Millivoltage(Accelerator_ADC),BSP_ADC_Get_Millivoltage(Brake_ADC));
 
         // Uncomment if testing ADC/DMA
 //         volatile uint16_t *ADCresults_test = getADCResults();
