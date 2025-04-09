@@ -72,6 +72,14 @@ void BSP_GPIO_Write_Pin(port_t port, uint16_t pinmask, bool state);
  */ 
 uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin);
 
+/**
+ * @brief   Toggles an output pin (not applicable to input pins)
+ * @param   port The port to toggle
+ * @param   pin The pin to toggle
+ * @return  None
+ */ 
+void BSP_GPIO_Toggle_Pin(port_t port, uint16_t pin);
+
 #endif
 
 

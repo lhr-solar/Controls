@@ -81,6 +81,8 @@ typedef uint16_t error_code_t;
  */
 void Task_Init(void* p_arg);
 
+void Task_StatusLED_Init(void);
+
 void Task_SendTritium(void* p_arg);
 
 void Task_ReadCarCAN(void* p_arg);

@@ -5,6 +5,8 @@
  * 
  */
 
+// (TODO) Status LEDs
+
 #include "common.h"
 #include "config.h"
 #include "Tasks.h"
@@ -17,7 +19,7 @@
 #include "Pedals.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
-
+#include "daybreak_pins.h"
 #include "BSP_GPIO.h"
 
 int idle_time_ctr = 0;
@@ -36,7 +38,7 @@ void IdleTaskHook(void)
             last_tick_cnt = current_tick_cnt;
 
             if(current_tick_cnt % 50 == 0){
-                BSP_GPIO_Write_Pin(PORTB, GPIO_Pin_6, toggle);
+                BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN, toggle);
                 toggle = !toggle;
             }
         }
@@ -45,7 +47,7 @@ void IdleTaskHook(void)
 
 void IdleInit(void)
 {
-    BSP_GPIO_Init(PORTB, GPIO_Pin_6, OUTPUT, false);
+    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT_PIN, OUTPUT, false);
     OS_AppIdleTaskHookPtr = &IdleTaskHook;
 }
 
@@ -58,6 +60,7 @@ int main(void) {
     OSInit(&err);
     IdleInit();
     TaskSwHook_Init();
+    Task_StatusLED_Init();
 
     assertOSError(err);
 
@@ -89,6 +92,19 @@ int main(void) {
     while(1);
 }
 
+void Task_StatusLED_Init(void) {
+    BSP_GPIO_Init(OS_FAULT_PORT, OS_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(IG1_PORT, IG1, OUTPUT, false);
+    BSP_GPIO_Init(IG2_PORT, IG2, OUTPUT, false);
+    BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false);
+    BSP_GPIO_Init(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, OUTPUT, false);
+    BSP_GPIO_Init(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, OUTPUT, false);
+    BSP_GPIO_Init(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(BPS_FAULT_PORT, BPS_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
+    BSP_GPIO_Init(CRUISE_IND_PORT, CRUISE_IND, OUTPUT, false);
+}
+
 void Task_Init(void *p_arg){
     OS_ERR err;
 
@@ -97,7 +113,7 @@ void Task_Init(void *p_arg){
     
     // Initialize drivers
     Pedals_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     CANbus_Init(CARCAN, carCANFilterList, NUM_CARCAN_FILTERS);
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();

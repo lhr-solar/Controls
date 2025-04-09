@@ -16,6 +16,10 @@
 #include "ReadTritium.h"
 #include "UpdateDisplay.h"
 
+#define DISP_OUT DISPLAY
+#define MAX_MSG_LEN 32
+#define MAX_ARG_LEN 16
+
 // Assignment commands have only 1 arg, an operator, and an attribute
 #define IS_ASSIGN_CMD(cmd)                              \
     (cmd.compOrCmd != NULL && cmd.op != NULL &&         \
