@@ -13,13 +13,13 @@
 // Indexed using pedal_t
 // Refine in testing
 static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
-    500, // Accelerator lower bound
-    2100, // Brake lower bound
+    0, // Accelerator lower bound
+    2220, // Brake lower bound
 };
 
 static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
-    1100, // Accelerator upper bound
-    3300, // Brake upper bound
+    3150, // Accelerator upper bound
+    3205, // Brake upper bound
 };
 
 /**
@@ -43,10 +43,6 @@ void Pedals_Init(){
  * @return  percent amount the pedal has been pressed in percentage
  */
 int8_t Pedals_Read(pedal_t pedal){
-    if (pedal == BRAKE){
-        return (BSP_GPIO_Read_Pin(BRAKE_SW_PORT, BRAKE_SW))?100:0;
-    }
-    
     if (pedal >= NUMBER_OF_PEDALS) return 0;
     int16_t millivoltsPedal = (int16_t) BSP_ADC_Get_Millivoltage(pedal);
 
