@@ -11,90 +11,96 @@
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
-void testBoolComp(UpdateDisplayError_t(*function)(bool)){
+void delay(){
     OS_ERR e;
+    OSTimeDlyHMSM(0, 0, 0, 750, OS_OPT_TIME_HMSM_STRICT, &e);
+}
 
+void delay_short(){
+    OS_ERR e;
+    OSTimeDlyHMSM(0, 0, 0, 50, OS_OPT_TIME_HMSM_STRICT, &e);
+}
+
+void testBoolComp(UpdateDisplayError_t(*function)(bool)){
     function(false);
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(true);
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(false);
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
 }
 
 void testPercentageCompAccel(UpdateDisplayError_t(*function)(uint8_t)){
-    OS_ERR e;
-
     function(0);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(25);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(50);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(75);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(100);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(0);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
 }
 
 void testPercentageCompSOC(UpdateDisplayError_t(*function)(uint32_t)){
-    OS_ERR e;
 
+    for(int i=0; i<100;i+=1){
+        function(i);
+        delay_short();
+    }
     function(0);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(25);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(50);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(75);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(100);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(0);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
 }
 
 void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
-    OS_ERR e;
-
     function(STATE_0); // DISP_DISABLED & DISP_NEUTRAL
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(STATE_1); // DISP_ENABLED & DISP_FORWARD
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(STATE_2); // DISP_ACTIVE & DISP_REVERSE
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(STATE_0);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
 }
 
 void Task1(void *arg)
 {   
+
     CPU_Init();
     Display_Init();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     UpdateDisplay_Init();
     
-
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-
-    OS_ERR e;
+     OS_ERR e;
 
     OSTaskCreate(
         (OS_TCB *)&UpdateDisplay_TCB,
@@ -112,35 +118,34 @@ void Task1(void *arg)
         (OS_ERR *)&e);
     assertOSError(e);
 
-    OSTimeDlyHMSM(0, 0, 7, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     testTriStateComp(&UpdateDisplay_SetGear);
     
-    UpdateDisplay_SetVelocity(12);
+    UpdateDisplay_SetVelocity(690);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    UpdateDisplay_SetVelocity(345);
+    delay();
+    UpdateDisplay_SetVelocity(34);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    UpdateDisplay_SetVelocity(6789);
+    delay();
+    UpdateDisplay_SetVelocity(678);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
 
-    testTriStateComp(&UpdateDisplay_SetCruiseState);
-    testTriStateComp(&UpdateDisplay_SetRegenState);
-    testBoolComp(&UpdateDisplay_SetMotor);
+    // testTriStateComp(&UpdateDisplay_SetCruiseState);
+    // testTriStateComp(&UpdateDisplay_SetRegenState);
     testBoolComp(&UpdateDisplay_SetArray);
+    testBoolComp(&UpdateDisplay_SetMotor);
     testPercentageCompSOC(&UpdateDisplay_SetSOC);
 
     UpdateDisplay_SetSBPV(12);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     UpdateDisplay_SetSBPV(345);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     UpdateDisplay_SetSBPV(6789);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
 
     testPercentageCompAccel(&UpdateDisplay_SetAccel);
 
