@@ -43,7 +43,9 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
 	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
 	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
-	[IO_STATE] 				        = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
+	[CONTACTOR_SENSE]               = {NOIDX, DOUBLE},
+    [PRECHARGE_TIMEOUT]             = {NOIDX, BYTE},
+    [IO_STATE] 				        = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
     [CONTROL_MODE]                  = {NOIDX, BYTE  }, /**     CONTROL_MODE			           **/
 };
 
@@ -58,7 +60,9 @@ CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
     SUPPLEMENTAL_VOLTAGE,
     VOLTAGE_SUMMARY,
     TEMPERATURE_SUMMARY,
-    CURRENT_DATA
+    CURRENT_DATA,
+    CONTACTOR_SENSE,
+    PRECHARGE_TIMEOUT
 };
 
 CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {
