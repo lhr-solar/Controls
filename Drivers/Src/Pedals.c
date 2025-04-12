@@ -41,7 +41,7 @@ void Pedals_Init(){
  * @param   pedal_t, ACCELERATOR or BRAKE as defined in enum
  * @return  percent amount the pedal has been pressed in percentage
  */
-int8_t Pedals_Read(pedal_t pedal){
+uint8_t Pedals_Read(pedal_t pedal){
     if (pedal == BRAKE){
         return (BSP_GPIO_Read_Pin(PORTC, GPIO_Pin_15))?100:0;
     }
