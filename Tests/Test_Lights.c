@@ -6,7 +6,7 @@
 #include <bsp.h>
 #include "daybreak_pins.h"
 #include "BSP_GPIO.h"
-#define BLINK_TO_FADE_OUT 1000u // 1s delay
+#define BLINK_TO_FADE_OUT 3000u // 1s delay TODO: change this to be longer
 #define FADE_OUT_TO_IN 1u       // 1min delay
 #define FADE_IN_TO_BLINK 1u     // 1min delay
 #define SET_BRIGHTNESS_DLY 200u // 200ms delay
@@ -20,7 +20,7 @@ static void Task_UnveilingLights(void *p_arg);
 // Task_SetBrightness
 OS_TCB SetBrightness_TCB;
 static CPU_STK SetBrightness_Stk[DEFAULT_STACK_SIZE];
-static void Task_SetBrightness(uint8_t *brightness);
+static void Task_SetBrightness(int8_t *brightness);
 
 // turn all lights on at maximum brightness
 static void On_All(void)
@@ -61,6 +61,8 @@ static void Twice_All(void)
     Off_All();
     OSTimeDlyHMSM(0, 0, 0, BLINK_TWICE_DLY, OS_OPT_TIME_HMSM_STRICT, &err); // wait 250ms
     On_All();
+    OSTimeDlyHMSM(0, 0, 0, BLINK_TWICE_DLY, OS_OPT_TIME_HMSM_STRICT, &err); // wait 250ms
+    Off_All();
 
     assertOSError(err);
 }
@@ -71,14 +73,36 @@ static void Fade_All_Out(void)
 {
     OS_ERR err;
 
-    On_All();
-    OSTimeDlyHMSM(0, 0, 0, SET_BRIGHTNESS_DLY, OS_OPT_TIME_HMSM_STRICT, &err); // wait 200ms
+    int8_t brightness; // set brightness percentage to pass into task
 
-    uint8_t brightness; // set brightness percentage to pass into task
+    // -1 handles jump between fully bright and first dim
+    brightness = -1;
+    // create set brightness task
+    OSTaskCreate(
+        (OS_TCB *)&SetBrightness_TCB,
+        (CPU_CHAR *)"SetBrightness",
+        (OS_TASK_PTR)Task_SetBrightness,
+        &brightness,
+        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
+        (CPU_STK *)SetBrightness_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void *)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
+        (OS_ERR *)&err);
+    assertOSError(err);
 
-    // ramp from 95% to 5% in increments of 5%
-    // should take 100ms * 19 = 1.9 seconds total
-    for (brightness = 95; brightness > 0; brightness -= 5)
+    // wait 2s
+    OSTimeDlyHMSM(0, 0, 2u, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+
+    // delete set brightness task
+    OSTaskDel((OS_TCB *)&SetBrightness_TCB, (OS_ERR *)&err);
+
+    // ramp off time 0 to 15 (lowers brightness)
+    // should take 200ms * 16 = 3.2 seconds total
+    for (brightness = 5; brightness <= 20; brightness++)
     {
         // create set brightness task
         OSTaskCreate(
@@ -121,9 +145,10 @@ static void Fade_All_In(void)
 
     uint8_t brightness; // set brightness percentage to pass into task
 
-    // ramp from 5% to 95% in increments of 5%
-    // should take 100ms * 19 = 1.9 seconds total
-    for (brightness = 5; brightness < 100; brightness += 5)
+    // ramp brightness from 0 (min) to 15 (max)
+    // should take 200ms * 16 = 3.2 seconds total
+    // -1 handles jump between fully bright and first dim
+    for (brightness = -1; brightness <= 15; brightness++)
     {
         // create set brightness task
         OSTaskCreate(
@@ -156,21 +181,42 @@ static void Fade_All_In(void)
 }
 
 // task to set brightness of all lights
-static void Task_SetBrightness(uint8_t *brightness)
+static void Task_SetBrightness(int8_t *brightness)
 {
     OS_ERR err;
 
-    // convert 0-100 brightness value to time delay for PWM (duty cycle)
-    uint32_t time_on = (*brightness / 100) * 20;
-    uint32_t time_off = ((1 - *brightness) / 100) * 20;
+    // brightness
+    uint32_t time_on;
+    uint32_t time_off;
 
-    // run forever - we expect task to be suspended/deleted when time is up
-    while (1)
+    // handle weird state to prevent large brightness diff between fully on and first dimming state
+    if (*brightness == -1)
     {
-        On_All();
-        OSTimeDlyHMSM(0, 0, 0, time_on, OS_OPT_TIME_HMSM_STRICT, &err); // time on
-        Off_All();
-        OSTimeDlyHMSM(0, 0, 0, time_off, OS_OPT_TIME_HMSM_STRICT, &err); // time off
+        BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, true);
+        time_on = 5;
+        time_off = 5;
+        // run forever - we expect task to be suspended/deleted when time is up
+        while (1)
+        {
+            On_All();
+            OSTimeDlyHMSM(0, 0, 0, time_on, OS_OPT_TIME_HMSM_STRICT, &err); // time on
+            Off_All();
+            OSTimeDlyHMSM(0, 0, 0, time_off, OS_OPT_TIME_HMSM_STRICT, &err); // time off
+        }
+    }
+    else
+    {
+        time_on = 1;
+        time_off = *brightness;
+
+        // run forever - we expect task to be suspended/deleted when time is up
+        while (1)
+        {
+            On_All();
+            OSTimeDlyHMSM(0, 0, 0, time_on, OS_OPT_TIME_HMSM_STRICT, &err); // time on
+            Off_All();
+            OSTimeDlyHMSM(0, 0, 0, time_off, OS_OPT_TIME_HMSM_STRICT, &err); // time off
+        }
     }
 
     assertOSError(err);
@@ -183,12 +229,13 @@ static void Task_UnveilingLights(void *p_arg)
 
     while (1)
     {
-        Twice_All();
-        OSTimeDlyHMSM(0, 0, 0, BLINK_TO_FADE_OUT, OS_OPT_TIME_HMSM_STRICT, &err);
+        (void)&Twice_All;
+        // OSTimeDlyHMSM(0, 0, 0, BLINK_TO_FADE_OUT, OS_OPT_TIME_HMSM_STRICT, &err);
         Fade_All_Out();
-        OSTimeDlyHMSM(0, FADE_OUT_TO_IN, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        Fade_All_In();
-        OSTimeDlyHMSM(0, FADE_IN_TO_BLINK, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, BLINK_TO_FADE_OUT, OS_OPT_TIME_HMSM_STRICT, &err);
+        // OSTimeDlyHMSM(0, FADE_OUT_TO_IN, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        (void)&Fade_All_In;
+        // OSTimeDlyHMSM(0, FADE_IN_TO_BLINK, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
     }
 }
@@ -205,6 +252,7 @@ static void Lights_Task_Init()
     BSP_GPIO_Init(OS_FAULT_PORT, OS_FAULT, OUTPUT, false);
     BSP_GPIO_Init(TIMER_CLK_PORT, TIMER_CLK, OUTPUT, false);
     BSP_GPIO_Init(BRAKE_LIGHT_PORT, BRAKE_LIGHT, OUTPUT, false);
+    BSP_GPIO_Init(BPS_FAULT_PORT, BPS_FAULT, OUTPUT, false);
 
     // UnveilingLights
     OSTaskCreate(
