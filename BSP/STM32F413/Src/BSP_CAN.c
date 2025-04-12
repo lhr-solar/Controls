@@ -86,6 +86,7 @@ void BSP_MotorCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
 
     /* CAN configuration ********************************************************/
     /* Enable CAN clock */
+    RCC_APB1PeriphClockCmd(MotorCANMaster_APB1_CAN, ENABLE);
     RCC_APB1PeriphClockCmd(MotorCAN_APB1_CAN, ENABLE);
 
     /* CAN cell init */
@@ -125,7 +126,7 @@ void BSP_MotorCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
         CAN_FilterInitStruct.CAN_FilterMaskIdLow = 0x0000;
         CAN_FilterInitStruct.CAN_FilterFIFOAssignment = 0;
         CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
-        CAN_FilterInit(MotorCAN, &CAN_FilterInitStruct);
+        CAN_FilterInit(MotorCANMaster, &CAN_FilterInitStruct); // CAN1 is master for CAN2 (MOTORCAN)
     } else{
         // Filter CAN IDs
         // So far, if we shift whatever id we need by 5, it works
@@ -145,27 +146,29 @@ void BSP_MotorCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize) {
             }
                 
             CAN_FilterInitStruct.CAN_FilterNumber = i / NUM_FILTER_REGS; //determines filter number based on CAN ID
-            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i] << 5;
+            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i] << 5; // Align ID with register filter bits
             validIDCounter++;
 
             if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
-                CAN_FilterInit(MotorCAN, &CAN_FilterInitStruct);
+                CAN_FilterInit(MotorCANMaster, &CAN_FilterInitStruct);
             }
             else if(i == idWhitelistSize - 1){ //we are out of elements, call CAN_FilterInit()
                 for(uint8_t j = i%NUM_FILTER_REGS + 1; j <= NUM_FILTER_REGS - 1; j++)   // Set unfilled filter registers to 0
                     *(FilterStructPtr + j) = 0x0000;
 
-                CAN_FilterInit(MotorCAN, &CAN_FilterInitStruct);
+                CAN_FilterInit(MotorCANMaster, &CAN_FilterInitStruct);
             }
             else if(validIDCounter > 112){ //All filter banks are to be filled and there is no point in filtering
                 for(uint8_t filter = 0; filter < 28; filter++){//Therefore, let all IDs through (no filtering)
                     CAN_FilterInitStruct.CAN_FilterNumber = filter;
                     CAN_FilterInitStruct.CAN_FilterActivation = DISABLE;
-                    CAN_FilterInit(MotorCAN, &CAN_FilterInitStruct);
+                    CAN_FilterInit(MotorCANMaster, &CAN_FilterInitStruct);
                 } 
             }
         }
     }
+
+    CAN_SlaveStartBank(CAN1, 0); // Sets beginning of CAN2 filters. CAN2 will not work without it.
 
     /* Transmit Structure preparation */
     gTxMessage[0].ExtId = 0x5;
@@ -221,7 +224,7 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
     GPIO_PinAFConfig(CarCAN_GPIO, CarCAN_TX_Pinsource, CarCAN_AF);
 
     /* Configure CAN RX and TX pins */
-    GPIO_InitStruct.GPIO_Pin = CarCAN_RX | CarCAN_TX;
+    GPIO_InitStruct.GPIO_Pin = CarCAN_RX  | CarCAN_TX;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
@@ -280,7 +283,7 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
         uint16_t* FilterStructPtr = (uint16_t*)&(CAN_FilterInitStruct); //address of CAN Filter Struct
         for(uint8_t i = 0; i < idWhitelistSize; i++){
             CAN_FilterInitStruct.CAN_FilterNumber = i / NUM_FILTER_REGS; //determines filter number based on CAN ID
-            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i];
+            *(FilterStructPtr + (i%NUM_FILTER_REGS)) = idWhitelist[i] << 5;
 
             if(i % NUM_FILTER_REGS == NUM_FILTER_REGS - 1){ //if four elements have been written to a filter call CAN_FilterInit()
                 CAN_FilterInit(CarCAN, &CAN_FilterInitStruct);
@@ -294,7 +297,7 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
         }
     }
 
-    // CAN_SlaveStartBank(CAN2, 0);
+    // CAN_SlaveStartBank(CAN1, 0);
 
     /* Transmit Structure preparation */
     gTxMessage[1].ExtId = 0x5;
