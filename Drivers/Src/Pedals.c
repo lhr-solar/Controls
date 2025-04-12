@@ -6,19 +6,20 @@
  */
 
 #include "Pedals.h"
+#include "daybreak_pins.h"
 #include "stm32f4xx_gpio.h"
 
 // Constants used to tune the pedals
 // Indexed using pedal_t
 // Refine in testing
 static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
-    500, // Accelerator lower bound
-    2100, // Brake lower bound
+    0, // Accelerator lower bound
+    2220, // Brake lower bound
 };
 
 static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
-    1100, // Accelerator upper bound
-    3300, // Brake upper bound
+    3150, // Accelerator upper bound
+    3205, // Brake upper bound
 };
 
 /**
@@ -30,7 +31,7 @@ static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
  */
 void Pedals_Init(){
     BSP_ADC_Init();
-    BSP_GPIO_Init(PORTC, GPIO_Pin_15, INPUT, true);
+    BSP_GPIO_Init(BRAKE_SW_PORT, BRAKE_SW, INPUT, true);
 }
 
 /**
