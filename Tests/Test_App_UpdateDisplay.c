@@ -6,6 +6,8 @@
 // #include "bsp.h"
 // #include "Contactors.h"
 #include "UpdateDisplay.h"
+#include "ReadCarCAN.h"
+#include "ReadTritium.h"
 
 
 static OS_TCB Task1TCB;
@@ -45,10 +47,10 @@ void testPercentageCompAccel(UpdateDisplayError_t(*function)(uint8_t)){
     delay();
     function(100);
     
-    delay();
-    function(0);
+    // delay();
+     function(0);
     
-    delay();
+    // delay();
 }
 
 void testPercentageCompSOC(UpdateDisplayError_t(*function)(uint32_t)){
@@ -57,24 +59,24 @@ void testPercentageCompSOC(UpdateDisplayError_t(*function)(uint32_t)){
         function(i);
         delay_short();
     }
-    function(0);
+     function(0);
     
-    delay();
-    function(25);
+    // delay();
+    // function(25);
     
-    delay();
-    function(50);
+    // delay();
+    // function(50);
     
-    delay();
-    function(75);
+    // delay();
+    // function(75);
     
-    delay();
-    function(100);
+    // delay();
+    // function(100);
     
-    delay();
-    function(0);
+    // delay();
+    // function(0);
     
-    delay();
+    // delay();
 }
 
 void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
@@ -86,8 +88,8 @@ void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
     delay();
     function(STATE_2); // DISP_ACTIVE & DISP_REVERSE
     
-    delay();
-    function(STATE_0);
+    // delay();
+    // function(STATE_0);
     
     delay();
 }
@@ -118,45 +120,42 @@ void Task1(void *arg)
         (OS_ERR *)&e);
     assertOSError(e);
 
+    while(1){
+        testTriStateComp(&UpdateDisplay_SetGear);
     
-    testTriStateComp(&UpdateDisplay_SetGear);
+    // UpdateDisplay_SetVelocity(690);
     
-    UpdateDisplay_SetVelocity(690);
+    // delay();
+    // UpdateDisplay_SetVelocity(34);
     
-    delay();
-    UpdateDisplay_SetVelocity(34);
+    // delay();
+    // UpdateDisplay_SetVelocity(678);
     
-    delay();
-    UpdateDisplay_SetVelocity(678);
-    
-    delay();
+    // delay();
 
-    // testTriStateComp(&UpdateDisplay_SetCruiseState);
-    // testTriStateComp(&UpdateDisplay_SetRegenState);
     testBoolComp(&UpdateDisplay_SetArray);
     testBoolComp(&UpdateDisplay_SetMotor);
     testPercentageCompSOC(&UpdateDisplay_SetSOC);
 
-    UpdateDisplay_SetSBPV(12);
+    // UpdateDisplay_SetSBPV(12);
     
-    delay();
-    UpdateDisplay_SetSBPV(345);
+    // delay();
+    // UpdateDisplay_SetSBPV(345);
     
-    delay();
-    UpdateDisplay_SetSBPV(6789);
+    // delay();
+    // UpdateDisplay_SetSBPV(6789);
     
-    delay();
+    // delay();
 
     testPercentageCompAccel(&UpdateDisplay_SetAccel);
 
+   // assertTritiumError(T_HALL_SENSOR_ERR);
     Display_Error();
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     Display_Reset();
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
-    while (1) {
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
     }
 };
 
