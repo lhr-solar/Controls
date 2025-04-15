@@ -47,11 +47,9 @@ void testPercentageCompAccel(UpdateDisplayError_t(*function)(uint8_t)){
     delay();
     function(100);
     
-    // delay();
+    delay();
      function(0);
-    
-    // delay();
-}
+    }
 
 void testPercentageCompSOC(UpdateDisplayError_t(*function)(uint32_t)){
 
@@ -60,23 +58,6 @@ void testPercentageCompSOC(UpdateDisplayError_t(*function)(uint32_t)){
         delay_short();
     }
      function(0);
-    
-    // delay();
-    // function(25);
-    
-    // delay();
-    // function(50);
-    
-    // delay();
-    // function(75);
-    
-    // delay();
-    // function(100);
-    
-    // delay();
-    // function(0);
-    
-    // delay();
 }
 
 void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
@@ -88,8 +69,8 @@ void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
     delay();
     function(STATE_2); // DISP_ACTIVE & DISP_REVERSE
     
-    // delay();
-    // function(STATE_0);
+    delay();
+    function(STATE_0);
     
     delay();
 }
@@ -123,33 +104,11 @@ void Task1(void *arg)
     while(1){
         testTriStateComp(&UpdateDisplay_SetGear);
     
-    // UpdateDisplay_SetVelocity(690);
-    
-    // delay();
-    // UpdateDisplay_SetVelocity(34);
-    
-    // delay();
-    // UpdateDisplay_SetVelocity(678);
-    
-    // delay();
-
     testBoolComp(&UpdateDisplay_SetArray);
     testBoolComp(&UpdateDisplay_SetMotor);
     testPercentageCompSOC(&UpdateDisplay_SetSOC);
-
-    // UpdateDisplay_SetSBPV(12);
-    
-    // delay();
-    // UpdateDisplay_SetSBPV(345);
-    
-    // delay();
-    // UpdateDisplay_SetSBPV(6789);
-    
-    // delay();
-
     testPercentageCompAccel(&UpdateDisplay_SetAccel);
 
-   // assertTritiumError(T_HALL_SENSOR_ERR);
     Display_Error();
     OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
