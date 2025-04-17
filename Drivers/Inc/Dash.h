@@ -5,13 +5,13 @@
 #include "BSP_GPIO.h"
 
 typedef struct{
-    uint8_t BPS_HZD;
-    uint8_t BRAKE;
+    bool BPS_HZD;
+    bool BRAKE;
     uint8_t GEAR;
-    uint8_t HBT;
-    uint8_t CRUZ_SET;
-    uint8_t CRUZ_EN;
-     uint8_t IGN;
+    bool HBT;
+    bool CRUZ_SET;
+    bool CRUZ_EN;
+    uint8_t IGN;
 }dashboard_t;
 
 
@@ -30,29 +30,25 @@ typedef enum{
 }ign_state;
 
 typedef enum{
- BPS = 0,
- BRAKE_LED,
- GEAR,
- HBT,
- CRUZ_SET,
- CRUZ_EN,
- IGN,
- NUM_DASH_PINS
+    BPS = 0,
+    BRAKE_LED,
+    GEAR,
+    HBT,
+    CRUZ_SET,
+    CRUZ_EN,
+    IGN,
+    NUM_DASH_PINS
 }dashPin_t;
 
 /**
- * input: dashboard pin
- * @return dashboard pin state
+ * @return Dashboard pin state (0 low, 1 high)
+ * @param dashPin_t Dashboard pin
  */
 uint8_t getDash(dashPin_t pin);
 
 /**
- * inits dash pins
+ * Initializes dashboard pins
  */
 void dashInit();
-
-/**
- * updates dash pins
- */
 
 #endif
