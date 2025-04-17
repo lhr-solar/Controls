@@ -193,8 +193,8 @@ static void Task_SetBrightness(int8_t *brightness)
     if (*brightness == -1)
     {
         BSP_GPIO_Write_Pin(BPS_FAULT_PORT, BPS_FAULT, true);
-        time_on = 5;
-        time_off = 5;
+        time_on = 1;
+        time_off = 1;
         // run forever - we expect task to be suspended/deleted when time is up
         while (1)
         {
@@ -222,6 +222,7 @@ static void Task_SetBrightness(int8_t *brightness)
     assertOSError(err);
 }
 
+
 // main lights task
 static void Task_UnveilingLights(void *p_arg)
 {
@@ -236,7 +237,9 @@ static void Task_UnveilingLights(void *p_arg)
         // OSTimeDlyHMSM(0, FADE_OUT_TO_IN, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         (void)&Fade_All_In;
         //OSTimeDlyHMSM(0, FADE_IN_TO_BLINK, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        OSTimeDlyHMSM(0, 0, 5u, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        On_All();
+        OSTimeDlyHMSM(0, 5u, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err); //5 min
+        Off_All();
         assertOSError(err);
     }
 }
