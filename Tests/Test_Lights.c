@@ -229,13 +229,14 @@ static void Task_UnveilingLights(void *p_arg)
 
     while (1)
     {
-        (void)&Twice_All;
+        Twice_All();
         // OSTimeDlyHMSM(0, 0, 0, BLINK_TO_FADE_OUT, OS_OPT_TIME_HMSM_STRICT, &err);
-        Fade_All_Out();
-        OSTimeDlyHMSM(0, 0, 0, BLINK_TO_FADE_OUT, OS_OPT_TIME_HMSM_STRICT, &err);
+        (void)&Fade_All_Out;
+        //OSTimeDlyHMSM(0, 0, 0, BLINK_TO_FADE_OUT, OS_OPT_TIME_HMSM_STRICT, &err);
         // OSTimeDlyHMSM(0, FADE_OUT_TO_IN, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         (void)&Fade_All_In;
-        // OSTimeDlyHMSM(0, FADE_IN_TO_BLINK, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        //OSTimeDlyHMSM(0, FADE_IN_TO_BLINK, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 5u, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
     }
 }
