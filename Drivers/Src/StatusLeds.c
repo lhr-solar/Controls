@@ -16,6 +16,7 @@ void Status_Leds_Init(void){
     
     // both LEDs are on the Dashboard
     BSP_GPIO_Init(BPS_HAZARD_PORT, BPS_HAZARD, OUTPUT, false);
+    Status_Leds_Write(DASH_BPS_HAZ_LED, false);                 //Starts off
     BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT_PIN, OUTPUT, false);
 } 
 
