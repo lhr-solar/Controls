@@ -21,7 +21,6 @@
 #define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
-#define MIN_CRUISE_VELOCITY mpsToRpm(20.0f)    // rpm
 #define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
 // Used to define thresholds for when to start/stop powering the motor for movement, respectively
@@ -33,12 +32,6 @@
 #define MAX_MOCO_BATTERY_CURRENT 64.0f  // NOTE: Provided only for reference. This 64A max for daybreak, anticipated to be 135 for next-gen
 #define CONT_MOCO_BATTERY_CURRENT 30.0f // Continuous 
 #define MAX_MOCO_CURRENT 122.0f
-
-// Accel deadbands (for stability of ACCELERATE_CRUISE entry/exit)
-// NOTE: Brake deadbands are unneeded, as brake won't cause rapid transitions between states (needing to 
-// explicitly re-press cruiseSet upon exit POWERED_CRUISE to FORWARD_DRIVE guarantees this)
-#define ACCEL_PEDAL_UNPRESSED_THRESHOLD 10 // percent
-#define ACCEL_PEDAL_PRESSED_THRESHOLD 25 // percent
 
 #define PEDAL_MIN 0        // percent
 #define PEDAL_MAX 100      // percent
@@ -64,9 +57,6 @@ typedef enum{
     FORWARD_DRIVE,
     PARK_STATE,
     REVERSE_DRIVE,
-    POWERED_CRUISE,
-    COASTING_CRUISE,
-    ACCELERATE_CRUISE,
 } TritiumStateName_t;
 
 // State Struct for FSM
@@ -88,13 +78,8 @@ typedef enum
 
 #ifdef SENDTRITIUM_EXPOSE_VARS
 // Inputs
-extern bool cruiseEnable;
-extern bool cruiseSet;
-
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
-
-extern bool accelPressed;
 
 extern Gear_t gear;
 extern TritiumState_t state;
@@ -104,29 +89,21 @@ extern float cruiseVelSetpoint;
 #endif
 
 // Getter functions for local variables in SendTritium.c
-EXPOSE_GETTER(bool, cruiseEnable)
-EXPOSE_GETTER(bool, cruiseSet)
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
-EXPOSE_GETTER(bool, accelPressed)
 EXPOSE_GETTER(Gear_t, gear)
 EXPOSE_GETTER(TritiumStateName_t, state)
 EXPOSE_GETTER(float, velocityObserved)
-EXPOSE_GETTER(float, cruiseVelSetpoint)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
 
 // Setter functions for local variables in SendTritium.c
 #ifdef SENDTRITIUM_EXPOSE_VARS
-EXPOSE_SETTER(bool, cruiseEnable)
-EXPOSE_SETTER(bool, cruiseSet)
 EXPOSE_SETTER(uint8_t, brakePedalPercent)
 EXPOSE_SETTER(uint8_t, accelPedalPercent)
-EXPOSE_SETTER(bool, accelPressed)
 EXPOSE_SETTER(Gear_t, gear)
 EXPOSE_SETTER(TritiumStateName_t, state)
 EXPOSE_SETTER(float, velocityObserved)
-EXPOSE_SETTER(float, cruiseVelSetpoint)
 EXPOSE_SETTER(float, currentSetpoint)
 EXPOSE_SETTER(float, velocitySetpoint)
 #endif

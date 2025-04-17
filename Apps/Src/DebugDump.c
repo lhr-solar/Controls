@@ -54,8 +54,8 @@ void Task_DebugDump(void* p_arg) {
 
         // Send Tritium variables
         printf("State: %s\n\r", GENERATE_STRING(get_state())); // State 
-        printf("Cruise Enable: %s\n\r", get_cruiseEnable() ? "true" : "false");
-        printf("Cruise Set: %s\n\r", get_cruiseSet() ? "true" : "false");
+        // printf("Cruise Enable: %s\n\r", get_cruiseEnable() ? "true" : "false");
+        // printf("Cruise Set: %s\n\r", get_cruiseSet() ? "true" : "false");
         // printf("One Pedal Enable: %s\n\r", get_onePedalEnable() ? "true" : "false");
         // printf("Regen Enable: %s\n\r", get_regenEnable() ? "true" : "false");
         printf("Pedal Brake Percent: %u\n\r", get_brakePedalPercent());
