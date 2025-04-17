@@ -49,6 +49,7 @@ int main()
         if(dash.CRUZ_SET){
             Status_Leds_Toggle(CRUISE_IND_LED);
         }
+
         if(dash.GEAR == FWD){
             Status_Leds_Write(BPS_FAULT_LED, true);
         } else if(dash.GEAR == REV){

@@ -11,6 +11,7 @@ typedef struct{
     uint8_t HBT;
     uint8_t CRUZ_SET;
     uint8_t CRUZ_EN;
+     uint8_t IGN;
 }dashboard_t;
 
 
@@ -22,12 +23,20 @@ typedef enum{
 }switch_state;
 
 typedef enum{
+    OFF_IGN = 0,
+    IGN_1,
+    IGN_2,
+    NUM_IGN_STATES
+}ign_state;
+
+typedef enum{
  BPS = 0,
  BRAKE_LED,
  GEAR,
  HBT,
  CRUZ_SET,
  CRUZ_EN,
+ IGN,
  NUM_DASH_PINS
 }dashPin_t;
 
