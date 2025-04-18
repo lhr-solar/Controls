@@ -1,23 +1,40 @@
 #include "Tasks.h"
 #include "Contactors.h"
+#include "CANbus.h"
+#include "CANConfig.h"
+#include "StatusLeds.h"
 
 static OS_TCB Task1_TCB;
 #define STACK_SIZE 128
 static CPU_STK Task1_Stk[STACK_SIZE];
 
+// Run test in Car CAN loopback mode
 
-void Task1(){
-    OS_ERR err;
+void Task_Fake_Contactor_Driver(){
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    Contactors_Init();
+    CANDATA_t msg;  
+    // msg.idx = 0;
+    memset(&msg.data, 0x00, sizeof msg.data);
+    while(1){
+        // send fake state of Canbus
+    }
+}
+
+
+void Task_Test_Contactors(){
+
+    CPU_Init();
+    OS_ERR err;
+
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OSTimeDlyHMSM(0, 0, 10, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     while(1){
         ErrorStatus stat = Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
         Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, stat == SUCCESS ? ON : OFF);
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-        bool set = Contactors_Get(ARRAY_CONTACTOR);
+        bool set = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
         Status_Leds_Write(BPS_FAULT_LED, set == ON ? ON : OFF);
     }
 }
@@ -25,14 +42,15 @@ void Task1(){
 int main(){
     Status_Leds_Init();
     Contactors_Init();
+    CANbus_Init(CARCAN, (CANId_t *) carCANFilterList, NUM_CARCAN_FILTERS);
     OS_ERR err;
     OSInit(&err);
     assertOSError(err);
 
     OSTaskCreate(
         (OS_TCB*)&Task1_TCB,
-        (CPU_CHAR*)"Task1",
-        (OS_TASK_PTR)Task1,
+        (CPU_CHAR*)"Task_Test_Contactors",
+        (OS_TASK_PTR)Task_Test_Contactors,
         (void*)NULL,
         (OS_PRIO)2,
         (CPU_STK*)Task1_Stk,
