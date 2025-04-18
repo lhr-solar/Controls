@@ -18,7 +18,7 @@
 #include "daybreak_pins.h"
 
 // Distinguishing between left and right turn indicators is done in hardware (thru switches)
-typedef enum {FRONT = 0, INDICATOR, BRAKE, NUM_PINS} pwm_pins_t;
+typedef enum {FRONT_PWM = 0, INDICATOR_PWM, BRAKE_PWM, NUM_PINS} pwm_pins_t;
 bool pinsActive[NUM_PINS] = {0};
 
 /**

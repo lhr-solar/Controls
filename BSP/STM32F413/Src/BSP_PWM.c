@@ -61,18 +61,23 @@ void TIM5_IRQHandler(void) {
 	if(indicatorCounter == FLASH_TOGGLE_COUNT / 2) BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
 
 	// PWM Pin logic
+	// TODO: Add logic that turns off stuff completely if pins aren't active
 	if(isPWMHigh) {
 		// Turn on
-		BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, true);
-		if(indicatorCounter < FLASH_TOGGLE_COUNT / 2) {
+		if(pinsActive[BRAKE_PWM]) {
+			BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, true);
+		}
+		if(pinsActive[INDICATOR_PWM] && indicatorCounter < FLASH_TOGGLE_COUNT / 2) {
 			BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, true);
 		}
 		TIM5->ARR = ((PRESCALED_CLK_FREQ / freq) * duty_cycle) / 100;
 	} 
 	else {
 		// Turn off
-		BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, false);
-		if(indicatorCounter < FLASH_TOGGLE_COUNT / 2) {
+		if(pinsActive[BRAKE_PWM]) {
+			BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, false);
+		}
+		if(pinsActive[INDICATOR_PWM] && indicatorCounter < FLASH_TOGGLE_COUNT / 2) {
 			BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
 		}
 		TIM5->ARR = ((PRESCALED_CLK_FREQ / freq) * (100 - duty_cycle)) / 100
@@ -82,4 +87,15 @@ void TIM5_IRQHandler(void) {
 
 void BSP_PWM_Set_State(pwm_pins_t pwm_pin, bool is_active) {
 	pinsActive[pwm_pin] = is_active;
+	switch(pwm_pin) {
+		case FRONT_PWM:
+			// TODO: 
+			break;
+		case INDICATOR_PWM:
+			BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, false);
+			break;
+		case BRAKE_PWM:
+			BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
+			break;
+	}
 }
