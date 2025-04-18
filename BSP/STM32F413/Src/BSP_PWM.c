@@ -7,19 +7,16 @@
 // TODO: Go back & fix this eventually to refer to some actual variable that defines this elsewhere
 #define SYS_CLK_FREQ 80000000 // STM clock runs at 80MHz
 #define PRESCALED_CLK_FREQ 10000000 // 10MHz
-
-// NOTE: The following assumes that both brakelight & turn indicators will use same clock; if this isn't the case
-// additional configuration (either using different channels for a given TIM or using multiple TIMs) must be done 
-// NOTE: APB1 is a bus driven downstream from CPU/DMA clock master, which is used to drive downstream peripherals
-#define BRAKE_LIGHT_TIM_PERIPH RCC_APB1Periph_TIM5 // Used for APB1 Periph clock enable bit (in APB1 register)
-#define BRAKE_LIGHT_TIM TIM5 // Used to manage the actual hardware timer instance
-#define BRAKE_LIGHT_TIM_NVIC_CHAN TIM5_IRQn // Based on TIM used, specifies which channel for the NVIC to use (which prompts interrupts)
+#define FLASH_TOGGLE_COUNT 16666 // Lights must flash (full cycle) 60-120 times/min. We'll use 90 flashes/min
+						 // (60 seconds/min / 90 flashes) * 25kHz 
 
 static bool isPWMHigh = false; // Used internally for PWM bitbanging
-static bool isPWMCoupled = false; // If braking, brakelight stays on (with PWM); otherwise, brake follows turn indicator PWM
+static uint32_t indicatorCounter = 0; // Used for flashing 
+static uint32_t freq = 0;
+static uint32_t duty_cycle = 0;
 
-void BSP_PWM_Init(uint32_t freq, uint32_t duty_cycle) {
-	RCC_APB1PeriphClockCmd(BRAKE_LIGHT_TIM_PERIPH, ENABLE);
+void BSP_PWM_Init(uint32_t freq_arg, uint32_t duty_cycle_arg) {
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 
 	BSP_GPIO_Init(TIMER_CLK_PORT, TIMER_CLK, OUTPUT, false);
 	BSP_GPIO_Init(BRAKE_LIGHT_PORT, BRAKE_LIGHT, OUTPUT, false);
@@ -29,18 +26,18 @@ void BSP_PWM_Init(uint32_t freq, uint32_t duty_cycle) {
     TIM_TimeBaseStructInit(&TB);
     TB.TIM_Prescaler     = (SYS_CLK_FREQ / PRESCALED_CLK_FREQ) - 1; // 10MHz (7 prescale to clock divide down by 8x)
     TB.TIM_CounterMode   = TIM_CounterMode_Up; 
-    TB.TIM_Period        = (PRESCALED_CLK_FREQ / freq) - 1; // 400 ticks per period (399 loaded into TIM_Period) -> more granular control
+    TB.TIM_Period        = (PRESCALED_CLK_FREQ / freq_arg) - 1; // 400 ticks per period (399 loaded into TIM_Period) -> more granular control
     TB.TIM_ClockDivision = TIM_CKD_DIV1;
-    TIM_TimeBaseInit(BRAKE_LIGHT_TIM, &TB);
-    TIM_ARRPreloadConfig(BRAKE_LIGHT_TIM, ENABLE); // Enable -> when new ARR is written, takes effect next cycle 
+    TIM_TimeBaseInit(TIM5, &TB);
+    TIM_ARRPreloadConfig(TIM5, ENABLE); // Enable -> when new ARR is written, takes effect next cycle 
 
 	// Clears pending interrupt indications & arms interrupt enable register so that NVIC interrupts occur
-	TIM_ClearITPendingBit(BRAKE_LIGHT_TIM, TIM_IT_Update);
-	TIM_ITConfig(BRAKE_LIGHT_TIM, TIM_IT_Update, ENABLE);
+	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
 
 	// Lower priority than CAN, SPI, & UART, which also use NVIC (Preempetion/SubPriority 0/0, 0/1, & 1/0, respectively)
 	NVIC_InitTypeDef NVIC_InitStruct;
-	NVIC_InitStruct.NVIC_IRQChannel = BRAKE_LIGHT_TIM_NVIC_CHAN;
+	NVIC_InitStruct.NVIC_IRQChannel = TIM5_IRQn;
 	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStruct.NVIC_IRQChannel = ENABLE;
@@ -48,25 +45,41 @@ void BSP_PWM_Init(uint32_t freq, uint32_t duty_cycle) {
 
 	// Set up initial brakelight state
 	BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, false);
-	BSP_GPIO_Write_Pin(B)
-    TIM_Cmd(BRAKE_LIGHT_TIM, ENABLE);
+	BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
+	// TODO: Front lights aura turn on
+
+	// Set our freq and duty cycle
+	freq = freq_arg;
+	duty_cycle = duty_cycle_arg;
+    TIM_Cmd(TIM5, ENABLE);
 }
 
-// TODO: Based off of static var determine if on/off & edit accordingly
-// TODO: set up num_ticks on vs num_ticks off, rn we have 400 total, need to figure out how to set stuff up here & in init func
 // such that the num_high_ticks & num_low_ticks add up to 400 & work with the desired duty cycle (not difficult, just WIP)
 void TIM5_IRQHandler(void) {
+	// Reset indicator counter
+	if(indicatorCounter >= FLASH_TOGGLE_COUNT) indicatorCounter = 0;
+	if(indicatorCounter == FLASH_TOGGLE_COUNT / 2) BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
+
+	// PWM Pin logic
 	if(isPWMHigh) {
-		
+		// Turn on
+		BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, true);
+		if(indicatorCounter < FLASH_TOGGLE_COUNT / 2) {
+			BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, true);
+		}
+		TIM5->ARR = ((PRESCALED_CLK_FREQ / freq) * duty_cycle) / 100;
 	} 
 	else {
-
+		// Turn off
+		BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, false);
+		if(indicatorCounter < FLASH_TOGGLE_COUNT / 2) {
+			BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
+		}
+		TIM5->ARR = ((PRESCALED_CLK_FREQ / freq) * (100 - duty_cycle)) / 100
 	}
+	indicatorCounter++;
 }
 
-void BSP_PWM_SetPWMCoupled(bool isCoupled) {
-	isPWMCoupled = isCoupled;
+void BSP_PWM_Set_State(pwm_pins_t pwm_pin, bool is_active) {
+	pinsActive[pwm_pin] = is_active;
 }
-
-
-// TODO: Figure out how to make brakelight(s)/turn indicators play nicely when alternating between braking (more important) & indicating turning
