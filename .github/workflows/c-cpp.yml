@@ -16,7 +16,7 @@ jobs:
     - name: Install tools
       run: |
         sudo ./Embedded-Sharepoint/docker-start.sh -i
-        docker build -t Embedded-Sharepoint/Dockerfile 
+        docker build Embedded-Sharepoint/Dockerfile 
         docker compose -f Embedded-Sharepoint/docker-compose.yml build
         docker compose -f Embedded-Sharepoint/docker-compose.yml run --rm dev
         sudo apt -y update
