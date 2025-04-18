@@ -8,6 +8,7 @@
 #include "Contactors.h"
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
+#include "CANbus.h"
 #include "daybreak_pins.h"
 
 
@@ -19,15 +20,21 @@ static OS_MUTEX contactorsMutex;
  * @param   contactor the contactor
  *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @param   state the state to set (ON/OFF)
+ * @param   blocking whether or not this should be a blocking call
  * @return  None
  */ 
-static void setContactor(contactor_t contactor, bool state) {
+static void setContactor(contactor_t contactor, bool state, bool blocking) {
+    CANDATA_t message;
+    memset(&message, 0, sizeof message);
     switch (contactor) {
-        case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
-            BSP_GPIO_Write_Pin(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, state);
+        case MOTOR_CONTROLLER_FAULT_CONTACTOR:
+            BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, state);
             break;
-        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
-            BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, state);
+        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR:
+            // Controls may or may not control this Contactor
+            break;
+        case ARRAY_PRECHARGE_BYPASS_CONTACTOR:
+            // Controls may or may not control this Contactor
             break;
         default:
             break;
@@ -40,15 +47,16 @@ static void setContactor(contactor_t contactor, bool state) {
  * @return  None
  */ 
 void Contactors_Init() {
-    BSP_GPIO_Init(ARRAY_PRCHG_BYPASS_PORT,  
-                 (ARRAY_PRCHG_BYPASS) |
-                 (MOTOR_PRCHG_BYPASS), 
-                  1,
-                  false);
+
+    // Motor Contactor pins
+    BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false); // control
+    BSP_GPIO_Init(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, false); // sense
+
+
 
     // start disabled
     for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
-        setContactor(contactor, OFF);
+        setContactor(contactor, OFF, false);
     }
 
     // initialize mutex
@@ -102,7 +110,8 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     assertOSError(err);
 
     // change contactor to match state and make sure it worked
-    setContactor(contactor, state);
+    setContactor(contactor, state, blocking);
+    // TODO: add delay between sense reads
     bool ret = (bool)Contactors_Get(contactor);
     result = (ret == state) ? SUCCESS: ERROR;
 
