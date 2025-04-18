@@ -18,7 +18,7 @@
 
 #define FOREACH_contactor(contactor)             \
     contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR), \
-    contactor(MOTOR_CONTROLLER_FAULT_CONTACTOR), \
+    contactor(MOTOR_CONTROLLER_CONTACTOR), \
         contactor(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR),
 
 typedef enum contactor_ENUM

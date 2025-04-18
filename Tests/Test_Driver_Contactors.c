@@ -6,29 +6,25 @@ static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[STACK_SIZE];
 
 
-/*
- * When running this test on the motor testbench, hardcode the SendTritium task
- * to always send an unobtainable velocity. This ensures that no regen braking
- * takes place
- */
-
 void Task1(){
     OS_ERR err;
 
     CPU_Init();
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    BSP_UART_Init(USB);
     Contactors_Init();
-
-    for (;;) {
-        bool set = Contactors_Get(ARRAY_CONTACTOR);
-        printf("Turning contactor %s\r\n", set ? "off" : "on");
-        Contactors_Set(ARRAY_CONTACTOR, !set, true);
+    OSTimeDlyHMSM(0, 0, 10, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    while(1){
+        ErrorStatus stat = Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
+        Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, stat == SUCCESS ? ON : OFF);
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        bool set = Contactors_Get(ARRAY_CONTACTOR);
+        Status_Leds_Write(BPS_FAULT_LED, set == ON ? ON : OFF);
     }
 }
 
 int main(){
+    Status_Leds_Init();
+    Contactors_Init();
     OS_ERR err;
     OSInit(&err);
     assertOSError(err);

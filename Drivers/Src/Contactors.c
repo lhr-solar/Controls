@@ -14,6 +14,8 @@
 
 static OS_MUTEX contactorsMutex;
 
+static bool contactorState[NUM_CONTACTORS];
+
 /**
  * @brief   Helper function for setting contactors without mutex.
  *          Should only be called if mutex is held and struct contactor has been checked
@@ -27,7 +29,7 @@ static void setContactor(contactor_t contactor, bool state, bool blocking) {
     CANDATA_t message;
     memset(&message, 0, sizeof message);
     switch (contactor) {
-        case MOTOR_CONTROLLER_FAULT_CONTACTOR:
+        case MOTOR_CONTROLLER_CONTACTOR:
             BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, state);
             break;
         case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR:
@@ -57,6 +59,7 @@ void Contactors_Init() {
     // start disabled
     for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
         setContactor(contactor, OFF, false);
+        contactorState[contactor] = OFF;
     }
 
     // initialize mutex
@@ -73,19 +76,19 @@ void Contactors_Init() {
  * @return  The contactor's state (ON/OFF)
  */ 
 bool Contactors_Get(contactor_t contactor) {
-    State state = OFF;
     switch (contactor) {
-        
+        case MOTOR_CONTROLLER_CONTACTOR:
+            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR) == 0 ? OFF : ON;
+            break;
+        // Precharge Contactors are updated by ReadCarCAN.c
         case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
-            state = BSP_GPIO_Get_State(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS);
             break;
         case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR :
-            state = BSP_GPIO_Get_State(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS);
             break;
         default:
             break;
     }
-    return (state == ON) ? ON : OFF;
+    return contactorState[contactor];
 }
 
 /**
@@ -112,7 +115,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     // change contactor to match state and make sure it worked
     setContactor(contactor, state, blocking);
     // TODO: add delay between sense reads
-    bool ret = (bool)Contactors_Get(contactor);
+    bool ret = Contactors_Get(contactor);
     result = (ret == state) ? SUCCESS: ERROR;
 
     // release lock
