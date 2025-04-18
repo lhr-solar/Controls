@@ -15,7 +15,7 @@ jobs:
       run: git submodule update --init --recursive
     - name: Install tools
       run: |
-        sudo ./Embedded-Sharepoint/install.sh -i
+        sudo ./Embedded-Sharepoint/docker-start.sh -i
         sudo apt -y update
     - name: clean
       run: make clean
