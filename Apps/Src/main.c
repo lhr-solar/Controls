@@ -5,8 +5,6 @@
  * 
  */
 
-// (TODO) Status LEDs
-
 #include "common.h"
 #include "config.h"
 #include "Tasks.h"
@@ -20,36 +18,9 @@
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "daybreak_pins.h"
+#include "Idle.h"
 #include "BSP_GPIO.h"
 
-int idle_time_ctr = 0;
-int last_tick_cnt = 0;
-int current_tick_cnt = 0;
-
-void IdleTaskHook(void)
-{
-    static OS_ERR err;
-    static bool toggle = false;
-    while(1){
-        current_tick_cnt = OSTimeGet(&err);
-        
-        if(last_tick_cnt != current_tick_cnt){
-            idle_time_ctr++;
-            last_tick_cnt = current_tick_cnt;
-
-            if(current_tick_cnt % 50 == 0){
-                BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN, toggle);
-                toggle = !toggle;
-            }
-        }
-    }
-}
-
-void IdleInit(void)
-{
-    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT_PIN, OUTPUT, false);
-    OS_AppIdleTaskHookPtr = &IdleTaskHook;
-}
 
 int main(void) {
     // Disable interrupts

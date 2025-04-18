@@ -2,6 +2,15 @@
 #define __SENDCARCAN_H
 
 #include "CANbus.h"
+#include "common.h"
+#include "os_cfg_app.h"
+#include "CANbus.h"
+#include "Minions.h"
+#include "Contactors.h"
+#include "Pedals.h"
+#include "Ignition.h"
+#include "Tasks.h"
+#include "SendTritium.h"
 
 /**
  * @brief Initialize SendCarCAN

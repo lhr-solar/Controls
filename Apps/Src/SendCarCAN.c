@@ -14,11 +14,12 @@
 #include "Minions.h"
 #include "Contactors.h"
 #include "Pedals.h"
+#include "Ignition.h"
 #include "Tasks.h"
 #include "SendCarCAN.h"
 #include "SendTritium.h"
 
-#define IO_STATE_DLY_MS 250u 
+#define IO_STATE_DLY_MS 250
 
 #define SENDCARCAN_MSG_SKIP_CTR 3
 
@@ -143,25 +144,27 @@ static void putIOState(void){
     CANDATA_t message;
     memset(&message, 0, sizeof message);
     message.ID = IO_STATE;
-    
-    // Get pedal information
-    message.data[0] = Pedals_Read(ACCELERATOR);
-    message.data[1] = Pedals_Read(BRAKE);
 
-    // Get minion information
-    for(pin_t pin = 0; pin < NUM_PINS; pin++){
-        bool pinState = Minions_Read(pin);
-        message.data[2] |= pinState << pin;
-    }
+    message.data[0] = 0xFF; // Set all bits to 1
     
-    // Get contactor info
-    for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-        bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
-        message.data[3] |= contactorState << contactor;
-    }
+    // // Get pedal information
+    // message.data[0] = Pedals_Read(ACCELERATOR);
+    // message.data[1] = Pedals_Read(BRAKE);
 
-    // Tell BPS if the array contactor should be on
-    message.data[3] |= (Minions_Read(IGN_1) || Minions_Read(IGN_2)) << 2;
+    // // Get minion information
+    // for(pin_t pin = 0; pin < NUM_PINS; pin++){
+    //     bool pinState = Minions_Read(pin);
+    //     message.data[2] |= pinState << pin;
+    // }
+    
+    // // Get contactor info
+    // for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
+    //     bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
+    //     message.data[3] |= contactorState << contactor;
+    // }
+
+    // // Tell BPS if the array contactor should be on
+    // message.data[3] |= (Minions_Read(IGN_1) || Minions_Read(IGN_2)) << 2;
 
     CANbus_Send(message, true, CARCAN);
 }
