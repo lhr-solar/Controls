@@ -48,8 +48,9 @@ void BSP_PWM_Init(uint32_t freq, uint32_t duty_cycle) {
     TIM_Cmd(BRAKE_LIGHT_TIM, ENABLE);
 }
 
-// TODO: Based off of static var determine if on/off
+// TODO: Based off of static var determine if on/off & edit accordingly
 // TODO: set up num_ticks on vs num_ticks off, rn we have 400 total, need to figure out how to set stuff up here & in init func
+// such that the num_high_ticks & num_low_ticks add up to 400 & work with the desired duty cycle (not difficult, just WIP)
 void TIM2_IRQHandler(void) {
 
 }
