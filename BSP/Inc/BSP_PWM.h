@@ -1,16 +1,16 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file BSP_TIM.h
+ * @file BSP_PWM.h
  * @brief Header file for the library to interact
- * with the Timer (TIM)
+ * with the Timer (PWM)
  * 
- * @defgroup BSP_TIM
- * @addtogroup BSP_TIM
+ * @defgroup BSP_PWM
+ * @addtogroup BSP_PWM
  * @{
  */
 
-#ifndef __BSP_TIM_H
-#define __BSP_TIM_H
+#ifndef __BSP_PWM_H
+#define __BSP_PWM_H
 
 #include "bsp.h"
 #include "common.h"
@@ -22,7 +22,7 @@
  * @brief   Initialize the ADC module
  * @return  None
  */ 
-void BSP_TIM_Init(void);
+void BSP_PWM_Init(void);
 
 
 #endif

@@ -1,6 +1,6 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
-#include "BSP_ADC.h"
+#include "BSP_PWM.h"
 #include "stm32f4xx.h"
 #include "daybreak_pins.h"
 
@@ -14,6 +14,9 @@
 #define BRAKE_LIGHT_TIM_PERIPH RCC_APB1Periph_TIM5 // Used for APB1 Periph clock enable bit (in APB1 register)
 #define BRAKE_LIGHT_TIM TIM5 // Used to manage the actual hardware timer instance
 #define BRAKE_LIGHT_TIM_NVIC_CHAN TIM5_IRQn // Based on TIM used, specifies which channel for the NVIC to use (which prompts interrupts)
+
+static bool isPWMHigh = false; // Used internally for PWM bitbanging
+static bool isPWMCoupled = false; // If braking, brakelight stays on (with PWM); otherwise, brake follows turn indicator PWM
 
 void BSP_PWM_Init(uint32_t freq, uint32_t duty_cycle) {
 	RCC_APB1PeriphClockCmd(BRAKE_LIGHT_TIM_PERIPH, ENABLE);
@@ -43,8 +46,9 @@ void BSP_PWM_Init(uint32_t freq, uint32_t duty_cycle) {
 	NVIC_InitStruct.NVIC_IRQChannel = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
 
-	// TODO: Set up initial brakelight state
-	BSP_GPIO_Write(BRAKE_LIGHT_PORT)
+	// Set up initial brakelight state
+	BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, false);
+	BSP_GPIO_Write_Pin(B)
     TIM_Cmd(BRAKE_LIGHT_TIM, ENABLE);
 }
 
@@ -52,7 +56,17 @@ void BSP_PWM_Init(uint32_t freq, uint32_t duty_cycle) {
 // TODO: set up num_ticks on vs num_ticks off, rn we have 400 total, need to figure out how to set stuff up here & in init func
 // such that the num_high_ticks & num_low_ticks add up to 400 & work with the desired duty cycle (not difficult, just WIP)
 void TIM5_IRQHandler(void) {
+	if(isPWMHigh) {
+		
+	} 
+	else {
 
+	}
 }
+
+void BSP_PWM_SetPWMCoupled(bool isCoupled) {
+	isPWMCoupled = isCoupled;
+}
+
 
 // TODO: Figure out how to make brakelight(s)/turn indicators play nicely when alternating between braking (more important) & indicating turning
