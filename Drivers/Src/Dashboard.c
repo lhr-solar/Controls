@@ -2,10 +2,6 @@
 
 switch_state getDashState(dashPin_t pin){
     switch(pin){
-        case(BRAKE_LED):
-            return BSP_GPIO_Read_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT) ? SWITCH_ON : SWITCH_OFF;
-            break;
-
         case(GEAR):
             if(BSP_GPIO_Read_Pin(FORWARD_PORT, FORWARD)) {return FWD;}
             else if(BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE)) {return REV;}
@@ -19,6 +15,7 @@ switch_state getDashState(dashPin_t pin){
         case(CRUZ_EN):
             return BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? SWITCH_ON : SWITCH_OFF;
             break;
+
         default:
             return SWITCH_ERROR;
             break;
@@ -31,4 +28,5 @@ void dashboardInit(){
     BSP_GPIO_Init(REVERSE_PORT, REVERSE, INPUT, false);             //REV
     BSP_GPIO_Init(CRUISE_SET_PORT, CRUISE_SET, INPUT, false);       //CRUZ_ST
     BSP_GPIO_Init(CRUISE_ENABLE_PORT, CRUISE_ENABLE, INPUT, false); //CRUZ_EN
+    //Dash LEDs initialized in StatusLeds.c
 }
