@@ -212,11 +212,11 @@ void Task1(void *arg)
     testPercentageCompSOC(&UpdateDisplay_SetSOC);
     testPercentageCompAccel(&UpdateDisplay_SetAccel);
 
-    Display_Error();
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
+    //Display_Error();
+    //OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
-    Display_Reset();
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
+    //Display_Reset();
+    //OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     }
 };
@@ -248,4 +248,5 @@ int main()
     assertOSError(err);
 
     OSStart(&err);
+    //On_All();
 }
