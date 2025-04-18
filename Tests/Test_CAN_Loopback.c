@@ -6,13 +6,11 @@
 
 
 #define TEST_CARCAN_LOOPBACK
-  #ifndef TEST_MOTORCAN_lOOPBACK
-     #define TEST_CARCAN_LOOPBACK
- #endif
-
 
 int main(){
     Status_Leds_Init();
+
+    Status_Leds_Write(OS_FAULT_LED, true);
 
     #ifdef TEST_CARCAN_LOOPBACK
     CANbus_Init(CARCAN, (CANId_t *) carCANFilterList, NUM_CARCAN_FILTERS);
@@ -20,7 +18,6 @@ int main(){
     CANbus_Init(MOTORCAN, (CANId_t *) motorCANFilterList, NUM_MOTORCAN_FILTERS);
     #endif
 
-    Status_Leds_Write(OS_FAULT_LED, true);
     CANDATA_t msg, out;    
     CAN_t bus;     
     msg.idx = 0;
