@@ -37,6 +37,31 @@ void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction, bool pull_
     GPIO_Init(portHandle, &GPIO_InitStruct);
 }
 
+/**
+ * @brief   Initializes a GPIO port
+ * @param   port - port to initialize
+ * @param	mask - pins
+ * @param	direction - input or output 
+ * @param	pull_up - pulled up or not
+ * @return  None
+ */ 
+void BSP_GPIO_Init_PullUp(port_t port, uint16_t mask, direction_t direction, bool pull_up){
+	GPIO_InitTypeDef GPIO_InitStruct;
+
+	RCC_AHB1PeriphClockCmd(1 << port, ENABLE);
+	// Configure the pins to be generic GPIO
+    GPIO_InitStruct.GPIO_Pin   = mask;
+    GPIO_InitStruct.GPIO_Mode  = direction ? GPIO_Mode_OUT : GPIO_Mode_IN;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Low_Speed;
+	GPIO_InitStruct.GPIO_PuPd  = (pull_up)?GPIO_PuPd_UP:GPIO_PuPd_NOPULL;
+
+	// Compute the offset for the port handle from the port passed in
+    GPIO_TypeDef *portHandle = GPIO_GetPort(port);
+
+    // Initialize the GPIO
+    GPIO_Init(portHandle, &GPIO_InitStruct);
+}
 
 /**
  * @brief   Reads value of the specified port
@@ -46,7 +71,6 @@ void BSP_GPIO_Init(port_t port, uint16_t mask, direction_t direction, bool pull_
 
 uint16_t BSP_GPIO_Read(port_t port){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
-
 	return GPIO_ReadInputData(gpio_port);
 }
 

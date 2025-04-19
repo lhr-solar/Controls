@@ -9,6 +9,7 @@
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
 #include "CANbus.h"
+#include "BSP_GPIO.h"
 #include "daybreak_pins.h"
 
 
@@ -30,13 +31,16 @@ static void setContactor(contactor_t contactor, bool state, bool blocking) {
     memset(&message, 0, sizeof message);
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
+            contactorState[MOTOR_CONTROLLER_CONTACTOR] = state;
             BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, state);
             break;
+
+        // Precharge Contactors are updated by ReadCarCAN.c
         case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR:
-            // Controls may or may not control this Contactor
+            contactorState[MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR] = state;
             break;
         case ARRAY_PRECHARGE_BYPASS_CONTACTOR:
-            // Controls may or may not control this Contactor
+            contactorState[ARRAY_PRECHARGE_BYPASS_CONTACTOR] = state;
             break;
         default:
             break;
@@ -49,10 +53,9 @@ static void setContactor(contactor_t contactor, bool state, bool blocking) {
  * @return  None
  */ 
 void Contactors_Init() {
-
     // Motor Contactor pins
     BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false); // control
-    BSP_GPIO_Init(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, false); // sense
+    BSP_GPIO_Init_PullUp(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, true); // sense
 
 
 
@@ -78,7 +81,7 @@ void Contactors_Init() {
 bool Contactors_Get(contactor_t contactor) {
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
-            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR) == 0 ? OFF : ON;
+            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR) == 0 ? ON : OFF;
             break;
         // Precharge Contactors are updated by ReadCarCAN.c
         case ARRAY_PRECHARGE_BYPASS_CONTACTOR :

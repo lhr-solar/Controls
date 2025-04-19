@@ -49,6 +49,8 @@ typedef enum {
 	ODOMETER_AMPHOURS 				= 0x24E,
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
     SLIP_SPEED                      = 0x257,
+	CONTACTOR_SENSE                 = 0x400,
+	PRECHARGE_TIMEOUT               = 0x401,
 	CONTROL_MODE                    = 0x580,
     IO_STATE 						= 0x581,
 	MAX_CAN_ID
