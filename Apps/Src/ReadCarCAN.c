@@ -538,8 +538,7 @@ void Task_ReadCarCAN(void *p_arg)
 
             // TODO: Update display
 
-            // TODO: fault (Womp womp)
-            
+            // TODO: Fault if needed
                         
             break;
         }

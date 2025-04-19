@@ -60,12 +60,18 @@ void Task_Test_Contactors(){
 
         if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR)){
             Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, true);
+            Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, false);
+            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, false);            
         }
         if(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)){
+            Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, false);
             Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, true);
+            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, false);          
         }
         if(Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR)){
-            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, true);            
+            Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, false);
+            Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, false);
+            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, true);          
         }
         Status_Leds_Write(OS_FAULT_LED, ON);
     }
