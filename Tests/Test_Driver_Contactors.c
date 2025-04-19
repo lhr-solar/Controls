@@ -12,6 +12,10 @@ OS_TCB Task2_TCB;
 static CPU_STK Task2_Stk[STACK_SIZE];
 
 // Run test in Car CAN loopback mode
+/**
+    Tests ability to read Contactor states over can and via sense pins on the Motor controller
+    Expected behavior:
+ */
 
 void Task_Fake_Contactor_Driver(){
 
