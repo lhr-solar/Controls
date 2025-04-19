@@ -8,7 +8,6 @@
 #include "Contactors.h"
 #include "stm32f4xx_gpio.h"
 #include "Tasks.h"
-#include "CANbus.h"
 #include "BSP_GPIO.h"
 #include "daybreak_pins.h"
 
@@ -27,8 +26,6 @@ static bool contactorState[NUM_CONTACTORS];
  * @return  None
  */ 
 static void setContactor(contactor_t contactor, bool state, bool blocking) {
-    CANDATA_t message;
-    memset(&message, 0, sizeof message);
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
             contactorState[MOTOR_CONTROLLER_CONTACTOR] = state;
