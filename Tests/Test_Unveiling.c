@@ -20,37 +20,45 @@
 #define SET_BRIGHTNESS_DLY 200u // 200ms delay
 #define BLINK_TWICE_DLY 250u    // 250ms delay
 
+#define LIGHTS_DEF 1
+#define DISPLAY_DEF 1
 
+#define PRIO_DEF 6
 
+void delay_short();
+void delay();
+
+#if DISPLAY_DEF
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
-#if 0
+#endif 
+
+
+
+#if LIGHTS_DEF
 static OS_TCB UnveilingLights_TCB;
 static CPU_STK UnveilingLights_Stk[DEFAULT_STACK_SIZE];
 static void Task_UnveilingLights(void *p_arg);
+
 
 // main lights task
 static void Task_UnveilingLights(void *p_arg)
 {
     int duty = 2;
     int add = 1;
-    volatile int x = 0;
-    while (1)
-    {
-        x++;
-        if(x > 50000){
-            x = 0;
-            BSP_PWM_Set_Duty_Cycle(duty);
-            duty += add;
-            if(duty == 25) add = -1;
-            else if(duty == 1) add = 1;
-        }
+    while (1) {
+        BSP_PWM_Set_Duty_Cycle(duty);
+        duty += add;
+
+        if(duty == 30) add = -1;
+        else if(duty == 1) add = 1;
+
+        delay_short();
     }
-    volatile int y = 0;
 }
 
-static void Lights_Task_Init()
-{
+static void Lights_Task_Init() {
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     OS_ERR err;
     // init GPIO
     BSP_GPIO_Init(OS_FAULT_PORT, OS_FAULT, OUTPUT, false);
@@ -73,7 +81,7 @@ static void Lights_Task_Init()
         (CPU_CHAR *)"UnveilingLights",
         (OS_TASK_PTR)Task_UnveilingLights,
         (void *)NULL,
-        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
+        (OS_PRIO)PRIO_DEF,
         (CPU_STK *)UnveilingLights_Stk,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
@@ -98,6 +106,7 @@ void delay_short(){
     assertOSError(e);
 }
 
+#if DISPLAY_DEF
 void testBoolComp(UpdateDisplayError_t(*function)(bool)){
     function(false);
     delay();
@@ -154,6 +163,7 @@ void Task1(void *arg)
 {   
     OS_ERR e;
     // CPU_Init();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     Display_Init();
     UpdateDisplay_Init();
 
@@ -166,7 +176,7 @@ void Task1(void *arg)
         (CPU_CHAR *)"UpdateDisplay_TCB",
         (OS_TASK_PTR)Task_UpdateDisplay,
         (void *)NULL,
-        (OS_PRIO)13,
+        (OS_PRIO) PRIO_DEF,
         (CPU_STK *)UpdateDisplay_Stk,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
@@ -193,6 +203,7 @@ void Task1(void *arg)
         
     }
 };
+#endif
 
 int main()
 {
@@ -202,13 +213,14 @@ int main()
     assertOSError(err);
     // CPU_Init();
 
+    #if DISPLAY_DEF
     // create tester thread
     OSTaskCreate(
         (OS_TCB *)&Task1TCB,
         (CPU_CHAR *)"Task 1",
         (OS_TASK_PTR)Task1,
         (void *)NULL,
-        (OS_PRIO)12,
+        (OS_PRIO)PRIO_DEF,
         (CPU_STK *)Task1Stk,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE / 10,
         (CPU_STK_SIZE)DEFAULT_STACK_SIZE,
@@ -217,16 +229,17 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-
-        
+    #endif
+    
     TaskSwHook_Init();
-    #if 0
+    #if LIGHTS_DEF
     Lights_Task_Init();
     #endif
     assertOSError(err);
 
     OSStart(&err);
 
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+    delay();
+    delay_short();
     //On_All();
 }
