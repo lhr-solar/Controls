@@ -29,7 +29,6 @@ void Task_Fake_Contactor_Driver(){
         // send fake state of Canbus
         CANbus_Send(msg, true, CARCAN);
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
-
     }
 }
 

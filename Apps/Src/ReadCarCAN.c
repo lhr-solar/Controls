@@ -525,6 +525,10 @@ void Task_ReadCarCAN(void *p_arg)
             UpdateDisplay_SetBattCurrent((*(int32_t *)dataBuf.data)); // int32_t
             break;
         }
+        case CONTACTOR_SENSE:
+        {
+            break;
+        }
 
         default:
         {
