@@ -44,13 +44,29 @@ void Task_Test_Contactors(){
     recv.idx = 0;
     recv.ID = CONTACTOR_SENSE;
     memset(&recv.data, 0x00, sizeof recv.data);
+    ErrorStatus stat = Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
     while(1){
-        ErrorStatus stat = Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
+        memset(&recv.data, 0x00, sizeof recv.data);
         Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, stat == SUCCESS ? ON : OFF);
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         bool set = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
         Status_Leds_Write(BPS_FAULT_LED, set == ON ? ON : OFF);
         CANbus_Read(&recv, true, CARCAN);
+         // Update Array Precharge sense state
+        Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(recv.data), true);
+
+        // Update Motor Precharge sense state
+        Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(recv.data), true);
+
+        if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR)){
+            Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, true);
+        }
+        if(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)){
+            Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, true);
+        }
+        if(Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR)){
+            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, true);            
+        }
         Status_Leds_Write(OS_FAULT_LED, ON);
     }
 }
