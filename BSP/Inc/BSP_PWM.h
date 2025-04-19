@@ -26,7 +26,7 @@ typedef enum {FRONT_PWM = 0, INDICATOR_PWM, BRAKE_PWM, NUM_PINS_PWM} pwm_lights_
  * @param	duty_cycle - Duty cycle of PWM
  * @return  None
  */ 
-void BSP_PWM_Init(uint32_t freq, uint8_t duty_cycle);
+void BSP_PWM_Init(uint32_t freq, uint16_t duty_cycle, bool ind_stay);
 
 /**
  * @brief   Sets status of PWM for a certain light
@@ -36,5 +36,6 @@ void BSP_PWM_Init(uint32_t freq, uint8_t duty_cycle);
  */ 
 void BSP_PWM_Set_State(pwm_lights_t pwm_light, bool is_active);
 
+void BSP_PWM_Set_Duty_Cycle(uint16_t duty);
 
 #endif
