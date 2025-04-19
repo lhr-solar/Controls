@@ -3,6 +3,11 @@
 #include "BSP_PWM.h"
 #include "stm32f4xx.h"
 #include "daybreak_pins.h"
+#include "bsp.h"
+#include "stm32f4xx_tim.h"
+#include "misc.h"
+#include "stm32f4xx_rcc.h"
+
 
 // TODO: Go back & fix this eventually to refer to some actual variable that defines this elsewhere
 #define SYS_CLK_FREQ 80000000 // STM clock runs at 80MHz
@@ -13,9 +18,10 @@
 static bool isPWMHigh = false; // Used internally for PWM bitbanging
 static uint32_t indicatorCounter = 0; // Used for flashing 
 static uint32_t freq = 0;
-static uint32_t duty_cycle = 0;
+static uint8_t duty_cycle = 0;
+static bool pinsActive[NUM_PINS_PWM] = {0};
 
-void BSP_PWM_Init(uint32_t freq_arg, uint32_t duty_cycle_arg) {
+void BSP_PWM_Init(uint32_t freq_arg, uint8_t duty_cycle_arg) {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 
 	BSP_GPIO_Init(TIMER_CLK_PORT, TIMER_CLK, OUTPUT, false);
@@ -40,7 +46,7 @@ void BSP_PWM_Init(uint32_t freq_arg, uint32_t duty_cycle_arg) {
 	NVIC_InitStruct.NVIC_IRQChannel = TIM5_IRQn;
 	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
-	NVIC_InitStruct.NVIC_IRQChannel = ENABLE;
+	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
 
 	// Set up initial brakelight state
@@ -56,6 +62,8 @@ void BSP_PWM_Init(uint32_t freq_arg, uint32_t duty_cycle_arg) {
 
 // such that the num_high_ticks & num_low_ticks add up to 400 & work with the desired duty cycle (not difficult, just WIP)
 void TIM5_IRQHandler(void) {
+	TIM_ClearITPendingBit(TIM5, TIM_IT_Update); //clear inturrupt flag
+
 	// Reset indicator counter
 	if(indicatorCounter >= FLASH_TOGGLE_COUNT) indicatorCounter = 0;
 	if(indicatorCounter == FLASH_TOGGLE_COUNT / 2) BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
@@ -80,9 +88,10 @@ void TIM5_IRQHandler(void) {
 		if(pinsActive[INDICATOR_PWM] && indicatorCounter < FLASH_TOGGLE_COUNT / 2) {
 			BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
 		}
-		TIM5->ARR = ((PRESCALED_CLK_FREQ / freq) * (100 - duty_cycle)) / 100
+		TIM5->ARR = ((PRESCALED_CLK_FREQ / freq) * (100 - duty_cycle)) / 100;
 	}
 	indicatorCounter++;
+	isPWMHigh = !isPWMHigh;
 }
 
 void BSP_PWM_Set_State(pwm_lights_t pwm_light, bool is_active) {
@@ -92,10 +101,12 @@ void BSP_PWM_Set_State(pwm_lights_t pwm_light, bool is_active) {
 			// TODO: 
 			break;
 		case INDICATOR_PWM:
-			BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, false);
+			BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
 			break;
 		case BRAKE_PWM:
-			BSP_GPIO_Write_Pin(TIMER_CLK_PORT, TIMER_CLK, false);
+			BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, false);
+			break;
+		default:
 			break;
 	}
 }

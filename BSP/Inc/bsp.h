@@ -16,6 +16,7 @@
 #include "BSP_UART.h"
 #include "BSP_SPI.h"
 #include "BSP_GPIO.h"
+#include "BSP_PWM.h"
 
 #include <sys/file.h>
 #include <unistd.h>

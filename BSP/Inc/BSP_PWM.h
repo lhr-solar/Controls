@@ -18,8 +18,7 @@
 #include "daybreak_pins.h"
 
 // Distinguishing between left and right turn indicators is done in hardware (thru switches)
-typedef enum {FRONT_PWM = 0, INDICATOR_PWM, BRAKE_PWM, NUM_PINS} pwm_lights_t;
-bool pinsActive[NUM_PINS] = {0};
+typedef enum {FRONT_PWM = 0, INDICATOR_PWM, BRAKE_PWM, NUM_PINS_PWM} pwm_lights_t;
 
 /**
  * @brief   Initialize the PWM module
@@ -27,7 +26,7 @@ bool pinsActive[NUM_PINS] = {0};
  * @param	duty_cycle - Duty cycle of PWM
  * @return  None
  */ 
-void BSP_PWM_Init(uint32_t freq, uint32_t duty_cycle);
+void BSP_PWM_Init(uint32_t freq, uint8_t duty_cycle);
 
 /**
  * @brief   Sets status of PWM for a certain light
