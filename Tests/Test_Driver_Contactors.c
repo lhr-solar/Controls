@@ -22,14 +22,14 @@ void Task_Fake_Contactor_Driver(){
     msg.idx = 0;
     msg.ID = CONTACTOR_SENSE;
     memset(&msg.data, 0x00, sizeof msg.data);
-    Status_Leds_Write(CRUISE_IND_LED, ON);
     while(1){
+        Status_Leds_Toggle(CRUISE_IND_LED);
         msg.data[0] = 0x01;
         msg.data[1] = 0x00;
         // send fake state of Canbus
-        ErorrStatus err = CANbus_Send(msg, true, CARCAN);
-        Status_Leds_Toggle(CRUISE_IND_LED);
+        CANbus_Send(msg, true, CARCAN);
         OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+
     }
 }
 
