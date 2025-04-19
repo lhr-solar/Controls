@@ -15,12 +15,12 @@ int main(){
     volatile int x = 0;
     for(int i = 0; i < 4200000; ++i) {
         x++;
-        if(x > 25000){
+        if(x > 20000){
             x = 0;
             BSP_PWM_Set_Duty_Cycle(duty);
             duty += add;
-            if(x == 25) add = -1;
-            else if(x == 1) add = 1;
+            if(duty == 25) add = -1;
+            else if(duty == 1) add = 1;
         }
     }
 
