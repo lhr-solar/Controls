@@ -527,6 +527,20 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
+            // Update Motor Contactor sense state
+            Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
+
+            // Update Array Precharge sense state
+            Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
+
+            // Update Motor Precharge sense state
+            Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
+
+            // TODO: Update display
+
+            // TODO: fault (Womp womp)
+            
+                        
             break;
         }
 
