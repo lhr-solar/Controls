@@ -85,9 +85,9 @@ void TIM5_IRQHandler(void) {
 	indicatorCounter++;
 }
 
-void BSP_PWM_Set_State(pwm_pins_t pwm_pin, bool is_active) {
-	pinsActive[pwm_pin] = is_active;
-	switch(pwm_pin) {
+void BSP_PWM_Set_State(pwm_lights_t pwm_light, bool is_active) {
+	pinsActive[pwm_light] = is_active;
+	switch(pwm_light) {
 		case FRONT_PWM:
 			// TODO: 
 			break;
