@@ -13,9 +13,9 @@ int main(){
     int duty = 2;
     int add = 1;
     volatile int x = 0;
-    for(int i = 0; i < 4200000; ++i) {
+    while(1) {
         x++;
-        if(x > 20000){
+        if(x > 42069){
             x = 0;
             BSP_PWM_Set_Duty_Cycle(duty);
             duty += add;

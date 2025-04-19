@@ -24,7 +24,7 @@
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
-
+#if 0
 static OS_TCB UnveilingLights_TCB;
 static CPU_STK UnveilingLights_Stk[DEFAULT_STACK_SIZE];
 static void Task_UnveilingLights(void *p_arg);
@@ -46,6 +46,7 @@ static void Task_UnveilingLights(void *p_arg)
             else if(duty == 1) add = 1;
         }
     }
+    volatile int y = 0;
 }
 
 static void Lights_Task_Init()
@@ -83,6 +84,7 @@ static void Lights_Task_Init()
         (OS_ERR *)&err);
     assertOSError(err);
 }
+#endif
 
 void delay(){
     OS_ERR e;
@@ -218,7 +220,9 @@ int main()
 
         
     TaskSwHook_Init();
+    #if 0
     Lights_Task_Init();
+    #endif
     assertOSError(err);
 
     OSStart(&err);
