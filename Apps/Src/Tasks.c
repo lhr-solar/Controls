@@ -63,7 +63,7 @@ void _assertOSError(OS_ERR err)
     {
         Status_Leds_Write(OS_FAULT_LED, ON);
         Error_OS = err;
-        EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
+        Contactors_EmergencyDisable(); // Turn off all contactors
         Display_Error(); // Display the location and error code
         while(1){;} //nonrecoverable
     }
@@ -92,7 +92,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     }
 
     if (nonrecoverable == OPT_NONRECOV) {
-        EmergencyContactorOpen();
+        Contactors_EmergencyDisable();
         Display_Error(); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
     }
@@ -132,14 +132,6 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
         }
         
     }
-}
-
-/**
- * @brief For use in error handling: opens array and motor precharge bypass contactor
- * and turns on additional brakelight to signal that a critical error happened.
-*/
-void EmergencyContactorOpen() {
-    BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OFF);
 }
 
 /**

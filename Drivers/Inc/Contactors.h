@@ -67,6 +67,14 @@ bool Contactors_Get(contactor_t contactor);
  */
 ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
 
+/**
+ * @brief   Disables all contactors and bypasses mutex
+ *          Should I only used in a fault state
+ *          Note: NOT not turn off Contactors not controlled by Controls
+ * @return  None
+ */
+void Contactors_EmergencyDisable();
+
 #endif
 
 /* @} */

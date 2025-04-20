@@ -126,6 +126,12 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     return result;
 }
 
+/**
+ * @brief   Disables all contactors
+ *          Note: NOT not turn off Contactors not controlled by Controls, only sets their status to off
+ * @param   None
+ * @return  None
+ */
 void Contactors_DisableAll(){
     for(uint8_t i = 0; i < NUM_CONTACTORS; i++){
         Contactors_Set(i, true, OFF);
@@ -134,8 +140,9 @@ void Contactors_DisableAll(){
 
 /**
  * @brief   Disables all contactors and bypasses mutex
- *          Should I only used in a fault state
- *          Note: NOT not turn off Contactors not controlled by Controls
+ *          Should only used in a fault state
+ *          Note: NOT not turn off Contactors not controlled by Controls, only sets their status to off
+ * @param   None
  * @return  None
  */
 void Contactors_EmergencyDisable() {
