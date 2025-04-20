@@ -14,6 +14,7 @@
 
 static OS_MUTEX contactorsMutex;
 
+// Array describes the state of the Contactors. 
 static bool contactorState[NUM_CONTACTORS];
 
 /**
@@ -22,10 +23,9 @@ static bool contactorState[NUM_CONTACTORS];
  * @param   contactor the contactor
  *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @param   state the state to set (ON/OFF)
- * @param   blocking whether or not this should be a blocking call
  * @return  None
  */ 
-static void setContactor(contactor_t contactor, bool state, bool blocking) {
+static void setContactor(contactor_t contactor, bool state) {
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
             contactorState[MOTOR_CONTROLLER_CONTACTOR] = state;
@@ -58,7 +58,8 @@ void Contactors_Init() {
 
     // start disabled
     for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
-        setContactor(contactor, OFF, false);
+        // Only Motor Contactor is directly controlled by Controls
+        setContactor(contactor, OFF);
         contactorState[contactor] = OFF;
     }
 
@@ -113,7 +114,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     assertOSError(err);
 
     // change contactor to match state and make sure it worked
-    setContactor(contactor, state, blocking);
+    setContactor(contactor, state);
     // TODO: add delay between sense reads
     bool ret = Contactors_Get(contactor);
     result = (ret == state) ? SUCCESS: ERROR;
