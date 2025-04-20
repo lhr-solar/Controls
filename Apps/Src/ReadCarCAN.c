@@ -414,6 +414,7 @@ void Task_ReadCarCAN(void *p_arg)
 
     // TODO: make can timers for active precharge board
 
+    // TODO: remove saturation buffer and replace with a single saturation variable
     // Fills buffers with disable messages
     // NOTE: If the buffer becomes bigger than of type int8_t, memset will not work and
     //  would need to be reimplemented.
@@ -434,6 +435,7 @@ void Task_ReadCarCAN(void *p_arg)
 
         switch (dataBuf.ID)
         {
+            // TODO: only trip if BPS_TRIP is a 1
         case BPS_TRIP:
         { // BPS has a fault and we need to enter fault state
 
@@ -488,6 +490,7 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
+            // TODO: Write a check motor contactor status function
             // TODO: compare measured Contactor value to recieved by CAN
 
             // Update Motor Contactor sense state
