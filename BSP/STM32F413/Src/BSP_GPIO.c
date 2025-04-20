@@ -71,6 +71,7 @@ void BSP_GPIO_Init_PullUp(port_t port, uint16_t mask, direction_t direction, boo
 
 uint16_t BSP_GPIO_Read(port_t port){
 	GPIO_TypeDef *gpio_port = GPIO_GetPort(port);
+	
 	return GPIO_ReadInputData(gpio_port);
 }
 

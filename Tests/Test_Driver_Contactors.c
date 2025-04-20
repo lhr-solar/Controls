@@ -18,9 +18,7 @@ static CPU_STK Task2_Stk[STACK_SIZE];
 
 void Task_Fake_Contactor_Driver(){
 
-    CPU_Init();
     OS_ERR err;
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANDATA_t msg;  
     msg.idx = 0;
     msg.ID = CONTACTOR_SENSE;
@@ -38,10 +36,7 @@ void Task_Fake_Contactor_Driver(){
 
 void Task_Test_Contactors(){
 
-    CPU_Init();
     OS_ERR err;
-
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     CANDATA_t recv;  
     recv.idx = 0;
@@ -87,6 +82,9 @@ int main(){
     OS_ERR err;
     OSInit(&err);
     assertOSError(err);
+
+    CPU_Init();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
     OSTaskCreate(
         (OS_TCB*)&Task1_TCB,
