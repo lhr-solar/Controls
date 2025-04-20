@@ -81,6 +81,9 @@ static bool mcPBCComplete = false;
 static uint32_t SOC = 0;
 static uint32_t SBPV = 0;
 
+// Contactor saturation variables to ensure BPS has been safe for long enough
+static int8_t BPSSafeMsgSaturation = 0;
+
 // Error assertion function prototype
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
@@ -347,8 +350,7 @@ static void handler_ReadCarCAN_contactorsDisable(void)
     updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
 
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    BSP_GPIO_Write_Pin(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, false);
-    BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, false);
+    Contactors_EmergencyDisable();
 
     // Fills buffers with disable messages
     memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
@@ -358,23 +360,11 @@ static void handler_ReadCarCAN_contactorsDisable(void)
     updateHVArraySaturation(DISABLE_SATURATION_MSG);
     updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
 
-    // Check that the contactor was successfully turned off
-    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) || (bool)Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
+    UpdateDisplay_SetArray(false);
+    UpdateDisplay_SetMotor(false);
 
-    if (ret)
-    { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
-        while (1)
-        {
-            ;
-        }
-    }
-    else
-    {
-        UpdateDisplay_SetArray(false);
-        UpdateDisplay_SetMotor(false);
-    }
 }
+
 
 /**
  * @brief error handler function to display the evac screen if we get a BPS trip message.
@@ -421,8 +411,8 @@ void Task_ReadCarCAN(void *p_arg)
     memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
     memset(HVPlusMinusChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVPlusMinusChargeMsgBuffer));
 
-    // todo: change this to standard Contactor disable function
-    handler_ReadCarCAN_contactorsDisable();
+    // todo: maybe make blocking?
+    Contactors_DisableAll();
 
     while (1)
     {
@@ -438,9 +428,12 @@ void Task_ReadCarCAN(void *p_arg)
             // TODO: only trip if BPS_TRIP is a 1
         case BPS_TRIP:
         { // BPS has a fault and we need to enter fault state
-
-            // kill contactors and enter a nonrecoverable fault
-            assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
+            
+            if(dataBuf.data[0] == 0x01)
+            {
+                // kill contactors and enter a nonrecoverable fault
+                assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);            
+            }
         }
         case BPS_CONTACTOR:
         {
