@@ -154,11 +154,6 @@ typedef enum {
     OPT_NONRECOV
 } error_recov_opt_t;
 
-/**
- * @brief For use in error handling: opens array and motor precharge bypass contactor
- * and turns on additional brakelight to signal that a critical error happened.
-*/
-void EmergencyContactorOpen();
 
 /**
  * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 
