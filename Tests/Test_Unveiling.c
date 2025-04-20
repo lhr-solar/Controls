@@ -20,22 +20,19 @@
 #define SET_BRIGHTNESS_DLY 200u // 200ms delay
 #define BLINK_TWICE_DLY 250u    // 250ms delay
 
-#define LIGHTS_DEF 1
-#define DISPLAY_DEF 1
-
 #define PRIO_DEF 6
+
+#define MAX_DUTY_PERCENT 100
+#define LIGHTS_FREQ 69420
 
 void delay_short();
 void delay();
 
-#if DISPLAY_DEF
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
-#endif 
 
 
 
-#if LIGHTS_DEF
 static OS_TCB UnveilingLights_TCB;
 static CPU_STK UnveilingLights_Stk[DEFAULT_STACK_SIZE];
 static void Task_UnveilingLights(void *p_arg);
@@ -50,7 +47,7 @@ static void Task_UnveilingLights(void *p_arg)
         BSP_PWM_Set_Duty_Cycle(duty);
         duty += add;
 
-        if(duty == 30) add = -1;
+        if(duty == MAX_DUTY_PERCENT) add = -1;
         else if(duty == 1) add = 1;
 
         delay_short();
@@ -92,7 +89,6 @@ static void Lights_Task_Init() {
         (OS_ERR *)&err);
     assertOSError(err);
 }
-#endif
 
 void delay(){
     OS_ERR e;
@@ -102,11 +98,10 @@ void delay(){
 
 void delay_short(){
     OS_ERR e;
-    OSTimeDlyHMSM(0, 0, 0, 50, OS_OPT_TIME_HMSM_STRICT, &e);
+    OSTimeDlyHMSM(0, 0, 0, 20, OS_OPT_TIME_HMSM_STRICT, &e);
     assertOSError(e);
 }
 
-#if DISPLAY_DEF
 void testBoolComp(UpdateDisplayError_t(*function)(bool)){
     function(false);
     delay();
@@ -159,17 +154,12 @@ void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
     delay();
 }
 
-void Task1(void *arg)
-{   
-    OS_ERR e;
-    // CPU_Init();
+void Task1(void *arg) {   
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     Display_Init();
     UpdateDisplay_Init();
 
-    // OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-
-    
+    OS_ERR e;
 
     OSTaskCreate(
         (OS_TCB *)&UpdateDisplay_TCB,
@@ -195,25 +185,22 @@ void Task1(void *arg)
         testPercentageCompSOC(&UpdateDisplay_SetSOC);
         testPercentageCompAccel(&UpdateDisplay_SetAccel);
 
-        //Display_Error();
-        //OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
-        
-        //Display_Reset();
-        //OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
-        
+        for (uint32_t i = 0; i < 610; i += 1) {
+            UpdateDisplay_SetVelocity(i);
+            delay_short();
+        }
+
+        UpdateDisplay_SetVelocity(0);
+        delay_short();
     }
 };
-#endif
 
-int main()
-{
+int main() {
     OS_ERR err;
     CPU_Init();
     OSInit(&err);
     assertOSError(err);
-    // CPU_Init();
 
-    #if DISPLAY_DEF
     // create tester thread
     OSTaskCreate(
         (OS_TCB *)&Task1TCB,
@@ -229,17 +216,13 @@ int main()
         (void *)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR *)&err);
-    #endif
     
     TaskSwHook_Init();
-    #if LIGHTS_DEF
     Lights_Task_Init();
-    #endif
     assertOSError(err);
 
     OSStart(&err);
 
     delay();
     delay_short();
-    //On_All();
 }
