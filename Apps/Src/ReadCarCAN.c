@@ -10,6 +10,7 @@
 #include "Contactors.h"
 #include "Minions.h"
 #include "os.h"
+#include "StatusLeds.h"
 #include "os_cfg_app.h"
 #include "Display.h"
 #include "daybreak_pins.h"
@@ -98,26 +99,6 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg)
 {
     assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
-
-/**
- * @brief Callback function for the precharge delay timer. Waits for precharge and then sets arrPBCComplete to true.
- * @param p_tmr pointer to the timer that calls this function, passed by timer
- * @param p_arg pointer to the argument passed by timer
- */
-static void setArrayBypassPrechargeComplete(void *p_tmr, void *p_arg)
-{
-    arrPBCComplete = true;
-};
-
-/**
- * @brief Callback function for the precharge delay timer. Waits for precharge and then sets mcPBCComplete to true.
- * @param p_tmr pointer to the timer that calls this function, passed by timer
- * @param p_arg pointer to the argument passed by timer
- */
-static void setMotorControllerBypassPrechargeComplete(void *p_tmr, void *p_arg)
-{
-    mcPBCComplete = true;
-};
 
 /**
  * @brief Disables Array Precharge Bypass Contactor (PBC) by asserting an error. Also updates display for Array PBC to be open.
@@ -401,6 +382,7 @@ static void handler_ReadCarCAN_contactorsDisable(void)
  */
 static void handler_ReadCarCAN_BPSTrip(void)
 {
+    Status_Leds_Write(BPS_FAULT_LED, ON); // Turn on BPS fault LED
     chargeEnable = false;    // Not really necessary but makes inspection less confusing
     Display_Evac(SOC, SBPV); // Display evacuation screen
 }
@@ -425,31 +407,12 @@ void Task_ReadCarCAN(void *p_arg)
         &err);
     assertOSError(err);
 
-    OSTmrCreate(
-        &arrayPBCDlyTimer,
-        "Array Bypass Precharge Delay Timer",
-        0,
-        ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS,
-        OS_OPT_TMR_ONE_SHOT,
-        setArrayBypassPrechargeComplete,
-        NULL,
-        &err);
-    assertOSError(err);
-
-    OSTmrCreate(
-        &motorControllerPBCDlyTimer,
-        "Motor Controller Bypass Precharge Delay Timer",
-        0,
-        MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS,
-        OS_OPT_TMR_ONE_SHOT,
-        setMotorControllerBypassPrechargeComplete,
-        NULL,
-        &err);
-    assertOSError(err);
 
     // Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(err);
+
+    // TODO: make can timers for active precharge board
 
     // Fills buffers with disable messages
     // NOTE: If the buffer becomes bigger than of type int8_t, memset will not work and
@@ -457,14 +420,12 @@ void Task_ReadCarCAN(void *p_arg)
     memset(HVArrayChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVArrayChargeMsgBuffer));
     memset(HVPlusMinusChargeMsgBuffer, DISABLE_SATURATION_MSG, sizeof(HVPlusMinusChargeMsgBuffer));
 
+    // todo: change this to standard Contactor disable function
     handler_ReadCarCAN_contactorsDisable();
 
     while (1)
     {
 
-        updatePrechargeContactors(); // Sets array and motor controller PBC if all conditions (PBC Status, Threshold, Precharge Complete) permit
-
-        // BPS sent a message
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
         if (status != SUCCESS)
         {
@@ -472,7 +433,7 @@ void Task_ReadCarCAN(void *p_arg)
         }
 
         switch (dataBuf.ID)
-        { // Switch case based on BPS msg received
+        {
         case BPS_TRIP:
         { // BPS has a fault and we need to enter fault state
 
@@ -527,9 +488,10 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
+            // TODO: compare measured Contactor value to recieved by CAN
+
             // Update Motor Contactor sense state
             Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
-
             // Update Array Precharge sense state
             Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
 

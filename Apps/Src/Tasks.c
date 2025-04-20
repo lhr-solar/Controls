@@ -16,6 +16,7 @@
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
+#include "StatusLeds.h"
 
 
 /**
@@ -60,6 +61,7 @@ void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
+        Status_Leds_Write(OS_FAULT_LED, ON);
         Error_OS = err;
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
         Display_Error(); // Display the location and error code
@@ -79,6 +81,7 @@ void _assertOSError(OS_ERR err)
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
+    Status_Leds_Write(CONTROLS_FAULT_LED, ON);
     if (errorCode == 0) { // Exit if there is no error
         return;
     }
@@ -136,12 +139,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
  * and turns on additional brakelight to signal that a critical error happened.
 */
 void EmergencyContactorOpen() {
-    // Array motor kill
-    BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, OFF);
-    BSP_GPIO_Write_Pin(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, OFF);
-
-    // Turn additional brakelight on to indicate critical error
-    BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);
+    BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OFF);
 }
 
 /**
