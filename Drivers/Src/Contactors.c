@@ -115,6 +115,13 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
 
     // change contactor to match state and make sure it worked
     setContactor(contactor, state);
+
+    // the motor contactor is the only contactor that controls has a sense pin for
+    if(blocking && contactor == MOTOR_CONTROLLER_CONTACTOR) {
+        // Need to add delay for pin to settle
+        OSTimeDlyHMSM(0, 0, 0, CONTACTOR_SENSE_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+
     // TODO: add delay between sense reads
     bool ret = Contactors_Get(contactor);
     result = (ret == state) ? SUCCESS: ERROR;

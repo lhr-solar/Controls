@@ -16,6 +16,8 @@
 #include "BSP_GPIO.h"
 #include "stm32f4xx_gpio.h"
 
+#define CONTACTOR_SENSE_DELAY 1
+
 
 // Masks for Contactor driver board's can message
 #define ARRAY_PRECHARGE_SENSE_FAULT(dataBuf)   ((dataBuf[1] >> 0) & 0x01) // Bit 8: Array precharge sense fault happened
