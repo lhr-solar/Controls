@@ -134,7 +134,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     // only reaches here is fault is recoverable
 
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
-        Status_Leds_Write(DASH_HEARTBEAT_LED, OFF);
+        Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
         OSSchedUnlock(&err); 
         // Don't err out if scheduler is still locked because of a timer callback
         if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
