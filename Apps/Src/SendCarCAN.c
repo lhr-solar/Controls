@@ -14,11 +14,15 @@
 #include "Minions.h"
 #include "Contactors.h"
 #include "Pedals.h"
+#include "Ignition.h"
+#include "Dashboard.h"
+#include "StatusLeds.h"
 #include "Tasks.h"
 #include "SendCarCAN.h"
 #include "SendTritium.h"
 
 #define IO_STATE_DLY_MS 250u 
+#define IO_STATE_HEARTBEAT_DELAY (1000u)/IO_STATE_DLY_MS
 
 #define SENDCARCAN_MSG_SKIP_CTR 3
 
@@ -143,25 +147,36 @@ static void putIOState(void){
     CANDATA_t message;
     memset(&message, 0, sizeof message);
     message.ID = IO_STATE;
-    
+
     // Get pedal information
     message.data[0] = Pedals_Read(ACCELERATOR);
     message.data[1] = Pedals_Read(BRAKE);
 
-    // Get minion information
-    for(pin_t pin = 0; pin < NUM_PINS; pin++){
-        bool pinState = Minions_Read(pin);
-        message.data[2] |= pinState << pin;
-    }
-    
-    // Get contactor info
-    for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-        bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
-        message.data[3] |= contactorState << contactor;
-    }
+    // TODO: write a brake pedal threshold for brake lights
 
-    // Tell BPS if the array contactor should be on
-    message.data[3] |= (Minions_Read(IGN_1) || Minions_Read(IGN_2)) << 2;
+    // Send Cruise states
+    message.data[2] |= SWITCH_BITMAP_CRUZ_EN(getDashState(CRUZ_EN));
+    message.data[2] |= SWITCH_BITMAP_CRUZ_ST(getDashState(CRUZ_SET));
+
+    // Regen is always disabled for daybreak
+    message.data[2] |= SWITCH_BITMAP_REGEN_SW(0);
+
+    // Send ignition states
+    switch(Get_Ignition_State()){
+        case IGN_ARR:
+            // array state comes after motor so both array on motor are considered on at array state
+            message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(1);
+            message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(1);
+            break;
+        case IGN_MOTOR:
+            message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
+            message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(1);
+            break;
+        default:
+            message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
+            message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
+            break;
+    }
 
     CANbus_Send(message, true, CARCAN);
 }
@@ -171,8 +186,15 @@ static void putIOState(void){
 */
 static void Task_PutIOState(void *p_arg) {
     OS_ERR err;
+    static uint8_t ioStateCounter = 0;
     while (1) {
         putIOState();
+        ioStateCounter++;
+        // toggle dashboard led every 1 second (IoState runs at 250ms)
+        if(ioStateCounter >= IO_STATE_HEARTBEAT_DELAY){
+            Status_Leds_Toggle(DASH_HEARTBEAT_LED); // heartbeat led on the dashboard
+            ioStateCounter = 0;
+        }
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
     }  
