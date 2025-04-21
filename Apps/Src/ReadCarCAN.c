@@ -367,6 +367,8 @@ static void handler_ReadCarCAN_BPSTrip(void)
  */
 static void handler_ReadCarCAN_ActivePrechargeFault(void)
 {
+    chargeEnable = false;
+    Display_Evac(SOC, SBPV); // Display evacuation screen
     // do smth, idk
 }
 
@@ -446,16 +448,11 @@ void Task_ReadCarCAN(void *p_arg)
             OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
             assertOSError(err);
 
-            // Retrieving HV contactor statuses using bit mapping
-            // Bitwise to get HV Plus and Minus, and then &&ing to ensure both are on
-            bool HVPlusMinusStatus = (bool)((dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT) && (dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT));
-            // Bitwise to get HV Array
-            bool HVArrayStatus = (bool)(dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT);
-
-            // Update HV Array and HV Plus/Minus saturations based on the respective statuses
-            HVArrayStatus ? updateHVArraySaturation(ENABLE_SATURATION_MSG) : disableArrayPrechargeBypassContactor();
-            HVPlusMinusStatus ? updateHVPlusMinusSaturation(ENABLE_SATURATION_MSG) : updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
-
+            // Set HV+, HV-, and Array Contactor states
+            // Note, does not control the Contactors, only stores the recieved state
+            Contactors_Set(HV_PLUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT), true);
+            Contactors_Set(HV_MINUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT), true);
+            Contactors_Set(ARRAY_CONTACTOR,(bool)(dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT), true);
             break; // End of BPS Contactor Status Updates
         }
 

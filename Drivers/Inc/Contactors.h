@@ -34,12 +34,15 @@
 #define FOREACH_contactor(contactor)             \
     contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR), \
     contactor(MOTOR_CONTROLLER_CONTACTOR), \
-        contactor(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR),
+    contactor(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR), \
+    contactor(ARRAY_CONTACTOR), \
+    contactor(HV_PLUS_CONTACTOR), \
+    contactor(HV_MINUS_CONTACTOR),
 
 typedef enum contactor_ENUM
 {
     FOREACH_contactor(GENERATE_ENUM)
-        NUM_CONTACTORS,
+        NUM_CONTACTORS
 } contactor_t;
 
 /**
@@ -73,7 +76,15 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
  *          Note: NOT not turn off Contactors not controlled by Controls
  * @return  None
  */
-void Contactors_EmergencyDisable();
+void Contactors_EmergencyDisable(void);
+
+/**
+ * @brief   Disables all contactors
+ *          Note: NOT not turn off Contactors not controlled by Controls, only sets their status to off
+ * @param   None
+ * @return  None
+ */
+void Contactors_DisableAll(void);
 
 #endif
 

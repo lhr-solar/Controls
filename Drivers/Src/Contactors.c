@@ -31,15 +31,8 @@ static void setContactor(contactor_t contactor, bool state) {
             contactorState[MOTOR_CONTROLLER_CONTACTOR] = state;
             BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, state);
             break;
-
-        // Precharge Contactors are updated by ReadCarCAN.c
-        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR:
-            contactorState[MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR] = state;
-            break;
-        case ARRAY_PRECHARGE_BYPASS_CONTACTOR:
-            contactorState[ARRAY_PRECHARGE_BYPASS_CONTACTOR] = state;
-            break;
         default:
+            contactorState[HV_MINUS_CONTACTOR] = state;
             break;
     }
 }
@@ -134,7 +127,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
  */
 void Contactors_DisableAll(){
     for(uint8_t i = 0; i < NUM_CONTACTORS; i++){
-        Contactors_Set(i, true, OFF);
+        Contactors_Set(i, false, OFF);
     }
 }
 
