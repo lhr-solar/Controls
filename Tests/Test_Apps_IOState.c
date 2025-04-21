@@ -14,8 +14,18 @@
    You should also read the message on a candapter
 */
 
-void IOState_recv(void *p_arg){
+// Allias for Controls fault led
+#define IO_STATE_RECIEVE CONTROLS_FAULT_LED
 
+void IOState_recv(void *p_arg){
+    OS_ERR err;
+    CANDATA_t msg;
+    while(1){
+        CANbus_Read(&msg, true, CARCAN);
+        if(msg.data == IO_STATE){
+            Status_Leds_Write(IO_STATE_RECIEVE, true);
+        }
+    }
 }
 
 void Task_Init(void *p_arg){
