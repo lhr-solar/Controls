@@ -6,6 +6,7 @@
 
 
 #define TEST_CARCAN_LOOPBACK
+
   #ifndef TEST_MOTORCAN_lOOPBACK
      #define TEST_CARCAN_LOOPBACK
  #endif
