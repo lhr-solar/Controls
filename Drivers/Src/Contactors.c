@@ -66,7 +66,6 @@ void Contactors_Init() {
  * @brief   Returns the current state of 
  *          a specified contactor
  * @param   contactor the contactor
- *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
  * @return  The contactor's state (ON/OFF)
  */ 
 bool Contactors_Get(contactor_t contactor) {
@@ -115,7 +114,6 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
         OSTimeDlyHMSM(0, 0, 0, CONTACTOR_SENSE_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 
-    // TODO: add delay between sense reads
     bool ret = Contactors_Get(contactor);
     result = (ret == state) ? SUCCESS: ERROR;
 
