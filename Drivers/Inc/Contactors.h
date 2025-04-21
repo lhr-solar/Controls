@@ -20,17 +20,17 @@
 
 
 // Masks for Contactor driver board's can message
-#define ARRAY_PRECHARGE_SENSE_FAULT(dataBuf)   ((dataBuf[1] >> 0) & 0x01) // Bit 8: Array precharge sense fault happened
-#define ARRAY_PRECHARGE_EXPECTED_VALUE(dataBuf) ((dataBuf[0] >> 7) & 0x01) // Bit 7: Expected array precharge sense value
-#define ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf)   ((dataBuf[0] >> 6) & 0x01) // Bit 6: Actual array precharge sense value
+#define ARRAY_PRECHARGE_SENSE_FAULT(dataBuf)   (bool)((dataBuf[1] >> 0) & 0x01) // Bit 8: Array precharge sense fault happened
+#define ARRAY_PRECHARGE_EXPECTED_VALUE(dataBuf) (bool)((dataBuf[0] >> 7) & 0x01) // Bit 7: Expected array precharge sense value
+#define ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf)   (bool)((dataBuf[0] >> 6) & 0x01) // Bit 6: Actual array precharge sense value
 
-#define MOTOR_PRECHARGE_SENSE_FAULT(dataBuf)   ((dataBuf[0] >> 5) & 0x01) // Bit 5: Motor precharge sense fault happened
-#define MOTOR_PRECHARGE_EXPECTED_VALUE(dataBuf) ((dataBuf[0] >> 4) & 0x01) // Bit 4: Expected motor precharge sense value
+#define MOTOR_PRECHARGE_SENSE_FAULT(dataBuf)   (bool)((dataBuf[0] >> 5) & 0x01) // Bit 5: Motor precharge sense fault happened
+#define MOTOR_PRECHARGE_EXPECTED_VALUE(dataBuf) (bool)((dataBuf[0] >> 4) & 0x01) // Bit 4: Expected motor precharge sense value
 #define MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf)   ((dataBuf[0] >> 3) & 0x01) // Bit 3: Actual motor precharge sense value
 
-#define MOTOR_SENSE_FAULT(dataBuf)             ((dataBuf[0] >> 2) & 0x01) // Bit 2: Motor sense fault happened
-#define MOTOR_SENSE_EXPECTED_VALUE(dataBuf)    ((dataBuf[0] >> 1) & 0x01) // Bit 1: Expected motor sense value
-#define MOTOR_SENSE_ACTUAL_VALUE(dataBuf)      ((dataBuf[0] >> 0) & 0x01) // Bit 0: Actual motor sense value
+#define MOTOR_SENSE_FAULT(dataBuf)             (bool)((dataBuf[0] >> 2) & 0x01) // Bit 2: Motor sense fault happened
+#define MOTOR_SENSE_EXPECTED_VALUE(dataBuf)    (bool)((dataBuf[0] >> 1) & 0x01) // Bit 1: Expected motor sense value
+#define MOTOR_SENSE_ACTUAL_VALUE(dataBuf)      (bool)((dataBuf[0] >> 0) & 0x01) // Bit 0: Actual motor sense value
 
 
 #define FOREACH_contactor(contactor)             \
