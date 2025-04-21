@@ -29,6 +29,9 @@ void putIOState(void){
     message.data[2] |= SWITCH_BITMAP_CRUZ_EN(getDashState(DASHBOARD_CRUZ_EN));
     message.data[2] |= SWITCH_BITMAP_CRUZ_ST(getDashState(DASHBOARD_CRUZ_SET));
 
+    // Set Cruise Indicator LED
+    Status_Leds_Write(CRUISE_IND_LED, getDashState(DASHBOARD_CRUZ_SET) ? ON : OFF);
+
     // Regen is always disabled for daybreak
     message.data[2] |= SWITCH_BITMAP_REGEN_SW(0);
 
