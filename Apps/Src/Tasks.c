@@ -105,7 +105,15 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 
     if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
         while(1) {
+            volatile static int faultLoopCount = 0;
+            faultLoopCount++;
 
+            // periodically toggle Controls Fault LED
+            if(faultLoopCount > 9999999){
+                faultLoopCount = 0;
+                Status_Leds_Toggle(CONTROLS_FAULT_LED);
+                Status_Leds_Toggle(DASH_HEARTBEAT_LED);
+            }
             #if DEBUG == 1
                // Print the error that caused this fault
                 // printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
@@ -123,14 +131,15 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
             
         }
     }
+    // only reaches here is fault is recoverable
 
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
+        Status_Leds_Write(DASH_HEARTBEAT_LED, OFF);
         OSSchedUnlock(&err); 
         // Don't err out if scheduler is still locked because of a timer callback
         if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
            assertOSError(err); 
         }
-        
     }
 }
 
