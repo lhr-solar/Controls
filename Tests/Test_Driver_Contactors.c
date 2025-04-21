@@ -16,6 +16,14 @@ static CPU_STK Task2_Stk[STACK_SIZE];
     Tests ability to read Contactor states over can and via sense pins on the Motor controller
  */
 
+ // Alliases for status LEDs
+ #define FAKE_CONTACTOR_TASK_LED CRUISE_IND_LED
+ #define TEST_CONTACTOR_TASK_HEARTBEAT OS_FAULT_LED
+ #define MOTOR_CONTACTOR_STATUS_LED BPS_FAULT_LED
+ #define MOTOR_PRECHARGE_CONTACTOR_LED MOTOR_PRECHARGE_CONTACTOR_LED
+ #define ARRAY_PRECHARGE_CONTACTOR_LED ARRAY_PRECHARGE_CONTACTOR_LED
+ #define MOTOR_CONTROLLER_FAULT_LED MOTOR_CONTROLLER_FAULT_LED
+
 void Task_Fake_Contactor_Driver(){
 
     OS_ERR err;
@@ -24,7 +32,7 @@ void Task_Fake_Contactor_Driver(){
     msg.ID = CONTACTOR_SENSE;
     memset(&msg.data, 0x00, sizeof msg.data);
     while(1){
-        Status_Leds_Toggle(CRUISE_IND_LED);
+        Status_Leds_Toggle(FAKE_CONTACTOR_TASK_LED);
         msg.data[0] = 0x09;
         msg.data[1] = 0x00;
         // send fake state of Canbus
@@ -42,13 +50,12 @@ void Task_Test_Contactors(){
     recv.idx = 0;
     recv.ID = CONTACTOR_SENSE;
     memset(&recv.data, 0x00, sizeof recv.data);
-    ErrorStatus stat = Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
+    Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
     while(1){
         memset(&recv.data, 0x00, sizeof recv.data);
-        Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, stat == SUCCESS ? ON : OFF);
         OSTimeDlyHMSM(0, 0, 5, 0, OS_OPT_TIME_HMSM_STRICT, &err);
         bool set = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
-        Status_Leds_Write(BPS_FAULT_LED, set == ON ? ON : OFF);
+        Status_Leds_Write(MOTOR_CONTACTOR_STATUS_LED, set == ON ? ON : OFF);
         CANbus_Read(&recv, true, CARCAN);
          // Update Array Precharge sense state
         Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(recv.data), true);
@@ -56,22 +63,21 @@ void Task_Test_Contactors(){
         // Update Motor Precharge sense state
         Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(recv.data), true);
 
+        // clear Contactor status LEDs
+        Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, true);
+        Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, false);
+        Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, false);
+
         if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR)){
             Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, true);
-            Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, false);
-            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, false);            
         }
         if(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)){
-            Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, false);
             Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, true);
-            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, false);          
         }
         if(Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR)){
-            Status_Leds_Write(MOTOR_CONTROLLER_FAULT_LED, false);
-            Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, false);
             Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, true);          
         }
-        Status_Leds_Write(OS_FAULT_LED, ON);
+        Status_Leds_Write(TEST_CONTACTOR_TASK_HEARTBEAT, ON);
     }
 }
 
