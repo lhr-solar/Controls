@@ -17,6 +17,7 @@
 #include "Display.h"
 #include "Minions.h"
 #include "Pedals.h"
+#include "Dashboard.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "daybreak_pins.h"
@@ -61,8 +62,9 @@ int main(void) {
     IdleInit();
     TaskSwHook_Init();
     Task_StatusLED_Init();
-
     assertOSError(err);
+    dashboardInit();
+
 
     // Initialize apps
     OSTaskCreate(

@@ -150,16 +150,31 @@ static void putIOState(void){
 
     // Get pedal information
     message.data[0] = Pedals_Read(ACCELERATOR);
-    message.data[1] = Pedals_Read(BRAKE);
+    int8_t brake_pedal = Pedals_Read(BRAKE);
+    message.data[1] = brake_pedal;
 
-    // TODO: write a brake pedal threshold for brake lights
+    // If the brake is pressed far enough, send the state to turn on the brakelight
+    message.data[2] |= (brake_pedal >= PEDAL_BRAKELIGHT_THRESHOLD) ? 1:0;
 
     // Send Cruise states
-    message.data[2] |= SWITCH_BITMAP_CRUZ_EN(getDashState(CRUZ_EN));
-    message.data[2] |= SWITCH_BITMAP_CRUZ_ST(getDashState(CRUZ_SET));
+    message.data[2] |= SWITCH_BITMAP_CRUZ_EN(getDashState(DASHBOARD_CRUZ_EN));
+    message.data[2] |= SWITCH_BITMAP_CRUZ_ST(getDashState(DASHBOARD_CRUZ_SET));
 
     // Regen is always disabled for daybreak
     message.data[2] |= SWITCH_BITMAP_REGEN_SW(0);
+
+    switch(getDashState(DASHBOARD_GEAR)){
+        case FWD:
+            message.data[2] |= SWITCH_BITMAP_FOR_SW(1);
+            break;
+        case REV:
+            message.data[2] |= SWITCH_BITMAP_REV_SW(1);
+            break;
+        default:
+            message.data[2] |= SWITCH_BITMAP_FOR_SW(0);
+            message.data[2] |= SWITCH_BITMAP_REV_SW(0);
+            break;
+    }
 
     // Send ignition states
     switch(Get_Ignition_State()){

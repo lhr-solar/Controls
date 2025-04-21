@@ -24,6 +24,8 @@ typedef enum
     NUMBER_OF_PEDALS
 } pedal_t;
 
+// Arbitrary brakelight percentage threshold to be ONLY used for the brakelight
+#define PEDAL_BRAKELIGHT_THRESHOLD 10
 /**
  * @brief   Initialize the pedals
  * @param   None
