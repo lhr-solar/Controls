@@ -15,6 +15,7 @@
 #include "CANConfig.h"
 #include "Contactors.h"
 #include "Display.h"
+#include "Ignition.h"
 #include "Minions.h"
 #include "Pedals.h"
 #include "Dashboard.h"
@@ -63,6 +64,7 @@ int main(void) {
     TaskSwHook_Init();
     Task_StatusLED_Init();
     assertOSError(err);
+    Ignition_Init();
     dashboardInit();
 
 
@@ -212,6 +214,24 @@ void Task_Init(void *p_arg){
         (OS_TICK)0,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
+        (OS_ERR*)&err
+    );
+    assertOSError(err);
+
+    // Initialize IOState
+    OSTaskCreate(
+        (OS_TCB*)&IOState_TCB,
+        (CPU_CHAR*)"PutIOState",
+        (OS_TASK_PTR)Task_IOState,
+        (void*)NULL,
+        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
+        (CPU_STK*)IOState_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
     assertOSError(err);
