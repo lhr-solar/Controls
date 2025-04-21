@@ -14,6 +14,7 @@
 #include "Minions.h"
 #include "Contactors.h"
 #include "Pedals.h"
+#include "Ignition.h"
 #include "Tasks.h"
 #include "SendCarCAN.h"
 #include "SendTritium.h"
