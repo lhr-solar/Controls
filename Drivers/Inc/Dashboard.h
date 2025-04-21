@@ -4,9 +4,6 @@
 #include "daybreak_pins.h"
 #include "BSP_GPIO.h"
 
-// Dasboard leds are negative logic
-#define DASHBOARD_LEDS_ON 0
-#define DASHBOARD_LEDS_OFF 1
 
 typedef enum{
     SWITCH_ERROR = -1,
