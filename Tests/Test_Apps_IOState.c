@@ -8,7 +8,13 @@
 #include "Ignition.h"
 #include "IOState.h"
 
-void IOState_recv(){
+/* Run in CAN_Loopback and use the IOState_recv task to recieve the IO_State CANbus message.
+    - Controls fault LED indicates that the message was succesfully read
+    - Use GDB to see if the message read is correct
+   You should also read the message on a candapter
+*/
+
+void IOState_recv(void *p_arg){
 
 }
 
