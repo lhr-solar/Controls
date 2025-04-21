@@ -16,6 +16,8 @@
 #include "Tasks.h"
 #include "CANbus.h"
 
+#define BPS_TRIP_MESSAGE 1
+
 /**
  * Error types
  */

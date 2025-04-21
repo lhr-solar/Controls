@@ -367,14 +367,7 @@ static void handler_ReadCarCAN_contactorsDisable(void)
 }
 
 static void check_MotorControllerContactor(void){
-    ignition_state_t ign = Get_Ignition_State();
-    if(ign != IGN_MOTOR && Contactors_Get(MOTOR_CONTROLLER_CONTACTOR) == ON){
-        // motor controller contactor is on but ignition is not
-        // Contactor handler error
-    }
-    if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR) == OFF && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == ON){
-        // motor contactor and motor precharge contactor should never be on
-    }
+    // TODO: do some Contactor checks?
 }
 
 
@@ -386,6 +379,7 @@ static void handler_ReadCarCAN_BPSTrip(void)
 {
     Status_Leds_Write(BPS_FAULT_LED, ON); // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
+
     chargeEnable = false;    // Not really necessary but makes inspection less confusing
     Display_Evac(SOC, SBPV); // Display evacuation screen
 }
@@ -396,7 +390,7 @@ static void handler_ReadCarCAN_BPSTrip(void)
  */
 static void handler_ReadCarCAN_ActivePrechargeFault(void)
 {
-    // TODO: put display fault here
+    // do smth, idk
 }
 
 
@@ -463,7 +457,7 @@ void Task_ReadCarCAN(void *p_arg)
         case BPS_TRIP:
         { 
             // BPS has a fault and we need to enter fault state
-            if(dataBuf.data[0] == 0x01)
+            if(dataBuf.data[0] == BPS_TRIP_MESSAGE)
             {
                 // kill contactors and enter a nonrecoverable fault
                 assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);            
@@ -517,9 +511,6 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
-            // TODO: Write a check motor contactor status function
-            // TODO: compare measured Contactor value to recieved by CAN
-
             // Update Motor Contactor sense state
             Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
             // Update Array Precharge sense state
