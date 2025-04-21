@@ -386,6 +386,7 @@ static void check_MotorControllerContactor(void){
 static void handler_ReadCarCAN_BPSTrip(void)
 {
     Status_Leds_Write(BPS_FAULT_LED, ON); // Turn on BPS fault LED
+    Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
     chargeEnable = false;    // Not really necessary but makes inspection less confusing
     Display_Evac(SOC, SBPV); // Display evacuation screen
 }
@@ -420,7 +421,6 @@ void Task_ReadCarCAN(void *p_arg)
         &err);
     assertOSError(err);
 
-
     // Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(err);
@@ -437,7 +437,6 @@ void Task_ReadCarCAN(void *p_arg)
         NULL,
         &err);
     assertOSError(err);
-
 
     // Start CAN Watchdog timer
     OSTmrStart(&prechargeCanWatchTimer, &err);
