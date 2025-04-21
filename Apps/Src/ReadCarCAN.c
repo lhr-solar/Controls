@@ -374,7 +374,6 @@ static void check_MotorControllerContactor(void){
     }
     if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR) == OFF && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == ON){
         // motor contactor and motor precharge contactor should never be on
-
     }
 }
 
@@ -438,7 +437,7 @@ void Task_ReadCarCAN(void *p_arg)
         &err);
     assertOSError(err);
 
-    // Start CAN Watchdog timer
+    // Start Precharge CAN Watchdog timer
     OSTmrStart(&prechargeCanWatchTimer, &err);
     assertOSError(err);
 
