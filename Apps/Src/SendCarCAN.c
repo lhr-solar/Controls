@@ -173,15 +173,8 @@ static void putIOState(void){
 */
 static void Task_PutIOState(void *p_arg) {
     OS_ERR err;
-    static uint8_t ioStateCounter = 0;
     while (1) {
         putIOState();
-        ioStateCounter++;
-        // toggle dashboard led every 1 second (IoState runs at 250ms)
-        if(ioStateCounter >= 4){
-            Status_Leds_Toggle(DASH_HEARTBEAT_LED); // heartbeat led on the dashboard
-            ioStateCounter = 0;
-        }
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
     }  
