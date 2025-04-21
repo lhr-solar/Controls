@@ -104,30 +104,6 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg)
     assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
 
-/**
- * @brief Disables Array Precharge Bypass Contactor (PBC) by asserting an error. Also updates display for Array PBC to be open.
- * @param None
- */
-static void disableArrayPrechargeBypassContactor(void)
-{
-    // Assert error to disable regen and update saturation in callback function
-    assertReadCarCANError(READCARCAN_ERR_CHARGE_DISABLE);
-
-    bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
-
-    if (ret)
-    { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
-        while (1)
-        {
-            ;
-        }
-    }
-    else
-    {
-        UpdateDisplay_SetArray(true);
-    }
-}
 
 /**
  * @brief Turns array PBC on if conditional meets ignition status, saturation threshold, array PCB to be off,
@@ -345,6 +321,7 @@ static void handler_ReadCarCAN_chargeDisable(void)
  */
 static void handler_ReadCarCAN_contactorsDisable(void)
 {
+    // TODO: figure out wtf this is for
 
     // Mark regen as disabled and update saturation
     updateHVArraySaturation(DISABLE_SATURATION_MSG);
@@ -511,6 +488,9 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
+            OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
+            assertOSError(err);
+
             // Update Motor Contactor sense state
             Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
             // Update Array Precharge sense state
