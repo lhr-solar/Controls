@@ -104,8 +104,8 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     
 
     if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
+        volatile static int faultLoopCount = 0;
         while(1) {
-            volatile static int faultLoopCount = 0;
             faultLoopCount++;
 
             // periodically toggle Controls Fault LED
