@@ -51,12 +51,12 @@ void putIOState(void){
     // Send ignition states
     switch(Get_Ignition_State()){
         case IGN_ARR:
-            // array state comes after motor so both array on motor are considered on at array state
             message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(1);
-            message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(1);
+            message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
             break;
         case IGN_MOTOR:
-            message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
+            // motor comes after array state, so both are set
+            message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(1);
             message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(1);
             break;
         default:
