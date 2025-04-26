@@ -227,7 +227,7 @@ void Task_Init(void *p_arg){
         (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
         (CPU_STK*)IOState_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
+        (CPU_STK_SIZE)TASK_IO_STATE_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,

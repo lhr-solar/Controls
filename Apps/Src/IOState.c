@@ -23,7 +23,7 @@ void putIOState(void){
     message.data[1] = brake_pedal;
 
     // If the brake is pressed far enough, send the state to turn on the brakelight
-    message.data[2] |= (brake_pedal >= PEDAL_BRAKELIGHT_THRESHOLD) ? 1:0;
+    message.data[2] |= SWITCH_BITMAP_BRAKELIGHT((brake_pedal >= PEDAL_BRAKELIGHT_THRESHOLD) ? 1:0);
 
     // Send Cruise states
     message.data[2] |= SWITCH_BITMAP_CRUZ_EN(getDashState(DASHBOARD_CRUZ_EN));
