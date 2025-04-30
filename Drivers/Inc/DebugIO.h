@@ -16,10 +16,9 @@
     PIN(B,  7)          \
     PIN(D,  2)          \
 
-// Macros to generate enums
+// Generates the enum for each pin entry (ie PC17)
 #define GENERATE_PIN_ENUM(PORT, PIN) P##PORT##PIN,
 
-// Macros to extract port and pin
 #define GET_PORT(port, PIN) PORT##port
 #define GET_PIN(PORT, PIN) GPIO_Pin_##PIN
 
@@ -29,7 +28,7 @@ typedef struct {
     uint32_t pin;
 } pinInfo_t;
 
-// Macro to generate pinInfo entries
+// Generates entries in the debugGPIOLUT array
 #define GENERATE_PIN_INFO(PORT, PIN) { .port = GET_PORT(PORT, PIN), .pin = GET_PIN(PORT, PIN) },
 
 // Use enum to index into debugGPIOLUT
@@ -43,8 +42,25 @@ static const pinInfo_t debugGPIOLUT[NUM_PINS] = {
     FOREACH_PIN(GENERATE_PIN_INFO)
 };
 
+/**
+ * @brief   Inits all debug pins
+ * @param   None
+ * @return  None
+ */ 
 void DebugIO_Init(void);
+
+/**
+ * @brief   Writes to a debug pin
+ * @param   pin the pin to write to (PC17)
+ * @return  None
+ */ 
 void DebugIO_Write(pinIndex_t pin, bool state);
+
+/**
+ * @brief   Toggles a debug pin
+ * @param   pin the pin to write to (PC17)
+ * @return  None
+ */ 
 void DebugIO_Toggle(pinIndex_t pin);
 
 #endif // DEBUGIO_H
