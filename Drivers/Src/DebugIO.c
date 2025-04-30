@@ -1,5 +1,7 @@
 #include "DebugIO.h"
 
+// TODO: Would be cool to also add support for extra ADC and UART breakout pins
+
 /**
  * @brief   Inits all debug pins
  * @param   None
