@@ -34,11 +34,11 @@ typedef struct {
 // Use enum to index into debugGPIOLUT
 typedef enum {
     FOREACH_PIN(GENERATE_PIN_ENUM)
-    NUM_PINS // Total number of pins
+    NUM_DEBUG_PINS // Total number of pins
 } pinIndex_t;
 
 // Array of pinInfo structs
-static const pinInfo_t debugGPIOLUT[NUM_PINS] = {
+static const pinInfo_t debugGPIOLUT[NUM_DEBUG_PINS] = {
     FOREACH_PIN(GENERATE_PIN_INFO)
 };
 
