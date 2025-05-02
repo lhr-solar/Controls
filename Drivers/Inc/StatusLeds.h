@@ -21,7 +21,6 @@
     DASH_HEARTBEAT_LED,
     NUM_STATUS_LED,
  } status_led_t;
-
  
 /**
  * @brief Initializes Status LED pins
@@ -49,6 +48,12 @@ void Status_Leds_Toggle(status_led_t led);
  * @return  None
  */ 
 void Status_Leds_All_On(void);
+
+/**
+ * @brief   Turns all status LEDs off
+ * @return  None
+ */ 
+ void Status_Leds_All_Off(void);
 
 
 #endif

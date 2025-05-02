@@ -17,6 +17,10 @@ export MOTOR_LOOPBACK
 CAR_LOOPBACK ?= 0
 export CAR_LOOPBACK
 
+$(info Motor CAN Loopback: $(if $(filter 1,$(MOTOR_LOOPBACK)),on,off))
+$(info Car CAN Loopback: $(if $(filter 1,$(CAR_LOOPBACK)),on,off))
+
+
 # Check if test file exists for the leader.
 ifneq (,$(wildcard Tests/Test_$(TEST).c))
 	TEST_LEADER ?= Tests/Test_$(TEST).c
