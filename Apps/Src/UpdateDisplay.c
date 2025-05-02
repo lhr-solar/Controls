@@ -59,14 +59,14 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 	UpdateDisplayError_t ret = UPDATEDISPLAY_ERR_NONE;
 	
 	// For components that are on/off
-	if (comp <= DISP_MOTOR) {
+	if (comp <= DISP_BLINK) {
 		DisplayCmd_t visCmd = {
 			.compOrCmd = "vis",
 			.attr = NULL,
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG,INT_ARG},
-			{
+			.args = {
 				{.str=(char*)DISPLAY_COMP_STR[comp]},
 				{.num=g_display_comp_vals[comp]}
 			}
@@ -75,8 +75,30 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 		ret = Display_Send(visCmd);
 		return ret;
 	}
-	// For components that have a non-boolean value
-	else if (comp > DISP_MOTOR) {
+	// For components that have a non-boolean value but aren't the contactors
+	else if (comp > DISP_BLINK) {
+		uint32_t comp_val = 0;
+		if (comp > DISP_MOTOR_PC) {
+			comp_val = g_display_comp_vals[comp];
+		} else { // Contactors
+			switch (comp) {
+				case DISP_ARRAY_EN:
+					//comp_val = Contactors_Get(); 
+					break;
+				case DISP_ARRAY_PC:
+					comp_val = Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
+					break;
+				case DISP_MOTOR_EN:
+					//comp_val = Contactors_Get();
+					break;
+				case DISP_MOTOR_PC:
+					comp_val = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
+					break;
+				default:
+				break;
+			}
+		}
+
 		DisplayCmd_t setCmd = {
 			.compOrCmd = (char*)DISPLAY_COMP_STR[comp],
 			.attr = "val",
@@ -84,13 +106,14 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 			.numArgs = 1,
 			.argTypes = {INT_ARG},
 			{
-				{.num=g_display_comp_vals[comp]}
+				{.num=comp_val}
 			}
 		};
 
 		ret = Display_Send(setCmd);
 		return ret;
 	}
+
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
@@ -132,15 +155,21 @@ UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent) {
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetArray(bool state) {
-	g_display_comp_vals[DISP_ARRAY] = state;
+UpdateDisplayError_t UpdateDisplay_SetBlink(bool state) {
+	g_display_comp_vals[DISP_BLINK] = state;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetMotor(bool state) {
-	g_display_comp_vals[DISP_MOTOR] = state;
-	return UPDATEDISPLAY_ERR_NONE;
-}
+
+// UpdateDisplayError_t UpdateDisplay_SetArray(bool state) {
+// 	g_display_comp_vals[DISP_ARRAY] = state;
+// 	return UPDATEDISPLAY_ERR_NONE;
+// }
+
+// UpdateDisplayError_t UpdateDisplay_SetMotor(bool state) {
+// 	g_display_comp_vals[DISP_MOTOR] = state;
+// 	return UPDATEDISPLAY_ERR_NONE;
+// }
 
 UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear) {
 	g_display_comp_vals[DISP_GEAR] = gear;
@@ -209,7 +238,7 @@ UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val) {
 void Task_UpdateDisplay(void *p_arg) {
 	OS_ERR err;
 	while (1) {
-		for (Component_t comp = DISP_ARRAY; comp <= DISP_GEAR; comp++) {
+		for (Component_t comp = 0; comp <= DISP_GEAR; comp++) {
 			if (comp != DISP_REGEN_ST && comp != DISP_CRUISE_ST) {
 				UpdateDisplay_SetComponent(comp);
 			}

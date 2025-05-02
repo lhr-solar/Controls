@@ -32,12 +32,14 @@ uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS] = {0};
 // Strings for each component id
 const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
     // Boolean components
-    "arr", "hb", "cs", "mcs", "brake", "mot",
+    "hb", "cs", "mcs", "brake", "blink",
+    // Contactors
+    "arren", "arrpc", "moten", "motpc", // technically boolean but the logic is cooked
     // Non-boolean components
     "vel", "accel", "soc", "supp", "cruiseSt", "rbsSt", "pv", "pc", "pt", "mcv",
     "mcc", "heatsink", "gear",
     // Fault code components
-    "oserr", "faulterr"
+    "oserr", "faulterr", "evac"
 };
 
 
@@ -148,6 +150,19 @@ DisplayError_t Display_Error() {
     };
     Display_Send(err_pg_cmd);
 
+    DisplayCmd_t evac_msg_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_EVAC_MSG], // "evac"
+        .attr = "txt",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {STR_ARG},
+        {
+            {.str = ErrMsg_Evac}
+        }
+    };
+    Display_Send(evac_msg_cmd);
+    strncpy(ErrMsg_Evac, DISP_EVAC_NONREQ_STR_LITERAL, ERR_CODE_LEN);
+
     // Display OS error if there is one
     DisplayCmd_t os_flt_cmd = {
         .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_OS_CODE], // "oserr"
@@ -224,6 +239,31 @@ DisplayError_t Display_Error() {
         Display_Send(no_flt_cmd);
     }
 
+    // Send SOC and SBPV values
+    DisplayCmd_t soc_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_SOC], // "soc"
+        .attr = "val",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {INT_ARG},
+        {
+            {.num = g_display_comp_vals[DISP_SOC]}
+        }
+    };
+    Display_Send(soc_cmd);
+
+    DisplayCmd_t supp_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_SUPP_BATT], // "supp"
+        .attr = "val",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {INT_ARG},
+        {
+            {.num = g_display_comp_vals[DISP_SUPP_BATT]}
+        }
+    };
+    Display_Send(supp_cmd);
+
     // Update pack current vars (value and sign)
     DisplayCmd_t packcurr_cmd = {
         .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_PACK_CURRENT], // "pc"
@@ -258,6 +298,10 @@ DisplayError_t Display_Error() {
  * @param SOC_percent state of charge in percent
  * @param supp_mv supplemental battery pack voltage
  * @returns DisplayError_t
+ * 
+ *  [DO NOT USE THIS ONE. IT IS DEPRECATED IN FAVOR OF JUST USING Display_Error()]
+ * 
+ * @deprecated
  */
 DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
     // Terminates any in progress command

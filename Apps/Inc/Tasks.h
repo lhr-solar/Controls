@@ -70,6 +70,8 @@
 } while(0)
 
 #define DISP_NA_STR_LITERAL "\"N/A\""
+#define DISP_EVAC_NONREQ_STR_LITERAL "\"RECOMMENDED\""
+#define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
 
 /**
  * Task error variable type
@@ -156,6 +158,7 @@ extern error_code_t Error_ReadTritium;
 extern error_code_t Error_ReadCarCAN;
 extern error_code_t Error_UpdateDisplay;
 extern error_code_t Error_OS;
+extern error_code_t ErrMsg_Evac;
 
 // Define the length of the error code message
 #define ERR_CODE_LEN 16

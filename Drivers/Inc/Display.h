@@ -29,13 +29,16 @@
  */
 typedef enum{
 	// Boolean components
-	DISP_ARRAY=0,
-	DISP_HEARTBEAT,
+	DISP_HEARTBEAT=0,
 	DISP_PACK_CURR_SIGN,
 	DISP_MC_CURR_SIGN,
 	DISP_BRAKE,
-	DISP_MOTOR,
+	DISP_BLINK,
 	// Non-boolean components
+	DISP_ARRAY_EN,
+	DISP_ARRAY_PC,
+	DISP_MOTOR_EN,
+	DISP_MOTOR_PC,
 	DISP_VELOCITY,
 	DISP_ACCEL_METER,
 	DISP_SOC,
@@ -52,6 +55,7 @@ typedef enum{
 	// Fault code components
 	DISP_OS_CODE,
 	DISP_FAULT_CODE,
+	DISP_EVAC_MSG,
 	DISP_NUM_COMPONENTS
 } Component_t;
 

@@ -95,19 +95,19 @@ UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);
  */
 UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent);
 
-/**
- * @brief Sets the array indicator state on the display
- * @param state array contactor on (true) or off (false)
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetArray(bool state);
+// /**
+//  * @brief Sets the array indicator state on the display
+//  * @param state array contactor on (true) or off (false)
+//  * @returns UpdateDisplayError_t
+//  */
+// UpdateDisplayError_t UpdateDisplay_SetArray(bool state);
 
-/**
- * @brief Sets the motor contactor indicator state on the display
- * @param state motor contactor on (true) or off (false)
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetMotor(bool state);
+// /**
+//  * @brief Sets the motor contactor indicator state on the display
+//  * @param state motor contactor on (true) or off (false)
+//  * @returns UpdateDisplayError_t
+//  */
+// UpdateDisplayError_t UpdateDisplay_SetMotor(bool state);
 
 /**
  * @brief Sets the gear selection state on the display
@@ -145,6 +145,9 @@ UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts);
 UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetBrake(bool state);
+
+UpdateDisplayError_t UpdateDisplay_SetBlink(bool state);
+
 
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0

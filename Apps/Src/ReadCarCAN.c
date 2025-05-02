@@ -89,6 +89,13 @@ bool ChargeEnable_Get(void)
     return chargeEnable;
 }
 
+void display_err_failed_recovery(void) {
+    UpdateDisplay_SetSBPV(SBPV);
+    UpdateDisplay_SetSOC(SOC);
+    strncpy(ErrMsg_Evac, DISP_EVAC_REQ_STR_LITERAL, ERR_CODE_LEN);
+    Display_Error();
+}
+
 /**
  * @brief Nested function as the same function needs to be executed however the timer requires different parameters
  * @param p_tmr pointer to the timer that calls this function, passed by timer
@@ -132,15 +139,11 @@ static void disableArrayPrechargeBypassContactor(void)
 
     if (ret)
     { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
+        display_err_failed_recovery();
         while (1)
         {
             ;
         }
-    }
-    else
-    {
-        UpdateDisplay_SetArray(true);
     }
 }
 
@@ -344,13 +347,11 @@ static void handler_ReadCarCAN_chargeDisable(void)
 
     if (ret)
     { // Contactor failed to turn off; display the evac screen and infinite l
-        Display_Evac(SOC, SBPV);
+        display_err_failed_recovery();
         while (1)
         {
             ;
         }
-    }else{
-        UpdateDisplay_SetArray(false);
     }
 }
 
@@ -382,16 +383,11 @@ static void handler_ReadCarCAN_contactorsDisable(void)
 
     if (ret)
     { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
+        display_err_failed_recovery();
         while (1)
         {
             ;
         }
-    }
-    else
-    {
-        UpdateDisplay_SetArray(false);
-        UpdateDisplay_SetMotor(false);
     }
 }
 
@@ -402,7 +398,7 @@ static void handler_ReadCarCAN_contactorsDisable(void)
 static void handler_ReadCarCAN_BPSTrip(void)
 {
     chargeEnable = false;    // Not really necessary but makes inspection less confusing
-    Display_Evac(SOC, SBPV); // Display evacuation screen
+    display_err_failed_recovery();    // Display evacuation screen
 }
 
 void Task_ReadCarCAN(void *p_arg)
