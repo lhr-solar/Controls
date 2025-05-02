@@ -32,7 +32,7 @@ static void setContactor(contactor_t contactor, bool state) {
             BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, state);
             break;
         default:
-            contactorState[HV_MINUS_CONTACTOR] = state;
+            contactorState[contactor] = state;
             break;
     }
 }
