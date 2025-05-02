@@ -258,7 +258,7 @@ void attemptTurnArrayPBCOn(void)
     if (arrPBCComplete && chargeEnable)
     {
         Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON, true); // Turn on
-        UpdateDisplay_SetArray(true);
+        // UpdateDisplay_SetArray(true);
         arrPBCComplete = false;
     }
 }
@@ -272,7 +272,7 @@ void attemptTurnMotorControllerPBCOn(void)
     if (mcPBCComplete)
     {
         Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
-        UpdateDisplay_SetMotor(true);
+        // UpdateDisplay_SetMotor(true);
     }
 }
 
@@ -283,7 +283,7 @@ void attemptTurnMotorControllerPBCOn(void)
 void turnMotorControllerPBCOff(void)
 {
     Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, OFF, true);
-    UpdateDisplay_SetMotor(false);
+    // UpdateDisplay_SetMotor(false);
 }
 
 /**
