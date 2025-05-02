@@ -3,7 +3,7 @@
 
 #include "CANbus.h"
 
-// Macros for the IO_State can SWITCH_BITMAP message
+// Macros for the SWITCH_BITMAP signal in the IO_STATE CAN message
 #define SWITCH_BITMAP_BRAKELIGHT(value)       ((value & 0x01) << 7) // Bit 7: BRAKELIGHT
 #define SWITCH_BITMAP_CRUZ_ST(value)          ((value & 0x01) << 6) // Bit 6: CRUZ_ST
 #define SWITCH_BITMAP_CRUZ_EN(value)          ((value & 0x01) << 5) // Bit 5: CRUZ_EN

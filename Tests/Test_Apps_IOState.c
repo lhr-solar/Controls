@@ -6,6 +6,7 @@
 #include "CANbus.h"
 #include "CANConfig.h"
 #include "Ignition.h"
+#include "Pedals.h"
 #include "IOState.h"
 
 /* Run in CAN_Loopback and use the IOState_recv task to recieve the IO_State CANbus message.
@@ -37,6 +38,7 @@ void Task_Init(void *p_arg){
     // Start systick    
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
     CANbus_Init(CARCAN, carCANFilterList, NUM_CARCAN_FILTERS);
+    Pedals_Init();
 
     // Initialize IOState
     OSTaskCreate(

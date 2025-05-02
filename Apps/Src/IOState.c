@@ -14,6 +14,8 @@ static void putIOState(void);
 
 void putIOState(void){
     CANDATA_t message;
+
+    // Clear message before sending
     memset(&message, 0, sizeof message);
     message.ID = IO_STATE;
 
@@ -35,6 +37,9 @@ void putIOState(void){
     // Regen is always disabled for daybreak
     message.data[2] |= SWITCH_BITMAP_REGEN_SW(0);
 
+    // make default gear state off
+    message.data[2] |= SWITCH_BITMAP_FOR_SW(0);
+    message.data[2] |= SWITCH_BITMAP_REV_SW(0);
     switch(getDashState(DASHBOARD_GEAR)){
         case FWD:
             message.data[2] |= SWITCH_BITMAP_FOR_SW(1);
@@ -43,12 +48,14 @@ void putIOState(void){
             message.data[2] |= SWITCH_BITMAP_REV_SW(1);
             break;
         default:
-            message.data[2] |= SWITCH_BITMAP_FOR_SW(0);
-            message.data[2] |= SWITCH_BITMAP_REV_SW(0);
             break;
     }
 
     // Send ignition states
+    // Make default state off
+    message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
+    message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
+    // Get_Ignition_State has a short delay associated with it, so avoid calling it often
     switch(Get_Ignition_State()){
         case IGN_ARR:
             message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(1);
@@ -60,8 +67,6 @@ void putIOState(void){
             message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(1);
             break;
         default:
-            message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
-            message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
             break;
     }
 
@@ -73,7 +78,7 @@ void putIOState(void){
 */
 void Task_IOState(void *p_arg) {
     OS_ERR err;
-    static uint8_t ioStateCounter = 0;
+    static volatile uint8_t ioStateCounter = 0;
     while (1) {
         putIOState();
         ioStateCounter++;
