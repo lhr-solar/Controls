@@ -22,10 +22,10 @@
 typedef enum
 {
 	READCARCAN_ERR_NONE = 0x0000,
-	READCARCAN_ERR_CHARGE_DISABLE = 0x000F,		    // Received a charge disable msg
-	READCARCAN_ERR_MISSED_MSG = 0x00F0,			    // Didn't receive a BPS charge msg in time
-	READCARCAN_ERR_DISABLE_CONTACTORS_MSG = 0x0F00, // Ignition is turned to neither (off due to LV) or both at the same time (impossible) are on at
-	READCARCAN_ERR_BPS_TRIP = 0xF000				// Received a BPS trip msg (0 or 1)
+	READCARCAN_ERR_CHARGE_DISABLE = 0xAAAA,		    // Received a charge disable msg
+	READCARCAN_ERR_MISSED_MSG = 0xBBBB,			    // Didn't receive a BPS charge msg in time
+	READCARCAN_ERR_DISABLE_CONTACTORS_MSG = 0xCCCC, // Ignition is turned to neither (off due to LV) or both at the same time (impossible) are on at
+	READCARCAN_ERR_BPS_TRIP = 0xDDDD				// Received a BPS trip msg (0 or 1)
 } ReadCarCAN_error_code_t;
 
 /**
