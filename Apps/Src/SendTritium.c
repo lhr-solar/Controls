@@ -117,18 +117,18 @@ static void getName(char *nameStr, uint8_t stateNameNum)
 {
     switch (stateNameNum)
     {
-    case FORWARD_DRIVE:
-        strcpy(nameStr, "FORWARD_DRIVE");
-        break;
-    case NEUTRAL_DRIVE:
-        strcpy(nameStr, "PARK_STATE");
-        break;
-    case REVERSE_DRIVE:
-        strcpy(nameStr, "REVERSE_DRIVE");
-        break;
-    default:
-        strcpy(nameStr, "UNKNOWN");
-        break;
+        case FORWARD_DRIVE:
+            strcpy(nameStr, "FORWARD_DRIVE");
+            break;
+        case NEUTRAL_DRIVE:
+            strcpy(nameStr, "PARK_STATE");
+            break;
+        case REVERSE_DRIVE:
+            strcpy(nameStr, "REVERSE_DRIVE");
+            break;
+        default:
+            strcpy(nameStr, "UNKNOWN");
+            break;
     }
     return;
 }
