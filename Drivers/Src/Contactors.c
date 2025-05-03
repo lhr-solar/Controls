@@ -57,10 +57,9 @@ void Contactors_Init() {
 
 
     // start disabled
-    for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
+    for (int contactor = 0; contactor < NUM_CONTACTORS; contactor++) {
         // Only Motor Contactor is directly controlled by Controls
         setContactor(contactor, OFF);
-        contactorState[contactor] = OFF;
     }
 
     // initialize mutex
