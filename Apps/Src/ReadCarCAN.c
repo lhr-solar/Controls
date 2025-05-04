@@ -348,7 +348,6 @@ static bool check_MotorControllerContactor(void){
     bool HVContactorState = Contactors_Get(HV_MINUS_CONTACTOR) && Contactors_Get(HV_PLUS_CONTACTOR);
 
     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
-    bool motorPrechargeContactorState = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
     // if the HV contactors are off and the motor contactor is on
     if(!HVContactorState && motorContactorState)
     {
