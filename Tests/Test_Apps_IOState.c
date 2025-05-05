@@ -15,22 +15,6 @@
    You should also read the message on a candapter
 */
 
-extern OS_TCB IOState_recv_TCB;
-extern CPU_STK IOState_Recv_Stk[TASK_IO_STATE_STACK_SIZE];
-
-// Allias for Controls fault led
-#define IO_STATE_RECIEVE CONTROLS_FAULT_LED
-
-void IOState_recv(void *p_arg){
-    OS_ERR err;
-    CANDATA_t msg;
-    while(1){
-        CANbus_Read(&msg, true, CARCAN);
-        if(msg.data == IO_STATE){
-            Status_Leds_Write(IO_STATE_RECIEVE, true);
-        }
-    }
-}
 
 void Task_Init(void *p_arg){
     OS_ERR err;
@@ -57,24 +41,6 @@ void Task_Init(void *p_arg){
         (OS_ERR*)&err
     );
     assertOSError(err);
-
-        // Initialize IOState
-        OSTaskCreate(
-            (OS_TCB*)&IOState_recv_TCB,
-            (CPU_CHAR*)"IOState_recv",
-            (OS_TASK_PTR)IOState_recv,
-            (void*)NULL,
-            (OS_PRIO)(TASK_PUT_IOSTATE_PRIO -1),
-            (CPU_STK*)IOState_Recv_Stk,
-            (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-            (CPU_STK_SIZE)TASK_IO_STATE_STACK_SIZE,
-            (OS_MSG_QTY)0,
-            (OS_TICK)0,
-            (void*)NULL,
-            (OS_OPT)(OS_OPT_TASK_STK_CLR),
-            (OS_ERR*)&err
-        );
-        assertOSError(err);
 
     OSTaskDel(NULL, &err);
 }
