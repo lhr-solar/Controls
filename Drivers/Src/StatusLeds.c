@@ -16,7 +16,8 @@ void Status_Leds_Init(void){
     
     // both LEDs are on the Dashboard
     BSP_GPIO_Init(BPS_HAZARD_PORT, BPS_HAZARD, OUTPUT, false);
-    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT, OUTPUT, false);
+    Status_Leds_Write(DASH_BPS_HAZ_LED, false);
+    BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT_PIN, OUTPUT, false);
 } 
 
 /**
@@ -54,7 +55,7 @@ void Status_Leds_Write(status_led_t led, bool state){
         case DASH_BPS_HAZ_LED:
             BSP_GPIO_Write_Pin(BPS_HAZARD_PORT, BPS_HAZARD, state);
         case DASH_HEARTBEAT_LED:
-            BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT, state);
+            BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN, state);
         default:
             break;
     }
@@ -94,7 +95,7 @@ void Status_Leds_Toggle(status_led_t led){
         case DASH_BPS_HAZ_LED:
             BSP_GPIO_Toggle_Pin(BPS_HAZARD_PORT, BPS_HAZARD);
         case DASH_HEARTBEAT_LED:
-            BSP_GPIO_Toggle_Pin(HEARTBEAT_PORT, HEARTBEAT);
+            BSP_GPIO_Toggle_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN);
         default:
             break;
     }
@@ -107,5 +108,15 @@ void Status_Leds_Toggle(status_led_t led){
 void Status_Leds_All_On(void){
     for(int i = 0; i < NUM_STATUS_LED; i++){
         Status_Leds_Write(i, ON);
+    }
+}
+
+/**
+ * @brief   Turns all status LEDs on
+ * @return  None
+ */ 
+void Status_Leds_All_Off(void){
+    for(int i = 0; i < NUM_STATUS_LED; i++){
+        Status_Leds_Write(i, OFF);
     }
 }

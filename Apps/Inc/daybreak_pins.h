@@ -82,7 +82,7 @@
 #define TIMER_CLK               GPIO_Pin_6
 
 #define HEARTBEAT_PORT          PORTC
-#define HEARTBEAT               GPIO_Pin_7
+#define HEARTBEAT_PIN           GPIO_Pin_7
 
 #define CRUISE_IND_PORT         PORTC
 #define CRUISE_IND              GPIO_Pin_8
@@ -199,11 +199,14 @@
 #define CarCAN_RX_IRQ CAN3_RX0_IRQn
 
 // MotorCan - CAN2 PB5_RX PB6_TX
+// CAN2 uses CAN1 as master
 #define MotorCAN_PORT PORTB
 #define MotorCAN_GPIO GPIOB
 #define MotorCAN CAN2
+#define MotorCANMaster CAN1 // CAN1 and CAN2 use dual CAN setup
 #define MotorCAN_AHB1_GPIO RCC_AHB1Periph_GPIOB
 #define MotorCAN_APB1_CAN RCC_APB1Periph_CAN2
+#define MotorCANMaster_APB1_CAN RCC_APB1Periph_CAN1 // CAN1 is master
 #define MotorCAN_AF GPIO_AF_CAN2
 #define MotorCAN_TX_Pinsource GPIO_PinSource6
 #define MotorCAN_TX GPIO_Pin_6
@@ -211,10 +214,6 @@
 #define MotorCAN_RX_Pinsource GPIO_PinSource5
 #define MotorCAN_RX GPIO_Pin_5
 #define MotorCAN_RX_IRQ CAN2_RX0_IRQn
-
-
-
-
 
 
 #endif
