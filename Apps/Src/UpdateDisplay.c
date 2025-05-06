@@ -263,8 +263,8 @@ UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val){
     return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetBrake(bool state){
-	componentVals[BRAKE] = (state)?1:0;
+UpdateDisplayError_t UpdateDisplay_SetBrake(uint8_t percent){
+	componentVals[BRAKE] = (percent > 100)?100:percent;
 
 	return UPDATEDISPLAY_ERR_NONE;
 }

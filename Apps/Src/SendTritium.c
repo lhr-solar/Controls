@@ -30,11 +30,9 @@
 #include "SendTritium.h"
 
 
-
 // Inputs
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
-
 static Gear_t gear = PARK_GEAR;
 
 // Outputs
@@ -45,117 +43,57 @@ static float busCurrentSetPoint = CONT_MOCO_BATTERY_CURRENT / MAX_MOCO_CURRENT; 
 // Current observed velocity
 static float velocityObserved = 0.0f;
 
-// Counter for sending setpoints to motor
-static uint8_t motorMsgCounter = 0;
-
-// FSM
-static TritiumState_t prevState; // Previous state
-static TritiumState_t state;     // Current state
-
 // Getter functions for local variables in SendTritium.c
 GETTER(uint8_t, brakePedalPercent)
 GETTER(uint8_t, accelPedalPercent)
 GETTER(Gear_t, gear)
-TritiumStateName_t get_state(void) {return state.name;}
 GETTER(float, velocityObserved)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
 
-// Setter functions for local variables in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
-SETTER(uint8_t, brakePedalPercent)
-SETTER(uint8_t, accelPedalPercent)
-SETTER(Gear_t, gear)
-void set_state(TritiumStateName_t stateName) {state = FSM[stateName];}
-SETTER(float, velocityObserved)
-SETTER(float, currentSetpoint)
-SETTER(float, velocitySetpoint)
-#endif
-
-// Handler & Decider Declarations
-void ForwardDriveHandler(void);
-void ForwardDriveDecider(void);
-void ParkHandler(void);
-void ParkDecider(void);
-void ReverseDriveHandler(void);
-void ReverseDriveDecider(void);
-
 // Function prototypes
 static void assertSendTritiumError(SendTritium_error_code_t sterr);
-
-// FSM
-static const TritiumState_t FSM[6] = {
-    {FORWARD_DRIVE, &ForwardDriveHandler, &ForwardDriveDecider},
-    {PARK_STATE, &ParkHandler, &ParkDecider},
-    {REVERSE_DRIVE, &ReverseDriveHandler, &ReverseDriveDecider}};
 
 
 // Helper Functions
 
 /**
- * @brief Updates the brakelight and brake indication on display
+ * @brief Update the accel, brake, & gear on the display +
+ * write to the brakelight
  */
-static void brakeUpdate(){
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) 
+static void updateDisplayState() 
+{
+    UpdateDisplay_SetAccel(accelPedalPercent);
+
+    if(brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) 
     {
         Minions_Write(BRAKELIGHT, true);
         UpdateDisplay_SetBrake(true);
     } 
-    else 
+    else if(brakePedalPercent <= BRAKE_UNPRESSED_THRESHOLD)
     {
         Minions_Write(BRAKELIGHT, false);
         UpdateDisplay_SetBrake(false);
     }
-}
 
-
-#ifdef SENDTRITIUM_PRINT_MES
-/**
- * @brief Dumps info to UART during testing
- */
-static void getName(char *nameStr, uint8_t stateNameNum)
-{
-    switch (stateNameNum)
-    {
-        case FORWARD_DRIVE:
-            strcpy(nameStr, "FORWARD_DRIVE");
+    switch(gear) {
+        case FORWARD_GEAR: 
+            UpdateDisplay_SetGear(DISP_FORWARD); 
             break;
-        case NEUTRAL_DRIVE:
-            strcpy(nameStr, "PARK_STATE");
+        case PARK_GEAR: 
+            UpdateDisplay_SetGear(DISP_PARK); 
             break;
-        case REVERSE_DRIVE:
-            strcpy(nameStr, "REVERSE_DRIVE");
-            break;
-        default:
-            strcpy(nameStr, "UNKNOWN");
+        case REVERSE_GEAR: 
+            UpdateDisplay_SetGear(DISP_REVERSE);
             break;
     }
-    return;
 }
 
-static void dumpInfo()
-{
-    printf("-------------------\n\r");
-    char stateName[20];
-    getName(stateName, state.name);
-    printf("State: %s\n\r", stateName);
-    printf("brakePedalPercent: %u\n\r", brakePedalPercent);
-    printf("accelPedalPercent: %u\n\r", accelPedalPercent);
-    printf("gear: %d\n\r", (uint8_t)gear);
-    print_float("currentSetpoint: ", currentSetpoint);
-    print_float("velocitySetpoint: ", velocitySetpoint);
-    print_float("velocityObserved: ", velocityObserved);
-    printf("-------------------\n\r");
-}
-#endif
-
-#ifndef SENDTRITIUM_EXPOSE_VARS
 /**
  * @brief Reads inputs from the system
  */
 static void readInputs()
 {
-
     brakePedalPercent = Pedals_Read(BRAKE);
     accelPedalPercent = Pedals_Read(ACCELERATOR);
 
@@ -169,6 +107,7 @@ static void readInputs()
     uint8_t gearFault = (uint8_t)forwardGear + (uint8_t)reverseGear + (uint8_t)parkGear;
     static uint8_t gearFaultCnt = 0;
 
+    // Check for gear fault
     if (gearFault != 1)
     {
         // Fault behavior
@@ -182,33 +121,23 @@ static void readInputs()
         gearFaultCnt = 0;
     }
 
-    if (parkGear)
+    // Set gear & update on display
+    if (parkGear) {
         gear = PARK_GEAR;
-    else if (forwardGear)
+    }
+    else if (forwardGear) {
         gear = FORWARD_GEAR;
-    else if (reverseGear)
+    }
+    else if (reverseGear) {
         gear = REVERSE_GEAR;
-    else
+    }
+    else {
         gear = PARK_GEAR;
-
-    // Display is state-based
-    if (state.name == PARK_STATE)
-    {
-        UpdateDisplay_SetGear(DISP_PARK);
-    }
-    else if (state.name == FORWARD_DRIVE)
-    {
-        UpdateDisplay_SetGear(DISP_FORWARD);
-    }
-    else if (state.name == REVERSE_DRIVE)
-    {
-        UpdateDisplay_SetGear(DISP_REVERSE);
     }
 
     // Get observed velocity
     velocityObserved = Motor_RPM_Get();
 }
-#endif
 
 /**
  * @brief Linearly map range of integers to another range of integers, and provide the pecentage result.
@@ -247,106 +176,6 @@ float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
     }
 }
 
-// State Handlers & Deciders
-
-/**
- * @brief Forward Drive State Handler. Accelerator is mapped directly
- * to current setpoint at positive velocity.
- */
-void ForwardDriveHandler()
-{
-    // If braking, set current to 0. Otherwise, set current based on accel
-    if (brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) 
-    {
-        velocitySetpoint = MAX_VELOCITY;
-        currentSetpoint = 0.0f;
-    } 
-    else 
-    {
-        velocitySetpoint = MAX_VELOCITY;
-        currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
-    }
-
-    // Turn brakelight on/off
-    brakeUpdate();
-}
-
-/**
- * @brief Forward Drive State Decider. Determines transitions out of
- * forward drive state (park, powered cruise).
- */
-void ForwardDriveDecider()
-{
-    // Go to PARK_STATE if you're in another gear
-    if (gear == PARK_GEAR || gear == REVERSE_GEAR)
-    {
-        state = FSM[PARK_STATE];
-    }
-    // Otherwise, stays in FORWARD_DRIVE
-}
-
-/**
- * @brief Park State Handler. No current is sent to the motor.
- */
-void ParkHandler()
-{
-    velocitySetpoint = MAX_VELOCITY;
-    currentSetpoint = 0.0f;
-
-    // Turn brakelight on/off
-    brakeUpdate();
-}
-
-/**
- * @brief Park State Decider. Determines transitions out of
- * neutral drive state (forward drive, reverse drive).
- */
-void ParkDecider()
-{
-    if (gear == FORWARD_GEAR) 
-    {
-        state = FSM[FORWARD_DRIVE];
-    } 
-    else if (gear == REVERSE_GEAR) 
-    {
-        state = FSM[REVERSE_DRIVE];
-    }
-}
-
-/**
- * @brief Reverse Drive State Handler. Accelerator is mapped directly to
- * current setpoint (at negative velocity).
- */
-void ReverseDriveHandler()
-{
-    // If braking, set current to 0. Otherwise, set current based on accel
-    if(brakePedalPercent >= BRAKE_PEDAL_THRESHOLD) 
-    {
-        velocitySetpoint = -MAX_VELOCITY;
-        currentSetpoint = 0.0f;
-    } 
-    else 
-    {
-        velocitySetpoint = -MAX_VELOCITY;
-        currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
-    }
-
-    // Turn brakelight on/off
-    brakeUpdate();
-}
-
-/**
- * @brief Reverse Drive State Decider. Determines transitions out of
- * reverse drive state (brake).
- */
-void ReverseDriveDecider()
-{
-    if (gear == PARK_GEAR || gear == FORWARD_GEAR)
-    {
-        state = FSM[PARK_STATE];
-    }
-}
-
 // Task (main loop)
 
 /**
@@ -356,58 +185,55 @@ void Task_SendTritium(void *p_arg)
 {
     OS_ERR err;
 
-    // Initialize current state to PARK_STATE
-    state = FSM[PARK_STATE];
-    prevState = FSM[PARK_STATE];
-    UpdateDisplay_SetGear(PARK_GEAR);
-
-    // Initialize Regen & Cruise disabled
-    // NOTE: No regen on Daybreak
-    UpdateDisplay_SetRegenState(DISP_DISABLED);
-    UpdateDisplay_SetCruiseState(DISP_DISABLED);
-
-#ifndef SENDTRITIUM_EXPOSE_VARS
+    // CAN Commands
     CANDATA_t driveCmd = {
         .ID = MOTOR_DRIVE,
         .idx = 0,
         .data = {0.0f, 0.0f},
     };
-#endif
     CANDATA_t powerCmd = {
         .ID = MOTOR_POWER,
         .idx = 0,
         .data = {0.0f, 0.0f},
     };
 
+    // Initialize display
+    UpdateDisplay_SetGear(PARK_GEAR);
+    UpdateDisplay_SetRegenState(DISP_DISABLED); // Not on Daybreak
+    UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
+    UpdateDisplay_SetAccel(accelPedalPercent); 
+    UpdateDisplay_SetBrake(brakePedalPercent);
+
     while (1)
     {
         memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float)); // CAN message for setpoint of bus current percent
         CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN); 
-        state.stateHandler();                          // do what the current state does
-#ifndef SENDTRITIUM_EXPOSE_VARS
         readInputs(); // read inputs from the system
-        UpdateDisplay_SetAccel(accelPedalPercent);
-#endif
-        prevState = state;
-        state.stateDecider(); // decide what the next state is
+        updateDisplayState();
 
-// Drive
-#ifdef SENDTRITIUM_PRINT_MES
-        dumpInfo();
-#endif
-#ifndef SENDTRITIUM_EXPOSE_VARS
-        if (MOTOR_MSG_COUNTER_THRESHOLD == motorMsgCounter)
-        {
-            memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
-            memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
-            CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
-            motorMsgCounter = 0;
-        } 
-        else
-        {
-            motorMsgCounter++;
+        // Update velocitySetpoint & currentSetpoint based on gear/state
+        switch(gear) {
+            case FORWARD_GEAR:
+                velocitySetpoint = MAX_VELOCITY;
+                currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                break;
+            case PARK_GEAR:
+                velocitySetpoint = MAX_VELOCITY;
+                currentSetpoint = 0.0f;
+                break;
+            case REVERSE_GEAR:
+                velocitySetpoint = -MAX_VELOCITY;
+                currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                break;
+            default:
+                velocitySetpoint = MAX_VELOCITY;
+                currentSetpoint = 0.0f;
+                break;
         }
-#endif
+
+        memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
+        memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
+        CANbus_Send(driveCmd, CAN_NON_BLOCKING, MOTORCAN);
 
         // Delay of FSM_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);

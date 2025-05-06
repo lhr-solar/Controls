@@ -18,15 +18,14 @@
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
-#define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
 #define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
-#define MAX_GEARSWITCH_VELOCITY mpsToRpm(8.0f) // rpm
 
-// Used to define thresholds for when to start/stop powering the motor for movement, respectively
+// Used to define accel & brake (hysteresis) thresholds for when to start/stop powering the motor, respectively
 // TODO: Test these thresholds
 #define ACCEL_PEDAL_THRESHOLD 15 // percent
-#define BRAKE_PEDAL_THRESHOLD 15 // percent
+#define BRAKE_UNPRESSED_THRESHOLD 15 // percent
+#define BRAKE_PRESSED_THRESHOLD 25 // percent
 
 // Motor Controller current values. Current is in Amps (A)
 #define MAX_MOCO_BATTERY_CURRENT 64.0f  // NOTE: Provided only for reference. This 64A max for daybreak, anticipated to be 135 for next-gen
@@ -51,21 +50,6 @@ typedef enum GEAR_ENUM {
     NUM_GEARS,
 } Gear_t;
 
-// State Names
-// NOTE: Park is equivalent to Neutral
-typedef enum{
-    FORWARD_DRIVE,
-    PARK_STATE,
-    REVERSE_DRIVE,
-} TritiumStateName_t;
-
-// State Struct for FSM
-typedef struct TritiumState{
-    TritiumStateName_t name;
-    void (*stateHandler)(void);
-    void (*stateDecider)(void);
-} TritiumState_t;
-
 /**
  * Error types
  * 
@@ -80,33 +64,19 @@ typedef enum
 // Inputs
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
-
 extern Gear_t gear;
-extern TritiumState_t state;
 
+// Outputs
 extern float velocityObserved;
-extern float cruiseVelSetpoint;
 #endif
 
 // Getter functions for local variables in SendTritium.c
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
 EXPOSE_GETTER(Gear_t, gear)
-EXPOSE_GETTER(TritiumStateName_t, state)
 EXPOSE_GETTER(float, velocityObserved)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
-
-// Setter functions for local variables in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
-EXPOSE_SETTER(uint8_t, brakePedalPercent)
-EXPOSE_SETTER(uint8_t, accelPedalPercent)
-EXPOSE_SETTER(Gear_t, gear)
-EXPOSE_SETTER(TritiumStateName_t, state)
-EXPOSE_SETTER(float, velocityObserved)
-EXPOSE_SETTER(float, currentSetpoint)
-EXPOSE_SETTER(float, velocitySetpoint)
-#endif
 
 /**
  * @brief Linearly map range of integers to another range of integers, and provide the pecentage result.
