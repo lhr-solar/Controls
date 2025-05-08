@@ -80,8 +80,23 @@ static bool mcPBCComplete = false;
 static uint32_t SOC = 0;
 static uint32_t SBPV = 0;
 
+// Boolean to indicate internally whether bps has been checked (for Daybreak => HV+ & HV- have already been turned on
+// to avoid extra CAN messages)
+// NOTE: For nextgen, BPS status (contactors, checked, trip, etc) will be done more compactly in a packed BPS message
+static bool bps_checked = false;
+
 // Error assertion function prototype
 static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
+
+/**
+ * @brief Initialize SendCarCAN
+*/
+void ReadCarCAN_Init() {
+    OS_ERR err;
+
+    OSFlagCreate(&BPS_Motor_Status_Flags, "BPS_Motor_Status_Flags", 0, &err);
+    assertOSError(err);
+}
 
 // Getter function for charge enable, indicating that battery charging is allowed
 bool ChargeEnable_Get(void)
@@ -281,6 +296,10 @@ void turnMotorControllerPBCOff(void)
 {
     Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, OFF, true);
     UpdateDisplay_SetMotor(false);
+     
+    OS_ERR err;
+    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    assertOSError(err);
 }
 
 /**
@@ -380,6 +399,10 @@ static void handler_ReadCarCAN_contactorsDisable(void)
     // Check that the contactor was successfully turned off
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) || (bool)Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
 
+    OS_ERR err;
+    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    assertOSError(err);
+
     if (ret)
     { // Contactor failed to turn off; display the evac screen and infinite loop
         Display_Evac(SOC, SBPV);
@@ -403,6 +426,9 @@ static void handler_ReadCarCAN_BPSTrip(void)
 {
     chargeEnable = false;    // Not really necessary but makes inspection less confusing
     Display_Evac(SOC, SBPV); // Display evacuation screen
+    OS_ERR err;
+    OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    assertOSError(&err);
 }
 
 void Task_ReadCarCAN(void *p_arg)
@@ -488,13 +514,32 @@ void Task_ReadCarCAN(void *p_arg)
             // Retrieving HV contactor statuses using bit mapping
             // Bitwise to get HV Plus and Minus, and then &&ing to ensure both are on
             bool HVPlusMinusStatus = (bool)((dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT) && (dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT));
+
+
+            // Mark BPS checked if its the first time
+            if(!bps_checked) {
+                OSFlagPost(&BPS_Motor_Status_Flags, BPS_CHECKED, OS_OPT_POST_FLAG_SET, &err);
+                assertOSError(err);
+                bps_checked = true;
+            }
+
+            // HV contactor used to determine BPS safety
+            if(HVPlusMinusStatus) {
+                OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE, OS_OPT_POST_FLAG_SET, &err);
+            }
+            else {
+                OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
+            }
+            assertOSError(err);
+            
+
             // Bitwise to get HV Array
             bool HVArrayStatus = (bool)(dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT);
 
             // Update HV Array and HV Plus/Minus saturations based on the respective statuses
             HVArrayStatus ? updateHVArraySaturation(ENABLE_SATURATION_MSG) : disableArrayPrechargeBypassContactor();
             HVPlusMinusStatus ? updateHVPlusMinusSaturation(ENABLE_SATURATION_MSG) : updateHVPlusMinusSaturation(DISABLE_SATURATION_MSG);
-
+            
             break; // End of BPS Contactor Status Updates
         }
 

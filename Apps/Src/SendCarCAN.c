@@ -16,6 +16,7 @@
 #include "Pedals.h"
 #include "Tasks.h"
 #include "SendCarCAN.h"
+#include "ReadCarCAN.h"
 #include "SendTritium.h"
 
 #define IO_STATE_DLY_MS 250u 
@@ -162,6 +163,24 @@ static void putIOState(void){
 
     // Tell BPS if the array contactor should be on
     message.data[3] |= (Minions_Read(IGN_1) || Minions_Read(IGN_2)) << 2;
+
+
+    // Update the global event flag group
+    OS_ERR err;
+    CPU_TS ticks;
+    bool isMotorReadyToRun = false;
+    OS_FLAGS res = OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
+    assertOSError(err);
+
+    // IF BPS Safe & in motor ignition rotary switch position & motor controller precharge bypass contactor is closed, mark motor ready to run
+    if(res && Minions_Read(IGN_2) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)) {
+        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_CAN_RUN, OS_OPT_POST_FLAG_SET, &err);
+        assertOSError(err);
+    }
+    else {
+        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
+        assertOSError(err);
+    }
 
     CANbus_Send(message, true, CARCAN);
 }

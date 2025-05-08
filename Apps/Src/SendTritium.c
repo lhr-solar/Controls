@@ -22,6 +22,7 @@
 #include "Minions.h"
 #include "ReadTritium.h"
 #include "SendCarCAN.h"
+#include "ReadCarCAN.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
 #include "CANConfig.h"
@@ -54,6 +55,9 @@ GETTER(float, velocitySetpoint)
 // Function prototypes
 static void assertSendTritiumError(SendTritium_error_code_t sterr);
 
+// Boolean used to ensure that if car turns on in non-park, it'll be in park until the switch 
+// moves to park; then, it'll follow the specified gear state afterward.
+static bool parkReset = true;
 
 // Helper Functions
 
@@ -184,6 +188,7 @@ float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
 void Task_SendTritium(void *p_arg)
 {
     OS_ERR err;
+    CPU_TS ticks;
 
     // CAN Commands
     CANDATA_t driveCmd = {
@@ -204,31 +209,49 @@ void Task_SendTritium(void *p_arg)
     UpdateDisplay_SetAccel(accelPedalPercent); 
     UpdateDisplay_SetBrake(brakePedalPercent);
 
+    // Wait for motor ready to run
+    OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_CAN_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_BLOCKING, &ticks, &err);
+    assertOSError(err);
+
     while (1)
     {
+        // Check that motor is ready to run
+        OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_CAN_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_BLOCKING, &ticks, &err);
+        assertOSError(err);
+
         memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float)); // CAN message for setpoint of bus current percent
         CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN); 
         readInputs(); // read inputs from the system
         updateDisplayState();
 
         // Update velocitySetpoint & currentSetpoint based on gear/state
-        switch(gear) {
-            case FORWARD_GEAR:
-                velocitySetpoint = MAX_VELOCITY;
-                currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
-                break;
-            case PARK_GEAR:
-                velocitySetpoint = MAX_VELOCITY;
-                currentSetpoint = 0.0f;
-                break;
-            case REVERSE_GEAR:
-                velocitySetpoint = -MAX_VELOCITY;
-                currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
-                break;
-            default:
-                velocitySetpoint = MAX_VELOCITY;
-                currentSetpoint = 0.0f;
-                break;
+        if(parkReset) 
+        {
+            // If the car just turned on and isn't in park, require a reset to neutral before normal gear behavior resumes.
+            if(gear == PARK_GEAR) parkReset = false;
+            velocitySetpoint = MAX_VELOCITY;
+            currentSetpoint = 0.0f;
+        }
+        else 
+        {
+            switch(gear) {
+                case FORWARD_GEAR:
+                    velocitySetpoint = MAX_VELOCITY;
+                    currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                    break;
+                case PARK_GEAR:
+                    velocitySetpoint = MAX_VELOCITY;
+                    currentSetpoint = 0.0f;
+                    break;
+                case REVERSE_GEAR:
+                    velocitySetpoint = -MAX_VELOCITY;
+                    currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                    break;
+                default:
+                    velocitySetpoint = MAX_VELOCITY;
+                    currentSetpoint = 0.0f;
+                    break;
+            }
         }
 
         memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
