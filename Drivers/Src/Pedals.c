@@ -1,7 +1,11 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Pedals.c
- * @brief
+ * @brief 
+ * 
+ * Used for pedal input reading. Each pedal is calibrated with
+ * an upper and lower analog bound used to convert ADC readings into 
+ * a percentent representing how much each pedal is being pressed.
  *
  */
 

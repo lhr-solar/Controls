@@ -14,7 +14,10 @@
 #include "BSP_ADC.h"
 
 /**
- * @brief Stuff
+ * @brief Enum to indentify control pedals
+ * 
+ * Used to differentiate between the accel and break pedals
+ * also includes a count value for arrray sizing and to check bounds
  * 
  */
 typedef enum 
