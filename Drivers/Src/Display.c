@@ -130,6 +130,23 @@ DisplayError_t Display_Reset() {
 }
 
 /**
+ * @brief Changes the page of the display
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_SetPage(Page_t page) {
+	DisplayCmd_t pgCmd = {
+		.compOrCmd = "page",
+		.attr = NULL,
+		.op = NULL,
+		.numArgs = 1,
+		.argTypes = {INT_ARG},
+		.args = {{.num = page}}
+	};
+
+	return Display_Send(pgCmd);
+}
+
+/**
  * @brief Overwrites any processing commands and triggers the display fault screen
  * @returns DisplayError_t
  */
@@ -138,17 +155,7 @@ DisplayError_t Display_Error() {
     BSP_UART_Write(DISPLAY, (char*) TERMINATOR, strlen(TERMINATOR)); 
 
     // Switch to fault page
-    DisplayCmd_t err_pg_cmd = {
-        .compOrCmd = "page",
-        .attr = NULL,
-        .op = NULL,
-        .numArgs = 1,
-        .argTypes = {INT_ARG},
-        {
-            {.num = FAULT}
-        }
-    };
-    Display_Send(err_pg_cmd);
+    Display_SetPage(FAULT);
 
     DisplayCmd_t evac_msg_cmd = {
         .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_EVAC_MSG], // "evac"
@@ -156,9 +163,7 @@ DisplayError_t Display_Error() {
         .op = "=",
         .numArgs = 1,
         .argTypes = {STR_ARG},
-        {
-            {.str = ErrMsg_Evac}
-        }
+        .args = {{.str = ErrMsg_Evac}}
     };
     Display_Send(evac_msg_cmd);
     strncpy(ErrMsg_Evac, DISP_EVAC_NONREQ_STR_LITERAL, ERR_CODE_LEN);
@@ -170,9 +175,7 @@ DisplayError_t Display_Error() {
         .op = "=",
         .numArgs = 1,
         .argTypes = {STR_ARG},
-        {
-            {.str = ErrMsg_OS}
-        }
+        .args = {{.str = ErrMsg_OS}}
     };
     Display_Send(os_flt_cmd);
     strncpy(ErrMsg_OS, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
@@ -190,9 +193,7 @@ DisplayError_t Display_Error() {
             .op = "=",
             .numArgs = 1,
             .argTypes = {STR_ARG},
-            {
-                {.str = ErrMsg_ReadTritium}
-            }
+            .args = {{.str = ErrMsg_ReadTritium}}
         };
         Display_Send(moco_flt_cmd);
         strncpy(ErrMsg_ReadTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
@@ -204,9 +205,7 @@ DisplayError_t Display_Error() {
             .op = "=",
             .numArgs = 1,
             .argTypes = {STR_ARG},
-            {
-                {.str = ErrMsg_ReadCarCAN}
-            }
+            .args = {{.str = ErrMsg_ReadCarCAN}}
         };
         Display_Send(rcc_flt_cmd);
         strncpy(ErrMsg_ReadCarCAN, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
@@ -218,9 +217,7 @@ DisplayError_t Display_Error() {
             .op = "=",
             .numArgs = 1,
             .argTypes = {STR_ARG},
-            {
-                {.str = ErrMsg_UpdateDisplay}
-            }
+            .args = {{.str = ErrMsg_UpdateDisplay}}
         };
         Display_Send(disp_flt_cmd);
         strncpy(ErrMsg_UpdateDisplay, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
@@ -232,9 +229,7 @@ DisplayError_t Display_Error() {
             .op = "=",
             .numArgs = 1,
             .argTypes = {STR_ARG},
-            {
-                {.str = (char*)DISP_NA_STR_LITERAL}
-            }
+            .args = {{.str = (char*)DISP_NA_STR_LITERAL}}
         };
         Display_Send(no_flt_cmd);
     }
@@ -246,9 +241,7 @@ DisplayError_t Display_Error() {
         .op = "=",
         .numArgs = 1,
         .argTypes = {INT_ARG},
-        {
-            {.num = g_display_comp_vals[DISP_SOC]}
-        }
+        .args = {{.num = g_display_comp_vals[DISP_SOC]}}
     };
     Display_Send(soc_cmd);
 
@@ -258,9 +251,7 @@ DisplayError_t Display_Error() {
         .op = "=",
         .numArgs = 1,
         .argTypes = {INT_ARG},
-        {
-            {.num = g_display_comp_vals[DISP_SUPP_BATT]}
-        }
+        .args = {{.num = g_display_comp_vals[DISP_SUPP_BATT]}}
     };
     Display_Send(supp_cmd);
 
@@ -271,9 +262,7 @@ DisplayError_t Display_Error() {
         .op = "=",
         .numArgs = 1,
         .argTypes = {INT_ARG},
-        {
-            {.num = g_display_comp_vals[DISP_PACK_CURRENT]}
-        }
+        .args = {{.num = g_display_comp_vals[DISP_PACK_CURRENT]}}
     };
     Display_Send(packcurr_cmd);
 
@@ -283,14 +272,14 @@ DisplayError_t Display_Error() {
         .op = NULL,
         .numArgs = 2,
         .argTypes = {STR_ARG, INT_ARG},
-        {
+        .args = {
             {.str = (char*) DISPLAY_COMP_STR[DISP_PACK_CURR_SIGN]},  // "cs"
             {.num = g_display_comp_vals[DISP_PACK_CURR_SIGN]}
         }
     };
     Display_Send(packcurr_sign_cmd);
 
-    return DISPLAY_ERR_NONE;
+    return DISPLAY_ERR_NONE; // Can't do anything if this errors out
 }
 
 /**
@@ -308,17 +297,7 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
     BSP_UART_Write(DISPLAY, (char*) TERMINATOR, strlen(TERMINATOR));
 
     // Switch to evac page
-    DisplayCmd_t evac_pg_cmd = {
-        .compOrCmd = "page",
-        .attr = NULL,
-        .op = NULL,
-        .numArgs = 1,
-        .argTypes = {INT_ARG},
-        {
-            {.num = EVAC}
-        }
-    };
-    Display_Send(evac_pg_cmd);
+    Display_SetPage(EVAC);
 
     // Send SOC and SBPV values
     DisplayCmd_t soc_cmd = {

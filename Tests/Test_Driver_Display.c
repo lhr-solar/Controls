@@ -59,122 +59,122 @@ void Task1()
 	DisplayError_t err;
 
 	err = Display_Init();
-	// assertDisplayError(err);
-	DisplayCmd_t setCmd = {
-		.compOrCmd = (char *)"faulterr",
-		.attr = "val",
-		.op = "=",
-		.numArgs = 1,
-		.argTypes = {STR_ARG},
-		{{.str = "1200"}}};
-	Display_Send(setCmd);
-	delay();
-	Display_Send(setCmd);
-
-	// Display the fault page
-	DisplayCmd_t pgCmd = {
-		.compOrCmd = "page",
-		.attr = NULL,
-		.op = NULL,
-		.numArgs = 1,
-		.argTypes = {true},
-		{{.num = FAULT}}};
 
 	while (1)
 	{
-		// Display the info page
-		pgCmd = (DisplayCmd_t){
-			.compOrCmd = "page",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 1,
-			.argTypes = {true},
-			{{.num = INFO}}};
-
-		err = Display_Send(pgCmd);
-		Display_Send(setCmd);
+		Display_SetPage(INFO);
 		// assertDisplayError(err);
 		delay();
-		Display_Send(setCmd);
 
-		
-
-		// Show the array icon
+		// Show the brake icon
 		DisplayCmd_t toggleCmd = {
 			.compOrCmd = "vis",
 			.attr = NULL,
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[4]}, {.num = 1}}};
+			.args = {{.str = compStrings[DISP_BRAKE]}, {.num = 1}}
+		};
 
 		err = Display_Send(toggleCmd);
 		delay();
 
-		// show the mot icon
+		// show the blinker icon
 		toggleCmd = (DisplayCmd_t){
 			.compOrCmd = "vis",
 			.attr = NULL,
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[5]}, {.num = 1}}};
+			.args = {{.str = compStrings[DISP_BLINK]}, {.num = 1}}
+		};
 		err = Display_Send(toggleCmd);
 		delay();
 
-		// Don't show the array icon
+		// Hide the brake icon
 		toggleCmd = (DisplayCmd_t){
 			.compOrCmd = "vis",
 			.attr = NULL,
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[4]}, {.num = 0}}};
+			.args = {{.str = compStrings[DISP_BRAKE]}, {.num = 0}}};
 		err = Display_Send(toggleCmd);
 		delay();
 
-		// Don't show the mot icon
+		// Hide the blinker icon
 		toggleCmd = (DisplayCmd_t){
 			.compOrCmd = "vis",
 			.attr = NULL,
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[5]}, {.num = 0}}};
+			.args = {{.str = compStrings[DISP_BLINK]}, {.num = 0}}};
 		err = Display_Send(toggleCmd);
 		delay();
 
-		// Don't show the mot icon
-		toggleCmd = (DisplayCmd_t){
-			.compOrCmd = "vis",
-			.attr = NULL,
-			.op = NULL,
-			.numArgs = 2,
-			.argTypes = {STR_ARG, INT_ARG},
-			{{.str = compStrings[5]}, {.num = 0}}};
-		err = Display_Send(toggleCmd);
+		DisplayCmd_t setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_ACCEL_METER],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 50}}
+		};
+		err = Display_Send(setCmd);
 		delay();
 
+		setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_SOC],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 60}}
+		};
+		err = Display_Send(setCmd);
+		delay();
 
-		// Test the fault screen
-		//  error_code_t faultCode = 0x69;
+		setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_VELOCITY],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 100}}
+		};
+		err = Display_Send(setCmd);
+		delay();
 
-		// delay();
-		//  delay();
-		//  assertOSError(OS_ERR_X);
-		//  delay();
-		//  Display_Error();
+		setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_VELOCITY],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 100}}
+		};
+		err = Display_Send(setCmd);
+		delay();
 
+		// Test the fault screens
+		printf("%d", err);
+
+		delay();
+		delay();
+		assertOSError(OS_ERR_X);
+
+		delay();
+		Display_Error();
+		delay();
+
+		// Uncomment one of these at a time (these will lock the scheduler)
 		// assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
-		// Display_Error();
-
 		// assertTritiumError(T_SOFTWARE_OVER_CURRENT_ERR);
-		// delay();
-		// Display_Error();
+		assertUpdateDisplayError(UPDATEDISPLAY_ERR_DRIVER);
 
-		// err = Display_Error();
-		printf("%x\n", err);
-		// Display_Send(setCmd);
+
+		delay();
 	}
 
 	// while (1) {;}

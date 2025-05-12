@@ -69,17 +69,19 @@ extern const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS];
  * Error types
  */
 typedef enum{ // Currently only ERR_NONE and ERR_PARSE are used
-	DISPLAY_ERR_NONE,
-	DISPLAY_ERR_PARSE,	    // Error parsing command struct passed to Display_Send
-	DISPLAY_ERR_INV_INSTR,	// Invalid instruction passed to nextion (0x00)
-	DISPLAY_ERR_INV_COMP,	// Invalid component id passed to nextion (0x02)
-	DISPLAY_ERR_INV_PGID,	// Invalid page id passed to nextion	(0x03)
-	DISPLAY_ERR_INV_VAR,	// Invalid variable name passed to nextion	(0x1A)
-	DISPLAY_ERR_INV_VAROP,	// Invalid variable operation passed to nextion	(0x1B)
-	DISPLAY_ERR_ASSIGN,	    // Assignment failure nextion	(0x1C)
-	DISPLAY_ERR_PARAMS,	    // Invalid number of parameters passed to nextion	(0x1E)
-	DISPLAY_ERR_MAX_ARGS,   // Command arg list exceeded MAX_ARGS elements
-	DISPLAY_ERR_OTHER       // Other nextion display error
+	DISPLAY_ERR_NONE 		= 0x0,		// No Error
+	DISPLAY_ERR_PARSE		= 1,		// Error parsing command struct passed to Display_Send
+	DISPLAY_ERR_OTHER		= 1 << 1,	// Other nextion display error
+
+	// All unused
+	// DISPLAY_ERR_INV_INSTR	= 1 << 2,	// Invalid instruction passed to nextion (0x00)
+	// DISPLAY_ERR_INV_COMP	= 1 << 3,	// Invalid component id passed to nextion (0x02)
+	// DISPLAY_ERR_INV_PGID 	= 1 << 4,	// Invalid page id passed to nextion	(0x03)
+	// DISPLAY_ERR_INV_VAR		= 1 << 5,	// Invalid variable name passed to nextion	(0x1A)
+	// DISPLAY_ERR_INV_VAROP	= 1 << 6,	// Invalid variable operation passed to nextion	(0x1B)
+	// DISPLAY_ERR_ASSIGN		= 1 << 7,	// Assignment failure nextion	(0x1C)
+	// DISPLAY_ERR_PARAMS		= 1 << 8,	// Invalid number of parameters passed to nextion	(0x1E)
+	// DISPLAY_ERR_MAX_ARGS	= 1 << 9    // Command arg list exceeded MAX_ARGS elements
 } DisplayError_t;
 
 
@@ -147,6 +149,12 @@ DisplayError_t Display_Error(void);
  * @returns DisplayError_t
  */
 DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
+
+/**
+ * @brief Changes the page of the display
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_SetPage(Page_t page);
 
 #endif
 
