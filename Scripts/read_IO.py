@@ -3,7 +3,7 @@ import serial
 import threading
 
 # take in parameters
-port_name = input('Enter port name (e.g., /dev/ttyUSB0): ')
+port_name = "/dev/ttyUSB0" #input('Enter port name (e.g., /dev/ttyUSB0): ')
 
 # establish connection
 ser = serial.Serial(
@@ -45,7 +45,7 @@ def parse_io_state(data_hex):
         switch_states = []
         for i, name in enumerate(switches):
             bit_pos = i  # MSB first as per the description
-            state = (switch_bitmap >> bit_pos) & 1
+            state = (switch_bitmap >> (len(switches) - i - 1)) & 1
             switch_states.append(f"{name}: {'ON' if state == 1 else 'OFF'}")
         
         # Format the output
@@ -84,7 +84,7 @@ def rec():
                     # Check for CAN message format (t or T followed by ID)
                     if (line.startswith('t') or line.startswith('T')) and len(line) >= 4:
                         msg_id = line[1:4]
-                        data_hex = line[4:]
+                        data_hex = line[5:]
                         
                         # Check if it's IO_STATE message (0x581)
                         if msg_id == '581':
