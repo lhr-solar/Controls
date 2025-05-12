@@ -69,7 +69,7 @@ void _assertOSError(OS_ERR err)
     if (err != OS_ERR_NONE)
     {
         Error_OS = err;
-        SET_ERR_MSG_HEX("uOS", ErrMsg_OS, err);
+        set_errmsg_hex("uOS", ErrMsg_OS, err);
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
         Display_Error(); // Display the location and error code
         while(1){;} //nonrecoverable

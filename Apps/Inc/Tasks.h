@@ -53,6 +53,11 @@
 #define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
 
 /**
+ * Task error variable type
+ */
+typedef uint16_t error_code_t;
+
+/**
  * Macro for adding error id to the error 
  * message array for displaying the fault.
  * Error id is a 16 bit number, so it is
@@ -60,23 +65,18 @@
  */
 // uOS_ERR_XXXX
 #define ERR_MSG_OFFSET 9
-#define SET_ERR_MSG_HEX(prefix, arr, err) do { \
-    arr[0] = '\"'; \
-    strncpy(arr + 1, prefix, 4); \
-    strncpy(arr + 4, "_ERR_", 6); \
-    snprintf(arr + ERR_MSG_OFFSET, 5, "%04X", (err) & 0xFFFF); \
-    arr[ERR_MSG_OFFSET + 4] = '\"'; \
-    arr[ERR_MSG_OFFSET + 5] = '\0'; \
-} while(0)
+static inline void set_errmsg_hex(const char *prefix, char *arr, error_code_t err) {
+    arr[0] = '\"';
+    memcpy(arr + 1, prefix, 4);
+    memcpy(arr + 4, "_ERR_", 6);
+    snprintf(arr + ERR_MSG_OFFSET, 5, "%04X", err & 0xFFFF);
+    arr[ERR_MSG_OFFSET + 4] = '\"';
+    arr[ERR_MSG_OFFSET + 5] = '\0';
+}
 
 #define DISP_NA_STR_LITERAL "\"N/A\""
 #define DISP_EVAC_NONREQ_STR_LITERAL "\"RECOMMENDED\""
 #define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
-
-/**
- * Task error variable type
- */
-typedef uint16_t error_code_t;
 
 /**
  * Task Prototypes
