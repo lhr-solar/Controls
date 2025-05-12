@@ -26,26 +26,6 @@
 static OS_TCB Task1_TCB;
 static CPU_STK Task1_Stk[DEFAULT_STACK_SIZE];
 
-static char *compStrings[15] = {
-	// Boolean components
-	"ltime",
-	"head",
-	"rtime",
-	"hzd",
-	"arr",
-	"mot",
-	// Non-boolean components
-	"vel",
-	"accel",
-	"soc",
-	"supp",
-	"cruiseSt",
-	"rbsSt",
-	"gear",
-	// Fault code components
-	"oserr",
-	"faulterr"};
-
 // Delay; Don't know how long
 void delay(void)
 {
@@ -73,10 +53,10 @@ void Task1()
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			.args = {{.str = compStrings[DISP_BRAKE]}, {.num = 1}}
+			.args = {{.str = (char*)DISPLAY_COMP_STR[DISP_BRAKE]}, {.num = 1}}
 		};
-
 		err = Display_Send(toggleCmd);
+		Display_Refresh();
 		delay();
 
 		// show the blinker icon
@@ -86,9 +66,10 @@ void Task1()
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			.args = {{.str = compStrings[DISP_BLINK]}, {.num = 1}}
+			.args = {{.str = (char*)DISPLAY_COMP_STR[DISP_BLINK]}, {.num = 1}}
 		};
 		err = Display_Send(toggleCmd);
+		Display_Refresh();
 		delay();
 
 		// Hide the brake icon
@@ -98,8 +79,9 @@ void Task1()
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			.args = {{.str = compStrings[DISP_BRAKE]}, {.num = 0}}};
+			.args = {{.str = (char*)DISPLAY_COMP_STR[DISP_BRAKE]}, {.num = 0}}};
 		err = Display_Send(toggleCmd);
+		Display_Refresh();
 		delay();
 
 		// Hide the blinker icon
@@ -109,8 +91,9 @@ void Task1()
 			.op = NULL,
 			.numArgs = 2,
 			.argTypes = {STR_ARG, INT_ARG},
-			.args = {{.str = compStrings[DISP_BLINK]}, {.num = 0}}};
+			.args = {{.str = (char*)DISPLAY_COMP_STR[DISP_BLINK]}, {.num = 0}}};
 		err = Display_Send(toggleCmd);
+		Display_Refresh();
 		delay();
 
 		DisplayCmd_t setCmd = (DisplayCmd_t) {
@@ -119,9 +102,61 @@ void Task1()
 			.op = "=",
 			.numArgs = 1,
 			.argTypes = {INT_ARG},
-			.args = {{.num = 50}}
+			.args = {{.num = 30}}
 		};
 		err = Display_Send(setCmd);
+		delay();
+
+		setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_SOC],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 60}}
+		};
+		err = Display_Send(setCmd);
+		Display_Refresh();
+		delay();
+
+		setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_VELOCITY],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 100}}
+		};
+		err = Display_Send(setCmd);
+		delay();
+
+		setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_VELOCITY],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 100}}
+		};
+		err = Display_Send(setCmd);
+		delay();
+
+		setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_ARRAY_PC],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 1}}
+		};
+		err = Display_Send(setCmd);
+		Display_Refresh();
+		delay();
+
+		// Test the fault screens
+
+		delay();
+		Display_Error();
 		delay();
 
 		setCmd = (DisplayCmd_t) {
@@ -136,48 +171,60 @@ void Task1()
 		delay();
 
 		setCmd = (DisplayCmd_t) {
-			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_VELOCITY],
-			.attr = "val",
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_FAULT_CODE],
+			.attr = "txt",
 			.op = "=",
 			.numArgs = 1,
-			.argTypes = {INT_ARG},
-			.args = {{.num = 100}}
+			.argTypes = {STR_ARG},
+			.args = {{.str = "\"TEST_FAULT\""}}
 		};
 		err = Display_Send(setCmd);
 		delay();
 
 		setCmd = (DisplayCmd_t) {
-			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_VELOCITY],
-			.attr = "val",
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_OS_CODE],
+			.attr = "txt",
 			.op = "=",
 			.numArgs = 1,
-			.argTypes = {INT_ARG},
-			.args = {{.num = 100}}
+			.argTypes = {STR_ARG},
+			.args = {{.str = "\"TEST_OS_FAULT\""}}
 		};
 		err = Display_Send(setCmd);
 		delay();
 
-		// Test the fault screens
-		printf("%d", err);
+		setCmd = (DisplayCmd_t) {
+			.compOrCmd = (char*)DISPLAY_COMP_STR[DISP_PACK_CURRENT],
+			.attr = "val",
+			.op = "=",
+			.numArgs = 1,
+			.argTypes = {INT_ARG},
+			.args = {{.num = 321}}
+		};
+		err = Display_Send(setCmd);
+		delay();
 
+		toggleCmd = (DisplayCmd_t){
+			.compOrCmd = "vis",
+			.attr = NULL,
+			.op = NULL,
+			.numArgs = 2,
+			.argTypes = {STR_ARG, INT_ARG},
+			.args = {{.str = (char*)DISPLAY_COMP_STR[DISP_PACK_CURR_SIGN]}, {.num = 1}}};
+		err = Display_Send(toggleCmd);
+		Display_Refresh();
 		delay();
-		delay();
-		assertOSError(OS_ERR_X);
 
-		delay();
-		Display_Error();
-		delay();
+		// assertUpdateDisplayError(UPDATEDISPLAY_ERR_DRIVER); // Just resets the display
 
 		// Uncomment one of these at a time (these will lock the scheduler)
+		// assertOSError(OS_ERR_X);
 		// assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);
 		// assertTritiumError(T_SOFTWARE_OVER_CURRENT_ERR);
-		assertUpdateDisplayError(UPDATEDISPLAY_ERR_DRIVER);
-
 
 		delay();
 	}
-
-	// while (1) {;}
+	
+	printf("%d", err);
 }
 
 int main()

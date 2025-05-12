@@ -130,6 +130,28 @@ DisplayError_t Display_Reset() {
 }
 
 /**
+ * @brief Several elements on the display do not update their
+ * state until a touch/click event is triggered. This includes the
+ * blinkers, gear selector, cruise control and regen braking indicator.
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_Refresh() {
+	DisplayCmd_t refreshCmd = {
+		.compOrCmd = "click",
+		.attr = NULL,
+		.op = NULL,
+		.numArgs = 2,
+		.argTypes = {INT_ARG,INT_ARG},
+		.args = {
+			{.num = 0},
+			{.num = 1}
+		}
+	};
+
+	return Display_Send(refreshCmd);
+}
+
+/**
  * @brief Changes the page of the display
  * @returns DisplayError_t
  */

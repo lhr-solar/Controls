@@ -26,29 +26,6 @@ UpdateDisplayError_t UpdateDisplay_Init() {
 }
 
 /**
- * @brief Several elements on the display do not update their
- * state until a touch/click event is triggered. This includes the
- * blinkers, gear selector, cruise control and regen braking indicator.
- * @returns UpdateDisplayError_t
- */
-static UpdateDisplayError_t UpdateDisplay_Refresh() {
-	DisplayCmd_t refreshCmd = {
-		.compOrCmd = "click",
-		.attr = NULL,
-		.op = NULL,
-		.numArgs = 2,
-		.argTypes = {INT_ARG,INT_ARG},
-		.args = {
-			{.num = 0},
-			{.num = 1}
-		}
-	};
-
-	DisplayError_t ret = Display_Send(refreshCmd);
-	return (ret == DISPLAY_ERR_NONE) ? UPDATEDISPLAY_ERR_NONE : UPDATEDISPLAY_ERR_DRIVER;
-}
-
-/**
  * @brief Uses component enum to make assigning component values easier.
  * Differentiates between timers, variables, and components to assign values.
  * @param comp component to set value of
@@ -56,7 +33,7 @@ static UpdateDisplayError_t UpdateDisplay_Refresh() {
  * @return UpdateDisplayError_t
  */
 static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
-	DisplayError_t ret = 0;
+	DisplayError_t ret = DISPLAY_ERR_NONE;
 	// For components that are on/off
 	if (comp <= DISP_BLINK) {
 		DisplayCmd_t visCmd = {
@@ -73,7 +50,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 		ret = Display_Send(visCmd);
 	}
 	// For components that have a non-boolean value but aren't the contactors
-	else if (comp > DISP_BLINK) {
+	else {
 		uint32_t comp_val = 0;
 		if (comp > DISP_MOTOR_PC) {
 			comp_val = g_display_comp_vals[comp];
@@ -214,7 +191,11 @@ void Task_UpdateDisplay(void *p_arg) {
 		}
 		assertUpdateDisplayError(UpdateDisplay_SetHeartbeat(g_display_comp_vals[DISP_HEARTBEAT] ? 0 : 1));
 
-		assertUpdateDisplayError(UpdateDisplay_Refresh());
+		assertUpdateDisplayError(
+			(Display_Refresh() == DISPLAY_ERR_NONE) 
+				? UPDATEDISPLAY_ERR_NONE
+				: UPDATEDISPLAY_ERR_DRIVER
+		);
 
 		// Delay of 250 ms
 		OSTimeDlyHMSM(0, 0, 0, 250, OS_OPT_TIME_HMSM_STRICT, &err);

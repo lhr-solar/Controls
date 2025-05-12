@@ -156,6 +156,8 @@ DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv);
  */
 DisplayError_t Display_SetPage(Page_t page);
 
+DisplayError_t Display_Refresh(void); 
+
 #endif
 
 
