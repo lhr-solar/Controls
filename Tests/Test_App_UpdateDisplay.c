@@ -48,16 +48,16 @@ void testPercentageCompAccel(UpdateDisplayError_t(*function)(uint8_t)){
     function(100);
     
     delay();
-     function(0);
-    }
+    function(0);
+}
 
 void testPercentageCompSOC(UpdateDisplayError_t(*function)(uint32_t)){
 
-    for(int i=0; i<100;i+=1){
+    for (int i = 0; i < 100; i++) {
         function(i);
         delay_short();
     }
-     function(0);
+    function(0);
 }
 
 void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
@@ -83,7 +83,7 @@ void Task1(void *arg)
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     UpdateDisplay_Init();
     
-     OS_ERR e;
+    OS_ERR e;
 
     OSTaskCreate(
         (OS_TCB *)&UpdateDisplay_TCB,
@@ -104,16 +104,22 @@ void Task1(void *arg)
     while(1){
         testTriStateComp(&UpdateDisplay_SetGear);
     
-    testBoolComp(&UpdateDisplay_SetArray);
-    testBoolComp(&UpdateDisplay_SetMotor);
-    testPercentageCompSOC(&UpdateDisplay_SetSOC);
-    testPercentageCompAccel(&UpdateDisplay_SetAccel);
+        testBoolComp(&UpdateDisplay_SetBrake);
+        testBoolComp(&UpdateDisplay_SetBlink);
 
-    Display_Error();
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
-    
-    Display_Reset();
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
+        testPercentageCompSOC(&UpdateDisplay_SetSOC);
+
+        assertUpdateDisplayError(UPDATEDISPLAY_ERR_NONE); // SHould continue normally
+
+        testPercentageCompAccel(&UpdateDisplay_SetAccel);
+
+        Display_Error();
+        OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
+
+        assertUpdateDisplayError(UPDATEDISPLAY_ERR_DRIVER);
+        
+        Display_Reset();
+        OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     
     }
 };
