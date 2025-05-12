@@ -75,9 +75,6 @@ void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
     delay();
 }
 
-void testContactors() {
-    
-}
 
 void Task1(void *arg)
 {   
@@ -124,8 +121,6 @@ void Task1(void *arg)
         
         Display_Reset();
         OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
-        
-        
     }
 };
 
