@@ -10,64 +10,41 @@
 static void putIOState(void);
 
 #define IO_STATE_DLY_MS 250u 
-#define IO_STATE_HEARTBEAT_DELAY (1000u)/IO_STATE_DLY_MS
+#define IO_STATE_HEARTBEAT_DELAY_MS 1000u
+#define IO_STATE_HEARTBEAT_DELAY IO_STATE_HEARTBEAT_DELAY_MS/IO_STATE_DLY_MS
 
 void putIOState(void){
-    CANDATA_t message;
+    CANDATA_t message = {0};
 
-    // Clear message before sending
-    memset(&message, 0, sizeof message);
     message.ID = IO_STATE;
 
-    // Get pedal information
+    uint8_t brake = Pedals_Read(BRAKE);
+
     message.data[0] = Pedals_Read(ACCELERATOR);
-    int8_t brake_pedal = Pedals_Read(BRAKE);
-    message.data[1] = brake_pedal;
+    message.data[1] = brake;
 
-    // If the brake is pressed far enough, send the state to turn on the brakelight
-    message.data[2] |= SWITCH_BITMAP_BRAKELIGHT((brake_pedal >= PEDAL_BRAKELIGHT_THRESHOLD) ? 1:0);
+    uint8_t s = 0;
+    s |= SWITCH_BITMAP_BRAKELIGHT((brake >= PEDAL_BRAKELIGHT_THRESHOLD));
+    s |= SWITCH_BITMAP_CRUZ_EN(0);
+    s |= SWITCH_BITMAP_CRUZ_ST(0);
+    s |= SWITCH_BITMAP_REGEN_SW(0);
+    Status_Leds_Write(CRUISE_IND_LED, getDashState(DASHBOARD_CRUZ_SET) ? ON : OFF); // Ceremonial (useless)
 
-    // Send Cruise states
-    // Cruise is always disabled for daybreak
-    message.data[2] |= SWITCH_BITMAP_CRUZ_EN(0);
-    message.data[2] |= SWITCH_BITMAP_CRUZ_ST(0);
-    Status_Leds_Write(CRUISE_IND_LED, getDashState(DASHBOARD_CRUZ_SET) ? ON : OFF);
-
-    // Regen is always disabled for daybreak
-    message.data[2] |= SWITCH_BITMAP_REGEN_SW(0);
-
-    // make default gear state off
-    message.data[2] |= SWITCH_BITMAP_FOR_SW(0);
-    message.data[2] |= SWITCH_BITMAP_REV_SW(0);
-    switch(getDashState(DASHBOARD_GEAR)){
-        case FWD:
-            message.data[2] |= SWITCH_BITMAP_FOR_SW(1);
+    switch(getDashState(DASHBOARD_GEAR)) {
+        case FWD: 
+            s |= SWITCH_BITMAP_FOR_SW(1); 
             break;
-        case REV:
-            message.data[2] |= SWITCH_BITMAP_REV_SW(1);
+        case REV: 
+            s |= SWITCH_BITMAP_REV_SW(1); 
             break;
-        default:
+        default: 
             break;
     }
 
-    // Send ignition states
-    // Make default state off
-    message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
-    message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
-    // Get_Ignition_State has a short delay associated with it, so avoid calling it often
-    switch(Get_Ignition_State()){
-        case IGN_ARR:
-            message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(1);
-            message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
-            break;
-        case IGN_MOTOR:
-            // motor comes after array state, so both are set
-            message.data[2] |= SWITCH_BITMAP_IGN_1_ARRAY(1);
-            message.data[2] |= SWITCH_BITMAP_IGN_2_MOTOR(1);
-            break;
-        default:
-            break;
-    }
+    ignition_state_t ign = Get_Ignition_State();
+    if (ign >= IGN_ARR) s |= SWITCH_BITMAP_IGN_1_ARRAY(1);
+    if (ign == IGN_MOTOR) s |= SWITCH_BITMAP_IGN_2_MOTOR(1);
+    message.data[2] = s;
 
     CANbus_Send(message, true, CARCAN);
 }
