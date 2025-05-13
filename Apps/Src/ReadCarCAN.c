@@ -62,12 +62,19 @@ static uint32_t SOC = 0;
 static uint32_t SBPV = 0;
 
 // Error assertion function prototype
-static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
+// static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
 // Getter function for charge enable, indicating that battery charging is allowed
 bool ChargeEnable_Get(void)
 {
     return chargeEnable;
+}
+
+void display_err_failed_recovery(void) {
+    UpdateDisplay_SetSBPV(SBPV);
+    UpdateDisplay_SetSOC(SOC);
+    strncpy(ErrMsg_Evac, DISP_EVAC_REQ_STR_LITERAL, ERR_CODE_LEN);
+    Display_Error();
 }
 
 /**
@@ -124,7 +131,6 @@ static bool check_MotorControllerContactor(void){
     return true;
 }
 
-
 /**
  * @brief error handler function to display the evac screen if we get a BPS trip message.
  * Callbacks happen after displaying the fault, so this screen won't get overwritten
@@ -151,6 +157,7 @@ static void handler_ReadCarCAN_ActivePrechargeFault(void)
 /**
  * @brief turns on or off the motor contactor depending on igntion and HV Contactors
  */
+
 static void updateMotorControllerContactor(void){
     ignition_state_t ignState = Get_Ignition_State();
     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
@@ -314,10 +321,11 @@ void Task_ReadCarCAN(void *p_arg)
  * Stores the error code and calls assertTaskError with the appropriate parameters and callback handler
  * @param  rcc_err error code to specify the issue encountered
  */
-static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
+void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
 {
     Error_ReadCarCAN = (error_code_t)rcc_err; // Store error code for inspection
-
+    set_errmsg_hex("RCC", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+    
     switch (rcc_err)
     {
     case READCARCAN_ERR_NONE:

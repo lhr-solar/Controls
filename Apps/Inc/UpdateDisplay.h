@@ -16,9 +16,9 @@
 #ifndef __UPDATE_DISPLAY_H
 #define __UPDATE_DISPLAY_H
 
-#include "os.h"
-#include "common.h"
-#include "Tasks.h"
+// #include "os.h"
+// #include "common.h"
+// #include "Tasks.h"
 
 #include "Display.h"
 #include "Contactors.h"
@@ -26,10 +26,10 @@
 /**
  * Error types
  */
-typedef enum{
+typedef enum {
 	UPDATEDISPLAY_ERR_NONE,
-	UPDATEDISPLAY_ERR_FIFO_PUT,     // Error putting command in fifo
-	UPDATEDISPLAY_ERR_FIFO_POP,     // Error popping command from fifo
+	// UPDATEDISPLAY_ERR_FIFO_PUT,     // Error putting command in fifo
+	// UPDATEDISPLAY_ERR_FIFO_POP,     // Error popping command from fifo
 	UPDATEDISPLAY_ERR_PARSE_COMP,   // Error parsing component/val in SetComponent
 	UPDATEDISPLAY_ERR_DRIVER        // Driver call returned an error
 } UpdateDisplayError_t;
@@ -37,10 +37,10 @@ typedef enum{
 /**
  * For display elements with three states
  */
-typedef enum{
-	STATE_0	=0,
-	STATE_1	=1,
-	STATE_2	=2
+typedef enum {
+	STATE_0	= 0,
+	STATE_1	= 1,
+	STATE_2	= 2
 } TriState_t;
 
 // For cruise control and regen
@@ -59,13 +59,6 @@ typedef enum{
  */
 
 UpdateDisplayError_t UpdateDisplay_Init();
-
-/**
- * @brief Selects visible page on the display
- * @param page which page to select
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetPage(Page_t page);
 
 /**
  * @brief Sets the state of charge value on the display
@@ -96,20 +89,6 @@ UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);
 UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent);
 
 /**
- * @brief Sets the array indicator state on the display
- * @param state array contactor on (true) or off (false)
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetArray(bool state);
-
-/**
- * @brief Sets the motor contactor indicator state on the display
- * @param state motor contactor on (true) or off (false)
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetMotor(bool state);
-
-/**
  * @brief Sets the gear selection state on the display
  * @param gear DISABLED=N, ENABLED=F, ACTIVE=R
  * @returns UpdateDisplayError_t
@@ -136,7 +115,7 @@ UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val);
 
-UpdateDisplayError_t UpdateDisplay_SetHeartbeat(uint32_t val);
+UpdateDisplayError_t UpdateDisplay_SetHeartbeat(bool val);
 
 UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val);
 
@@ -146,12 +125,17 @@ UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetBrake(bool state);
 
+UpdateDisplayError_t UpdateDisplay_SetBlink(bool state);
+
+
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0
  * @param none
  * @returns none
 */
 void UpdateDisplay_ClearQueue(void);
+
+void assertUpdateDisplayError(UpdateDisplayError_t err);
 
 #endif
 /* @} */
