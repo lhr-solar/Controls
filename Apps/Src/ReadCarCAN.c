@@ -81,12 +81,19 @@ static uint32_t SOC = 0;
 static uint32_t SBPV = 0;
 
 // Error assertion function prototype
-static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
+// static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
 // Getter function for charge enable, indicating that battery charging is allowed
 bool ChargeEnable_Get(void)
 {
     return chargeEnable;
+}
+
+void display_err_failed_recovery(void) {
+    UpdateDisplay_SetSBPV(SBPV);
+    UpdateDisplay_SetSOC(SOC);
+    strncpy(ErrMsg_Evac, DISP_EVAC_REQ_STR_LITERAL, ERR_CODE_LEN);
+    Display_Error();
 }
 
 /**
@@ -132,15 +139,11 @@ static void disableArrayPrechargeBypassContactor(void)
 
     if (ret)
     { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
+        display_err_failed_recovery();
         while (1)
         {
             ;
         }
-    }
-    else
-    {
-        UpdateDisplay_SetArray(true);
     }
 }
 
@@ -255,7 +258,7 @@ void attemptTurnArrayPBCOn(void)
     if (arrPBCComplete && chargeEnable)
     {
         Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ON, true); // Turn on
-        UpdateDisplay_SetArray(true);
+        // UpdateDisplay_SetArray(true);
         arrPBCComplete = false;
     }
 }
@@ -269,7 +272,7 @@ void attemptTurnMotorControllerPBCOn(void)
     if (mcPBCComplete)
     {
         Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, ON, true);
-        UpdateDisplay_SetMotor(true);
+        // UpdateDisplay_SetMotor(true);
     }
 }
 
@@ -280,7 +283,7 @@ void attemptTurnMotorControllerPBCOn(void)
 void turnMotorControllerPBCOff(void)
 {
     Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, OFF, true);
-    UpdateDisplay_SetMotor(false);
+    // UpdateDisplay_SetMotor(false);
 }
 
 /**
@@ -344,13 +347,11 @@ static void handler_ReadCarCAN_chargeDisable(void)
 
     if (ret)
     { // Contactor failed to turn off; display the evac screen and infinite l
-        Display_Evac(SOC, SBPV);
+        display_err_failed_recovery();
         while (1)
         {
             ;
         }
-    }else{
-        UpdateDisplay_SetArray(false);
     }
 }
 
@@ -382,16 +383,11 @@ static void handler_ReadCarCAN_contactorsDisable(void)
 
     if (ret)
     { // Contactor failed to turn off; display the evac screen and infinite loop
-        Display_Evac(SOC, SBPV);
+        display_err_failed_recovery();
         while (1)
         {
             ;
         }
-    }
-    else
-    {
-        UpdateDisplay_SetArray(false);
-        UpdateDisplay_SetMotor(false);
     }
 }
 
@@ -402,7 +398,7 @@ static void handler_ReadCarCAN_contactorsDisable(void)
 static void handler_ReadCarCAN_BPSTrip(void)
 {
     chargeEnable = false;    // Not really necessary but makes inspection less confusing
-    Display_Evac(SOC, SBPV); // Display evacuation screen
+    display_err_failed_recovery();    // Display evacuation screen
 }
 
 void Task_ReadCarCAN(void *p_arg)
@@ -556,10 +552,11 @@ void Task_ReadCarCAN(void *p_arg)
  * Stores the error code and calls assertTaskError with the appropriate parameters and callback handler
  * @param  rcc_err error code to specify the issue encountered
  */
-static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
+void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
 {
     Error_ReadCarCAN = (error_code_t)rcc_err; // Store error code for inspection
-
+    set_errmsg_hex("RCC", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+    
     switch (rcc_err)
     {
     case READCARCAN_ERR_NONE:

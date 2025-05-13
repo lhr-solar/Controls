@@ -50,17 +50,26 @@ error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 error_code_t Error_OS = OS_ERR_NONE;
 
+// Display error messages for readability
+char ErrMsg_ReadCarCAN[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_ReadTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_UpdateDisplay[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_OS[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_Evac[ERR_CODE_LEN] = DISP_EVAC_NONREQ_STR_LITERAL;
+
+
 extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
  * Error assertion-related functions
-*/
+ */
 
 void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
         Error_OS = err;
+        set_errmsg_hex("uOS", ErrMsg_OS, err);
         EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
         Display_Error(); // Display the location and error code
         while(1){;} //nonrecoverable
@@ -75,7 +84,7 @@ void _assertOSError(OS_ERR err)
  * @param errorCallback a callback function to a handler for that specific error, 
  * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately. Only applicable for recoverable errors- nonrecoverable errors will always lock
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
-*/
+ */
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
@@ -90,6 +99,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 
     if (nonrecoverable == OPT_NONRECOV) {
         EmergencyContactorOpen();
+        strncpy(ErrMsg_Evac, DISP_EVAC_REQ_STR_LITERAL, ERR_CODE_LEN);
         Display_Error(); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
     }
@@ -104,7 +114,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
         while(1) {
 
             #if DEBUG == 1
-               // Print the error that caused this fault
+            // Print the error that caused this fault
                 // printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
 
                 // // Print the errors for each applications with error data
@@ -125,7 +135,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
         OSSchedUnlock(&err); 
         // Don't err out if scheduler is still locked because of a timer callback
         if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
-           assertOSError(err); 
+        assertOSError(err); 
         }
         
     }
@@ -134,7 +144,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 /**
  * @brief For use in error handling: opens array and motor precharge bypass contactor
  * and turns on additional brakelight to signal that a critical error happened.
-*/
+ */
 void EmergencyContactorOpen() {
     // Array motor kill
     BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, OFF);
