@@ -109,6 +109,30 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
  */
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
 
+/**
+ * @brief Sets the array indicator state on the display to the current contactor value
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetArray();
+
+/**
+ * @brief Sets the motor contactor indicator state on the display to te current motor contactor value
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetMotor();
+
+/**
+ * @brief Sets the array precharge indicator state on the display to the current contactor value
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetArrayPrecharge();
+
+/**
+ * @brief Sets the motor precharge contactor indicator state on the display to te current motor contactor value
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetMotorPrecharge();
+
 UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t val);
 
 UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val);

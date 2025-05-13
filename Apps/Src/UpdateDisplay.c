@@ -63,7 +63,7 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 					comp_val = Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
 					break;
 				case DISP_MOTOR_EN:
-					comp_val = Contactors_Get(MOTOR_CONTACTOR);
+					comp_val = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
 					break;
 				case DISP_MOTOR_PC:
 					comp_val = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
@@ -131,6 +131,38 @@ UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state) {
 UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state) {
 	g_display_comp_vals[DISP_CRUISE_ST] = (uint32_t)(state);
 	return UPDATEDISPLAY_ERR_NONE;
+}
+
+/**
+ * @brief Sets the array indicator state on the display to the current contactor value
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetArray() {
+    return UpdateDisplay_SetComponent(DISP_ARRAY_EN);
+}
+
+/**
+ * @brief Sets the motor contactor indicator state on the display to te current motor contactor value
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetMotor() {
+    return UpdateDisplay_SetComponent(DISP_MOTOR_EN);
+}
+
+/**
+ * @brief Sets the array precharge indicator state on the display to the current contactor value
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetArrayPrecharge() {
+    return UpdateDisplay_SetComponent(DISP_ARRAY_PC);
+}
+
+/**
+ * @brief Sets the motor precharge contactor indicator state on the display to te current motor contactor value
+ * @returns UpdateDisplayError_t
+ */
+UpdateDisplayError_t UpdateDisplay_SetMotorPrecharge() {
+    return UpdateDisplay_SetComponent(DISP_MOTOR_PC);
 }
 
 UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t mv) {
