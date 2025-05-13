@@ -50,10 +50,9 @@ void Contactors_Init() {
 
 
     // start disabled
-    for (int contactor = 0; contactor < NUM_CONTACTORS; ++contactor) {
+    for (int contactor = 0; contactor < NUM_CONTACTORS; contactor++) {
         // Only Motor Contactor is directly controlled by Controls
         setContactor(contactor, OFF);
-        contactorState[contactor] = OFF;
     }
 
     // initialize mutex
@@ -71,7 +70,7 @@ void Contactors_Init() {
 bool Contactors_Get(contactor_t contactor) {
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
-            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR) == 0 ? ON : OFF;
+            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 ? ON : OFF;
             break;
         // Precharge Contactors are updated by ReadCarCAN.c
         case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
@@ -109,7 +108,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     setContactor(contactor, state);
 
     // the motor contactor is the only contactor that controls has a sense pin for
-    if(blocking && contactor == MOTOR_CONTROLLER_CONTACTOR) {
+    if(blocking && (contactor == MOTOR_CONTROLLER_CONTACTOR)) {
         // Need to add delay for pin to settle
         OSTimeDlyHMSM(0, 0, 0, CONTACTOR_SENSE_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
     }
