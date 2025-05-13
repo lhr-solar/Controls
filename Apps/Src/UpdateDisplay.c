@@ -54,16 +54,16 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 		uint32_t comp_val = 0;
 		if (comp > DISP_MOTOR_PC) {
 			comp_val = g_display_comp_vals[comp];
-		} else { // Contactors TODO: get this updated with other contactors
+		} else {
 			switch (comp) {
 				case DISP_ARRAY_EN:
-					//comp_val = Contactors_Get(); 
+					comp_val = Contactors_Get(ARRAY_CONTACTOR); 
 					break;
 				case DISP_ARRAY_PC:
 					comp_val = Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
 					break;
 				case DISP_MOTOR_EN:
-					//comp_val = Contactors_Get();
+					comp_val = Contactors_Get(MOTOR_CONTACTOR);
 					break;
 				case DISP_MOTOR_PC:
 					comp_val = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
