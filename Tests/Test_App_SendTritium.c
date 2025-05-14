@@ -26,7 +26,7 @@ void printFullState() {
     char gearName[20];
     switch(get_gear()) {
         case DASH_FWD:
-            strcpy(gearName, "FORWARD: \n\r--------\n\r");
+            strcpy(gearName, "FORWARD: \n\r");
             break;
         case DASH_NEU:
             strcpy(gearName, "NEUTRAL: \n\r");
@@ -101,7 +101,7 @@ void Task1(void *arg)
     assertOSError(err);
     while(get_velocitySetpoint() != MAX_VELOCITY || get_currentSetpoint() == 0.0f) {}
     printf("ACTION: Put the gear switch in neutral");
-    while(getGear != DASH_NEU) {}
+    while(getGear() != DASH_NEU) {}
 
 
     // Testing Neutral
