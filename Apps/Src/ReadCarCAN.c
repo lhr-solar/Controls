@@ -298,7 +298,7 @@ void turnMotorControllerPBCOff(void)
     UpdateDisplay_SetMotor(false);
      
     OS_ERR err;
-    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
     assertOSError(err);
 }
 
@@ -400,7 +400,7 @@ static void handler_ReadCarCAN_contactorsDisable(void)
     bool ret = (bool)Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) || (bool)Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
 
     OS_ERR err;
-    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
     assertOSError(err);
 
     if (ret)
@@ -427,8 +427,8 @@ static void handler_ReadCarCAN_BPSTrip(void)
     chargeEnable = false;    // Not really necessary but makes inspection less confusing
     Display_Evac(SOC, SBPV); // Display evacuation screen
     OS_ERR err;
-    OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
-    assertOSError(&err);
+    OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    assertOSError(err);
 }
 
 void Task_ReadCarCAN(void *p_arg)
@@ -528,7 +528,7 @@ void Task_ReadCarCAN(void *p_arg)
                 OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE, OS_OPT_POST_FLAG_SET, &err);
             }
             else {
-                OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_CAN_RUN, OS_OPT_POST_FLAG_CLR, &err);
+                OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
             }
             assertOSError(err);
             

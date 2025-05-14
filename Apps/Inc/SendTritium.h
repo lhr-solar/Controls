@@ -11,6 +11,7 @@
 #define __SENDTRITIUM_H
 
 #include "common.h"
+#include "Dashboard.h"
 
 //#define SENDTRITIUM_PRINT_MES
 
@@ -39,17 +40,6 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-// NOTE: Park behaves the exact same as neutral in a normal car
-#define FOREACH_Gear(GEAR) \
-        GEAR(FORWARD_GEAR),   \
-        GEAR(PARK_GEAR),  \
-        GEAR(REVERSE_GEAR),   \
-
-typedef enum GEAR_ENUM {
-    FOREACH_Gear(GENERATE_ENUM)
-    NUM_GEARS,
-} Gear_t;
-
 /**
  * Error types
  * 
@@ -64,7 +54,7 @@ typedef enum
 // Inputs
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
-extern Gear_t gear;
+extern gear_t gear;
 
 // Outputs
 extern float velocityObserved;
@@ -73,7 +63,7 @@ extern float velocityObserved;
 // Getter functions for local variables in SendTritium.c
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
-EXPOSE_GETTER(Gear_t, gear)
+EXPOSE_GETTER(gear_t, gear)
 EXPOSE_GETTER(float, velocityObserved)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)

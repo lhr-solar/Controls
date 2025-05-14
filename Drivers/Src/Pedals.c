@@ -42,7 +42,7 @@ void Pedals_Init(){
  * @param   pedal_t, ACCELERATOR or BRAKE as defined in enum
  * @return  percent amount the pedal has been pressed in percentage
  */
-int8_t Pedals_Read(pedal_t pedal){
+uint8_t Pedals_Read(pedal_t pedal){
     if (pedal >= NUMBER_OF_PEDALS) return 0;
     int16_t millivoltsPedal = (int16_t) BSP_ADC_Get_Millivoltage(pedal);
 

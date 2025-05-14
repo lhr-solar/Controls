@@ -20,6 +20,7 @@
 #include "Pedals.h"
 #include "ReadCarCAN.h"
 #include "Minions.h"
+#include "Dashboard.h"
 #include "ReadTritium.h"
 #include "SendCarCAN.h"
 #include "ReadCarCAN.h"
@@ -34,7 +35,7 @@
 // Inputs
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
-static Gear_t gear = PARK_GEAR;
+static gear_t gear = NEU;
 
 // Outputs
 static float currentSetpoint = 0.0f;
@@ -47,17 +48,16 @@ static float velocityObserved = 0.0f;
 // Getter functions for local variables in SendTritium.c
 GETTER(uint8_t, brakePedalPercent)
 GETTER(uint8_t, accelPedalPercent)
-GETTER(Gear_t, gear)
+GETTER(gear_t, gear)
 GETTER(float, velocityObserved)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
 
+// Gear fault counter
+static uint8_t gearFaultCnt = 0;
+
 // Function prototypes
 static void assertSendTritiumError(SendTritium_error_code_t sterr);
-
-// Boolean used to ensure that if car turns on in non-park, it'll be in park until the switch 
-// moves to park; then, it'll follow the specified gear state afterward.
-static bool parkReset = true;
 
 // Helper Functions
 
@@ -81,14 +81,17 @@ static void updateDisplayState()
     }
 
     switch(gear) {
-        case FORWARD_GEAR: 
+        case FWD: 
             UpdateDisplay_SetGear(DISP_FORWARD); 
             break;
-        case PARK_GEAR: 
+        case NEU: 
             UpdateDisplay_SetGear(DISP_PARK); 
             break;
-        case REVERSE_GEAR: 
+        case REV: 
             UpdateDisplay_SetGear(DISP_REVERSE);
+            break;
+        default:
+            UpdateDisplay_SetGear(DISP_PARK); 
             break;
     }
 }
@@ -101,18 +104,10 @@ static void readInputs()
     brakePedalPercent = Pedals_Read(BRAKE);
     accelPedalPercent = Pedals_Read(ACCELERATOR);
 
-    // Update gears
-    bool forwardSwitch = Minions_Read(FOR_SW);
-    bool reverseSwitch = Minions_Read(REV_SW);
-    bool forwardGear = (forwardSwitch && !reverseSwitch);
-    bool reverseGear = (!forwardSwitch && reverseSwitch);
-    bool parkGear = (!forwardSwitch && !reverseSwitch);
-
-    uint8_t gearFault = (uint8_t)forwardGear + (uint8_t)reverseGear + (uint8_t)parkGear;
-    static uint8_t gearFaultCnt = 0;
+    gear = getGear(); 
 
     // Check for gear fault
-    if (gearFault != 1)
+    if (gear == GEAR_FAULT_ERROR)
     {
         // Fault behavior
         if (gearFaultCnt > GEAR_FAULT_THRESHOLD)
@@ -123,20 +118,6 @@ static void readInputs()
     else
     {
         gearFaultCnt = 0;
-    }
-
-    // Set gear & update on display
-    if (parkGear) {
-        gear = PARK_GEAR;
-    }
-    else if (forwardGear) {
-        gear = FORWARD_GEAR;
-    }
-    else if (reverseGear) {
-        gear = REVERSE_GEAR;
-    }
-    else {
-        gear = PARK_GEAR;
     }
 
     // Get observed velocity
@@ -203,20 +184,20 @@ void Task_SendTritium(void *p_arg)
     };
 
     // Initialize display
-    UpdateDisplay_SetGear(PARK_GEAR);
+    UpdateDisplay_SetGear(NEU);
     UpdateDisplay_SetRegenState(DISP_DISABLED); // Not on Daybreak
     UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
     UpdateDisplay_SetAccel(accelPedalPercent); 
     UpdateDisplay_SetBrake(brakePedalPercent);
 
     // Wait for motor ready to run
-    OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_CAN_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_BLOCKING, &ticks, &err);
+    OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_BLOCKING, &ticks, &err);
     assertOSError(err);
 
     while (1)
     {
         // Check that motor is ready to run
-        OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_CAN_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_BLOCKING, &ticks, &err);
+        OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_BLOCKING, &ticks, &err);
         assertOSError(err);
 
         memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float)); // CAN message for setpoint of bus current percent
@@ -225,34 +206,25 @@ void Task_SendTritium(void *p_arg)
         updateDisplayState();
 
         // Update velocitySetpoint & currentSetpoint based on gear/state
-        if(parkReset) 
-        {
-            // If the car just turned on and isn't in park, require a reset to neutral before normal gear behavior resumes.
-            if(gear == PARK_GEAR) parkReset = false;
-            velocitySetpoint = MAX_VELOCITY;
-            currentSetpoint = 0.0f;
-        }
-        else 
-        {
-            switch(gear) {
-                case FORWARD_GEAR:
-                    velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
-                    break;
-                case PARK_GEAR:
-                    velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = 0.0f;
-                    break;
-                case REVERSE_GEAR:
-                    velocitySetpoint = -MAX_VELOCITY;
-                    currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
-                    break;
-                default:
-                    velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = 0.0f;
-                    break;
+
+        switch(gear) {
+            case FWD:
+                velocitySetpoint = MAX_VELOCITY;
+                currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                break;
+            case NEU:
+                velocitySetpoint = MAX_VELOCITY;
+                currentSetpoint = 0.0f;
+                break;
+            case REV:
+                velocitySetpoint = -MAX_VELOCITY;
+                currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                break;
+            default:
+                velocitySetpoint = MAX_VELOCITY;
+                currentSetpoint = 0.0f;
+                break;
             }
-        }
 
         memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
         memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
@@ -277,6 +249,9 @@ static void assertSendTritiumError(SendTritium_error_code_t sterr)
             break;
         case SENDTRITIUM_ERR_GEAR_FAULT:
             // Assert a nonrecoverable error that will kill the motor, turn off contactors, display a fault screen, & infinite loop
+            OS_ERR err;
+            OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+            assertOSError(err);
             throwTaskError(Error_SendTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
     }

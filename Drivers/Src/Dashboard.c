@@ -1,20 +1,37 @@
 #include "Dashboard.h"
 
-switch_state getDashState(dashPin_t pin){
-    switch(pin){
-        case(GEAR):
-            if(BSP_GPIO_Read_Pin(FORWARD_PORT, FORWARD)) {return FWD;}
-            else if(BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE)) {return REV;}
-            else {return NUE;}
-            break;
+// Boolean used to ensure that if car turns on in non-park, it'll be overriden to park 
+// until the switch is moved to park; then, it'll follow the specified gear state afterward.
+static bool neutralReset = true;
 
+gear_t getGear(void) {
+    bool fwdSwitch = BSP_GPIO_Read_Pin(FORWARD_PORT, FORWARD);
+    bool revSwitch = BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE);
+
+    // Check for gear fault
+    if(fwdSwitch && revSwitch) {return GEAR_FAULT_ERROR;}
+
+    // Check for manual override into neutral
+    if(neutralReset && !fwdSwitch && !revSwitch) {return NEU;}
+
+    // Normal check
+    neutralReset = false;
+    if(fwdSwitch) {return FWD;}
+    else if(revSwitch) {return REV;}
+    else {return NEU;}
+}
+
+switch_state_t getDashState(dash_pin_t pin){
+    switch(pin){
         case(CRUZ_SET):
             return BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? SWITCH_ON : SWITCH_OFF;
             break;
 
+
         case(CRUZ_EN):
             return BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? SWITCH_ON : SWITCH_OFF;
             break;
+
 
         default:
             return SWITCH_ERROR;

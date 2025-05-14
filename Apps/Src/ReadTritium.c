@@ -8,6 +8,7 @@
 #include "ReadTritium.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
+#include "ReadCarCAN.h"
 #include "SendCarCAN.h"
 #include "os_cfg_app.h"
 #include <string.h>
@@ -158,6 +159,8 @@ static inline void handler_ReadTritium_HallError(void)
  */
 static void assertTritiumError(tritium_error_code_t motor_err)
 {
+	OS_ERR err;
+
 	static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
 	static uint8_t motor_fault_cnt = 0;
 
@@ -170,6 +173,10 @@ static void assertTritiumError(tritium_error_code_t motor_err)
 	if (motor_err != T_HALL_SENSOR_ERR && motor_err != T_MOTOR_WATCHDOG_TRIP)
 	{
 		// Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
+		OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_ERR, OS_OPT_POST_FLAG_SET, &err);
+		assertOSError(err);
+		OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+		assertOSError(err);
 		throwTaskError(Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
 	}
@@ -179,6 +186,10 @@ static void assertTritiumError(tritium_error_code_t motor_err)
 	if (motor_err == T_HALL_SENSOR_ERR && ++hall_fault_cnt > RESTART_THRESHOLD)
 	{ // Threshold has been exceeded
 		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
+		OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_ERR, OS_OPT_POST_FLAG_SET, &err);
+		assertOSError(err);
+		OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+		assertOSError(err);
 		throwTaskError(Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
 	}
@@ -187,6 +198,10 @@ static void assertTritiumError(tritium_error_code_t motor_err)
 	if (motor_err == T_MOTOR_WATCHDOG_TRIP && ++motor_fault_cnt > RESTART_THRESHOLD)
 	{
 		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
+		OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_ERR, OS_OPT_POST_FLAG_SET, &err);
+		assertOSError(err);
+		OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+		assertOSError(err);
 		throwTaskError(Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
 		return;
 	}
