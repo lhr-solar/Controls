@@ -110,7 +110,6 @@ static void handler_ReadCarCAN_BPSTrip(void)
  */
 static void handler_ReadCarCAN_ActivePrechargeFault(void)
 {
-    chargeEnable = false;
     //Display_Evac(SOC, SBPV); // Display evacuation screen /   /   /   /   /   
     display_err_failed_recovery();
 }
@@ -146,7 +145,7 @@ void Task_ReadCarCAN(void *p_arg)
     CANDATA_t dataBuf;
 
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
-    // if we do not get a CAN message with the ID Charge_Enable within the desired interval.
+    // if we do not get a CAN message with the ID BPS_CONTACTOR within the desired interval.
     OSTmrCreate(
         &canWatchTimer,
         "CAN Watch Timer",
@@ -163,7 +162,7 @@ void Task_ReadCarCAN(void *p_arg)
     assertOSError(err);
 
     // Create the Active Precharge CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
-    // if we do not get a CAN message with the ID Charge_Enable within the desired interval.
+    // if we do not get a CAN message with the ID CONTACTOR_SENSE within the desired interval.
     OSTmrCreate(
         &prechargeCanWatchTimer,
         "Active Precharge CAN Watch Timer",

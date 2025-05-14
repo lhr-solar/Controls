@@ -71,7 +71,7 @@ void _assertOSError(OS_ERR err)
     {
         Status_Leds_Write(OS_FAULT_LED, ON);
         Error_OS = err;
-        Contactors_EmergencyDisable(); // Turn off all contactors
+        MotorContactor_EmergencyDisable(); // Turn off all contactors
         Display_Error(); // Display the location and error code
         while(1){;} //nonrecoverable
     }
@@ -100,7 +100,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     }
 
     if (nonrecoverable == OPT_NONRECOV) {
-        Contactors_EmergencyDisable();
+        MotorContactor_EmergencyDisable();
         Display_Error(); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
     }
