@@ -133,38 +133,6 @@ UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state) {
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-/**
- * @brief Sets the array indicator state on the display to the current contactor value
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetArray() {
-    return UpdateDisplay_SetComponent(DISP_ARRAY_EN);
-}
-
-/**
- * @brief Sets the motor contactor indicator state on the display to te current motor contactor value
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetMotor() {
-    return UpdateDisplay_SetComponent(DISP_MOTOR_EN);
-}
-
-/**
- * @brief Sets the array precharge indicator state on the display to the current contactor value
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetArrayPrecharge() {
-    return UpdateDisplay_SetComponent(DISP_ARRAY_PC);
-}
-
-/**
- * @brief Sets the motor precharge contactor indicator state on the display to te current motor contactor value
- * @returns UpdateDisplayError_t
- */
-UpdateDisplayError_t UpdateDisplay_SetMotorPrecharge() {
-    return UpdateDisplay_SetComponent(DISP_MOTOR_PC);
-}
-
 UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t mv) {
 	g_display_comp_vals[DISP_PACK_VOLTAGE] = (mv / 100); // mv to tenths of a volt
 	return UPDATEDISPLAY_ERR_NONE;

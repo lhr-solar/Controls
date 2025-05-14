@@ -107,9 +107,6 @@ static void handler_ReadCarCAN_contactorsDisable(void)
 
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
     Contactors_EmergencyDisable();
-
-    UpdateDisplay_SetArray(false);
-    UpdateDisplay_SetMotor(false);
 }
 
 static bool check_MotorControllerContactor(void){
@@ -245,11 +242,10 @@ void Task_ReadCarCAN(void *p_arg)
             assertOSError(err);
 
             // Set HV+, HV-, and Array Contactor states
-            // Note, does not control the Contactors, only stores the recieved state
+            // Note, does not control the Contactors, only stores the received state
             Contactors_Set(HV_PLUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT), true);
             Contactors_Set(HV_MINUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT), true);
             Contactors_Set(ARRAY_CONTACTOR, (bool)(dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT), true);
-            UpdateDisplay_SetArray(Contactors_Get(ARRAY_CONTACTOR));
             break; // End of BPS Contactor Status Updates
         }
 
@@ -287,14 +283,11 @@ void Task_ReadCarCAN(void *p_arg)
 
             // Update Motor Contactor sense state
             Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
-            UpdateDisplay_SetMotor(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR));
             // Update Array Precharge sense state
             Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
-            UpdateDisplay_SetArrayPrecharge(Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
             // Update Motor Precharge sense state
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
-            UpdateDisplay_SetMotorPrecharge(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
-
+        
             Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
             Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
 
