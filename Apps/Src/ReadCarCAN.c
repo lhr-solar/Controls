@@ -16,33 +16,15 @@
 #include "Display.h"
 #include "daybreak_pins.h"
 
-// Length of the array and motor PBC saturation buffers
-#define SAT_BUF_LENGTH 5
-
-// The Array/Motor Controller Saturation Threshold is used to determine if Controls has
-//      received a sufficient number of BPS's HV Array/Plus-Minus Enable Messages.
-//      BPS Array and Plus/Minus saturation threshold is halfway between 0 and max saturation value.
-#define ARRAY_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4)
-#define PLUS_MINUS_SATURATION_THRESHOLD (((SAT_BUF_LENGTH + 1) * SAT_BUF_LENGTH) / 4)
 
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 500u                                                             // 500 ms
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) // 1000 for ms -> s conversion
 
-// Precharge Delay times in milliseconds
-#define PRECHARGE_PLUS_MINUS_DELAY 100u // 100 ms, as this the smallest time delay that the RTOS can work with
-#define PRECHARGE_ARRAY_DELAY 100u      // 100 ms
-#define ARRAY_PRECHARGE_BYPASS_DLY_TMR_TS ((PRECHARGE_ARRAY_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
-#define MOTOR_CONTROLLER_PRECHARGE_BYPASS_DLY_TMR_TS ((PRECHARGE_PLUS_MINUS_DELAY * OS_CFG_TMR_TASK_RATE_HZ) / (1000u))
-
 // High Voltage BPS Contactor bit mapping
 #define HV_ARRAY_CONTACTOR_BIT 1 // 0b001
 #define HV_MINUS_CONTACTOR_BIT 2 // 0b010
 #define HV_PLUS_CONTACTOR_BIT 4  // 0b100
-
-// Saturation messages
-#define DISABLE_SATURATION_MSG -1
-#define ENABLE_SATURATION_MSG 1
 
 // State of Charge scalar to scale it to correct fixed point
 #define SOC_SCALER 1000000
@@ -53,10 +35,6 @@ static OS_TMR canWatchTimer;
 // Active Precharge CAN watchdog timer variable
 static OS_TMR prechargeCanWatchTimer;
 
-// NOTE: This should not be written to anywhere other than ReadCarCAN. If the need arises, a mutex to protect it must be added.
-// Indicates whether or not regenerative braking / charging is enabled.
-static bool chargeEnable = false; // Enable (High message) of BPS high voltage (HV) array contactor
-
 // State of Charge (SOC) and supplemental battery pack voltage (SBPV) value intialization
 static uint32_t SOC = 0;
 static uint32_t SBPV = 0;
@@ -64,11 +42,6 @@ static uint32_t SBPV = 0;
 // Error assertion function prototype
 // static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
-// Getter function for charge enable, indicating that battery charging is allowed
-bool ChargeEnable_Get(void)
-{
-    return chargeEnable;
-}
 
 void display_err_failed_recovery(void) {
     UpdateDisplay_SetSBPV(SBPV);
@@ -87,26 +60,14 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg)
     assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
 
-
-/**
- * @brief error handler callback for disabling charging,
- * kills contactor and turns off display
- */
-static void handler_ReadCarCAN_chargeDisable(void)
-{
-    // TODO: idk rlly why this exists
-    Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, OFF, true);
-}
-
 /**
  * @brief error handler callback for disabling charging,
  * kills contactor and turns off display
  */
 static void handler_ReadCarCAN_contactorsDisable(void)
 {
-
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    Contactors_EmergencyDisable();
+    MotorContactor_EmergencyDisable();
 }
 
 static bool check_MotorControllerContactor(void){
@@ -134,10 +95,11 @@ static bool check_MotorControllerContactor(void){
  */
 static void handler_ReadCarCAN_BPSTrip(void)
 {
+    MotorContactor_EmergencyDisable();
     Status_Leds_Write(BPS_FAULT_LED, ON); // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
 
-    chargeEnable = false;    // Not really necessary but makes inspection less confusing
+    // chargeEnable = false;    // Not really necessary but makes inspection less confusing
     //Display_Evac(SOC, SBPV); // Display evacuation screen             /   /////////////////////////
     display_err_failed_recovery();
 }
@@ -233,7 +195,7 @@ void Task_ReadCarCAN(void *p_arg)
             // BPS has a fault and we need to enter fault state
             if(dataBuf.data[0] == BPS_TRIP_MESSAGE)
             {
-                // kill contactors and enter a nonrecoverable fault
+                // kill motor contactor and enter a nonrecoverable fault
                 assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);            
             }
             break;
@@ -330,15 +292,7 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
     case READCARCAN_ERR_NONE:
         break;
 
-    case READCARCAN_ERR_CHARGE_DISABLE: // Received a charge disable msg and need to turn off array contactor
-        throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_chargeDisable, OPT_LOCK_SCHED, OPT_RECOV);
-        break;
-
     case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
-        throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_RECOV);
-        break;
-
-    case READCARCAN_ERR_DISABLE_CONTACTORS_MSG: // Ignition turned to off or turned to last two simultaneously
         throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_RECOV);
         break;
 

@@ -78,11 +78,11 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking);
  *          Note: NOT not turn off Contactors not controlled by Controls
  * @return  None
  */
-void Contactors_EmergencyDisable(void);
+void MotorContactor_EmergencyDisable(void);
 
 /**
- * @brief   Disables all contactors
- *          Note: NOT not turn off Contactors not controlled by Controls, only sets their status to off
+ * @brief   Disables motor contactor and bypasses mutex
+ *          Should only used in a fault state
  * @param   None
  * @return  None
  */

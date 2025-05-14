@@ -136,14 +136,11 @@ void Contactors_DisableAll(){
 }
 
 /**
- * @brief   Disables all contactors and bypasses mutex
+ * @brief   Disables motor contactor and bypasses mutex
  *          Should only used in a fault state
- *          Note: NOT not turn off Contactors not controlled by Controls, only sets their status to off
  * @param   None
  * @return  None
  */
-void Contactors_EmergencyDisable() {
-    for (uint8_t i = 0; i < NUM_CONTACTORS; i++) {
-        setContactor(i, OFF);
-    }
+void MotorContactor_EmergencyDisable() {
+    setContactor(MOTOR_CONTROLLER_CONTACTOR, OFF);
 }

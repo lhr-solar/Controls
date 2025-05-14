@@ -206,24 +206,24 @@ void Task_Init(void *p_arg){
 
 void HardFault_Handler(){
     __disable_irq();
-    Contactors_EmergencyDisable();
+    MotorContactor_EmergencyDisable();
     while(1){}
 }
 
 void MemManage_Handler(){
     __disable_irq();
-    Contactors_EmergencyDisable();
+    MotorContactor_EmergencyDisable();
     while(1){}
 }
 
 void BusFault_Handler(){
     __disable_irq();
-    Contactors_EmergencyDisable();
+    MotorContactor_EmergencyDisable();
     while(1){}
 }
 
 void UsageFault_Handler(){
     __disable_irq();
-    Contactors_EmergencyDisable();
+    MotorContactor_EmergencyDisable();
     while(1){}
 }
