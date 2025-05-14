@@ -9,32 +9,32 @@ gear_t getGear(void) {
     bool revSwitch = BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE);
 
     // Check for gear fault
-    if(fwdSwitch && revSwitch) {return GEAR_FAULT_ERROR;}
+    if(fwdSwitch && revSwitch) {return DASH_GEAR_FAULT_ERROR;}
 
     // Check for manual override into neutral
-    if(neutralReset && !fwdSwitch && !revSwitch) {return NEU;}
+    if(neutralReset && !fwdSwitch && !revSwitch) {return DASH_NEU;}
 
     // Normal check
     neutralReset = false;
-    if(fwdSwitch) {return FWD;}
-    else if(revSwitch) {return REV;}
-    else {return NEU;}
+    if(fwdSwitch) {return DASH_FWD;}
+    else if(revSwitch) {return DASH_REV;}
+    else {return DASH_NEU;}
 }
 
-switch_state_t getDashState(dash_pin_t pin){
+switch_state_t getSwitchState(dash_pin_t pin){
     switch(pin){
-        case(CRUZ_SET):
-            return BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? SWITCH_ON : SWITCH_OFF;
+        case(DASH_CRUZ_SET):
+            return BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SWITCH_ON : DASH_SWITCH_OFF;
             break;
 
 
-        case(CRUZ_EN):
-            return BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? SWITCH_ON : SWITCH_OFF;
+        case(DASH_CRUZ_EN):
+            return BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SWITCH_ON : DASH_SWITCH_OFF;
             break;
 
 
         default:
-            return SWITCH_ERROR;
+            return DASH_SWITCH_ERROR;
             break;
     }
 }

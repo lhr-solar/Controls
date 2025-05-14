@@ -25,13 +25,13 @@ void printFullState() {
     printf("-------------------\n\r");
     char gearName[20];
     switch(get_gear()) {
-        case FWD:
+        case DASH_FWD:
             strcpy(gearName, "FORWARD: \n\r--------\n\r");
             break;
-        case NEU:
+        case DASH_NEU:
             strcpy(gearName, "NEUTRAL: \n\r");
             break;
-        case REV:
+        case DASH_REV:
             strcpy(gearName, "REVERSE: \n\r");
             break;
         default:
@@ -92,7 +92,7 @@ void Task1(void *arg)
     while(BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE) || BSP_GPIO_Read_Pin(FORWARD_PORT, FORWARD)) {} // Waiting until in neutral 
     getGear();
     printf("ACTION: Put the gear switch in forward\n\r");
-    while(getGear() != FWD) {} // Waiting until in forward
+    while(getGear() != DASH_FWD) {} // Waiting until in forward
     printf("ACTION: Hold accel pedal pressed down\n\r");
     // NOTE: Check for <= ACCEL_PEDAL_THRESHOLD + 5 since minimum for current to be sent to motor is ACCEL_PEDAL_THRESHOLD
     while(Pedals_Read(ACCELERATOR) <= ACCEL_PEDAL_THRESHOLD + 5) {} 
@@ -101,7 +101,7 @@ void Task1(void *arg)
     assertOSError(err);
     while(get_velocitySetpoint() != MAX_VELOCITY || get_currentSetpoint() == 0.0f) {}
     printf("ACTION: Put the gear switch in neutral");
-    while(getGear != NEU) {}
+    while(getGear != DASH_NEU) {}
 
 
     // Testing Neutral
@@ -123,7 +123,7 @@ void Task1(void *arg)
     printf("\n\rTesting: Neutral -> Forward Drive==============\n\r");
     printf("ACTION: Switch to forward gear\n\r");
     printFullState();
-    while(get_gear() != FWD){}
+    while(get_gear() != DASH_FWD){}
     printFullState();
     printf("============================================\n\r");
 
@@ -144,7 +144,7 @@ void Task1(void *arg)
     printf("\n\rTesting: Forward Drive -> Reverse Drive======\n\r");
     printf("ACTION: Switch to reverse gear\n\r");
     printFullState();
-    while(get_gear() != REV){}
+    while(get_gear() != DASH_REV){}
     printFullState();
     // Quick check to ensure velcoity setpoint is -MAX_VELOCITY
     while(get_velocitySetpoint() != -MAX_VELOCITY) {}
@@ -167,7 +167,7 @@ void Task1(void *arg)
     printf("\n\rTesting: Reverse Drive -> Forward Drive======\n\r");
     printf("ACTION: Switch to forward gear\n\r");
     printFullState();
-    while(get_gear() != FWD){}
+    while(get_gear() != DASH_FWD){}
     printFullState();
     printf("============================================\n\r");
 
@@ -175,7 +175,7 @@ void Task1(void *arg)
     printf("\n\rTesting: Forward Drive -> Neutral Drive=========\n\r");
     printf("ACTION: Switch to neutral gear\n\r");
     printFullState();
-    while(get_gear() != NEU){}
+    while(get_gear() != DASH_NEU){}
     printFullState();
     printf("============================================\n\r");
 
@@ -183,10 +183,10 @@ void Task1(void *arg)
     printf("\n\rTesting: Reverse Drive -> Neutral Drive=========\n\r");
     printf("ACTION: Switch to reverse gear\n\r");
     printFullState();
-    while(get_gear() != REV){}
+    while(get_gear() != DASH_REV){}
     printFullState();
     printf("ACTION: Switch to neutral gear\n\r");
-    while(get_gear() != NEU) {}
+    while(get_gear() != DASH_NEU) {}
     printFullState();
     printf("============================================\n\r");
 

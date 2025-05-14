@@ -23,7 +23,7 @@
 
 // Synchronization-protected event flag group signaling BPS_SAFE, if BPS
 // has been checked, & motor ready to run status
-OS_FLAG_GRP BPS_Motor_Status_Flags;
+extern OS_FLAG_GRP BPS_Motor_Status_Flags;
 
 /**
  * @brief Initialize ReadCarCAN

@@ -5,21 +5,21 @@
 #include "BSP_GPIO.h"
 
 #define FOREACH_Gear(GEAR) \
-        GEAR(NEU), \
-        GEAR(FWD), \
-        GEAR(REV), \
+        GEAR(DASH_NEU), \
+        GEAR(DASH_FWD), \
+        GEAR(DASH_REV), \
 
 typedef enum {
-    GEAR_FAULT_ERROR = -1,
+    DASH_GEAR_FAULT_ERROR = -1,
     FOREACH_Gear(GENERATE_ENUM)
-    NUM_GEARS,
+    DASH_NUM_GEARS,
 } gear_t;
 
 typedef enum{
-    SWITCH_ERROR = -1,
-    SWITCH_OFF,
-    SWITCH_ON,
-    NUM_SWITCH_STATES,
+    DASH_SWITCH_ERROR = -1,
+    DASH_SWITCH_OFF,
+    DASH_SWITCH_ON,
+    DASH_NUM_SWITCH_STATES,
 } switch_state_t;
 
 typedef enum{
@@ -27,9 +27,9 @@ typedef enum{
     //BRAKE_LED,
     // GEAR = 0,
     //HBT,
-    CRUZ_SET,
-    CRUZ_EN,
-    NUM_DASH_PINS
+    DASH_CRUZ_SET,
+    DASH_CRUZ_EN,
+    DASH_NUM_PINS,
 } dash_pin_t;
 
 /**

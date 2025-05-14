@@ -35,7 +35,7 @@
 // Inputs
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
-static gear_t gear = NEU;
+static gear_t gear = DASH_NEU;
 
 // Outputs
 static float currentSetpoint = 0.0f;
@@ -81,13 +81,13 @@ static void updateDisplayState()
     }
 
     switch(gear) {
-        case FWD: 
+        case DASH_FWD: 
             UpdateDisplay_SetGear(DISP_FORWARD); 
             break;
-        case NEU: 
+        case DASH_NEU: 
             UpdateDisplay_SetGear(DISP_PARK); 
             break;
-        case REV: 
+        case DASH_REV: 
             UpdateDisplay_SetGear(DISP_REVERSE);
             break;
         default:
@@ -107,7 +107,7 @@ static void readInputs()
     gear = getGear(); 
 
     // Check for gear fault
-    if (gear == GEAR_FAULT_ERROR)
+    if (gear == DASH_GEAR_FAULT_ERROR)
     {
         // Fault behavior
         if (gearFaultCnt > GEAR_FAULT_THRESHOLD)
@@ -184,7 +184,7 @@ void Task_SendTritium(void *p_arg)
     };
 
     // Initialize display
-    UpdateDisplay_SetGear(NEU);
+    UpdateDisplay_SetGear(DASH_NEU);
     UpdateDisplay_SetRegenState(DISP_DISABLED); // Not on Daybreak
     UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
     UpdateDisplay_SetAccel(accelPedalPercent); 
@@ -208,15 +208,15 @@ void Task_SendTritium(void *p_arg)
         // Update velocitySetpoint & currentSetpoint based on gear/state
 
         switch(gear) {
-            case FWD:
+            case DASH_FWD:
                 velocitySetpoint = MAX_VELOCITY;
                 currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
                 break;
-            case NEU:
+            case DASH_NEU:
                 velocitySetpoint = MAX_VELOCITY;
                 currentSetpoint = 0.0f;
                 break;
-            case REV:
+            case DASH_REV:
                 velocitySetpoint = -MAX_VELOCITY;
                 currentSetpoint = (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
                 break;
