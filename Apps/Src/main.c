@@ -19,6 +19,7 @@
 #include "Pedals.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
+#include "ReadCarCAN.h"
 #include "daybreak_pins.h"
 #include "BSP_GPIO.h"
 
