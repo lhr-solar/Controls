@@ -138,7 +138,8 @@ static void handler_ReadCarCAN_BPSTrip(void)
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
 
     chargeEnable = false;    // Not really necessary but makes inspection less confusing
-    Display_Evac(SOC, SBPV); // Display evacuation screen
+    //Display_Evac(SOC, SBPV); // Display evacuation screen             /   /////////////////////////
+    display_err_failed_recovery();
 }
 
 /**
@@ -148,7 +149,8 @@ static void handler_ReadCarCAN_BPSTrip(void)
 static void handler_ReadCarCAN_ActivePrechargeFault(void)
 {
     chargeEnable = false;
-    Display_Evac(SOC, SBPV); // Display evacuation screen
+    //Display_Evac(SOC, SBPV); // Display evacuation screen /   /   /   /   /   
+    display_err_failed_recovery();
 }
 
 /**
@@ -234,6 +236,7 @@ void Task_ReadCarCAN(void *p_arg)
                 // kill contactors and enter a nonrecoverable fault
                 assertReadCarCANError(READCARCAN_ERR_BPS_TRIP);            
             }
+            break;
         }
         case BPS_CONTACTOR:
         {

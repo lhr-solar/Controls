@@ -99,7 +99,7 @@ UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent) {	// Integer percent
 }
 
 UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv) {
-	g_display_comp_vals[DISP_SUPP_BATT] = mv;
+	g_display_comp_vals[DISP_SUPP_BATT] = (mv / 100); // mv to tenths of a volt;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
