@@ -69,8 +69,9 @@ void Contactors_Init() {
  */ 
 bool Contactors_Get(contactor_t contactor) {
     switch (contactor) {
-        case MOTOR_CONTROLLER_CONTACTOR:
-            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 ? ON : OFF;
+        case MOTOR_CONTROLLER_CONTACTOR: //TODO: Switch back to default high once we've switched to Controls Leader rev. 2
+            //contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 ? ON : OFF;
+            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 ? OFF : ON;
             break;
         // Precharge Contactors are updated by ReadCarCAN.c
         case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
