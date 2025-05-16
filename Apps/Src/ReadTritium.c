@@ -31,7 +31,7 @@ CANDATA_t motorstatusmsg = {0};
 static OS_TMR MotorWatchdog;
 
 // Function prototypes
-static void assertTritiumError(tritium_error_code_t motor_err);
+// static void assertTritiumError(tritium_error_code_t motor_err);
 
 // Callback for motor watchdog
 static void motorWatchdog(void *tmr, void *p_arg)
@@ -157,14 +157,17 @@ static inline void handler_ReadTritium_HallError(void)
  * or locking the scheduler and entering a nonrecoverable fault (all other cases)
  * @param   motor_err Bitmap with motor error codes to check
  */
-static void assertTritiumError(tritium_error_code_t motor_err)
+void assertTritiumError(tritium_error_code_t motor_err)
 {
 	OS_ERR err;
 
 	static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
 	static uint8_t motor_fault_cnt = 0;
 
-	Error_ReadTritium = (error_code_t)motor_err; // Store error codes for inspection info
+	// Store error codes for inspection info
+	Error_ReadTritium = (error_code_t) motor_err; 
+	set_errmsg_hex("MCO", ErrMsg_ReadTritium, motor_err);
+
 	if (motor_err == T_NONE || motor_err == T_WATCHDOG_LAST_RESET_ERR)
 		return; // No error, return
 				// NOTE: If we had >1 recoverable errors,

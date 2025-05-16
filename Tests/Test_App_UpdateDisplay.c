@@ -6,73 +6,84 @@
 // #include "bsp.h"
 // #include "Contactors.h"
 #include "UpdateDisplay.h"
+#include "ReadCarCAN.h"
+#include "ReadTritium.h"
 
 
 static OS_TCB Task1TCB;
 static CPU_STK Task1Stk[DEFAULT_STACK_SIZE];
 
-void testBoolComp(UpdateDisplayError_t(*function)(bool)){
+void delay(){
     OS_ERR e;
-
-    function(false);
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    function(true);
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    function(false);
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    OSTimeDlyHMSM(0, 0, 0, 750, OS_OPT_TIME_HMSM_STRICT, &e);
 }
 
-void testPercentageComp(UpdateDisplayError_t(*function)(uint8_t)){
+void delay_short(){
     OS_ERR e;
+    OSTimeDlyHMSM(0, 0, 0, 50, OS_OPT_TIME_HMSM_STRICT, &e);
+}
 
+void testBoolComp(UpdateDisplayError_t(*function)(bool)){
+    function(false);
+    delay();
+    function(true);
+    delay();
+    function(false);
+    delay();
+}
+
+void testPercentageCompAccel(UpdateDisplayError_t(*function)(uint8_t)){
     function(0);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(25);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(50);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(75);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(100);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(0);
-    
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+}
+
+void testPercentageCompSOC(UpdateDisplayError_t(*function)(uint32_t)){
+
+    for (int i = 0; i < 100; i++) {
+        function(i);
+        delay_short();
+    }
+    function(0);
 }
 
 void testTriStateComp(UpdateDisplayError_t(*function)(TriState_t)){
-    OS_ERR e;
-
     function(STATE_0); // DISP_DISABLED & DISP_NEUTRAL
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(STATE_1); // DISP_ENABLED & DISP_FORWARD
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(STATE_2); // DISP_ACTIVE & DISP_REVERSE
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
     function(STATE_0);
     
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+    delay();
 }
+
 
 void Task1(void *arg)
 {   
-    DisplayError_t error;
 
     CPU_Init();
-    error = Display_Init();
+    Display_Init();
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     UpdateDisplay_Init();
     
-
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
-
     OS_ERR e;
 
     OSTaskCreate(
@@ -91,46 +102,25 @@ void Task1(void *arg)
         (OS_ERR *)&e);
     assertOSError(e);
 
-    OSTimeDlyHMSM(0, 0, 7, 0, OS_OPT_TIME_HMSM_STRICT, &e);
+    while(1){
+        testTriStateComp(&UpdateDisplay_SetGear);
     
-    testTriStateComp(&UpdateDisplay_SetGear);
-    
-    UpdateDisplay_SetVelocity(12);
-    
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    UpdateDisplay_SetVelocity(345);
-    
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    UpdateDisplay_SetVelocity(6789);
-    
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+        testBoolComp(&UpdateDisplay_SetBrake);
+        testBoolComp(&UpdateDisplay_SetBlink);
 
-    testTriStateComp(&UpdateDisplay_SetCruiseState);
-    testTriStateComp(&UpdateDisplay_SetRegenState);
-    testBoolComp(&UpdateDisplay_SetMotor);
-    testBoolComp(&UpdateDisplay_SetArray);
-    testPercentageComp(&UpdateDisplay_SetSOC);
+        testPercentageCompSOC(&UpdateDisplay_SetSOC);
 
-    UpdateDisplay_SetSBPV(12);
-    
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    UpdateDisplay_SetSBPV(345);
-    
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
-    UpdateDisplay_SetSBPV(6789);
-    
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &e);
+        assertUpdateDisplayError(UPDATEDISPLAY_ERR_NONE); // SHould continue normally
 
-    testPercentageComp(&UpdateDisplay_SetAccel);
+        testPercentageCompAccel(&UpdateDisplay_SetAccel);
 
-    Display_Error((error_code_t)error); // Testing Display_Error
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
-    
-    Display_Reset();
-    OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
-    
-    while (1) {
-        OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &e);
+        Display_Error();
+        OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
+
+        assertUpdateDisplayError(UPDATEDISPLAY_ERR_DRIVER);
+        
+        Display_Reset();
+        OSTimeDlyHMSM(0, 0, 3, 0, OS_OPT_TIME_HMSM_STRICT, &e);
     }
 };
 

@@ -5,146 +5,371 @@
  *
  * This contains functions relevant to sending/receiving messages
  * to/from our Nextion display.
- * 
+ *
  */
 
 #include "Display.h"
-#include "bsp.h"   // for writing to UART
 #include "Tasks.h" // for os and fault error codes
+#include "bsp.h"   // for writing to UART
 
-#define DISP_OUT DISPLAY
-#define MAX_MSG_LEN 32
-#define MAX_ARG_LEN 16
+#include "ReadCarCAN.h"
+#include "ReadTritium.h"
+#include "UpdateDisplay.h"
+
 // Assignment commands have only 1 arg, an operator, and an attribute
-#define isAssignCmd(cmd) (cmd.compOrCmd != NULL && cmd.op != NULL && cmd.attr != NULL && cmd.numArgs == 1)
-// Operational commands have no attribute and no operator, just a command and >= 0 arguments
-#define isOpCmd(cmd) (cmd.op == NULL && cmd.attr == NULL)
+#define IS_ASSIGN_CMD(cmd)                              \
+    (cmd.compOrCmd != NULL && cmd.op != NULL &&         \
+     cmd.attr != NULL && cmd.numArgs == 1)
+// Operational commands have no attribute and no operator, just a command and
+// >= 0 arguments
+#define IS_OP_CMD(cmd) (cmd.op == NULL && cmd.attr == NULL)
 
 static const char *TERMINATOR = "\xff\xff\xff";
 
-DisplayError_t Display_Init(){
-	BSP_UART_Init(DISP_OUT);
-    
-	return Display_Reset();
+// Hold component values for display
+uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS] = {0};
+
+// Strings for each component id
+const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
+    // Boolean components
+    "hb", "cs", "mcs", "brake", "blink",
+    // Contactors
+    "arren", "arrpc", "moten", "motpc", // technically boolean but the logic is cooked
+    // Non-boolean components
+    "vel", "accel", "soc", "supp", "cruiseSt", "rbsSt", "pv", "pc", "pt", "mcv",
+    "mcc", "heatsink", "gear",
+    // Fault code components
+    "oserr", "faulterr", "evac"
+};
+
+
+/**
+ * @brief Initializes the display driver
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_Init() {
+    BSP_UART_Init(DISPLAY);
+    return Display_Reset();
 }
 
-DisplayError_t Display_Send(DisplayCmd_t cmd){
-	char msgArgs[MAX_MSG_LEN];
-	if (isAssignCmd(cmd)){
-		if (cmd.argTypes[0] == INT_ARG){
-			sprintf(msgArgs, "%d", (int)cmd.args[0].num);
-		}
-		else{
-			if (cmd.args[0].str == NULL){return DISPLAY_ERR_PARSE;}
-			sprintf(msgArgs, "%s", cmd.args[0].str);
-		}
+/**
+ * @brief Sends a command to the display
+ * @param cmd command to send
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_Send(DisplayCmd_t cmd) {
+    char msgArgs[MAX_MSG_LEN] = {0}; // Initialize to avoid garbage values
 
-		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
-		BSP_UART_Write(DISP_OUT, ".", 1);
-		BSP_UART_Write(DISP_OUT, cmd.attr, strlen(cmd.attr));
-		BSP_UART_Write(DISP_OUT, cmd.op, strlen(cmd.op));
-	}
-	else if (isOpCmd(cmd)){
-		msgArgs[0] = ' '; // No args
-		msgArgs[1] = '\0';
-		if (cmd.numArgs > MAX_ARGS){return DISPLAY_ERR_OTHER;}
-		if (cmd.numArgs >= 1){ // If there are arguments
-			for (int i = 0; i < cmd.numArgs; i++){
-				char arg[MAX_ARG_LEN];
-				if (cmd.argTypes[i] == INT_ARG){
-					sprintf(arg, "%d", (int)cmd.args[i].num);
-				}
-				else{
-					sprintf(arg, "%s", cmd.args[i].str);
-				}
+    if (IS_ASSIGN_CMD(cmd)) {
+        if (cmd.argTypes[0] == INT_ARG) {
+            sprintf(msgArgs, "%d", (int) cmd.args[0].num);
+        } else { // STR_ARG
+            if (cmd.args[0].str == NULL)
+            return DISPLAY_ERR_PARSE;
+            sprintf(msgArgs, "%s", cmd.args[0].str);
+        }
 
-				strcat(msgArgs, arg);
+        BSP_UART_Write(DISPLAY, cmd.compOrCmd, strlen(cmd.compOrCmd));
+        BSP_UART_Write(DISPLAY, ".", 1);
+        BSP_UART_Write(DISPLAY, cmd.attr, strlen(cmd.attr));
+        BSP_UART_Write(DISPLAY, cmd.op, strlen(cmd.op));
+    } else if (IS_OP_CMD(cmd)) {
+        if (cmd.numArgs > MAX_ARGS) return DISPLAY_ERR_OTHER;
 
-				if (i < cmd.numArgs - 1){ // delimiter
-					strcat(msgArgs, ",");
-				}
-			}
-		}
-		BSP_UART_Write(DISP_OUT, cmd.compOrCmd, strlen(cmd.compOrCmd));
-	}
-	else{ // Error parsing command struct
-		return DISPLAY_ERR_PARSE;
-	}
+        msgArgs[0] = ' '; // No args
+        msgArgs[1] = '\0';
+        if (cmd.numArgs >= 1) { // If there are arguments
+            for (int i = 0; i < cmd.numArgs; i++) {
+                char arg[MAX_ARG_LEN];
+                if (cmd.argTypes[i] == INT_ARG) {
+                    sprintf(arg, "%d", (int) cmd.args[i].num);
+                } else { // STR_ARG
+                    if (cmd.args[i].str == NULL) return DISPLAY_ERR_PARSE;
+                    sprintf(arg, "%s", cmd.args[i].str);
+                }
 
-	if (cmd.numArgs >= 1){ // If there are arguments
-		BSP_UART_Write(DISP_OUT, msgArgs, strlen(msgArgs));
-	}
+                strcat(msgArgs, arg);
 
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+                // Add delimiter
+                if (i < cmd.numArgs - 1) strcat(msgArgs, ",");
+            }
+        }
 
-	return DISPLAY_ERR_NONE;
+        BSP_UART_Write(DISPLAY, cmd.compOrCmd, strlen(cmd.compOrCmd));
+    } 
+    else { // Error parsing command struct
+        return DISPLAY_ERR_PARSE;
+    }
+
+    // If there are arguments, write them
+    if (cmd.numArgs >= 1) { 
+        BSP_UART_Write(DISPLAY, msgArgs, strlen(msgArgs));
+    }
+
+    BSP_UART_Write(DISPLAY, (char *)TERMINATOR, strlen(TERMINATOR));
+
+    return DISPLAY_ERR_NONE;
 }
 
-DisplayError_t Display_Reset(){
-	DisplayCmd_t restCmd = {
-		.compOrCmd = "rest",
+/**
+ * @brief Resets the display
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_Reset() {
+    DisplayCmd_t restCmd = {
+        .compOrCmd = "rest", 
+        .attr = NULL, 
+        .op = NULL, 
+        .numArgs = 0
+    };
+
+    // Terminates any in progress command
+    BSP_UART_Write(DISPLAY, (char *)TERMINATOR, strlen(TERMINATOR));
+
+    return Display_Send(restCmd);
+}
+
+/**
+ * @brief Several elements on the display do not update their
+ * state until a touch/click event is triggered. This includes the
+ * blinkers, gear selector, cruise control and regen braking indicator.
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_Refresh() {
+	DisplayCmd_t refreshCmd = {
+		.compOrCmd = "click",
 		.attr = NULL,
 		.op = NULL,
-		.numArgs = 0};
+		.numArgs = 2,
+		.argTypes = {INT_ARG,INT_ARG},
+		.args = {
+			{.num = 0},
+			{.num = 1}
+		}
+	};
 
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
-
-	return Display_Send(restCmd);
+	return Display_Send(refreshCmd);
 }
 
-DisplayError_t Display_Error(){
+/**
+ * @brief Changes the page of the display
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_SetPage(Page_t page) {
+	DisplayCmd_t pgCmd = {
+		.compOrCmd = "page",
+		.attr = NULL,
+		.op = NULL,
+		.numArgs = 1,
+		.argTypes = {INT_ARG},
+		.args = {{.num = page}}
+	};
 
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
-
-	char faultPage[7] = "page 2";
-	BSP_UART_Write(DISP_OUT, faultPage, strlen(faultPage));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-
-    char setFaultCode[20];
-    
-    sprintf(setFaultCode, "%s%d", "oserr.val=", (uint16_t)Error_OS);
-    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-
-    sprintf(setFaultCode, "%s%d", "rccerr.val=", (uint16_t)Error_ReadCarCAN);
-    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-
-    sprintf(setFaultCode, "%s%d", "sterr.val=", (uint16_t)Error_SendTritium);
-    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-
-    sprintf(setFaultCode, "%s%d", "merr.val=", (uint16_t)Error_ReadTritium);
-    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-
-    sprintf(setFaultCode, "%s%d", "disperr.val=", (uint16_t)Error_UpdateDisplay);
-    BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-    memset(setFaultCode, 0, strlen(setFaultCode) * sizeof(char));
-	
-	
-	// BSP_UART_Write(DISP_OUT, setFaultCode, strlen(setFaultCode));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
-
-	return DISPLAY_ERR_NONE;
+	return Display_Send(pgCmd);
 }
 
-DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv){
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR)); // Terminates any in progress command
+/**
+ * @brief Overwrites any processing commands and triggers the display fault screen
+ * @returns DisplayError_t
+ */
+DisplayError_t Display_Error() {
+    // Terminates any in progress command
+    BSP_UART_Write(DISPLAY, (char*) TERMINATOR, strlen(TERMINATOR)); 
 
-	char evacPage[7] = "page 3";
-	BSP_UART_Write(DISP_OUT, evacPage, strlen(evacPage));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    // Switch to fault page
+    Display_SetPage(FAULT);
 
-	char soc[13];
-	sprintf(soc, "%s%d", "soc.val=", (int)SOC_percent);
-	BSP_UART_Write(DISP_OUT, soc, strlen(soc));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    DisplayCmd_t evac_msg_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_EVAC_MSG], // "evac"
+        .attr = "txt",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {STR_ARG},
+        .args = {{.str = ErrMsg_Evac}}
+    };
+    Display_Send(evac_msg_cmd);
+    strncpy(ErrMsg_Evac, DISP_EVAC_NONREQ_STR_LITERAL, ERR_CODE_LEN);
 
-	char supp[18];
-	sprintf(supp, "%s%d", "supp.val=", (int)supp_mv);
-	BSP_UART_Write(DISP_OUT, supp, strlen(supp));
-	BSP_UART_Write(DISP_OUT, (char *)TERMINATOR, strlen(TERMINATOR));
+    // Display OS error if there is one
+    DisplayCmd_t os_flt_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_OS_CODE], // "oserr"
+        .attr = "txt",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {STR_ARG},
+        .args = {{.str = ErrMsg_OS}}
+    };
+    Display_Send(os_flt_cmd);
+    strncpy(ErrMsg_OS, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+    memset(&Error_OS, 0, sizeof(error_code_t));
 
-	return DISPLAY_ERR_NONE;
+    // Display other errors if there are any.
+    // Prioritized errors in order of importance:
+    // 1. ReadTritium
+    // 2. ReadCarCAN
+    // 3. UpdateDisplay
+    if (Error_ReadTritium != T_NONE) {
+        DisplayCmd_t moco_flt_cmd = {
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
+            .attr = "txt",
+            .op = "=",
+            .numArgs = 1,
+            .argTypes = {STR_ARG},
+            .args = {{.str = ErrMsg_ReadTritium}}
+        };
+        Display_Send(moco_flt_cmd);
+        strncpy(ErrMsg_ReadTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        memset(&Error_ReadTritium, 0, sizeof(error_code_t));
+    } else if (Error_ReadCarCAN != READCARCAN_ERR_NONE) {
+        DisplayCmd_t rcc_flt_cmd = {
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
+            .attr = "txt",
+            .op = "=",
+            .numArgs = 1,
+            .argTypes = {STR_ARG},
+            .args = {{.str = ErrMsg_ReadCarCAN}}
+        };
+        Display_Send(rcc_flt_cmd);
+        strncpy(ErrMsg_ReadCarCAN, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        memset(&Error_ReadCarCAN, 0, sizeof(error_code_t));
+    } else if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE) {
+        DisplayCmd_t disp_flt_cmd = {
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
+            .attr = "txt",
+            .op = "=",
+            .numArgs = 1,
+            .argTypes = {STR_ARG},
+            .args = {{.str = ErrMsg_UpdateDisplay}}
+        };
+        Display_Send(disp_flt_cmd);
+        strncpy(ErrMsg_UpdateDisplay, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        memset(&Error_UpdateDisplay, 0, sizeof(error_code_t));
+    } else {
+        DisplayCmd_t no_flt_cmd = {
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
+            .attr = "txt",
+            .op = "=",
+            .numArgs = 1,
+            .argTypes = {STR_ARG},
+            .args = {{.str = (char*)DISP_NA_STR_LITERAL}}
+        };
+        Display_Send(no_flt_cmd);
+    }
+
+    // Send SOC and SBPV values
+    DisplayCmd_t soc_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_SOC], // "soc"
+        .attr = "val",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {INT_ARG},
+        .args = {{.num = g_display_comp_vals[DISP_SOC]}}
+    };
+    Display_Send(soc_cmd);
+
+    DisplayCmd_t supp_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_SUPP_BATT], // "supp"
+        .attr = "val",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {INT_ARG},
+        .args = {{.num = g_display_comp_vals[DISP_SUPP_BATT]}}
+    };
+    Display_Send(supp_cmd);
+
+    // Update pack current vars (value and sign)
+    DisplayCmd_t packcurr_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_PACK_CURRENT], // "pc"
+        .attr = "val",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {INT_ARG},
+        .args = {{.num = g_display_comp_vals[DISP_PACK_CURRENT]}}
+    };
+    Display_Send(packcurr_cmd);
+
+    DisplayCmd_t packcurr_sign_cmd = {
+        .compOrCmd = "vis",
+        .attr = NULL,
+        .op = NULL,
+        .numArgs = 2,
+        .argTypes = {STR_ARG, INT_ARG},
+        .args = {
+            {.str = (char*) DISPLAY_COMP_STR[DISP_PACK_CURR_SIGN]},  // "cs"
+            {.num = g_display_comp_vals[DISP_PACK_CURR_SIGN]}
+        }
+    };
+    Display_Send(packcurr_sign_cmd);
+
+    return DISPLAY_ERR_NONE; // Can't do anything if this errors out
+}
+
+/**
+ * @brief Displays the evacuation screen on the display
+ * @param SOC_percent state of charge in percent
+ * @param supp_mv supplemental battery pack voltage
+ * @returns DisplayError_t
+ * 
+ *  [DO NOT USE THIS ONE. IT IS DEPRECATED IN FAVOR OF JUST USING Display_Error()]
+ * 
+ * @deprecated
+ */
+DisplayError_t Display_Evac(uint8_t SOC_percent, uint32_t supp_mv) {
+    // Terminates any in progress command
+    BSP_UART_Write(DISPLAY, (char*) TERMINATOR, strlen(TERMINATOR));
+
+    // Switch to evac page
+    Display_SetPage(EVAC);
+
+    // Send SOC and SBPV values
+    DisplayCmd_t soc_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_SOC], // "soc"
+        .attr = "val",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {INT_ARG},
+        {
+            {.num = SOC_percent}
+        }
+    };
+    Display_Send(soc_cmd);
+
+    DisplayCmd_t supp_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_SUPP_BATT], // "supp"
+        .attr = "val",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {INT_ARG},
+        {
+            {.num = supp_mv}
+        }
+    };
+    Display_Send(supp_cmd);
+
+    DisplayCmd_t packcurr_cmd = {
+        .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_PACK_CURRENT], // "pc"
+        .attr = "val",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {INT_ARG},
+        {
+            {.num = g_display_comp_vals[DISP_PACK_CURRENT]}
+        }
+    };
+    Display_Send(packcurr_cmd);
+
+    DisplayCmd_t packcurr_sign_cmd = {
+        .compOrCmd = "vis",
+        .attr = NULL,
+        .op = NULL,
+        .numArgs = 2,
+        .argTypes = {STR_ARG, INT_ARG},
+        { 
+            {.str = (char*) DISPLAY_COMP_STR[DISP_PACK_CURR_SIGN]}, // "cs"
+            {.num = g_display_comp_vals[DISP_PACK_CURR_SIGN]}
+        } 
+    };
+    Display_Send(packcurr_sign_cmd);
+
+    return DISPLAY_ERR_NONE;
 }
