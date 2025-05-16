@@ -187,6 +187,34 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
     return retval;
 }
 
+/**
+ * CANbus_Send but without the mutex calls since the scheduler is locked when
+ * in a fault state
+ */
+ErrorStatus CANbus_Send_Faultstate(CANDATA_t CanData, CAN_t bus)
+{
+    //error check the id
+    if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+
+    CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    
+    if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
+
+    uint8_t txdata[8];
+    if(msginfo.idxEn){ //first byte of txData should be the idx value
+        memcpy(txdata, &CanData.idx, 1);
+        memcpy(&(txdata[sizeof(CanData.idx)]), &CanData.data, msginfo.size);
+    } else { //non-idx case
+        memcpy(txdata, &CanData.data, msginfo.size);
+    }
+
+    
+    while (BSP_CAN_Write(bus, CanData.ID, txdata, 
+        (msginfo.idxEn ? msginfo.size+sizeof(CanData.idx) : msginfo.size)) == ERROR);
+
+    return SUCCESS;
+}
+
 ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
 {
     CPU_TS timestamp;
