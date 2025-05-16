@@ -169,27 +169,45 @@ def test_bps_trip():
 
 
 
-# # Simulate BPS + Contactor board
-# # Send BPS Contactor and Contactor Sense (at least) every 500 ms to avoid tripping the watchdog
-# # Intermittently send other messages
-# def test_sim():
-#     CONTACTOR_SENSE_MSG = 0b0_0000_0000
+# Simulate BPS + Contactor board
+# Send BPS Contactor and Contactor Sense (at least) every 500 ms to avoid tripping the watchdog
+# Intermittently send other messages
+def test_sim():
+    CONTACTOR_SENSE_MSG = 0b0_0000_0000
+    
 
-#     def thread_send_contactor_sense():
-#         while True:
-#             send_can_message(CONTACTOR_SENSE, [CONTACTOR_SENSE_MSG])
+    def thread_send_contactor_sense():
+        while True:
+            send_can_message(CONTACTOR_SENSE, [CONTACTOR_SENSE_MSG])
+            time.sleep(.4)
+
+    def thread_send_bps_contactor():
+        while True:
+            send_can_message(BPS_CONTACTOR, [CONTACTOR_SENSE_MSG])
+            time.sleep(.4)
            
-#     printf("\n=== Running simulation test ===")
+    printf("\n=== Running simulation test ===")
 
     
 
-#     thread1 = threading.Thread(target=task, args=("A", 2))
-#     thread2 = threading.Thread(target=task, args=("B", 3))
+    thread1 = threading.Thread(target=thread_send_contactor_sense)
+    thread2 = threading.Thread(target=thread_send_bps_contactor)
 
-#     # Arrays of messages to cycle through
+    # Arrays of messages to cycle through
 
-#     # While loop every 
+    # While loop every 
    
+############
+def send(id, msg, hz, cnt):
+    int i = 0
+    while (i < cnt):
+        send_can_message(id, msg)
+        time.sleep(1.0/hz)
+    
+# threading.Thread(target=rec).start()
+for ind in range(len(num_messages)):
+    threading.Thread(target=send, args=num_messages[ind]).start()
+######################
 
 
 
@@ -250,5 +268,7 @@ if __name__ == "__main__":
         test_supplemental_voltage()
     elif choice == '5':
         test_contactor_sense()
+    elif choice == '6':
+        test_sim()
     else:
         print("[ERR] Invalid choice")
