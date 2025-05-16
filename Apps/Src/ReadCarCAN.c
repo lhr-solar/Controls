@@ -67,7 +67,8 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg)
 static void handler_ReadCarCAN_contactorsDisable(void)
 {
     // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    MotorContactor_EmergencyDisable();
+    //MotorContactor_EmergencyDisable(); also happens in nonrecoverable errors
+    display_err_failed_recovery();
 }
 
 static bool check_MotorControllerContactor(void){
@@ -292,7 +293,7 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
         break;
 
     case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
-        throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_RECOV);
+        throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_NONRECOV);
         break;
 
     case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop
