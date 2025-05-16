@@ -242,6 +242,7 @@ void Task_SendTritium(void *p_arg)
 static void assertSendTritiumError(SendTritium_error_code_t sterr)
 {
     Error_SendTritium = (error_code_t) sterr;
+    set_errmsg_hex("ST", ErrMsg_SendTritium, sterr);
 
     switch(sterr)
     {

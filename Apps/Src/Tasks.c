@@ -53,6 +53,7 @@ error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
 error_code_t Error_OS = OS_ERR_NONE;
 
 // Display error messages for readability
+char ErrMsg_SendTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_ReadCarCAN[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_ReadTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_UpdateDisplay[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;

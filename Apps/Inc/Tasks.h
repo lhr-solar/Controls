@@ -163,6 +163,7 @@ extern error_code_t Error_OS;
 // Define the length of the error code message
 #define ERR_CODE_LEN 16
 
+extern char ErrMsg_SendTritium[ERR_CODE_LEN];
 extern char ErrMsg_ReadTritium[ERR_CODE_LEN];
 extern char ErrMsg_ReadCarCAN[ERR_CODE_LEN];
 extern char ErrMsg_UpdateDisplay[ERR_CODE_LEN];

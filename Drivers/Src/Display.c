@@ -15,6 +15,7 @@
 #include "ReadCarCAN.h"
 #include "ReadTritium.h"
 #include "UpdateDisplay.h"
+#include "SendTritium.h"
 
 // Assignment commands have only 1 arg, an operator, and an attribute
 #define IS_ASSIGN_CMD(cmd)                              \
@@ -208,6 +209,7 @@ DisplayError_t Display_Error() {
     // 1. ReadTritium
     // 2. ReadCarCAN
     // 3. UpdateDisplay
+    // 4. SendTritium
     if (Error_ReadTritium != T_NONE) {
         DisplayCmd_t moco_flt_cmd = {
             .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
@@ -244,6 +246,18 @@ DisplayError_t Display_Error() {
         Display_Send(disp_flt_cmd);
         strncpy(ErrMsg_UpdateDisplay, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
         memset(&Error_UpdateDisplay, 0, sizeof(error_code_t));
+    } else if (Error_SendTritium != SENDTRITIUM_ERR_NONE) {
+        DisplayCmd_t disp_flt_cmd = {
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
+            .attr = "txt",
+            .op = "=",
+            .numArgs = 1,
+            .argTypes = {STR_ARG},
+            .args = {{.str = ErrMsg_SendTritium}}
+        };
+        Display_Send(disp_flt_cmd);
+        strncpy(ErrMsg_SendTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        memset(&ErrMsg_SendTritium, 0, sizeof(error_code_t));
     } else {
         DisplayCmd_t no_flt_cmd = {
             .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
