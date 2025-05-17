@@ -179,34 +179,35 @@ def test_sim():
     def thread_send_contactor_sense():
         while True:
             send_can_message(CONTACTOR_SENSE, [CONTACTOR_SENSE_MSG])
-            time.sleep(.4)
+            time.sleep(.3)
 
     def thread_send_bps_contactor():
         while True:
             send_can_message(BPS_CONTACTOR, [CONTACTOR_SENSE_MSG])
-            time.sleep(.4)
+            time.sleep(.3)
            
-    printf("\n=== Running simulation test ===")
+    print("\n=== Running simulation test ===")
 
     
 
     thread1 = threading.Thread(target=thread_send_contactor_sense)
     thread2 = threading.Thread(target=thread_send_bps_contactor)
 
-    # Arrays of messages to cycle through
+    thread1.start()
+    thread2.start()
 
-    # While loop every 
+  
    
-############
-def send(id, msg, hz, cnt):
-    int i = 0
-    while (i < cnt):
-        send_can_message(id, msg)
-        time.sleep(1.0/hz)
+# ############
+# def send(id, msg, hz, cnt):
+#     int i = 0
+#     while (i < cnt):
+#         send_can_message(id, msg)
+#         time.sleep(1.0/hz)
     
-# threading.Thread(target=rec).start()
-for ind in range(len(num_messages)):
-    threading.Thread(target=send, args=num_messages[ind]).start()
+# # threading.Thread(target=rec).start()
+# for ind in range(len(num_messages)):
+#     threading.Thread(target=send, args=num_messages[ind]).start()
 ######################
 
 
@@ -253,7 +254,8 @@ if __name__ == "__main__":
     print("3. Send BPS trip")
     print("4. Test Supplemental voltage")
     print("5. Test Contactor Sense")
-    choice = input("Enter choice (1, 2, 3, 4, 5): ")
+    print("6. Test Sim")
+    choice = input("Enter choice (1, 2, 3, 4, 5, 6): ")
     configure_slcan()
     
     if choice == '1':
