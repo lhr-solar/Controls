@@ -17,7 +17,7 @@
 #include "daybreak_pins.h"
 
 // Uncomment this to remove CAN watchdog timers for BPS_CONTACTOR and CONTACTOR_SENSE messages
-//#define NODOGS
+#define NODOGS
 
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 1000u                                                             // 500 ms

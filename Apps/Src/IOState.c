@@ -46,7 +46,7 @@ void putIOState(void){
     if (ign == IGN_MOTOR) s |= SWITCH_BITMAP_IGN_2_MOTOR(1);
     message.data[2] = s;
 
-    CANbus_Send(message, true, CARCAN);
+    CANbus_Send(message, false, CARCAN); //f-t
 }
 
 /**
