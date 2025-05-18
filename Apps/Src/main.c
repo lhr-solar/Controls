@@ -15,12 +15,13 @@
 #include "Contactors.h"
 #include "Display.h"
 #include "Ignition.h"
-#include "Minions.h"
+//#include "Minions.h"
 #include "Pedals.h"
 #include "Dashboard.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "daybreak_pins.h"
+#include "DebugIO.h"
 #include "StatusLeds.h"
 #include "BSP_GPIO.h"
 
@@ -40,6 +41,7 @@ void IdleTaskHook(void)
             last_tick_cnt = current_tick_cnt;
 
             if(current_tick_cnt % 50 == 0){
+                DebugIO_Toggle(PA15);
                 toggle = !toggle;
             }
         }
@@ -65,7 +67,7 @@ int main(void) {
     assertOSError(err);
     Ignition_Init();
     dashboardInit();
-
+    DebugIO_Init();
 
     // Initialize apps
     OSTaskCreate(
@@ -108,7 +110,7 @@ void Task_Init(void *p_arg){
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    Minions_Init();
+    // Minions_Init();
 
     // Initialize applications
     UpdateDisplay_Init();
