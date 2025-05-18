@@ -14,10 +14,6 @@
 #include "common.h"
 #include "config.h"
 #include "BSP_GPIO.h"
-#include "stm32f4xx_gpio.h"
-
-#define CONTACTOR_SENSE_DELAY 1
-
 
 // Masks for Contactor driver board's can message
 #define ARRAY_PRECHARGE_SENSE_FAULT(dataBuf)   (bool)((dataBuf[1] >> 0) & 0x01) // Bit 8: Array precharge sense fault happened
@@ -56,9 +52,10 @@ void Contactors_Init();
  *          a specified contactor
  * @param   contactor the contactor
  *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
+ * @param   blocking whether or not this should be a blocking call
  * @return  The contactor's state (ON/OFF)
  */
-bool Contactors_Get(contactor_t contactor);
+bool Contactors_Get(contactor_t contactor, bool blocking);
 
 /**
  * @brief   Sets the state of a specified contactor
