@@ -40,7 +40,6 @@ void IdleTaskHook(void)
             last_tick_cnt = current_tick_cnt;
 
             if(current_tick_cnt % 50 == 0){
-                BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN, toggle);
                 toggle = !toggle;
             }
         }
