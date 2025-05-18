@@ -11,6 +11,7 @@
 #include "Contactors.h"
 #include "Display.h"
 #include "Minions.h"
+#include "IOState.h"
 #include "Pedals.h"
 #include "ReadTritium.h"
 #include "ReadCarCAN.h"
@@ -30,6 +31,7 @@ OS_TCB ReadTritium_TCB;
 OS_TCB SendCarCAN_TCB;
 OS_TCB DebugDump_TCB;
 OS_TCB CommandLine_TCB;
+OS_TCB IOState_TCB;
 
 task_trace_t PrevTasks;
 
@@ -44,6 +46,8 @@ CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
+CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
+
 
 // Variables to store error codes, stored and cleared in task error assert functions
 error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 

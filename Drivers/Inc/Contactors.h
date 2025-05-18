@@ -59,9 +59,10 @@ void Contactors_Init();
  *          a specified contactor
  * @param   contactor the contactor
  *              (MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR/ARRAY_PRECHARGE_BYPASS_CONTACTOR)
+ * @param   blocking whether or not this should be a blocking call
  * @return  The contactor's state (ON/OFF)
  */
-bool Contactors_Get(contactor_t contactor);
+bool Contactors_Get(contactor_t contactor, bool blocking);
 
 /**
  * @brief   Sets the state of a specified contactor

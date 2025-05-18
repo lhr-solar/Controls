@@ -79,15 +79,15 @@ static void handler_ReadCarCAN_contactorsDisable(void)
 
 static bool check_MotorControllerContactor(void){
     // both should be on at the same time
-    bool HVContactorState = Contactors_Get(HV_MINUS_CONTACTOR) && Contactors_Get(HV_PLUS_CONTACTOR);
+    bool HVContactorState = Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true);
 
-    bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
+    bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
     if(!HVContactorState && motorContactorState)
     {
         // if the HV contactors are off and the motor contactor is on
         return false;
     }
-    bool motorPrechargeContactorState = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
+    bool motorPrechargeContactorState = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true);
     if(motorPrechargeContactorState && !motorContactorState)
     {
         // if the motor precharge contactor is on and the motor contactor is off
@@ -127,9 +127,9 @@ static void handler_ReadCarCAN_ActivePrechargeFault(void)
 
 static void updateMotorControllerContactor(void){
     ignition_state_t ignState = Get_Ignition_State();
-    bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
+    bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
     if(ignState == IGN_MOTOR || ignState == IGN_ARR){
-        if(Contactors_Get(HV_MINUS_CONTACTOR) && Contactors_Get(HV_PLUS_CONTACTOR)){
+        if(Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)){
             // turn on motor contactor if it was off before
             if(motorContactorState == OFF){
                 Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
@@ -266,8 +266,8 @@ void Task_ReadCarCAN(void *p_arg)
             // Update Motor Precharge sense state
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
         
-            Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
-            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
+            Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true));
+            Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, true));
 
             // check to see if motor controller contactor is in expected state
             if(!check_MotorControllerContactor()){
