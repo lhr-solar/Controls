@@ -1,3 +1,6 @@
+# This script will send CAN messages for ReadCarCAN to process
+# When running test_sim, enter numbers in decimal format
+
 import time
 import serial
 import threading
@@ -105,6 +108,32 @@ def send_timed_messages():
 # Simulate BPS + Contactor board
 # Send BPS Contactor and Contactor Sense (at least) every 500 ms to avoid tripping the watchdog
 # Change what the data in each message is to test other conditions
+
+############################ Some reference numbers for BPS_CONTACTOR:
+#  HV_ARRAY_CONTACTOR_BIT = 0b001                                                 1
+#     HV_MINUS_CONTACTOR_BIT = 0b010                                              2
+#     HV_PLUS_CONTACTOR_BIT  = 0b100                                              4
+    
+
+############################ Some reference numbers for CONTACTOR_SENSE:
+#### Note: MOTOR-related bit are not used since Controls controls that contactor
+
+#     ACTUAL_MOTOR_SENSE_BIT = 0b1                                  1
+#     EXPECTED_MOTOR_SENSE_BIT = 0b10                               2
+#     MOTOR_SENSE_FAULT_BIT = 0b100                                 4
+#     ACTUAL_MOTOR_PRECHARGE_SENSE_BIT = 0b1000                     8
+#     EXPECTED_MOTOR_PRECHARGE_SENSE_BIT = 0b1_0000                 16
+#     MOTOR_PRECHARGE_SENSE_FAULT_BIT = 0b10_0000                   32
+#     ACTUAL_ARRAY_PRECHARGE_SENSE_BIT = 0b100_0000                 64
+#     EXPECTED_ARRAY_PRECHARGE_SENSE_BIT = 0b1000_0000 #128         128
+#     ARRAY_PRECHARGE_SENSE_FAULT_BIT = 0b1_0000_0000               256
+
+#     # Assuming motor sense, HV+- is off, motor precharge on faults
+#     # Assuming HV+- is off, if the motor contactor is on, Controls immediately faults
+#     # Assuming motor sense is on, HV+- is on, only fault bits should fault
+#  
+
+
 def test_sim():
     CONTACTOR_SENSE_MSG = 0b0_0000_0000
     BPS_CONTACTOR_MSG = 0b0_0000_0000
@@ -132,13 +161,37 @@ def test_sim():
             time.sleep(.5)
            
     print("\n=== Running simulation test ===")
-
-
+   
     thread1 = threading.Thread(target=thread_send_contactor_sense)
     thread2 = threading.Thread(target=thread_send_bps_contactor)
 
     thread1.start()
     thread2.start()
+
+    # Messages to test [BPS_CONTACTOR, CONTACTOR_SENSE]
+    messages = [[0,0], # All off
+                [6,0], # HV+- on
+                [7,0], # Array enable also on
+                [7,64],# Array precharge also on
+                [7,320]# Array precharge fault also added
+                ]
+    
+    for message in messages:
+        BPS_CONTACTOR_MSG = message[0]
+        CONTACTOR_SENSE_MSG = message[1]
+        time.sleep(1)
+        print(f"[INFO] Sent BPS_CONTACTOR and CONTACTOR_SENSE: {message[0]}, {message[1]}")
+        if (message[1] == 64):
+            print("About to enable motor precharge. This will cause a fault if motor enable is not on")
+        input("Press Enter to continue...")
+
+    CONTACTOR_SENSE_MSG = 0b0_0000_0000
+    BPS_CONTACTOR_MSG = 0b0_0000_0000
+
+
+    input("Reset leader to continue sending messages if desired...")
+
+    
 
     while (1):
         BPS_CONTACTOR_MSG = int(input("Input BPS Contactor MSG: "))
@@ -147,77 +200,6 @@ def test_sim():
         print(CONTACTOR_SENSE_MSG)
 
   
-# Test function for BPS contactors states
-
-# Needs to be rewritten to to satisfy watchdogs
-# For now, use test_sim to manually test instead
-
-# def test_bps_contactor():
-#     HV_ARRAY_CONTACTOR_BIT = 0b001
-#     HV_MINUS_CONTACTOR_BIT = 0b010
-#     HV_PLUS_CONTACTOR_BIT  = 0b100
-    
-#     # Test all possible combinations of contactor states
-#     states = [
-#         [0],  # All contactors off
-#         [HV_ARRAY_CONTACTOR_BIT],  # Array contactor on
-#         [HV_MINUS_CONTACTOR_BIT],  # HV- contactor on
-#         [HV_PLUS_CONTACTOR_BIT],  # HV+ contactor on
-#         [HV_ARRAY_CONTACTOR_BIT | HV_MINUS_CONTACTOR_BIT],  # Array and HV- on
-#         [HV_ARRAY_CONTACTOR_BIT | HV_PLUS_CONTACTOR_BIT],  # Array and HV+ on
-#         [HV_MINUS_CONTACTOR_BIT | HV_PLUS_CONTACTOR_BIT],  # HV- and HV+ on
-#         [HV_ARRAY_CONTACTOR_BIT | HV_MINUS_CONTACTOR_BIT | HV_PLUS_CONTACTOR_BIT]  # All on
-#     ]
-    
-#     for state in states:
-#         send_can_message(BPS_CONTACTOR, state)
-#         time.sleep(1)
-#         print(f"[INFO] Sent BPS contactor state: {state[0]:b} (binary)")
-#         input("Press Enter to continue...")
-
-
-# Needs to be rewritten to to satisfy watchdogs
-# For now, use test_sim to manually test instead
-
-# def test_contactor_sense():
-#     ACTUAL_MOTOR_SENSE_BIT = 0b1
-#     EXPECTED_MOTOR_SENSE_BIT = 0b10
-#     MOTOR_SENSE_FAULT_BIT = 0b100
-#     ACTUAL_MOTOR_PRECHARGE_SENSE_BIT = 0b1000 #8
-#     EXPECTED_MOTOR_PRECHARGE_SENSE_BIT = 0b1_0000
-#     MOTOR_PRECHARGE_SENSE_FAULT_BIT = 0b10_0000
-#     ACTUAL_ARRAY_PRECHARGE_SENSE_BIT = 0b100_0000 #64
-#     EXPECTED_ARRAY_PRECHARGE_SENSE_BIT = 0b1000_0000 #128
-#     ARRAY_PRECHARGE_SENSE_FAULT_BIT = 0b1_0000_0000 #256
-
-#     # Assuming motor sense, HV+- is off, motor precharge on faults
-#     # Assuming motor sense is on, HV+- is on, only fault bits should fault
-#     states = [
-#         [0], # All off
-#         [ACTUAL_MOTOR_SENSE_BIT], # Motor sense on
-#         [ACTUAL_MOTOR_PRECHARGE_SENSE_BIT], # Motor precharge on
-#         [ACTUAL_ARRAY_PRECHARGE_SENSE_BIT], # Array precharge on
-#         [ACTUAL_MOTOR_SENSE_BIT | ACTUAL_MOTOR_PRECHARGE_SENSE_BIT | ACTUAL_ARRAY_PRECHARGE_SENSE_BIT], # All on
-#        [MOTOR_SENSE_FAULT_BIT], # Motor sense fault
-#        [MOTOR_PRECHARGE_SENSE_FAULT_BIT], # Motor precharge sense fault
-#        [ARRAY_PRECHARGE_SENSE_FAULT_BIT], # Array precharge sense fault
-#        [ARRAY_PRECHARGE_SENSE_FAULT_BIT | ACTUAL_ARRAY_PRECHARGE_SENSE_BIT] # Array precharge sense fault plus contactor on
-#     ]
-
-#     # Satisfy watchdogs
-#     send_timed_messages()
-
-    
-#     for state in states:
-#         print(state[0])
-#         data = [ # Convert to little-endian bytes
-#             state[0] & 0xFF,
-#             (state[0] >> 8) & 0xFF
-#         ]
-#         send_can_message(CONTACTOR_SENSE, data)
-#         time.sleep(1)
-#         print(f"[INFO] Sent contactor sense: {state}")
-#         input("Press Enter to continue...")
 
 
 
@@ -275,68 +257,44 @@ def test_bps_trip():
 
 
 
-
-
 # Main test sequence function
 def run_all_tests():
     # Configure SLCAN interface now done in main function
-    configure_slcan()
+    # configure_slcan()
     
-    print("\n=== Running BPS Contactor Tests ===")
-    test_bps_contactor()
-
     print("\n=== Running State of Charge Tests ===")
     test_state_of_charge()
 
     print("\n=== Running Supplemental Voltage Tests ===")
     test_supplemental_voltage()
 
-    print("\n=== Running Contactor Sense Tests ===")
-    #TODO
-
     print("\n=== Running BPS Trip Test ===")
     print("[WARN] This will trigger a fault condition!")
     if input("Continue? (y/n): ").lower() == 'y':
         test_bps_trip()
 
-# Continuous message sending function
-# def send_continuous():
-#     while True:
-#         msg_can_id = int(input("Enter CAN message ID (e.g., 0x10D, 0x10E, etc.): "))
-#         msg_data = input("Enter message data (e.g., 0x00, 0x01, etc.): ")
-#         if len(msg_data) > MAX_DATA_LENGTH:
-#             print("[ERR] Invalid data length")
-#             continue
-#         send_can_message(msg_can_id, msg_data)
-#         time.sleep(1.0)
-
 
 if __name__ == "__main__":
     print("\n=== ReadCarCAN Test ===")
     print("Select test mode:")
-    print("1. Run all tests in sequence")
-    # print("2. Send particular messages")
-    print("3. Send BPS trip")
-    print("4. Test Supplemental voltage")
-    # print("5. Test Contactor Sense")
-    print("6. Test Sim")
-    choice = input("Enter choice (1, 3, 4, 6): ")
+    print("1. Run display/BPS Trip tests")
+    print("2. Test only State of Charge")
+    print("3. Send only BPS trip")
+    print("4. Test only Supplemental voltage")
+    print("5. Simulate contactor messages")
+    choice = input("Enter choice (1, 2, 3, 4, or 5): ")
     configure_slcan()
     
     if choice == '1':
         run_all_tests()
-    # elif choice == '2':
-    #     configure_slcan()
-    #     send_continuous()
+    elif choice == '2':
+        test_state_of_charge()
     elif choice == '3':
         test_bps_trip()
     elif choice == '4':
         test_supplemental_voltage()
-    # elif choice == '5':
-    #     test_contactor_sense()
-    elif choice == '6':
+    elif choice == '5':
         test_sim()
-    elif choice == '7':
-        test_state_of_charge()
+    
     else:
         print("[ERR] Invalid choice")
