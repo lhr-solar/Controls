@@ -41,7 +41,9 @@ void IdleTaskHook(void)
             last_tick_cnt = current_tick_cnt;
 
             if(current_tick_cnt % 50 == 0){
-                DebugIO_Toggle(PA15);
+                #ifdef TASK_PROFILER
+                DebugIO_Toggle(IDLE_PIN);
+                #endif
                 toggle = !toggle;
             }
         }

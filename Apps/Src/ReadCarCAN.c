@@ -8,12 +8,12 @@
 #include "ReadCarCAN.h"
 #include "UpdateDisplay.h"
 #include "Contactors.h"
-#include "Minions.h"
 #include "Ignition.h"
 #include "os.h"
 #include "StatusLeds.h"
 #include "os_cfg_app.h"
 #include "Display.h"
+#include "DebugIO.h"
 #include "daybreak_pins.h"
 
 // Uncomment this to remove CAN watchdog timers for BPS_CONTACTOR and CONTACTOR_SENSE messages
@@ -193,6 +193,9 @@ void Task_ReadCarCAN(void *p_arg)
     {
 
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(READ_CARCAN_PIN);
+        #endif
         if (status != SUCCESS)
         {
             continue;
@@ -287,6 +290,9 @@ void Task_ReadCarCAN(void *p_arg)
             break; // Unhandled CAN message IDs, do nothing
         }
         }
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(READ_CARCAN_PIN);
+        #endif
     }
 }
 

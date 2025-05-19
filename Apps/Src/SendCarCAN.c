@@ -12,6 +12,7 @@
 #include "os_cfg_app.h"
 #include "CANbus.h"
 #include "Tasks.h"
+#include "DebugIO.h"
 #include "StatusLeds.h"
 #include "SendCarCAN.h"
 #include "SendTritium.h"
@@ -99,6 +100,9 @@ void Task_SendCarCAN(void *p_arg){
         // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
         OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
         assertOSError(err);
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(SEND_CARCAN_PIN);
+        #endif
 
         OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
         assertOSError(err);
@@ -107,6 +111,10 @@ void Task_SendCarCAN(void *p_arg){
 
         OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
         assertOSError(err);
+
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(SEND_CARCAN_PIN);
+        #endif
 
         if(res) CANbus_Send(message, true, CARCAN);
     }

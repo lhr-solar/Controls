@@ -1,6 +1,7 @@
 /* Copyright (c) 2020 UT Longhorn Racing Solar */
 
 #include "BSP_CAN.h"
+#include "DebugIO.h"
 #include "stm32f4xx.h"
 #include "os.h"
 #include "daybreak_pins.h"
@@ -237,9 +238,9 @@ void BSP_CarCAN_Init(uint16_t* idWhitelist, uint8_t idWhitelistSize)
 
     /* CAN cell init */
     CAN_InitStruct.CAN_TTCM = DISABLE;
-    CAN_InitStruct.CAN_ABOM = DISABLE;
+    CAN_InitStruct.CAN_ABOM = ENABLE;
     CAN_InitStruct.CAN_AWUM = DISABLE;
-    CAN_InitStruct.CAN_NART = DISABLE;
+    CAN_InitStruct.CAN_NART = ENABLE;
     CAN_InitStruct.CAN_RFLM = DISABLE;
     CAN_InitStruct.CAN_TXFP = ENABLE;
     #ifdef CAR_LOOPBACK
@@ -473,6 +474,7 @@ void CAN3_TX_IRQHandler(void)
     CAN_ClearFlag(CAN3, CAN_FLAG_RQCP0 | CAN_FLAG_RQCP1 | CAN_FLAG_RQCP2);
 
     // Call the function provided
+    DebugIO_Toggle(PC9);
     gTxEnd[1]();
 
     OSIntExit(); // Signal to uC/OS

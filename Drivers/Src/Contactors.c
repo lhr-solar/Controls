@@ -79,15 +79,8 @@ void Contactors_Init() {
 bool Contactors_Get(contactor_t contactor, bool blocking) {
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
-            // Read the GPIO and update the contactor state array in a critical section
-            // OS_ERR err = 0;
-            // CPU_TS ts = 0;
-            // OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &ts, &err);
-            // assertOSError(err);
             contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 
                                                          ? true : false;
-            // OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
-            // assertOSError(err);
             break;
 
         // Precharge Contactors are updated by ReadCarCAN.c

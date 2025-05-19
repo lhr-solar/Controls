@@ -15,7 +15,7 @@ void DebugIO_Init(void) {
 
 /**
  * @brief   Writes to a debug pin
- * @param   pin the pin to write to (PC17)
+ * @param   pin the pin to write to. Format is PORT+PIN (eg PC17)
  * @return  None
  */ 
 void DebugIO_Write(pinIndex_t pin, bool state) {
@@ -26,7 +26,7 @@ void DebugIO_Write(pinIndex_t pin, bool state) {
 
 /**
  * @brief   Toggles a debug pin
- * @param   pin the pin to write to (PC17)
+ * @param   pin the pin to write to. Format is PORT+PIN (eg PC17)
  * @return  None
  */ 
 void DebugIO_Toggle(pinIndex_t pin) {

@@ -19,7 +19,6 @@
 #include "daybreak_pins.h"
 #include "StatusLeds.h"
 
-
 /**
  * TCBs
  */

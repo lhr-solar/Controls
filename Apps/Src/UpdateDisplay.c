@@ -10,6 +10,7 @@
  */
 
 #include "UpdateDisplay.h"
+#include "DebugIO.h"
 // #include "Minions.h"
 #include <math.h>
 
@@ -184,6 +185,9 @@ UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val) {
 void Task_UpdateDisplay(void *p_arg) {
 	OS_ERR err;
 	while (1) {
+		#ifdef TASK_PROFILER
+		DebugIO_Toggle(UPDATE_DISPLAY_PIN);
+		#endif
 		for (Component_t comp = 0; comp <= DISP_GEAR; comp++) {
 			if (comp != DISP_REGEN_ST && comp != DISP_CRUISE_ST) {
 				assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
@@ -196,6 +200,9 @@ void Task_UpdateDisplay(void *p_arg) {
 				? UPDATEDISPLAY_ERR_NONE
 				: UPDATEDISPLAY_ERR_DRIVER
 		);
+		#ifdef TASK_PROFILER
+		DebugIO_Toggle(UPDATE_DISPLAY_PIN);
+		#endif
 
 		// Delay of 250 ms
 		OSTimeDlyHMSM(0, 0, 0, 250, OS_OPT_TIME_HMSM_STRICT, &err);
