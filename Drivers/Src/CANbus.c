@@ -9,7 +9,6 @@
 
 #include "CANbus.h"
 #include "config.h"
-#include "DebugIO.h"
 #include "os.h"
 #include "Tasks.h"
 #include "CANConfig.h"
