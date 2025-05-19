@@ -113,7 +113,7 @@ void Task_ReadTritium(void *p_arg)
 			}
 			}
 
-			//SendCarCAN_Put(dataBuf); // Forward message on CarCAN for telemetry
+			SendCarCAN_Put(dataBuf); // Forward message on CarCAN for telemetry
 		}
 	}
 }

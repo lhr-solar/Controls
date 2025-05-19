@@ -1,7 +1,7 @@
 #include "Ignition.h"
 
-#define IGN_OFF_THRESHOLD 10 // tune this value based on task running frequency
-#define READ_PIN_DELAY 20 // tune this value based off switching time of Ignition switch
+#define IGN_OFF_THRESHOLD 30 // tune this value based on task running frequency
+#define READ_PIN_DELAY 1000 // tune this value based off switching time of Ignition switch
 
 #define IGN_IS_OFF(motor_state, array_state) (motor_state == OFF && array_state == OFF)
 #define IGN_IS_MOTOR(motor_state, array_state) (motor_state == ON && array_state == OFF)
