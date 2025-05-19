@@ -2,6 +2,7 @@
 #include "os_cfg_app.h"
 #include "IOState.h"
 #include "Tasks.h"
+#include "DebugIO.h"
 #include "Pedals.h"
 #include "Ignition.h"
 #include "Dashboard.h"
@@ -46,7 +47,7 @@ void putIOState(void){
     if (ign == IGN_MOTOR) s |= SWITCH_BITMAP_IGN_2_MOTOR(1);
     message.data[2] = s;
 
-    CANbus_Send(message, false, CARCAN); //f-t
+    CANbus_Send(message, true, CARCAN);
 }
 
 /**
@@ -56,6 +57,10 @@ void Task_IOState(void *p_arg) {
     OS_ERR err;
     static volatile uint8_t ioStateCounter = 0;
     while (1) {
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(IO_STATE_PIN);
+        #endif
+
         putIOState();
         ioStateCounter++;
         // toggle dashboard led every 1 second (IoState runs at 250ms)
@@ -63,6 +68,10 @@ void Task_IOState(void *p_arg) {
             Status_Leds_Toggle(DASH_HEARTBEAT_LED); // heartbeat led on the dashboard
             ioStateCounter = 0;
         }
+
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(IO_STATE_PIN);
+        #endif
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
     }  
