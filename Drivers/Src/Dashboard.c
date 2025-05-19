@@ -1,7 +1,7 @@
 #include "Dashboard.h"
 
-// Boolean used to ensure that if car turns on in non-park, it'll be overriden to park 
-// until the switch is moved to park; then, it'll follow the specified gear state afterward.
+// Boolean used to ensure that if car turns on in non-neutral, it'll be overriden to neutral 
+// until the switch is moved to neutral; then, it'll follow the specified gear state afterward.
 static bool neutralReset = true;
 
 gear_t getGear(void) {

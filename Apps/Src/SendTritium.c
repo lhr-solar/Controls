@@ -85,13 +85,13 @@ static void updateDisplayState()
             UpdateDisplay_SetGear(DISP_FORWARD); 
             break;
         case DASH_NEU: 
-            UpdateDisplay_SetGear(DISP_PARK); 
+            UpdateDisplay_SetGear(DISP_NEUTRAL); 
             break;
         case DASH_REV: 
             UpdateDisplay_SetGear(DISP_REVERSE);
             break;
         default:
-            UpdateDisplay_SetGear(DISP_PARK); 
+            UpdateDisplay_SetGear(DISP_NEUTRAL); 
             break;
     }
 }
