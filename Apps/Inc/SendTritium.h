@@ -15,7 +15,6 @@
 
 //#define SENDTRITIUM_PRINT_MES
 
-// Macros
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD

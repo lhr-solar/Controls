@@ -255,6 +255,8 @@ static void assertSendTritiumError(SendTritium_error_code_t sterr)
             assertOSError(err);
             throwTaskError(Error_SendTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
+        default:
+            break;
     }
 
     Error_SendTritium = SENDTRITIUM_ERR_NONE;
