@@ -47,12 +47,6 @@ static uint32_t SBPV = 0;
 // static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
 
-void display_err_failed_recovery(void) {
-    UpdateDisplay_SetSBPV(SBPV);
-    UpdateDisplay_SetSOC(SOC);
-    strncpy(ErrMsg_Evac, DISP_EVAC_REQ_STR_LITERAL, ERR_CODE_LEN);
-    Display_Error();
-}
 
 #ifndef NODOGS
 /**
@@ -65,17 +59,6 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg)
     assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
 #endif
-
-/**
- * @brief error handler callback for disabling charging,
- * kills contactor and turns off display
- */
-static void handler_ReadCarCAN_contactorsDisable(void)
-{
-    // Kill contactor using a direct write to avoid blocking calls when the scheduler is locked
-    //MotorContactor_EmergencyDisable(); also happens in nonrecoverable errors
-    display_err_failed_recovery();
-}
 
 static bool check_MotorControllerContactor(void){
     // both should be on at the same time
@@ -105,10 +88,6 @@ static void handler_ReadCarCAN_BPSTrip(void)
     MotorContactor_EmergencyDisable();
     Status_Leds_Write(BPS_FAULT_LED, ON); // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
-
-    // chargeEnable = false;    // Not really necessary but makes inspection less confusing
-    //Display_Evac(SOC, SBPV); // Display evacuation screen             /   /////////////////////////
-    display_err_failed_recovery();
 }
 
 /**
@@ -118,7 +97,7 @@ static void handler_ReadCarCAN_BPSTrip(void)
 static void handler_ReadCarCAN_ActivePrechargeFault(void)
 {
     //Display_Evac(SOC, SBPV); // Display evacuation screen /   /   /   /   /   
-    display_err_failed_recovery();
+    // display_err_failed_recovery();
 }
 
 /**
@@ -305,25 +284,34 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
 {
     Error_ReadCarCAN = (error_code_t)rcc_err; // Store error code for inspection
     set_errmsg_hex("RCC", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+    UpdateDisplay_SetSBPV(SBPV);
+    UpdateDisplay_SetSOC(SOC);
     
-    switch (rcc_err)
-    {
-    case READCARCAN_ERR_NONE:
-        break;
+    switch (rcc_err) {
+        case READCARCAN_ERR_NONE:
+            break;
 
-    case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
-        throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_contactorsDisable, OPT_LOCK_SCHED, OPT_NONRECOV);
-        break;
+        case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
+            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
+            throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
 
-    case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop
-        throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
-        break;
-    case READCARCAN_ERR_ACTIVE_PRECHARGE_FAULT:
-        throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_ActivePrechargeFault, OPT_LOCK_SCHED, OPT_NONRECOV);
-        break;
+        case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop
+            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
+            throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
 
-    default:
-        break;
+        case READCARCAN_ERR_ACTIVE_PRECHARGE_FAULT:
+            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
+            throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_ActivePrechargeFault, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
+
+        case READCARCAN_ERR_IOSTATE:
+            throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
+        
+        default:
+            break;
     }
 
     Error_ReadCarCAN = READCARCAN_ERR_NONE; // Clear the error after handling it

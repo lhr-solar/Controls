@@ -86,9 +86,9 @@ static inline void set_errmsg_hex(const char *prefix, char *arr, error_code_t er
     arr[ERR_MSG_OFFSET + 5] = '\0';
 }
 
-#define DISP_NA_STR_LITERAL "\"N/A\""
-#define DISP_EVAC_NONREQ_STR_LITERAL "\"RECOMMENDED\""
-#define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
+extern const char *DISP_ERRMSG_NA;
+extern const char *DISP_EVACMSG_DEFAULT;
+extern const char *DISP_EVACMAG_REQ;
 
 /**
  * Task Prototypes

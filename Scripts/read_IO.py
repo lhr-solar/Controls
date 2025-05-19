@@ -5,6 +5,8 @@ import threading
 # take in parameters
 port_name = "/dev/ttyUSB0" #input('Enter port name (e.g., /dev/ttyUSB0): ')
 
+print_other_can_msgs = False
+
 # establish connection
 ser = serial.Serial(
     port=port_name,
@@ -90,7 +92,7 @@ def rec():
                         if msg_id == '581':
                             parsed_data = parse_io_state(data_hex)
                             print(parsed_data)
-                        else:
+                        elif print_other_can_msgs:
                             # For other messages, just print ID and data
                             print(f"CAN ID: 0x{msg_id}, Data: {data_hex}")
             except Exception as e:

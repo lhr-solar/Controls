@@ -8,11 +8,18 @@
 #include "Dashboard.h"
 #include "StatusLeds.h"
 
+#include "ReadCarCAN.h"
+
 static void putIOState(void);
 
 #define IO_STATE_DLY_MS 250u 
 #define IO_STATE_HEARTBEAT_DELAY_MS 1000u
 #define IO_STATE_HEARTBEAT_DELAY IO_STATE_HEARTBEAT_DELAY_MS/IO_STATE_DLY_MS
+
+#define IOSTATE_ERROR_THRESHOLD 3
+
+// havent added transition state stuff yet
+#define UNSTABLE_IGN_READING(ign) (ign == IGN_ERROR || ign == IGN_TRANSITION)
 
 void putIOState(void){
     CANDATA_t message = {0};
@@ -43,8 +50,17 @@ void putIOState(void){
     }
 
     ignition_state_t ign = Get_Ignition_State();
+    static uint8_t err_count = 0; 
+    while (UNSTABLE_IGN_READING(ign) && err_count < IOSTATE_ERROR_THRESHOLD) {
+        err_count++;
+        ign = Get_Ignition_State();
+    }
+    
+    if (UNSTABLE_IGN_READING(ign)) assertReadCarCANError(READCARCAN_ERR_IOSTATE);
+    
     if (ign >= IGN_ARR) s |= SWITCH_BITMAP_IGN_1_ARRAY(1);
     if (ign == IGN_MOTOR) s |= SWITCH_BITMAP_IGN_2_MOTOR(1);
+    
     message.data[2] = s;
 
     CANbus_Send(message, true, CARCAN);

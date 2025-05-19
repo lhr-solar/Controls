@@ -188,7 +188,7 @@ DisplayError_t Display_Error() {
         .args = {{.str = ErrMsg_Evac}}
     };
     Display_Send(evac_msg_cmd);
-    strncpy(ErrMsg_Evac, DISP_EVAC_NONREQ_STR_LITERAL, ERR_CODE_LEN);
+    strncpy(ErrMsg_Evac, DISP_ERRMSG_NA, ERR_CODE_LEN);
 
     // Display OS error if there is one
     DisplayCmd_t os_flt_cmd = {
@@ -200,7 +200,7 @@ DisplayError_t Display_Error() {
         .args = {{.str = ErrMsg_OS}}
     };
     Display_Send(os_flt_cmd);
-    strncpy(ErrMsg_OS, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+    strncpy(ErrMsg_OS, DISP_ERRMSG_NA, ERR_CODE_LEN);
     memset(&Error_OS, 0, sizeof(error_code_t));
 
     // Display other errors if there are any.
@@ -218,7 +218,7 @@ DisplayError_t Display_Error() {
             .args = {{.str = ErrMsg_ReadTritium}}
         };
         Display_Send(moco_flt_cmd);
-        strncpy(ErrMsg_ReadTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        strncpy(ErrMsg_ReadTritium, DISP_ERRMSG_NA, ERR_CODE_LEN);
         memset(&Error_ReadTritium, 0, sizeof(error_code_t));
     } else if (Error_ReadCarCAN != READCARCAN_ERR_NONE) {
         DisplayCmd_t rcc_flt_cmd = {
@@ -230,7 +230,7 @@ DisplayError_t Display_Error() {
             .args = {{.str = ErrMsg_ReadCarCAN}}
         };
         Display_Send(rcc_flt_cmd);
-        strncpy(ErrMsg_ReadCarCAN, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        strncpy(ErrMsg_ReadCarCAN, DISP_ERRMSG_NA, ERR_CODE_LEN);
         memset(&Error_ReadCarCAN, 0, sizeof(error_code_t));
     } else if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE) {
         DisplayCmd_t disp_flt_cmd = {
@@ -242,7 +242,7 @@ DisplayError_t Display_Error() {
             .args = {{.str = ErrMsg_UpdateDisplay}}
         };
         Display_Send(disp_flt_cmd);
-        strncpy(ErrMsg_UpdateDisplay, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        strncpy(ErrMsg_UpdateDisplay, DISP_ERRMSG_NA, ERR_CODE_LEN);
         memset(&Error_UpdateDisplay, 0, sizeof(error_code_t));
     } else {
         DisplayCmd_t no_flt_cmd = {
@@ -251,7 +251,7 @@ DisplayError_t Display_Error() {
             .op = "=",
             .numArgs = 1,
             .argTypes = {STR_ARG},
-            .args = {{.str = (char*)DISP_NA_STR_LITERAL}}
+            .args = {{.str = (char*)DISP_ERRMSG_NA}}
         };
         Display_Send(no_flt_cmd);
     }

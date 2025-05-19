@@ -47,6 +47,13 @@ CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 
+#define DISP_NA_STR_LITERAL "\"N/A\""
+#define DISP_EVAC_NONREQ_STR_LITERAL "\"RECOMMENDED\""
+#define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
+
+const char *DISP_ERRMSG_NA = DISP_NA_STR_LITERAL;
+const char *DISP_EVACMSG_DEFAULT = DISP_EVAC_NONREQ_STR_LITERAL;
+const char *DISP_EVACMAG_REQ = DISP_EVAC_REQ_STR_LITERAL;
 
 // Variables to store error codes, stored and cleared in task error assert functions
 error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
@@ -74,6 +81,7 @@ void _assertOSError(OS_ERR err)
     {
         Status_Leds_Write(OS_FAULT_LED, ON);
         Error_OS = err;
+        snprintf(ErrMsg_OS, ERR_CODE_LEN, "%08X", Error_OS);
         MotorContactor_EmergencyDisable(); // Turn off all contactors
         Display_Error(); // Display the location and error code
         while(1){;} //nonrecoverable
