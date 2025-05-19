@@ -90,15 +90,6 @@ static void handler_ReadCarCAN_BPSTrip(void)
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
 }
 
-/**
- * @brief error handle Contactor gives a fault
- * Callbacks happen after displaying the fault, so this screen won't get overwritten
- */
-static void handler_ReadCarCAN_ActivePrechargeFault(void)
-{
-    //Display_Evac(SOC, SBPV); // Display evacuation screen /   /   /   /   /   
-    // display_err_failed_recovery();
-}
 
 /**
  * @brief turns on or off the motor contactor depending on igntion and HV Contactors
@@ -303,7 +294,7 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
 
         case READCARCAN_ERR_ACTIVE_PRECHARGE_FAULT:
             strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
-            throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_ActivePrechargeFault, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case READCARCAN_ERR_IOSTATE:
