@@ -53,6 +53,19 @@
 #define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
 
 /**
+ * BPS & Motor Status Event Flag Definitions
+ */
+
+#define BPS_SAFE 1 << 0
+#define BPS_CHECKED 1 << 1
+#define MOTOR_ERR 1 << 2
+#define MOTOR_SAFE_TO_RUN 1 << 3
+
+// Synchronization-protected event flag group signaling BPS_SAFE, if BPS
+// has been checked, & motor ready to run status
+extern OS_FLAG_GRP BPS_Motor_Status_Flags;
+
+/**
  * Task error variable type
  */
 typedef uint16_t error_code_t;
@@ -136,6 +149,12 @@ extern OS_Q CANBus_MsgQ;
  * Registers the hook with the RTOS
  */
 void TaskSwHook_Init(void);
+
+/**
+ * @brief Initializes the BPS & Motor
+ * Flags for use between tasks
+ */
+void BPSMotorFlags_Init(void);
 
 /**
  * Task trace

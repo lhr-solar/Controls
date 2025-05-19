@@ -60,6 +60,11 @@ char ErrMsg_UpdateDisplay[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_OS[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_Evac[ERR_CODE_LEN] = DISP_EVAC_NONREQ_STR_LITERAL;
 
+// Synchronization-protected event flag group signaling BPS_SAFE, if BPS
+// has been checked, & motor ready to run status
+OS_FLAG_GRP BPS_Motor_Status_Flags;
+
+
 
 extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
@@ -184,4 +189,11 @@ void App_OS_TaskSwHook(void) {
 void TaskSwHook_Init(void) {
     PrevTasks.index = TASK_TRACE_LENGTH - 1; // List starts out empty
     OS_AppTaskSwHookPtr = App_OS_TaskSwHook;
+}
+
+// Initialize BPS & Motor Event Flag Group
+void BPSMotorFlags_Init(void) {
+    OS_ERR err;
+    OSFlagCreate(&BPS_Motor_Status_Flags, "BPS_Motor_Status_Flags", 0, &err);
+    assertOSError(err);
 }

@@ -85,22 +85,8 @@ static uint32_t SBPV = 0;
 // NOTE: For nextgen, BPS status (contactors, checked, trip, etc) will be done more compactly in a packed BPS message
 static bool bps_checked = false;
 
-// Synchronization-protected event flag group signaling BPS_SAFE, if BPS
-// has been checked, & motor ready to run status
-OS_FLAG_GRP BPS_Motor_Status_Flags;
-
 // Error assertion function prototype
 // static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
-
-/**
- * @brief Initialize SendCarCAN
-*/
-void ReadCarCAN_Init() {
-    OS_ERR err;
-
-    OSFlagCreate(&BPS_Motor_Status_Flags, "BPS_Motor_Status_Flags", 0, &err);
-    assertOSError(err);
-}
 
 // Getter function for charge enable, indicating that battery charging is allowed
 bool ChargeEnable_Get(void)

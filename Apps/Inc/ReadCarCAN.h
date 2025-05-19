@@ -16,20 +16,6 @@
 #include "Tasks.h"
 #include "CANbus.h"
 
-#define BPS_SAFE 1 << 0
-#define BPS_CHECKED 1 << 1
-#define MOTOR_ERR 1 << 2
-#define MOTOR_SAFE_TO_RUN 1 << 3
-
-// Synchronization-protected event flag group signaling BPS_SAFE, if BPS
-// has been checked, & motor ready to run status
-extern OS_FLAG_GRP BPS_Motor_Status_Flags;
-
-/**
- * @brief Initialize ReadCarCAN
-*/
-void ReadCarCAN_Init();
-
 /**
  * Error types
  */

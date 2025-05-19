@@ -111,6 +111,9 @@ void Task_Init(void *p_arg){
 
     // Start systick    
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
+
+    // Initialize BPS & Motor Event Flag Group
+    BPSMotorFlags_Init();
     
     // Initialize drivers
     Pedals_Init();
@@ -124,7 +127,6 @@ void Task_Init(void *p_arg){
     // Initialize applications
     UpdateDisplay_Init();
     SendCarCAN_Init();
-    ReadCarCAN_Init();
 
     // Initialize ReadTritium
     OSTaskCreate(

@@ -7,7 +7,6 @@
 #include "Dashboard.h"
 #include "CANbus.h"
 #include "UpdateDisplay.h"
-#include "ReadCarCAN.h"
 #include "BSP_UART.h"
 #include "Tasks.h"
 #include "SendTritium.h"
@@ -58,7 +57,7 @@ void Task1(void *arg)
     Minions_Init();
     dashboardInit();
     UpdateDisplay_Init();
-    ReadCarCAN_Init();
+    BPSMotorFlags_Init();
 
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
     // set_regenEnable(ON);

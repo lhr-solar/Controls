@@ -16,7 +16,6 @@
 #include "Pedals.h"
 #include "Tasks.h"
 #include "SendCarCAN.h"
-#include "ReadCarCAN.h"
 #include "SendTritium.h"
 
 #define IO_STATE_DLY_MS 250u 
