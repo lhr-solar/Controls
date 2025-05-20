@@ -20,7 +20,7 @@
 UpdateDisplayError_t UpdateDisplay_Init() {
 	OS_ERR err;
 	DisplayError_t ret = Display_SetPage(INFO);
-	OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, &err); // Wait >215ms so errors will show on the display
+	OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &err); // Wait so errors will show on the display.
 	assertOSError(err);
 	
 	return (ret == DISPLAY_ERR_NONE) ? UPDATEDISPLAY_ERR_NONE : UPDATEDISPLAY_ERR_DRIVER;
