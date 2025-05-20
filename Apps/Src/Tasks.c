@@ -85,9 +85,10 @@ extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions 
 
 /**
  * @brief Check and set error bits for CONTROLS_FAULT_MSG
+ * @param errorCode the Controls-define errorCode. Only used to check for BPS Trip
  * @return a byte with the error bits set according to Controls' current faults
  */
-uint8_t get_fault_bits(error_code_t errorCode) {
+uint8_t get_fault_bits(uint16_t errorCode) {
     
     uint8_t msg = 0;
 
@@ -119,7 +120,7 @@ void _assertOSError(OS_ERR err)
 
         CANDATA_t faultmsg = {0};
         faultmsg.ID = CONTROLS_FAULT_MSG;
-        faultmsg.data[0] = get_fault_bits(NULL); // No errCode - Won't know if it's a BPS trip message
+        faultmsg.data[0] = get_fault_bits(Error_OS);
         
         volatile static int faultLoopCount = 0;
 
