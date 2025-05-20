@@ -53,6 +53,7 @@ typedef enum {
 	PRECHARGE_TIMEOUT               = 0x401,
 	CONTROL_MODE                    = 0x580,
     IO_STATE 						= 0x581,
+    CONTROLS_FAULT_MSG              = 0x583,
 	MAX_CAN_ID
 } CANId_t;
 
