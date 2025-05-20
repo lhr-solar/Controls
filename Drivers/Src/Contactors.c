@@ -1,16 +1,16 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
- * @file Contactors.h
+ * @file Contactors.c
  * @brief 
  * 
  */
 
 #include "Contactors.h"
-#include "stm32f4xx_gpio.h"
 #include "Tasks.h"
 #include "BSP_GPIO.h"
 #include "daybreak_pins.h"
 
+#define CONTACTOR_SENSE_DELAY 1
 
 static OS_MUTEX contactorsMutex;
 
@@ -31,6 +31,14 @@ static void setContactor(contactor_t contactor, bool state) {
             contactorState[MOTOR_CONTROLLER_CONTACTOR] = state;
             BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, state);
             break;
+
+        // Precharge Contactors are updated by ReadCarCAN.c
+        case MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR:
+            contactorState[MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR] = state;
+            break;
+        case ARRAY_PRECHARGE_BYPASS_CONTACTOR:
+            contactorState[ARRAY_PRECHARGE_BYPASS_CONTACTOR] = state;
+            break;
         default:
             contactorState[contactor] = state;
             break;
@@ -45,12 +53,10 @@ static void setContactor(contactor_t contactor, bool state) {
 void Contactors_Init() {
     // Motor Contactor pins
     BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false); // control
-    BSP_GPIO_Init_PullUp(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, true); // sense
-
-
+    BSP_GPIO_Init_PullUp(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, true); // sense //TRUE before
 
     // start disabled
-    for (int contactor = 0; contactor < NUM_CONTACTORS; contactor++) {
+    for (contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++) {
         // Only Motor Contactor is directly controlled by Controls
         setContactor(contactor, OFF);
     }
@@ -65,14 +71,16 @@ void Contactors_Init() {
  * @brief   Returns the current state of 
  *          a specified contactor
  * @param   contactor the contactor
+ * @param   blocking whether or not this should be a blocking call
  * @return  The contactor's state (ON/OFF)
  */ 
-bool Contactors_Get(contactor_t contactor) {
+bool Contactors_Get(contactor_t contactor, bool blocking) {
     switch (contactor) {
-        case MOTOR_CONTROLLER_CONTACTOR: //TODO: Switch back to default high once we've switched to Controls Leader rev. 2
-            //contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 ? ON : OFF;
-            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 ? OFF : ON;
+        case MOTOR_CONTROLLER_CONTACTOR:
+            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Read_Pin(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 
+                                                         ? ON : OFF;
             break;
+
         // Precharge Contactors are updated by ReadCarCAN.c
         case ARRAY_PRECHARGE_BYPASS_CONTACTOR :
             break;
@@ -99,10 +107,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
 
     // acquire lock if its available
     OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &timestamp, &err);
-    
-    if(err == OS_ERR_PEND_WOULD_BLOCK){
-        return ERROR;
-    }
+    if (err == OS_ERR_PEND_WOULD_BLOCK) return ERROR;
     assertOSError(err);
 
     // change contactor to match state and make sure it worked
@@ -114,7 +119,7 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
         OSTimeDlyHMSM(0, 0, 0, CONTACTOR_SENSE_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 
-    bool ret = Contactors_Get(contactor);
+    bool ret = Contactors_Get(contactor, blocking);
     result = (ret == state) ? SUCCESS: ERROR;
 
     // release lock

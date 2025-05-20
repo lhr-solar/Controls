@@ -11,22 +11,13 @@
 #include "common.h"
 #include "os_cfg_app.h"
 #include "CANbus.h"
-#include "Minions.h"
-#include "Contactors.h"
-#include "Pedals.h"
-#include "Ignition.h"
 #include "Tasks.h"
+#include "DebugIO.h"
 #include "StatusLeds.h"
 #include "SendCarCAN.h"
 #include "SendTritium.h"
 
-#define IO_STATE_DLY_MS 250u 
-
 #define SENDCARCAN_MSG_SKIP_CTR 3
-
-// Task_PutIOState
-OS_TCB putIOState_TCB;
-CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 
 //fifo
 #define FIFO_TYPE CANDATA_t
@@ -39,7 +30,6 @@ static SendCarCAN_Q_t CANFifo;
 static OS_SEM CarCAN_Sem4;
 static OS_MUTEX CarCAN_Mtx;
 
-static void Task_PutIOState(void *p_arg);
 
 /**
  * @brief return the space left in SendCarCAN_Q for debug purposes
@@ -105,29 +95,14 @@ void Task_SendCarCAN(void *p_arg){
     CANDATA_t message;
     memset(&message, 0, sizeof message);
 
-    // PutIOState
-    OSTaskCreate(
-        (OS_TCB*)&putIOState_TCB,
-        (CPU_CHAR*)"PutIOState",
-        (OS_TASK_PTR)Task_PutIOState,
-        (void*)NULL,
-        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
-        (CPU_STK*)putIOState_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    assertOSError(err);
-
     while (1) {
           
         // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
         OSSemPend(&CarCAN_Sem4, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
         assertOSError(err);
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(SEND_CARCAN_PIN);
+        #endif
 
         OSMutexPend(&CarCAN_Mtx, 0, OS_OPT_PEND_BLOCKING, &ticks, &err);
         assertOSError(err);
@@ -137,45 +112,10 @@ void Task_SendCarCAN(void *p_arg){
         OSMutexPost(&CarCAN_Mtx, OS_OPT_POST_NONE, &err);
         assertOSError(err);
 
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(SEND_CARCAN_PIN);
+        #endif
+
         if(res) CANbus_Send(message, true, CARCAN);
     }
-}
-
-static void putIOState(void){
-    CANDATA_t message;
-    memset(&message, 0, sizeof message);
-    message.ID = IO_STATE;
-    
-    // Get pedal information
-    message.data[0] = Pedals_Read(ACCELERATOR);
-    message.data[1] = Pedals_Read(BRAKE);
-
-    // Get minion information
-    for(pin_t pin = 0; pin < NUM_PINS; pin++){
-        bool pinState = Minions_Read(pin);
-        message.data[2] |= pinState << pin;
-    }
-    
-    // Get contactor info
-    for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-        bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
-        message.data[3] |= contactorState << contactor;
-    }
-
-    // Tell BPS if the array contactor should be on
-    message.data[3] |= (Minions_Read(IGN_1) || Minions_Read(IGN_2)) << 2;
-
-    CANbus_Send(message, true, CARCAN);
-}
-
-/**
- * @brief sends IO information over CarCAN every IO_STATE_DLY_MS
-*/
-static void Task_PutIOState(void *p_arg) {
-    OS_ERR err;
-    while (1) {
-        putIOState();
-        OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(err);
-    }  
 }

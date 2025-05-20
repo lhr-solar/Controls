@@ -9,6 +9,7 @@
 
 #include "CANbus.h"
 #include "config.h"
+#include "DebugIO.h"
 #include "os.h"
 #include "Tasks.h"
 #include "CANConfig.h"
@@ -109,10 +110,6 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
     assertOSError(err);
 
     idWhitelist = whitelist_validator(idWhitelist, idWhitelistSize);
-
-    //callback_t rxHandler = (bus == motor ? &CANbus_RxHandler_2 : &CANbus_RxHandler_3);
-    //callback_t txHandler = (bus == motor ? &CANbus_TxHandler_2 : &CANbus_TxHandler_3);
-    // BSP_CAN_Init(bus, rxHandler, txHandler, (uint16_t*)idWhitelist, idWhitelistSize);
 
     if(bus==motor){
         BSP_CAN_Init(bus,&CANbus_RxHandler_2,&CANbus_TxHandler_2, (uint16_t*)idWhitelist, idWhitelistSize);

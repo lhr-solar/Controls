@@ -7,8 +7,7 @@
 /**
  * Possible Status LED Pins
  */
- typedef enum
- {
+typedef enum {
     ARRAY_PRECHARGE_CONTACTOR_LED = 0,
     MOTOR_PRECHARGE_CONTACTOR_LED,
     OS_FAULT_LED,
@@ -19,7 +18,7 @@
     DASH_BPS_HAZ_LED,
     DASH_HEARTBEAT_LED,
     NUM_STATUS_LED,
- } status_led_t;
+} status_led_t;
  
 /**
  * @brief Initializes Status LED pins
@@ -52,7 +51,7 @@ void Status_Leds_All_On(void);
  * @brief   Turns all status LEDs off
  * @return  None
  */ 
- void Status_Leds_All_Off(void);
+void Status_Leds_All_Off(void);
 
 
 #endif

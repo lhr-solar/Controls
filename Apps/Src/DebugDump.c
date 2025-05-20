@@ -49,7 +49,7 @@ void Task_DebugDump(void* p_arg) {
 
         // Get contactor info
         for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-            bool contactorState = Contactors_Get(contactor) == ON ? true : false;
+            bool contactorState = Contactors_Get(contactor, false) == ON ? true : false;
             printf("%s: %s\n\r", CONTACTOR_STRING[contactor], contactorState ? "on" : "off");
         } 
 

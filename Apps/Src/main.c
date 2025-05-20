@@ -14,11 +14,14 @@
 #include "CANConfig.h"
 #include "Contactors.h"
 #include "Display.h"
-#include "Minions.h"
+#include "Ignition.h"
+//#include "Minions.h"
 #include "Pedals.h"
+#include "Dashboard.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "daybreak_pins.h"
+#include "DebugIO.h"
 #include "StatusLeds.h"
 #include "BSP_GPIO.h"
 
@@ -38,7 +41,9 @@ void IdleTaskHook(void)
             last_tick_cnt = current_tick_cnt;
 
             if(current_tick_cnt % 50 == 0){
-                BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN, toggle);
+                #ifdef TASK_PROFILER
+                DebugIO_Toggle(IDLE_PIN);
+                #endif
                 toggle = !toggle;
             }
         }
@@ -61,8 +66,10 @@ int main(void) {
     IdleInit();
     TaskSwHook_Init();
     Status_Leds_Init();
-
     assertOSError(err);
+    Ignition_Init();
+    dashboardInit();
+    DebugIO_Init();
 
     // Initialize apps
     OSTaskCreate(
@@ -105,7 +112,7 @@ void Task_Init(void *p_arg){
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    Minions_Init();
+    // Minions_Init();
 
     // Initialize applications
     UpdateDisplay_Init();
@@ -197,6 +204,24 @@ void Task_Init(void *p_arg){
         (OS_TICK)0,
         (void*)NULL,
         (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
+        (OS_ERR*)&err
+    );
+    assertOSError(err);
+
+    // Initialize IOState
+    OSTaskCreate(
+        (OS_TCB*)&IOState_TCB,
+        (CPU_CHAR*)"PutIOState",
+        (OS_TASK_PTR)Task_IOState,
+        (void*)NULL,
+        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
+        (CPU_STK*)IOState_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_IO_STATE_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR),
         (OS_ERR*)&err
     );
     assertOSError(err);

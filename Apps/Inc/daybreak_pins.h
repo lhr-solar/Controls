@@ -33,17 +33,11 @@
 #define CRUISE_SET_PORT         PORTA
 #define CRUISE_SET              GPIO_Pin_7
 
-#define PA8_PORT                PORTA
-#define PA8                     GPIO_Pin_8
-
 #define MOTOR_C_SENSE_PORT      PORTA
 #define MOTOR_C_SENSE           GPIO_Pin_9
 
 #define MOTOR_CONTACTOR_PORT    PORTA
 #define MOTOR_CONTACTOR         GPIO_Pin_10
-
-#define PA15_PORT               PORTA
-#define PA15                    GPIO_Pin_15
 
 #define BPS_FAULT_PORT          PORTB
 #define BPS_FAULT               GPIO_Pin_0
@@ -53,9 +47,6 @@
 
 #define FORWARD_PORT            PORTB
 #define FORWARD                 GPIO_Pin_2
-
-#define PB7_PORT                PORTB
-#define PB7                     GPIO_Pin_7
 
 #define ARRAY_PBC_SENSE_PORT    PORTB
 #define ARRAY_PBC_SENSE         GPIO_Pin_8
@@ -87,29 +78,9 @@
 #define CRUISE_IND_PORT         PORTC
 #define CRUISE_IND              GPIO_Pin_8
 
-#define PC9_PORT                PORTC
-#define PC9                     GPIO_Pin_9
-
-#define PC10_PORT               PORTC
-#define PC10                    GPIO_Pin_10
-
-#define PC11_PORT               PORTC
-#define PC11                    GPIO_Pin_11
-
-#define PC12_PORT               PORTC
-#define PC12                    GPIO_Pin_12
-
-#define PC13_PORT               PORTC
-#define PC13                    GPIO_Pin_13
-
-#define PC14_PORT               PORTC
-#define PC14                    GPIO_Pin_14
-
 #define BRAKE_SW_PORT           PORTC
 #define BRAKE_SW                GPIO_Pin_15
 
-#define PD2_PORT                PORTD
-#define PD2                     GPIO_Pin_2
 
 // UART/USART
 

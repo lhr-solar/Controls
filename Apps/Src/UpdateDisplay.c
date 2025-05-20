@@ -10,6 +10,7 @@
  */
 
 #include "UpdateDisplay.h"
+#include "DebugIO.h"
 // #include "Minions.h"
 #include <math.h>
 
@@ -19,7 +20,7 @@
 UpdateDisplayError_t UpdateDisplay_Init() {
 	OS_ERR err;
 	DisplayError_t ret = Display_SetPage(INFO);
-	OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, &err); // Wait >215ms so errors will show on the display
+	OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &err); // Wait so errors will show on the display.
 	assertOSError(err);
 	
 	return (ret == DISPLAY_ERR_NONE) ? UPDATEDISPLAY_ERR_NONE : UPDATEDISPLAY_ERR_DRIVER;
@@ -57,16 +58,16 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 		} else {
 			switch (comp) {
 				case DISP_ARRAY_EN:
-					comp_val = Contactors_Get(ARRAY_CONTACTOR); 
+					comp_val = Contactors_Get(ARRAY_CONTACTOR, false); 
 					break;
 				case DISP_ARRAY_PC:
-					comp_val = Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR);
+					comp_val = Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false);
 					break;
 				case DISP_MOTOR_EN:
-					comp_val = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR);
+					comp_val = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false);
 					break;
 				case DISP_MOTOR_PC:
-					comp_val = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR);
+					comp_val = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false);
 					break;
 				default:
 				break;
@@ -184,6 +185,9 @@ UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val) {
 void Task_UpdateDisplay(void *p_arg) {
 	OS_ERR err;
 	while (1) {
+		#ifdef TASK_PROFILER
+		DebugIO_Toggle(UPDATE_DISPLAY_PIN);
+		#endif
 		for (Component_t comp = 0; comp <= DISP_GEAR; comp++) {
 			if (comp != DISP_REGEN_ST && comp != DISP_CRUISE_ST) {
 				assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
@@ -196,6 +200,9 @@ void Task_UpdateDisplay(void *p_arg) {
 				? UPDATEDISPLAY_ERR_NONE
 				: UPDATEDISPLAY_ERR_DRIVER
 		);
+		#ifdef TASK_PROFILER
+		DebugIO_Toggle(UPDATE_DISPLAY_PIN);
+		#endif
 
 		// Delay of 250 ms
 		OSTimeDlyHMSM(0, 0, 0, 250, OS_OPT_TIME_HMSM_STRICT, &err);

@@ -24,6 +24,16 @@
  * @param err the local OS_ERR variable
  */
 
+#define TASK_PROFILER
+
+#ifdef TASK_PROFILER
+#define IDLE_PIN PA15
+#define IO_STATE_PIN PB7
+#define READ_CARCAN_PIN PC14
+#define UPDATE_DISPLAY_PIN PA8
+#define SEND_CARCAN_PIN PC12
+#endif
+
 /**
  * Priority Definitions
  */ 
@@ -51,6 +61,8 @@
 #define TASK_SEND_CAR_CAN_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_DEBUG_DUMP_STACK_SIZE          DEFAULT_STACK_SIZE
 #define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
+#define TASK_IO_STATE_STACK_SIZE            DEFAULT_STACK_SIZE
+
 
 /**
  * Task error variable type
@@ -74,9 +86,9 @@ static inline void set_errmsg_hex(const char *prefix, char *arr, error_code_t er
     arr[ERR_MSG_OFFSET + 5] = '\0';
 }
 
-#define DISP_NA_STR_LITERAL "\"N/A\""
-#define DISP_EVAC_NONREQ_STR_LITERAL "\"RECOMMENDED\""
-#define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
+extern const char *DISP_ERRMSG_NA;
+extern const char *DISP_EVACMSG_DEFAULT;
+extern const char *DISP_EVACMAG_REQ;
 
 /**
  * Task Prototypes
@@ -99,7 +111,7 @@ void Task_DebugDump(void *p_arg);
 
 void Task_CommandLine(void* p_arg);
 
-
+void Task_IOState(void* p_arg);
 
 /**
  * TCBs
@@ -112,6 +124,7 @@ extern OS_TCB ReadTritium_TCB;
 extern OS_TCB SendCarCAN_TCB;
 extern OS_TCB DebugDump_TCB;
 extern OS_TCB CommandLine_TCB;
+extern OS_TCB IOState_TCB;
 
 
 /**
@@ -125,6 +138,7 @@ extern CPU_STK ReadTritium_Stk[TASK_READ_TRITIUM_STACK_SIZE];
 extern CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 extern CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 extern CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
+extern CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 
 /**
  * Queues
