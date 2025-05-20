@@ -53,7 +53,7 @@ static void setContactor(contactor_t contactor, bool state) {
 void Contactors_Init() {
     // Motor Contactor pins
     BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false); // control
-    BSP_GPIO_Init_PullUp(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, true); // sense
+    BSP_GPIO_Init_PullUp(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, true); // sense //TRUE before
 
     // start disabled
     for (contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++) {
@@ -77,7 +77,7 @@ void Contactors_Init() {
 bool Contactors_Get(contactor_t contactor, bool blocking) {
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
-            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 
+            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Read_Pin(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 
                                                          ? ON : OFF;
             break;
 
