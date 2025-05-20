@@ -73,6 +73,23 @@ static CANId_t* whitelist_validator(CANId_t* wlist, uint8_t size){
     return wlist;
 }
 
+/**
+ * @brief Check that the CAN message is valid by comparing it with the CAN lookup table
+ * @param msginfo the address of the can info struct to populate from the table
+ * @param CanData the CAN data used to index into the table
+ * @return ERROR if the ID is invalid; SUCCESS otherwise
+ */
+static ErrorStatus get_CANLUT_entry(CANLUT_T* msginfo, CANDATA_t CanData) {
+    //error check the id
+    if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+
+    *msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    
+    if(msginfo->size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
+
+    return SUCCESS;
+}
+
 ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize)
 {
     // initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
@@ -113,13 +130,16 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
     CPU_TS timestamp;
     OS_ERR err;
 
-    //error check the id
-    if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+    CANLUT_T msginfo;
 
-    CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    // //error check the id
+    // if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+
+    // CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
     
-    if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
+    // if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
 
+    if (get_CANLUT_entry(&msginfo, CanData) == ERROR){return ERROR;}
 
     // make sure that Can mailbox is available
     if (blocking == CAN_BLOCKING)
@@ -193,12 +213,16 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
  */
 ErrorStatus CANbus_Send_Faultstate(CANDATA_t CanData, CAN_t bus)
 {
-    //error check the id
-    if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+    // //error check the id
+    // if(CanData.ID >= MAX_CAN_ID){return ERROR;}
 
-    CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    // CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
     
-    if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
+    // if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
+
+    CANLUT_T msginfo;
+
+    if (get_CANLUT_entry(&msginfo, CanData) == ERROR){return ERROR;}
 
     uint8_t txdata[8];
     if(msginfo.idxEn){ //first byte of txData should be the idx value
