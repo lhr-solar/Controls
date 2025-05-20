@@ -61,6 +61,8 @@ CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 #define OS_FAULT_BIT 64                     // 1 if there is an OS Error
 // #define LAKSHAY_FAULT_BIT 128        // Not sure what this is
 
+#define FAULT_MSG_DELAY 100000
+
 const char *DISP_ERRMSG_NA = DISP_NA_STR_LITERAL;
 const char *DISP_EVACMSG_DEFAULT = DISP_EVAC_NONREQ_STR_LITERAL;
 const char *DISP_EVACMAG_REQ = DISP_EVAC_REQ_STR_LITERAL;
@@ -82,6 +84,26 @@ char ErrMsg_Evac[ERR_CODE_LEN] = DISP_EVAC_NONREQ_STR_LITERAL;
 extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
+ * @brief Check and set error bits for CONTROLS_FAULT_MSG
+ * @return a byte with the error bits set according to Controls' current faults
+ */
+uint8_t get_fault_bits(error_code_t errorCode) {
+    
+    uint8_t msg = 0;
+
+    if (Error_ReadCarCAN != READCARCAN_ERR_NONE)        {msg |= READCARCAN_FAULT_BIT;}
+    if (Error_ReadTritium != T_NONE)                    {msg |= MOTOR_CONTROLLER_FAULT_BIT;}
+    if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE)  {msg |= DISPLAY_FAULT_BIT;}
+    if (Error_OS != OS_ERR_NONE)                        {msg |= OS_FAULT_BIT;}
+
+    if (errorCode == READCARCAN_ERR_BPS_TRIP)           {msg |= BPS_FAULT_BIT;}
+
+    if (msg != 0)                                       {msg |= ANY_CONTROLS_FAULT_BIT;}
+
+    return msg;
+}
+
+/**
  * Error assertion-related functions
  */
 
@@ -94,7 +116,22 @@ void _assertOSError(OS_ERR err)
         snprintf(ErrMsg_OS, ERR_CODE_LEN, "%08X", Error_OS);
         MotorContactor_EmergencyDisable(); // Turn off all contactors
         Display_Error(); // Display the location and error code
-        while(1){;} //nonrecoverable
+
+        CANDATA_t faultmsg = {0};
+        faultmsg.ID = CONTROLS_FAULT_MSG;
+        faultmsg.data[0] = get_fault_bits(NULL); // No errCode - Won't know if it's a BPS trip message
+        
+        volatile static int faultLoopCount = 0;
+
+        while(1){ //nonrecoverable
+            faultLoopCount++;
+            if (faultLoopCount > FAULT_MSG_DELAY){
+                faultLoopCount = 0;
+                CANbus_Send_Faultstate(faultmsg, CARCAN);
+            }
+        }
+            
+           
     }
 }
 
@@ -135,18 +172,8 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     CANDATA_t faultmsg = {0};
     faultmsg.ID = CONTROLS_FAULT_MSG;
 
-
     // Check and set errors
-    uint8_t msg = 0;
-
-    if (Error_ReadCarCAN != READCARCAN_ERR_NONE)        {msg |= READCARCAN_FAULT_BIT;}
-    if (Error_ReadTritium != T_NONE)                    {msg |= MOTOR_CONTROLLER_FAULT_BIT;}
-    if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE)  {msg |= DISPLAY_FAULT_BIT;}
-
-    if (errorCode == READCARCAN_ERR_BPS_TRIP)           {msg |= BPS_FAULT_BIT;}
-    if (msg != 0)                                       {msg |= ANY_CONTROLS_FAULT_BIT;}
-
-    faultmsg.data[0] = msg;
+    faultmsg.data[0] = get_fault_bits(errorCode);
 
     CANbus_Send_Faultstate(faultmsg, CARCAN);
 
@@ -163,7 +190,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
                 Status_Leds_Toggle(DASH_HEARTBEAT_LED);
             }
             // periodically resend the Controls Fault message
-            if ((faultLoopCount % 100000) == 0){
+            if ((faultLoopCount % FAULT_MSG_DELAY) == 0){
                 CANbus_Send_Faultstate(faultmsg, CARCAN);
             }
             #if DEBUG == 1
