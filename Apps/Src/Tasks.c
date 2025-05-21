@@ -53,18 +53,20 @@ CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 
 const char *DISP_ERRMSG_NA = DISP_NA_STR_LITERAL;
 const char *DISP_EVACMSG_DEFAULT = DISP_EVAC_NONREQ_STR_LITERAL;
-const char *DISP_EVACMAG_REQ = DISP_EVAC_REQ_STR_LITERAL;
+const char *DISP_EVACMSG_REQ = DISP_EVAC_REQ_STR_LITERAL;
 
 // Variables to store error codes, stored and cleared in task error assert functions
 error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
+error_code_t Error_IOState = IOSTATE_ERR_NONE;
 error_code_t Error_OS = OS_ERR_NONE;
 
 // Display error messages for readability
 char ErrMsg_ReadCarCAN[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_ReadTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_UpdateDisplay[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_IOState[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_OS[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_Evac[ERR_CODE_LEN] = DISP_EVAC_NONREQ_STR_LITERAL;
 

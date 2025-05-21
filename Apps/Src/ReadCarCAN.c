@@ -283,21 +283,17 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
             break;
 
         case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
-            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop
-            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case READCARCAN_ERR_ACTIVE_PRECHARGE_FAULT:
-            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
-            throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
-            break;
-
-        case READCARCAN_ERR_IOSTATE:
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
         

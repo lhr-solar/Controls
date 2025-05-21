@@ -17,7 +17,7 @@
  */ 
 ignition_state_t Get_Ignition_State(void) {
     static bool ign_has_been_reset = false; // ensures that the ignition switch is turned off before it reads as array or motor
-    static ignition_state_t prev_state = IGN_OFF;
+    // static ignition_state_t prev_state = IGN_OFF;
     uint8_t array_state = BSP_GPIO_Read_Pin(ARRAY_IGNITION_PORT, ARRAY_IGNITION_PIN);
     uint8_t motor_state = BSP_GPIO_Read_Pin(MOTOR_IGNITION_PORT, MOTOR_IGNITION_PIN);    
     uint8_t off_state = BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE);    
@@ -29,20 +29,20 @@ ignition_state_t Get_Ignition_State(void) {
 
     if(off_state){
         ign_has_been_reset = true;
-        prev_state = IGN_OFF;
+        // prev_state = IGN_OFF;
         return IGN_OFF;
     }
     if(!ign_has_been_reset){
         return IGN_OFF;
     }
     if(array_state){
-        prev_state = IGN_ARR;
+        // prev_state = IGN_ARR;
         return IGN_ARR;
     }
     if(motor_state){
-        prev_state = IGN_MOTOR;
+        // prev_state = IGN_MOTOR;
         return IGN_MOTOR;
     }
     // likely in a transition state
-    return prev_state;
+    return IGN_TRANSITION; // prev_state
 }

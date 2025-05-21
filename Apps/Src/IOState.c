@@ -9,6 +9,7 @@
 #include "StatusLeds.h"
 
 #include "ReadCarCAN.h"
+#include "Tasks.h"
 
 static void putIOState(void);
 
@@ -17,6 +18,7 @@ static void putIOState(void);
 #define IO_STATE_HEARTBEAT_DELAY IO_STATE_HEARTBEAT_DELAY_MS/IO_STATE_DLY_MS
 
 #define IOSTATE_ERROR_THRESHOLD 3
+#define IOSTATE_TRANSITION_THRESHOLD 3
 
 // havent added transition state stuff yet
 #define UNSTABLE_IGN_READING(ign) (ign == IGN_ERROR || ign == IGN_TRANSITION)
@@ -49,14 +51,29 @@ void putIOState(void){
             break;
     }
 
+    static ignition_state_t prev_state = IGN_OFF; // Return last state when switching between positions
+    static uint8_t transition_count = 0; // Assert recoverable error and set to off if in transition too long
+    static uint8_t error_count = 0; // Assert nonrecoverable error if there are too many ignition errors
+
     ignition_state_t ign = Get_Ignition_State();
-    static uint8_t err_count = 0; 
-    while (UNSTABLE_IGN_READING(ign) && err_count < IOSTATE_ERROR_THRESHOLD) {
-        err_count++;
-        ign = Get_Ignition_State();
+
+    if (UNSTABLE_IGN_READING(ign)) {
+        // Update ignition counters
+        transition_count += (ign == IGN_TRANSITION ? 1 : 0);
+        error_count += (ign == IGN_ERROR ? 1 : 0);
+        ign = prev_state; // Return last state
+
+    } else { // Valid ignition state
+        prev_state = ign;
+        transition_count = 0;
+        error_count  = 0;
     }
     
-    if (UNSTABLE_IGN_READING(ign)) assertReadCarCANError(READCARCAN_ERR_IOSTATE);
+    // If in an unstable state for too long, return IGN_OFF instead
+    if (transition_count > IOSTATE_TRANSITION_THRESHOLD || error_count > IOSTATE_ERROR_THRESHOLD) {ign = IGN_OFF;}
+    
+    // If experiencing an error for too long, assert a (nonrecoverable) fault
+    if (error_count > IOSTATE_ERROR_THRESHOLD) {assertIOStateError(IOSTATE_ERROR);}
     
     if (ign >= IGN_ARR) s |= SWITCH_BITMAP_IGN_1_ARRAY(1);
     if (ign == IGN_MOTOR) s |= SWITCH_BITMAP_IGN_2_MOTOR(1);
@@ -91,4 +108,30 @@ void Task_IOState(void *p_arg) {
         OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
     }  
+}
+
+/**
+ * @brief error assertion function for IOState, used to handle ignition errors
+ * Stores the error code and calls assertTaskError with the appropriate parameters and callback handler
+ * @param  io_err error code to specify the issue encountered
+ */
+void assertIOStateError(IOState_error_code_t io_err)
+{
+    Error_IOState = (error_code_t)io_err; // Store error code for inspection
+    set_errmsg_hex("IOS", ErrMsg_IOState, io_err);    // Store error message for inspection
+    
+    switch (io_err) {
+        case IOSTATE_ERR_NONE:
+            break;
+
+        case IOSTATE_ERROR: // More than one state on for multiple cycles. Set IGN to OFF and fault
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_DEFAULT, ERR_CODE_LEN);
+            throwTaskError(Error_IOState, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
+        
+        default:
+            break;
+    }
+
+    Error_IOState = IOSTATE_ERR_NONE; // Clear the error after handling it
 }
