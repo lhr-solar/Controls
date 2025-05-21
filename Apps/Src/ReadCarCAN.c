@@ -17,7 +17,8 @@
 #include "daybreak_pins.h"
 
 // Uncomment this to remove CAN watchdog timers for BPS_CONTACTOR and CONTACTOR_SENSE messages
-#define NODOGS
+//#define NODOGS
+#define NO_CONTACTOR_DOGS
 
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 1000u                                                             // 500 ms
@@ -35,8 +36,10 @@
 // BPS CAN watchdog timer variable
 static OS_TMR canWatchTimer;
 
+#ifndef NO_CONTACTOR_DOGS
 // Active Precharge CAN watchdog timer variable
 static OS_TMR prechargeCanWatchTimer;
+#endif
 #endif
 
 // State of Charge (SOC) and supplemental battery pack voltage (SBPV) value intialization
@@ -141,6 +144,7 @@ void Task_ReadCarCAN(void *p_arg)
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(err);
 
+    #ifndef NO_CONTACTOR_DOGS
     // Create the Active Precharge CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID CONTACTOR_SENSE within the desired interval.
     OSTmrCreate(
@@ -157,6 +161,7 @@ void Task_ReadCarCAN(void *p_arg)
     // Start Precharge CAN Watchdog timer
     OSTmrStart(&prechargeCanWatchTimer, &err);
     assertOSError(err);
+    #endif
     #endif
 
     while (1)
@@ -228,8 +233,10 @@ void Task_ReadCarCAN(void *p_arg)
         case CONTACTOR_SENSE:
         {
             #ifndef NODOGS
+            #ifndef NO_CONTACTOR_DOGS
             OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
             assertOSError(err);
+            #endif
             #endif
 
             // Update Motor Contactor sense state
