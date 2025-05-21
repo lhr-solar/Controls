@@ -51,29 +51,13 @@ void putIOState(void){
             break;
     }
 
-    static ignition_state_t prev_state = IGN_OFF; // Return last state when switching between positions
-    static uint8_t transition_count = 0; // Assert recoverable error and set to off if in transition too long
-    static uint8_t error_count = 0; // Assert nonrecoverable error if there are too many ignition errors
-
     ignition_state_t ign = Get_Ignition_State();
-
-    if (UNSTABLE_IGN_READING(ign)) {
-        // Update ignition counters
-        transition_count += (ign == IGN_TRANSITION ? 1 : 0);
-        error_count += (ign == IGN_ERROR ? 1 : 0);
-        ign = prev_state; // Return last state
-
-    } else { // Valid ignition state
-        prev_state = ign;
-        transition_count = 0;
-        error_count  = 0;
-    }
     
     // If in an unstable state for too long, return IGN_OFF instead
-    if (transition_count > IOSTATE_TRANSITION_THRESHOLD || error_count > IOSTATE_ERROR_THRESHOLD) {ign = IGN_OFF;}
+    if (ign == IGN_TRANSITION) {ign = IGN_OFF;}
     
     // If experiencing an error for too long, assert a (nonrecoverable) fault
-    if (error_count > IOSTATE_ERROR_THRESHOLD) {assertIOStateError(IOSTATE_ERROR);}
+    if (ign == IGN_ERROR) {ign = IGN_OFF; assertIOStateError(IOSTATE_ERROR);}
     
     if (ign >= IGN_ARR) s |= SWITCH_BITMAP_IGN_1_ARRAY(1);
     if (ign == IGN_MOTOR) s |= SWITCH_BITMAP_IGN_2_MOTOR(1);
