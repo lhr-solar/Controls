@@ -1,6 +1,6 @@
 #include "Ignition.h"
 
-#define TRANSITION_THRESHOLD 3
+#define TRANSITION_THRESHOLD 15
 /**
  * @brief Initializes the Ignition pins
  * 

@@ -52,12 +52,9 @@ void putIOState(void){
     }
 
     ignition_state_t ign = Get_Ignition_State();
-    
-    // If in an unstable state for too long, return IGN_OFF instead
-    if (ign == IGN_TRANSITION) {ign = IGN_OFF;}
-    
-    // If experiencing an error for too long, assert a (nonrecoverable) fault
-    if (ign == IGN_ERROR) {ign = IGN_OFF; assertIOStateError(IOSTATE_ERROR);}
+        
+    // If experiencing an error (short or disconnect) for too long, assert a nonrecoverable fault
+    if (UNSTABLE_IGN_READING(ign)) {ign = IGN_OFF; assertIOStateError(IOSTATE_ERROR);}
     
     if (ign >= IGN_ARR) s |= SWITCH_BITMAP_IGN_1_ARRAY(1);
     if (ign == IGN_MOTOR) s |= SWITCH_BITMAP_IGN_2_MOTOR(1);
