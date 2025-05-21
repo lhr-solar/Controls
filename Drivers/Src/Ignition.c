@@ -26,22 +26,24 @@ ignition_state_t Get_Ignition_State(void) {
         return IGN_ERROR;
     }
 
+    if(!(array_state || motor_state || off_state)){
+        return IGN_TRANSITION;
+    }
+
     if(off_state){
         ign_has_been_reset = true;
-        // prev_state = IGN_OFF;
         return IGN_OFF;
     }
     if(!ign_has_been_reset){
         return IGN_OFF;
     }
     if(array_state){
-        // prev_state = IGN_ARR;
         return IGN_ARR;
     }
     if(motor_state){
-        // prev_state = IGN_MOTOR;
         return IGN_MOTOR;
     }
-    // likely in a transition state
-    return IGN_TRANSITION; // prev_state
+
+    return IGN_TRANSITION; // Default- should not hit here
+
 }
