@@ -14,7 +14,7 @@
 
 #include "common.h"
 #include "os.h"
-#include "config.h"
+// #include "config.h"
 
 /**
  * Task initialization macro

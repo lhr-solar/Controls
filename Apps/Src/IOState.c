@@ -1,15 +1,15 @@
 #include "common.h"
 #include "os_cfg_app.h"
-#include "IOState.h"
-#include "Tasks.h"
+
 #include "DebugIO.h"
 #include "Pedals.h"
 #include "Ignition.h"
 #include "Dashboard.h"
 #include "StatusLeds.h"
+#include "CANbus.h"
 
-#include "ReadCarCAN.h"
 #include "Tasks.h"
+#include "IOState.h"
 
 static void putIOState(void);
 
@@ -35,7 +35,7 @@ void putIOState(void){
 
     uint8_t s = 0;
     s |= SWITCH_BITMAP_BRAKELIGHT((brake >= PEDAL_BRAKELIGHT_THRESHOLD));
-    s |= SWITCH_BITMAP_CRUZ_EN(0);
+    s |= SWITCH_BITMAP_CRUZ_EN(0);  // Cruise and regen are disabled for daybreak
     s |= SWITCH_BITMAP_CRUZ_ST(0);
     s |= SWITCH_BITMAP_REGEN_SW(0);
     Status_Leds_Write(CRUISE_IND_LED, getDashState(DASHBOARD_CRUZ_SET) ? ON : OFF); // Ceremonial (useless)
@@ -59,11 +59,11 @@ void putIOState(void){
 
     if (UNSTABLE_IGN_READING(ign)) {
         // Update ignition counters
-        transition_count += (ign == IGN_TRANSITION ? 1 : 0);
-        error_count += (ign == IGN_ERROR ? 1 : 0);
+        if (ign == IGN_ERROR) error_count++;
+        if (ign == IGN_TRANSITION) transition_count++;
         ign = prev_state; // Return last state
-
-    } else { // Valid ignition state
+    } 
+    else { // Valid ignition state
         prev_state = ign;
         transition_count = 0;
         error_count  = 0;
@@ -115,8 +115,7 @@ void Task_IOState(void *p_arg) {
  * Stores the error code and calls assertTaskError with the appropriate parameters and callback handler
  * @param  io_err error code to specify the issue encountered
  */
-void assertIOStateError(IOState_error_code_t io_err)
-{
+void assertIOStateError(IOState_error_code_t io_err) {
     Error_IOState = (error_code_t)io_err; // Store error code for inspection
     set_errmsg_hex("IOS", ErrMsg_IOState, io_err);    // Store error message for inspection
     

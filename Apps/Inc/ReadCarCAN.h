@@ -13,8 +13,6 @@
 
 #include "os.h"
 #include "common.h"
-#include "Tasks.h"
-#include "CANbus.h"
 
 #define BPS_TRIP_MESSAGE 1
 

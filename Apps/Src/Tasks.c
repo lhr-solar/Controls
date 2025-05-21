@@ -5,19 +5,21 @@
  * 
  */
 
-#include "Tasks.h"
-#include "os.h"
+// #include "os_cfg_app.h"
+
 #include "CANbus.h"
 #include "Contactors.h"
 #include "Display.h"
-#include "Minions.h"
-#include "IOState.h"
+// #include "Minions.h"
 #include "Pedals.h"
+#include "StatusLeds.h"
+
+#include "Tasks.h"
 #include "ReadTritium.h"
 #include "ReadCarCAN.h"
+#include "IOState.h"
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
-#include "StatusLeds.h"
 
 /**
  * TCBs
@@ -71,7 +73,7 @@ char ErrMsg_OS[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_Evac[ERR_CODE_LEN] = DISP_EVAC_NONREQ_STR_LITERAL;
 
 
-extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
+// extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
  * Error assertion-related functions

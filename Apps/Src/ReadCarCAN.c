@@ -5,15 +5,17 @@
  *
  */
 
-#include "ReadCarCAN.h"
-#include "UpdateDisplay.h"
+#include "os_cfg_app.h"
+
+#include "DebugIO.h"
 #include "Contactors.h"
 #include "Ignition.h"
-#include "os.h"
 #include "StatusLeds.h"
-#include "os_cfg_app.h"
-#include "Display.h"
-#include "DebugIO.h"
+#include "CANbus.h"
+
+#include "Tasks.h"
+#include "ReadCarCAN.h"
+#include "UpdateDisplay.h"
 #include "daybreak_pins.h"
 
 // Uncomment this to remove CAN watchdog timers for BPS_CONTACTOR and CONTACTOR_SENSE messages

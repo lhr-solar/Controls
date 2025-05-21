@@ -9,10 +9,16 @@
  * 
  */
 
-#include "UpdateDisplay.h"
+#include "os_cfg_app.h"
+
 #include "DebugIO.h"
-// #include "Minions.h"
-#include <math.h>
+#include "Contactors.h"
+#include "Display.h"
+
+#include "Tasks.h"
+#include "UpdateDisplay.h"
+
+
 
 // For fault handling
 #define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
