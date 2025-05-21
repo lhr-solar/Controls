@@ -11,7 +11,7 @@
 #include "Display.h"
 #include "Tasks.h" // for os and fault error codes
 #include "bsp.h"   // for writing to UART
-
+#include "IOState.h"
 #include "ReadCarCAN.h"
 #include "ReadTritium.h"
 #include "UpdateDisplay.h"
@@ -232,6 +232,18 @@ DisplayError_t Display_Error() {
         Display_Send(rcc_flt_cmd);
         strncpy(ErrMsg_ReadCarCAN, DISP_ERRMSG_NA, ERR_CODE_LEN);
         memset(&Error_ReadCarCAN, 0, sizeof(error_code_t));
+    } else if (Error_IOState != IOSTATE_ERR_NONE) {
+        DisplayCmd_t ios_flt_cmd = {
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
+            .attr = "txt",
+            .op = "=",
+            .numArgs = 1,
+            .argTypes = {STR_ARG},
+            .args = {{.str = ErrMsg_IOState}}
+        };
+        Display_Send(ios_flt_cmd);
+        strncpy(ErrMsg_IOState, DISP_ERRMSG_NA, ERR_CODE_LEN);
+        memset(&Error_IOState, 0, sizeof(error_code_t));
     } else if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE) {
         DisplayCmd_t disp_flt_cmd = {
             .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"

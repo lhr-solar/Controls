@@ -14,7 +14,7 @@
 
 #include "common.h"
 #include "os.h"
-#include "config.h"
+// #include "config.h"
 
 /**
  * Task initialization macro
@@ -88,7 +88,7 @@ static inline void set_errmsg_hex(const char *prefix, char *arr, error_code_t er
 
 extern const char *DISP_ERRMSG_NA;
 extern const char *DISP_EVACMSG_DEFAULT;
-extern const char *DISP_EVACMAG_REQ;
+extern const char *DISP_EVACMSG_REQ;
 
 /**
  * Task Prototypes
@@ -171,6 +171,7 @@ extern task_trace_t PrevTasks;
 extern error_code_t Error_ReadTritium; 
 extern error_code_t Error_ReadCarCAN;
 extern error_code_t Error_UpdateDisplay;
+extern error_code_t Error_IOState;
 extern error_code_t Error_OS;
 
 // Define the length of the error code message
@@ -179,6 +180,7 @@ extern error_code_t Error_OS;
 extern char ErrMsg_ReadTritium[ERR_CODE_LEN];
 extern char ErrMsg_ReadCarCAN[ERR_CODE_LEN];
 extern char ErrMsg_UpdateDisplay[ERR_CODE_LEN];
+extern char ErrMsg_IOState[ERR_CODE_LEN];
 extern char ErrMsg_OS[ERR_CODE_LEN];
 extern char ErrMsg_Evac[ERR_CODE_LEN];
 

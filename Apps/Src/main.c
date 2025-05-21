@@ -8,22 +8,22 @@
 
 #include "common.h"
 #include "config.h"
-#include "Tasks.h"
 #include "stm32f4xx.h"
-#include "CANbus.h"
-#include "CANConfig.h"
+
 #include "Contactors.h"
 #include "Display.h"
 #include "Ignition.h"
-//#include "Minions.h"
+#include "CANbus.h"
+#include "CANConfig.h"
 #include "Pedals.h"
 #include "Dashboard.h"
+#include "DebugIO.h"
+#include "StatusLeds.h"
+
+#include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "daybreak_pins.h"
-#include "DebugIO.h"
-#include "StatusLeds.h"
-#include "BSP_GPIO.h"
 
 int idle_time_ctr = 0;
 int last_tick_cnt = 0;
