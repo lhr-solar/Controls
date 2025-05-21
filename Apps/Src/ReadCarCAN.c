@@ -101,6 +101,7 @@ static void handler_ReadCarCAN_BPSTrip(void)
 static void updateMotorControllerContactor(void){
     ignition_state_t ignState = Get_Ignition_State();
     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
+    if (ignState == IGN_ERROR || ignState == IGN_TRANSITION) {return;}
     if(ignState == IGN_MOTOR || ignState == IGN_ARR){
         if(Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)){
             // turn on motor contactor if it was off before
