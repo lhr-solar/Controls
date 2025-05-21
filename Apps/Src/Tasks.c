@@ -58,10 +58,10 @@ CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 // #define PEDALS_FAULT_BIT 8           // ""
 #define READCARCAN_FAULT_BIT 16         // 1 if there is a ReadCarCAN Error
 #define DISPLAY_FAULT_BIT 32            // 1 if there is an UpdateDisplay Error
-#define OS_FAULT_BIT 64                     // 1 if there is an OS Error
-// #define LAKSHAY_FAULT_BIT 128        // Not sure what this is
+#define OS_FAULT_BIT 64                 // 1 if there is an OS Error
+#define LAKSHAY_FAULT_BIT 128           // 1 if Lakshay's code is running
 
-#define FAULT_MSG_DELAY 100000
+#define FAULT_MSG_DELAY 1000000
 
 const char *DISP_ERRMSG_NA = DISP_NA_STR_LITERAL;
 const char *DISP_EVACMSG_DEFAULT = DISP_EVAC_NONREQ_STR_LITERAL;
@@ -92,12 +92,15 @@ uint8_t get_fault_bits(uint16_t errorCode) {
     
     uint8_t msg = 0;
 
-    if (Error_ReadCarCAN != READCARCAN_ERR_NONE)        {msg |= READCARCAN_FAULT_BIT;}
+    if(Error_ReadCarCAN == READCARCAN_ERR_BPS_TRIP){
+        msg |= BPS_FAULT_BIT;
+    }
+    if(Error_ReadCarCAN != READCARCAN_ERR_NONE)         {msg |= READCARCAN_FAULT_BIT;}
     if (Error_ReadTritium != T_NONE)                    {msg |= MOTOR_CONTROLLER_FAULT_BIT;}
     if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE)  {msg |= DISPLAY_FAULT_BIT;}
     if (Error_OS != OS_ERR_NONE)                        {msg |= OS_FAULT_BIT;}
 
-    if (errorCode == READCARCAN_ERR_BPS_TRIP)           {msg |= BPS_FAULT_BIT;}
+    msg |= LAKSHAY_FAULT_BIT;                           // TODO: remove this when Lakshay's code is removed
 
     if (msg != 0)                                       {msg |= ANY_CONTROLS_FAULT_BIT;}
 
@@ -185,11 +188,12 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
             faultLoopCount++;
 
             // periodically toggle Controls Fault LED
-            if(faultLoopCount > 9999999){
+            if(faultLoopCount > 1000000){
                 faultLoopCount = 0;
                 Status_Leds_Toggle(CONTROLS_FAULT_LED);
                 Status_Leds_Toggle(DASH_HEARTBEAT_LED);
             }
+
             // periodically resend the Controls Fault message
             if ((faultLoopCount % FAULT_MSG_DELAY) == 0){
                 CANbus_Send_Faultstate(faultmsg, CARCAN);
