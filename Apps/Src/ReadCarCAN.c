@@ -17,7 +17,7 @@
 #include "daybreak_pins.h"
 
 // Uncomment this to remove CAN watchdog timers for BPS_CONTACTOR and CONTACTOR_SENSE messages
-//#define NODOGS
+#define NODOGS
 #define NO_CONTACTOR_DOGS
 
 // Timer delay constants
@@ -32,15 +32,11 @@
 // State of Charge scalar to scale it to correct fixed point
 #define SOC_SCALER 1000000
 
-#ifndef NODOGS
 // BPS CAN watchdog timer variable
 static OS_TMR canWatchTimer;
 
-#ifndef NO_CONTACTOR_DOGS
 // Active Precharge CAN watchdog timer variable
 static OS_TMR prechargeCanWatchTimer;
-#endif
-#endif
 
 // State of Charge (SOC) and supplemental battery pack voltage (SBPV) value intialization
 static uint32_t SOC = 0;
@@ -51,7 +47,6 @@ static uint32_t SBPV = 0;
 
 
 
-#ifndef NODOGS
 /**
  * @brief Nested function as the same function needs to be executed however the timer requires different parameters
  * @param p_tmr pointer to the timer that calls this function, passed by timer
@@ -61,7 +56,6 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg)
 {
     assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
-#endif
 
 static bool check_MotorControllerContactor(void){
     // both should be on at the same time
@@ -120,14 +114,11 @@ static void updateMotorControllerContactor(void){
 
 void Task_ReadCarCAN(void *p_arg)
 {
-    #ifndef NODOGS
     OS_ERR err;
-    #endif
 
     // data struct for CAN message
     CANDATA_t dataBuf;
 
-    #ifndef NODOGS
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID BPS_CONTACTOR within the desired interval.
     OSTmrCreate(
@@ -141,11 +132,12 @@ void Task_ReadCarCAN(void *p_arg)
         &err);
     assertOSError(err);
 
+    #ifndef NODOGS
     // Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(err);
-
-    #ifndef NO_CONTACTOR_DOGS
+    #endif
+    
     // Create the Active Precharge CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID CONTACTOR_SENSE within the desired interval.
     OSTmrCreate(
@@ -159,6 +151,8 @@ void Task_ReadCarCAN(void *p_arg)
         &err);
     assertOSError(err);
 
+    #ifndef NODOGS
+    #ifndef NO_CONTACTOR_DOGS
     // Start Precharge CAN Watchdog timer
     OSTmrStart(&prechargeCanWatchTimer, &err);
     assertOSError(err);
