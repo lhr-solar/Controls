@@ -69,11 +69,11 @@ void putIOState(void){
         error_count  = 0;
     }
     
-    // If in an unstable state for too long, return IGN_OFF instead
-    if (transition_count > IOSTATE_TRANSITION_THRESHOLD || error_count > IOSTATE_ERROR_THRESHOLD) {ign = IGN_OFF;}
-    
-    // If experiencing an error for too long, assert a (nonrecoverable) fault
-    if (error_count > IOSTATE_ERROR_THRESHOLD) {assertIOStateError(IOSTATE_ERROR);}
+    // If in an unstable state for too long, return IGN_OFF and fault
+    if (transition_count > IOSTATE_TRANSITION_THRESHOLD || error_count > IOSTATE_ERROR_THRESHOLD) {
+        ign = IGN_OFF;
+        assertIOStateError(IOSTATE_ERROR);
+    }
     
     if (ign >= IGN_ARR) s |= SWITCH_BITMAP_IGN_1_ARRAY(1);
     if (ign == IGN_MOTOR) s |= SWITCH_BITMAP_IGN_2_MOTOR(1);
