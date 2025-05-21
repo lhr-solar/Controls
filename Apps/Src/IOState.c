@@ -17,8 +17,8 @@ static void putIOState(void);
 #define IO_STATE_HEARTBEAT_DELAY_MS 1000u
 #define IO_STATE_HEARTBEAT_DELAY IO_STATE_HEARTBEAT_DELAY_MS/IO_STATE_DLY_MS
 
-#define IOSTATE_ERROR_THRESHOLD 3
-#define IOSTATE_TRANSITION_THRESHOLD 3
+#define IOSTATE_ERROR_THRESHOLD 2000u // in MS
+#define IOSTATE_TRANSITION_THRESHOLD 1000u // in MS
 
 // havent added transition state stuff yet
 #define UNSTABLE_IGN_READING(ign) (ign == IGN_ERROR || ign == IGN_TRANSITION)
@@ -70,7 +70,7 @@ void putIOState(void){
     }
     
     // If in an unstable state for too long, return IGN_OFF and fault
-    if (transition_count > IOSTATE_TRANSITION_THRESHOLD || error_count > IOSTATE_ERROR_THRESHOLD) {
+    if (transition_count > (IOSTATE_TRANSITION_THRESHOLD/IO_STATE_DLY_MS) || error_count > (IOSTATE_ERROR_THRESHOLD/IO_STATE_DLY_MS)) {
         ign = IGN_OFF;
         assertIOStateError(IOSTATE_ERROR);
     }

@@ -26,10 +26,6 @@ ignition_state_t Get_Ignition_State(void) {
         return IGN_ERROR;
     }
 
-    if(!(array_state || motor_state || off_state)){
-        return IGN_TRANSITION;
-    }
-
     if(off_state){
         ign_has_been_reset = true;
         return IGN_OFF;
@@ -44,6 +40,6 @@ ignition_state_t Get_Ignition_State(void) {
         return IGN_MOTOR;
     }
 
-    return IGN_TRANSITION; // Default- should not hit here
+    return IGN_TRANSITION;
 
 }
