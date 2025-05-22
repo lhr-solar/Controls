@@ -222,6 +222,18 @@ DisplayError_t Display_Error() {
         Display_Send(moco_flt_cmd);
         strncpy(ErrMsg_ReadTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
         memset(&Error_ReadTritium, 0, sizeof(error_code_t));
+    } else if (Error_SendTritium != SENDTRITIUM_ERR_NONE) {
+        DisplayCmd_t disp_flt_cmd = {
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
+            .attr = "txt",
+            .op = "=",
+            .numArgs = 1,
+            .argTypes = {STR_ARG},
+            .args = {{.str = ErrMsg_SendTritium}}
+        };
+        Display_Send(disp_flt_cmd);
+        strncpy(ErrMsg_SendTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        memset(&ErrMsg_SendTritium, 0, sizeof(error_code_t));
     } else if (Error_ReadCarCAN != READCARCAN_ERR_NONE) {
         DisplayCmd_t rcc_flt_cmd = {
             .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
@@ -246,18 +258,6 @@ DisplayError_t Display_Error() {
         Display_Send(disp_flt_cmd);
         strncpy(ErrMsg_UpdateDisplay, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
         memset(&Error_UpdateDisplay, 0, sizeof(error_code_t));
-    } else if (Error_SendTritium != SENDTRITIUM_ERR_NONE) {
-        DisplayCmd_t disp_flt_cmd = {
-            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
-            .attr = "txt",
-            .op = "=",
-            .numArgs = 1,
-            .argTypes = {STR_ARG},
-            .args = {{.str = ErrMsg_SendTritium}}
-        };
-        Display_Send(disp_flt_cmd);
-        strncpy(ErrMsg_SendTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
-        memset(&ErrMsg_SendTritium, 0, sizeof(error_code_t));
     } else {
         DisplayCmd_t no_flt_cmd = {
             .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"

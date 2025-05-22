@@ -10,20 +10,28 @@ int main()
     gear_t gear = DASH_GEAR_FAULT_ERROR;
     //uint8_t dashStatus[NUM_DASH_PINS];
 
+    Status_Leds_All_Off();
 
     //// Testing forced gear reset to neutral
+    // NOTE: MOTOR_PRECHARGE_CONTACTOR_LED On => Move the gearswitch to FWD gear
+    // NOTE: ARRAY_PRECHARGE_CONTACTOR_LED On => Move the gearswitch to NEU gear
+    // NOTE: Both MOTOR_PRECHARGE_CONTACTOR_LED & ARRAY_PRECHARGE_CONTACTOR_LED on => Done testing forced gear reset to neutral, it works!
+
     // Move to non-neutral start point
-    printf("ACTION: Please move the gear switch to FWD gear\n\r");
+    Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, true);
     while(BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE) || !BSP_GPIO_Read_Pin(FORWARD_PORT, FORWARD)) {}
     while(getGear() != DASH_NEU) {} // Should be manually overriden to neutral
     // Move to neutral to enable reset
-    printf("ACTION: Please move the gear switch to NEU gear\n\r");
+    Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, false);
+    Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, true);
     while(BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE) || BSP_GPIO_Read_Pin(FORWARD_PORT, FORWARD)) {}
     while(getGear() != DASH_NEU) {}
     // Move to forward now that reset logic should be done
-    printf("ACTION: Please move the gear switch to FWD gear\n\r");
+    Status_Leds_Write(MOTOR_PRECHARGE_CONTACTOR_LED, true);
+    Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, false);
     while(getGear() != DASH_FWD) {} // Should operate as expected now
-    printf("SUCCESS!! Forced gear reset to neutral works\n\r");
+    // Forced gear reset to neutral is a success!!
+    Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED, true);
 
     
     while (1) {

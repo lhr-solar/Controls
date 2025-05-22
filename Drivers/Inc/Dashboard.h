@@ -15,11 +15,12 @@ typedef enum {
     DASH_NUM_GEARS,
 } gear_t;
 
+// NOTE: Relevant when we're using cruise
 typedef enum{
-    DASH_SWITCH_ERROR = -1,
-    DASH_SWITCH_OFF,
-    DASH_SWITCH_ON,
-    DASH_NUM_SWITCH_STATES,
+    DASH_SW_ERROR = -1,
+    DASH_SW_OFF,
+    DASH_SW_ON,
+    DASH_NUM_SW_STATES,
 } switch_state_t;
 
 typedef enum{
@@ -42,7 +43,8 @@ gear_t getGear(void);
  * @return switch_state Dashboard pin state
  * @param dashPin_t Dashboard pin
  */
- switch_state_t getSwitchState(dash_pin_t pin);
+// NOTE: Relevant when we're using cruise
+switch_state_t getSwitchState(dash_pin_t pin);
 
 /**
  * Initializes dashboard pins

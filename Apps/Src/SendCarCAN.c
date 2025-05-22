@@ -14,6 +14,7 @@
 #include "Minions.h"
 #include "Contactors.h"
 #include "Pedals.h"
+#include "Ignition.h"
 #include "Tasks.h"
 #include "SendCarCAN.h"
 #include "SendTritium.h"
@@ -175,7 +176,7 @@ static void putIOState(void){
     // IF BPS Safe & in motor ignition rotary switch position & motor controller precharge bypass contactor is closed, mark motor ready to run
     // NOTE: BPS Safe means HV+ & HV- are closed
     // TODO: Modify this as needed when merging (to use the PR w/ motor contactor stuff -> also make MOTOR_SAFE_TO_RUN false when moco contactor turned off)
-    if(res_set && res_clr && Minions_Read(IGN_2) && BSP_GPIO_Read_Pin(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)) {
+    if(res_set && res_clr && (Get_Ignition_State() == IGN_MOTOR) && BSP_GPIO_Read_Pin(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)) {
         OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
         assertOSError(err);
     }

@@ -162,8 +162,8 @@ UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val) {
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
-UpdateDisplayError_t UpdateDisplay_SetBrake(uint8_t percent) {
-	g_display_comp_vals[DISP_BRAKE] = (percent > 100)?100:percent;
+UpdateDisplayError_t UpdateDisplay_SetBrake(bool state) {
+	g_display_comp_vals[DISP_BRAKE] = state;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 

@@ -63,7 +63,6 @@ void Task_DebugDump(void* p_arg) {
         printf("Current Gear: %s\n\r", GEAR_STRING[get_gear()]);
         print_float("Current Setpoint: ", get_currentSetpoint());
         print_float("Velocity Setpoint: %s\n\r", get_velocitySetpoint()); // velocitySetpoint 
-        print_float("Velocity Observed: %s\n\r", get_velocityObserved()); // velocityObserved 
 
         printf("\n\r");
 

@@ -54,16 +54,12 @@ typedef enum
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
 extern gear_t gear;
-
-// Outputs
-extern float velocityObserved;
 #endif
 
 // Getter functions for local variables in SendTritium.c
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
 EXPOSE_GETTER(gear_t, gear)
-EXPOSE_GETTER(float, velocityObserved)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
 

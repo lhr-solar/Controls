@@ -41,7 +41,6 @@ void printFullState() {
     printf("accelPedalPercent: %u\n\r", get_accelPedalPercent());
     print_float("currentSetpoint: \n\r", get_currentSetpoint());
     print_float("velocitySetpoint: \n\r", get_velocitySetpoint());
-    print_float("velocityObserved: \n\r", get_velocityObserved());
     printf("----------------------------\n\r");
 }
 

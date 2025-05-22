@@ -123,7 +123,7 @@ UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts);
 
 UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val);
 
-UpdateDisplayError_t UpdateDisplay_SetBrake(uint8_t percent);
+UpdateDisplayError_t UpdateDisplay_SetBrake(bool state);
 
 UpdateDisplayError_t UpdateDisplay_SetBlink(bool state);
 
