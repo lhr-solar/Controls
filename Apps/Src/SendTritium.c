@@ -36,6 +36,7 @@
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
 static gear_t gear = DASH_NEU;
+static bool isBrakeOn = false; // Used for updating display & brakelight
 
 // Outputs
 static float currentSetpoint = 0.0f;
@@ -50,6 +51,7 @@ GETTER(uint8_t, accelPedalPercent)
 GETTER(gear_t, gear)
 GETTER(float, currentSetpoint)
 GETTER(float, velocitySetpoint)
+GETTER(bool, isBrakeOn)
 
 // Gear fault counter
 static uint8_t gearFaultCnt = 0;
@@ -67,8 +69,8 @@ static void updateDisplayState()
 {
     UpdateDisplay_SetAccel(accelPedalPercent);
 
-    Minions_Write(BRAKE_LIGHT, brakePedalPercent >= BRAKE_UNPRESSED_THRESHOLD ? true : false);
-    UpdateDisplay_SetBrake(brakePedalPercent >= BRAKE_UNPRESSED_THRESHOLD ? true : false);
+    Minions_Write(BRAKE_LIGHT, isBrakeOn);
+    UpdateDisplay_SetBrake(isBrakeOn);
 
     switch(gear) {
         case DASH_FWD: 
@@ -93,6 +95,10 @@ static void readInputs()
 {
     brakePedalPercent = Pedals_Read(BRAKE);
     accelPedalPercent = Pedals_Read(ACCELERATOR);
+
+    // Brake hysteresis
+    if(brakePedalPercent <= BRAKE_UNPRESSED_THRESHOLD) isBrakeOn = false;
+    else if(brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) isBrakeOn = true;
 
     gear = getGear(); 
 
@@ -193,12 +199,11 @@ void Task_SendTritium(void *p_arg)
         updateDisplayState();
 
         // Update velocitySetpoint & currentSetpoint based on gear/state
-
+        // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
         switch(gear) {
             case DASH_FWD:
                 velocitySetpoint = MAX_VELOCITY;
-                if (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) currentSetpoint = 0;
-                else if (brakePedalPercent <= BRAKE_UNPRESSED_THRESHOLD) currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                currentSetpoint = isBrakeOn ? mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX) : 0;
                 break;
             case DASH_NEU:
                 velocitySetpoint = MAX_VELOCITY;
@@ -206,8 +211,7 @@ void Task_SendTritium(void *p_arg)
                 break;
             case DASH_REV:
                 velocitySetpoint = -MAX_VELOCITY;
-                if (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) currentSetpoint = 0;
-                else if (brakePedalPercent <= BRAKE_UNPRESSED_THRESHOLD) currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                currentSetpoint = isBrakeOn ? mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX) : 0;
                 break;
             default:
                 velocitySetpoint = MAX_VELOCITY;

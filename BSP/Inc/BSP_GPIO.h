@@ -80,6 +80,16 @@ uint8_t BSP_GPIO_Get_State(port_t port, uint16_t pin);
  */ 
 void BSP_GPIO_Toggle_Pin(port_t port, uint16_t pin);
 
+/**
+ * @brief   Initializes a GPIO port
+ * @param   port - port to initialize
+ * @param	mask - pins
+ * @param	direction - input or output 
+ * @param	pull_up - pulled up or not
+ * @return  None
+ */ 
+ void BSP_GPIO_Init_PullUp(port_t port, uint16_t mask, direction_t direction, bool pull_up);
+
 #endif
 
 

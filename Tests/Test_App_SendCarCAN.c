@@ -290,7 +290,7 @@ void Task1(void *arg)
         printf("\n\rMinions: %x", pins);
         uint8_t contactors = 0;
         for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-            bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
+            bool contactorState = (Contactors_Get(contactor, false) == ON) ? true : false;
             contactors |= contactorState << contactor;
         }
         printf("\n\rContactors: %x", contactors);

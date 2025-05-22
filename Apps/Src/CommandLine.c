@@ -220,7 +220,7 @@ static bool cmd_Contactors_Get(void){
 		return false;
 	}
 
-	printf("%s state: %s\n\r", contactorInput, Contactors_Get(contactor) == ON ? "on" : "off");
+	printf("%s state: %s\n\r", contactorInput, Contactors_Get(contactor, false) == ON ? "on" : "off");
 	return true;
 }
 

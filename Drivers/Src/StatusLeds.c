@@ -6,9 +6,11 @@
  */
 void Status_Leds_Init(void){
     BSP_GPIO_Init(OS_FAULT_PORT, OS_FAULT, OUTPUT, false);
-    BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false);
+
+    // pins are technically Contactor control pins, but they will just be used as status leds
     BSP_GPIO_Init(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, OUTPUT, false);
     BSP_GPIO_Init(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, OUTPUT, false);
+    
     BSP_GPIO_Init(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, OUTPUT, false);
     BSP_GPIO_Init(BPS_FAULT_PORT, BPS_FAULT, OUTPUT, false);
     BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
@@ -30,9 +32,6 @@ void Status_Leds_Write(status_led_t led, bool state){
     switch (led){
         case OS_FAULT_LED:
             BSP_GPIO_Write_Pin(OS_FAULT_PORT, OS_FAULT, state);
-            break;
-        case MOTOR_CONTACTOR_LED:
-            BSP_GPIO_Write_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, state);
             break;
         case MOTOR_PRECHARGE_CONTACTOR_LED:
             BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, state);
@@ -70,9 +69,6 @@ void Status_Leds_Toggle(status_led_t led){
     switch (led){
         case OS_FAULT_LED:
             BSP_GPIO_Toggle_Pin(OS_FAULT_PORT, OS_FAULT);
-            break;
-        case MOTOR_CONTACTOR_LED:
-            BSP_GPIO_Toggle_Pin(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR);
             break;
         case MOTOR_PRECHARGE_CONTACTOR_LED:
             BSP_GPIO_Toggle_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS);

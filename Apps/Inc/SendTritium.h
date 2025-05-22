@@ -54,6 +54,7 @@ typedef enum
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
 extern gear_t gear;
+extern bool isBrakeOn; // Used for updating display & brakelight
 #endif
 
 // Getter functions for local variables in SendTritium.c
@@ -62,6 +63,7 @@ EXPOSE_GETTER(uint8_t, accelPedalPercent)
 EXPOSE_GETTER(gear_t, gear)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
+EXPOSE_GETTER(bool, isBrakeOn)
 
 /**
  * @brief Linearly map range of integers to another range of integers, and provide the pecentage result.

@@ -11,21 +11,11 @@
 #include "common.h"
 #include "os_cfg_app.h"
 #include "CANbus.h"
-#include "Minions.h"
-#include "Contactors.h"
-#include "Pedals.h"
-#include "Ignition.h"
 #include "Tasks.h"
 #include "SendCarCAN.h"
 #include "SendTritium.h"
 
-#define IO_STATE_DLY_MS 250u 
-
 #define SENDCARCAN_MSG_SKIP_CTR 3
-
-// Task_PutIOState
-OS_TCB putIOState_TCB;
-CPU_STK putIOState_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 
 //fifo
 #define FIFO_TYPE CANDATA_t
@@ -38,7 +28,6 @@ static SendCarCAN_Q_t CANFifo;
 static OS_SEM CarCAN_Sem4;
 static OS_MUTEX CarCAN_Mtx;
 
-static void Task_PutIOState(void *p_arg);
 
 /**
  * @brief return the space left in SendCarCAN_Q for debug purposes
@@ -104,24 +93,6 @@ void Task_SendCarCAN(void *p_arg){
     CANDATA_t message;
     memset(&message, 0, sizeof message);
 
-    // PutIOState
-    OSTaskCreate(
-        (OS_TCB*)&putIOState_TCB,
-        (CPU_CHAR*)"PutIOState",
-        (OS_TASK_PTR)Task_PutIOState,
-        (void*)NULL,
-        (OS_PRIO)TASK_PUT_IOSTATE_PRIO,
-        (CPU_STK*)putIOState_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_SEND_CAR_CAN_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR),
-        (OS_ERR*)&err
-    );
-    assertOSError(err);
-
     while (1) {
           
         // Check if there's something to send in the queue (either IOState or Car state from sendTritium)
@@ -138,64 +109,4 @@ void Task_SendCarCAN(void *p_arg){
 
         if(res) CANbus_Send(message, true, CARCAN);
     }
-}
-
-static void putIOState(void){
-    CANDATA_t message;
-    memset(&message, 0, sizeof message);
-    message.ID = IO_STATE;
-    
-    // Get pedal information
-    message.data[0] = Pedals_Read(ACCELERATOR);
-    message.data[1] = Pedals_Read(BRAKE);
-
-    // Get minion information
-    for(pin_t pin = 0; pin < NUM_PINS; pin++){
-        bool pinState = Minions_Read(pin);
-        message.data[2] |= pinState << pin;
-    }
-    
-    // Get contactor info
-    for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-        bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
-        message.data[3] |= contactorState << contactor;
-    }
-
-    // Tell BPS if the array contactor should be on
-    message.data[3] |= (Minions_Read(IGN_1) || Minions_Read(IGN_2)) << 2;
-
-
-    // Update the global event flag group
-    OS_ERR err;
-    CPU_TS ticks;
-    OS_FLAGS res_set = OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
-    assertOSError(err);
-    OS_FLAGS res_clr = OSFlagPend(&BPS_Motor_Status_Flags, MOTOR_ERR, 0, OS_OPT_PEND_FLAG_CLR_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
-    assertOSError(err);
-
-    // IF BPS Safe & in motor ignition rotary switch position & motor controller precharge bypass contactor is closed, mark motor ready to run
-    // NOTE: BPS Safe means HV+ & HV- are closed
-    // TODO: Modify this as needed when merging (to use the PR w/ motor contactor stuff -> also make MOTOR_SAFE_TO_RUN false when moco contactor turned off)
-    if(res_set && res_clr && (Get_Ignition_State() == IGN_MOTOR) && BSP_GPIO_Read_Pin(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR)) {
-        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
-        assertOSError(err);
-    }
-    else {
-        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
-        assertOSError(err);
-    }
-
-    CANbus_Send(message, true, CARCAN);
-}
-
-/**
- * @brief sends IO information over CarCAN every IO_STATE_DLY_MS
-*/
-static void Task_PutIOState(void *p_arg) {
-    OS_ERR err;
-    while (1) {
-        putIOState();
-        OSTimeDlyHMSM(0, 0, 0, IO_STATE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
-        assertOSError(err);
-    }  
 }
