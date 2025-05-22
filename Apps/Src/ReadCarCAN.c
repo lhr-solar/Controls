@@ -567,6 +567,11 @@ void Task_ReadCarCAN(void *p_arg)
             // Update Motor Precharge sense state
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
 
+            if(!Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) || !Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
+                OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+                assertOSError(err);
+            }
+
             // TODO: Update display
 
             // TODO: Fault if needed

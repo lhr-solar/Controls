@@ -4,8 +4,10 @@
 #include "Tasks.h"
 #include "Pedals.h"
 #include "Ignition.h"
+#include "Contactors.h"
 #include "Dashboard.h"
 #include "StatusLeds.h"
+#include "SendTritium.h"
 
 static void putIOState(void);
 
@@ -24,17 +26,17 @@ void putIOState(void){
     message.data[1] = brake;
 
     uint8_t s = 0;
-    s |= SWITCH_BITMAP_BRAKELIGHT((brake >= PEDAL_BRAKELIGHT_THRESHOLD));
+    s |= SWITCH_BITMAP_BRAKELIGHT(get_isBrakeOn());
     s |= SWITCH_BITMAP_CRUZ_EN(0);
     s |= SWITCH_BITMAP_CRUZ_ST(0);
     s |= SWITCH_BITMAP_REGEN_SW(0);
-    Status_Leds_Write(CRUISE_IND_LED, getDashState(DASHBOARD_CRUZ_SET) ? ON : OFF); // Ceremonial (useless)
+    Status_Leds_Write(CRUISE_IND_LED, getSwitchState(DASH_CRUZ_SET) ? ON : OFF); // Ceremonial (useless)
 
-    switch(getDashState(DASHBOARD_GEAR)) {
-        case FWD: 
+    switch(getGear()) {
+        case DASH_FWD: 
             s |= SWITCH_BITMAP_FOR_SW(1); 
             break;
-        case REV: 
+        case DASH_REV: 
             s |= SWITCH_BITMAP_REV_SW(1); 
             break;
         default: 
@@ -47,6 +49,26 @@ void putIOState(void){
     message.data[2] = s;
 
     CANbus_Send(message, true, CARCAN);
+
+    // Update the global event flag group
+    OS_ERR err;
+    CPU_TS ticks;
+    OS_FLAGS res_set = OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
+    assertOSError(err);
+    OS_FLAGS res_clr = OSFlagPend(&BPS_Motor_Status_Flags, MOTOR_ERR, 0, OS_OPT_PEND_FLAG_CLR_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
+    assertOSError(err);
+
+    // IF BPS Safe & in motor ignition rotary switch position & motor controller precharge bypass contactor is closed, mark motor ready to run
+    // NOTE: BPS Safe means HV+ & HV- are closed
+    // TODO: Modify this as needed when merging (to use the PR w/ motor contactor stuff -> also make MOTOR_SAFE_TO_RUN false when moco contactor turned off)
+    if(res_set && res_clr && (Get_Ignition_State() == IGN_MOTOR) && Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
+        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
+        assertOSError(err);
+    }
+    else {
+        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+        assertOSError(err);
+    }
 }
 
 /**
