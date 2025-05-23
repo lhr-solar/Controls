@@ -10,8 +10,8 @@
 #include "CANbus.h"
 #include "Contactors.h"
 #include "Display.h"
-// #include "Minions.h"
 #include "Pedals.h"
+#include "DebugIO.h"
 #include "StatusLeds.h"
 
 #include "Tasks.h"
@@ -143,6 +143,24 @@ void _assertOSError(OS_ERR err)
     }
 }
 
+static inline void delay_ms(uint32_t ms) {
+    // Adjusted loop count per ms based on empirical timing
+    // Originally: 20,000 per ms (80,000 cycles / 4 cycles/iter)
+    // Observed: ~3.77× slower → need ~5300 iterations per ms
+    uint32_t count = ms * 5300;
+
+    __asm__ volatile (
+        "1: \n"
+        "subs %[cnt], %[cnt], #1 \n"
+        "bne 1b \n"
+        : [cnt] "+r" (count)
+        :
+        : "cc"
+    );
+}
+
+
+
 /**
  * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
  * and jumping to the error's specified callback function. 
@@ -187,40 +205,15 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 
 
     if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
-        volatile static int faultLoopCount = 0;
         while(1) {
-            faultLoopCount++;
-
-            // periodically toggle Controls Fault LED
-            if(faultLoopCount > 1000000){
-                faultLoopCount = 0;
-                Status_Leds_Toggle(CONTROLS_FAULT_LED);
-                Status_Leds_Toggle(DASH_HEARTBEAT_LED);
-            }
-
-            // periodically resend the Controls Fault message
-            if ((faultLoopCount % FAULT_MSG_DELAY) == 0){
-                CANbus_Send_Faultstate(faultmsg, CARCAN);
-            }
-            #if DEBUG == 1
-            // Print the error that caused this fault
-                // printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
-
-                // // Print the errors for each applications with error data
-                // printf("\n\rAll application errors:\n\r");
-                // printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
-                // printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
-                // printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
-
-                // // Delay so that we're not constantly printing
-                // for (int i = 0; i < 9999999; i++) {
-                // } 
-            #endif
+            delay_ms(500);
+            Status_Leds_Toggle(CONTROLS_FAULT_LED);
+            Status_Leds_Toggle(DASH_HEARTBEAT_LED);
+            CANbus_Send_Faultstate(faultmsg, CARCAN);
             
         }
     }
     // only reaches here is fault is recoverable
-
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
         Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
         OSSchedUnlock(&err); 
