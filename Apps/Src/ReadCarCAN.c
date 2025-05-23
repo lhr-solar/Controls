@@ -19,7 +19,9 @@
 #include "daybreak_pins.h"
 
 #define BPS_CAN_WATCHDOG
-#define PRECHARGE_CAN_WATCHDOG
+// #define PRECHARGE_CAN_WATCHDOG
+
+
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 1000u                                                             // 500 ms
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) // 1000 for ms -> s conversion
@@ -185,7 +187,7 @@ void Task_ReadCarCAN(void *p_arg)
         case BPS_CONTACTOR:
         {
             #ifdef BPS_CAN_WATCHDOG
-            OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
+            OSTmrStart(&canWatchTimer, &err);
             assertOSError(err);
             #endif 
 
@@ -229,7 +231,6 @@ void Task_ReadCarCAN(void *p_arg)
             #ifdef PRECHARGE_CAN_WATCHDOG
             OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
             assertOSError(err);
-            #endif
             #endif
 
             // Update Motor Contactor sense state
