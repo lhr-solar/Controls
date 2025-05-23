@@ -208,6 +208,7 @@ DisplayError_t Display_Error() {
     // 1. ReadTritium
     // 2. ReadCarCAN
     // 3. UpdateDisplay
+    // 4. IOState
     if (Error_ReadTritium != T_NONE) {
         DisplayCmd_t moco_flt_cmd = {
             .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
