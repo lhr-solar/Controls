@@ -16,7 +16,9 @@
 #include "DebugIO.h"
 #include "daybreak_pins.h"
 
-//#define NO_PRECHARGE_CAN_WATCHDOG
+#define BPS_CAN_WATCHDOG
+// #define PRECHARGE_CAN_WATCHDOG
+
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 1000u                                                             // 500 ms
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) // 1000 for ms -> s conversion
@@ -129,9 +131,11 @@ void Task_ReadCarCAN(void *p_arg)
         &err);
     assertOSError(err);
 
+    #ifdef BPS_CAN_WATCHDOG
     // Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(err);
+    #endif
 
     // Create the Active Precharge CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID CONTACTOR_SENSE within the desired interval.
@@ -147,7 +151,7 @@ void Task_ReadCarCAN(void *p_arg)
     assertOSError(err);
 
     // Start Precharge CAN Watchdog timer
-    #ifdef NO_PRECHARGE_CAN_WATCHDOG
+    #ifdef PRECHARGE_CAN_WATCHDOG
     OSTmrStart(&prechargeCanWatchTimer, &err);
     assertOSError(err);
     #endif
@@ -178,8 +182,10 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case BPS_CONTACTOR:
         {
+            #ifdef BPS_CAN_WATCHDOG
             OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
             assertOSError(err);
+            #endif 
 
             // Set HV+, HV-, and Array Contactor states
             // Note, does not control the Contactors, only stores the received state
@@ -218,7 +224,7 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
-            #ifdef NO_PRECHARGE_CAN_WATCHDOG
+            #ifdef PRECHARGE_CAN_WATCHDOG
             OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
             assertOSError(err);
             #endif
