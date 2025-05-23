@@ -18,9 +18,9 @@
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
 
-// Uncomment this to remove CAN watchdog timers for BPS_CONTACTOR and CONTACTOR_SENSE messages
-#define NODOGS
-#define NO_CONTACTOR_DOGS
+#define BPS_CAN_WATCHDOG
+// #define PRECHARGE_CAN_WATCHDOG
+
 
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 1000u                                                             // 500 ms
@@ -134,11 +134,12 @@ void Task_ReadCarCAN(void *p_arg)
         &err);
     assertOSError(err);
 
-    #ifndef NODOGS
+    #ifdef BPS_CAN_WATCHDOG
     // Start CAN Watchdog timer
     OSTmrStart(&canWatchTimer, &err);
     assertOSError(err);
     #endif
+
     
     // Create the Active Precharge CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID CONTACTOR_SENSE within the desired interval.
@@ -152,13 +153,11 @@ void Task_ReadCarCAN(void *p_arg)
         NULL,
         &err);
     assertOSError(err);
-
-    #ifndef NODOGS
-    #ifndef NO_CONTACTOR_DOGS
     // Start Precharge CAN Watchdog timer
+  
+    #ifdef PRECHARGE_CAN_WATCHDOG
     OSTmrStart(&prechargeCanWatchTimer, &err);
     assertOSError(err);
-    #endif
     #endif
 
     while (1)
@@ -187,10 +186,10 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case BPS_CONTACTOR:
         {
-            #ifndef NODOGS
-            OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
+            #ifdef BPS_CAN_WATCHDOG
+            OSTmrStart(&canWatchTimer, &err);
             assertOSError(err);
-            #endif
+            #endif 
 
             // Set HV+, HV-, and Array Contactor states
             // Note, does not control the Contactors, only stores the received state
@@ -229,11 +228,9 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
-            #ifndef NODOGS
-            #ifndef NO_CONTACTOR_DOGS
+            #ifdef PRECHARGE_CAN_WATCHDOG
             OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
             assertOSError(err);
-            #endif
             #endif
 
             // Update Motor Contactor sense state

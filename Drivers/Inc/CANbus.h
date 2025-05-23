@@ -53,6 +53,7 @@ typedef enum {
 	PRECHARGE_TIMEOUT               = 0x401,
 	CONTROL_MODE                    = 0x580,
     IO_STATE 						= 0x581,
+    CONTROLS_FAULT_MSG              = 0x583,
 	MAX_CAN_ID
 } CANId_t;
 
@@ -107,6 +108,16 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
  * @return  ERROR if data wasn't sent, otherwise it was sent.
  */
 ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
+
+/**
+ * @brief   Transmits data onto the CANbus during a fault state without using any semaphore or mutex calls. 
+ * Used when the scheduler is locked and sends continuously until it is successful.
+ * Transmits up to 8 bytes at a time. If more is necessary, please use an IDX message.
+ * @param 	CanData 	The data to be transmitted
+ * @param  	bus			The bus to transmit on. This should be either CARCAN or MOTORCAN.
+ * @return  ERROR if the data wasn't sent due to an invalid ID
+ */
+ErrorStatus CANbus_Send_Faultstate(CANDATA_t CanData, CAN_t bus);
 
 /**
  * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers.
