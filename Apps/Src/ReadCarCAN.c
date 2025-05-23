@@ -16,9 +16,7 @@
 #include "DebugIO.h"
 #include "daybreak_pins.h"
 
-// Uncomment this to remove CAN watchdog timers for BPS_CONTACTOR and CONTACTOR_SENSE messages
-#define NODOGS
-
+//#define NO_PRECHARGE_CAN_WATCHDOG
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 1000u                                                             // 500 ms
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) // 1000 for ms -> s conversion
@@ -31,13 +29,12 @@
 // State of Charge scalar to scale it to correct fixed point
 #define SOC_SCALER 1000000
 
-#ifndef NODOGS
 // BPS CAN watchdog timer variable
 static OS_TMR canWatchTimer;
 
 // Active Precharge CAN watchdog timer variable
 static OS_TMR prechargeCanWatchTimer;
-#endif
+
 
 // State of Charge (SOC) and supplemental battery pack voltage (SBPV) value intialization
 static uint32_t SOC = 0;
@@ -48,7 +45,6 @@ static uint32_t SBPV = 0;
 
 
 
-#ifndef NODOGS
 /**
  * @brief Nested function as the same function needs to be executed however the timer requires different parameters
  * @param p_tmr pointer to the timer that calls this function, passed by timer
@@ -58,7 +54,6 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg)
 {
     assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
 }
-#endif
 
 static bool check_MotorControllerContactor(void){
     // both should be on at the same time
@@ -116,14 +111,11 @@ static void updateMotorControllerContactor(void){
 
 void Task_ReadCarCAN(void *p_arg)
 {
-    #ifndef NODOGS
     OS_ERR err;
-    #endif
 
     // data struct for CAN message
     CANDATA_t dataBuf;
 
-    #ifndef NODOGS
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID BPS_CONTACTOR within the desired interval.
     OSTmrCreate(
@@ -155,6 +147,7 @@ void Task_ReadCarCAN(void *p_arg)
     assertOSError(err);
 
     // Start Precharge CAN Watchdog timer
+    #ifdef NO_PRECHARGE_CAN_WATCHDOG
     OSTmrStart(&prechargeCanWatchTimer, &err);
     assertOSError(err);
     #endif
@@ -185,10 +178,8 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case BPS_CONTACTOR:
         {
-            #ifndef NODOGS
             OSTmrStart(&canWatchTimer, &err); // Restart CAN Watchdog timer for BPS Contactor msg
             assertOSError(err);
-            #endif
 
             // Set HV+, HV-, and Array Contactor states
             // Note, does not control the Contactors, only stores the received state
@@ -227,7 +218,7 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
-            #ifndef NODOGS
+            #ifdef NO_PRECHARGE_CAN_WATCHDOG
             OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
             assertOSError(err);
             #endif
