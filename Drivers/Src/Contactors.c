@@ -7,7 +7,6 @@
 
 #include "Contactors.h"
 #include "Tasks.h"
-#include "BSP_GPIO.h"
 #include "daybreak_pins.h"
 
 #define CONTACTOR_SENSE_DELAY 1

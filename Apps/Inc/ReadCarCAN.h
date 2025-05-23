@@ -13,8 +13,6 @@
 
 #include "os.h"
 #include "common.h"
-#include "Tasks.h"
-#include "CANbus.h"
 
 #define BPS_TRIP_MESSAGE 1
 
@@ -29,7 +27,6 @@ typedef enum
 	//READCARCAN_ERR_DISABLE_CONTACTORS_MSG = 0xCCCC, // Ignition is turned to neither (off due to LV) or both at the same time (impossible) are on at
 	READCARCAN_ERR_BPS_TRIP = 0xDDDD,				// Received a BPS trip msg (0 or 1)
 	READCARCAN_ERR_ACTIVE_PRECHARGE_FAULT = 0xEEEE,  // Active precharge sent a fault message
-	READCARCAN_ERR_IOSTATE = 0xFFFF
 } ReadCarCAN_error_code_t;
 
 

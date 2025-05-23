@@ -5,20 +5,21 @@
  *
  */
 
-#include "ReadCarCAN.h"
-#include "UpdateDisplay.h"
+#include "os_cfg_app.h"
+
+#include "DebugIO.h"
 #include "Contactors.h"
 #include "Ignition.h"
-#include "os.h"
 #include "StatusLeds.h"
-#include "os_cfg_app.h"
-#include "Display.h"
-#include "DebugIO.h"
+#include "CANbus.h"
+
+#include "Tasks.h"
+#include "ReadCarCAN.h"
+#include "UpdateDisplay.h"
 #include "daybreak_pins.h"
 
 #define BPS_CAN_WATCHDOG
-// #define PRECHARGE_CAN_WATCHDOG
-
+#define PRECHARGE_CAN_WATCHDOG
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 1000u                                                             // 500 ms
 #define CAN_WATCH_TMR_DLY_TMR_TS ((CAN_WATCH_TMR_DLY_MS * OS_CFG_TMR_TASK_RATE_HZ) / (1000u)) // 1000 for ms -> s conversion
@@ -36,7 +37,6 @@ static OS_TMR canWatchTimer;
 
 // Active Precharge CAN watchdog timer variable
 static OS_TMR prechargeCanWatchTimer;
-
 
 // State of Charge (SOC) and supplemental battery pack voltage (SBPV) value intialization
 static uint32_t SOC = 0;
@@ -95,6 +95,7 @@ static void handler_ReadCarCAN_BPSTrip(void)
 static void updateMotorControllerContactor(void){
     ignition_state_t ignState = Get_Ignition_State();
     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
+    if (ignState == IGN_ERROR || ignState == IGN_TRANSITION) {return;}
     if(ignState == IGN_MOTOR || ignState == IGN_ARR){
         if(Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)){
             // turn on motor contactor if it was off before
@@ -137,6 +138,7 @@ void Task_ReadCarCAN(void *p_arg)
     assertOSError(err);
     #endif
 
+    
     // Create the Active Precharge CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
     // if we do not get a CAN message with the ID CONTACTOR_SENSE within the desired interval.
     OSTmrCreate(
@@ -149,8 +151,8 @@ void Task_ReadCarCAN(void *p_arg)
         NULL,
         &err);
     assertOSError(err);
-
     // Start Precharge CAN Watchdog timer
+  
     #ifdef PRECHARGE_CAN_WATCHDOG
     OSTmrStart(&prechargeCanWatchTimer, &err);
     assertOSError(err);
@@ -228,6 +230,7 @@ void Task_ReadCarCAN(void *p_arg)
             OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
             assertOSError(err);
             #endif
+            #endif
 
             // Update Motor Contactor sense state
             Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
@@ -280,21 +283,17 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
             break;
 
         case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
-            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case READCARCAN_ERR_BPS_TRIP: // Received a BPS trip msg (0 or 1), need to shut down car and infinite loop
-            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case READCARCAN_ERR_ACTIVE_PRECHARGE_FAULT:
-            strncpy(ErrMsg_Evac, DISP_EVACMAG_REQ, ERR_CODE_LEN);
-            throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
-            break;
-
-        case READCARCAN_ERR_IOSTATE:
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
         
