@@ -55,7 +55,6 @@ static bool bps_checked = false;
 // static void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err);
 
 
-
 /**
  * @brief Nested function as the same function needs to be executed however the timer requires different parameters
  * @param p_tmr pointer to the timer that calls this function, passed by timer
@@ -63,7 +62,14 @@ static bool bps_checked = false;
  */
 static void callbackCANWatchdog(void *p_tmr, void *p_arg)
 {
-    assertReadCarCANError(READCARCAN_ERR_MISSED_MSG);
+    // BPS CAN Timer called
+    if(p_tmr == &canWatchTimer){
+        assertReadCarCANError(READCARCAN_ERR_BPS_MISSED_MSG);
+    }
+    // Precharge CAN Timer called
+    else{
+        assertReadCarCANError(READCARCAN_ERR_PCHG_MISSED_MSG);
+    }
 }
 
 static bool check_MotorControllerContactor(void){
@@ -331,7 +337,6 @@ void Task_ReadCarCAN(void *p_arg)
 void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
 {
     Error_ReadCarCAN = (error_code_t)rcc_err; // Store error code for inspection
-    set_errmsg_hex("RCC", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
     UpdateDisplay_SetSBPV(SBPV);
     UpdateDisplay_SetSOC(SOC);
     
@@ -339,20 +344,25 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
         case READCARCAN_ERR_NONE:
             break;
 
-        case READCARCAN_ERR_MISSED_MSG: // Missed message- turn off array and motor controller PBC
-            set_errmsg_hex("DOG", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+        case READCARCAN_ERR_BPS_MISSED_MSG:
+            set_errmsg_hex("BPS_CANW", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case READCARCAN_ERR_BPS_TRIP:
-            set_errmsg_hex("BPS", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+            set_errmsg_hex("BPS_TRIP", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case READCARCAN_ERR_ACTIVE_PRECHARGE_FAULT:
-            set_errmsg_hex("PCG", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+            set_errmsg_hex("ACTV_PCG", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
+            throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
+        case READCARCAN_ERR_PCHG_MISSED_MSG:
+            set_errmsg_hex("PCG_CANW", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;

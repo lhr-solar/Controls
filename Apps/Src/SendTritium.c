@@ -84,6 +84,10 @@ static void updateDisplayState()
             UpdateDisplay_SetGear(DISP_NEUTRAL); 
             break;
     }
+
+    UpdateDisplay_SetRegenState(DISP_DISABLED); // Not on Daybreak
+    UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
+    UpdateDisplay_SetAccel(accelPedalPercent); 
 }
 
 /**
@@ -174,73 +178,68 @@ void Task_SendTritium(void *p_arg)
         .idx = 0,
         .data = {0.0f, 0.0f},
     };
-
-    readInputs(); // read inputs from the system
-
-    updateDisplayState();        
-    UpdateDisplay_SetRegenState(DISP_DISABLED); // Not on Daybreak
-    UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
-    UpdateDisplay_SetAccel(accelPedalPercent); 
+     
 
     while (1) {
+        readInputs(); // read inputs from the system
+
+        updateDisplayState();   
+
         // Check that motor is ready to run
+        // non-blocking
         OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
+        // if you return OS_ERR_PEND_WOULD_BLOCK, one of the bits are not sent, and would've blocked
         if (err != OS_ERR_PEND_WOULD_BLOCK){
             assertOSError(err);
         }
 
+        // All bits are set 
+        if(err == OS_ERR_NONE){
+            memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float)); // CAN message for setpoint of bus current percent
+            CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN); 
 
-        memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float)); // CAN message for setpoint of bus current percent
-        CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN); 
+            // Update velocitySetpoint & currentSetpoint based on gear/state
+            // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
+            switch(gear) {
+                case DASH_FWD:
+                    velocitySetpoint = MAX_VELOCITY;
+                    currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                    break;
+                case DASH_NEU:
+                    velocitySetpoint = MAX_VELOCITY;
+                    currentSetpoint = 0.0f;
+                    break;
+                case DASH_REV:
+                    velocitySetpoint = -MAX_VELOCITY;
+                    currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                    break;
+                default:
+                    velocitySetpoint = MAX_VELOCITY;
+                    currentSetpoint = 0.0f;
+                    break;
+            }
 
-        // Update velocitySetpoint & currentSetpoint based on gear/state
-        // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
-        switch(gear) {
-            case DASH_FWD:
-                velocitySetpoint = MAX_VELOCITY;
-                currentSetpoint = isBrakeOn ? mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX) : 0;
-                break;
-            case DASH_NEU:
-                velocitySetpoint = MAX_VELOCITY;
-                currentSetpoint = 0.0f;
-                break;
-            case DASH_REV:
-                velocitySetpoint = -MAX_VELOCITY;
-                currentSetpoint = isBrakeOn ? mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX) : 0;
-                break;
-            default:
-                velocitySetpoint = MAX_VELOCITY;
-                currentSetpoint = 0.0f;
-                break;
+            memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
+            memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
+            CANbus_Send(driveCmd, CAN_BLOCKING, MOTORCAN);
         }
-
-        memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
-        memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
-        CANbus_Send(driveCmd, CAN_BLOCKING, MOTORCAN);
-
+        
         // Delay of FSM_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
-        if (err != OS_ERR_NONE)
-        {
-            assertOSError(err);
-        }
+        assertOSError(err);
     }
 }
 
 static void assertSendTritiumError(SendTritium_error_code_t sterr)
 {
     Error_SendTritium = (error_code_t) sterr;
-    set_errmsg_hex("ST", ErrMsg_SendTritium, sterr);
 
     switch(sterr)
     {
         case SENDTRITIUM_ERR_NONE:
             break;
         case SENDTRITIUM_ERR_GEAR_FAULT:
-            // Assert a nonrecoverable error that will kill the motor, turn off contactors, display a fault screen, & infinite loop
-            OS_ERR err;
-            OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
-            assertOSError(err);
+            set_errmsg_hex("STRI_GEA", ErrMsg_SendTritium, sterr);
             throwTaskError(Error_SendTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
         default:

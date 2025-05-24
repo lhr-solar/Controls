@@ -160,7 +160,8 @@ void _assertOSError(OS_ERR err)
  */
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
-    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu
+    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR | OS_OPT_POST_NO_SCHED, &err);
     assertOSError(err);
 
     Status_Leds_Write(CONTROLS_FAULT_LED, ON);

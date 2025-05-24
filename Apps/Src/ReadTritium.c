@@ -168,7 +168,7 @@ void assertTritiumError(tritium_error_code_t motor_err)
 
 	// Store error codes for inspection info
 	Error_ReadTritium = (error_code_t) motor_err; 
-	set_errmsg_hex("MCO", ErrMsg_ReadTritium, motor_err);
+	set_errmsg_hex("RTRI_MCO", ErrMsg_ReadTritium, motor_err);
 
 	if (motor_err == T_NONE || motor_err == T_WATCHDOG_LAST_RESET_ERR)
 		return; // No error, return

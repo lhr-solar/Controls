@@ -136,13 +136,13 @@ void Task_IOState(void *p_arg) {
  */
 void assertIOStateError(IOState_error_code_t io_err) {
     Error_IOState = (error_code_t)io_err; // Store error code for inspection
-    set_errmsg_hex("IOS", ErrMsg_IOState, io_err);    // Store error message for inspection
     
     switch (io_err) {
         case IOSTATE_ERR_NONE:
             break;
 
         case IOSTATE_ERROR: // More than one state on for multiple cycles. Set IGN to OFF and fault
+            set_errmsg_hex("IOST_IGN", ErrMsg_IOState, io_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_DEFAULT, ERR_CODE_LEN);
             throwTaskError(Error_IOState, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;

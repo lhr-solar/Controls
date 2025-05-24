@@ -95,12 +95,12 @@ typedef uint16_t error_code_t;
 #define ERR_MSG_OFFSET 9
 static inline void set_errmsg_hex(const char *prefix, char *arr, error_code_t err) {
     arr[0] = '\"';
-    memcpy(arr + 1, prefix, 4);
-    memcpy(arr + 4, "_ERR_", 6);
-    snprintf(arr + ERR_MSG_OFFSET, 5, "%04X", err & 0xFFFF);
-    arr[ERR_MSG_OFFSET + 4] = '\"';
-    arr[ERR_MSG_OFFSET + 5] = '\0';
+    memcpy(arr + 1, prefix, 9);
+    snprintf(arr + ERR_MSG_OFFSET, 6, "_%04X", err & 0xFFFF);
+    arr[ERR_MSG_OFFSET + 5] = '\"';
+    arr[ERR_MSG_OFFSET + 6] = '\0';
 }
+#undef ERR_MSG_OFFSET
 
 extern const char *DISP_ERRMSG_NA;
 extern const char *DISP_EVACMSG_DEFAULT;
