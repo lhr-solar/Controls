@@ -14,8 +14,7 @@
 #ifndef __DISPLAY_H
 #define __DISPLAY_H
 
-// #include "common.h"	// common headers
-#include "Tasks.h"	// for os and fault error locs
+#include "common.h"
 
 
 // #define DISP_OUT DISPLAY

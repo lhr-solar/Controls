@@ -9,9 +9,16 @@
  * 
  */
 
+#include "os_cfg_app.h"
+
+#include "DebugIO.h"
+#include "Contactors.h"
+#include "Display.h"
+
+#include "Tasks.h"
 #include "UpdateDisplay.h"
-// #include "Minions.h"
-#include <math.h>
+
+
 
 // For fault handling
 #define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
@@ -19,7 +26,7 @@
 UpdateDisplayError_t UpdateDisplay_Init() {
 	OS_ERR err;
 	DisplayError_t ret = Display_SetPage(INFO);
-	OSTimeDlyHMSM(0, 0, 0, 300, OS_OPT_TIME_HMSM_STRICT, &err); // Wait >215ms so errors will show on the display
+	OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &err); // Wait so errors will show on the display.
 	assertOSError(err);
 	
 	return (ret == DISPLAY_ERR_NONE) ? UPDATEDISPLAY_ERR_NONE : UPDATEDISPLAY_ERR_DRIVER;
@@ -54,16 +61,16 @@ static UpdateDisplayError_t UpdateDisplay_SetComponent(Component_t comp) {
 		uint32_t comp_val = 0;
 		if (comp > DISP_MOTOR_PC) {
 			comp_val = g_display_comp_vals[comp];
-		} else { // Contactors TODO: get this updated with other contactors
+		} else {
 			switch (comp) {
 				case DISP_ARRAY_EN:
-					//comp_val = Contactors_Get(); 
+					comp_val = Contactors_Get(ARRAY_CONTACTOR, false); 
 					break;
 				case DISP_ARRAY_PC:
 					comp_val = Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false);
 					break;
 				case DISP_MOTOR_EN:
-					//comp_val = Contactors_Get();
+					comp_val = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false);
 					break;
 				case DISP_MOTOR_PC:
 					comp_val = Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false);
@@ -99,7 +106,7 @@ UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent) {	// Integer percent
 }
 
 UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv) {
-	g_display_comp_vals[DISP_SUPP_BATT] = mv;
+	g_display_comp_vals[DISP_SUPP_BATT] = (mv / 100); // mv to tenths of a volt;
 	return UPDATEDISPLAY_ERR_NONE;
 }
 
@@ -184,6 +191,9 @@ UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val) {
 void Task_UpdateDisplay(void *p_arg) {
 	OS_ERR err;
 	while (1) {
+		#ifdef TASK_PROFILER
+		DebugIO_Toggle(UPDATE_DISPLAY_PIN);
+		#endif
 		for (Component_t comp = 0; comp <= DISP_GEAR; comp++) {
 			if (comp != DISP_REGEN_ST && comp != DISP_CRUISE_ST) {
 				assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
@@ -196,6 +206,9 @@ void Task_UpdateDisplay(void *p_arg) {
 				? UPDATEDISPLAY_ERR_NONE
 				: UPDATEDISPLAY_ERR_DRIVER
 		);
+		#ifdef TASK_PROFILER
+		DebugIO_Toggle(UPDATE_DISPLAY_PIN);
+		#endif
 
 		// Delay of 250 ms
 		OSTimeDlyHMSM(0, 0, 0, 250, OS_OPT_TIME_HMSM_STRICT, &err);

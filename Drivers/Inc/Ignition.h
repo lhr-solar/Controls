@@ -7,12 +7,13 @@
 /**
  * Possible Ignition Status
  */
-typedef enum{
+typedef enum {
     IGN_OFF = 0,
     IGN_ARR,
     IGN_MOTOR,
+    IGN_TRANSITION,
     IGN_ERROR
-}ignition_state_t;
+} ignition_state_t;
 
 #define IGNITION_BUFFER_SIZE 10
 

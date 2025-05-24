@@ -11,7 +11,7 @@
 #include "Display.h"
 #include "Tasks.h" // for os and fault error codes
 #include "bsp.h"   // for writing to UART
-
+#include "IOState.h"
 #include "ReadCarCAN.h"
 #include "ReadTritium.h"
 #include "UpdateDisplay.h"
@@ -189,7 +189,7 @@ DisplayError_t Display_Error() {
         .args = {{.str = ErrMsg_Evac}}
     };
     Display_Send(evac_msg_cmd);
-    strncpy(ErrMsg_Evac, DISP_EVAC_NONREQ_STR_LITERAL, ERR_CODE_LEN);
+    strncpy(ErrMsg_Evac, DISP_ERRMSG_NA, ERR_CODE_LEN);
 
     // Display OS error if there is one
     DisplayCmd_t os_flt_cmd = {
@@ -201,7 +201,7 @@ DisplayError_t Display_Error() {
         .args = {{.str = ErrMsg_OS}}
     };
     Display_Send(os_flt_cmd);
-    strncpy(ErrMsg_OS, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+    strncpy(ErrMsg_OS, DISP_ERRMSG_NA, ERR_CODE_LEN);
     memset(&Error_OS, 0, sizeof(error_code_t));
 
     // Display other errors if there are any.
@@ -210,6 +210,7 @@ DisplayError_t Display_Error() {
     // 2. ReadCarCAN
     // 3. UpdateDisplay
     // 4. SendTritium
+    // 5. IOState
     if (Error_ReadTritium != T_NONE) {
         DisplayCmd_t moco_flt_cmd = {
             .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
@@ -220,7 +221,7 @@ DisplayError_t Display_Error() {
             .args = {{.str = ErrMsg_ReadTritium}}
         };
         Display_Send(moco_flt_cmd);
-        strncpy(ErrMsg_ReadTritium, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        strncpy(ErrMsg_ReadTritium, DISP_ERRMSG_NA, ERR_CODE_LEN);
         memset(&Error_ReadTritium, 0, sizeof(error_code_t));
     } else if (Error_SendTritium != SENDTRITIUM_ERR_NONE) {
         DisplayCmd_t disp_flt_cmd = {
@@ -244,8 +245,20 @@ DisplayError_t Display_Error() {
             .args = {{.str = ErrMsg_ReadCarCAN}}
         };
         Display_Send(rcc_flt_cmd);
-        strncpy(ErrMsg_ReadCarCAN, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        strncpy(ErrMsg_ReadCarCAN, DISP_ERRMSG_NA, ERR_CODE_LEN);
         memset(&Error_ReadCarCAN, 0, sizeof(error_code_t));
+    } else if (Error_IOState != IOSTATE_ERR_NONE) {
+        DisplayCmd_t ios_flt_cmd = {
+            .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
+            .attr = "txt",
+            .op = "=",
+            .numArgs = 1,
+            .argTypes = {STR_ARG},
+            .args = {{.str = ErrMsg_IOState}}
+        };
+        Display_Send(ios_flt_cmd);
+        strncpy(ErrMsg_IOState, DISP_ERRMSG_NA, ERR_CODE_LEN);
+        memset(&Error_IOState, 0, sizeof(error_code_t));
     } else if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE) {
         DisplayCmd_t disp_flt_cmd = {
             .compOrCmd = (char*) DISPLAY_COMP_STR[DISP_FAULT_CODE], // "faulterr"
@@ -256,7 +269,7 @@ DisplayError_t Display_Error() {
             .args = {{.str = ErrMsg_UpdateDisplay}}
         };
         Display_Send(disp_flt_cmd);
-        strncpy(ErrMsg_UpdateDisplay, DISP_NA_STR_LITERAL, ERR_CODE_LEN);
+        strncpy(ErrMsg_UpdateDisplay, DISP_ERRMSG_NA, ERR_CODE_LEN);
         memset(&Error_UpdateDisplay, 0, sizeof(error_code_t));
     } else {
         DisplayCmd_t no_flt_cmd = {
@@ -265,7 +278,7 @@ DisplayError_t Display_Error() {
             .op = "=",
             .numArgs = 1,
             .argTypes = {STR_ARG},
-            .args = {{.str = (char*)DISP_NA_STR_LITERAL}}
+            .args = {{.str = (char*)DISP_ERRMSG_NA}}
         };
         Display_Send(no_flt_cmd);
     }

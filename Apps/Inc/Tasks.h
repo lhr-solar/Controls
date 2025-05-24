@@ -14,7 +14,7 @@
 
 #include "common.h"
 #include "os.h"
-#include "config.h"
+// #include "config.h"
 
 /**
  * Task initialization macro
@@ -23,6 +23,16 @@
  * @param arg the argument to pass to the task
  * @param err the local OS_ERR variable
  */
+
+#define TASK_PROFILER
+
+#ifdef TASK_PROFILER
+#define IDLE_PIN PA15
+#define IO_STATE_PIN PB7
+#define READ_CARCAN_PIN PC14
+#define UPDATE_DISPLAY_PIN PA8
+#define SEND_CARCAN_PIN PC12
+#endif
 
 /**
  * Priority Definitions
@@ -89,9 +99,9 @@ static inline void set_errmsg_hex(const char *prefix, char *arr, error_code_t er
     arr[ERR_MSG_OFFSET + 5] = '\0';
 }
 
-#define DISP_NA_STR_LITERAL "\"N/A\""
-#define DISP_EVAC_NONREQ_STR_LITERAL "\"RECOMMENDED\""
-#define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
+extern const char *DISP_ERRMSG_NA;
+extern const char *DISP_EVACMSG_DEFAULT;
+extern const char *DISP_EVACMSG_REQ;
 
 /**
  * Task Prototypes
@@ -181,6 +191,7 @@ extern error_code_t Error_SendTritium;
 extern error_code_t Error_ReadTritium; 
 extern error_code_t Error_ReadCarCAN;
 extern error_code_t Error_UpdateDisplay;
+extern error_code_t Error_IOState;
 extern error_code_t Error_OS;
 
 // Define the length of the error code message
@@ -190,6 +201,7 @@ extern char ErrMsg_SendTritium[ERR_CODE_LEN];
 extern char ErrMsg_ReadTritium[ERR_CODE_LEN];
 extern char ErrMsg_ReadCarCAN[ERR_CODE_LEN];
 extern char ErrMsg_UpdateDisplay[ERR_CODE_LEN];
+extern char ErrMsg_IOState[ERR_CODE_LEN];
 extern char ErrMsg_OS[ERR_CODE_LEN];
 extern char ErrMsg_Evac[ERR_CODE_LEN];
 
@@ -208,12 +220,6 @@ typedef enum {
     OPT_RECOV,
     OPT_NONRECOV
 } error_recov_opt_t;
-
-/**
- * @brief For use in error handling: opens array and motor precharge bypass contactor
- * and turns on additional brakelight to signal that a critical error happened.
- */
-void EmergencyContactorOpen();
 
 /**
  * @brief Assert a task error by setting the location variable and optionally locking the scheduler, 

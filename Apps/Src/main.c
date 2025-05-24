@@ -5,25 +5,26 @@
  * 
  */
 
-// (TODO) Status LEDs
 
 #include "common.h"
 #include "config.h"
-#include "Tasks.h"
 #include "stm32f4xx.h"
-#include "CANbus.h"
-#include "CANConfig.h"
+
 #include "Contactors.h"
 #include "Display.h"
 #include "Ignition.h"
-#include "Minions.h"
+#include "CANbus.h"
+#include "CANConfig.h"
 #include "Pedals.h"
 #include "Dashboard.h"
+#include "DebugIO.h"
+#include "StatusLeds.h"
+
+#include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "ReadCarCAN.h"
 #include "daybreak_pins.h"
-#include "BSP_GPIO.h"
 
 int idle_time_ctr = 0;
 int last_tick_cnt = 0;
@@ -41,7 +42,9 @@ void IdleTaskHook(void)
             last_tick_cnt = current_tick_cnt;
 
             if(current_tick_cnt % 50 == 0){
-                BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN, toggle);
+                #ifdef TASK_PROFILER
+                DebugIO_Toggle(IDLE_PIN);
+                #endif
                 toggle = !toggle;
             }
         }
@@ -63,11 +66,11 @@ int main(void) {
     OSInit(&err);
     IdleInit();
     TaskSwHook_Init();
-    Task_StatusLED_Init();
+    Status_Leds_Init();
     assertOSError(err);
     Ignition_Init();
     dashboardInit();
-
+    DebugIO_Init();
 
     // Initialize apps
     OSTaskCreate(
@@ -97,19 +100,6 @@ int main(void) {
     while(1);
 }
 
-void Task_StatusLED_Init(void) {
-    BSP_GPIO_Init(OS_FAULT_PORT, OS_FAULT, OUTPUT, false);
-    BSP_GPIO_Init(IG1_PORT, IG1, OUTPUT, false);
-    BSP_GPIO_Init(IG2_PORT, IG2, OUTPUT, false);
-    BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false);
-    BSP_GPIO_Init(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, OUTPUT, false);
-    BSP_GPIO_Init(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, OUTPUT, false);
-    BSP_GPIO_Init(MOTOR_CTRL_FAULT_PORT, MOTOR_CTRL_FAULT, OUTPUT, false);
-    BSP_GPIO_Init(BPS_FAULT_PORT, BPS_FAULT, OUTPUT, false);
-    BSP_GPIO_Init(CONTROLS_FAULT_PORT, CONTROLS_FAULT, OUTPUT, false);
-    BSP_GPIO_Init(CRUISE_IND_PORT, CRUISE_IND, OUTPUT, false);
-}
-
 void Task_Init(void *p_arg){
     OS_ERR err;
 
@@ -126,7 +116,7 @@ void Task_Init(void *p_arg){
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    Minions_Init();
+    // Minions_Init();
 
     // Initialize applications
     UpdateDisplay_Init();
@@ -245,24 +235,24 @@ void Task_Init(void *p_arg){
 
 void HardFault_Handler(){
     __disable_irq();
-    EmergencyContactorOpen();
+    MotorContactor_EmergencyDisable();
     while(1){}
 }
 
 void MemManage_Handler(){
     __disable_irq();
-    EmergencyContactorOpen();
+    MotorContactor_EmergencyDisable();
     while(1){}
 }
 
 void BusFault_Handler(){
     __disable_irq();
-    EmergencyContactorOpen();
+    MotorContactor_EmergencyDisable();
     while(1){}
 }
 
 void UsageFault_Handler(){
     __disable_irq();
-    EmergencyContactorOpen();
+    MotorContactor_EmergencyDisable();
     while(1){}
 }

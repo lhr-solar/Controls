@@ -5,20 +5,21 @@
  * 
  */
 
-#include "Tasks.h"
-#include "os.h"
+// #include "os_cfg_app.h"
+
 #include "CANbus.h"
 #include "Contactors.h"
 #include "Display.h"
-#include "Minions.h"
-#include "IOState.h"
 #include "Pedals.h"
 #include "SendTritium.h"
+#include "DebugIO.h"
+#include "StatusLeds.h"
+#include "Tasks.h"
 #include "ReadTritium.h"
 #include "ReadCarCAN.h"
+#include "IOState.h"
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
-
 
 /**
  * TCBs
@@ -48,12 +49,32 @@ CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 
+#define DISP_NA_STR_LITERAL "\"N/A\""
+#define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
+#define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
+
+// Controls Fault Message bits
+#define ANY_CONTROLS_FAULT_BIT 1        // 1 if any of the other bits are true
+#define MOTOR_CONTROLLER_FAULT_BIT 2    // 1 if there is a ReadTritium Error
+#define BPS_FAULT_BIT 4                 // 1 if there is a BPS Trip error
+// #define PEDALS_FAULT_BIT 8           // ""
+#define READCARCAN_FAULT_BIT 16         // 1 if there is a ReadCarCAN Error
+#define DISPLAY_FAULT_BIT 32            // 1 if there is an UpdateDisplay Error
+#define OS_FAULT_BIT 64                 // 1 if there is an OS Error
+#define LAKSHAY_FAULT_BIT 128           // 1 if Lakshay's code is running
+
+#define FAULT_MSG_DELAY 1000000
+
+const char *DISP_ERRMSG_NA = DISP_NA_STR_LITERAL;
+const char *DISP_EVACMSG_DEFAULT = DISP_EVAC_NONREQ_STR_LITERAL;
+const char *DISP_EVACMSG_REQ = DISP_EVAC_REQ_STR_LITERAL;
 
 // Variables to store error codes, stored and cleared in task error assert functions
 error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
 error_code_t Error_SendTritium = SENDTRITIUM_ERR_NONE;
 error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
 error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
+error_code_t Error_IOState = IOSTATE_ERR_NONE;
 error_code_t Error_OS = OS_ERR_NONE;
 
 // Display error messages for readability
@@ -61,6 +82,7 @@ char ErrMsg_SendTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_ReadCarCAN[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_ReadTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_UpdateDisplay[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
+char ErrMsg_IOState[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_OS[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
 char ErrMsg_Evac[ERR_CODE_LEN] = DISP_EVAC_NONREQ_STR_LITERAL;
 
@@ -70,7 +92,31 @@ OS_FLAG_GRP BPS_Motor_Status_Flags;
 
 
 
-extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
+// extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
+
+/**
+ * @brief Check and set error bits for CONTROLS_FAULT_MSG
+ * @param errorCode the Controls-define errorCode. Only used to check for BPS Trip
+ * @return a byte with the error bits set according to Controls' current faults
+ */
+uint8_t get_fault_bits(uint16_t errorCode) {
+    
+    uint8_t msg = 0;
+
+    if(Error_ReadCarCAN == READCARCAN_ERR_BPS_TRIP){
+        msg |= BPS_FAULT_BIT;
+    }
+    if(Error_ReadCarCAN != READCARCAN_ERR_NONE)         {msg |= READCARCAN_FAULT_BIT;}
+    if (Error_ReadTritium != T_NONE)                    {msg |= MOTOR_CONTROLLER_FAULT_BIT;}
+    if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE)  {msg |= DISPLAY_FAULT_BIT;}
+    if (Error_OS != OS_ERR_NONE)                        {msg |= OS_FAULT_BIT;}
+
+    msg |= LAKSHAY_FAULT_BIT;                           // TODO: remove this when Lakshay's code is removed
+
+    if (msg != 0)                                       {msg |= ANY_CONTROLS_FAULT_BIT;}
+
+    return msg;
+}
 
 /**
  * Error assertion-related functions
@@ -80,13 +126,47 @@ void _assertOSError(OS_ERR err)
 {
     if (err != OS_ERR_NONE)
     {
+        Status_Leds_Write(OS_FAULT_LED, ON);
         Error_OS = err;
-        set_errmsg_hex("uOS", ErrMsg_OS, err);
-        EmergencyContactorOpen(); // Turn off contactors and turn on the brakelight to indicate an emergency
+        snprintf(ErrMsg_OS, ERR_CODE_LEN, "%08X", Error_OS);
+        MotorContactor_EmergencyDisable(); // Turn off all contactors
         Display_Error(); // Display the location and error code
-        while(1){;} //nonrecoverable
+
+        CANDATA_t faultmsg = {0};
+        faultmsg.ID = CONTROLS_FAULT_MSG;
+        faultmsg.data[0] = get_fault_bits(Error_OS);
+        
+        volatile static int faultLoopCount = 0;
+
+        while(1){ //nonrecoverable
+            faultLoopCount++;
+            if (faultLoopCount > FAULT_MSG_DELAY){
+                faultLoopCount = 0;
+                CANbus_Send_Faultstate(faultmsg, CARCAN);
+            }
+        }
+            
+           
     }
 }
+
+static inline void delay_ms(uint32_t ms) {
+    // Adjusted loop count per ms based on empirical timing
+    // Originally: 20,000 per ms (80,000 cycles / 4 cycles/iter)
+    // Observed: ~3.77× slower → need ~5300 iterations per ms
+    uint32_t count = ms * 5300;
+
+    __asm__ volatile (
+        "1: \n"
+        "subs %[cnt], %[cnt], #1 \n"
+        "bne 1b \n"
+        : [cnt] "+r" (count)
+        :
+        : "cc"
+    );
+}
+
+
 
 /**
  * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
@@ -100,6 +180,7 @@ void _assertOSError(OS_ERR err)
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
 
+    Status_Leds_Write(CONTROLS_FAULT_LED, ON);
     if (errorCode == 0) { // Exit if there is no error
         return;
     }
@@ -110,8 +191,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     }
 
     if (nonrecoverable == OPT_NONRECOV) {
-        EmergencyContactorOpen();
-        strncpy(ErrMsg_Evac, DISP_EVAC_REQ_STR_LITERAL, ERR_CODE_LEN);
+        MotorContactor_EmergencyDisable();
         Display_Error(); // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
     }
@@ -120,51 +200,35 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     if (errorCallback != NULL) {
         errorCallback(); // Run a handler for this error that was specified in another task file
     }
-    
+
+    // Set CAN Message data for Controls Fault
+    CANDATA_t faultmsg = {0};
+    faultmsg.ID = CONTROLS_FAULT_MSG;
+
+    // Check and set errors
+    faultmsg.data[0] = get_fault_bits(errorCode);
+
+    CANbus_Send_Faultstate(faultmsg, CARCAN);
+
 
     if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
         while(1) {
-
-            #if DEBUG == 1
-            // Print the error that caused this fault
-                // printf("\n\rCurrent Error Code: 0x%04x\n\r", errorCode);
-
-                // // Print the errors for each applications with error data
-                // printf("\n\rAll application errors:\n\r");
-                // printf("Error_ReadCarCAN: 0x%04x\n\r", Error_ReadCarCAN);
-                // printf("Error_SendTritium: 0x%04x\n\r", Error_SendTritium);
-                // printf("Error_ReadTritium: 0x%04x\n\r", Error_ReadTritium);
-                // printf("Error_UpdateDisplay: 0x%04x\n\r", Error_UpdateDisplay);
-
-                // // Delay so that we're not constantly printing
-                // for (int i = 0; i < 9999999; i++) {
-                // } 
-            #endif
+            delay_ms(500);
+            Status_Leds_Toggle(CONTROLS_FAULT_LED);
+            Status_Leds_Toggle(DASH_HEARTBEAT_LED);
+            CANbus_Send_Faultstate(faultmsg, CARCAN);
             
         }
     }
-
+    // only reaches here is fault is recoverable
     if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
+        Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
         OSSchedUnlock(&err); 
         // Don't err out if scheduler is still locked because of a timer callback
         if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
         assertOSError(err); 
         }
-        
     }
-}
-
-/**
- * @brief For use in error handling: opens array and motor precharge bypass contactor
- * and turns on additional brakelight to signal that a critical error happened.
- */
-void EmergencyContactorOpen() {
-    // Array motor kill
-    BSP_GPIO_Write_Pin(MOTOR_PRCHG_BYPASS_PORT, MOTOR_PRCHG_BYPASS, OFF);
-    BSP_GPIO_Write_Pin(ARRAY_PRCHG_BYPASS_PORT, ARRAY_PRCHG_BYPASS, OFF);
-
-    // Turn additional brakelight on to indicate critical error
-    BSP_GPIO_Write_Pin(PININFO_LUT[BRAKELIGHT].port, PININFO_LUT[BRAKELIGHT].pinMask, true);
 }
 
 /**
