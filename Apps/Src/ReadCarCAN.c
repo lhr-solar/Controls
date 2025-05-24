@@ -89,7 +89,7 @@ static bool check_MotorControllerContactor(void){
  */
 static void handler_ReadCarCAN_BPSTrip(void)
 {
-    OS_ERR err;
+    // OS_ERR err;
     MotorContactor_EmergencyDisable();
     Status_Leds_Write(BPS_FAULT_LED, ON); // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED

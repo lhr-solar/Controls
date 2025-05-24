@@ -158,7 +158,7 @@ static inline void handler_ReadTritium_HallError(void)
  */
 void assertTritiumError(tritium_error_code_t motor_err)
 {
-	OS_ERR err;
+	// OS_ERR err;
 
 	static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
 	static uint8_t motor_fault_cnt = 0;
