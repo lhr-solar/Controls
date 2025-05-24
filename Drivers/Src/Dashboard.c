@@ -5,30 +5,30 @@
 
 gear_t getGear(void) {
     static bool neutralReset = true;
-    bool fwdSwitch = BSP_GPIO_Read_Pin(FORWARD_PORT, FORWARD);
-    bool revSwitch = BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE);
+    bool fwd = BSP_GPIO_Read_Pin(FORWARD_PORT,  FORWARD);
+    bool rev = BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE);
 
-    // Check for gear fault
-    if(fwdSwitch && revSwitch) {return DASH_GEAR_FAULT_ERROR;}
-
-    // if we've reset to neutral before, and the switch is in a known state we can directly return the gear
-    if(neutralReset){
-        if(fwdSwitch){
-            return DASH_FWD;
-        }
-        else if(revSwitch){
-            return DASH_REV;
-        }
+    if (fwd && rev) {
+        return DASH_GEAR_FAULT_ERROR;
     }
-    // don't actually have an off gear pin so we need to do some funky logic
-    // Check for manual override into neutral
-    if(neutralReset && !fwdSwitch && !revSwitch) {return DASH_NEU;}
 
-    // Normal check
-    neutralReset = false;
-    if(fwdSwitch) {return DASH_FWD;}
-    else if(revSwitch) {return DASH_REV;}
-    else {return DASH_NEU;}
+    // Until we've actually seen neutral, manually override to neutral
+    if (neutralReset) {
+        // only clear neutralReset once we see the switches truly in neutral
+        if (!fwd && !rev) {
+            neutralReset = false;
+        }
+        return DASH_NEU;
+    }
+
+    // After the initial neutral has been observed, obey the switches normally:
+    if (fwd) {
+        return DASH_FWD;
+    } else if (rev) {
+        return DASH_REV;
+    } else {
+        return DASH_NEU;
+    }
 }
 
 // NOTE: Uncomment when we're using cruise
