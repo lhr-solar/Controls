@@ -20,6 +20,9 @@ void Status_Leds_Init(void){
     BSP_GPIO_Init(BPS_HAZARD_PORT, BPS_HAZARD, OUTPUT, false);
     Status_Leds_Write(DASH_BPS_HAZ_LED, false);
     BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT_PIN, OUTPUT, false);
+
+    // Brakelight is a special case, it is an output pin but it is controlled by the SendTritium
+    BSP_GPIO_Init(BRAKE_LIGHT_PORT, BRAKE_LIGHT, OUTPUT, false);
 } 
 
 /**
@@ -57,6 +60,8 @@ void Status_Leds_Write(status_led_t led, bool state){
         case DASH_HEARTBEAT_LED:
             BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN, state);
             break;
+        case BRAKELIGHT_LED:
+            BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT, state);
         default:
             break;
     }
@@ -95,6 +100,9 @@ void Status_Leds_Toggle(status_led_t led){
             break;
         case DASH_HEARTBEAT_LED:
             BSP_GPIO_Toggle_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN);
+            break;
+        case BRAKELIGHT_LED:
+            BSP_GPIO_Toggle_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT);
             break;
         default:
             break;

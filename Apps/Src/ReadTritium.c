@@ -72,6 +72,7 @@ void Task_ReadTritium(void *p_arg)
 
 				UpdateDisplay_SetMCVoltage(Motor_BusVoltage * 10);
 				UpdateDisplay_SetMCCurrent(Motor_BusCurrent * 10);
+				break;
 			}
 			case MOTOR_STATUS:
 			{
@@ -100,11 +101,13 @@ void Task_ReadTritium(void *p_arg)
 				Car_Velocity = (Car_Velocity * 223694) / 10000000;
 
 				UpdateDisplay_SetVelocity(Car_Velocity);
+				break;
 			}
 
 			case TEMPERATURE:
 			{
 				UpdateDisplay_SetHeatSinkTemp(*(float *)(&dataBuf.data[4]));
+				break;
 			}
 
 			default:

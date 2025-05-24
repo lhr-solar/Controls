@@ -19,7 +19,6 @@
 
 #include "Pedals.h"
 #include "ReadCarCAN.h"
-#include "Minions.h"
 #include "Dashboard.h"
 #include "ReadTritium.h"
 #include "SendCarCAN.h"
@@ -30,6 +29,7 @@
 #include "common.h"
 #include "Tasks.h"
 #include "SendTritium.h"
+#include "StatusLeds.h"
 
 
 // Inputs
@@ -68,8 +68,6 @@ static void assertSendTritiumError(SendTritium_error_code_t sterr);
 static void updateDisplayState() 
 {
     UpdateDisplay_SetAccel(accelPedalPercent);
-
-    Minions_Write(BRAKE_LIGHT, isBrakeOn);
     UpdateDisplay_SetBrake(isBrakeOn);
 
     switch(gear) {
@@ -99,6 +97,7 @@ static void readInputs()
     // Brake hysteresis
     if(brakePedalPercent <= BRAKE_UNPRESSED_THRESHOLD) isBrakeOn = false;
     else if(brakePedalPercent >= BRAKE_PRESSED_THRESHOLD) isBrakeOn = true;
+    Status_Leds_Write(BRAKELIGHT_LED, isBrakeOn); // Write to the dashboard brake light    
 
     gear = getGear(); 
 
@@ -176,24 +175,20 @@ void Task_SendTritium(void *p_arg)
         .data = {0.0f, 0.0f},
     };
 
-    
-
     readInputs(); // read inputs from the system
+
     updateDisplayState();        
     UpdateDisplay_SetRegenState(DISP_DISABLED); // Not on Daybreak
     UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
     UpdateDisplay_SetAccel(accelPedalPercent); 
-    UpdateDisplay_SetBrake(false);
 
-    // Wait for motor ready to run
-    OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_BLOCKING, &ticks, &err);
-    assertOSError(err);
-
-    while (1)
-    {
+    while (1) {
         // Check that motor is ready to run
-        OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_BLOCKING, &ticks, &err);
-        assertOSError(err);
+        OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
+        if (err != OS_ERR_PEND_WOULD_BLOCK){
+            assertOSError(err);
+        }
+
 
         memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float)); // CAN message for setpoint of bus current percent
         CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN); 

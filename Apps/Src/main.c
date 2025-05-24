@@ -64,10 +64,14 @@ int main(void) {
 
     OS_ERR err;
     OSInit(&err);
+    
     IdleInit();
     TaskSwHook_Init();
     Status_Leds_Init();
-    assertOSError(err);
+
+    assertOSError(err); // for OS init
+
+    BPSMotorFlags_Init();
     Ignition_Init();
     dashboardInit();
     DebugIO_Init();
@@ -106,8 +110,6 @@ void Task_Init(void *p_arg){
     // Start systick    
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
 
-    // Initialize BPS & Motor Event Flag Group
-    BPSMotorFlags_Init();
     
     // Initialize drivers
     Pedals_Init();

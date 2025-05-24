@@ -29,10 +29,8 @@ void putIOState(void){
 
     message.ID = IO_STATE;
 
-    uint8_t brake = Pedals_Read(BRAKE);
-
     message.data[0] = Pedals_Read(ACCELERATOR);
-    message.data[1] = brake;
+    message.data[1] = Pedals_Read(BRAKE); // raw analog value
 
     uint8_t s = 0;
     s |= SWITCH_BITMAP_BRAKELIGHT(get_isBrakeOn());
