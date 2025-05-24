@@ -107,6 +107,25 @@ extern const char *DISP_EVACMSG_DEFAULT;
 extern const char *DISP_EVACMSG_REQ;
 
 /**
+ * @brief Can be used by tasks to add a delay in ms
+ */
+inline void delay_ms(uint32_t ms) {
+    // Adjusted loop count per ms based on empirical timing
+    // Originally: 20,000 per ms (80,000 cycles / 4 cycles/iter)
+    // Observed: ~3.77× slower → need ~5300 iterations per ms
+    uint32_t count = ms * 5300;
+
+    __asm__ volatile (
+        "1: \n"
+        "subs %[cnt], %[cnt], #1 \n"
+        "bne 1b \n"
+        : [cnt] "+r" (count)
+        :
+        : "cc"
+    );
+}
+
+/**
  * Task Prototypes
  */
 void Task_Init(void* p_arg);

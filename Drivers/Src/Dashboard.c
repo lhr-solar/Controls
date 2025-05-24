@@ -1,21 +1,34 @@
 #include "Dashboard.h"
+#include "Tasks.h"
 
 // Boolean used to ensure that if car turns on in non-neutral, it'll be overriden to neutral 
 // until the switch is moved to neutral; then, it'll follow the specified gear state afterward.
 
 gear_t getGear(void) {
     static bool neutralReset = true;
-    bool fwd = BSP_GPIO_Read_Pin(FORWARD_PORT,  FORWARD);
-    bool rev = BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE);
+    bool fwd;
+    bool rev;
+    bool neu;
 
-    if (fwd && rev) {
-        return DASH_GEAR_FAULT_ERROR;
+    // Makes sure we're not in a transition (not sufficient to just saw !fwd && !rev => neu)
+    neu = true;
+    for(int i = 0; i < NEUTRAL_DEBOUNCE_COUNT; i++) {
+        fwd = BSP_GPIO_Read_Pin(FORWARD_PORT,  FORWARD);
+        rev = BSP_GPIO_Read_Pin(REVERSE_PORT, REVERSE);
+        if (fwd && rev) {
+            return DASH_GEAR_FAULT_ERROR;
+        }
+        if(fwd || rev) {
+            neu = false;
+            break;
+        }
+        delay_ms(NEUTRAL_DEBOUNCE_DLY_MS);
     }
 
     // Until we've actually seen neutral, manually override to neutral
     if (neutralReset) {
         // only clear neutralReset once we see the switches truly in neutral
-        if (!fwd && !rev) {
+        if (neu) {
             neutralReset = false;
         }
         return DASH_NEU;

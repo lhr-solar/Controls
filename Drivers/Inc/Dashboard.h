@@ -4,6 +4,9 @@
 #include "daybreak_pins.h"
 #include "BSP_GPIO.h"
 
+#define NEUTRAL_DEBOUNCE_COUNT 5
+#define NEUTRAL_DEBOUNCE_DLY_MS 10
+
 #define FOREACH_Gear(GEAR) \
         GEAR(DASH_NEU), \
         GEAR(DASH_FWD), \
