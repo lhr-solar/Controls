@@ -178,8 +178,8 @@ void Task_SendTritium(void *p_arg)
 
     
 
-    // Initialize display
-    UpdateDisplay_SetGear(DASH_NEU);
+    readInputs(); // read inputs from the system
+    updateDisplayState();        
     UpdateDisplay_SetRegenState(DISP_DISABLED); // Not on Daybreak
     UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
     UpdateDisplay_SetAccel(accelPedalPercent); 
@@ -197,8 +197,6 @@ void Task_SendTritium(void *p_arg)
 
         memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float)); // CAN message for setpoint of bus current percent
         CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN); 
-        readInputs(); // read inputs from the system
-        updateDisplayState();
 
         // Update velocitySetpoint & currentSetpoint based on gear/state
         // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
