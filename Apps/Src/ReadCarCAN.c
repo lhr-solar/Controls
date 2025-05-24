@@ -90,12 +90,9 @@ static bool check_MotorControllerContactor(void){
 static void handler_ReadCarCAN_BPSTrip(void)
 {
     OS_ERR err;
-    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
-    assertOSError(err);
     MotorContactor_EmergencyDisable();
     Status_Leds_Write(BPS_FAULT_LED, ON); // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
-      OS_ERR err;
     OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
     assertOSError(err);
 }
@@ -118,6 +115,7 @@ static void updateMotorControllerContactor(void){
             }
         }
   }
+}
 
 void Task_ReadCarCAN(void *p_arg)
 {
@@ -145,9 +143,6 @@ void Task_ReadCarCAN(void *p_arg)
     assertOSError(err);
     #endif
 
-    
-    // Create the Active Precharge CAN Watchdog (periodic) timer, which disconnects the array and disables regenerative braking
-    // if we do not get a CAN message with the ID CONTACTOR_SENSE within the desired interval.
     OSTmrCreate(
         &prechargeCanWatchTimer,
         "Active Precharge CAN Watch Timer",
@@ -336,7 +331,6 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
-        
         default:
             break;
     }

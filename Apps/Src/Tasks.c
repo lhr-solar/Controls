@@ -49,9 +49,7 @@ CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 
-#define DISP_NA_STR_LITERAL "\"N/A\""
-#define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
-#define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
+
 
 // Controls Fault Message bits
 #define ANY_CONTROLS_FAULT_BIT 1        // 1 if any of the other bits are true
@@ -179,6 +177,8 @@ static inline void delay_ms(uint32_t ms) {
  */
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
     OS_ERR err;
+    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    assertOSError(err);
 
     Status_Leds_Write(CONTROLS_FAULT_LED, ON);
     if (errorCode == 0) { // Exit if there is no error

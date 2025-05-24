@@ -63,6 +63,10 @@
 #define TASK_COMMAND_LINE_STACK_SIZE        DEFAULT_STACK_SIZE
 #define TASK_IO_STATE_STACK_SIZE            DEFAULT_STACK_SIZE
 
+#define DISP_NA_STR_LITERAL "\"N/A\""
+#define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
+#define DISP_EVAC_REQ_STR_LITERAL "\"REQUIRED!!!\""
+
 
 /**
  * BPS & Motor Status Event Flag Definitions
