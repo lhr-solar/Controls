@@ -176,6 +176,8 @@ void Task_SendTritium(void *p_arg)
         .data = {0.0f, 0.0f},
     };
 
+    
+
     // Initialize display
     UpdateDisplay_SetGear(DASH_NEU);
     UpdateDisplay_SetRegenState(DISP_DISABLED); // Not on Daybreak

@@ -11,6 +11,16 @@ gear_t getGear(void) {
     // Check for gear fault
     if(fwdSwitch && revSwitch) {return DASH_GEAR_FAULT_ERROR;}
 
+    // if we've reset to neutral before, and the switch is in a known state we can directly return the gear
+    if(neutralReset){
+        if(fwdSwitch){
+            return DASH_FWD;
+        }
+        else if(revSwitch){
+            return DASH_REV;
+        }
+    }
+    // don't actually have an off gear pin so we need to do some funky logic
     // Check for manual override into neutral
     if(neutralReset && !fwdSwitch && !revSwitch) {return DASH_NEU;}
 
