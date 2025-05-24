@@ -88,12 +88,9 @@ void putIOState(void){
     // CPU_TS ticks;
     // OS_FLAGS res_set = OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
     // assertOSError(err);
-    // OS_FLAGS res_clr = OSFlagPend(&BPS_Motor_Status_Flags, MOTOR_ERR, 0, OS_OPT_PEND_FLAG_CLR_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
-    // assertOSError(err);
 
     // // IF BPS Safe & in motor ignition rotary switch position & motor controller precharge bypass contactor is closed, mark motor ready to run
     // // NOTE: BPS Safe means HV+ & HV- are closed
-    // // TODO: Modify this as needed when merging (to use the PR w/ motor contactor stuff -> also make MOTOR_SAFE_TO_RUN false when moco contactor turned off)
     // if(res_set && res_clr && (Get_Ignition_State() == IGN_MOTOR) && Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
     //     OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
     //     assertOSError(err);

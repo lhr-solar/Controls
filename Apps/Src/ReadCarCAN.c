@@ -93,8 +93,8 @@ static void handler_ReadCarCAN_BPSTrip(void)
     MotorContactor_EmergencyDisable();
     Status_Leds_Write(BPS_FAULT_LED, ON); // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
-    OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
-    assertOSError(err);
+    // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+    // assertOSError(err);
 }
 
 
@@ -191,12 +191,12 @@ void Task_ReadCarCAN(void *p_arg)
             assertOSError(err);
             #endif 
             
-          // Set HV+, HV-, and Array Contactor states
+            // Set HV+, HV-, and Array Contactor states
             // Note, does not control the Contactors, only stores the received state
             Contactors_Set(HV_PLUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT), true);
             Contactors_Set(HV_MINUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT), true);
             Contactors_Set(ARRAY_CONTACTOR, (bool)(dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT), true);
-          uint8_t bps_stat = (Contactors_Get(HV_MINUS_CONTACTOR, false) && Contactors_Get(HV_PLUS_CONTACTOR, false));
+            uint8_t bps_state = (Contactors_Get(HV_MINUS_CONTACTOR, false) && Contactors_Get(HV_PLUS_CONTACTOR, false));
 
 
             // Mark BPS checked if its the first time
@@ -207,7 +207,7 @@ void Task_ReadCarCAN(void *p_arg)
             }
 
             // HV contactor used to determine BPS safety
-            if(bps_stat) {
+            if(bps_state) {
                 OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE, OS_OPT_POST_FLAG_SET, &err);
             }
             else {
@@ -264,7 +264,6 @@ void Task_ReadCarCAN(void *p_arg)
             // Update Motor Precharge sense state
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
           
-          // TOOD: double check this motor safe to run logic
             if(!Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) || !Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
                 OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
                 assertOSError(err);
