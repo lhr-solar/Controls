@@ -83,22 +83,25 @@ void putIOState(void){
 
     CANbus_Send(message, true, CARCAN);
 
-    // // Update the global event flag group
-    // OS_ERR err;
-    // CPU_TS ticks;
-    // OS_FLAGS res_set = OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
-    // assertOSError(err);
-
-    // // IF BPS Safe & in motor ignition rotary switch position & motor controller precharge bypass contactor is closed, mark motor ready to run
-    // // NOTE: BPS Safe means HV+ & HV- are closed
-    // if(res_set && res_clr && (Get_Ignition_State() == IGN_MOTOR) && Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
-    //     OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
-    //     assertOSError(err);
-    // }
-    // else {
-    //     OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
-    //     assertOSError(err);
-    // }
+    // Send if Controls thinks the motor is safe to run over CAN
+    // Would be good to put somewhere else but this task runs periodically :3
+    s = 0;
+    message.ID = MOTOR_CONTROLLER_SAFE;
+    OS_ERR err;
+    OSFlagPend(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, NULL, &err);
+    message.data[0] = s;
+    switch(err){
+        case OS_ERR_NONE:
+            s |= CANBUS_MOTOR_SAFE_TO_RUN;
+            break;
+        case OS_ERR_PEND_WOULD_BLOCK:
+            s |= CANBUS_MOTOR_NOT_SAFE_TO_RUN; // If the flag is not set, we are not safe to run
+            break;
+        default:
+            s |= CANBUS_MOTOR_NOT_SAFE_TO_RUN;
+            break;
+    }
+    CANbus_Send(message, true, CARCAN);
 }
 
 /**

@@ -47,7 +47,8 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[PRECHARGE_TIMEOUT]             = {NOIDX, BYTE},
     [CONTROL_MODE]                  = {NOIDX, BYTE  }, /**     CONTROL_MODE	                   **/
 	[IO_STATE] 				        = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
-    [CONTROLS_FAULT_MSG]            = {NOIDX, BYTE  }  /**     CONTROLS_FAULT_MSG                  **/        
+    [CONTROLS_FAULT_MSG]            = {NOIDX, BYTE  },  /**    CONTROLS_FAULT_MSG              **/     
+	[MOTOR_CONTROLLER_SAFE]			= {NOIDX, BYTE} /**        MOTOR_CONTROLLER_SAFE            **/	   
 };
 
 /**

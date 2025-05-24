@@ -21,6 +21,8 @@
 #define BPS_CAN_WATCHDOG
 // #define PRECHARGE_CAN_WATCHDOG
 
+#define MOTOR_PRECHARGE_ON_COUNT_THRESHOLD 5
+
 
 // Timer delay constants
 #define CAN_WATCH_TMR_DLY_MS 1000u                                                             // 500 ms
@@ -97,6 +99,24 @@ static void handler_ReadCarCAN_BPSTrip(void)
     // assertOSError(err);
 }
 
+static void setMotorControllerContactor(bool state, bool blocking){
+    Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, state, blocking);
+
+    // If the motor contactor is turned off, we should not be running the motor controller
+    if(state == OFF){
+        OS_ERR err;
+        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
+
+    }
+
+    if(state){
+        Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
+    } else {
+        OS_ERR err;
+        Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, OFF, true);
+        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
+    }
+}
 
 /**
  * @brief turns on or off the motor contactor depending on igntion and HV Contactors
@@ -110,10 +130,13 @@ static void updateMotorControllerContactor(void){
         if(Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)){
             // turn on motor contactor if it was off before
             if(motorContactorState == OFF){
-                Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
+                setMotorControllerContactor(ON, true);
                 return;
             }
         }
+  }
+  if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) == ON){
+    setMotorControllerContactor(OFF, true); // turn off motor contactor if it was on before
   }
 }
 
@@ -199,6 +222,7 @@ void Task_ReadCarCAN(void *p_arg)
             uint8_t bps_state = (Contactors_Get(HV_MINUS_CONTACTOR, false) && Contactors_Get(HV_PLUS_CONTACTOR, false));
 
 
+            // Context switches should not occur here since the only task pending on these flags waits for all bits to be set
             // Mark BPS checked if its the first time
             if(!bps_checked) {
                 OSFlagPost(&BPS_Motor_Status_Flags, BPS_CHECKED, OS_OPT_POST_FLAG_SET, &err);
@@ -214,12 +238,6 @@ void Task_ReadCarCAN(void *p_arg)
                 OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
             }
             assertOSError(err);
-            
-            // Set HV+, HV-, and Array Contactor states
-            // Note, does not control the Contactors, only stores the received state
-            Contactors_Set(HV_PLUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT), true);
-            Contactors_Set(HV_MINUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT), true);
-            Contactors_Set(ARRAY_CONTACTOR, (bool)(dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT), true);
             break; // End of BPS Contactor Status Updates
         }
 
@@ -252,21 +270,29 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case CONTACTOR_SENSE:
         {
+            // counter to ensure motor precharge stays on for a few iterations
+            static volatile uint8_t motorPrechargeOnCount = 0;
             #ifdef PRECHARGE_CAN_WATCHDOG
             OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
             assertOSError(err);
             #endif
 
-            // Update Motor Contactor sense state
-            //Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
             // Update Array Precharge sense state
             Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
             // Update Motor Precharge sense state
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
           
             if(!Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) || !Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
-                OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
-                assertOSError(err);
+                motorPrechargeOnCount++;
+                if(motorPrechargeOnCount >= MOTOR_PRECHARGE_ON_COUNT_THRESHOLD) {
+                    // If the motor precharge contactor has been on for enough iterations, we can consider it safe to run
+                    OS_ERR err;
+                    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
+                    assertOSError(err);
+                }
+            }
+            else{
+                motorPrechargeOnCount = 0; // Reset the counter if both motor contactors are not on
             }
                     
         

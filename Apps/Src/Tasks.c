@@ -208,7 +208,12 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     // Check and set errors
     faultmsg.data[0] = get_fault_bits(errorCode);
 
+    CANDATA_t motormsg = {0};
+    motormsg.ID = MOTOR_CONTROLLER_SAFE;
+    motormsg.data[0] = 0;
+
     CANbus_Send_Faultstate(faultmsg, CARCAN);
+    CANbus_Send_Faultstate(motormsg, CARCAN);
 
 
     if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
@@ -217,7 +222,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
             Status_Leds_Toggle(CONTROLS_FAULT_LED);
             Status_Leds_Toggle(DASH_HEARTBEAT_LED);
             CANbus_Send_Faultstate(faultmsg, CARCAN);
-            
+            CANbus_Send_Faultstate(motormsg, CARCAN);
         }
     }
     // only reaches here is fault is recoverable
