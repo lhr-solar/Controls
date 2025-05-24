@@ -13,5 +13,11 @@
 #define SWITCH_BITMAP_IGN_2_MOTOR(value)      ((value & 0x01) << 1) // Bit 1: IGN_2_Motor
 #define SWITCH_BITMAP_IGN_1_ARRAY(value)      ((value & 0x01) << 0) // Bit 0: IGN_1_Array
 
+typedef enum {
+    IOSTATE_ERR_NONE  = 0x0000,         // No error
+    IOSTATE_ERROR = 0xFFFF,             // More than one state is high at a time
+} IOState_error_code_t;
+
+void assertIOStateError(IOState_error_code_t io_err);
 
 #endif

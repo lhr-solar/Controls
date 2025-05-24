@@ -7,7 +7,6 @@
 
 #include "Contactors.h"
 #include "Tasks.h"
-#include "BSP_GPIO.h"
 #include "daybreak_pins.h"
 
 #define CONTACTOR_SENSE_DELAY 1
@@ -40,6 +39,7 @@ static void setContactor(contactor_t contactor, bool state) {
             contactorState[ARRAY_PRECHARGE_BYPASS_CONTACTOR] = state;
             break;
         default:
+            contactorState[contactor] = state;
             break;
     }
 }
@@ -52,12 +52,12 @@ static void setContactor(contactor_t contactor, bool state) {
 void Contactors_Init() {
     // Motor Contactor pins
     BSP_GPIO_Init(MOTOR_CONTACTOR_PORT, MOTOR_CONTACTOR, OUTPUT, false); // control
-    BSP_GPIO_Init_PullUp(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, true); // sense
+    BSP_GPIO_Init_PullUp(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE, INPUT, true); // sense //TRUE before
 
     // start disabled
     for (contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++) {
         // Only Motor Contactor is directly controlled by Controls
-        setContactor(contactor, false);
+        setContactor(contactor, OFF);
     }
 
     // initialize mutex
@@ -76,15 +76,8 @@ void Contactors_Init() {
 bool Contactors_Get(contactor_t contactor, bool blocking) {
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
-            // Read the GPIO and update the contactor state array in a critical section
-            OS_ERR err = 0;
-            CPU_TS ts = 0;
-            OSMutexPend(&contactorsMutex, 0, blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING, &ts, &err);
-            assertOSError(err);
-            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Get_State(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 
-                                                         ? true : false;
-            OSMutexPost(&contactorsMutex, OS_OPT_POST_NONE, &err);
-            assertOSError(err);
+            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Read_Pin(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 
+                                                         ? ON : OFF;
             break;
 
         // Precharge Contactors are updated by ReadCarCAN.c
@@ -133,4 +126,26 @@ ErrorStatus Contactors_Set(contactor_t contactor, bool state, bool blocking) {
     assertOSError(err);
 
     return result;
+}
+
+/**
+ * @brief   Disables all contactors
+ *          Note: NOT not turn off Contactors not controlled by Controls, only sets their status to off
+ * @param   None
+ * @return  None
+ */
+void Contactors_DisableAll(){
+    for(uint8_t i = 0; i < NUM_CONTACTORS; i++){
+        Contactors_Set(i, false, OFF);
+    }
+}
+
+/**
+ * @brief   Disables motor contactor and bypasses mutex
+ *          Should only used in a fault state
+ * @param   None
+ * @return  None
+ */
+void MotorContactor_EmergencyDisable() {
+    setContactor(MOTOR_CONTROLLER_CONTACTOR, OFF);
 }

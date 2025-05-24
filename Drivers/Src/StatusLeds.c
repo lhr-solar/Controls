@@ -53,8 +53,10 @@ void Status_Leds_Write(status_led_t led, bool state){
             break;
         case DASH_BPS_HAZ_LED:
             BSP_GPIO_Write_Pin(BPS_HAZARD_PORT, BPS_HAZARD, state);
+            break;
         case DASH_HEARTBEAT_LED:
             BSP_GPIO_Write_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN, state);
+            break;
         default:
             break;
     }
@@ -90,8 +92,10 @@ void Status_Leds_Toggle(status_led_t led){
             break;
         case DASH_BPS_HAZ_LED:
             BSP_GPIO_Toggle_Pin(BPS_HAZARD_PORT, BPS_HAZARD);
+            break;
         case DASH_HEARTBEAT_LED:
             BSP_GPIO_Toggle_Pin(HEARTBEAT_PORT, HEARTBEAT_PIN);
+            break;
         default:
             break;
     }
