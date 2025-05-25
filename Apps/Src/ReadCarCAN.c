@@ -267,12 +267,12 @@ void Task_ReadCarCAN(void *p_arg)
         }
         case PRECHARGE_TIMEOUT:
         {
-            /*
-            1 if motor precharge timeout
-            0 if array precharge timeout
-            Lakshay is stupid, never let him to make CAN IDs again
-            */
-            assertReadCarCANError((uint8_t)(dataBuf.data[0]) ? READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_ARR : READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_MOTOR);
+            if(dataBuf.data[0] & 0x01){
+                assertReadCarCANError(READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_MOTOR);
+            }
+            else{
+                assertReadCarCANError(READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_ARR);
+            }
             break;
         }
         case CONTACTOR_SENSE:
@@ -364,11 +364,11 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
         case READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_MOTOR:
-            set_errmsg_hex("PC_TIMMo", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+            set_errmsg_hex("PC_TimMo", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
         case READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_ARR:
-            set_errmsg_hex("PC_TIMAr", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+            set_errmsg_hex("PC_TimAr", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
         case READCARCAN_ERR_PCHG_MISSED_MSG:
