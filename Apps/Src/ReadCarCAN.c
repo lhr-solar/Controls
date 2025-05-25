@@ -18,7 +18,7 @@
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
 
-#define BPS_CAN_WATCHDOG
+// #define BPS_CAN_WATCHDOG
 // #define PRECHARGE_CAN_WATCHDOG
 
 #define MOTOR_PRECHARGE_ON_COUNT_THRESHOLD 5
@@ -112,15 +112,6 @@ static void setMotorControllerContactor(bool state, bool blocking){
     if(state == OFF){
         OS_ERR err;
         OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
-
-    }
-
-    if(state){
-        Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
-    } else {
-        OS_ERR err;
-        Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, OFF, true);
-        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
     }
 }
 
@@ -128,23 +119,23 @@ static void setMotorControllerContactor(bool state, bool blocking){
  * @brief turns on or off the motor contactor depending on igntion and HV Contactors
  */
 
-static void updateMotorControllerContactor(void){
-    ignition_state_t ignState = Get_Ignition_State();
-    bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
-    if (ignState == IGN_ERROR || ignState == IGN_TRANSITION) {return;}
-    if(ignState == IGN_MOTOR || ignState == IGN_ARR){
-        if(Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)){
-            // turn on motor contactor if it was off before
-            if(motorContactorState == OFF){
-                setMotorControllerContactor(ON, true);
-                return;
-            }
-        }
-  }
-  if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) == ON){
-    setMotorControllerContactor(OFF, true); // turn off motor contactor if it was on before
-  }
-}
+// static void updateMotorControllerContactor(void){
+//     ignition_state_t ignState = Get_Ignition_State();
+//     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
+//     if (ignState == IGN_ERROR || ignState == IGN_TRANSITION) {return;}
+//     if(ignState == IGN_MOTOR || ignState == IGN_ARR){
+//         if(Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)){
+//             // turn on motor contactor if it was off before
+//             if(motorContactorState == OFF){
+//                 setMotorControllerContactor(ON, true);
+//                 return;
+//             }
+//         }
+//   }
+//   if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) == ON){
+//     setMotorControllerContactor(OFF, true); // turn off motor contactor if it was on before
+//   }
+// }
 
 void Task_ReadCarCAN(void *p_arg)
 {
@@ -200,7 +191,7 @@ void Task_ReadCarCAN(void *p_arg)
         {
             continue;
         }
-        updateMotorControllerContactor(); // Update motor contactor state based on ignition and HV contactors
+        //updateMotorControllerContactor(); // Update motor contactor state based on ignition and HV contactors
         switch (dataBuf.ID)
         {
         case BPS_TRIP:
@@ -274,6 +265,16 @@ void Task_ReadCarCAN(void *p_arg)
             UpdateDisplay_SetBattCurrent((*(int32_t *)dataBuf.data)); // int32_t
             break;
         }
+        case PRECHARGE_TIMEOUT:
+        {
+            /*
+            1 if motor precharge timeout
+            0 if array precharge timeout
+            Lakshay is stupid, never let him to make CAN IDs again
+            */
+            assertReadCarCANError((uint8_t)(dataBuf.data[0]) ? READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_ARR : READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_MOTOR);
+            break;
+        }
         case CONTACTOR_SENSE:
         {
             // counter to ensure motor precharge stays on for a few iterations
@@ -283,12 +284,14 @@ void Task_ReadCarCAN(void *p_arg)
             assertOSError(err);
             #endif
 
+            // More things involved with setting the motor controller contactor, so use this function instead
+            setMotorControllerContactor(MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
             // Update Array Precharge sense state
             Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
             // Update Motor Precharge sense state
             Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
-          
-            if(!Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) || !Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
+
+            if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
                 motorPrechargeOnCount++;
                 if(motorPrechargeOnCount >= MOTOR_PRECHARGE_ON_COUNT_THRESHOLD) {
                     // If the motor precharge contactor has been on for enough iterations, we can consider it safe to run
@@ -355,12 +358,19 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
-
         case READCARCAN_ERR_ACTIVE_PRECHARGE_FAULT:
             set_errmsg_hex("ACTV_PCG", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
+        case READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_MOTOR:
+            set_errmsg_hex("PC_TIMMo", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
+            throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+        case READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_ARR:
+            set_errmsg_hex("PC_TIMAr", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
+            strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
+            throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
         case READCARCAN_ERR_PCHG_MISSED_MSG:
             set_errmsg_hex("PCG_CANW", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);

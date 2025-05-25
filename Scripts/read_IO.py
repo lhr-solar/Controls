@@ -67,8 +67,12 @@ def parse_io_state(data_hex):
 def rec():
     """Receive and parse CAN messages"""
     buffer = ""
-    
+    last_io_state_time = int(time.time() * 1000)  # ms
+    largest_io_state_delta = 0
+    smallest_io_state_delta = 1000000
+
     while True:
+
         # Read data if available
         if ser.in_waiting > 0:
             try:
@@ -92,6 +96,15 @@ def rec():
                         if msg_id == '581':
                             parsed_data = parse_io_state(data_hex)
                             print(parsed_data)
+                            now = int(time.time() * 1000)  # ms
+                            delta = now - last_io_state_time
+                            if(delta > largest_io_state_delta):
+                                largest_io_state_delta = delta
+                            if(delta < smallest_io_state_delta):
+                                smallest_io_state_delta = delta
+                            print(f"IO State Jitter: {largest_io_state_delta - smallest_io_state_delta} ms")
+                            print(f"Time since last IO_STATE: {delta} ms")
+                            last_io_state_time = now
                         elif print_other_can_msgs:
                             # For other messages, just print ID and data
                             print(f"CAN ID: 0x{msg_id}, Data: {data_hex}")
@@ -99,7 +112,7 @@ def rec():
                 print(f"Error in receive thread: {str(e)}")
         
         # Small delay to prevent CPU hogging
-        time.sleep(0.01)
+        time.sleep(0.001)
 
 # Start the receive thread
 threading.Thread(target=rec, daemon=True).start()

@@ -31,7 +31,7 @@
 #define MOTOR_SENSE_FAULT(dataBuf)             (bool)((dataBuf[0] >> 2) & 0x01) // Bit 2: Motor sense fault happened
 #define MOTOR_SENSE_EXPECTED_VALUE(dataBuf)    (bool)((dataBuf[0] >> 1) & 0x01) // Bit 1: Expected motor sense value
 #define MOTOR_SENSE_ACTUAL_VALUE(dataBuf)      (bool)((dataBuf[0] >> 0) & 0x01) // Bit 0: Actual motor sense value
-
+ 
 
 #define FOREACH_contactor(contactor)             \
     contactor(ARRAY_PRECHARGE_BYPASS_CONTACTOR), \
