@@ -225,7 +225,7 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
 
 
-    if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
+    if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
         while(1) {
 
             delay_ms(500);

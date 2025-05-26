@@ -70,24 +70,25 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg) {
     }
 }
 
-static bool check_MotorControllerContactor(void) {
-    // both should be on at the same time
-    bool HVContactorState =
-        Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true);
+// IS THIS ACTUALLY UNUSED? OR NAH?
+// static bool check_MotorControllerContactor(void) {
+//     // both should be on at the same time
+//     bool HVContactorState =
+//         Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true);
 
-    bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
-    if (!HVContactorState && motorContactorState) {
-        // if the HV contactors are off and the motor contactor is on
-        return false;
-    }
-    bool motorPrechargeContactorState =
-        Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true);
-    if (motorPrechargeContactorState && !motorContactorState) {
-        // if the motor precharge contactor is on and the motor contactor is off
-        return false;
-    }
-    return true;
-}
+//     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
+//     if (!HVContactorState && motorContactorState) {
+//         // if the HV contactors are off and the motor contactor is on
+//         return false;
+//     }
+//     bool motorPrechargeContactorState =
+//         Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true);
+//     if (motorPrechargeContactorState && !motorContactorState) {
+//         // if the motor precharge contactor is on and the motor contactor is off
+//         return false;
+//     }
+//     return true;
+// }
 
 /**
  * @brief error handler function to display the evac screen if we get a BPS trip message.
@@ -115,7 +116,6 @@ static void setMotorControllerContactor(bool state, bool blocking) {
 /**
  * @brief turns on or off the motor contactor depending on igntion and HV Contactors
  */
-
 
 // static void updateMotorControllerContactor(void){
 //     ignition_state_t ignState = Get_Ignition_State();
@@ -169,8 +169,8 @@ void Task_ReadCarCAN(void *p_arg) {
 #endif
 
     while (1) {
-
         ErrorStatus status = CANbus_Read(&dataBuf, true, CARCAN);
+
 #ifdef TASK_PROFILER
         DebugIO_Toggle(READ_CARCAN_PIN);
 #endif
@@ -178,8 +178,8 @@ void Task_ReadCarCAN(void *p_arg) {
             continue;
         }
 
-        //updateMotorControllerContactor(); // Update motor contactor state based on ignition and HV
-                                          // contactors
+        // updateMotorControllerContactor(); // Update motor contactor state based on ignition and
+        // HV contactors
         switch (dataBuf.ID) {
             case BPS_TRIP: {
                 // BPS has a fault and we need to enter fault state
@@ -188,7 +188,6 @@ void Task_ReadCarCAN(void *p_arg) {
                     assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
                 }
                 break;
-
             }
             case BPS_CONTACTOR: {
 #ifdef BPS_CAN_WATCHDOG
@@ -239,53 +238,13 @@ void Task_ReadCarCAN(void *p_arg) {
             case VOLTAGE_SUMMARY: { // uint24_t
                 UpdateDisplay_SetBattVoltage((*((uint32_t *)dataBuf.data)) & ~0xFF000000);
                 break;
-
-
-      
-        case PRECHARGE_TIMEOUT:
-        {
-            if(dataBuf.data[0] & 0x01){
-                assertReadCarCANError(READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_MOTOR);
             }
-            else{
-                assertReadCarCANError(READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_ARR);
-            }
-            break;
-        }
-        case CONTACTOR_SENSE:
-        {
-            // counter to ensure motor precharge stays on for a few iterations
-            static volatile uint8_t motorPrechargeOnCount = 0;
-            #ifdef PRECHARGE_CAN_WATCHDOG
-            OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
-            assertOSError(err);
-            #endif
-
-            // More things involved with setting the motor controller contactor, so use this function instead
-            setMotorControllerContactor(MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
-
-            Status_Leds_Write(CONTROLS_FAULT, true);
-            // Update Array Precharge sense state
-            Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
-            // Update Motor Precharge sense state
-            Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
-
-            if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
-                motorPrechargeOnCount++;
-                if(motorPrechargeOnCount >= MOTOR_PRECHARGE_ON_COUNT_THRESHOLD) {
-                    // If the motor precharge contactor has been on for enough iterations, we can consider it safe to run
-                    OS_ERR err;
-                    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
-                    assertOSError(err);
+            case PRECHARGE_TIMEOUT: {
+                if (dataBuf.data[0] & 0x01) {
+                    assertReadCarCANError(C_ERR_RCC_PRECHARGE_TMOUT_MOT);
+                } else {
+                    assertReadCarCANError(C_ERR_RCC_PRECHARGE_TMOUT_ARR);
                 }
-
-            }
-            case TEMPERATURE_SUMMARY: { // uint24_t
-                UpdateDisplay_SetBattTemperature((*((int32_t *)dataBuf.data)) & ~0xFF000000);
-                break;
-            }
-            case CURRENT_DATA: { // int32_t
-                UpdateDisplay_SetBattCurrent((*(int32_t *)dataBuf.data));
                 break;
             }
             case CONTACTOR_SENSE: {
@@ -297,6 +256,11 @@ void Task_ReadCarCAN(void *p_arg) {
                 assertOSError(err);
 #endif
 
+                // More things involved with setting the motor controller contactor, so use this
+                // function instead
+                setMotorControllerContactor(MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
+
+                Status_Leds_Write(CONTROLS_FAULT, true);
                 // Update Array Precharge sense state
                 Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR,
                                ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
@@ -304,38 +268,25 @@ void Task_ReadCarCAN(void *p_arg) {
                 Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR,
                                MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
 
-                if (!Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) ||
-                    !Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
+                if (Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) &&
+                    Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
                     motorPrechargeOnCount++;
                     if (motorPrechargeOnCount >= MOTOR_PRECHARGE_ON_COUNT_THRESHOLD) {
-                        // If the motor precharge contactor has been on for enough iterations, we
-                        // can consider it safe to run
+                        // If the motor precharge contactor has been on for enough iterations,
+                        // we can consider it safe to run
                         OS_ERR err;
                         OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET,
                                    &err);
                         assertOSError(err);
                     }
-                } else {
-                    motorPrechargeOnCount =
-                        0; // Reset the counter if both motor contactors are not on
                 }
-
-                Status_Leds_Write(
-                    MOTOR_PRECHARGE_CONTACTOR_LED,
-                    Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true));
-                Status_Leds_Write(ARRAY_PRECHARGE_CONTACTOR_LED,
-                                  Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, true));
-
-                // check to see if motor controller contactor is in expected state
-                if (!check_MotorControllerContactor()) {
-                    assertReadCarCANError(C_ERR_RCC_ACTIVE_PRECHARGE_FLT);
-                }
-
-                // Contactor driver indicates a sense fault
-                if (MOTOR_SENSE_FAULT(dataBuf.data) || MOTOR_PRECHARGE_SENSE_FAULT(dataBuf.data) ||
-                    ARRAY_PRECHARGE_SENSE_FAULT(dataBuf.data)) {
-                    assertReadCarCANError(C_ERR_RCC_ACTIVE_PRECHARGE_FLT);
-                }
+            }
+            case TEMPERATURE_SUMMARY: { // uint24_t
+                UpdateDisplay_SetBattTemperature((*((int32_t *)dataBuf.data)) & ~0xFF000000);
+                break;
+            }
+            case CURRENT_DATA: { // int32_t
+                UpdateDisplay_SetBattCurrent((*(int32_t *)dataBuf.data));
                 break;
             }
 
@@ -350,9 +301,9 @@ void Task_ReadCarCAN(void *p_arg) {
 }
 
 /**
- * @brief error assertion function for ReadCarCAN, used to disable charging and handle BPS trip
- * messages Stores the error code and calls assertTaskError with the appropriate parameters and
- * callback handler
+ * @brief error assertion function for ReadCarCAN, used to disable charging and handle BPS
+ * trip messages Stores the error code and calls assertTaskError with the appropriate
+ * parameters and callback handler
  * @param  rcc_err error code to specify the issue encountered
  */
 void assertReadCarCANError(controls_error_e rcc_err) {
@@ -367,7 +318,8 @@ void assertReadCarCANError(controls_error_e rcc_err) {
         case C_ERR_RCC_BPS_MISSED_MSG:
         case C_ERR_RCC_PRECHARGE_MISSED_MSG:
         case C_ERR_RCC_ACTIVE_PRECHARGE_FLT:
-        // TODO: add the new active precharge tmout errors
+        case C_ERR_RCC_PRECHARGE_TMOUT_MOT:
+        case C_ERR_RCC_PRECHARGE_TMOUT_ARR:
             throwTaskError(rcc_err, true, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
@@ -376,7 +328,7 @@ void assertReadCarCANError(controls_error_e rcc_err) {
             break;
 
         default:
-			// Critical failure, we have a non readcarcan error in readcarcan somehow
+            // Critical failure, we have a non readcarcan error in readcarcan somehow
             throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
     }

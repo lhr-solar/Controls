@@ -94,6 +94,8 @@ typedef enum {
     C_ERR_RCC_PRECHARGE_MISSED_MSG, /* Didn't receive a precharge msg in time (watchdog trip) */
     C_ERR_RCC_BPS_TRIP,             /* Recieved a BPS trip msg */
     C_ERR_RCC_ACTIVE_PRECHARGE_FLT, /* Received active precharge fault */
+    C_ERR_RCC_PRECHARGE_TMOUT_MOT, 
+    C_ERR_RCC_PRECHARGE_TMOUT_ARR,
     // IO state Errors
     C_ERR_IOS_GENERIC,
     C_ERR_IOS_IGN_FAULT,
