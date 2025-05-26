@@ -286,6 +286,8 @@ void Task_ReadCarCAN(void *p_arg)
 
             // More things involved with setting the motor controller contactor, so use this function instead
             setMotorControllerContactor(MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
+
+            Status_Leds_Write(CONTROLS_FAULT, true);
             // Update Array Precharge sense state
             Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
             // Update Motor Precharge sense state
