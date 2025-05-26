@@ -201,6 +201,12 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     CANbus_Send_Faultstate(faultmsg, CARCAN);
     CANbus_Send_Faultstate(motormsg, CARCAN);
 
+    // set motor and array positions off
+    CANDATA_t iostatemsg = {0};
+    iostatemsg.ID = IO_STATE;
+    iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
+    iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
+
 
     if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
         while(1) {
@@ -209,6 +215,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
             Status_Leds_Toggle(DASH_HEARTBEAT_LED);
             CANbus_Send_Faultstate(faultmsg, CARCAN);
             CANbus_Send_Faultstate(motormsg, CARCAN);
+            CANbus_Send_Faultstate(iostatemsg, CARCAN);
         }
     }
     // only reaches here is fault is recoverable
