@@ -18,19 +18,20 @@
 
 #include "os.h"
 #include "common.h"
+#include "Tasks.h"
 
-// #include "Display.h"
 
-/**
- * Error types
- */
-typedef enum {
-	UPDATEDISPLAY_ERR_NONE,
-	// UPDATEDISPLAY_ERR_FIFO_PUT,     // Error putting command in fifo
-	// UPDATEDISPLAY_ERR_FIFO_POP,     // Error popping command from fifo
-	UPDATEDISPLAY_ERR_PARSE_COMP,   // Error parsing component/val in SetComponent
-	UPDATEDISPLAY_ERR_DRIVER        // Driver call returned an error
-} UpdateDisplayError_t;
+
+// /**
+//  * Error types
+//  */
+// typedef enum {
+// 	UPDATEDISPLAY_ERR_NONE,
+// 	// UPDATEDISPLAY_ERR_FIFO_PUT,     // Error putting command in fifo
+// 	// UPDATEDISPLAY_ERR_FIFO_POP,     // Error popping command from fifo
+// 	UPDATEDISPLAY_ERR_PARSE_COMP,   // Error parsing component/val in SetComponent
+// 	UPDATEDISPLAY_ERR_DRIVER        // Driver call returned an error
+// } controls_error_e;
 
 /**
  * For display elements with three states
@@ -53,77 +54,77 @@ typedef enum {
 
 /**
  * @brief Initializes UpdateDisplay application
- * @returns UpdateDisplayError_t
+ * @returns controls_error_e
  */
 
-UpdateDisplayError_t UpdateDisplay_Init();
+controls_error_e UpdateDisplay_Init();
 
 /**
  * @brief Sets the state of charge value on the display
  * @param percent charge as a percent (0 digits of precision)
- * @returns UpdateDisplayError_t
+ * @returns controls_error_e
  */
-UpdateDisplayError_t UpdateDisplay_SetSOC(uint32_t percent);
+controls_error_e UpdateDisplay_SetSOC(uint32_t percent);
 
 /**
  * @brief Sets the supplemental battery pack voltage value on the display
  * @param mv supplemental battery pack voltage in millivolts
- * @returns UpdateDisplayError_t
+ * @returns controls_error_e
  */
-UpdateDisplayError_t UpdateDisplay_SetSBPV(uint32_t mv);
+controls_error_e UpdateDisplay_SetSBPV(uint32_t mv);
 
 /**
  * @brief Sets the velocity of the vehicle on the display
  * @param mphTenths velocity of the vehicle in tenths of mph (1 digit of precision)
- * @returns UpdateDisplayError_t
+ * @returns controls_error_e
  */
-UpdateDisplayError_t UpdateDisplay_SetVelocity(uint32_t mphTenths);
+controls_error_e UpdateDisplay_SetVelocity(uint32_t mphTenths);
 
 /**
  * @brief Sets the accelerator slider value on the display
  * @param percent pressure on accelerator in percent
- * @returns UpdateDisplayError_t
+ * @returns controls_error_e
  */
-UpdateDisplayError_t UpdateDisplay_SetAccel(uint8_t percent);
+controls_error_e UpdateDisplay_SetAccel(uint8_t percent);
 
 /**
  * @brief Sets the gear selection state on the display
  * @param gear DISABLED=N, ENABLED=F, ACTIVE=R
- * @returns UpdateDisplayError_t
+ * @returns controls_error_e
  */
-UpdateDisplayError_t UpdateDisplay_SetGear(TriState_t gear);
+controls_error_e UpdateDisplay_SetGear(TriState_t gear);
 
 /**
  * @brief Sets the regenerative braking indicator state on the display
  * @param state DISABLED, ENABLED, or ACTIVE
- * @returns UpdateDisplayError_t
+ * @returns controls_error_e
  */
-UpdateDisplayError_t UpdateDisplay_SetRegenState(TriState_t state);
+controls_error_e UpdateDisplay_SetRegenState(TriState_t state);
 
 /**
  * @brief Sets the cruise control indicator state on the display
  * @param state DISABLED, ENABLED, or ACTIVE
- * @returns UpdateDisplayError_t
+ * @returns controls_error_e
  */
-UpdateDisplayError_t UpdateDisplay_SetCruiseState(TriState_t state);
+controls_error_e UpdateDisplay_SetCruiseState(TriState_t state);
 
-UpdateDisplayError_t UpdateDisplay_SetBattVoltage(uint32_t val);
+controls_error_e UpdateDisplay_SetBattVoltage(uint32_t val);
 
-UpdateDisplayError_t UpdateDisplay_SetBattTemperature(uint32_t val);
+controls_error_e UpdateDisplay_SetBattTemperature(uint32_t val);
 
-UpdateDisplayError_t UpdateDisplay_SetBattCurrent(int32_t val);
+controls_error_e UpdateDisplay_SetBattCurrent(int32_t val);
 
-UpdateDisplayError_t UpdateDisplay_SetHeartbeat(bool val);
+controls_error_e UpdateDisplay_SetHeartbeat(bool val);
 
-UpdateDisplayError_t UpdateDisplay_SetHeatSinkTemp(uint32_t val);
+controls_error_e UpdateDisplay_SetHeatSinkTemp(uint32_t val);
 
-UpdateDisplayError_t UpdateDisplay_SetMCVoltage(uint32_t volts);
+controls_error_e UpdateDisplay_SetMCVoltage(uint32_t volts);
 
-UpdateDisplayError_t UpdateDisplay_SetMCCurrent(int32_t val);
+controls_error_e UpdateDisplay_SetMCCurrent(int32_t val);
 
-UpdateDisplayError_t UpdateDisplay_SetBrake(bool state);
+controls_error_e UpdateDisplay_SetBrake(bool state);
 
-UpdateDisplayError_t UpdateDisplay_SetBlink(bool state);
+controls_error_e UpdateDisplay_SetBlink(bool state);
 
 
 /**
@@ -133,7 +134,7 @@ UpdateDisplayError_t UpdateDisplay_SetBlink(bool state);
 */
 void UpdateDisplay_ClearQueue(void);
 
-void assertUpdateDisplayError(UpdateDisplayError_t err);
+void assertUpdateDisplayError(controls_error_e err);
 
 #endif
 /* @} */

@@ -1,7 +1,9 @@
 #ifndef __IOSTATE_H
 #define __IOSTATE_H
 
-#include "CANbus.h"
+#include "common.h"
+#include "os.h"
+#include "Tasks.h"
 
 // Macros for the SWITCH_BITMAP signal in the IO_STATE CAN message
 #define SWITCH_BITMAP_BRAKELIGHT(value)       ((value & 0x01) << 7) // Bit 7: BRAKELIGHT
@@ -16,11 +18,11 @@
 #define CANBUS_MOTOR_SAFE_TO_RUN 1
 #define CANBUS_MOTOR_NOT_SAFE_TO_RUN !CANBUS_MOTOR_SAFE_TO_RUN
 
-typedef enum {
-    IOSTATE_ERR_NONE  = 0x0000,         // No error
-    IOSTATE_ERROR = 0xFFFF,             // More than one state is high at a time
-} IOState_error_code_t;
+// typedef enum {
+//     IOSTATE_ERR_NONE  = 0x0000,         // No error
+//     IOSTATE_ERROR = 0xFFFF,             // More than one state is high at a time
+// } IOState_error_code_t;
 
-void assertIOStateError(IOState_error_code_t io_err);
+void assertIOStateError(controls_error_e io_err);
 
 #endif
