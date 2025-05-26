@@ -211,18 +211,29 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
 
     CANDATA_t motormsg = {0};
     motormsg.ID = MOTOR_CONTROLLER_SAFE;
+
     motormsg.data[0] = 0;
+    motormsg.data[0] |= 0x2; // Bit 1 of motor message 
 
     CANbus_Send_Faultstate(faultmsg, CARCAN);
     CANbus_Send_Faultstate(motormsg, CARCAN);
 
-    if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
-        while (1) {
+    // set motor and array positions off
+    CANDATA_t iostatemsg = {0};
+    iostatemsg.ID = IO_STATE;
+    iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
+    iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
+
+
+    if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
+        while(1) {
+
             delay_ms(500);
             Status_Leds_Toggle(CONTROLS_FAULT_LED);
             Status_Leds_Toggle(DASH_HEARTBEAT_LED);
             CANbus_Send_Faultstate(faultmsg, CARCAN);
             CANbus_Send_Faultstate(motormsg, CARCAN);
+            CANbus_Send_Faultstate(iostatemsg, CARCAN);
         }
     }
 

@@ -17,6 +17,7 @@
 
 #define BPS_TRIP_MESSAGE 1
 
+
 // /**
 //  * Error types
 //  */
@@ -33,6 +34,7 @@
 
 
 void assertReadCarCANError(controls_error_e rcc_err);
+
 
 #endif
 

@@ -18,7 +18,7 @@
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
 
-#define BPS_CAN_WATCHDOG
+// #define BPS_CAN_WATCHDOG
 // #define PRECHARGE_CAN_WATCHDOG
 
 #define MOTOR_PRECHARGE_ON_COUNT_THRESHOLD 5
@@ -110,39 +110,30 @@ static void setMotorControllerContactor(bool state, bool blocking) {
         OS_ERR err;
         OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
     }
-
-    if (state) {
-        Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, ON, true);
-    } else {
-        OS_ERR err;
-        Contactors_Set(MOTOR_CONTROLLER_CONTACTOR, OFF, true);
-        OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
-    }
 }
 
 /**
  * @brief turns on or off the motor contactor depending on igntion and HV Contactors
  */
 
-static void updateMotorControllerContactor(void) {
-    ignition_state_t ignState = Get_Ignition_State();
-    bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
-    if (ignState == IGN_ERROR || ignState == IGN_TRANSITION) {
-        return;
-    }
-    if (ignState == IGN_MOTOR || ignState == IGN_ARR) {
-        if (Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)) {
-            // turn on motor contactor if it was off before
-            if (motorContactorState == OFF) {
-                setMotorControllerContactor(ON, true);
-                return;
-            }
-        }
-    }
-    if (Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) == ON) {
-        setMotorControllerContactor(OFF, true); // turn off motor contactor if it was on before
-    }
-}
+
+// static void updateMotorControllerContactor(void){
+//     ignition_state_t ignState = Get_Ignition_State();
+//     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
+//     if (ignState == IGN_ERROR || ignState == IGN_TRANSITION) {return;}
+//     if(ignState == IGN_MOTOR || ignState == IGN_ARR){
+//         if(Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)){
+//             // turn on motor contactor if it was off before
+//             if(motorContactorState == OFF){
+//                 setMotorControllerContactor(ON, true);
+//                 return;
+//             }
+//         }
+//   }
+//   if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) == ON){
+//     setMotorControllerContactor(OFF, true); // turn off motor contactor if it was on before
+//   }
+// }
 
 void Task_ReadCarCAN(void *p_arg) {
     OS_ERR err;
@@ -186,7 +177,8 @@ void Task_ReadCarCAN(void *p_arg) {
         if (status != SUCCESS) {
             continue;
         }
-        updateMotorControllerContactor(); // Update motor contactor state based on ignition and HV
+
+        //updateMotorControllerContactor(); // Update motor contactor state based on ignition and HV
                                           // contactors
         switch (dataBuf.ID) {
             case BPS_TRIP: {
@@ -196,6 +188,7 @@ void Task_ReadCarCAN(void *p_arg) {
                     assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
                 }
                 break;
+
             }
             case BPS_CONTACTOR: {
 #ifdef BPS_CAN_WATCHDOG
@@ -246,6 +239,46 @@ void Task_ReadCarCAN(void *p_arg) {
             case VOLTAGE_SUMMARY: { // uint24_t
                 UpdateDisplay_SetBattVoltage((*((uint32_t *)dataBuf.data)) & ~0xFF000000);
                 break;
+
+
+      
+        case PRECHARGE_TIMEOUT:
+        {
+            if(dataBuf.data[0] & 0x01){
+                assertReadCarCANError(READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_MOTOR);
+            }
+            else{
+                assertReadCarCANError(READCARCAN_ERR_ACTIVEPRECHARGE_TMOUT_ARR);
+            }
+            break;
+        }
+        case CONTACTOR_SENSE:
+        {
+            // counter to ensure motor precharge stays on for a few iterations
+            static volatile uint8_t motorPrechargeOnCount = 0;
+            #ifdef PRECHARGE_CAN_WATCHDOG
+            OSTmrStart(&prechargeCanWatchTimer, &err); // Restart CAN Watchdog timer for Active Precharge Contactor msg
+            assertOSError(err);
+            #endif
+
+            // More things involved with setting the motor controller contactor, so use this function instead
+            setMotorControllerContactor(MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
+
+            Status_Leds_Write(CONTROLS_FAULT, true);
+            // Update Array Precharge sense state
+            Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR, ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
+            // Update Motor Precharge sense state
+            Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
+
+            if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
+                motorPrechargeOnCount++;
+                if(motorPrechargeOnCount >= MOTOR_PRECHARGE_ON_COUNT_THRESHOLD) {
+                    // If the motor precharge contactor has been on for enough iterations, we can consider it safe to run
+                    OS_ERR err;
+                    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
+                    assertOSError(err);
+                }
+
             }
             case TEMPERATURE_SUMMARY: { // uint24_t
                 UpdateDisplay_SetBattTemperature((*((int32_t *)dataBuf.data)) & ~0xFF000000);
@@ -334,6 +367,7 @@ void assertReadCarCANError(controls_error_e rcc_err) {
         case C_ERR_RCC_BPS_MISSED_MSG:
         case C_ERR_RCC_PRECHARGE_MISSED_MSG:
         case C_ERR_RCC_ACTIVE_PRECHARGE_FLT:
+        // TODO: add the new active precharge tmout errors
             throwTaskError(rcc_err, true, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
