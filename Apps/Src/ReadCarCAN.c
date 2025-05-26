@@ -352,7 +352,6 @@ void assertReadCarCANError(ReadCarCAN_error_code_t rcc_err)
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);
             throwTaskError(Error_ReadCarCAN, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
-
         case READCARCAN_ERR_BPS_TRIP:
             set_errmsg_hex("BPS_TRIP", ErrMsg_ReadCarCAN, rcc_err);    // Store error message for inspection
             strncpy(ErrMsg_Evac, DISP_EVACMSG_REQ, ERR_CODE_LEN);

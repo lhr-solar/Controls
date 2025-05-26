@@ -206,7 +206,7 @@ void assertTritiumError(tritium_error_code_t motor_err)
 	}
 
 	// Threshold hasn't been exceeded, so assert a recoverable error with the motor restart callback function
-	throwTaskError(Error_ReadTritium, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV);
+	throwTaskError(Error_ReadTritium, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV);
 
 	Error_ReadTritium = T_NONE; // Clear the error after handling it
 }

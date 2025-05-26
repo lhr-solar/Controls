@@ -194,7 +194,9 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
 
     CANDATA_t motormsg = {0};
     motormsg.ID = MOTOR_CONTROLLER_SAFE;
+
     motormsg.data[0] = 0;
+    motormsg.data[0] |= 0x2; // Bit 1 of motor message 
 
     CANbus_Send_Faultstate(faultmsg, CARCAN);
     CANbus_Send_Faultstate(motormsg, CARCAN);
