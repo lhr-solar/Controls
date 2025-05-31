@@ -27,6 +27,7 @@
 
 #include "ReadTritium.h"
 #include "SendTritium.h"
+#include "SendCarCAN.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 
@@ -213,7 +214,7 @@ void Task_SendTritium(void *p_arg) {
                                                          PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
                     break;
                 default:
-                    assertSendTritiumError(SENDTRITIUM_ERR_GEAR_FAULT);
+                    assertSendTritiumError(C_ERR_STR_GEAR_FAULT);
                     break;
             }
         }
