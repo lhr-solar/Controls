@@ -71,6 +71,10 @@ def rec():
     largest_io_state_delta = 0
     smallest_io_state_delta = 1000000
 
+    last_motor_safe_time = int(time.time() * 1000)  # ms
+    largest_motor_safe_delta = 0
+    smallest_motor_safe_delta = 1000000
+
     while True:
 
         # Read data if available
@@ -94,6 +98,7 @@ def rec():
                         
                         # Check if it's IO_STATE message (0x581)
                         if msg_id == '581':
+                            print("====================================")
                             parsed_data = parse_io_state(data_hex)
                             print(parsed_data)
                             now = int(time.time() * 1000)  # ms
@@ -105,6 +110,18 @@ def rec():
                             print(f"IO State Jitter: {largest_io_state_delta - smallest_io_state_delta} ms")
                             print(f"Time since last IO_STATE: {delta} ms")
                             last_io_state_time = now
+                        # Check if it's MOTOR_SAFE message (0x584)
+                        if msg_id == '584':
+                            print("====================================")
+                            motor_safe_now = int(time.time() * 1000)  # ms
+                            motor_safe_delta = motor_safe_now - last_motor_safe_time
+                            if(motor_safe_delta > largest_motor_safe_delta):
+                                largest_motor_safe_delta = motor_safe_delta
+                            if(delta < smallest_motor_safe_delta):
+                                smallest_motor_safe_delta = motor_safe_delta
+                            print(f"Motor Safe Jitter: {largest_motor_safe_delta - smallest_motor_safe_delta} ms")
+                            print(f"Time since last Motor Safe: {motor_safe_delta} ms")
+                            last_motor_safe_time = motor_safe_now
                         elif print_other_can_msgs:
                             # For other messages, just print ID and data
                             print(f"CAN ID: 0x{msg_id}, Data: {data_hex}")
