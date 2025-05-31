@@ -219,7 +219,7 @@ void Task_SendTritium(void *p_arg) {
         }
 
         // Motor is not safe to run so velocitySetpoint and currentSetpoint are set to 0
-        else{
+        else {
             velocitySetpoint = 0;
             currentSetpoint = 0.0f;
         }

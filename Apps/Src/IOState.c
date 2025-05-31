@@ -87,8 +87,7 @@ void putIOState(void) {
     message.ID = MOTOR_CONTROLLER_SAFE;
     OS_ERR err;
     OSFlagPend(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, 0,
-               OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, NULL, &err);
-    message.data[0] = s;
+               OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING | OS_OPT_POST_NO_SCHED, NULL, &err);
     switch (err) {
         case OS_ERR_NONE:
             s |= CANBUS_MOTOR_SAFE_TO_RUN;
@@ -100,6 +99,7 @@ void putIOState(void) {
             s |= CANBUS_MOTOR_NOT_SAFE_TO_RUN;
             break;
     }
+    message.data[0] = s;
     CANbus_Send(message, true, CARCAN);
 }
 
