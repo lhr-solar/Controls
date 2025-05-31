@@ -16,7 +16,7 @@
 #define SWITCH_BITMAP_IGN_1_ARRAY(value)      ((value & 0x01) << 0) // Bit 0: IGN_1_Array
 
 #define CANBUS_MOTOR_SAFE_TO_RUN 1
-#define CANBUS_MOTOR_NOT_SAFE_TO_RUN !CANBUS_MOTOR_SAFE_TO_RUN
+#define CANBUS_MOTOR_NOT_SAFE_TO_RUN (!CANBUS_MOTOR_SAFE_TO_RUN)
 
 // typedef enum {
 //     IOSTATE_ERR_NONE  = 0x0000,         // No error
