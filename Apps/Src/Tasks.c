@@ -62,40 +62,53 @@ CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 
 #define FAULT_MSG_DELAY            1000000
 
+/**
+ * String array holding all the error message string for all application errors in the
+ * controls code.
+ *
+ * If the `controls_error_e` enum is changed, this array should also be
+ * modified accordingly. When the respective controls error is asserted, the corresponding
+ * string will be displayed on the fault page, with the exception of the `C_ERR_RTR_MULTIPLE`
+ * because in that case we want to see the bitmap.
+ */
 const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
-    [C_ERR_NONE] = "\"N/A\"",
+    // Generic errors are placeholder errors for debugging purposes and should eventually
+    // become individual errors themselves
+
+    [C_ERR_NONE]                     = "\"N/A\"", /* No error :) */
     // Read Tritium Errors
-    [C_ERR_RTR_GENERIC] = "\"RTR_GENERIC\"",
-    [C_ERR_RTR_HARDWARE_OC] = "\"MOT_HW_OC\"",
-    [C_ERR_RTR_SOFTWARE_OC] = "\"MOT_SW_OC\"",
-    [C_ERR_RTR_DC_BUS_OV] = "\"MOT_DC_BUS_OV\"",
-    [C_ERR_RTR_HALL_SENSOR] = "\"MOT_HALLSENSR\"",
-    [C_ERR_RTR_WDOG_LAST_RESET] = "\"\"",
-    [C_ERR_RTR_CONFIG_READ] = "",
-    [C_ERR_RTR_UNDERVOLT_LOCKOUT] = "",
-    [C_ERR_RTR_DESAT_FAULT] = "",
-    [C_ERR_RTR_MOTOR_OVERSPEED] = "",
-    [C_ERR_RTR_INIT_FAIL] = "",
-    [C_ERR_RTR_MOTOR_WDOG_TRIP] = "",
+    [C_ERR_RTR_GENERIC]              = "\"RTR_GENERIC\"", /* Generic placeholder error */
+    [C_ERR_RTR_HARDWARE_OC]          = "\"MOT_HW_OC\"",
+    [C_ERR_RTR_SOFTWARE_OC]          = "\"MOT_SW_OC\"",
+    [C_ERR_RTR_DC_BUS_OV]            = "\"MOT_DC_BUS_OV\"",
+    [C_ERR_RTR_HALL_SENSOR]          = "\"MOT_HALLSENSR\"",
+    [C_ERR_RTR_WDOG_LAST_RESET]      = "\"MOT_DOG_LRESET\"",
+    [C_ERR_RTR_CONFIG_READ]          = "\"MOT_CONFIG_RD\"",
+    [C_ERR_RTR_UNDERVOLT_LOCKOUT]    = "\"MOT_UNDERV_LCK\"",
+    [C_ERR_RTR_DESAT_FAULT]          = "\"MOT_DESAT_FLT\"",
+    [C_ERR_RTR_MOTOR_OVERSPEED]      = "\"MOT_OVERSPEED\"",
+    [C_ERR_RTR_INIT_FAIL]            = "\"RTR_INIT_FAIL\"", /* TODO: WHAT IS THIS?? */
+    [C_ERR_RTR_MOTOR_WDOG_TRIP]      = "\"RTR_WDOG_TRIP\"",
+    [C_ERR_RTR_MULTIPLE]             = "\"RTR_MULTI_ERR\"", /* Should never actually display this */
     // Send Tritium Errors
-    [C_ERR_STR_GENERIC] = "",
-    [C_ERR_STR_GEAR_FAULT] = "", /* Received multiple or no gear inputs */
+    [C_ERR_STR_GENERIC]              = "\"STR_GENERIC\"",  /* Generic placeholder error */
+    [C_ERR_STR_GEAR_FAULT]           = "\"STR_GEAR_FLT\"", /* Received multiple or no gear inputs */
     // Read Car CAN Errors
-    [C_ERR_RCC_GENERIC] = "",
-    [C_ERR_RCC_BPS_MISSED_MSG] = "",       /* Didn't receive a BPS msg in time (watchdog trip) */
-    [C_ERR_RCC_PRECHARGE_MISSED_MSG] = "\"PRECHRG_MISS\"", /* Didn't receive a precharge msg in time */
-    [C_ERR_RCC_BPS_TRIP] = "\"PRECHRG_MISS\"",             /* Recieved a BPS trip msg */
-    [C_ERR_RCC_ACTIVE_PRECHARGE_FLT] = "", /* Received active precharge fault */
+    [C_ERR_RCC_GENERIC]              = "\"RCC_GENERIC\"", /* Generic placeholder error */
+    [C_ERR_RCC_BPS_MISSED_MSG]       = "\"BPS_MISS\"",    /* Didn't receive a BPS msg in time */
+    [C_ERR_RCC_PRECHARGE_MISSED_MSG] = "\"PRECHG_MISS\"", /* Didn't receive prechrg msg in time */
+    [C_ERR_RCC_BPS_TRIP]             = "\"BPS_TRIP\"",    /* Recieved a BPS trip msg */
+    [C_ERR_RCC_ACTIVE_PRECHARGE_FLT] = "\"ACT_PRECHG_FLT\"", /* Received active precharge fault */
     // IO state Errors
-    [C_ERR_IOS_GENERIC] = "",
-    [C_ERR_IOS_IGN_FAULT] = "",
+    [C_ERR_IOS_GENERIC]              = "\"IOS_GENERIC\"", /* Generic placeholder error */
+    [C_ERR_IOS_IGN_FAULT]            = "\"IOS_IGN_FLT\"", /* Ignition unstable for too long */
     // Update display errors
-    [C_ERR_UPD_GENERIC] = "",
-    [C_ERR_UPD_PARSE_COMPONENT] = "",
-    [C_ERR_UPD_DRIVER] = "",
+    [C_ERR_UPD_GENERIC]              = "\"UPD_GENERIC\"",    /* Generic placeholder error */
+    [C_ERR_UPD_PARSE_COMPONENT]      = "\"UPD_PARSE_COMP\"", /* Error in parsing a componenet */
+    [C_ERR_UPD_DRIVER]               = "\"UPD_DRIVER_ERR\"", /* Error propogating from driver */
     // Special
-    [C_ERR_GENERIC] = "\"ERROR :(\"",
-    [C_ERR_ILLEGAL_ERROR] = "\"ILLEGAL_ERR\"", /* An error was thrown that doesn't belong */
+    [C_ERR_GENERIC]                  = "\"GENERIC_ERROR\"", /* Generic placeholder error */
+    [C_ERR_ILLEGAL_ERROR]            = "\"ILLEGAL_ERR\"",   /* Error thrown in illegal context */
 };
 
 // Synchronization-protected event flag group signaling BPS_SAFE, if BPS
@@ -111,20 +124,27 @@ OS_FLAG_GRP BPS_Motor_Status_Flags;
 static uint8_t get_fault_bits(controls_error_e app_err, OS_ERR os_err) {
     uint8_t msg = 0;
 
-    if (app_err >= C_ERR_UPD_GENERIC)
-        msg |= DISPLAY_FAULT_BIT;
-    else if (app_err >= C_ERR_RCC_GENERIC)
-        msg |= READCARCAN_FAULT_BIT; // Includes iostate for now
-    else if (app_err >= C_ERR_RTR_GENERIC)
-        msg |= MOTOR_CONTROLLER_FAULT_BIT; // Includes read and send tritium for now
+    if (app_err != C_ERR_NONE) {
+        msg |= ANY_CONTROLS_FAULT_BIT;
 
-    if (app_err == C_ERR_RCC_BPS_TRIP) msg |= BPS_FAULT_BIT;
+        if (app_err == C_ERR_RCC_BPS_TRIP) msg |= BPS_FAULT_BIT;
 
-    if (os_err != OS_ERR_NONE) msg |= OS_FAULT_BIT;
+        if (app_err < C_ERR_RCC_GENERIC) //  Incl read and send tritium
+            msg |= MOTOR_CONTROLLER_FAULT_BIT;
+        else if (app_err < C_ERR_UPD_GENERIC) // Incl rcc and iostate
+            msg |= READCARCAN_FAULT_BIT;
+        else if (app_err < C_ERR_GENERIC)
+            msg |= DISPLAY_FAULT_BIT;
+        // Generic controls errors do not affect the bits other than
+        // the general cotnrols fault bit
+    }
 
-    if (msg != 0) msg |= ANY_CONTROLS_FAULT_BIT;
+    if (os_err != OS_ERR_NONE) {
+        msg |= ANY_CONTROLS_FAULT_BIT;
+        msg |= OS_FAULT_BIT;
+    }
 
-    // msg |= LAKSHAY_FAULT_BIT; // TODO: remove this when Lakshay's code is removed
+    msg |= LAKSHAY_FAULT_BIT; // TODO: remove this when Lakshay's code is removed
 
     return msg;
 }
@@ -175,6 +195,7 @@ void _assertOSError(OS_ERR err) {
  */
 void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t error_callback,
                     error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery) {
+
     if (error_code == C_ERR_NONE) return;
 
     OS_ERR err;
@@ -196,7 +217,14 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
         MotorContactor_EmergencyDisable();
         // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
-        Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+        if (error_code == C_ERR_RTR_MULTIPLE) {
+            char err_msg_multiple[ERRMSG_MAX_LEN] = {0};
+            snprintf(err_msg_multiple, ERRMSG_MAX_LEN, "\"RTR_ERR_%04X\"",
+                     Motor_Error_Get() & 0xFFFF);
+            Display_Error(err_msg_multiple, ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+        } else {
+            Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+        }
     }
 
     // Run a handler for this error if specified
@@ -206,14 +234,14 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
 
     // Send Controls fault message over Car CAN
     CANDATA_t faultmsg = {0};
-    faultmsg.ID = CONTROLS_FAULT_MSG;
-    faultmsg.data[0] = get_fault_bits(error_code, OS_ERR_NONE);
+    faultmsg.ID        = CONTROLS_FAULT_MSG;
+    faultmsg.data[0]   = get_fault_bits(error_code, OS_ERR_NONE);
 
     CANDATA_t motormsg = {0};
-    motormsg.ID = MOTOR_CONTROLLER_SAFE;
+    motormsg.ID        = MOTOR_CONTROLLER_SAFE;
 
-    motormsg.data[0] = 0;
-    motormsg.data[0] |= 0x2; // Bit 1 of motor message 
+    motormsg.data[0]   = 0;
+    motormsg.data[0] |= 0x2; // Bit 1 of motor message
 
     CANbus_Send_Faultstate(faultmsg, CARCAN);
     CANbus_Send_Faultstate(motormsg, CARCAN);
@@ -224,9 +252,8 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
 
-
     if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
-        while(1) {
+        while (1) {
 
             delay_ms(500);
             Status_Leds_Toggle(CONTROLS_FAULT_LED);

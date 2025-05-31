@@ -99,8 +99,8 @@ static void handler_ReadCarCAN_BPSTrip(void) {
     MotorContactor_EmergencyDisable();
     Status_Leds_Write(BPS_FAULT_LED, ON);    // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
-    // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR,
-    // &err); assertOSError(err);
+    // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err); 
+    // assertOSError(err);
 }
 
 static void setMotorControllerContactor(bool state, bool blocking) {
@@ -139,7 +139,7 @@ void Task_ReadCarCAN(void *p_arg) {
     OS_ERR err;
 
     // data struct for CAN message
-    CANDATA_t dataBuf;
+    CANDATA_t dataBuf = {0};
 
     // Create the CAN Watchdog (periodic) timer, which disconnects the array and disables
     // regenerative braking if we do not get a CAN message with the ID BPS_CONTACTOR within the

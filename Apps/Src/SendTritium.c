@@ -34,14 +34,13 @@
 // Inputs
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
-static gear_t gear = DASH_NEU;
-static bool isBrakeOn = false; // Used for updating display & brakelight
+static gear_t  gear              = DASH_NEU;
+static bool    isBrakeOn         = false; // Used for updating display & brakelight
 
 // Outputs
-static float currentSetpoint = 0.0f;
-static float velocitySetpoint = 0.0f;
-static float busCurrentSetPoint =
-    CONT_MOCO_BATTERY_CURRENT / MAX_MOCO_CURRENT; // why float and not int?
+static float currentSetpoint     = 0.0f;
+static float velocitySetpoint    = 0.0f;
+static float busCurrentSetPoint  = CONT_MOCO_BATTERY_CURRENT / MAX_MOCO_CURRENT;
 
 // NOTE: Instead of a "velocityObserved" variable, we can just use Motor_Velocity_Get() from
 // ReadTritium when doing cruise logic
@@ -130,24 +129,25 @@ static void readInputs() {
  */
 float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_min,
                    uint8_t out_max) {
+    // The minimum of the input range should never be greater than the maximum of the input range
     if (in_min >= in_max) {
-        in_max = in_min; // The minimum of the input range should never be greater than the maximum
-                         // of the input range
+        in_max = in_min;
     }
+
+    // Lower bound the input to the minimum possible output
     if (input <= in_min) {
-        // Lower bound the input to the minimum possible output
         return out_min / 100.0;
     } else if (input >= in_max) {
         // Upper bound the input to the maximum output
         return out_max / 100.0;
     } else {
         // Linear mapping between ranges
-        uint8_t offset_in = input - in_min; // If input went from A -> B, it now goes from 0 -> B-A
-        uint8_t in_range = in_max - in_min; // Input range
-        uint8_t out_range = out_max - out_min; // Output range
+        uint8_t offset_in  = input - in_min; // If input went from A -> B, it now goes from 0 -> B-A
+        uint8_t in_range   = in_max - in_min;   // Input range
+        uint8_t out_range  = out_max - out_min; // Output range
         uint8_t offset_out = out_min;
-        return ((offset_in * out_range) / in_range + offset_out) /
-               100.0; // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
+        // slope = out_range/in_range. y=mx+b so output=slope*offset_in+offset_out
+        return ((offset_in * out_range) / in_range + offset_out) / 100.0;
     }
 }
 
@@ -162,13 +162,13 @@ void Task_SendTritium(void *p_arg) {
 
     // CAN Commands
     CANDATA_t driveCmd = {
-        .ID = MOTOR_DRIVE,
-        .idx = 0,
+        .ID   = MOTOR_DRIVE,
+        .idx  = 0,
         .data = {0.0f, 0.0f},
     };
     CANDATA_t powerCmd = {
-        .ID = MOTOR_POWER,
-        .idx = 0,
+        .ID   = MOTOR_POWER,
+        .idx  = 0,
         .data = {0.0f, 0.0f},
     };
 
@@ -177,8 +177,7 @@ void Task_SendTritium(void *p_arg) {
 
         updateDisplayState();
 
-        // Check that motor is ready to run
-        // non-blocking
+        // Check that motor is ready to run (non-blocking)
         OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0,
                    OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
         // if you return OS_ERR_PEND_WOULD_BLOCK, one of the bits are not sent, and would've blocked
@@ -197,21 +196,21 @@ void Task_SendTritium(void *p_arg) {
             switch (gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn
-                                          ? 0
-                                          : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD,
-                                                         PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                    currentSetpoint  = isBrakeOn
+                                           ? 0
+                                           : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD,
+                                                          PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
                     break;
                 case DASH_NEU:
                     velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = 0.0f;
+                    currentSetpoint  = 0.0f;
                     break;
                 case DASH_REV:
                     velocitySetpoint = -MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn
-                                          ? 0
-                                          : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD,
-                                                         PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                    currentSetpoint  = isBrakeOn
+                                           ? 0
+                                           : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD,
+                                                          PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
                     break;
                 default:
                     assertSendTritiumError(C_ERR_STR_GEAR_FAULT);

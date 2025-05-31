@@ -25,7 +25,6 @@
 #define IS_OP_CMD(cmd)               (cmd.op == NULL && cmd.attr == NULL)
 
 // String literals (used to initialize error messages as well as the const strings)
-// #define DISP_NA_STR_LITERAL          "\"N/A\""
 #define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
 #define DISP_EVAC_REQ_STR_LITERAL    "\"REQUIRED!!!\""
 

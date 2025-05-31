@@ -15,19 +15,20 @@
 #include "UpdateDisplay.h"
 
 // status limit flag masks
-#define MASK_MOTOR_TEMP_LIMIT (1 << 6) // check if motor temperature is limiting the motor
-#define MAX_CAN_LEN           8
-#define RESTART_THRESHOLD     3 // Number of times to restart before asserting a nonrecoverable error
-#define MOTOR_TIMEOUT_SECS    1 // Timeout for several missed motor messages
-#define MOTOR_TIMEOUT_TICKS   (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
+// #define MASK_MOTOR_TEMP_LIMIT (1 << 6) // check if motor temperature is limiting the motor
+// #define MAX_CAN_LEN           8
 
-uint16_t Motor_FaultBitmap = 0x0000;
-static float Motor_RPM = 0;
-static float Motor_Velocity = 0;
-static float Motor_BusVoltage = 0;
-static float Motor_BusCurrent = 0;
+#define RESTART_THRESHOLD   3 // Number of times to restart before asserting a nonrecoverable error
+#define MOTOR_TIMEOUT_SECS  1 // Timeout for several missed motor messages
+#define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
+#define MOTOR_ERROR_MASK    0x01FF
 
-CANDATA_t motorstatusmsg = {0};
+
+uint16_t     Motor_FaultBitmap = 0x0000;
+float 		 Motor_RPM         = 0;
+static float Motor_Velocity    = 0;
+static float Motor_BusVoltage  = 0;
+static float Motor_BusCurrent  = 0;
 
 static OS_TMR MotorWatchdog;
 
@@ -55,15 +56,13 @@ static controls_error_e convert_motorfault_to_error(void) {
     if (Motor_FaultBitmap & (1 << 6)) return C_ERR_RTR_UNDERVOLT_LOCKOUT;
     if (Motor_FaultBitmap & (1 << 7)) return C_ERR_RTR_DESAT_FAULT;
     if (Motor_FaultBitmap & (1 << 8)) return C_ERR_RTR_MOTOR_OVERSPEED;
-    if (Motor_FaultBitmap & (1 << 9)) return C_ERR_RTR_INIT_FAIL;
-    if (Motor_FaultBitmap & (1 << 15)) return C_ERR_RTR_MOTOR_WDOG_TRIP;
 
     return C_ERR_RTR_UNKNOWN_ERROR; // Current error matches no known error
 }
 
 void Task_ReadTritium(void *p_arg) {
-    OS_ERR err;
-    CANDATA_t dataBuf = {0};
+    OS_ERR    err;
+    CANDATA_t dataBuf           = {0};
 
     static bool watchdogCreated = false;
 
@@ -72,8 +71,8 @@ void Task_ReadTritium(void *p_arg) {
         // An error in the can read but not an os error, signifies that the recv queue is empty
 
         if (status == SUCCESS) {
-            if (!watchdogCreated) { // Timer doesn't seem to trigger without initial delay? Might be
-                                    // an RTOS bug
+            // Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
+            if (!watchdogCreated) {
                 OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS,
                             MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
                 assertOSError(err);
@@ -95,9 +94,7 @@ void Task_ReadTritium(void *p_arg) {
                 }
                 case MOTOR_STATUS: {
                     // motor status error flags is in bytes 4-5
-                    Motor_FaultBitmap = (*((uint16_t *)(&dataBuf.data[4])) &
-                                         0x1FE); // Storing error flags into Motor_FaultBitmap
-                    motorstatusmsg = dataBuf;
+                    Motor_FaultBitmap = (*((uint16_t *)(&dataBuf.data[4])) & MOTOR_ERROR_MASK);
 
                     assertTritiumError(convert_motorfault_to_error());
                     break;
@@ -110,13 +107,13 @@ void Task_ReadTritium(void *p_arg) {
                     memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
 
                     // Motor RPM is in bytes 0-3
-                    Motor_RPM = *((float *)(&dataBuf.data[0]));
+                    Motor_RPM          = *((float *)(&dataBuf.data[0]));
 
                     // Car Velocity (in m/s) is in bytes 4-7
-                    Motor_Velocity = *((float *)(&dataBuf.data[4]));
+                    Motor_Velocity     = *((float *)(&dataBuf.data[4]));
                     float Car_Velocity = Motor_Velocity * 1000;
 
-                    Car_Velocity = (Car_Velocity * 223694) / 10000000;
+                    Car_Velocity       = (Car_Velocity * 223694) / 10000000;
 
                     UpdateDisplay_SetVelocity(Car_Velocity);
                     break;
@@ -149,6 +146,9 @@ float Motor_RPM_Get() { return Motor_RPM; }
 // Getter function for motor velocity
 float Motor_Velocity_Get() { return Motor_Velocity; }
 
+// Getter function for motor error
+uint16_t Motor_Error_Get() { return Motor_FaultBitmap; }
+
 /**
  * Error handler functions
  * Passed as callback functions to the main throwTaskError function by assertTritiumError
@@ -169,7 +169,7 @@ static inline void handler_ReadTritium_HallError(void) { restartMotorController(
  * @param   motor_err Bitmap with motor error codes to check
  */
 void assertTritiumError(controls_error_e m_err) {
-    static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
+    static uint8_t hall_fault_cnt  = 0; // trip counter, doesn't ever reset
     static uint8_t motor_fault_cnt = 0;
 
     switch (m_err) {
