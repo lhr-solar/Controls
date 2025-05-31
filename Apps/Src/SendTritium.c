@@ -213,15 +213,20 @@ void Task_SendTritium(void *p_arg) {
                                                          PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
                     break;
                 default:
-                    velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = 0.0f;
+                    assertSendTritiumError(SENDTRITIUM_ERR_GEAR_FAULT);
                     break;
             }
-
-            memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
-            memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
-            CANbus_Send(driveCmd, CAN_BLOCKING, MOTORCAN);
         }
+
+        // Motor is not safe to run so velocitySetpoint and currentSetpoint are set to 0
+        else{
+            velocitySetpoint = 0;
+            currentSetpoint = 0.0f;
+        }
+        memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
+        memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
+        CANbus_Send(driveCmd, CAN_BLOCKING, MOTORCAN);
+        SendCarCAN_Put(driveCmd);
 
         // Delay of FSM_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
