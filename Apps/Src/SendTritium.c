@@ -165,7 +165,7 @@ float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
 void Task_SendTritium(void *p_arg)
 {
     OS_ERR err;
-    CPU_TS ticks;
+    // CPU_TS ticks;
 
     // CAN Commands
     CANDATA_t driveCmd = {
@@ -186,8 +186,10 @@ void Task_SendTritium(void *p_arg)
         updateDisplayState();   
 
         // Check that motor is ready to run
-        // non-blocking
-        OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0, OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
+        err = MotorStatus_Wait(BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, false);
+
+        // OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0,
+        //            OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
         // if you return OS_ERR_PEND_WOULD_BLOCK, one of the bits are not sent, and would've blocked
         if (err != OS_ERR_PEND_WOULD_BLOCK){
             assertOSError(err);

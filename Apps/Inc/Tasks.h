@@ -81,6 +81,10 @@
 // has been checked, & motor ready to run status
 extern OS_FLAG_GRP BPS_Motor_Status_Flags;
 
+OS_ERR   MotorStatus_Wait(uint8_t bits, bool blocking);
+OS_FLAGS MotorStatus_GetBits();
+bool     MotorStatus_ModifyBits(uint8_t bits, bool to_clr, bool allow_sched);
+
 /**
  * Task error variable type
  */

@@ -88,6 +88,9 @@ char ErrMsg_Evac[ERR_CODE_LEN] = DISP_EVAC_NONREQ_STR_LITERAL;
 // has been checked, & motor ready to run status
 OS_FLAG_GRP BPS_Motor_Status_Flags;
 
+// The defined bits in the flag group
+const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN;
+
 
 
 // extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
@@ -159,10 +162,12 @@ void _assertOSError(OS_ERR err)
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
  */
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
+    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, true, false);
+
     OS_ERR err;
-    // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu
-    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR | OS_OPT_POST_NO_SCHED, &err);
-    assertOSError(err);
+    // // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu
+    // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR | OS_OPT_POST_NO_SCHED, &err);
+    // assertOSError(err);
 
     Status_Leds_Write(CONTROLS_FAULT_LED, ON);
     if (errorCode == 0) { // Exit if there is no error
@@ -170,6 +175,7 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     }
 
     if (lockSched == OPT_LOCK_SCHED || nonrecoverable == OPT_NONRECOV) { // Prevent other tasks from interrupting the handling of important (includes all nonrecoverable) errors
+        
         OSSchedLock(&err);
         assertOSError(err);
     }
@@ -262,4 +268,63 @@ void BPSMotorFlags_Init(void) {
     OS_ERR err;
     OSFlagCreate(&BPS_Motor_Status_Flags, "BPS_Motor_Status_Flags", 0, &err);
     assertOSError(err);
+}
+
+/**
+ * @brief A generic wrapper for pending on BPS_Motor_Status_Flags.
+ * @param bits these are the bits to pend on to be set.
+ * @param blocking whether to block the thread or not.
+ */
+OS_ERR MotorStatus_Wait(uint8_t bits, bool blocking) {
+    // Validate bit input
+    if ((bits & ~ALLOWED_BITS) != 0) return false;
+
+    OS_ERR err;
+    OS_OPT block_opt = blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING;
+    OSFlagPend(&BPS_Motor_Status_Flags, bits, 0,
+               OS_OPT_PEND_FLAG_SET_ALL | block_opt , NULL, &err);
+    return err;
+}
+
+/**
+ * @brief Fucntion to get the flags directly from BPS_Motor_Status_Flags in a critical section.
+ * @return a copy of the OS_FLAGS from BPS_Motor_Status_Flags.
+ */
+OS_FLAGS MotorStatus_GetBits() {
+    OS_FLAGS current_flags;
+
+    // In cpu.h, it says that the cpu status register variable may need to be set
+    // and that it should be set after local variables are declared.
+    // After that, enter a critical section; interrupts are disabled after saving status.
+    // See cpu.h line 250ish
+    CPU_SR_ALLOC();
+
+    OS_CRITICAL_ENTER();
+    current_flags = BPS_Motor_Status_Flags.Flags;
+    OS_CRITICAL_EXIT();
+
+    return current_flags;
+}
+
+/**
+ * @brief Function to modify the bitmap of flags within BPS_Motor_Status_Flags. 
+ * 
+ * @param bits these are the bits to either set or clear. Must be a valid combination.
+ * @param to_clr whether or not to clear (true) or to set (false) the given bits.
+ * @param allow_sched whether there may be a scheduling point or not. (i.e. whether the option 
+ *                    OS_OPT_POST_NO_SCHED should be included)
+ * 
+ * @return a bool value representing if the modification was successful.
+ */
+bool MotorStatus_ModifyBits(uint8_t bits, bool to_clr, bool allow_sched) {
+    // Validate bit input
+    if ((bits & ~ALLOWED_BITS) != 0) return false;
+
+    OS_OPT set_opt = to_clr ? OS_OPT_POST_FLAG_CLR : OS_OPT_POST_FLAG_SET;
+    OS_OPT sched_opt = allow_sched ? 0 : OS_OPT_POST_NO_SCHED;
+    OS_ERR err;
+    OS_FLAGS flags = OSFlagPost(&BPS_Motor_Status_Flags, bits, set_opt | sched_opt, &err);
+    assertOSError(err);
+
+    return (flags & bits) == (to_clr ? 0 : bits);
 }
