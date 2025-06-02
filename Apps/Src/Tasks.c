@@ -287,7 +287,9 @@ OS_ERR MotorStatus_Wait(uint8_t bits, bool blocking) {
     // assert error if 
     //   1. blocking is true
     //   2. nonblocking but error is not OS_ERR_PEND_WOULD_BLOCK
-    if (blocking || err != OS_ERR_PEND_WOULD_BLOCK) assertOSError(err);
+    if (blocking || err != OS_ERR_PEND_WOULD_BLOCK) {
+        assertOSError(err);
+    }
 
     return err;
 }
