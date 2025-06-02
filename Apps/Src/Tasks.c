@@ -277,12 +277,18 @@ void BPSMotorFlags_Init(void) {
  */
 OS_ERR MotorStatus_Wait(uint8_t bits, bool blocking) {
     // Validate bit input
-    if ((bits & ~ALLOWED_BITS) != 0) return false;
+    if ((bits & ~ALLOWED_BITS) != 0) return OS_ERR_OPT_INVALID;
 
     OS_ERR err;
     OS_OPT block_opt = blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING;
     OSFlagPend(&BPS_Motor_Status_Flags, bits, 0,
                OS_OPT_PEND_FLAG_SET_ALL | block_opt , NULL, &err);
+
+    // assert error if 
+    //   1. blocking is true
+    //   2. nonblocking but error is not OS_ERR_PEND_WOULD_BLOCK
+    if (blocking || err != OS_ERR_PEND_WOULD_BLOCK) assertOSError(err);
+
     return err;
 }
 

@@ -97,7 +97,6 @@ void putIOState(void){
             break;
         default:
             s |= CANBUS_MOTOR_NOT_SAFE_TO_RUN;
-            assertOSError(err);
             break;
     }
     message.data[0] = s;
