@@ -91,8 +91,6 @@ OS_FLAG_GRP BPS_Motor_Status_Flags;
 // The defined bits in the flag group
 const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN;
 
-
-
 // extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
 
 /**
@@ -162,7 +160,7 @@ void _assertOSError(OS_ERR err)
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
  */
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
-    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, false);
+    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING, false);
 
     OS_ERR err;
     // // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu

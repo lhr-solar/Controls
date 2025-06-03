@@ -31,6 +31,7 @@
 #include "SendTritium.h"
 #include "StatusLeds.h"
 
+//#define USING_PROFINITY
 
 // Inputs
 static uint8_t brakePedalPercent = 0;
@@ -67,7 +68,6 @@ static void assertSendTritiumError(SendTritium_error_code_t sterr);
  */
 static void updateDisplayState() 
 {
-    UpdateDisplay_SetAccel(accelPedalPercent);
     UpdateDisplay_SetBrake(isBrakeOn);
 
     switch(gear) {
@@ -178,6 +178,11 @@ void Task_SendTritium(void *p_arg)
         .idx = 0,
         .data = {0.0f, 0.0f},
     };
+    CANDATA_t motorSafeCmd = {
+        .ID = MOTOR_SAFE_TO_RUN,
+        .idx = 0,
+        .data = {0}
+    };
      
 
     while (1) {
@@ -186,11 +191,10 @@ void Task_SendTritium(void *p_arg)
         updateDisplayState();   
 
         // Check that motor is ready to run
-        err = MotorStatus_Wait(BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, false);
+        err = MotorStatus_Wait(BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING);
 
-        // OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0,
-        //            OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
         // if you return OS_ERR_PEND_WOULD_BLOCK, one of the bits are not sent, and would've blocked
+        // If the error is ERR_NONE, assertOSError returns without asserting an error
         if (err != OS_ERR_PEND_WOULD_BLOCK){
             assertOSError(err);
         }
@@ -208,7 +212,7 @@ void Task_SendTritium(void *p_arg)
                     currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
                     break;
                 case DASH_NEU:
-                    velocitySetpoint = MAX_VELOCITY;
+                    velocitySetpoint = 0.0f;
                     currentSetpoint = 0.0f;
                     break;
                 case DASH_REV:
@@ -219,16 +223,25 @@ void Task_SendTritium(void *p_arg)
                     assertSendTritiumError(SENDTRITIUM_ERR_GEAR_FAULT);
                     break;
             }
+            motorSafeCmd.data[0] = 1; // Set motor safe to run to true
         }
         // Motor is not safe to run so velocitySetpoint and currentSetpoint are set to 0
         else{
             velocitySetpoint = 0;
             currentSetpoint = 0.0f;
+            motorSafeCmd.data[0] = 0; // Set motor safe to run to false
         }
         memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
         memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
+
+        // The motor controller will error if 2 different sources are sending drive commands, so if profinity is plugged in, don't send drive command
+        #ifndef USING_PROFINITY
+        // Drive command must be sent every 250ms or the motor will return to neutral
         CANbus_Send(driveCmd, CAN_BLOCKING, MOTORCAN);
-        SendCarCAN_Put(driveCmd);
+        #endif
+        SendCarCAN_Put(driveCmd); // Send the drive command to the car CAN bus for telemetry
+        SendCarCAN_Put(motorSafeCmd);
+
         // Delay of FSM_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);

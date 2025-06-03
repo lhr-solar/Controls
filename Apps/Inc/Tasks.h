@@ -77,6 +77,9 @@
 #define BPS_CHECKED 1 << 1
 #define MOTOR_SAFE_TO_RUN 1 << 2
 
+#define OS_FLAG_BLOCKING true
+#define OS_FLAG_SCHED_POINT true
+
 // Synchronization-protected event flag group signaling BPS_SAFE, if BPS
 // has been checked, & motor ready to run status
 extern OS_FLAG_GRP BPS_Motor_Status_Flags;
