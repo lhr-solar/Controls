@@ -162,7 +162,7 @@ void _assertOSError(OS_ERR err)
  * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
  */
 void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
-    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, true, false);
+    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, false);
 
     OS_ERR err;
     // // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu
@@ -318,21 +318,21 @@ OS_FLAGS MotorStatus_GetBits() {
  * @brief Function to modify the bitmap of flags within BPS_Motor_Status_Flags. 
  * 
  * @param bits these are the bits to either set or clear. Must be a valid combination.
- * @param to_clr whether or not to clear (true) or to set (false) the given bits.
+ * @param state whether or not to clear (false) or to set (true) the given bits.
  * @param allow_sched whether there may be a scheduling point or not. (i.e. whether the option 
  *                    OS_OPT_POST_NO_SCHED should be included)
  * 
  * @return a bool value representing if the modification was successful.
  */
-bool MotorStatus_ModifyBits(uint8_t bits, bool to_clr, bool allow_sched) {
+bool MotorStatus_ModifyBits(uint8_t bits, bool state, bool allow_sched) {
     // Validate bit input
     if ((bits & ~ALLOWED_BITS) != 0) return false;
 
-    OS_OPT set_opt = to_clr ? OS_OPT_POST_FLAG_CLR : OS_OPT_POST_FLAG_SET;
+    OS_OPT set_opt = state ? OS_OPT_POST_FLAG_SET : OS_OPT_POST_FLAG_CLR;
     OS_OPT sched_opt = allow_sched ? 0 : OS_OPT_POST_NO_SCHED;
     OS_ERR err;
     OS_FLAGS flags = OSFlagPost(&BPS_Motor_Status_Flags, bits, set_opt | sched_opt, &err);
     assertOSError(err);
 
-    return (flags & bits) == (to_clr ? 0 : bits);
+    return (flags & bits) == (state ? bits : 0);
 }

@@ -110,7 +110,7 @@ static void setMotorControllerContactor(bool state, bool blocking){
 
     // If the motor contactor is turned off, we should not be running the motor controller
     if(state == OFF){
-        MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, false);
+        MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, true, false);
         // OS_ERR err;
         // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
     }
@@ -223,7 +223,7 @@ void Task_ReadCarCAN(void *p_arg)
             // Context switches should not occur here since the only task pending on these flags waits for all bits to be set
             // Mark BPS checked if its the first time
             if(!bps_checked) {
-                MotorStatus_ModifyBits(BPS_CHECKED, false, false);
+                MotorStatus_ModifyBits(BPS_CHECKED, true, false);
                 // OSFlagPost(&BPS_Motor_Status_Flags, BPS_CHECKED, OS_OPT_POST_FLAG_SET, &err);
                 // assertOSError(err);
                 bps_checked = true;
@@ -231,11 +231,11 @@ void Task_ReadCarCAN(void *p_arg)
 
             // HV contactor used to determine BPS safety
             if(bps_state) {
-                MotorStatus_ModifyBits(BPS_SAFE, false, false);
+                MotorStatus_ModifyBits(BPS_SAFE, true, false);
                 // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE, OS_OPT_POST_FLAG_SET, &err);
             }
             else {
-                MotorStatus_ModifyBits(BPS_SAFE | MOTOR_SAFE_TO_RUN, true, false);
+                MotorStatus_ModifyBits(BPS_SAFE | MOTOR_SAFE_TO_RUN, false, false);
                 // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
             }
             assertOSError(err);
@@ -301,7 +301,7 @@ void Task_ReadCarCAN(void *p_arg)
                 motorPrechargeOnCount++;
                 if(motorPrechargeOnCount >= MOTOR_PRECHARGE_ON_COUNT_THRESHOLD) {
                     // If the motor precharge contactor has been on for enough iterations, we can consider it safe to run
-                    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, false);
+                    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, true, false);
                     // OS_ERR err;
                     // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
                     // assertOSError(err);
