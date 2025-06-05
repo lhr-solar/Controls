@@ -115,6 +115,9 @@ const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
 // has been checked, & motor ready to run status
 OS_FLAG_GRP BPS_Motor_Status_Flags;
 
+// The defined bits in the flag group
+const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN;
+
 /**
  * @brief Check and set error bits for CONTROLS_FAULT_MSG
  * @param app_err the Controls-defined error.
@@ -198,13 +201,16 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
 
     if (error_code == C_ERR_NONE) return;
 
+    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING, false);
+
     OS_ERR err;
-    // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu
-    OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN,
-               OS_OPT_POST_FLAG_CLR | OS_OPT_POST_NO_SCHED, &err);
-    assertOSError(err);
+    // // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu
+    // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR | OS_OPT_POST_NO_SCHED, &err);
+    // assertOSError(err);
+
 
     Status_Leds_Write(CONTROLS_FAULT_LED, ON);
+
 
     // Prevent other tasks from interrupting the handling of important
     // (includes all nonrecoverable) errors
@@ -310,4 +316,71 @@ void BPSMotorFlags_Init(void) {
     OS_ERR err;
     OSFlagCreate(&BPS_Motor_Status_Flags, "BPS_Motor_Status_Flags", 0, &err);
     assertOSError(err);
+}
+
+/**
+ * @brief A generic wrapper for pending on BPS_Motor_Status_Flags.
+ * @param bits these are the bits to pend on to be set.
+ * @param blocking whether to block the thread or not.
+ */
+OS_ERR MotorStatus_Wait(uint8_t bits, bool blocking) {
+    // Validate bit input
+    if ((bits & ~ALLOWED_BITS) != 0) return OS_ERR_OPT_INVALID;
+
+    OS_ERR err;
+    OS_OPT block_opt = blocking ? OS_OPT_PEND_BLOCKING : OS_OPT_PEND_NON_BLOCKING;
+    OSFlagPend(&BPS_Motor_Status_Flags, bits, 0,
+               OS_OPT_PEND_FLAG_SET_ALL | block_opt , NULL, &err);
+
+    // assert error if 
+    //   1. blocking is true
+    //   2. nonblocking but error is not OS_ERR_PEND_WOULD_BLOCK
+    if (blocking || err != OS_ERR_PEND_WOULD_BLOCK) {
+        assertOSError(err);
+    }
+
+    return err;
+}
+
+/**
+ * @brief Fucntion to get the flags directly from BPS_Motor_Status_Flags in a critical section.
+ * @return a copy of the OS_FLAGS from BPS_Motor_Status_Flags.
+ */
+OS_FLAGS MotorStatus_GetBits() {
+    OS_FLAGS current_flags;
+
+    // In cpu.h, it says that the cpu status register variable may need to be set
+    // and that it should be set after local variables are declared.
+    // After that, enter a critical section; interrupts are disabled after saving status.
+    // See cpu.h line 250ish
+    CPU_SR_ALLOC();
+
+    OS_CRITICAL_ENTER();
+    current_flags = BPS_Motor_Status_Flags.Flags;
+    OS_CRITICAL_EXIT();
+
+    return current_flags;
+}
+
+/**
+ * @brief Function to modify the bitmap of flags within BPS_Motor_Status_Flags. 
+ * 
+ * @param bits these are the bits to either set or clear. Must be a valid combination.
+ * @param state whether or not to clear (false) or to set (true) the given bits.
+ * @param allow_sched whether there may be a scheduling point or not. (i.e. whether the option 
+ *                    OS_OPT_POST_NO_SCHED should be included)
+ * 
+ * @return a bool value representing if the modification was successful.
+ */
+bool MotorStatus_ModifyBits(uint8_t bits, bool state, bool allow_sched) {
+    // Validate bit input
+    if ((bits & ~ALLOWED_BITS) != 0) return false;
+
+    OS_OPT set_opt = state ? OS_OPT_POST_FLAG_SET : OS_OPT_POST_FLAG_CLR;
+    OS_OPT sched_opt = allow_sched ? 0 : OS_OPT_POST_NO_SCHED;
+    OS_ERR err;
+    OS_FLAGS flags = OSFlagPost(&BPS_Motor_Status_Flags, bits, set_opt | sched_opt, &err);
+    assertOSError(err);
+
+    return (flags & bits) == (state ? bits : 0);
 }

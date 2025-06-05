@@ -23,6 +23,7 @@
 //     IOSTATE_ERROR = 0xFFFF,             // More than one state is high at a time
 // } IOState_error_code_t;
 
+
 void assertIOStateError(controls_error_e io_err);
 
 #endif

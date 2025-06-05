@@ -17,6 +17,7 @@
 
 
 //#define SENDTRITIUM_PRINT_MES
+#define CANBUS_MOTOR_SAFE_TO_RUN 1
 
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
