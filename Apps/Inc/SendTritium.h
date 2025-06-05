@@ -11,7 +11,10 @@
 #define __SENDTRITIUM_H
 
 #include "common.h"
+#include "os.h"
 #include "Dashboard.h"
+#include "Tasks.h"
+
 
 //#define SENDTRITIUM_PRINT_MES
 #define CANBUS_MOTOR_SAFE_TO_RUN 1
@@ -40,15 +43,15 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
-/**
- * Error types
- * 
- */
-typedef enum
-{
-    SENDTRITIUM_ERR_NONE,
-    SENDTRITIUM_ERR_GEAR_FAULT,     // Received multiple or no gear inputs (e.g. FOR_SW, REV_SW)
-} SendTritium_error_code_t;
+// /**
+//  * Error types
+//  * 
+//  */
+// typedef enum
+// {
+//     SENDTRITIUM_ERR_NONE,
+//     SENDTRITIUM_ERR_GEAR_FAULT,     // Received multiple or no gear inputs (e.g. FOR_SW, REV_SW)
+// } SendTritium_error_code_t;
 
 #ifdef SENDTRITIUM_EXPOSE_VARS
 // Inputs

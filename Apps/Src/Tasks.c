@@ -1,23 +1,24 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Tasks.c
- * @brief 
- * 
+ * @brief
+ *
  */
 
-// #include "os_cfg_app.h"
+#include "os_cfg_app.h"
 
 #include "CANbus.h"
 #include "Contactors.h"
+#include "DebugIO.h"
 #include "Display.h"
 #include "Pedals.h"
-#include "SendTritium.h"
-#include "DebugIO.h"
 #include "StatusLeds.h"
-#include "Tasks.h"
-#include "ReadTritium.h"
-#include "ReadCarCAN.h"
+
 #include "IOState.h"
+#include "ReadCarCAN.h"
+#include "ReadTritium.h"
+#include "SendTritium.h"
+#include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
 
@@ -49,40 +50,67 @@ CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
 
+/* Controls Fault Message bits */
+#define ANY_CONTROLS_FAULT_BIT     0x1 << 0 // 1 if any of the other bits are true
+#define MOTOR_CONTROLLER_FAULT_BIT 0x1 << 1 // 1 if there is a ReadTritium Error
+#define BPS_FAULT_BIT              0x1 << 2 // 1 if there is a BPS Trip error
+// #define PEDALS_FAULT_BIT           0x1 << 3 // ""
+#define READCARCAN_FAULT_BIT       0x1 << 4 // 1 if there is a ReadCarCAN Error
+#define DISPLAY_FAULT_BIT          0x1 << 5 // 1 if there is an UpdateDisplay Error
+#define OS_FAULT_BIT               0x1 << 6 // 1 if there is an OS Error
+#define LAKSHAY_FAULT_BIT          0x1 << 7 // 1 if Lakshay's code is running
 
+#define FAULT_MSG_DELAY            1000000
 
-// Controls Fault Message bits
-#define ANY_CONTROLS_FAULT_BIT 1        // 1 if any of the other bits are true
-#define MOTOR_CONTROLLER_FAULT_BIT 2    // 1 if there is a ReadTritium Error
-#define BPS_FAULT_BIT 4                 // 1 if there is a BPS Trip error
-// #define PEDALS_FAULT_BIT 8           // ""
-#define READCARCAN_FAULT_BIT 16         // 1 if there is a ReadCarCAN Error
-#define DISPLAY_FAULT_BIT 32            // 1 if there is an UpdateDisplay Error
-#define OS_FAULT_BIT 64                 // 1 if there is an OS Error
-#define LAKSHAY_FAULT_BIT 128           // 1 if Lakshay's code is running
+/**
+ * String array holding all the error message string for all application errors in the
+ * controls code.
+ *
+ * If the `controls_error_e` enum is changed, this array should also be
+ * modified accordingly. When the respective controls error is asserted, the corresponding
+ * string will be displayed on the fault page, with the exception of the `C_ERR_RTR_MULTIPLE`
+ * because in that case we want to see the bitmap.
+ */
 
-#define FAULT_MSG_DELAY 1000000
+const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
+    // Generic errors are placeholder errors for debugging purposes and should eventually
+    // become individual errors themselves
 
-const char *DISP_ERRMSG_NA = DISP_NA_STR_LITERAL;
-const char *DISP_EVACMSG_DEFAULT = DISP_EVAC_NONREQ_STR_LITERAL;
-const char *DISP_EVACMSG_REQ = DISP_EVAC_REQ_STR_LITERAL;
-
-// Variables to store error codes, stored and cleared in task error assert functions
-error_code_t Error_ReadCarCAN = READCARCAN_ERR_NONE; // TODO: change this back to the error 
-error_code_t Error_SendTritium = SENDTRITIUM_ERR_NONE;
-error_code_t Error_ReadTritium = T_NONE;  // Initialized to no error
-error_code_t Error_UpdateDisplay = UPDATEDISPLAY_ERR_NONE;
-error_code_t Error_IOState = IOSTATE_ERR_NONE;
-error_code_t Error_OS = OS_ERR_NONE;
-
-// Display error messages for readability
-char ErrMsg_SendTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
-char ErrMsg_ReadCarCAN[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
-char ErrMsg_ReadTritium[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
-char ErrMsg_UpdateDisplay[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
-char ErrMsg_IOState[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
-char ErrMsg_OS[ERR_CODE_LEN] = DISP_NA_STR_LITERAL;
-char ErrMsg_Evac[ERR_CODE_LEN] = DISP_EVAC_NONREQ_STR_LITERAL;
+    [C_ERR_NONE]                     = "\"N/A\"",           /* No error :) */
+    // Read Tritium Errors
+    [C_ERR_RTR_GENERIC]              = "\"RTR_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_RTR_HARDWARE_OC]          = "\"MOT_HW_OC\"",
+    [C_ERR_RTR_SOFTWARE_OC]          = "\"MOT_SW_OC\"",
+    [C_ERR_RTR_DC_BUS_OV]            = "\"MOT_DC_BUS_OV\"",
+    [C_ERR_RTR_HALL_SENSOR]          = "\"MOT_HALLSENSR\"",
+    [C_ERR_RTR_WDOG_LAST_RESET]      = "\"MOT_DOG_LREST\"",
+    [C_ERR_RTR_CONFIG_READ]          = "\"MOT_CONFIG_RD\"",
+    [C_ERR_RTR_UNDERVOLT_LOCKOUT]    = "\"MOT_UNDERV_LK\"",
+    [C_ERR_RTR_DESAT_FAULT]          = "\"MOT_DESAT_FLT\"",
+    [C_ERR_RTR_MOTOR_OVERSPEED]      = "\"MOT_OVERSPEED\"",
+    [C_ERR_RTR_INIT_FAIL]            = "\"RTR_INIT_FAIL\"", /* TODO: WHAT IS THIS?? */
+    [C_ERR_RTR_MOTOR_WDOG_TRIP]      = "\"RTR_WDOG_TRIP\"",
+    [C_ERR_RTR_MULTIPLE]             = "\"RTR_MULTI_ERR\"", /* Should never actually display this */
+    // Send Tritium Errors
+    [C_ERR_STR_GENERIC]              = "\"STR_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_STR_GEAR_FAULT]           = "\"STR_GEAR_FLT\"",  /* Received multiple or no gear inputs */
+    // Read Car CAN Errors
+    [C_ERR_RCC_GENERIC]              = "\"RCC_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_RCC_BPS_MISSED_MSG]       = "\"BPS_MISS\"",      /* Didn't receive a BPS msg in time */
+    [C_ERR_RCC_PRECHARGE_MISSED_MSG] = "\"PRECHG_MISS\"",   /* Didn't receive prechrg msg in time */
+    [C_ERR_RCC_BPS_TRIP]             = "\"BPS_TRIP\"",      /* Recieved a BPS trip msg */
+    [C_ERR_RCC_ACTIVE_PRECHARGE_FLT] = "\"ACT_PRECH_FLT\"", /* Received active precharge fault */
+    // IO state Errors
+    [C_ERR_IOS_GENERIC]              = "\"IOS_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_IOS_IGN_FAULT]            = "\"IOS_IGN_FLT\"",   /* Ignition unstable for too long */
+    // Update display errors
+    [C_ERR_UPD_GENERIC]              = "\"UPD_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_UPD_PARSE_COMPONENT]      = "\"UPD_PARSE_COM\"", /* Error in parsing a componenet */
+    [C_ERR_UPD_DRIVER]               = "\"UPD_DRIVR_ERR\"", /* Error propogating from driver */
+    // Special
+    [C_ERR_GENERIC]                  = "\"GENERIC_ERROR\"", /* Generic placeholder error */
+    [C_ERR_ILLEGAL_ERROR]            = "\"ILLEGAL_ERR\"",   /* Error thrown in illegal context */
+};
 
 // Synchronization-protected event flag group signaling BPS_SAFE, if BPS
 // has been checked, & motor ready to run status
@@ -91,28 +119,36 @@ OS_FLAG_GRP BPS_Motor_Status_Flags;
 // The defined bits in the flag group
 const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN;
 
-// extern const pinInfo_t PININFO_LUT[]; // For GPIO writes. Externed from Minions Driver C file.
-
 /**
  * @brief Check and set error bits for CONTROLS_FAULT_MSG
- * @param errorCode the Controls-define errorCode. Only used to check for BPS Trip
+ * @param app_err the Controls-defined error.
+ * @param os_err the OS error.
  * @return a byte with the error bits set according to Controls' current faults
  */
-uint8_t get_fault_bits(uint16_t errorCode) {
-    
+static uint8_t get_fault_bits(controls_error_e app_err, OS_ERR os_err) {
     uint8_t msg = 0;
 
-    if(Error_ReadCarCAN == READCARCAN_ERR_BPS_TRIP){
-        msg |= BPS_FAULT_BIT;
+    if (app_err != C_ERR_NONE) {
+        msg |= ANY_CONTROLS_FAULT_BIT;
+
+        if (app_err == C_ERR_RCC_BPS_TRIP) msg |= BPS_FAULT_BIT;
+
+        if (app_err < C_ERR_RCC_GENERIC) //  Incl read and send tritium
+            msg |= MOTOR_CONTROLLER_FAULT_BIT;
+        else if (app_err < C_ERR_UPD_GENERIC) // Incl rcc and iostate
+            msg |= READCARCAN_FAULT_BIT;
+        else if (app_err < C_ERR_GENERIC)
+            msg |= DISPLAY_FAULT_BIT;
+        // Generic controls errors do not affect the bits other than
+        // the general cotnrols fault bit
     }
-    if(Error_ReadCarCAN != READCARCAN_ERR_NONE)         {msg |= READCARCAN_FAULT_BIT;}
-    if (Error_ReadTritium != T_NONE)                    {msg |= MOTOR_CONTROLLER_FAULT_BIT;}
-    if (Error_UpdateDisplay != UPDATEDISPLAY_ERR_NONE)  {msg |= DISPLAY_FAULT_BIT;}
-    if (Error_OS != OS_ERR_NONE)                        {msg |= OS_FAULT_BIT;}
 
-    msg |= LAKSHAY_FAULT_BIT;                           // TODO: remove this when Lakshay's code is removed
+    if (os_err != OS_ERR_NONE) {
+        msg |= ANY_CONTROLS_FAULT_BIT;
+        msg |= OS_FAULT_BIT;
+    }
 
-    if (msg != 0)                                       {msg |= ANY_CONTROLS_FAULT_BIT;}
+    msg |= LAKSHAY_FAULT_BIT; // TODO: remove this when Lakshay's code is removed
 
     return msg;
 }
@@ -121,45 +157,52 @@ uint8_t get_fault_bits(uint16_t errorCode) {
  * Error assertion-related functions
  */
 
-void _assertOSError(OS_ERR err)
-{
-    if (err != OS_ERR_NONE)
-    {
+void _assertOSError(OS_ERR err) {
+    if (err != OS_ERR_NONE) {
         Status_Leds_Write(OS_FAULT_LED, ON);
-        Error_OS = err;
-        snprintf(ErrMsg_OS, ERR_CODE_LEN, "%08X", Error_OS);
+
+        char os_err_msg[ERRMSG_MAX_LEN] = {0};
+        snprintf(os_err_msg, ERRMSG_MAX_LEN, "%08X", err);
+
         MotorContactor_EmergencyDisable(); // Turn off all contactors
-        Display_Error(); // Display the location and error code
+        Display_Error(ERROR_MSGS[C_ERR_NONE], os_err_msg, false);
 
         CANDATA_t faultmsg = {0};
         faultmsg.ID = CONTROLS_FAULT_MSG;
-        faultmsg.data[0] = get_fault_bits(Error_OS);
-        
+        faultmsg.data[0] = get_fault_bits(C_ERR_NONE, err);
+
         volatile static int faultLoopCount = 0;
 
-        while(1){ //nonrecoverable
+        while (1) { // nonrecoverable
             faultLoopCount++;
-            if (faultLoopCount > FAULT_MSG_DELAY){
+            if (faultLoopCount > FAULT_MSG_DELAY) {
                 faultLoopCount = 0;
                 CANbus_Send_Faultstate(faultmsg, CARCAN);
             }
         }
-            
-           
     }
 }
 
-
 /**
- * @brief Assert a task error by locking the scheduler (if necessary), displaying a fault screen,
- * and jumping to the error's specified callback function. 
- * Called by task-specific error-assertion functions that are also responsible for setting the error variable.
- * @param errorCode the enum for the specific error that happened
- * @param errorCallback a callback function to a handler for that specific error, 
- * @param lockSched whether or not to lock the scheduler to ensure the error is handled immediately. Only applicable for recoverable errors- nonrecoverable errors will always lock
- * @param nonrecoverable whether or not to kill the motor, display the fault screen, and enter an infinite while loop
+ * @brief Assert a task error by setting the location variable and optionally
+ * locking the scheduler, displaying a fault screen (if nonrecoverable), jumping
+ * to a callback function, and entering an infinite loop. Called by
+ * task-specific error-assertion functions that are also responsible for setting
+ * the error variable.
+ * @param error_code the enum for the specific error that happened
+ * @param is_evac_needed whether evac is required, it will be recommended regardless.
+ * @param error_callback a callback function to a handler for that specific
+ * error (NULL is permissible),
+ * @param lock_scheduler whether or not to lock the scheduler to ensure the
+ * error is handled immediately
+ * @param recovery whether or not to kill the motor, display the fault
+ * screen, and enter an infinite while loop
  */
-void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_scheduler_lock_opt_t lockSched, error_recov_opt_t nonrecoverable) {
+void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t error_callback,
+                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery) {
+
+    if (error_code == C_ERR_NONE) return;
+
     MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING, false);
 
     OS_ERR err;
@@ -168,39 +211,44 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     // assertOSError(err);
 
     Status_Leds_Write(CONTROLS_FAULT_LED, ON);
-    if (errorCode == 0) { // Exit if there is no error
-        return;
-    }
 
-    if (lockSched == OPT_LOCK_SCHED || nonrecoverable == OPT_NONRECOV) { // Prevent other tasks from interrupting the handling of important (includes all nonrecoverable) errors
-        
+
+    // Prevent other tasks from interrupting the handling of important
+    // (includes all nonrecoverable) errors
+    if (lock_scheduler == OPT_LOCK_SCHED || recovery == OPT_NONRECOV) {
         OSSchedLock(&err);
         assertOSError(err);
     }
 
-    if (nonrecoverable == OPT_NONRECOV) {
+    if (recovery == OPT_NONRECOV) {
         MotorContactor_EmergencyDisable();
-        Display_Error(); // Needs to happen before callback so that tasks can change the screen
+        // Needs to happen before callback so that tasks can change the screen
         // (ex: readCarCAN and evac screen for BPS trip)
+        if (error_code == C_ERR_RTR_MULTIPLE) {
+            char err_msg_multiple[ERRMSG_MAX_LEN] = {0};
+            snprintf(err_msg_multiple, ERRMSG_MAX_LEN, "\"MOCO_%03X\"",
+                     Motor_Error_Get() & 0xFFF);
+            Display_Error(err_msg_multiple, ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+        } else {
+            Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+        }
     }
 
-
-    if (errorCallback != NULL) {
-        errorCallback(); // Run a handler for this error that was specified in another task file
+    // Run a handler for this error if specified
+    if (error_callback != NULL) {
+        error_callback();
     }
 
-    // Set CAN Message data for Controls Fault
+    // Send Controls fault message over Car CAN
     CANDATA_t faultmsg = {0};
-    faultmsg.ID = CONTROLS_FAULT_MSG;
-
-    // Check and set errors
-    faultmsg.data[0] = get_fault_bits(errorCode);
+    faultmsg.ID        = CONTROLS_FAULT_MSG;
+    faultmsg.data[0]   = get_fault_bits(error_code, OS_ERR_NONE);
 
     CANDATA_t motormsg = {0};
-    motormsg.ID = MOTOR_CONTROLLER_SAFE;
+    motormsg.ID        = MOTOR_CONTROLLER_SAFE;
 
-    motormsg.data[0] = 0;
-    motormsg.data[0] |= 0x2; // Bit 1 of motor message 
+    motormsg.data[0]   = 0;
+    motormsg.data[0] |= 0x2; // Bit 1 of motor message
 
     CANbus_Send_Faultstate(faultmsg, CARCAN);
     CANbus_Send_Faultstate(motormsg, CARCAN);
@@ -211,9 +259,9 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
 
+    if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
+        while (1) {
 
-    if (nonrecoverable == OPT_NONRECOV) { // Enter an infinite while loop
-        while(1) {
             delay_ms(500);
             Status_Leds_Toggle(CONTROLS_FAULT_LED);
             Status_Leds_Toggle(DASH_HEARTBEAT_LED);
@@ -222,34 +270,37 @@ void throwTaskError(error_code_t errorCode, callback_t errorCallback, error_sche
             CANbus_Send_Faultstate(iostatemsg, CARCAN);
         }
     }
+
     // only reaches here is fault is recoverable
-    if (lockSched == OPT_LOCK_SCHED) { // Only happens on recoverable errors
+    if (lock_scheduler == OPT_LOCK_SCHED) {
         Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
-        OSSchedUnlock(&err); 
-        // Don't err out if scheduler is still locked because of a timer callback
-        if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) { // But we don't plan to lock more than one level deep
-        assertOSError(err); 
+        OSSchedUnlock(&err);
+        // Don't err out if scheduler is still locked because of a timer
+        // callback; but we don't plan to lock more than one level deep
+        if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) {
+            assertOSError(err);
         }
     }
 }
 
 /**
  * @brief Hook that's called every context switch
- * 
- * This function will append the task being switched out to the task trace if and only if:
+ *
+ * This function will append the task being switched out to the task trace if
+ * and only if:
  *      1. It's not a task created automatically by the RTOS
- *      2. It's not the previously recorded task (a long running task interrupted by the
- *         tick task will only show up once)
- * This function will overwrite tasks that have been in the trace for a while, keeping only
- * the 8 most recent tasks
+ *      2. It's not the previously recorded task (a long running task
+ * interrupted by the tick task will only show up once) This function will
+ * overwrite tasks that have been in the trace for a while, keeping only the 8
+ * most recent tasks
  */
 void App_OS_TaskSwHook(void) {
     OS_TCB *cur = OSTCBCurPtr;
     uint32_t idx = PrevTasks.index;
-    if (cur == &OSTickTaskTCB) return; // Ignore the tick task
-    if (cur == &OSIdleTaskTCB) return; // Ignore the idle task
-    if (cur == &OSTmrTaskTCB ) return; // Ignore the timer task
-    if (cur == &OSStatTaskTCB) return; // Ignore the stat task
+    if (cur == &OSTickTaskTCB) return;       // Ignore the tick task
+    if (cur == &OSIdleTaskTCB) return;       // Ignore the idle task
+    if (cur == &OSTmrTaskTCB) return;        // Ignore the timer task
+    if (cur == &OSStatTaskTCB) return;       // Ignore the stat task
     if (cur == PrevTasks.tasks[idx]) return; // Don't record the same task again
     if (++idx == TASK_TRACE_LENGTH) idx = 0;
     PrevTasks.tasks[idx] = cur;

@@ -1,8 +1,8 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file daybreak_pins.h
- * @brief 
- * 
+ * @brief
+ *
  * @defgroup daybreak_pins
  * @addtogroup daybreak_pins
  * @{
@@ -81,110 +81,107 @@
 #define BRAKE_SW_PORT           PORTC
 #define BRAKE_SW                GPIO_Pin_15
 
-
 // UART/USART
 
 // USB - USART2 - PA2_TX PA3_RX
-#define USB_GPIO GPIOA
-#define USB_UART USART2
-#define USB_IRQ USART2_IRQn
-#define USB_AF GPIO_AF_USART2
-#define USB_APB1_UART RCC_APB1Periph_USART2
-#define USB_AHB1_GPIO RCC_AHB1Periph_GPIOA
-#define USB_TX_Pinsource GPIO_PinSource2
-#define USB_TX   GPIO_Pin_2
-#define USB_RX_Pinsource GPIO_PinSource3
-#define USB_RX   GPIO_Pin_3
+#define USB_GPIO                GPIOA
+#define USB_UART                USART2
+#define USB_IRQ                 USART2_IRQn
+#define USB_AF                  GPIO_AF_USART2
+#define USB_APB1_UART           RCC_APB1Periph_USART2
+#define USB_AHB1_GPIO           RCC_AHB1Periph_GPIOA
+#define USB_TX_Pinsource        GPIO_PinSource2
+#define USB_TX                  GPIO_Pin_2
+#define USB_RX_Pinsource        GPIO_PinSource3
+#define USB_RX                  GPIO_Pin_3
 
 // DISPLAY UART4 - PA11_RX PA12_TX
-#define DISPLAY_GPIO GPIOA
-#define DISPLAY_UART UART4
-#define DISPLAY_IRQ UART4_IRQn
-#define DISPLAY_AF GPIO_AF11_UART4
-#define DISPLAY_APB1_UART RCC_APB1Periph_UART4
-#define DISPLAY_AHB1_GPIO RCC_AHB1Periph_GPIOA
-#define DISPLAY_TX_Pinsource GPIO_PinSource12
-#define DISPLAY_TX   GPIO_Pin_12
-#define DISPLAY_RX_Pinsource GPIO_PinSource11
-#define DISPLAY_RX   GPIO_Pin_11
+#define DISPLAY_GPIO            GPIOA
+#define DISPLAY_UART            UART4
+#define DISPLAY_IRQ             UART4_IRQn
+#define DISPLAY_AF              GPIO_AF11_UART4
+#define DISPLAY_APB1_UART       RCC_APB1Periph_UART4
+#define DISPLAY_AHB1_GPIO       RCC_AHB1Periph_GPIOA
+#define DISPLAY_TX_Pinsource    GPIO_PinSource12
+#define DISPLAY_TX              GPIO_Pin_12
+#define DISPLAY_RX_Pinsource    GPIO_PinSource11
+#define DISPLAY_RX              GPIO_Pin_11
 
 // EXTRA_UART UART5 - PB12_RX PB13_TX
-#define ExtraUART_GPIO GPIOB
-#define ExtraUART_UART UART5
-#define ExtraUART_IRQ UART5_IRQn
-#define ExtraUART_AF GPIO_AF11_UART5
-#define ExtraUART_APB1_UART RCC_APB1Periph_UART5
-#define ExtraUART_AHB1_GPIO RCC_AHB1Periph_GPIOB
-#define ExtraUART_TX_Pinsource GPIO_PinSource13
-#define ExtraUART_TX GPIO_Pin_13
-#define ExtraUART_RX_Pinsource GPIO_PinSource12
-#define ExtraUART_RX GPIO_Pin_12
+#define ExtraUART_GPIO          GPIOB
+#define ExtraUART_UART          UART5
+#define ExtraUART_IRQ           UART5_IRQn
+#define ExtraUART_AF            GPIO_AF11_UART5
+#define ExtraUART_APB1_UART     RCC_APB1Periph_UART5
+#define ExtraUART_AHB1_GPIO     RCC_AHB1Periph_GPIOB
+#define ExtraUART_TX_Pinsource  GPIO_PinSource13
+#define ExtraUART_TX            GPIO_Pin_13
+#define ExtraUART_RX_Pinsource  GPIO_PinSource12
+#define ExtraUART_RX            GPIO_Pin_12
 
-
-#define ExtraUART_PORT PORTB
-#define ExtraUART_TX   GPIO_Pin_13
-#define ExtraUART_RX   GPIO_Pin_12
+#define ExtraUART_PORT          PORTB
+#define ExtraUART_TX            GPIO_Pin_13
+#define ExtraUART_RX            GPIO_Pin_12
 
 // ADC
 
-#define ADC1_APB1 RCC_APB2Periph_ADC1
-#define ADC1_AHB1_GPIO RCC_AHB1Periph_GPIOC
-#define ADC1_GPIO GPIOC
+#define ADC1_APB1               RCC_APB2Periph_ADC1
+#define ADC1_AHB1_GPIO          RCC_AHB1Periph_GPIOC
+#define ADC1_GPIO               GPIOC
 
 // ACCEL_POT PC0
-#define ACCEL_POT_PORT PORTC
-#define ACCEL_POT_CHANNEL ADC_Channel_10
-#define ACCEL_POT GPIO_Pin_0
+#define ACCEL_POT_PORT          PORTC
+#define ACCEL_POT_CHANNEL       ADC_Channel_10
+#define ACCEL_POT               GPIO_Pin_0
 
 // BRAKE_POT PC1
-#define BRAKE_POT_PORT PORTC
-#define BRAKE_POT_CHANNEL ADC_Channel_11
-#define BRAKE_POT GPIO_Pin_1
+#define BRAKE_POT_PORT          PORTC
+#define BRAKE_POT_CHANNEL       ADC_Channel_11
+#define BRAKE_POT               GPIO_Pin_1
 
 // EXTRA_ADC1 PC2
-#define ExtraADC_1_PORT PORTC
-#define ExtraADC_1_CHANNEL ADC_Channel_12
-#define ExtraADC_1 GPIO_Pin_2
+#define ExtraADC_1_PORT         PORTC
+#define ExtraADC_1_CHANNEL      ADC_Channel_12
+#define ExtraADC_1              GPIO_Pin_2
 
 // EXTRA_ADC2 PC3
-#define ExtraADC_2_PORT PORTC
-#define ExtraADC_2_CHANNEL ADC_Channel_13
-#define ExtraADC_2 GPIO_Pin_3
+#define ExtraADC_2_PORT         PORTC
+#define ExtraADC_2_CHANNEL      ADC_Channel_13
+#define ExtraADC_2              GPIO_Pin_3
 
 // CAN
 
 // The pins have been changed in the BSP
 
 // CarCan - CAN3 PB3_RX PB4_TX
-#define CarCAN_PORT PORTB
-#define CarCAN_GPIO GPIOB
-#define CarCAN CAN3
-#define CarCAN_AHB1_GPIO RCC_AHB1Periph_GPIOB
-#define CarCAN_APB1_CAN RCC_APB1Periph_CAN3
-#define CarCAN_AF GPIO_AF11_CAN3
-#define CarCAN_TX_Pinsource GPIO_PinSource4
-#define CarCAN_TX GPIO_Pin_4
-#define CarCAN_TX_IRQ CAN3_TX_IRQn
-#define CarCAN_RX_Pinsource GPIO_PinSource3
-#define CarCAN_RX GPIO_Pin_3
-#define CarCAN_RX_IRQ CAN3_RX0_IRQn
+#define CarCAN_PORT             PORTB
+#define CarCAN_GPIO             GPIOB
+#define CarCAN                  CAN3
+#define CarCAN_AHB1_GPIO        RCC_AHB1Periph_GPIOB
+#define CarCAN_APB1_CAN         RCC_APB1Periph_CAN3
+#define CarCAN_AF               GPIO_AF11_CAN3
+#define CarCAN_TX_Pinsource     GPIO_PinSource4
+#define CarCAN_TX               GPIO_Pin_4
+#define CarCAN_TX_IRQ           CAN3_TX_IRQn
+#define CarCAN_RX_Pinsource     GPIO_PinSource3
+#define CarCAN_RX               GPIO_Pin_3
+#define CarCAN_RX_IRQ           CAN3_RX0_IRQn
 
 // MotorCan - CAN2 PB5_RX PB6_TX
 // CAN2 uses CAN1 as master
-#define MotorCAN_PORT PORTB
-#define MotorCAN_GPIO GPIOB
-#define MotorCAN CAN2
-#define MotorCANMaster CAN1 // CAN1 and CAN2 use dual CAN setup
-#define MotorCAN_AHB1_GPIO RCC_AHB1Periph_GPIOB
-#define MotorCAN_APB1_CAN RCC_APB1Periph_CAN2
+#define MotorCAN_PORT           PORTB
+#define MotorCAN_GPIO           GPIOB
+#define MotorCAN                CAN2
+#define MotorCANMaster          CAN1 // CAN1 and CAN2 use dual CAN setup
+#define MotorCAN_AHB1_GPIO      RCC_AHB1Periph_GPIOB
+#define MotorCAN_APB1_CAN       RCC_APB1Periph_CAN2
 #define MotorCANMaster_APB1_CAN RCC_APB1Periph_CAN1 // CAN1 is master
-#define MotorCAN_AF GPIO_AF_CAN2
-#define MotorCAN_TX_Pinsource GPIO_PinSource6
-#define MotorCAN_TX GPIO_Pin_6
-#define MotorCAN_TX_IRQ CAN2_TX_IRQn
-#define MotorCAN_RX_Pinsource GPIO_PinSource5
-#define MotorCAN_RX GPIO_Pin_5
-#define MotorCAN_RX_IRQ CAN2_RX0_IRQn
-
+#define MotorCAN_AF             GPIO_AF_CAN2
+#define MotorCAN_TX_Pinsource   GPIO_PinSource6
+#define MotorCAN_TX             GPIO_Pin_6
+#define MotorCAN_TX_IRQ         CAN2_TX_IRQn
+#define MotorCAN_RX_Pinsource   GPIO_PinSource5
+#define MotorCAN_RX             GPIO_Pin_5
+#define MotorCAN_RX_IRQ         CAN2_RX0_IRQn
 
 #endif

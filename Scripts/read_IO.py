@@ -24,6 +24,26 @@ ser.write(out.encode('ascii'))
 out = 'O' + chr(13)  # Open the CAN channel
 ser.write(out.encode('ascii'))
 
+def parse_motor_safe(data_hex):
+    """
+    Parse MOTOR_SAFE message data (0x584)
+    Format:
+    [1] : Motor Fault
+    [0] : Motor Safe
+    """
+    try:
+        byte0 = int(data_hex[0:2], 16)
+        motor_safe = (byte0 >> 0) & 1
+        motor_fault = (byte0 >> 1) & 1
+        # Format the output
+        result = "\n===== MOTOR_SAFE (0x584) =====\n"
+        result += f"Motor Safe To Run: {'TRUE' if motor_safe == 1 else 'FALSE'}\n"
+        result += f"Motor Fault: {'YES' if motor_fault == 1 else 'NONE'}\n"
+        result += "============================="
+        return result
+    except Exception as e:
+        return f"Error parsing MOTOR_SAFE data: {str(e)}"
+
 def parse_io_state(data_hex):
     """
     Parse IO_STATE message data (0x581)
@@ -76,13 +96,12 @@ def rec():
     smallest_motor_safe_delta = 1000000
 
     while True:
-
         # Read data if available
         if ser.in_waiting > 0:
             try:
                 new_data = ser.read(ser.in_waiting).decode("ascii", errors="replace")
                 buffer += new_data
-                
+            
                 # Process complete messages (assuming they end with CR)
                 while '\r' in buffer:
                     line, buffer = buffer.split('\r', 1)
@@ -113,6 +132,7 @@ def rec():
                         # Check if it's MOTOR_SAFE message (0x584)
                         if msg_id == '584':
                             print("====================================")
+                            print(parse_motor_safe(data_hex))
                             motor_safe_now = int(time.time() * 1000)  # ms
                             motor_safe_delta = motor_safe_now - last_motor_safe_time
                             if(motor_safe_delta > largest_motor_safe_delta):
