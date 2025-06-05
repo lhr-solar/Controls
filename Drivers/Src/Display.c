@@ -43,7 +43,8 @@ const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
     "vel", "accel", "soc", "supp", "cruiseSt", "rbsSt", "pv", "pc", 
     "pt", "mcv", "mcc", "heatsink", "gear",
     // Fault code components
-    "oserr", "faulterr", "evac"};
+    "oserr", "faulterr", "evac"
+};
 
 /**
  * @brief Initializes the display driver
@@ -241,8 +242,8 @@ DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bo
         .op = "=",
         .numArgs = 1,
         .argTypes = {INT_ARG},
-        .args = {{.num = g_display_comp_vals[DISP_PACK_CURRENT]}}}
-    ;
+        .args = {{.num = g_display_comp_vals[DISP_PACK_CURRENT]}}
+    };
     Display_Send(packcurr_cmd);
 
     DisplayCmd_t packcurr_sign_cmd = {

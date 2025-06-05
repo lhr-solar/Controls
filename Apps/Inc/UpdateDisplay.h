@@ -2,12 +2,12 @@
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file UpdateDisplay.h
  * @brief Function prototypes for the display application.
- * 
+ *
  * This contains function prototypes relevant to the UpdateDisplay
  * application. Call assertUpdateDisplayError after calling any of the
  * functions in this application.
- * 
- * 
+ *
+ *
  * @defgroup UpdateDisplay
  * @addtogroup UpdateDisplay
  * @{
@@ -36,21 +36,17 @@
 /**
  * For display elements with three states
  */
-typedef enum {
-	STATE_0	= 0,
-	STATE_1	= 1,
-	STATE_2	= 2
-} TriState_t;
+typedef enum { STATE_0 = 0, STATE_1 = 1, STATE_2 = 2 } TriState_t;
 
 // For cruise control and regen
 #define DISP_DISABLED STATE_0
-#define DISP_ENABLED STATE_1	// Able to be used
-#define DISP_ACTIVE STATE_2	// Actively being used right now
+#define DISP_ENABLED  STATE_1 // Able to be used
+#define DISP_ACTIVE   STATE_2 // Actively being used right now
 
 // For gear changes
-#define DISP_NEUTRAL STATE_0
-#define DISP_FORWARD STATE_1
-#define DISP_REVERSE STATE_2
+#define DISP_NEUTRAL  STATE_0
+#define DISP_FORWARD  STATE_1
+#define DISP_REVERSE  STATE_2
 
 /**
  * @brief Initializes UpdateDisplay application
@@ -126,12 +122,11 @@ controls_error_e UpdateDisplay_SetBrake(bool state);
 
 controls_error_e UpdateDisplay_SetBlink(bool state);
 
-
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0
  * @param none
  * @returns none
-*/
+ */
 void UpdateDisplay_ClearQueue(void);
 
 void assertUpdateDisplayError(controls_error_e err);

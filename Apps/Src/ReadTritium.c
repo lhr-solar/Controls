@@ -23,12 +23,11 @@
 #define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
 #define MOTOR_ERROR_MASK    0x01FF
 
-
-uint16_t     Motor_FaultBitmap = 0x0000;
-float 		 Motor_RPM         = 0;
-static float Motor_Velocity    = 0;
-static float Motor_BusVoltage  = 0;
-static float Motor_BusCurrent  = 0;
+uint16_t Motor_FaultBitmap = 0x0000;
+float Motor_RPM = 0;
+static float Motor_Velocity = 0;
+static float Motor_BusVoltage = 0;
+static float Motor_BusCurrent = 0;
 
 static OS_TMR MotorWatchdog;
 
@@ -61,8 +60,8 @@ static controls_error_e convert_motorfault_to_error(void) {
 }
 
 void Task_ReadTritium(void *p_arg) {
-    OS_ERR    err;
-    CANDATA_t dataBuf           = {0};
+    OS_ERR err;
+    CANDATA_t dataBuf = {0};
 
     static bool watchdogCreated = false;
 
@@ -92,6 +91,7 @@ void Task_ReadTritium(void *p_arg) {
                     UpdateDisplay_SetMCCurrent(Motor_BusCurrent * 10);
                     break;
                 }
+                
                 case MOTOR_STATUS: {
                     // motor status error flags is in bytes 4-5
                     Motor_FaultBitmap = (*((uint16_t *)(&dataBuf.data[4])) & MOTOR_ERROR_MASK);
@@ -107,13 +107,13 @@ void Task_ReadTritium(void *p_arg) {
                     memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
 
                     // Motor RPM is in bytes 0-3
-                    Motor_RPM          = *((float *)(&dataBuf.data[0]));
+                    Motor_RPM = *((float *)(&dataBuf.data[0]));
 
                     // Car Velocity (in m/s) is in bytes 4-7
-                    Motor_Velocity     = *((float *)(&dataBuf.data[4]));
+                    Motor_Velocity = *((float *)(&dataBuf.data[4]));
                     float Car_Velocity = Motor_Velocity * 1000;
 
-                    Car_Velocity       = (Car_Velocity * 223694) / 10000000;
+                    Car_Velocity = (Car_Velocity * 223694) / 10000000;
 
                     UpdateDisplay_SetVelocity(Car_Velocity);
                     break;
@@ -169,7 +169,7 @@ static inline void handler_ReadTritium_HallError(void) { restartMotorController(
  * @param   motor_err Bitmap with motor error codes to check
  */
 void assertTritiumError(controls_error_e m_err) {
-    static uint8_t hall_fault_cnt  = 0; // trip counter, doesn't ever reset
+    static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
     static uint8_t motor_fault_cnt = 0;
 
     switch (m_err) {

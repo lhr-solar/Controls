@@ -14,7 +14,6 @@
 #include "common.h"
 #include "os.h"
 
-
 /**
  * Task initialization macro
  * @param task name of the task
@@ -64,7 +63,6 @@
 #define TASK_COMMAND_LINE_STACK_SIZE   DEFAULT_STACK_SIZE
 #define TASK_IO_STATE_STACK_SIZE       DEFAULT_STACK_SIZE
 
-
 /**
  * Controls wide error enum.
  */
@@ -94,7 +92,7 @@ typedef enum {
     C_ERR_RCC_PRECHARGE_MISSED_MSG, /* Didn't receive a precharge msg in time (watchdog trip) */
     C_ERR_RCC_BPS_TRIP,             /* Recieved a BPS trip msg */
     C_ERR_RCC_ACTIVE_PRECHARGE_FLT, /* Received active precharge fault */
-    C_ERR_RCC_PRECHARGE_TMOUT_MOT, 
+    C_ERR_RCC_PRECHARGE_TMOUT_MOT,
     C_ERR_RCC_PRECHARGE_TMOUT_ARR,
     // IO state Errors
     C_ERR_IOS_GENERIC,
@@ -115,26 +113,24 @@ typedef enum {
 
 extern const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN];
 
-
-
 /**
  * BPS & Motor Status Event Flag Definitions
  */
 
-#define BPS_SAFE          1 << 0
-#define BPS_CHECKED       1 << 1
-#define MOTOR_SAFE_TO_RUN 1 << 2
+#define BPS_SAFE            1 << 0
+#define BPS_CHECKED         1 << 1
+#define MOTOR_SAFE_TO_RUN   1 << 2
 
-#define OS_FLAG_BLOCKING true
+#define OS_FLAG_BLOCKING    true
 #define OS_FLAG_SCHED_POINT true
 
 // Synchronization-protected event flag group signaling BPS_SAFE, if BPS
 // has been checked, & motor ready to run status
 extern OS_FLAG_GRP BPS_Motor_Status_Flags;
 
-OS_ERR   MotorStatus_Wait(uint8_t bits, bool blocking);
+OS_ERR MotorStatus_Wait(uint8_t bits, bool blocking);
 OS_FLAGS MotorStatus_GetBits();
-bool     MotorStatus_ModifyBits(uint8_t bits, bool state, bool allow_sched);
+bool MotorStatus_ModifyBits(uint8_t bits, bool state, bool allow_sched);
 
 /**
  * Task error variable type
@@ -158,7 +154,6 @@ typedef uint16_t error_code_t;
 // }
 // #undef ERR_MSG_OFFSET
 
-
 /**
  * @brief Can be used by tasks to add a delay in ms
  */
@@ -168,12 +163,14 @@ inline void delay_ms(uint32_t ms) {
     // Observed: ~3.77× slower → need ~5300 iterations per ms
     uint32_t count = ms * 5300;
 
-    __asm__ volatile("1: \n"
-                     "subs %[cnt], %[cnt], #1 \n"
-                     "bne 1b \n"
-                     : [cnt] "+r"(count)
-                     :
-                     : "cc");
+    __asm__ volatile(
+        "1: \n"       
+        "subs %[cnt], %[cnt], #1 \n"
+        "bne 1b \n"
+        : [cnt] "+r"(count)
+        :
+        : "cc"
+    );
 }
 
 /**
@@ -275,7 +272,7 @@ typedef enum { OPT_RECOV, OPT_NONRECOV } error_recovery_opt_e;
  * task-specific error-assertion functions that are also responsible for setting
  * the error variable.
  * @param error_code the enum for the specific error that happened
- * @param is_evac_needed whether evac is required, it wil be recommended regardless.
+ * @param is_evac_needed whether evac is required, it will be recommended regardless.
  * @param error_callback a callback function to a handler for that specific
  * error (NULL is permissible),
  * @param lock_scheduler whether or not to lock the scheduler to ensure the

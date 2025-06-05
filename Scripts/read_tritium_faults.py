@@ -3,9 +3,10 @@ import serial
 import threading
 
 # CAN configuration
-PORT = "/dev/ttyUSB1"
-CAN_ID = "241"  # Motor status message ID from your code
-BITRATE_CMD = 'S5'  # 250 kbps (matches your motor controller setup)
+PORT = "/dev/ttyUSB0"
+CAN_ID = 0x241
+BITRATE_CMD = 'S4'  # 125 kbps
+CR = chr(13)
 
 # Fault bit descriptions from Motor_FaultBitmap
 FAULT_MAP = {
@@ -32,7 +33,10 @@ def send_fault(ser, fault_bits):
     payload = bytes([0]*4) + fault_bytes + bytes([0]*2)
     
     # Create CAN message string
-    can_msg = f't{CAN_ID}{8}{payload.hex()}\r'
+    id_str = format(CAN_ID, '03X')
+    prefix = 'T'
+
+    can_msg = prefix + id_str + '8' + payload.hex() + CR
     
     # Send message
     ser.write(can_msg.encode('ascii'))
@@ -74,9 +78,10 @@ def main():
     )
     
     # Initialize CAN interface
-    ser.write(f'{BITRATE_CMD}\r'.encode('ascii'))
-    ser.write('O\r'.encode('ascii'))  # Open channel
+    ser.write(f'{BITRATE_CMD}{CR}'.encode('ascii'))
+    ser.write(f'O{CR}'.encode('ascii'))  # Open channel
     time.sleep(0.1)
+    print('[INFO] Configured slcan')
     
     # Start user input thread
     input_thread = threading.Thread(target=user_input_handler, args=(ser,))

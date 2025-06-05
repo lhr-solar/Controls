@@ -225,16 +225,17 @@ void handler_UpdateDisplay_Restart() {
  * @param   err variable with display error codes
  */
 void assertUpdateDisplayError(controls_error_e uderr) {
-	switch (uderr) {
-		case C_ERR_NONE:
+    switch (uderr) {
+        case C_ERR_NONE:
             break;
-		case C_ERR_UPD_GENERIC:
-		case C_ERR_UPD_PARSE_COMPONENT:
-		case C_ERR_UPD_DRIVER:
-			throwTaskError(uderr, false, handler_UpdateDisplay_Restart, OPT_NO_LOCK_SCHED, OPT_RECOV);
+        case C_ERR_UPD_GENERIC:
+        case C_ERR_UPD_PARSE_COMPONENT:
+        case C_ERR_UPD_DRIVER:
+            throwTaskError(uderr, false, handler_UpdateDisplay_Restart, OPT_NO_LOCK_SCHED,
+                           OPT_RECOV);
             break;
-		default:
-			// Critical failure, we have a non updatedisplay error in updatedisplay somehow
+        default:
+            // Critical failure, we have a non updatedisplay error in updatedisplay somehow
             throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
     }

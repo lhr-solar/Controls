@@ -112,7 +112,8 @@ static void setMotorControllerContactor(bool state, bool blocking) {
         // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
         MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, true, !OS_FLAG_SCHED_POINT);
     }
-    // Turning the motor controller does not necessarily imply the motor is safe to run due to waiting for precharge
+    // Turning the motor controller on does not necessarily imply the motor is safe to run due to
+    // waiting for precharge
 }
 
 /**
@@ -191,6 +192,7 @@ void Task_ReadCarCAN(void *p_arg) {
                 }
                 break;
             }
+
             case BPS_CONTACTOR: {
 #ifdef BPS_CAN_WATCHDOG
                 OSTmrStart(&canWatchTimer, &err);
@@ -199,18 +201,15 @@ void Task_ReadCarCAN(void *p_arg) {
 
                 // Set HV+, HV-, and Array Contactor states
                 // Note, does not control the Contactors, only stores the received state
-                Contactors_Set(HV_PLUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT),
-                               true);
-                Contactors_Set(HV_MINUS_CONTACTOR, (bool)(dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT),
-                               true);
-                Contactors_Set(ARRAY_CONTACTOR, (bool)(dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT),
-                               true);
+                Contactors_Set(HV_PLUS_CONTACTOR, (dataBuf.data[0] & HV_PLUS_CONTACTOR_BIT), true);
+                Contactors_Set(HV_MINUS_CONTACTOR, (dataBuf.data[0] & HV_MINUS_CONTACTOR_BIT), true);
+                Contactors_Set(ARRAY_CONTACTOR, (dataBuf.data[0] & HV_ARRAY_CONTACTOR_BIT), true);
                 uint8_t bps_state = (Contactors_Get(HV_MINUS_CONTACTOR, false) &&
                                      Contactors_Get(HV_PLUS_CONTACTOR, false));
 
                 // Context switches should not occur here since the only task pending on these flags
                 // waits for all bits to be set Mark BPS checked if its the first time
-                if(!bps_checked) {
+                if (!bps_checked) {
                     MotorStatus_ModifyBits(BPS_CHECKED, true, !OS_FLAG_SCHED_POINT);
                     // OSFlagPost(&BPS_Motor_Status_Flags, BPS_CHECKED, OS_OPT_POST_FLAG_SET, &err);
                     // assertOSError(err);
@@ -221,10 +220,11 @@ void Task_ReadCarCAN(void *p_arg) {
                 if (bps_state) {
                     MotorStatus_ModifyBits(BPS_SAFE, true, !OS_FLAG_SCHED_POINT);
                     // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE, OS_OPT_POST_FLAG_SET, &err);
-                }
-                else {
-                    MotorStatus_ModifyBits(BPS_SAFE | MOTOR_SAFE_TO_RUN, false, !OS_FLAG_SCHED_POINT);
-                    // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err);
+                } else {
+                    MotorStatus_ModifyBits(BPS_SAFE | MOTOR_SAFE_TO_RUN, false,
+                                           !OS_FLAG_SCHED_POINT);
+                    // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN,
+                    // OS_OPT_POST_FLAG_CLR, &err);
                 }
                 assertOSError(err);
                 break; // End of BPS Contactor Status Updates
@@ -280,10 +280,9 @@ void Task_ReadCarCAN(void *p_arg) {
                         // If the motor precharge contactor has been on for enough iterations,
                         // we can consider it safe to run
                         MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, true, !OS_FLAG_SCHED_POINT);
-//                         OS_ERR err;
-//                         OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET,
-//                                    &err);
-//                         assertOSError(err);
+                        // OS_ERR err;
+                        // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
+                        // assertOSError(err);
                     }
                 }
             }
