@@ -256,7 +256,7 @@ void Task_SendTritium(void *p_arg) {
                 // Drive command must be sent every 250ms or the motor will return to neutral
                 CANbus_Send(driveCmd, CAN_BLOCKING, MOTORCAN);
         #endif
-        CANbus_Send(motorSafeCmd, CAN_BLOCKING, CARCAN); // Send the motor safe command
+        SendCarCAN_Put(motorSafeCmd); // Send the motor safe command
         SendCarCAN_Put(driveCmd); // Send the drive command to the car CAN bus for telemetry
 
         // Delay of FSM_PERIOD ms
