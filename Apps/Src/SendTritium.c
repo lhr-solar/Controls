@@ -29,9 +29,10 @@
 #include "SendCarCAN.h"
 #include "SendTritium.h"
 #include "Tasks.h"
+#include "DebugIO.h"
 #include "UpdateDisplay.h"
 
-// #define USING_PROFINITY
+#define USING_PROFINITY
 
 // Inputs
 static uint8_t brakePedalPercent = 0;
@@ -175,19 +176,18 @@ void Task_SendTritium(void *p_arg) {
     };
 
     CANDATA_t motorSafeCmd = {
-        .ID = MOTOR_SAFE_TO_RUN, 
+        .ID = MOTOR_CONTROLLER_SAFE, 
         .idx = 0, 
         .data = {0}
     };
 
     while (1) {
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(SEND_TRITIUM_PIN);
+        #endif
         readInputs(); // read inputs from the system
 
         updateDisplayState();
-
-        // Check that motor is ready to run (non-blocking)
-        // OSFlagPend(&BPS_Motor_Status_Flags, BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, 0,
-        //            OS_OPT_PEND_FLAG_SET_ALL | OS_OPT_PEND_NON_BLOCKING, &ticks, &err);
 
         // Check that motor is ready to run
         err = MotorStatus_Wait(BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING);
@@ -198,11 +198,16 @@ void Task_SendTritium(void *p_arg) {
             assertOSError(err);
         }
 
+        memset(&motorSafeCmd.data, 0, sizeof(motorSafeCmd.data));
         // All bits are set
         if (err == OS_ERR_NONE) {
             // CAN message for setpoint of bus current percent
             memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float));
-            CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
+
+            // If we're using the profinity software don't set the power here
+            #ifndef USING_PROFINITY
+                CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
+            #endif
 
             // Update velocitySetpoint & currentSetpoint based on gear/state
             // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
@@ -232,31 +237,34 @@ void Task_SendTritium(void *p_arg) {
                     assertSendTritiumError(C_ERR_STR_GEAR_FAULT);
                     break;
             }
-            motorSafeCmd.data[0] = 1; // Set motor safe to run to true
+            motorSafeCmd.data[0] |= 0x01; // Set motor safe to run to true
         }
 
         // Motor is not safe to run so velocitySetpoint and currentSetpoint are set to 0
         else {
-            velocitySetpoint = 0;
+            velocitySetpoint = 0.0f;
             currentSetpoint = 0.0f;
             motorSafeCmd.data[0] = 0; // Set motor safe to run to false
         }
         memcpy(&driveCmd.data[4], &currentSetpoint, sizeof(float));
         memcpy(&driveCmd.data[0], &velocitySetpoint, sizeof(float));
 
-// The motor controller will error if 2 different sources are sending drive commands, so if
-// profinity is plugged in, don't send drive command
-#ifndef USING_PROFINITY
-        // Drive command must be sent every 250ms or the motor will return to neutral
-        CANbus_Send(driveCmd, CAN_BLOCKING, MOTORCAN);
-#endif
-
+        // Set motor fault as 0
+        // The motor controller will error if 2 different sources are sending drive commands, so if
+        // profinity is plugged in, don't send drive command
+        #ifndef USING_PROFINITY
+                // Drive command must be sent every 250ms or the motor will return to neutral
+                CANbus_Send(driveCmd, CAN_BLOCKING, MOTORCAN);
+        #endif
+        CANbus_Send(motorSafeCmd, CAN_BLOCKING, CARCAN); // Send the motor safe command
         SendCarCAN_Put(driveCmd); // Send the drive command to the car CAN bus for telemetry
-        SendCarCAN_Put(motorSafeCmd);
 
         // Delay of FSM_PERIOD ms
         OSTimeDlyHMSM(0, 0, 0, FSM_PERIOD, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
+        #ifdef TASK_PROFILER
+        DebugIO_Toggle(SEND_TRITIUM_PIN);
+        #endif
     }
 }
 

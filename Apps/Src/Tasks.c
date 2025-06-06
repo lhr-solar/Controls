@@ -333,13 +333,17 @@ OS_ERR MotorStatus_Wait(uint8_t bits, bool blocking) {
     OSFlagPend(&BPS_Motor_Status_Flags, bits, 0,
                OS_OPT_PEND_FLAG_SET_ALL | block_opt , NULL, &err);
 
-    // assert error if 
-    //   1. blocking is true
-    //   2. nonblocking but error is not OS_ERR_PEND_WOULD_BLOCK
-    if (blocking || err != OS_ERR_PEND_WOULD_BLOCK) {
+    // Nonblocking and not all the specified bits are set
+    if(!blocking && err == OS_ERR_PEND_WOULD_BLOCK){
+        return OS_ERR_PEND_WOULD_BLOCK;
+    }
+
+    // If there errors other than OS_ERR_NONE, assert them, should never return from this
+    if(err != OS_ERR_NONE){
         assertOSError(err);
     }
 
+    
     return err;
 }
 

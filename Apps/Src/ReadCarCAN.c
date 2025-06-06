@@ -99,8 +99,6 @@ static void handler_ReadCarCAN_BPSTrip(void) {
     MotorContactor_EmergencyDisable();
     Status_Leds_Write(BPS_FAULT_LED, ON);    // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
-    // OSFlagPost(&BPS_Motor_Status_Flags, BPS_SAFE | MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR, &err); 
-    // assertOSError(err);
 }
 
 static void setMotorControllerContactor(bool state, bool blocking) {
@@ -108,35 +106,11 @@ static void setMotorControllerContactor(bool state, bool blocking) {
 
     // If the motor contactor is turned off, we should not be running the motor controller
     if (state == OFF) {
-        // OS_ERR err;
-        // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
-        MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, true, !OS_FLAG_SCHED_POINT);
+        MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, !OS_FLAG_SCHED_POINT);
     }
-    // Turning the motor controller on does not necessarily imply the motor is safe to run due to
-    // waiting for precharge
+    // Turning the motor controller on does not necessarily imply the motor is safe to run due to waiting for precharge
+    // Hence we do not set the MOTOR safe bit only based on motor contactor state
 }
-
-/**
- * @brief turns on or off the motor contactor depending on igntion and HV Contactors
- */
-
-// static void updateMotorControllerContactor(void){
-//     ignition_state_t ignState = Get_Ignition_State();
-//     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
-//     if (ignState == IGN_ERROR || ignState == IGN_TRANSITION) {return;}
-//     if(ignState == IGN_MOTOR || ignState == IGN_ARR){
-//         if(Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true)){
-//             // turn on motor contactor if it was off before
-//             if(motorContactorState == OFF){
-//                 setMotorControllerContactor(ON, true);
-//                 return;
-//             }
-//         }
-//   }
-//   if(Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) == ON){
-//     setMotorControllerContactor(OFF, true); // turn off motor contactor if it was on before
-//   }
-// }
 
 void Task_ReadCarCAN(void *p_arg) {
     OS_ERR err;
@@ -194,10 +168,12 @@ void Task_ReadCarCAN(void *p_arg) {
             }
 
             case BPS_CONTACTOR: {
-#ifdef BPS_CAN_WATCHDOG
+            #ifdef BPS_CAN_WATCHDOG
+                // Restart CAN Watchdog timer for BPS Contactor Status msg
+                OS_ERR err;
                 OSTmrStart(&canWatchTimer, &err);
                 assertOSError(err);
-#endif
+            #endif
 
                 // Set HV+, HV-, and Array Contactor states
                 // Note, does not control the Contactors, only stores the received state
@@ -265,25 +241,30 @@ void Task_ReadCarCAN(void *p_arg) {
                 // function instead
                 setMotorControllerContactor(MOTOR_SENSE_ACTUAL_VALUE(dataBuf.data), true);
 
-                Status_Leds_Write(CONTROLS_FAULT, true);
                 // Update Array Precharge sense state
                 Contactors_Set(ARRAY_PRECHARGE_BYPASS_CONTACTOR,
                                ARRAY_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
                 // Update Motor Precharge sense state
                 Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR,
                                MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
+                
+                bool motorContactorsOn = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false);
+                bool bps_state = (Contactors_Get(HV_MINUS_CONTACTOR, false) && Contactors_Get(HV_PLUS_CONTACTOR, false));
 
-                if (Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true) &&
-                    Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true)) {
+                if (motorContactorsOn && bps_state) {
+                    // TODO: might need to check if the motor is already safe to run?
                     motorPrechargeOnCount++;
                     if (motorPrechargeOnCount >= MOTOR_PRECHARGE_ON_COUNT_THRESHOLD) {
                         // If the motor precharge contactor has been on for enough iterations,
                         // we can consider it safe to run
                         MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, true, !OS_FLAG_SCHED_POINT);
-                        // OS_ERR err;
-                        // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_SET, &err);
-                        // assertOSError(err);
+                        motorPrechargeOnCount = 0; // Reset the counter so we don't overflow and/or constantly post to the flag
                     }
+                    // Leave the motor safe to run bit as if it was set
+                }
+                else{
+                    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, !OS_FLAG_SCHED_POINT);
+                    motorPrechargeOnCount = 0;
                 }
             }
             case TEMPERATURE_SUMMARY: { // uint24_t

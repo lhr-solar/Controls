@@ -26,7 +26,7 @@ CR = chr(13)
 
 #com_num = input('Enter COM number: ')
 #port_name = input('Enter port name: ')
-port_name = "/dev/ttyUSB1" ### CHANGE THIS TO MATCH YOUR CANDAPTER PORT ###
+port_name = "/dev/ttyUSB0" #input('Enter port name (e.g., /dev/ttyUSB0): ')
 
 # Establish serial connection with specified parameters
 ser = serial.Serial(
@@ -171,9 +171,10 @@ def test_sim():
     # Messages to test [BPS_CONTACTOR, CONTACTOR_SENSE]
     messages = [[0,0], # All off
                 [6,0], # HV+- on
-                [7,0], # Array enable also on
-                [7,64],# Array precharge also on
-                [7,320]# Array precharge fault also added
+                [7, 73]
+                # [7,0], # Array enable also on
+                # [7,64],# Array precharge also on
+                # [7,320]# Array precharge fault also added
                 ]
     
     for message in messages:

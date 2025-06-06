@@ -30,6 +30,8 @@
 #define READ_CARCAN_PIN    PC14
 #define UPDATE_DISPLAY_PIN PA8
 #define SEND_CARCAN_PIN    PC12
+#define SEND_TRITIUM_PIN    PC13
+
 #endif
 
 /**

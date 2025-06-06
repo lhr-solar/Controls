@@ -17,7 +17,7 @@
 #include "SendCarCAN.h"
 #include "Tasks.h"
 
-#define SENDCARCAN_MSG_SKIP_CTR 3
+#define SENDCARCAN_MSG_SKIP_CTR 10
 
 // fifo
 #define FIFO_TYPE               CANDATA_t
