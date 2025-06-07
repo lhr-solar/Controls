@@ -1,8 +1,14 @@
+/**
+ * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
+ * @file StatusLeds.h
+ * @brief Header file for the StatusLeds driver
+ */
+
 #ifndef __STATUS_LEDS_H
 #define __STATUS_LEDS_H
 
-#include "daybreak_pins.h"
-#include "BSP_GPIO.h"
+#include "common.h"
+
 
 /**
  * Possible Status LED Pins
@@ -17,6 +23,7 @@ typedef enum {
     CRUISE_IND_LED,
     DASH_BPS_HAZ_LED,
     DASH_HEARTBEAT_LED,
+    BRAKELIGHT_LED,
     NUM_STATUS_LED,
 } status_led_t;
  

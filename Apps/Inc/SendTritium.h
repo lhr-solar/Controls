@@ -11,90 +11,63 @@
 #define __SENDTRITIUM_H
 
 #include "common.h"
+#include "os.h"
+#include "Dashboard.h"
+#include "Tasks.h"
+
 
 //#define SENDTRITIUM_PRINT_MES
+#define CANBUS_MOTOR_SAFE_TO_RUN 1
 
 #define MOTOR_MSG_PERIOD 100 // in ms
 #define FSM_PERIOD 100 // in ms
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
-#define MOTOR_MSG_COUNTER_THRESHOLD (MOTOR_MSG_PERIOD)/(FSM_PERIOD)
 
-#define FOREACH_Gear(GEAR) \
-        GEAR(FORWARD_GEAR),   \
-        GEAR(NEUTRAL_GEAR),  \
-        GEAR(REVERSE_GEAR),   \
+#define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
 
-typedef enum GEAR_ENUM {
-    FOREACH_Gear(GENERATE_ENUM)
-    NUM_GEARS,
-} Gear_t;
+// Used to define accel & brake (hysteresis) thresholds for when to start/stop powering the motor, respectively
+// TODO: Test these thresholds
+#define ACCEL_PEDAL_THRESHOLD 15 // percent
+#define BRAKE_UNPRESSED_THRESHOLD 15 // percent
+#define BRAKE_PRESSED_THRESHOLD 25 // percent
 
-// State Names
-typedef enum{
-    FORWARD_DRIVE,
-    NEUTRAL_DRIVE,
-    REVERSE_DRIVE,
-    RECORD_VELOCITY,
-    POWERED_CRUISE,
-    COASTING_CRUISE,
-    BRAKE_STATE,
-    ONEPEDAL,
-    ACCELERATE_CRUISE
-} TritiumStateName_t;
+// Motor Controller current values. Current is in Amps (A)
+#define MAX_MOCO_BATTERY_CURRENT 64.0f  // NOTE: Provided only for reference. This 64A max for daybreak, anticipated to be 135 for next-gen
+#define CONT_MOCO_BATTERY_CURRENT 30.0f // Continuous 
+#define MAX_MOCO_CURRENT 122.0f
 
-// State Struct for FSM
-typedef struct TritiumState{
-    TritiumStateName_t name;
-    void (*stateHandler)(void);
-    void (*stateDecider)(void);
-} TritiumState_t;
+#define PEDAL_MIN 0        // percent
+#define PEDAL_MAX 100      // percent
+#define CURRENT_SP_MIN 0   // percent
+#define CURRENT_SP_MAX 100 // percent
+
+#define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
+
+// /**
+//  * Error types
+//  * 
+//  */
+// typedef enum
+// {
+//     SENDTRITIUM_ERR_NONE,
+//     SENDTRITIUM_ERR_GEAR_FAULT,     // Received multiple or no gear inputs (e.g. FOR_SW, REV_SW)
+// } SendTritium_error_code_t;
 
 #ifdef SENDTRITIUM_EXPOSE_VARS
 // Inputs
-extern bool cruiseEnable;
-extern bool cruiseSet;
-extern bool onePedalEnable;
-extern bool regenEnable;
-
 extern uint8_t brakePedalPercent;
 extern uint8_t accelPedalPercent;
-
-extern Gear_t gear;
-
-extern TritiumState_t state;
-extern float velocityObserved;
-extern float cruiseVelSetpoint;
+extern gear_t gear;
+extern bool isBrakeOn; // Used for updating display & brakelight
 #endif
 
 // Getter functions for local variables in SendTritium.c
-EXPOSE_GETTER(bool, cruiseEnable)
-EXPOSE_GETTER(bool, cruiseSet)
-EXPOSE_GETTER(bool, onePedalEnable)
-EXPOSE_GETTER(bool, regenEnable)
 EXPOSE_GETTER(uint8_t, brakePedalPercent)
 EXPOSE_GETTER(uint8_t, accelPedalPercent)
-EXPOSE_GETTER(Gear_t, gear)
-EXPOSE_GETTER(TritiumState_t, state)
-EXPOSE_GETTER(float, velocityObserved)
-EXPOSE_GETTER(float, cruiseVelSetpoint)
+EXPOSE_GETTER(gear_t, gear)
 EXPOSE_GETTER(float, currentSetpoint)
 EXPOSE_GETTER(float, velocitySetpoint)
-
-// Setter functions for local variables in SendTritium.c
-#ifdef SENDTRITIUM_EXPOSE_VARS
-EXPOSE_SETTER(bool, cruiseEnable)
-EXPOSE_SETTER(bool, cruiseSet)
-EXPOSE_SETTER(bool, onePedalEnable)
-EXPOSE_SETTER(bool, regenEnable)
-EXPOSE_SETTER(uint8_t, brakePedalPercent)
-EXPOSE_SETTER(uint8_t, accelPedalPercent)
-EXPOSE_SETTER(Gear_t, gear)
-EXPOSE_SETTER(TritiumState_t, state)
-EXPOSE_SETTER(float, velocityObserved)
-EXPOSE_SETTER(float, cruiseVelSetpoint)
-EXPOSE_SETTER(float, currentSetpoint)
-EXPOSE_SETTER(float, velocitySetpoint)
-#endif
+EXPOSE_GETTER(bool, isBrakeOn)
 
 /**
  * @brief Linearly map range of integers to another range of integers, and provide the pecentage result.

@@ -76,8 +76,8 @@ void Contactors_Init() {
 bool Contactors_Get(contactor_t contactor, bool blocking) {
     switch (contactor) {
         case MOTOR_CONTROLLER_CONTACTOR:
-            contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Read_Pin(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 
-                                                         ? ON : OFF;
+            // contactorState[MOTOR_CONTROLLER_CONTACTOR] = BSP_GPIO_Read_Pin(MOTOR_C_SENSE_PORT, MOTOR_C_SENSE) == 0 
+            //                                              ? ON : OFF;
             break;
 
         // Precharge Contactors are updated by ReadCarCAN.c

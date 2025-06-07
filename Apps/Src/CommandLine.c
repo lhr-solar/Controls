@@ -344,6 +344,6 @@ static bool cmd_Pedals_Read(void){
 		return false;
 	}
 
-	printf("%s: %d\n\r", pedalInput, Pedals_Read(pedal));
+	printf("%s: %u\n\r", pedalInput, Pedals_Read(pedal));
 	return true;
 }

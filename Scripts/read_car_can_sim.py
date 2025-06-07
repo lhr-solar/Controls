@@ -26,7 +26,7 @@ CR = chr(13)
 
 #com_num = input('Enter COM number: ')
 #port_name = input('Enter port name: ')
-port_name = "/dev/ttyUSB1" ### CHANGE THIS TO MATCH YOUR CANDAPTER PORT ###
+port_name = "/dev/ttyUSB0" #input('Enter port name (e.g., /dev/ttyUSB0): ')
 
 # Establish serial connection with specified parameters
 ser = serial.Serial(

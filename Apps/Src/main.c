@@ -1,10 +1,9 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file main.c
- * @brief 
- * 
+ * @brief
+ *
  */
-
 
 #include "common.h"
 #include "config.h"
@@ -23,35 +22,34 @@
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
+#include "ReadCarCAN.h"
 #include "daybreak_pins.h"
 
 int idle_time_ctr = 0;
 int last_tick_cnt = 0;
 int current_tick_cnt = 0;
 
-void IdleTaskHook(void)
-{
+void IdleTaskHook(void) {
     static OS_ERR err;
     static bool toggle = false;
-    while(1){
+    while (1) {
         current_tick_cnt = OSTimeGet(&err);
-        
-        if(last_tick_cnt != current_tick_cnt){
+
+        if (last_tick_cnt != current_tick_cnt) {
             idle_time_ctr++;
             last_tick_cnt = current_tick_cnt;
 
-            if(current_tick_cnt % 50 == 0){
-                #ifdef TASK_PROFILER
+            if (current_tick_cnt % 50 == 0) {
+#ifdef TASK_PROFILER
                 DebugIO_Toggle(IDLE_PIN);
-                #endif
+#endif
                 toggle = !toggle;
             }
         }
     }
 }
 
-void IdleInit(void)
-{
+void IdleInit(void) {
     BSP_GPIO_Init(HEARTBEAT_PORT, HEARTBEAT_PIN, OUTPUT, false);
     OS_AppIdleTaskHookPtr = &IdleTaskHook;
 }
@@ -60,13 +58,16 @@ int main(void) {
     // Disable interrupts
     __disable_irq();
 
-
     OS_ERR err;
     OSInit(&err);
+
     IdleInit();
     TaskSwHook_Init();
     Status_Leds_Init();
-    assertOSError(err);
+
+    assertOSError(err); // for OS init
+
+    BPSMotorFlags_Init();
     Ignition_Init();
     dashboardInit();
     DebugIO_Init();
@@ -96,15 +97,15 @@ int main(void) {
     OSStart(&err);
     assertOSError(err);
 
-    while(1);
+    while (1);
 }
 
-void Task_Init(void *p_arg){
+void Task_Init(void *p_arg) {
     OS_ERR err;
 
-    // Start systick    
-    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U) OSCfg_TickRate_Hz);
-    
+    // Start systick
+    OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
+
     // Initialize drivers
     Pedals_Init();
     BSP_UART_Init(USB);
@@ -189,7 +190,7 @@ void Task_Init(void *p_arg){
         (OS_ERR*)&err
     );
     assertOSError(err);
-    
+
     // Initialize SendCarCAN
     OSTaskCreate(
         (OS_TCB*)&SendCarCAN_TCB,
@@ -229,26 +230,26 @@ void Task_Init(void *p_arg){
     OSTaskDel(NULL, &err);
 }
 
-void HardFault_Handler(){
+void HardFault_Handler() {
     __disable_irq();
     MotorContactor_EmergencyDisable();
-    while(1){}
+    while (1) {}
 }
 
-void MemManage_Handler(){
+void MemManage_Handler() {
     __disable_irq();
     MotorContactor_EmergencyDisable();
-    while(1){}
+    while (1) {}
 }
 
-void BusFault_Handler(){
+void BusFault_Handler() {
     __disable_irq();
     MotorContactor_EmergencyDisable();
-    while(1){}
+    while (1) {}
 }
 
-void UsageFault_Handler(){
+void UsageFault_Handler() {
     __disable_irq();
     MotorContactor_EmergencyDisable();
-    while(1){}
+    while (1) {}
 }
