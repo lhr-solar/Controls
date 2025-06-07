@@ -29,6 +29,8 @@ static float Motor_Velocity = 0;
 static float Motor_BusVoltage = 0;
 static float Motor_BusCurrent = 0;
 
+#define MPH_CONVERSION      2.236936f // mph = m/s * MPH_CONVERSION
+
 static OS_TMR MotorWatchdog;
 
 // Function prototypes
@@ -111,11 +113,15 @@ void Task_ReadTritium(void *p_arg) {
 
                     // Car Velocity (in m/s) is in bytes 4-7
                     Motor_Velocity = *((float *)(&dataBuf.data[4]));
-                    float Car_Velocity = Motor_Velocity * 1000;
 
-                    Car_Velocity = (Car_Velocity * 223694) / 10000000;
+                    float Car_Velocity = Motor_Velocity * MPH_CONVERSION * 10.0f;
 
-                    UpdateDisplay_SetVelocity(Car_Velocity);
+                    // Display can't take negative values, and reverse puts Car_Velocity in the negative
+                    Car_Velocity = (Car_Velocity < 0) ? -Car_Velocity : Car_Velocity; 
+
+                    // Round car velocity to the nearest integer
+                    UpdateDisplay_SetVelocity((uint32_t)(Car_Velocity));
+
                     break;
                 }
 

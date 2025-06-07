@@ -210,10 +210,14 @@ void Task_SendTritium(void *p_arg) {
             #endif
             // Update velocitySetpoint & currentSetpoint based on gear/state
             // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
+
+            float fakeCurrent = 0.25f; // Fake current for testing purposes, should be removed in production
+
             switch (gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                    
+                    currentSetpoint = fakeCurrent;
+                    // currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                    
                     break;
 
                 case DASH_NEU:
@@ -223,7 +227,8 @@ void Task_SendTritium(void *p_arg) {
 
                 case DASH_REV:
                     velocitySetpoint = -MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                    
+                    currentSetpoint = fakeCurrent;
+                    // currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                    
                     break;
 
                 default:
