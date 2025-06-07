@@ -246,6 +246,11 @@ void Task_ReadCarCAN(void *p_arg) {
                 // Update Motor Precharge sense state
                 Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR,
                                MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
+
+                // If Precharge notices a fault in any of the Contactor's sense pins
+                if(MOTOR_SENSE_FAULT(dataBuf.data) || MOTOR_PRECHARGE_SENSE_FAULT(dataBuf.data) || ARRAY_PRECHARGE_SENSE_FAULT(dataBuf.data)) {
+                    assertReadCarCANError(C_ERR_RCC_ACTIVE_PRECHARGE_FLT);
+                }
                 
                 bool motorContactorsOn = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false);
                 bool bps_state = (Contactors_Get(HV_MINUS_CONTACTOR, false) && Contactors_Get(HV_PLUS_CONTACTOR, false));
@@ -303,18 +308,22 @@ void assertReadCarCANError(controls_error_e rcc_err) {
         case C_ERR_RCC_BPS_MISSED_MSG:
         case C_ERR_RCC_PRECHARGE_MISSED_MSG:
         case C_ERR_RCC_ACTIVE_PRECHARGE_FLT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
         case C_ERR_RCC_PRECHARGE_TMOUT_MOT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
         case C_ERR_RCC_PRECHARGE_TMOUT_ARR:
-            throwTaskError(rcc_err, true, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case C_ERR_RCC_BPS_TRIP:
-            throwTaskError(rcc_err, true, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(rcc_err, EVAC_NEEDED, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         default:
             // Critical failure, we have a non readcarcan error in readcarcan somehow
-            throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(C_ERR_ILLEGAL_ERROR, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
     }
 }

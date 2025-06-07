@@ -18,7 +18,7 @@
 
 // #define DISP_OUT DISPLAY
 #define MAX_MSG_LEN 32
-#define MAX_ARG_LEN 16
+#define MAX_ARG_LEN 17
 
 #define MAX_ARGS    2 // maximum # of arguments in a command packet
 

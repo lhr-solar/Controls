@@ -100,6 +100,9 @@ const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
     [C_ERR_RCC_PRECHARGE_MISSED_MSG] = "\"PRECHG_MISS\"",   /* Didn't receive prechrg msg in time */
     [C_ERR_RCC_BPS_TRIP]             = "\"BPS_TRIP\"",      /* Recieved a BPS trip msg */
     [C_ERR_RCC_ACTIVE_PRECHARGE_FLT] = "\"ACT_PRECH_FLT\"", /* Received active precharge fault */
+    [C_ERR_RCC_PRECHARGE_TMOUT_MOT]  = "\"PRECH_MTOUT\"",   /* Received active precharge timeout fault for motor */
+    [C_ERR_RCC_PRECHARGE_TMOUT_ARR]  = "\"PRECH_ARTOUT\"",  /* Received active precharge timeout fault for array */
+
     // IO state Errors
     [C_ERR_IOS_GENERIC]              = "\"IOS_GENERIC\"",   /* Generic placeholder error */
     [C_ERR_IOS_IGN_FAULT]            = "\"IOS_IGN_FLT\"",   /* Ignition unstable for too long */
@@ -203,12 +206,11 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
 
     if (error_code == C_ERR_NONE) return;
 
-    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING, false);
+    // Set the motor safe to run bit to false and don't make it a scheduling point
+    // This avoids context switching while we're in an error
+    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, !OS_FLAG_SCHED_POINT);
 
     OS_ERR err;
-    // // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu
-    // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR | OS_OPT_POST_NO_SCHED, &err);
-    // assertOSError(err);
 
     Status_Leds_Write(CONTROLS_FAULT_LED, ON);
 
@@ -271,14 +273,17 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
         }
     }
 
-    // only reaches here is fault is recoverable
-    if (lock_scheduler == OPT_LOCK_SCHED) {
+    // We're in a recoverable error so turn the scheduler back on
+    else{
+
         Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
-        OSSchedUnlock(&err);
-        // Don't err out if scheduler is still locked because of a timer
-        // callback; but we don't plan to lock more than one level deep
-        if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) {
-            assertOSError(err);
+        if(lock_scheduler == OPT_LOCK_SCHED){
+            OSSchedUnlock(&err);
+            // Don't err out if scheduler is still locked because of a timer
+            // callback; but we don't plan to lock more than one level deep
+            if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) {
+                assertOSError(err);
+            }
         }
     }
 }
