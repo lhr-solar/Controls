@@ -171,10 +171,9 @@ def test_sim():
     # Messages to test [BPS_CONTACTOR, CONTACTOR_SENSE]
     messages = [[0,0], # All off
                 [6,0], # HV+- on
-                [7, 73]
-                # [7,0], # Array enable also on
-                # [7,64],# Array precharge also on
-                # [7,320]# Array precharge fault also added
+                [7,0], # Array enable also on
+                [7,64],# Array precharge also on
+                [7,320]# Array precharge fault also added
                 ]
     
     for message in messages:

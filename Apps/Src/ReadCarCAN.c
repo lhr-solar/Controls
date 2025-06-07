@@ -170,7 +170,6 @@ void Task_ReadCarCAN(void *p_arg) {
             case BPS_CONTACTOR: {
             #ifdef BPS_CAN_WATCHDOG
                 // Restart CAN Watchdog timer for BPS Contactor Status msg
-                OS_ERR err;
                 OSTmrStart(&canWatchTimer, &err);
                 assertOSError(err);
             #endif

@@ -32,7 +32,7 @@
 #include "DebugIO.h"
 #include "UpdateDisplay.h"
 
-#define USING_PROFINITY
+// #define USING_PROFINITY
 
 // Inputs
 static uint8_t brakePedalPercent = 0;
