@@ -194,15 +194,15 @@ void assertTritiumError(controls_error_e m_err) {
         case C_ERR_RTR_INIT_FAIL:
         case C_ERR_RTR_MULTIPLE:
         case C_ERR_RTR_UNKNOWN_ERROR:
-            throwTaskError(m_err, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
 
         case C_ERR_RTR_MOTOR_WDOG_TRIP:
             // Try to restart the motor a few times and then fail out
             if (++motor_fault_cnt > RESTART_THRESHOLD) {
-                throwTaskError(m_err, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+                throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             } else {
-                throwTaskError(m_err, false, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED,
+                throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED,
                                OPT_RECOV);
             }
             break;
@@ -211,16 +211,16 @@ void assertTritiumError(controls_error_e m_err) {
             // If it's purely a hall sensor error, try to restart the motor a few times and then
             // fail out
             if (++hall_fault_cnt > RESTART_THRESHOLD) {
-                throwTaskError(m_err, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+                throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             } else {
-                throwTaskError(m_err, false, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED,
+                throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED,
                                OPT_RECOV);
             }
             break;
 
         default:
             // Critical failure, we have a non readtritium error in readtritium somehow
-            throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(C_ERR_ILLEGAL_ERROR, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
     }
 }

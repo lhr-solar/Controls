@@ -102,6 +102,9 @@ const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
     [C_ERR_RCC_ACTIVE_PRECHARGE_FLT] = "\"ACT_PRECH_FLT\"", /* Received active precharge fault */
     [C_ERR_RCC_PRECHARGE_TMOUT_MOT]  = "\"PRECH_MTOUT\"",   /* Received active precharge timeout fault for motor */
     [C_ERR_RCC_PRECHARGE_TMOUT_ARR]  = "\"PRECH_ARTOUT\"",  /* Received active precharge timeout fault for array */
+    [C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT] = "\"PRECH_MSENSE\"", /* Received precharge motor sense fault */
+    [C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT] = "\"PRECH_ASENSE\"", /* Received precharge array pre sense fault */
+    [C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT] = "\"PRECH_MPSENSE\"", /* Received precharge motor pre sense fault */
 
     // IO state Errors
     [C_ERR_IOS_GENERIC]              = "\"IOS_GENERIC\"",   /* Generic placeholder error */
@@ -272,11 +275,11 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
             CANbus_Send_Faultstate(iostatemsg, CARCAN);
         }
     }
-
-    // We're in a recoverable error so turn the scheduler back on
     else{
 
         Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
+
+        // Only unlock the scheduler if we locked it
         if(lock_scheduler == OPT_LOCK_SCHED){
             OSSchedUnlock(&err);
             // Don't err out if scheduler is still locked because of a timer

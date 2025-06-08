@@ -248,8 +248,14 @@ void Task_ReadCarCAN(void *p_arg) {
                                MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
 
                 // If Precharge notices a fault in any of the Contactor's sense pins
-                if(MOTOR_SENSE_FAULT(dataBuf.data) || MOTOR_PRECHARGE_SENSE_FAULT(dataBuf.data) || ARRAY_PRECHARGE_SENSE_FAULT(dataBuf.data)) {
-                    assertReadCarCANError(C_ERR_RCC_ACTIVE_PRECHARGE_FLT);
+                if(MOTOR_SENSE_FAULT(dataBuf.data)) {
+                    assertReadCarCANError(C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT);
+                }
+                if(MOTOR_PRECHARGE_SENSE_FAULT(dataBuf.data)) {
+                    assertReadCarCANError(C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT);
+                }
+                if(ARRAY_PRECHARGE_SENSE_FAULT(dataBuf.data)) {
+                    assertReadCarCANError(C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT);
                 }
                 
                 bool motorContactorsOn = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false);
@@ -307,6 +313,15 @@ void assertReadCarCANError(controls_error_e rcc_err) {
         case C_ERR_RCC_GENERIC:
         case C_ERR_RCC_BPS_MISSED_MSG:
         case C_ERR_RCC_PRECHARGE_MISSED_MSG:
+        case C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
+        case C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
+        case C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            break;
         case C_ERR_RCC_ACTIVE_PRECHARGE_FLT:
             throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
