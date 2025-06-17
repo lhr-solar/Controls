@@ -189,6 +189,20 @@ void _assertOSError(OS_ERR err) {
     }
 }
 
+static void setDisplayErrorScreen(controls_error_e error_code, bool is_evac_needed) {
+    if (error_code == C_ERR_RTR_MULTIPLE) {
+        char err_msg_multiple[ERRMSG_MAX_LEN] = {0};
+        snprintf(err_msg_multiple, ERRMSG_MAX_LEN, "\"MOCO_%03X\"",
+                    Motor_Error_Get() & 0xFFF);
+        Display_Error(err_msg_multiple, ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+    } else {
+        Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+    }
+}
+
+#define ERROR_CAN_DELAY_MS 500
+#define ERROR_DISPLAY_UPDATE_COUNT (1000 / ERROR_CAN_DELAY_MS)
+
 /**
  * @brief Assert a task error by setting the location variable and optionally
  * locking the scheduler, displaying a fault screen (if nonrecoverable), jumping
@@ -227,16 +241,7 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
 
     if (recovery == OPT_NONRECOV) {
         MotorContactor_EmergencyDisable();
-        // Needs to happen before callback so that tasks can change the screen
-        // (ex: readCarCAN and evac screen for BPS trip)
-        if (error_code == C_ERR_RTR_MULTIPLE) {
-            char err_msg_multiple[ERRMSG_MAX_LEN] = {0};
-            snprintf(err_msg_multiple, ERRMSG_MAX_LEN, "\"MOCO_%03X\"",
-                     Motor_Error_Get() & 0xFFF);
-            Display_Error(err_msg_multiple, ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
-        } else {
-            Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
-        }
+        setDisplayErrorScreen(error_code, is_evac_needed);
     }
 
     // Run a handler for this error if specified
@@ -264,6 +269,8 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
 
+    volatile int displayUpdateCount = 0;
+
     if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
         while (1) {
 
@@ -273,6 +280,13 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
             CANbus_Send_Faultstate(faultmsg, CARCAN);
             CANbus_Send_Faultstate(motormsg, CARCAN);
             CANbus_Send_Faultstate(iostatemsg, CARCAN);
+            displayUpdateCount++;
+            // Updates the display every ERROR_DISPLAY_UPDATE_COUNT iterations
+            // Did this due to the display sometimes browning out and resetting when voltage drops in fault
+            if(displayUpdateCount >= ERROR_DISPLAY_UPDATE_COUNT) {
+                displayUpdateCount = 0;
+                //setDisplayErrorScreen(error_code, is_evac_needed);
+            }
         }
     }
     else{

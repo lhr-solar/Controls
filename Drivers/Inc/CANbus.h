@@ -35,6 +35,7 @@ typedef enum {
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
     VOLTAGE_SUMMARY                 = 0x10D,
     TEMPERATURE_SUMMARY             = 0x10E,
+	BPS_FAULT_STATE					= 0x10F,
 	MOTOR_DRIVE 					= 0x221,
 	MOTOR_POWER						= 0x222,
 	MOTOR_RESET 					= 0x223,

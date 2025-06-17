@@ -28,6 +28,8 @@
 #define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
 #define DISP_EVAC_REQ_STR_LITERAL    "\"REQUIRED!!!\""
 
+#define DISP_EVAC_BPS_FAULT_STR_LITERAL "\"FUCK\""
+
 static const char *TERMINATOR = "\xff\xff\xff";
 
 // Hold component values for display
@@ -35,15 +37,8 @@ uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS] = {0};
 
 // Strings for each component id
 const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
-    // Boolean components
-    "hb", "cs", "mcs", "brake", "blink",
-    // Contactors
-    "arren", "arrpc", "moten", "motpc", // technically boolean but the logic is cooked
-    // Non-boolean components
-    "vel", "accel", "soc", "supp", "cruiseSt", "rbsSt", "pv", "pc", 
-    "pt", "mcv", "mcc", "heatsink", "gear",
-    // Fault code components
-    "oserr", "faulterr", "evac"
+    #define GENERATE_DISP_COMP_STRING(name, str) str,
+    FOREACH_DISPLAY_COMPONENT(GENERATE_DISP_COMP_STRING)
 };
 
 /**
@@ -191,6 +186,17 @@ DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bo
                                         : DISP_EVAC_NONREQ_STR_LITERAL}}
     };
     Display_Send(evac_msg_cmd);
+
+    // Diplay the bps fault if there is one
+    DisplayCmd_t bps_fault_msg_cmd = {
+        .compOrCmd = (char *)DISPLAY_COMP_STR[DISP_EVAC_BPS_FAULT], // "bpsfaulterr"
+        .attr = "txt",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {STR_ARG},
+        .args = {{.str = DISP_EVAC_BPS_FAULT_STR_LITERAL}}
+    };
+    Display_Send(bps_fault_msg_cmd);
 
     // Display OS error if there is one
     DisplayCmd_t os_flt_cmd = {

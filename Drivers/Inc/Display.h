@@ -22,40 +22,48 @@
 
 #define MAX_ARGS    2 // maximum # of arguments in a command packet
 
+
+#define FOREACH_DISPLAY_COMPONENT(DISP_COMP) \
+    /* Boolean components */                 \
+    DISP_COMP(DISP_HEARTBEAT,        "hb")   \
+    DISP_COMP(DISP_PACK_CURR_SIGN,   "cs")   \
+    DISP_COMP(DISP_MC_CURR_SIGN,     "mcs")  \
+    DISP_COMP(DISP_BRAKE,            "brake")\
+    DISP_COMP(DISP_BLINK,            "blink")\
+    /* Contactor-ish (still bool, but logically different) */ \
+    DISP_COMP(DISP_ARRAY_EN,         "arren")\
+    DISP_COMP(DISP_ARRAY_PC,         "arrpc")\
+    DISP_COMP(DISP_MOTOR_EN,         "moten")\
+    DISP_COMP(DISP_MOTOR_PC,         "motpc")\
+    /* Non-boolean components */             \
+    DISP_COMP(DISP_VELOCITY,         "vel")  \
+    DISP_COMP(DISP_ACCEL_METER,      "accel")\
+    DISP_COMP(DISP_SOC,              "soc")  \
+    DISP_COMP(DISP_SUPP_BATT,        "supp") \
+    DISP_COMP(DISP_CRUISE_ST,        "cruiseSt") \
+    DISP_COMP(DISP_REGEN_ST,         "rbsSt")\
+    DISP_COMP(DISP_PACK_VOLTAGE,     "pv")   \
+    DISP_COMP(DISP_PACK_CURRENT,     "pc")   \
+    DISP_COMP(DISP_PACK_TEMP,        "pt")   \
+    DISP_COMP(DISP_MC_BUS_VOLTAGE,   "mcv")  \
+    DISP_COMP(DISP_MC_BUS_CURRENT,   "mcc")  \
+    DISP_COMP(DISP_HEAT_SINK_TEMP,   "heatsink")\
+    DISP_COMP(DISP_GEAR,             "gear") \
+    /* Fault components */                   \
+    DISP_COMP(DISP_OS_CODE,          "oserr")\
+    DISP_COMP(DISP_FAULT_CODE,       "faulterr")\
+    DISP_COMP(DISP_EVAC_MSG,         "evac") \
+    DISP_COMP(DISP_EVAC_BPS_FAULT,   "bpsfaulterr")
+
 /**
  * Enum and corresponding array for easy component selection.
  */
 typedef enum {
-    // Boolean components
-    DISP_HEARTBEAT = 0,
-    DISP_PACK_CURR_SIGN,
-    DISP_MC_CURR_SIGN,
-    DISP_BRAKE,
-    DISP_BLINK,
-    // Non-boolean components
-    DISP_ARRAY_EN,
-    DISP_ARRAY_PC,
-    DISP_MOTOR_EN,
-    DISP_MOTOR_PC,
-    DISP_VELOCITY,
-    DISP_ACCEL_METER,
-    DISP_SOC,
-    DISP_SUPP_BATT,
-    DISP_CRUISE_ST,
-    DISP_REGEN_ST,
-    DISP_PACK_VOLTAGE,
-    DISP_PACK_CURRENT,
-    DISP_PACK_TEMP,
-    DISP_MC_BUS_VOLTAGE,
-    DISP_MC_BUS_CURRENT,
-    DISP_HEAT_SINK_TEMP,
-    DISP_GEAR,
-    // Fault code components
-    DISP_OS_CODE,
-    DISP_FAULT_CODE,
-    DISP_EVAC_MSG,
+    #define GENERATE_DISPLAY_ENUM(name, str) name,
+    FOREACH_DISPLAY_COMPONENT(GENERATE_DISPLAY_ENUM)
     DISP_NUM_COMPONENTS
 } Component_t;
+
 
 /**
  * Values corresponding to the component enum.

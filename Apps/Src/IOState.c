@@ -37,7 +37,7 @@ void putIOState(void) {
     s |= SWITCH_BITMAP_REGEN_SW(0);
     Status_Leds_Write(CRUISE_IND_LED, getSwitchState(DASH_CRUZ_SET) ? ON : OFF);
 
-    switch (getGear()) {
+    switch (getGear(GEAR_USE_OS_DELAY)) {
         case DASH_FWD:
             s |= SWITCH_BITMAP_FOR_SW(1);
             break;

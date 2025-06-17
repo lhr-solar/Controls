@@ -4,7 +4,7 @@
 // Boolean used to ensure that if car turns on in non-neutral, it'll be overriden to neutral 
 // until the switch is moved to neutral; then, it'll follow the specified gear state afterward.
 
-gear_t getGear(void) {
+gear_t getGear(bool useOSDelay) {
     static bool neutralReset = true;
     bool fwd;
     bool rev;
@@ -22,7 +22,14 @@ gear_t getGear(void) {
             neu = false;
             break;
         }
-        delay_ms(NEUTRAL_DEBOUNCE_DLY_MS);
+        if(useOSDelay == GEAR_USE_OS_DELAY){
+            OS_ERR err;
+            OSTimeDlyHMSM(0, 0, 0, NEUTRAL_DEBOUNCE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
+            assertOSError(err);
+        }
+        else{
+            delay_ms(NEUTRAL_DEBOUNCE_DLY_MS);
+        }
     }
 
     // Until we've actually seen neutral, manually override to neutral

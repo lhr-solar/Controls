@@ -162,7 +162,7 @@ void Task_ReadCarCAN(void *p_arg) {
                 // BPS has a fault and we need to enter fault state
                 if (dataBuf.data[0] == BPS_TRIP_MESSAGE) {
                     // kill motor contactor and enter a nonrecoverable fault
-                    assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
+                    //assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
                 }
                 break;
             }
@@ -285,6 +285,12 @@ void Task_ReadCarCAN(void *p_arg) {
                 UpdateDisplay_SetBattCurrent((*(int32_t *)dataBuf.data));
                 break;
             }
+            case BPS_FAULT_STATE:{
+                 if (dataBuf.data[0] != 0) {
+                    assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
+                }
+                break;
+            }
 
             default: {
                 break; // Unhandled CAN message IDs, do nothing
@@ -331,11 +337,9 @@ void assertReadCarCANError(controls_error_e rcc_err) {
         case C_ERR_RCC_PRECHARGE_TMOUT_ARR:
             throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
-
         case C_ERR_RCC_BPS_TRIP:
             throwTaskError(rcc_err, EVAC_NEEDED, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
             break;
-
         default:
             // Critical failure, we have a non readcarcan error in readcarcan somehow
             throwTaskError(C_ERR_ILLEGAL_ERROR, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);

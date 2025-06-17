@@ -106,7 +106,7 @@ static void readInputs() {
         isBrakeOn = true;
     Status_Leds_Write(BRAKELIGHT_LED, isBrakeOn); // Write to the dashboard brake light
 
-    gear = getGear();
+    gear = getGear(GEAR_USE_OS_DELAY);
 
     // Check for gear fault
     if (gear == DASH_GEAR_FAULT_ERROR) {
@@ -212,7 +212,6 @@ void Task_SendTritium(void *p_arg) {
             // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
 
             // float fakeCurrent = 0.25f; // Fake current for testing purposes, should be removed in production
-
             switch (gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
@@ -229,7 +228,7 @@ void Task_SendTritium(void *p_arg) {
                 case DASH_REV:
                     velocitySetpoint = -MAX_VELOCITY;
                     // currentSetpoint = fakeCurrent;
-                    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
+                    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX) / 2.0f;
                     // currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                    
                     break;
 
