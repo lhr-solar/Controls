@@ -28,7 +28,7 @@
 #define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
 #define DISP_EVAC_REQ_STR_LITERAL    "\"REQUIRED!!!\""
 
-#define DISP_EVAC_BPS_FAULT_STR_LITERAL "\"ESTOP\""
+#define DISP_EVAC_BPS_FAULT_STR_LITERAL "\"FUCK\""
 
 static const char *TERMINATOR = "\xff\xff\xff";
 
@@ -39,6 +39,12 @@ uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS] = {0};
 const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
     #define GENERATE_DISP_COMP_STRING(name, str) str,
     FOREACH_DISPLAY_COMPONENT(GENERATE_DISP_COMP_STRING)
+};
+
+#define GENERATE_BPS_FAULT_STRING(name, str) str,
+
+const char *BPSFaultErrStr[] = {
+    FOREACH_BPS_FAULT_ERR(GENERATE_BPS_FAULT_STRING)
 };
 
 /**

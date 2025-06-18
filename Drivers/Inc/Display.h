@@ -64,6 +64,32 @@ typedef enum {
     DISP_NUM_COMPONENTS
 } Component_t;
 
+#define FOREACH_BPS_FAULT_ERR(BPS_ERR) \
+    BPS_ERR(CAN_NONE_BPS, "\"NONE\"") \
+    BPS_ERR(CAN_ESTOP_BPS, "\"ESTOP\"") \
+    BPS_ERR(CAN_UNDERVOLTAGE_BPS, "\"UNDERVOLTAGE\"") \
+    BPS_ERR(CAN_OVERTEMPERATURE_BPS, "\"OVERTEMPERATURE\"") \
+    BPS_ERR(CAN_OVERVOLTAGE_BPS, "\"OVERVOLTAGE\"") \
+    BPS_ERR(CAN_OVERCURRENT_BPS, "\"OVERCURRENT\"") \
+    BPS_ERR(CAN_WIRE_BPS, "\"OPEN_WIRE\"") \
+    BPS_ERR(CAN_OS_BPS, "\"OS\"") \
+    BPS_ERR(CAN_IWDG_BPS, "\"WATCHDOG\"") \
+    BPS_ERR(CAN_CRC_BPS, "\"CRC\"") \
+    BPS_ERR(CAN_CONTACTOR_BPS, "\"CONTACTOR\"") \
+    BPS_ERR(CAN_MPPT_BPS, "\"MPPT\"") \
+    BPS_ERR(CAN_UNKNOWN_BPS, "\"UNKNOWN\"") \
+
+
+#define GENERATE_BPS_FAULT_ENUM(name, str) name,
+
+typedef enum {
+    FOREACH_BPS_FAULT_ERR(GENERATE_BPS_FAULT_ENUM)
+    NUM_BPS_FAULT_ERRS
+} BPSFaultErr_e;
+
+#define GENERATE_BPS_FAULT_STRING(name, str) str,
+
+extern const char *BPSFaultErrStr[NUM_BPS_FAULT_ERRS];
 
 /**
  * Values corresponding to the component enum.
