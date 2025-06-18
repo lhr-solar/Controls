@@ -28,7 +28,7 @@
 #define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
 #define DISP_EVAC_REQ_STR_LITERAL    "\"REQUIRED!!!\""
 
-#define DISP_EVAC_BPS_FAULT_STR_LITERAL "\"FUCK\""
+#define DISP_EVAC_BPS_FAULT_STR_LITERAL "\"ESTOP\""
 
 static const char *TERMINATOR = "\xff\xff\xff";
 
