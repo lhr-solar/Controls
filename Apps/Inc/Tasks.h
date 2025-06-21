@@ -140,6 +140,30 @@ OS_ERR MotorStatus_Wait(uint8_t bits, bool blocking);
 OS_FLAGS MotorStatus_GetBits();
 bool MotorStatus_ModifyBits(uint8_t bits, bool state, bool allow_sched);
 
+#define FOREACH_BPS_FAULT_ERR(BPS_ERR) \
+    BPS_ERR(CAN_NONE_BPS, "\"NONE\"") \
+    BPS_ERR(CAN_ESTOP_BPS, "\"ESTOP\"") \
+    BPS_ERR(CAN_UNDERVOLTAGE_BPS, "\"UNDERVOLTAGE\"") \
+    BPS_ERR(CAN_OVERTEMPERATURE_BPS, "\"OVERTEMPERATURE\"") \
+    BPS_ERR(CAN_OVERVOLTAGE_BPS, "\"OVERVOLTAGE\"") \
+    BPS_ERR(CAN_OVERCURRENT_BPS, "\"OVERCURRENT\"") \
+    BPS_ERR(CAN_HARDFAULT_BPS, "\"HARDFAULT\"") \
+    BPS_ERR(CAN_WIRE_BPS, "\"OPEN_WIRE\"") \
+    BPS_ERR(CAN_OS_BPS, "\"OS\"") \
+    BPS_ERR(CAN_IWDG_BPS, "\"WATCHDOG\"") \
+    BPS_ERR(CAN_CRC_BPS, "\"CRC\"") \
+    BPS_ERR(CAN_CONTACTOR_BPS, "\"CONTACTOR\"") \
+    BPS_ERR(CAN_MPPT_BPS, "\"MPPT\"") \
+    BPS_ERR(CAN_UNKNOWN_BPS, "\"UNKNOWN\"") \
+
+
+#define GENERATE_BPS_FAULT_ENUM(name, str) name,
+
+typedef enum {
+    FOREACH_BPS_FAULT_ERR(GENERATE_BPS_FAULT_ENUM)
+    NUM_BPS_FAULT_ERRS
+} BPSFaultErr_e;
+
 /**
  * Task error variable type
  */
@@ -289,7 +313,7 @@ typedef enum { OPT_RECOV, OPT_NONRECOV } error_recovery_opt_e;
  * screen, and enter an infinite while loop
  */
 void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t error_callback,
-                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery);
+                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery, BPSFaultErr_e bps_err);
 
 /**
  * @brief   Assert Error if OS function call fails

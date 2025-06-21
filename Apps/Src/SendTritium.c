@@ -270,11 +270,11 @@ static void assertSendTritiumError(controls_error_e sterr) {
             break;
         case C_ERR_STR_GENERIC:
         case C_ERR_STR_GEAR_FAULT:
-            throwTaskError(sterr, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(sterr, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             break;
         default:
             // Critical failure, we have a non sendtritium error in send tritium somehow
-            throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             break;
     }
 }

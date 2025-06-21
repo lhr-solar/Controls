@@ -171,7 +171,7 @@ void _assertOSError(OS_ERR err) {
         snprintf(os_err_msg, ERRMSG_MAX_LEN, "%08X", err);
 
         MotorContactor_EmergencyDisable(); // Turn off all contactors
-        Display_Error(ERROR_MSGS[C_ERR_NONE], os_err_msg, false);
+        Display_Error(ERROR_MSGS[C_ERR_NONE], os_err_msg, false, CAN_NONE_BPS);
 
         CANDATA_t faultmsg = {0};
         faultmsg.ID = CONTROLS_FAULT_MSG;
@@ -189,14 +189,14 @@ void _assertOSError(OS_ERR err) {
     }
 }
 
-static void setDisplayErrorScreen(controls_error_e error_code, bool is_evac_needed) {
+static void setDisplayErrorScreen(controls_error_e error_code, bool is_evac_needed, BPSFaultErr_e bps_err) {
     if (error_code == C_ERR_RTR_MULTIPLE) {
         char err_msg_multiple[ERRMSG_MAX_LEN] = {0};
         snprintf(err_msg_multiple, ERRMSG_MAX_LEN, "\"MOCO_%03X\"",
                     Motor_Error_Get() & 0xFFF);
-        Display_Error(err_msg_multiple, ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+        Display_Error(err_msg_multiple, ERROR_MSGS[OS_ERR_NONE], is_evac_needed, bps_err);
     } else {
-        Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
+        Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed, bps_err);
     }
 }
 
@@ -219,7 +219,7 @@ static void setDisplayErrorScreen(controls_error_e error_code, bool is_evac_need
  * screen, and enter an infinite while loop
  */
 void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t error_callback,
-                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery) {
+                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery, BPSFaultErr_e bps_err) {
 
     if (error_code == C_ERR_NONE) return;
 
@@ -241,7 +241,7 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
 
     if (recovery == OPT_NONRECOV) {
         MotorContactor_EmergencyDisable();
-        setDisplayErrorScreen(error_code, is_evac_needed);
+        setDisplayErrorScreen(error_code, is_evac_needed, bps_err);
     }
 
     // Run a handler for this error if specified

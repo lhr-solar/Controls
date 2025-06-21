@@ -15,6 +15,7 @@
 #define __DISPLAY_H
 
 #include "common.h"
+#include "Tasks.h"
 
 // #define DISP_OUT DISPLAY
 #define MAX_MSG_LEN 32
@@ -63,33 +64,6 @@ typedef enum {
     FOREACH_DISPLAY_COMPONENT(GENERATE_DISPLAY_ENUM)
     DISP_NUM_COMPONENTS
 } Component_t;
-
-#define FOREACH_BPS_FAULT_ERR(BPS_ERR) \
-    BPS_ERR(CAN_NONE_BPS, "\"NONE\"") \
-    BPS_ERR(CAN_ESTOP_BPS, "\"ESTOP\"") \
-    BPS_ERR(CAN_UNDERVOLTAGE_BPS, "\"UNDERVOLTAGE\"") \
-    BPS_ERR(CAN_OVERTEMPERATURE_BPS, "\"OVERTEMPERATURE\"") \
-    BPS_ERR(CAN_OVERVOLTAGE_BPS, "\"OVERVOLTAGE\"") \
-    BPS_ERR(CAN_OVERCURRENT_BPS, "\"OVERCURRENT\"") \
-    BPS_ERR(CAN_WIRE_BPS, "\"OPEN_WIRE\"") \
-    BPS_ERR(CAN_OS_BPS, "\"OS\"") \
-    BPS_ERR(CAN_IWDG_BPS, "\"WATCHDOG\"") \
-    BPS_ERR(CAN_CRC_BPS, "\"CRC\"") \
-    BPS_ERR(CAN_CONTACTOR_BPS, "\"CONTACTOR\"") \
-    BPS_ERR(CAN_MPPT_BPS, "\"MPPT\"") \
-    BPS_ERR(CAN_UNKNOWN_BPS, "\"UNKNOWN\"") \
-
-
-#define GENERATE_BPS_FAULT_ENUM(name, str) name,
-
-typedef enum {
-    FOREACH_BPS_FAULT_ERR(GENERATE_BPS_FAULT_ENUM)
-    NUM_BPS_FAULT_ERRS
-} BPSFaultErr_e;
-
-#define GENERATE_BPS_FAULT_STRING(name, str) str,
-
-extern const char *BPSFaultErrStr[NUM_BPS_FAULT_ERRS];
 
 /**
  * Values corresponding to the component enum.
@@ -174,7 +148,11 @@ DisplayError_t Display_Reset(void);
  * @param is_evac_needed whether evac is required.
  * @returns DisplayError_t
  */
-DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bool is_evac_needed);
+DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bool is_evac_needed, BPSFaultErr_e bps_err);
+
+/**
+ * 
+ */
 
 /**
  * @brief Overwrites any processing commands and triggers the evacuation screen

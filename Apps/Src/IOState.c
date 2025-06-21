@@ -122,12 +122,12 @@ void assertIOStateError(controls_error_e io_err) {
 
         case C_ERR_IOS_GENERIC:
         case C_ERR_IOS_IGN_FAULT: // Reading != 1 ign state too many times. Set IGN to OFF and fault
-            throwTaskError(io_err, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(io_err, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             break;
 
         default:
             // Critical failure, we have a non sendtritium error in send tritium somehow
-            throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             break;
     }
 }
