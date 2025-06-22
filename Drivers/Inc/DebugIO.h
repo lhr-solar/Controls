@@ -5,15 +5,14 @@
 
 // Define the list of pins
 #define FOREACH_PIN(PIN) \
-    PIN(C, 9)           \
-    PIN(C, 10)          \
     PIN(C, 11)          \
     PIN(C, 12)          \
     PIN(C, 13)          \
     PIN(C, 14)          \
-    PIN(A, 8)           \
-    PIN(A, 15)          \
+    PIN(A,  4)          \
     PIN(B,  7)          \
+    PIN(B,  8)          \
+    PIN(B,  9)          \
     PIN(D,  2)          \
 
 // Generates the enum for each pin entry (ie PC17)

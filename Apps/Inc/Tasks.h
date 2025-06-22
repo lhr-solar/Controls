@@ -25,12 +25,12 @@
 #define TASK_PROFILER
 
 #ifdef TASK_PROFILER
-#define IDLE_PIN           PA15
+#define IDLE_PIN           PA4
 #define IO_STATE_PIN       PB7
 #define READ_CARCAN_PIN    PC14
-#define UPDATE_DISPLAY_PIN PA8
+#define UPDATE_DISPLAY_PIN PB8
 #define SEND_CARCAN_PIN    PC12
-#define SEND_TRITIUM_PIN    PC13
+#define SEND_TRITIUM_PIN   PC13
 
 #endif
 

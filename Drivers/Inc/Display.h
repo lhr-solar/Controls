@@ -30,7 +30,9 @@
     DISP_COMP(DISP_PACK_CURR_SIGN,   "cs")   \
     DISP_COMP(DISP_MC_CURR_SIGN,     "mcs")  \
     DISP_COMP(DISP_BRAKE,            "brake")\
-    DISP_COMP(DISP_BLINK,            "blink")\
+    DISP_COMP(DISP_BLINK,             "blink")\
+    DISP_COMP(DISP_RIGHT_BLINK,      "rightblink")\
+    DISP_COMP(DISP_LEFT_BLINK,       "leftblink")\
     /* Contactor-ish (still bool, but logically different) */ \
     DISP_COMP(DISP_ARRAY_EN,         "arren")\
     DISP_COMP(DISP_ARRAY_PC,         "arrpc")\
