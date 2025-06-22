@@ -122,9 +122,14 @@ extern const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN];
  * BPS & Motor Status Event Flag Definitions
  */
 
-#define BPS_SAFE            1 << 0
-#define BPS_CHECKED         1 << 1
-#define MOTOR_SAFE_TO_RUN   1 << 2
+ // Whether or not the BPS is currently safe
+#define BPS_SAFE                   1 << 0
+// Whether or not the BPS has been checked intially for safety (good for edge case at startup but not used)
+#define BPS_CHECKED                1 << 1
+// Whether or not the motor is safe to run basic on the motor contactor state
+#define MOTOR_SAFE_TO_RUN          1 << 2
+// Whether or not the motor direction can be swapped (should avoid at high speeds)
+#define MOTOR_SAFE_TO_SWITCH_DIR   1 << 3
 
 
 #define OS_FLAG_BLOCKING    true

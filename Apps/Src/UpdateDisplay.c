@@ -98,7 +98,7 @@ controls_error_e UpdateDisplay_SetSOC(uint32_t percent) { // Integer percentage 
 }
 
 controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag){
-    static char *str = "\"NONE\"";
+    static char *str = "\"None\"";
     DisplayCmd_t motor_limit_msg = {
         .compOrCmd = (char *)DISPLAY_COMP_STR[DISP_MOT_LIMIT], // "Motor limit flags"
         .attr = "txt",
@@ -107,7 +107,7 @@ controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag){
         .argTypes = {STR_ARG}
     };
     if(motor_limit_flag == 0){
-        str = "\"NONE\"";
+        str = "\"None\"";
     }
     else if(motor_limit_flag & 0x01){
         str = "\"OUTPUT_PWM\"";
