@@ -340,8 +340,8 @@ void Task_ReadCarCAN(void *p_arg) {
             }
             case BPS_FAULT_STATE:{
                  if (dataBuf.data[0] != 0) {
-                    assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
                     setBPSFault(dataBuf);
+                    assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
                 }
 
                 break;

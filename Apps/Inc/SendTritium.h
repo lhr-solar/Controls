@@ -23,7 +23,7 @@
 #define FSM_PERIOD 100 // in ms
 #define DEBOUNCE_PERIOD 2 // in units of FSM_PERIOD
 
-#define MAX_VELOCITY 20000.0f // rpm (unobtainable value)
+#define MAX_VELOCITY 12000.0f // rpm (unobtainable value)
 
 // Used to define accel & brake (hysteresis) thresholds for when to start/stop powering the motor, respectively
 // TODO: Test these thresholds

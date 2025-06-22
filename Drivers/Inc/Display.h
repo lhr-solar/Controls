@@ -50,6 +50,7 @@
     DISP_COMP(DISP_MC_BUS_CURRENT,   "mcc")  \
     DISP_COMP(DISP_HEAT_SINK_TEMP,   "heatsink")\
     DISP_COMP(DISP_GEAR,             "gear") \
+    DISP_COMP(DISP_MOT_LIMIT,        "motorlimit") \
     /* Fault components */                   \
     DISP_COMP(DISP_OS_CODE,          "oserr")\
     DISP_COMP(DISP_FAULT_CODE,       "faulterr")\

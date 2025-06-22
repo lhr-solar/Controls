@@ -43,7 +43,7 @@ static bool isBrakeOn = false; // Used for updating display & brakelight
 // Outputs
 static float currentSetpoint = 0.0f;
 static float velocitySetpoint = 0.0f;
-static float busCurrentSetPoint = CONT_MOCO_BATTERY_CURRENT / MAX_MOCO_CURRENT;
+static float busCurrentSetPoint = 1.0f;
 
 // NOTE: Instead of a "velocityObserved" variable, we can just use Motor_Velocity_Get() from
 // ReadTritium when doing cruise logic
