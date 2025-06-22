@@ -104,7 +104,7 @@ static void readInputs() {
         isBrakeOn = false;
     else if (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD)
         isBrakeOn = true;
-    Status_Leds_Write(BRAKELIGHT_LED, isBrakeOn); // Write to the dashboard brake light
+    Status_Leds_Write(BRAKELIGHT_LED, ON); // Write to the dashboard brake light
 
     gear = getGear(GEAR_USE_OS_DELAY);
 

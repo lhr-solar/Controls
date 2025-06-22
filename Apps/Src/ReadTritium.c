@@ -22,6 +22,7 @@
 #define MOTOR_TIMEOUT_SECS  1 // Timeout for several missed motor messages
 #define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
 #define MOTOR_ERROR_MASK    0x01FF
+#define MOTOR_LIMIT_MASK 0x7F
 
 uint16_t Motor_FaultBitmap = 0x0000;
 float Motor_RPM = 0;
@@ -97,11 +98,11 @@ void Task_ReadTritium(void *p_arg) {
                 case MOTOR_STATUS: {
                     // motor status error flags is in bytes 4-5
                     Motor_FaultBitmap = (*((uint16_t *)(&dataBuf.data[4])) & MOTOR_ERROR_MASK);
+                    assertTritiumError(convert_motorfault_to_error());
 
 					// If none of the bits are set, then it will display None
-					//UpdateDisplay_SetMotorLimit(*((uint16_t *)(&dataBuf.data[6])));
-
-                    assertTritiumError(convert_motorfault_to_error());
+					uint16_t Motor_LimitBitmap = (*((uint16_t *)(&dataBuf.data[6])) & MOTOR_LIMIT_MASK);
+					UpdateDisplay_SetMotorLimit(Motor_LimitBitmap);
                     break;
                 }
 

@@ -51,12 +51,6 @@
 #define FORWARD_PORT            PORTB
 #define FORWARD                 GPIO_Pin_2
 
-#define ARRAY_PBC_SENSE_PORT    PORTB
-#define ARRAY_PBC_SENSE         GPIO_Pin_8
-
-#define MOTOR_PBC_SENSE_PORT    PORTB
-#define MOTOR_PBC_SENSE         GPIO_Pin_9
-
 #define IG2_PORT                PORTB
 #define IG2                     GPIO_Pin_10
 
