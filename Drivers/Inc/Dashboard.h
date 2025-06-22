@@ -33,6 +33,8 @@ typedef enum{
     //HBT,
     DASH_CRUZ_SET,
     DASH_CRUZ_EN,
+    DASH_LEFT_SIG,
+    DASH_RIGHT_SIG,
     DASH_NUM_PINS,
 } dash_pin_t;
 

@@ -18,6 +18,7 @@
 #include "Dashboard.h"
 #include "DebugIO.h"
 #include "StatusLeds.h"
+#include "Lights.h"
 
 #include "Tasks.h"
 #include "UpdateDisplay.h"
@@ -64,6 +65,8 @@ int main(void) {
     IdleInit();
     TaskSwHook_Init();
     Status_Leds_Init();
+    Lights_Init();
+
 
     assertOSError(err); // for OS init
 

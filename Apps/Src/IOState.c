@@ -7,6 +7,7 @@
 #include "Ignition.h"
 #include "Pedals.h"
 #include "StatusLeds.h"
+#include "Lights.h"
 
 #include "IOState.h"
 #include "SendTritium.h"
@@ -36,6 +37,8 @@ void putIOState(void) {
     s |= SWITCH_BITMAP_CRUZ_ST(0);
     s |= SWITCH_BITMAP_REGEN_SW(0);
     Status_Leds_Write(CRUISE_IND_LED, getSwitchState(DASH_CRUZ_SET) ? ON : OFF);
+    Lights_Write(RIGHT_LIGHT, (getSwitchState(DASH_RIGHT_SIG) ? ON : OFF));
+    Lights_Write(LEFT_LIGHT, (getSwitchState(DASH_LEFT_SIG) ? ON : OFF));
 
     switch (getGear(GEAR_USE_OS_DELAY)) {
         case DASH_FWD:
