@@ -97,6 +97,44 @@ controls_error_e UpdateDisplay_SetSOC(uint32_t percent) { // Integer percentage 
     return C_ERR_NONE;
 }
 
+controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag){
+    static char *str = "\"NONE\"";
+    DisplayCmd_t motor_limit_msg = {
+        .compOrCmd = (char *)DISPLAY_COMP_STR[DISP_MOT_LIMIT], // "Motor limit flags"
+        .attr = "txt",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {STR_ARG}
+    };
+    if(motor_limit_flag == 0){
+        str = "\"NONE\"";
+    }
+    else if(motor_limit_flag & 0x01){
+        str = "\"OUTPUT_PWM\"";
+    }
+    else if((motor_limit_flag >> 1) & 0x01){
+        str = "\"MOTOR_CURR\"";
+    }
+    else if((motor_limit_flag >> 2) & 0x01){
+        str = "\"VELOCITY\"";
+    }
+    else if((motor_limit_flag >> 3) & 0x01){
+        str = "\"BUS_CURR\"";
+    }
+    else if((motor_limit_flag >> 4) & 0x01){
+        str = "\"BUS_V_UPPER\"";
+    }
+    else if((motor_limit_flag >> 5) & 0x01){
+        str = "\"BUS_V_LOWER\"";
+    }
+    else if((motor_limit_flag >> 6) & 0x01){
+        str = "\"TEMPERATURE\"";
+    }
+    motor_limit_msg.args->str=str;
+    Display_Send(motor_limit_msg);
+    return C_ERR_NONE;
+}
+
 controls_error_e UpdateDisplay_SetSBPV(uint32_t mv) {
     g_display_comp_vals[DISP_SUPP_BATT] = (mv / 100); // mv to tenths of a volt;
     return C_ERR_NONE;

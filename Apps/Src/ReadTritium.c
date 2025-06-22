@@ -98,6 +98,9 @@ void Task_ReadTritium(void *p_arg) {
                     // motor status error flags is in bytes 4-5
                     Motor_FaultBitmap = (*((uint16_t *)(&dataBuf.data[4])) & MOTOR_ERROR_MASK);
 
+					// If none of the bits are set, then it will display None
+					//UpdateDisplay_SetMotorLimit(*((uint16_t *)(&dataBuf.data[6])));
+
                     assertTritiumError(convert_motorfault_to_error());
                     break;
                 }

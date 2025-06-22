@@ -56,6 +56,13 @@ typedef enum { STATE_0 = 0, STATE_1 = 1, STATE_2 = 2 } TriState_t;
 controls_error_e UpdateDisplay_Init();
 
 /**
+ * @brief Sets the motor limit flags
+ * @returns controls_error_e
+ */
+
+controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag);
+
+/**
  * @brief Sets the state of charge value on the display
  * @param percent charge as a percent (0 digits of precision)
  * @returns controls_error_e
