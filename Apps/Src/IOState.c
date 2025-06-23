@@ -9,6 +9,7 @@
 #include "StatusLeds.h"
 
 #include "IOState.h"
+#include "Lights.h"
 #include "SendTritium.h"
 #include "Tasks.h"
 
@@ -100,6 +101,10 @@ void Task_IOState(void *p_arg) {
             Status_Leds_Toggle(DASH_HEARTBEAT_LED); // heartbeat led on the dashboard
             ioStateCounter = 0;
         }
+        
+        // if(getSwitchState(DASH_LEFT_IND)){}
+        Lights_Write(RIGHT_BLINK_LIGHT, getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON);
+        Lights_Write(LEFT_BLINK_LIGHT, getSwitchState(DASH_LEFT_IND) == DASH_SW_ON);
 
 #ifdef TASK_PROFILER
         DebugIO_Toggle(IO_STATE_PIN);

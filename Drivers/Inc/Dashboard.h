@@ -27,12 +27,10 @@ typedef enum{
 } switch_state_t;
 
 typedef enum{
-    //BPS = 0,
-    //BRAKE_LED,
-    // GEAR = 0,
-    //HBT,
     DASH_CRUZ_SET,
     DASH_CRUZ_EN,
+    DASH_RIGHT_IND,
+    DASH_LEFT_IND,
     DASH_NUM_PINS,
 } dash_pin_t;
 

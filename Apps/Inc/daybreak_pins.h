@@ -21,11 +21,22 @@
 #define ARRAY_PRCHG_BYPASS_PORT PORTA
 #define ARRAY_PRCHG_BYPASS      GPIO_Pin_1
 
+// Lights
+#define RIGHT_BLINK_PORT         PORTC
+#define RIGHT_BLINK              GPIO_Pin_9
+
+#define LEFT_BLINK_PORT         PORTA
+#define LEFT_BLINK              GPIO_Pin_8
+
+// don't ask me why BRAKE_LIGHT_PIN is a diff naming convention
 #define BRAKE_LIGHT_PORT        PORTC
-#define BRAKE_LIGHT             GPIO_Pin_6
+#define BRAKE_LIGHT_PIN         GPIO_Pin_6
 
 #define RIGHT_INDICATOR_PORT    PORTA
 #define RIGHT_INDICATOR         GPIO_Pin_15
+
+#define LEFT_INDICATOR_PORT    PORTC
+#define LEFT_INDICATOR         GPIO_Pin_10
 
 #define OS_FAULT_PORT           PORTA
 #define OS_FAULT                GPIO_Pin_5

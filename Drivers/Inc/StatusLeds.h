@@ -23,7 +23,6 @@ typedef enum {
     CRUISE_IND_LED,
     DASH_BPS_HAZ_LED,
     DASH_HEARTBEAT_LED,
-    BRAKELIGHT_LED,
     NUM_STATUS_LED,
 } status_led_t;
  
