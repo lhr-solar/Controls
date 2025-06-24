@@ -52,23 +52,27 @@ gear_t getGear(bool useOSDelay) {
 }
 
 switch_state_t getSwitchState(dash_pin_t pin){
+    switch_state_t ret = DASH_SW_ERROR;
     switch(pin){
         case(DASH_CRUZ_SET):
-            return BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SW_ON : DASH_SW_OFF;
+            ret = BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SW_ON : DASH_SW_OFF;
             break;
         case(DASH_CRUZ_EN):
-            return BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SW_ON : DASH_SW_OFF;
+            ret = BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SW_ON : DASH_SW_OFF;
             break;
+
+        // The indicators are negative logic
         case (DASH_RIGHT_IND):
-            return BSP_GPIO_Read_Pin(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR) ? DASH_SW_ON : DASH_SW_OFF;
+            ret = BSP_GPIO_Read_Pin(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR) ? DASH_SW_OFF : DASH_SW_ON;
             break;
         case (DASH_LEFT_IND):
-            return BSP_GPIO_Read_Pin(LEFT_INDICATOR_PORT, LEFT_INDICATOR) ? DASH_SW_ON : DASH_SW_OFF;
+            ret = BSP_GPIO_Read_Pin(LEFT_INDICATOR_PORT, LEFT_INDICATOR) ? DASH_SW_OFF : DASH_SW_ON;
             break;
         default:
-            return DASH_SW_ERROR;
+            ret = DASH_SW_ERROR;
             break;
     }
+    return ret;
 }
 
 void dashboardInit(){

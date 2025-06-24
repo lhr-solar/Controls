@@ -102,8 +102,8 @@ void Task_IOState(void *p_arg) {
             ioStateCounter = 0;
         }
         
-        // if(getSwitchState(DASH_LEFT_IND)){}
         Lights_Write(RIGHT_BLINK_LIGHT, getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON);
+        Status_Leds_Write(DASH_BPS_HAZ_LED, getSwitchState(DASH_RIGHT_IND) == DASH_SW_OFF ? ON : OFF);
         Lights_Write(LEFT_BLINK_LIGHT, getSwitchState(DASH_LEFT_IND) == DASH_SW_ON);
 
 #ifdef TASK_PROFILER

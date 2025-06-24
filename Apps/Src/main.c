@@ -23,6 +23,7 @@
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "ReadCarCAN.h"
+#include "Lights.h"
 #include "daybreak_pins.h"
 
 int idle_time_ctr = 0;
@@ -69,6 +70,7 @@ int main(void) {
 
     BPSMotorFlags_Init();
     Ignition_Init();
+    Lights_Init();
     dashboardInit();
     DebugIO_Init();
 
