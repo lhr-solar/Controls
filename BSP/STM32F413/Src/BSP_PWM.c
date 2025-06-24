@@ -172,7 +172,7 @@ void pwm_tim1_tim8_init(uint32_t pwm_freq_hz, uint8_t duty_cycle_percent) {
     TIM1->ARR = period;             // Auto-reload value
     TIM1->CCR1 = pulse;             // Duty cycle
     TIM1->CCMR1 &= ~TIM_CCMR1_OC1M;
-    TIM1->CCMR1 |= (6 << TIM_CCMR1_OC1M_Pos);  // PWM mode 1 (OC1M = 110)
+    TIM1->CCMR1 |= (6 << 4);  // PWM mode 1 (OC1M = 110)
     TIM1->CCMR1 |= TIM_CCMR1_OC1PE;            // Enable preload
     TIM1->CCER |= TIM_CCER_CC1E;               // Enable output on CH1
     TIM1->CR1 |= TIM_CR1_ARPE;                 // Enable auto-reload preload
@@ -184,7 +184,7 @@ void pwm_tim1_tim8_init(uint32_t pwm_freq_hz, uint8_t duty_cycle_percent) {
     TIM8->ARR = period;
     TIM8->CCR4 = pulse;
     TIM8->CCMR2 &= ~TIM_CCMR2_OC4M;
-    TIM8->CCMR2 |= (6 << TIM_CCMR2_OC4M_Pos); // PWM mode 1
+    TIM8->CCMR2 |= (6 << 12); // PWM mode 1
     TIM8->CCMR2 |= TIM_CCMR2_OC4PE;
     TIM8->CCER |= TIM_CCER_CC4E;
 }

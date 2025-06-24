@@ -31,17 +31,11 @@ void Lights_Init(void);
  * @param   state true=ON or false=OFF
  * @return  None
  */ 
-void Lights_Write(lights_t led, bool state);
+void Lights_Write(lights_t led, uint8_t duty);
 
 /**
  * @brief   Toggles a status led
  * @param   led The led to toggle
- * @return  None
- */ 
-void Lights_Toggle(lights_t led);
-
-/**
- * @brief   Turns all status LEDs on
  * @return  None
  */ 
 void Lights_All_On(void);
