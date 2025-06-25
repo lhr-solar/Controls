@@ -8,6 +8,8 @@
 
 #include "BSP_GPIO.h"
 
+#include "stm32f4xx.h"
+
 #include "BSP_PWM.h"
 
 #include "Lights.h"
@@ -19,15 +21,9 @@
  * 
  */
 void Lights_Init(void){
-    pwm_gpio_init();
-    pwm_tim8_init(25000,90);
-    pwm_tim1_init(25000,20);
-    // pwm_tim1_stop();
-    // pwm_tim8_stop();
+    pwm_setup(); // Init TIM8 and TIM1 for PA8 and PC9
     BSP_GPIO_Init(RIGHT_IND_PORT, RIGHT_IND, INPUT, false);
     BSP_GPIO_Init(LEFT_IND_PORT, RIGHT_IND, INPUT, false);   
-    pwm_tim8_start(); 
-    pwm_tim1_start();
 } 
 
 /**
@@ -39,12 +35,12 @@ void Lights_Init(void){
 void Lights_Write(lights_t led, uint8_t duty){ // tim1 = port a = left 
     switch (led){
         case RIGHT_LIGHT:
-                pwm_tim8_set_duty(duty);
-              //  pwm_tim8_start();
+                pwm_timx_set_duty(TIM8,4,duty);
+                pwm_timx_start(TIM8);
             break;
         case LEFT_LIGHT:
-                pwm_tim1_set_duty(duty);
-                pwm_tim1_start();
+                pwm_timx_set_duty(TIM1,1,duty);
+                pwm_timx_start(TIM1);
             break;
         default:
             break;
@@ -58,10 +54,7 @@ void Lights_Write(lights_t led, uint8_t duty){ // tim1 = port a = left
 void Lights_All_On(void){
     for(int i = 0; i < NUM_LIGHTS; i++){
         Lights_Write(i, 100);
-        
     }
-    pwm_tim1_start();
-    pwm_tim8_start();
 }
 
 /**
