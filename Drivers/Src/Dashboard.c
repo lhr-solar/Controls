@@ -61,10 +61,10 @@ switch_state_t getSwitchState(dash_pin_t pin){
             return BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SW_ON : DASH_SW_OFF;
             break;
         case(DASH_RIGHT_SIG):
-            return BSP_GPIO_Read_Pin(RIGHT_IND_PORT, RIGHT_IND) ? DASH_SW_ON : DASH_SW_OFF;
+            return BSP_GPIO_Read_Pin(RIGHT_IND_PORT, RIGHT_IND) ? DASH_SW_OFF : DASH_SW_ON;
             break;
         case(DASH_LEFT_SIG):
-            return BSP_GPIO_Read_Pin(LEFT_IND_PORT, LEFT_IND) ? DASH_SW_ON : DASH_SW_OFF;
+            return BSP_GPIO_Read_Pin(LEFT_IND_PORT, LEFT_IND) ? DASH_SW_OFF : DASH_SW_ON;
             break;
         default:
             return DASH_SW_ERROR;

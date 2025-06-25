@@ -20,6 +20,8 @@
 #include "StatusLeds.h"
 #include "Lights.h"
 
+#include "BSP_GPIO.h"
+
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
@@ -55,7 +57,7 @@ void IdleInit(void) {
     OS_AppIdleTaskHookPtr = &IdleTaskHook;
 }
 
-int main(void) {
+/*int main(void) {
     // Disable interrupts
     __disable_irq();
 
@@ -101,6 +103,35 @@ int main(void) {
     assertOSError(err);
 
     while (1);
+}*/
+
+int main (void){
+    // Disable interrupts
+    __disable_irq();
+
+    OS_ERR err;
+    OSInit(&err);
+
+    IdleInit();
+    TaskSwHook_Init();
+    Status_Leds_Init();
+
+
+    assertOSError(err); // for OS init
+
+    BPSMotorFlags_Init();
+    Ignition_Init();
+    dashboardInit();
+ //   DebugIO_Init();
+    Lights_Init();
+//    BSP_GPIO_Init(RIGHT_BLINK_PORT,RIGHT_BLINK,OUTPUT,true);
+//    BSP_GPIO_Write_Pin(RIGHT_BLINK_PORT,RIGHT_BLINK,1);
+
+
+    while(1){
+    //    Lights_Write(RIGHT_LIGHT,100);
+    //    Lights_Write(LEFT_LIGHT,50);
+    }
 }
 
 void Task_Init(void *p_arg) {

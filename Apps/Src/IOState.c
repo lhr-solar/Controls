@@ -38,8 +38,8 @@ void putIOState(void) {
     s |= SWITCH_BITMAP_REGEN_SW(0);
     Status_Leds_Write(CRUISE_IND_LED, getSwitchState(DASH_CRUZ_SET) ? ON : OFF);
 
-    Lights_Write(RIGHT_LIGHT, getSwitchState(DASH_RIGHT_SIG)? 50 : 0);
-    Lights_Write(LEFT_LIGHT, getSwitchState(DASH_LEFT_SIG)? 10 : 0);
+    Lights_Write(RIGHT_LIGHT, getSwitchState(DASH_RIGHT_SIG)? 95 : 0);
+    Lights_Write(LEFT_LIGHT, getSwitchState(DASH_LEFT_SIG)? 70 : 0);
 
     switch (getGear(GEAR_USE_OS_DELAY)) {
         case DASH_FWD:

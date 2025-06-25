@@ -19,11 +19,15 @@
  * 
  */
 void Lights_Init(void){
-    pwm_tim1_tim8_init(25000,20);
-    pwm_tim1_stop();
-    pwm_tim8_stop();
+    pwm_gpio_init();
+    pwm_tim8_init(25000,90);
+    pwm_tim1_init(25000,20);
+    // pwm_tim1_stop();
+    // pwm_tim8_stop();
     BSP_GPIO_Init(RIGHT_IND_PORT, RIGHT_IND, INPUT, false);
-    BSP_GPIO_Init(LEFT_IND_PORT, RIGHT_IND, INPUT, false);    
+    BSP_GPIO_Init(LEFT_IND_PORT, RIGHT_IND, INPUT, false);   
+    pwm_tim8_start(); 
+    pwm_tim1_start();
 } 
 
 /**
@@ -35,20 +39,12 @@ void Lights_Init(void){
 void Lights_Write(lights_t led, uint8_t duty){ // tim1 = port a = left 
     switch (led){
         case RIGHT_LIGHT:
-            if (duty == 0){
-                pwm_tim8_stop();
-            }
-            else {
                 pwm_tim8_set_duty(duty);
-            }
+              //  pwm_tim8_start();
             break;
         case LEFT_LIGHT:
-            if (duty == 0){
-                pwm_tim1_stop();
-            }
-            else {
                 pwm_tim1_set_duty(duty);
-            }
+                pwm_tim1_start();
             break;
         default:
             break;
@@ -62,7 +58,10 @@ void Lights_Write(lights_t led, uint8_t duty){ // tim1 = port a = left
 void Lights_All_On(void){
     for(int i = 0; i < NUM_LIGHTS; i++){
         Lights_Write(i, 100);
+        
     }
+    pwm_tim1_start();
+    pwm_tim8_start();
 }
 
 /**
