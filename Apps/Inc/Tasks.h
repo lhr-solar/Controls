@@ -316,6 +316,7 @@ typedef enum { OPT_RECOV, OPT_NONRECOV } error_recovery_opt_e;
  * error is handled immediately
  * @param recovery whether or not to kill the motor, display the fault
  * screen, and enter an infinite while loop
+ * @param bps_err the enum for the BPS fault (or none if no error)
  */
 void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t error_callback,
                     error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery, BPSFaultErr_e bps_err);
