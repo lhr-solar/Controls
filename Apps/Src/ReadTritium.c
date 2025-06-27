@@ -131,6 +131,8 @@ void Task_ReadTritium(void *p_arg) {
 
                     // Display can't take negative values, and reverse puts Car_Velocity in the negative
                     Car_Velocity = (Car_Velocity < 0) ? -Car_Velocity : Car_Velocity; 
+                    bool allowed_to_switch_dir = Car_Velocity <= 5.0f ? true : false;
+                    MotorStatus_ModifyBits(MOTOR_SAFE_TO_SWITCH_DIR, allowed_to_switch_dir, !OS_FLAG_SCHED_POINT);
 
                     // Round car velocity to the nearest integer
                     UpdateDisplay_SetVelocity((uint32_t)(Car_Velocity));

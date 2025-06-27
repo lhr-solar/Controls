@@ -181,6 +181,16 @@ void Task_SendTritium(void *p_arg) {
         .data = {0}
     };
 
+    gear_t motor_gear = gear;
+
+    // CAN message for setpoint of bus current percent
+    memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float));
+
+    // If we're using the profinity software don't set the power here
+    #ifndef USING_PROFINITY
+        CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
+    #endif
+
     while (1) {
         #ifdef TASK_PROFILER
         DebugIO_Toggle(SEND_TRITIUM_PIN);
@@ -201,17 +211,25 @@ void Task_SendTritium(void *p_arg) {
         memset(&motorSafeCmd.data, 0, sizeof(motorSafeCmd.data));
         // All bits are set
         if (err == OS_ERR_NONE) {
-            // CAN message for setpoint of bus current percent
-            memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float));
-
-            // If we're using the profinity software don't set the power here
-            #ifndef USING_PROFINITY
-                //CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
-            #endif
             // Update velocitySetpoint & currentSetpoint based on gear/state
             // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
 
-            switch (gear) {
+            // err = MotorStatus_Wait(MOTOR_SAFE_TO_SWITCH_DIR, !OS_FLAG_BLOCKING);
+                    // If you want to swap the direction to not neutral the motor needs to be slow enough
+            if(gear != motor_gear && gear != DASH_NEU){
+                err = MotorStatus_Wait(MOTOR_SAFE_TO_SWITCH_DIR, !OS_FLAG_BLOCKING);
+                if(err == OS_ERR_NONE){
+                    motor_gear = gear;
+                }
+                else if(err != OS_ERR_PEND_WOULD_BLOCK){
+                    assertOSError(err);
+                }
+            }
+            else{
+                motor_gear = gear;
+            }
+
+            switch (motor_gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
                     currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                 
