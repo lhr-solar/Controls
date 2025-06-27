@@ -90,7 +90,6 @@ static void updateDisplayState() {
 
     UpdateDisplay_SetRegenState(DISP_DISABLED);  // Not on Daybreak
     UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
-    UpdateDisplay_SetAccel(accelPedalPercent);
 }
 
 /**
@@ -100,12 +99,12 @@ static void readInputs() {
     brakePedalPercent = Pedals_Read(BRAKE);
     accelPedalPercent = Pedals_Read(ACCELERATOR);
 
-    // Brake hysteresis
-    if (brakePedalPercent <= BRAKE_UNPRESSED_THRESHOLD)
-        isBrakeOn = false;
-    else if (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD)
+    // // Brake hysteresis
+    if (brakePedalPercent >= BRAKE_UNPRESSED_THRESHOLD)
         isBrakeOn = true;
-    Lights_Write(BRAKE_LIGHT, isBrakeOn); 
+    else if (brakePedalPercent <= BRAKE_PRESSED_THRESHOLD)
+        isBrakeOn = false;
+    Lights_Write(BRAKE_LIGHT, isBrakeOn);
     gear = getGear(GEAR_USE_OS_DELAY);
 
     // Check for gear fault
@@ -214,7 +213,7 @@ void Task_SendTritium(void *p_arg) {
             switch (gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                 
+                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));                 
                     break;
 
                 case DASH_NEU:
@@ -224,7 +223,7 @@ void Task_SendTritium(void *p_arg) {
 
                 case DASH_REV:
                     velocitySetpoint = -MAX_VELOCITY;
-                    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);   
+                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));   
                     break;
 
                 default:
