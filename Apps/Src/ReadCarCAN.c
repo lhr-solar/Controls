@@ -331,7 +331,9 @@ void Task_ReadCarCAN(void *p_arg) {
                 }
             }
             case TEMPERATURE_SUMMARY: { // uint24_t
-                UpdateDisplay_SetBattTemperature((*((int32_t *)dataBuf.data)) & ~0xFF000000);
+                // UpdateDisplay_SetBattTemperature((*((int32_t *)dataBuf.data)) & ~0xFF000000);
+                int32_t avg_temp = (*((int32_t *)dataBuf.data)) & ~0xFF000000; 
+                UpdateDisplay_SetBattTemperature((uint32_t)(avg_temp));
                 break;
             }
             case CURRENT_DATA: { // int32_t
