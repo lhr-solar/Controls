@@ -104,7 +104,6 @@ void Task_IOState(void *p_arg) {
         }
         bool right_ind = getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON;
         bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
-        Status_Leds_Write(DASH_BPS_HAZ_LED, right_ind && left_ind);
         UpdateDisplay_SetBlink(left_ind, right_ind);
         Lights_Write(RIGHT_BLINK_LIGHT, right_ind);
         Lights_Write(LEFT_BLINK_LIGHT, left_ind);
