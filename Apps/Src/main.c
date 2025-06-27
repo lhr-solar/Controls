@@ -70,16 +70,15 @@ int main(void) {
     IdleInit();
     TaskSwHook_Init();
     Status_Leds_Init();
-    Lights_Init();
 
 
     assertOSError(err); // for OS init
 
     BPSMotorFlags_Init();
     Ignition_Init();
-    Lights_Init();
     dashboardInit();
     DebugIO_Init();
+    Lights_Init();
 
     // Initialize apps
     OSTaskCreate(
@@ -269,7 +268,7 @@ void Task_Init(void *p_arg) {
 
 void HardFault_Handler() {
     Status_Leds_Init();
-    Status_Leds_Write(OS_FAULT_LED,true);
+    Status_Leds_Write(CRUISE_IND_LED,true);
     __disable_irq();
     MotorContactor_EmergencyDisable();
     while (1) {}

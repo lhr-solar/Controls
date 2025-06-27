@@ -83,9 +83,6 @@
 #define CRUISE_ENABLE_PORT      PORTC
 #define CRUISE_ENABLE           GPIO_Pin_5
 
-#define BRAKE_LIGHT_PORT        PORTC
-#define BRAKE_LIGHT             GPIO_Pin_6
-
 #define HEARTBEAT_PORT          PORTC
 #define HEARTBEAT_PIN           GPIO_Pin_7
 

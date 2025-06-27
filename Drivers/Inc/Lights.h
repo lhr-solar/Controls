@@ -16,6 +16,7 @@
 typedef enum {
     RIGHT_LIGHT,
     LEFT_LIGHT,
+    BRAKE_LIGHT,
     NUM_LIGHTS,
 } lights_t;
  
@@ -31,7 +32,7 @@ void Lights_Init(void);
  * @param   state true=ON or false=OFF
  * @return  None
  */ 
-void Lights_Write(lights_t led, uint8_t duty);
+void Lights_Write(lights_t led, bool state);
 
 /**
  * @brief   Toggles a status led

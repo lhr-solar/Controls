@@ -32,16 +32,18 @@ void Lights_Init(void){
  * @param   state true=ON or false=OFF
  * @return  None
  */ 
-void Lights_Write(lights_t led, uint8_t duty){ // tim1 = port a = left 
+void Lights_Write(lights_t led, bool state){ // tim1 = port a = left 
     switch (led){
         case RIGHT_LIGHT:
-                pwm_timx_set_duty(TIM8,4,duty);
+                pwm_timx_set_duty(TIM8,4,(state ? 50 : 0));
                 pwm_timx_start(TIM8);
             break;
         case LEFT_LIGHT:
-                pwm_timx_set_duty(TIM1,1,duty);
+                pwm_timx_set_duty(TIM1,1,(state ? 50 : 0));
                 pwm_timx_start(TIM1);
             break;
+        case BRAKE_LIGHT:
+                BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT,BRAKE_LIGHT_PIN,state);    
         default:
             break;
     }

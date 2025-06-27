@@ -105,7 +105,7 @@ static void readInputs() {
         isBrakeOn = false;
     else if (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD)
         isBrakeOn = true;
-    Lights_Write(BRAKE_LIGHT, ON);
+    Lights_Write(BRAKE_LIGHT, isBrakeOn); 
     gear = getGear(GEAR_USE_OS_DELAY);
 
     // Check for gear fault
