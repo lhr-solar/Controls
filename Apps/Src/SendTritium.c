@@ -205,7 +205,7 @@ void Task_SendTritium(void *p_arg) {
 
             // If we're using the profinity software don't set the power here
             #ifndef USING_PROFINITY
-                //CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
+                CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
             #endif
             // Update velocitySetpoint & currentSetpoint based on gear/state
             // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
