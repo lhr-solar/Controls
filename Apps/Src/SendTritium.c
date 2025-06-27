@@ -31,6 +31,7 @@
 #include "Tasks.h"
 #include "DebugIO.h"
 #include "UpdateDisplay.h"
+#include "Lights.h"
 
 // #define USING_PROFINITY
 
@@ -104,8 +105,7 @@ static void readInputs() {
         isBrakeOn = false;
     else if (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD)
         isBrakeOn = true;
-    Status_Leds_Write(BRAKELIGHT_LED, ON); // Write to the dashboard brake light
-
+    Lights_Write(BRAKE_LIGHT, ON);
     gear = getGear(GEAR_USE_OS_DELAY);
 
     // Check for gear fault
@@ -206,7 +206,7 @@ void Task_SendTritium(void *p_arg) {
 
             // If we're using the profinity software don't set the power here
             #ifndef USING_PROFINITY
-                CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
+                //CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
             #endif
             // Update velocitySetpoint & currentSetpoint based on gear/state
             // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
@@ -214,8 +214,7 @@ void Task_SendTritium(void *p_arg) {
             switch (gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);
-                    // currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                    
+                    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                 
                     break;
 
                 case DASH_NEU:
@@ -225,8 +224,7 @@ void Task_SendTritium(void *p_arg) {
 
                 case DASH_REV:
                     velocitySetpoint = -MAX_VELOCITY;
-                    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX) / 2.0f;
-                    // currentSetpoint = isBrakeOn ? 0 : mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);                    
+                    currentSetpoint = mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX);   
                     break;
 
                 default:

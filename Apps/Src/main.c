@@ -26,6 +26,7 @@
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "ReadCarCAN.h"
+#include "Lights.h"
 #include "daybreak_pins.h"
 
 int idle_time_ctr = 0;
@@ -74,6 +75,7 @@ void IdleInit(void) {
 
     BPSMotorFlags_Init();
     Ignition_Init();
+    Lights_Init();
     dashboardInit();
     DebugIO_Init();
 
@@ -264,8 +266,8 @@ void Task_Init(void *p_arg) {
 }
 
 void HardFault_Handler() {
-    __disable_irq();
     Status_Leds_All_On();
+    __disable_irq();
     MotorContactor_EmergencyDisable();
     while (1) {}
 }

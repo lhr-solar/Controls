@@ -51,31 +51,36 @@ gear_t getGear(bool useOSDelay) {
     }
 }
 
-// NOTE: Uncomment when we're using cruise
 switch_state_t getSwitchState(dash_pin_t pin){
+    switch_state_t ret = DASH_SW_ERROR;
     switch(pin){
         case(DASH_CRUZ_SET):
-            return BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SW_ON : DASH_SW_OFF;
+            ret = BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SW_ON : DASH_SW_OFF;
             break;
         case(DASH_CRUZ_EN):
-            return BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SW_ON : DASH_SW_OFF;
+            ret = BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SW_ON : DASH_SW_OFF;
             break;
-        case(DASH_RIGHT_SIG):
-            return BSP_GPIO_Read_Pin(RIGHT_IND_PORT, RIGHT_IND) ? DASH_SW_OFF : DASH_SW_ON;
+
+        // The indicators are negative logic
+        case (DASH_RIGHT_IND):
+            ret = BSP_GPIO_Read_Pin(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR) ? DASH_SW_OFF : DASH_SW_ON;
             break;
-        case(DASH_LEFT_SIG):
-            return BSP_GPIO_Read_Pin(LEFT_IND_PORT, LEFT_IND) ? DASH_SW_OFF : DASH_SW_ON;
+        case (DASH_LEFT_IND):
+            ret = BSP_GPIO_Read_Pin(LEFT_INDICATOR_PORT, LEFT_INDICATOR) ? DASH_SW_OFF : DASH_SW_ON;
             break;
         default:
-            return DASH_SW_ERROR;
+            ret = DASH_SW_ERROR;
             break;
     }
+    return ret;
 }
 
 void dashboardInit(){
-    BSP_GPIO_Init(BRAKE_LIGHT_PORT, BRAKE_LIGHT, OUTPUT, false);    //BRAKE
     BSP_GPIO_Init(FORWARD_PORT, FORWARD, INPUT, false);             //FWD
     BSP_GPIO_Init(REVERSE_PORT, REVERSE, INPUT, false);             //REV
     BSP_GPIO_Init(CRUISE_SET_PORT, CRUISE_SET, INPUT, false);       //CRUZ_ST
-    //Dash LEDs initialized in StatusLeds.c
+
+    BSP_GPIO_Init(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR, INPUT, false);
+    BSP_GPIO_Init(LEFT_INDICATOR_PORT, LEFT_INDICATOR, INPUT, false);
+
 }

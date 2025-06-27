@@ -1,7 +1,7 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file StatusLeds.h
- * @brief Header file for the StatusLeds driver
+ * @brief Header file for the Lights driver
  */
 
 #ifndef __LIGHTS_H

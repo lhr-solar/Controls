@@ -10,6 +10,8 @@
 #include "Lights.h"
 
 #include "IOState.h"
+#include "UpdateDisplay.h"
+#include "Lights.h"
 #include "SendTritium.h"
 #include "Tasks.h"
 
@@ -37,9 +39,6 @@ void putIOState(void) {
     s |= SWITCH_BITMAP_CRUZ_ST(0);
     s |= SWITCH_BITMAP_REGEN_SW(0);
     Status_Leds_Write(CRUISE_IND_LED, getSwitchState(DASH_CRUZ_SET) ? ON : OFF);
-
-    Lights_Write(RIGHT_LIGHT, getSwitchState(DASH_RIGHT_SIG)? 95 : 0);
-    Lights_Write(LEFT_LIGHT, getSwitchState(DASH_LEFT_SIG)? 70 : 0);
 
     switch (getGear(GEAR_USE_OS_DELAY)) {
         case DASH_FWD:
@@ -104,6 +103,12 @@ void Task_IOState(void *p_arg) {
             Status_Leds_Toggle(DASH_HEARTBEAT_LED); // heartbeat led on the dashboard
             ioStateCounter = 0;
         }
+        bool right_ind = getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON;
+        bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
+        Status_Leds_Write(DASH_BPS_HAZ_LED, right_ind && left_ind);
+        UpdateDisplay_SetBlink(left_ind, right_ind);
+        Lights_Write(RIGHT_LIGHT, right_ind);
+        Lights_Write(LEFT_LIGHT, left_ind);
 
 #ifdef TASK_PROFILER
         DebugIO_Toggle(IO_STATE_PIN);

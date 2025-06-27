@@ -13,6 +13,7 @@
 #include "SendCarCAN.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
+#include "StatusLeds.h"
 
 // status limit flag masks
 // #define MASK_MOTOR_TEMP_LIMIT (1 << 6) // check if motor temperature is limiting the motor
@@ -98,7 +99,15 @@ void Task_ReadTritium(void *p_arg) {
                 case MOTOR_STATUS: {
                     // motor status error flags is in bytes 4-5
                     Motor_FaultBitmap = (*((uint16_t *)(&dataBuf.data[4])) & MOTOR_ERROR_MASK);
-                    assertTritiumError(convert_motorfault_to_error());
+                    controls_error_e motor_error = convert_motorfault_to_error();
+                    if(motor_error != C_ERR_NONE){
+                        assertTritiumError(motor_error);
+                    }
+                    else{
+                        // TODO: delete this
+                        // This is just for testing if we recieve a motor fault
+                        Status_Leds_Write(DASH_BPS_HAZ_LED, ON);
+                    }
 
 					// If none of the bits are set, then it will display None
 					uint16_t Motor_LimitBitmap = (*((uint16_t *)(&dataBuf.data[6])) & MOTOR_LIMIT_MASK);
@@ -186,6 +195,7 @@ void assertTritiumError(controls_error_e m_err) {
         case C_ERR_NONE:
             break;
 
+        // Start of fallthrough
         case C_ERR_RTR_GENERIC:
         case C_ERR_RTR_HARDWARE_OC:
         case C_ERR_RTR_SOFTWARE_OC:
@@ -200,6 +210,7 @@ void assertTritiumError(controls_error_e m_err) {
         case C_ERR_RTR_UNKNOWN_ERROR:
             throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             break;
+        // Emd of fallthrough
 
         case C_ERR_RTR_MOTOR_WDOG_TRIP:
             // Try to restart the motor a few times and then fail out

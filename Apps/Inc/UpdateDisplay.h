@@ -127,7 +127,7 @@ controls_error_e UpdateDisplay_SetMCCurrent(int32_t val);
 
 controls_error_e UpdateDisplay_SetBrake(bool state);
 
-controls_error_e UpdateDisplay_SetBlink(bool state);
+controls_error_e UpdateDisplay_SetBlink(bool leftState, bool rightState);
 
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0

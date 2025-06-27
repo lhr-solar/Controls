@@ -18,6 +18,12 @@
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 
+bool leftBlinkerOn = false;
+bool rightBlinkerOn = false;
+
+#define UPDATE_DISPLAY_DELAY 250
+#define BLINKER_COUNT (1000)/UPDATE_DISPLAY_DELAY
+
 // For fault handling
 #define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
 
@@ -26,6 +32,8 @@ controls_error_e UpdateDisplay_Init() {
     DisplayError_t ret = Display_SetPage(INFO);
     OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &err);
     assertOSError(err);
+    leftBlinkerOn = false;
+    rightBlinkerOn = false;
 
     return (ret == DISPLAY_ERR_NONE) ? C_ERR_NONE : C_ERR_UPD_DRIVER;
 }
@@ -40,7 +48,7 @@ controls_error_e UpdateDisplay_Init() {
 static controls_error_e UpdateDisplay_SetComponent(Component_t comp) {
     DisplayError_t ret = DISPLAY_ERR_NONE;
     // For components that are on/off
-    if (comp <= DISP_BLINK) {
+    if (comp <= DISP_LEFT_BLINK) {
         DisplayCmd_t visCmd = {
             .compOrCmd = "vis",
             .attr = NULL,
@@ -150,8 +158,10 @@ controls_error_e UpdateDisplay_SetAccel(uint8_t percent) {
     return C_ERR_NONE;
 }
 
-controls_error_e UpdateDisplay_SetBlink(bool state) {
-    g_display_comp_vals[DISP_BLINK] = (uint32_t)(state);
+controls_error_e UpdateDisplay_SetBlink(bool leftState, bool rightState) {
+    leftBlinkerOn = leftState;
+    rightBlinkerOn = rightState;
+
     return C_ERR_NONE;
 }
 
@@ -214,6 +224,32 @@ controls_error_e UpdateDisplay_SetHeatSinkTemp(uint32_t val) {
     return C_ERR_NONE;
 }
 
+
+static inline void Update_Blinkers(){
+    static uint8_t blinkCounter = 0;
+    
+    // Blink the left and right indicators about once every second
+    if(blinkCounter >= BLINKER_COUNT){
+        if(rightBlinkerOn){
+            g_display_comp_vals[DISP_RIGHT_BLINK] = g_display_comp_vals[DISP_RIGHT_BLINK] ? 0 : 1;
+        }
+        else{
+            g_display_comp_vals[DISP_RIGHT_BLINK] = 0;
+        }
+
+        if(leftBlinkerOn){
+            g_display_comp_vals[DISP_LEFT_BLINK] = g_display_comp_vals[DISP_LEFT_BLINK] ? 0 : 1;
+        }
+        else{
+            g_display_comp_vals[DISP_LEFT_BLINK] = 0;
+        }
+        blinkCounter = 0;
+    }
+    else{
+        blinkCounter++;
+    }
+
+}
 /**
  * @brief Loops through the display queue and sends all messages
  */
@@ -233,12 +269,15 @@ void Task_UpdateDisplay(void *p_arg) {
 
         assertUpdateDisplayError((Display_Refresh() == DISPLAY_ERR_NONE) ? C_ERR_NONE
                                                                          : C_ERR_UPD_DRIVER);
+
+
+        Update_Blinkers();
 #ifdef TASK_PROFILER
         DebugIO_Toggle(UPDATE_DISPLAY_PIN);
 #endif
 
         // Delay of 250 ms
-        OSTimeDlyHMSM(0, 0, 0, 250, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, UPDATE_DISPLAY_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
     }
 }
