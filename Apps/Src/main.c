@@ -265,6 +265,7 @@ void Task_Init(void *p_arg) {
 
 void HardFault_Handler() {
     __disable_irq();
+    Status_Leds_All_On();
     MotorContactor_EmergencyDisable();
     while (1) {}
 }
