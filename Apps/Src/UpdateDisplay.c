@@ -38,6 +38,10 @@ controls_error_e UpdateDisplay_Init() {
     return (ret == DISPLAY_ERR_NONE) ? C_ERR_NONE : C_ERR_UPD_DRIVER;
 }
 
+static UpdateDisplay_ModifyComponentVal(Component_t comp, uint32_t val){
+
+}
+
 /**
  * @brief Uses component enum to make assigning component values easier.
  * Differentiates between timers, variables, and components to assign values.
@@ -96,19 +100,15 @@ static controls_error_e UpdateDisplay_SetComponent(Component_t comp) {
 
 /* WRAPPERS */
 controls_error_e UpdateDisplay_SetSOC(uint32_t percent) { // Integer percentage from 0-100
-    if (percent > 100) {
-        g_display_comp_vals[DISP_SOC] = 123;
-        return C_ERR_UPD_PARSE_COMPONENT;
-    }
-
-    g_display_comp_vals[DISP_SOC] = percent;
-    return C_ERR_NONE;
+    g_display_comp_vals[DISP_SOC] = (percent > 100) ? 123 : percent;
+    display_modified_component[DISP_SOC] = true;
+    return (percent > 100) ? C_ERR_UPD_PARSE_COMPONENT : C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag){
     static char *str = "\"None\"";
     DisplayCmd_t motor_limit_msg = {
-        .compOrCmd = (char *)DISPLAY_COMP_STR[DISP_MOT_LIMIT], // "Motor limit flags"
+        .compOrCmd = (char *)display_components[DISP_MOT_LIMIT].name, // "Motor limit flags"
         .attr = "txt",
         .op = "=",
         .numArgs = 1,
@@ -145,16 +145,19 @@ controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag){
 
 controls_error_e UpdateDisplay_SetSBPV(uint32_t mv) {
     g_display_comp_vals[DISP_SUPP_BATT] = (mv / 100); // mv to tenths of a volt;
+    display_modified_component[DISP_SUPP_BATT] = true;
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetVelocity(uint32_t mphTenths) {
     g_display_comp_vals[DISP_VELOCITY] = mphTenths;
+    display_modified_component[DISP_VELOCITY] = true;
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetAccel(uint8_t percent) {
     g_display_comp_vals[DISP_ACCEL_METER] = (uint32_t)((percent > 100) ? 100 : percent);
+    display_modified_component[DISP_ACCEL_METER] = true;
     return C_ERR_NONE;
 }
 
@@ -172,28 +175,34 @@ controls_error_e UpdateDisplay_SetGear(TriState_t gear) {
 
 controls_error_e UpdateDisplay_SetRegenState(TriState_t state) {
     g_display_comp_vals[DISP_REGEN_ST] = (uint32_t)(state);
+    display_modified_component[DISP_REGEN_ST] = true;
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetCruiseState(TriState_t state) {
     g_display_comp_vals[DISP_CRUISE_ST] = (uint32_t)(state);
+    display_modified_component[DISP_CRUISE_ST] = true;
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetBattVoltage(uint32_t mv) {
     g_display_comp_vals[DISP_PACK_VOLTAGE] = (mv / 100); // mv to tenths of a volt
+    display_modified_component[DISP_PACK_VOLTAGE] = true;
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetBattTemperature(uint32_t val) {
     g_display_comp_vals[DISP_PACK_TEMP] = (val / 100);
+    display_modified_component[DISP_PACK_TEMP] = true;
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetBattCurrent(int32_t val) {
     bool is_neg = (val < 0);
     g_display_comp_vals[DISP_PACK_CURR_SIGN] = (uint32_t)(is_neg);
+    display_modified_component[DISP_PACK_CURR_SIGN] = true;
     g_display_comp_vals[DISP_PACK_CURRENT] = (uint32_t)((is_neg ? -val : val) / 100);
+    display_modified_component[DISP_PACK_CURRENT] = true;
     return C_ERR_NONE;
 }
 
@@ -250,6 +259,36 @@ static inline void Update_Blinkers(){
     }
 
 }
+
+
+void Task_UpdateDisplay2ElectricBoogaloo(void *p_arg){
+    OS_ERR err;
+    while(1){
+#ifdef TASK_PROFILER
+        DebugIO_Toggle(UPDATE_DISPLAY_PIN);
+#endif
+        for(Component_t comp = 0; comp <= DISP_NUM_COMPONENTS; comp++){
+            switch(display_components[comp].type){
+                case (DISP_COMP_TYPE_IGNORE):
+                    break;
+                default:
+                    break;
+            }
+            // if(display_components[comp].type != DISP_COMP_TYPE_IGNORE){
+
+            // }
+        }
+        Update_Blinkers();
+#ifdef TASK_PROFILER
+        DebugIO_Toggle(UPDATE_DISPLAY_PIN);
+#endif
+
+        // Delay of 250 ms
+        OSTimeDlyHMSM(0, 0, 0, UPDATE_DISPLAY_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
+        assertOSError(err);
+    }
+}
+
 /**
  * @brief Loops through the display queue and sends all messages
  */

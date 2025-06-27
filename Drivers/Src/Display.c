@@ -28,8 +28,6 @@
 #define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
 #define DISP_EVAC_REQ_STR_LITERAL    "\"REQUIRED!!!\""
 
-#define DISP_EVAC_BPS_FAULT_STR_LITERAL "\"FUCK\""
-
 static const char *TERMINATOR = "\xff\xff\xff";
 
 // Hold component values for display
@@ -37,8 +35,14 @@ uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS] = {0};
 
 // Strings for each component id
 const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
-    #define GENERATE_DISP_COMP_STRING(name, str) str,
+    #define GENERATE_DISP_COMP_STRING(name, type, str) str,
     FOREACH_DISPLAY_COMPONENT(GENERATE_DISP_COMP_STRING)
+};
+
+bool display_modified_component[DISP_NUM_COMPONENTS] = {false}; 
+
+DisplayComponent_t display_components[DISP_NUM_COMPONENTS] = {
+    FOREACH_DISPLAY_COMPONENT(GENERATE_DISP_COMP_STRUCT)
 };
 
 #define GENERATE_BPS_FAULT_STRING(name, str) str,

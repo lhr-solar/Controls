@@ -23,49 +23,71 @@
 
 #define MAX_ARGS    2 // maximum # of arguments in a command packet
 
-
 #define FOREACH_DISPLAY_COMPONENT(DISP_COMP) \
     /* Boolean components */                 \
-    DISP_COMP(DISP_HEARTBEAT,        "hb")   \
-    DISP_COMP(DISP_PACK_CURR_SIGN,   "cs")   \
-    DISP_COMP(DISP_MC_CURR_SIGN,     "mcs")  \
-    DISP_COMP(DISP_BRAKE,            "brake")\
-    DISP_COMP(DISP_RIGHT_BLINK,      "rightblink")\
-    DISP_COMP(DISP_LEFT_BLINK,       "leftblink")\
+    DISP_COMP(DISP_HEARTBEAT,        DISP_COMP_TYPE_BOOL, "hb")   \
+    DISP_COMP(DISP_PACK_CURR_SIGN,   DISP_COMP_TYPE_BOOL, "cs")   \
+    DISP_COMP(DISP_MC_CURR_SIGN,     DISP_COMP_TYPE_BOOL, "mcs")  \
+    DISP_COMP(DISP_BRAKE,            DISP_COMP_TYPE_BOOL, "brake")\
+    DISP_COMP(DISP_RIGHT_BLINK,      DISP_COMP_TYPE_BOOL, "rightblink")\
+    DISP_COMP(DISP_LEFT_BLINK,       DISP_COMP_TYPE_BOOL, "leftblink")\
     /* Contactor-ish (still bool, but logically different) */ \
-    DISP_COMP(DISP_ARRAY_EN,         "arren")\
-    DISP_COMP(DISP_ARRAY_PC,         "arrpc")\
-    DISP_COMP(DISP_MOTOR_EN,         "moten")\
-    DISP_COMP(DISP_MOTOR_PC,         "motpc")\
+    DISP_COMP(DISP_ARRAY_EN,         DISP_COMP_TYPE_BOOL, "arren")\
+    DISP_COMP(DISP_ARRAY_PC,         DISP_COMP_TYPE_BOOL, "arrpc")\
+    DISP_COMP(DISP_MOTOR_EN,         DISP_COMP_TYPE_BOOL, "moten")\
+    DISP_COMP(DISP_MOTOR_PC,         DISP_COMP_TYPE_BOOL, "motpc")\
     /* Non-boolean components */             \
-    DISP_COMP(DISP_VELOCITY,         "vel")  \
-    DISP_COMP(DISP_ACCEL_METER,      "accel")\
-    DISP_COMP(DISP_SOC,              "soc")  \
-    DISP_COMP(DISP_SUPP_BATT,        "supp") \
-    DISP_COMP(DISP_CRUISE_ST,        "cruiseSt") \
-    DISP_COMP(DISP_REGEN_ST,         "rbsSt")\
-    DISP_COMP(DISP_PACK_VOLTAGE,     "pv")   \
-    DISP_COMP(DISP_PACK_CURRENT,     "pc")   \
-    DISP_COMP(DISP_PACK_TEMP,        "pt")   \
-    DISP_COMP(DISP_MC_BUS_VOLTAGE,   "mcv")  \
-    DISP_COMP(DISP_MC_BUS_CURRENT,   "mcc")  \
-    DISP_COMP(DISP_HEAT_SINK_TEMP,   "heatsink")\
-    DISP_COMP(DISP_GEAR,             "gear") \
-    DISP_COMP(DISP_MOT_LIMIT,        "motorlimit") \
+    DISP_COMP(DISP_VELOCITY,         DISP_COMP_TYPE_VALUE, "vel")  \
+    DISP_COMP(DISP_ACCEL_METER,      DISP_COMP_TYPE_VALUE, "accel")\
+    DISP_COMP(DISP_SOC,              DISP_COMP_TYPE_VALUE, "soc")  \
+    DISP_COMP(DISP_SUPP_BATT,        DISP_COMP_TYPE_VALUE, "supp") \
+    DISP_COMP(DISP_CRUISE_ST,        DISP_COMP_TYPE_IGNORE, "cruiseSt") \
+    DISP_COMP(DISP_REGEN_ST,         DISP_COMP_TYPE_IGNORE, "rbsSt")\
+    DISP_COMP(DISP_PACK_VOLTAGE,     DISP_COMP_TYPE_VALUE, "pv")   \
+    DISP_COMP(DISP_PACK_CURRENT,     DISP_COMP_TYPE_VALUE, "pc")   \
+    DISP_COMP(DISP_PACK_TEMP,        DISP_COMP_TYPE_VALUE, "pt")   \
+    DISP_COMP(DISP_MC_BUS_VOLTAGE,   DISP_COMP_TYPE_VALUE, "mcv")  \
+    DISP_COMP(DISP_MC_BUS_CURRENT,   DISP_COMP_TYPE_VALUE, "mcc")  \
+    DISP_COMP(DISP_HEAT_SINK_TEMP,   DISP_COMP_TYPE_VALUE, "heatsink")\
+    DISP_COMP(DISP_GEAR,             DISP_COMP_TYPE_VALUE, "gear") \
+    DISP_COMP(DISP_MOT_LIMIT,        DISP_COMP_TYPE_VALUE, "motorlimit") \
     /* Fault components */                   \
-    DISP_COMP(DISP_OS_CODE,          "oserr")\
-    DISP_COMP(DISP_FAULT_CODE,       "faulterr")\
-    DISP_COMP(DISP_EVAC_MSG,         "evac") \
-    DISP_COMP(DISP_EVAC_BPS_FAULT,   "bpsfaulterr")
+    DISP_COMP(DISP_OS_CODE,          DISP_COMP_TYPE_VALUE, "oserr")\
+    DISP_COMP(DISP_FAULT_CODE,       DISP_COMP_TYPE_VALUE, "faulterr")\
+    DISP_COMP(DISP_EVAC_MSG,         DISP_COMP_TYPE_VALUE, "evac") \
+    DISP_COMP(DISP_EVAC_BPS_FAULT,   DISP_COMP_TYPE_VALUE, "bpsfaulterr")
 
 /**
  * Enum and corresponding array for easy component selection.
  */
+#define GENERATE_DISP_COMP_ENUM(name, type, str) name,
+
 typedef enum {
-    #define GENERATE_DISPLAY_ENUM(name, str) name,
-    FOREACH_DISPLAY_COMPONENT(GENERATE_DISPLAY_ENUM)
+    FOREACH_DISPLAY_COMPONENT(GENERATE_DISP_COMP_ENUM)
     DISP_NUM_COMPONENTS
 } Component_t;
+
+typedef enum {
+    DISP_COMP_TYPE_ONOFF,
+    DISP_COMP_TYPE_BOOL,
+    DISP_COMP_TYPE_VALUE,
+    DISP_COMP_TYPE_IGNORE
+} ComponentType_t;
+
+typedef struct {
+    Component_t comp;
+    ComponentType_t type;
+    const char *name;
+    bool modified;
+} DisplayComponent_t;
+
+extern bool display_modified_component[DISP_NUM_COMPONENTS];
+
+#define GENERATE_DISP_COMP_STRUCT(name, type, str) { name, type, str , false},
+
+extern DisplayComponent_t display_components[DISP_NUM_COMPONENTS];
+
+
 
 /**
  * Values corresponding to the component enum.
