@@ -33,6 +33,8 @@ int idle_time_ctr = 0;
 int last_tick_cnt = 0;
 int current_tick_cnt = 0;
 
+void HardFault_Handler(void);
+
 void IdleTaskHook(void) {
     static OS_ERR err;
     static bool toggle = false;
@@ -58,7 +60,7 @@ void IdleInit(void) {
     OS_AppIdleTaskHookPtr = &IdleTaskHook;
 }
 
-/*int main(void) {
+int main(void) {
     // Disable interrupts
     __disable_irq();
 
@@ -105,8 +107,8 @@ void IdleInit(void) {
     assertOSError(err);
 
     while (1);
-}*/
-
+}
+/*
 int main (void){
     // Disable interrupts
     __disable_irq();
@@ -134,7 +136,7 @@ int main (void){
     //    Lights_Write(RIGHT_LIGHT,100);
     //    Lights_Write(LEFT_LIGHT,50);
     }
-}
+}*/
 
 void Task_Init(void *p_arg) {
     OS_ERR err;
@@ -266,7 +268,8 @@ void Task_Init(void *p_arg) {
 }
 
 void HardFault_Handler() {
-    Status_Leds_All_On();
+    Status_Leds_Init();
+    Status_Leds_Write(OS_FAULT_LED,true);
     __disable_irq();
     MotorContactor_EmergencyDisable();
     while (1) {}

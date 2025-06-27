@@ -107,8 +107,8 @@ void Task_IOState(void *p_arg) {
         bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
         Status_Leds_Write(DASH_BPS_HAZ_LED, right_ind && left_ind);
         UpdateDisplay_SetBlink(left_ind, right_ind);
-        Lights_Write(RIGHT_LIGHT, right_ind);
-        Lights_Write(LEFT_LIGHT, left_ind);
+        Lights_Write(RIGHT_LIGHT, right_ind ? 50 : 0); // kys akshay
+        Lights_Write(LEFT_LIGHT, left_ind ? 50 : 0);
 
 #ifdef TASK_PROFILER
         DebugIO_Toggle(IO_STATE_PIN);

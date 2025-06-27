@@ -23,7 +23,7 @@
 void Lights_Init(void){
     pwm_setup(); // Init TIM8 and TIM1 for PA8 and PC9
     BSP_GPIO_Init(RIGHT_IND_PORT, RIGHT_IND, INPUT, false);
-    BSP_GPIO_Init(LEFT_IND_PORT, RIGHT_IND, INPUT, false);   
+    BSP_GPIO_Init(LEFT_IND_PORT, LEFT_IND, INPUT, false);   
 } 
 
 /**

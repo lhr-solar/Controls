@@ -145,11 +145,11 @@ void pwm_setup(void)
     GPIOC->AFR[1] = (GPIOC->AFR[1] & ~(0xF << 4)) | (3 << 4);
 
     // TIM1_CH1, 20 kHz, 50% duty
-    pwm_timx_init(TIM1, /*on_APB2=*/1, 1, 5, 50);
+    pwm_timx_init(TIM1, /*on_APB2=*/1, 1, 4, 1);
     TIM1->CR1 |= TIM_CR1_CEN;
 
     // TIM8_CH4, 20 kHz, 75% duty
-    pwm_timx_init(TIM8, /*on_APB2=*/1, 4, 5, 5);
+    pwm_timx_init(TIM8, /*on_APB2=*/1, 4, 4, 1);
     TIM8->CR1 |= TIM_CR1_CEN;
 }
 
