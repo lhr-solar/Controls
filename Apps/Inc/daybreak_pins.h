@@ -53,6 +53,9 @@
 #define MOTOR_CONTACTOR_PORT    PORTA
 #define MOTOR_CONTACTOR         GPIO_Pin_10
 
+#define RIGHT_IND_PORT          PORTA
+#define RIGHT_IND               GPIO_Pin_15
+
 #define BPS_FAULT_PORT          PORTB
 #define BPS_FAULT               GPIO_Pin_0
 
@@ -82,6 +85,9 @@
 
 #define CRUISE_IND_PORT         PORTC
 #define CRUISE_IND              GPIO_Pin_8
+
+#define LEFT_IND_PORT           PORTC
+#define LEFT_IND                GPIO_Pin_10
 
 #define BRAKE_SW_PORT           PORTC
 #define BRAKE_SW                GPIO_Pin_15

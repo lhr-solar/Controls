@@ -7,6 +7,7 @@
 #include "Ignition.h"
 #include "Pedals.h"
 #include "StatusLeds.h"
+#include "Lights.h"
 
 #include "IOState.h"
 #include "UpdateDisplay.h"
@@ -105,8 +106,8 @@ void Task_IOState(void *p_arg) {
         bool right_ind = getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON;
         bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
         UpdateDisplay_SetBlink(left_ind, right_ind);
-        Lights_Write(RIGHT_BLINK_LIGHT, right_ind);
-        Lights_Write(LEFT_BLINK_LIGHT, left_ind);
+        Lights_Write(RIGHT_LIGHT, right_ind);
+        Lights_Write(LEFT_LIGHT, left_ind);
 
 #ifdef TASK_PROFILER
         DebugIO_Toggle(IO_STATE_PIN);

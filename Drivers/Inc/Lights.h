@@ -8,17 +8,20 @@
 #define __LIGHTS_H
 
 #include "common.h"
-#include "BSP_GPIO.h"
 
+
+/**
+ * Possible Lights
+ */
 typedef enum {
-    RIGHT_BLINK_LIGHT,
-    LEFT_BLINK_LIGHT,
+    RIGHT_LIGHT,
+    LEFT_LIGHT,
     BRAKE_LIGHT,
     NUM_LIGHTS,
-} light_t;
+} lights_t;
  
 /**
- * @brief Initializes Light pins
+ * @brief Initializes Status LED pins
  * 
  */
 void Lights_Init(void);
@@ -29,6 +32,20 @@ void Lights_Init(void);
  * @param   state true=ON or false=OFF
  * @return  None
  */ 
-void Lights_Write(light_t led, bool state);
+void Lights_Write(lights_t led, bool state);
+
+/**
+ * @brief   Toggles a status led
+ * @param   led The led to toggle
+ * @return  None
+ */ 
+void Lights_All_On(void);
+
+/**
+ * @brief   Turns all status LEDs off
+ * @return  None
+ */ 
+void Lights_All_Off(void);
+
 
 #endif

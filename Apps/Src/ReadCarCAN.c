@@ -17,6 +17,7 @@
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
+#include "Lights.h"
 
 // #define BPS_CAN_WATCHDOG
 // #define PRECHARGE_CAN_WATCHDOG
@@ -101,6 +102,10 @@ static void handler_ReadCarCAN_BPSTrip(void) {
 
     Status_Leds_Write(BPS_FAULT_LED, ON);    // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
+
+    // Turn on left and right lights
+    Lights_Write(RIGHT_LIGHT, ON);
+    Lights_Write(LEFT_LIGHT, ON);
 }
 
 static void setMotorControllerContactor(bool state, bool blocking) {
