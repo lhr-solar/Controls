@@ -22,7 +22,7 @@ bool leftBlinkerOn = false;
 bool rightBlinkerOn = false;
 
 #define UPDATE_DISPLAY_DELAY 250
-#define BLINKER_COUNT (1000)/UPDATE_DISPLAY_DELAY
+#define BLINKER_COUNT (500)/UPDATE_DISPLAY_DELAY
 
 // For fault handling
 #define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
@@ -259,7 +259,7 @@ void Task_UpdateDisplay(void *p_arg) {
 #ifdef TASK_PROFILER
         DebugIO_Toggle(UPDATE_DISPLAY_PIN);
 #endif
-        for (Component_t comp = 0; comp <= DISP_GEAR; comp++) {
+        for (Component_t comp = 0; comp <= DISP_MOT_LIMIT; comp++) {
             if (comp != DISP_REGEN_ST && comp != DISP_CRUISE_ST) {
                 assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
             }

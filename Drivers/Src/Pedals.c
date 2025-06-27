@@ -16,12 +16,12 @@
 // Refine in testing
 static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
     0,   // Accelerator lower bound
-    500, // Brake lower bound
+    0,   // Brake lower bound
 };
 
 static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
-    3150, // Accelerator upper bound
-    2600, // Brake upper bound
+    3200, // Accelerator upper bound
+    3200, // Brake upper bound
 };
 
 /**
@@ -54,9 +54,9 @@ uint8_t Pedals_Read(pedal_t pedal) {
         percentage = (int8_t)((int32_t)(millivoltsPedal - LowerBound[pedal]) * 100 /
                               (UpperBound[pedal] - LowerBound[pedal]));
     }
-
-    if (percentage > 100) return 100;
-    if (percentage < 0) return 0;
-
+    
+    percentage = percentage > 100 ? 100 : percentage;
+    percentage = percentage < 0 ? 0 : percentage;
+    percentage = 100 - percentage;
     return (uint8_t)percentage;
 }
