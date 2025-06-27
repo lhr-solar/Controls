@@ -72,7 +72,7 @@ typedef enum {
  */
 extern uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS];
 extern const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS];
-
+    
 /**
  * Error types
  */
