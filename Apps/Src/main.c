@@ -19,9 +19,6 @@
 #include "DebugIO.h"
 #include "StatusLeds.h"
 #include "Lights.h"
-
-#include "BSP_GPIO.h"
-
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
@@ -32,8 +29,6 @@
 int idle_time_ctr = 0;
 int last_tick_cnt = 0;
 int current_tick_cnt = 0;
-
-void HardFault_Handler(void);
 
 void IdleTaskHook(void) {
     static OS_ERR err;
@@ -73,7 +68,6 @@ int main(void) {
 
 
     assertOSError(err); // for OS init
-
     BPSMotorFlags_Init();
     Ignition_Init();
     dashboardInit();
@@ -105,37 +99,10 @@ int main(void) {
     OSStart(&err);
     assertOSError(err);
 
-    while (1);
-}
-/*
-int main (void){
-    // Disable interrupts
-    __disable_irq();
+    while (1){
 
-    OS_ERR err;
-    OSInit(&err);
-
-    IdleInit();
-    TaskSwHook_Init();
-    Status_Leds_Init();
-
-
-    assertOSError(err); // for OS init
-
-    BPSMotorFlags_Init();
-    Ignition_Init();
-    dashboardInit();
- //   DebugIO_Init();
-    Lights_Init();
-//    BSP_GPIO_Init(RIGHT_BLINK_PORT,RIGHT_BLINK,OUTPUT,true);
-//    BSP_GPIO_Write_Pin(RIGHT_BLINK_PORT,RIGHT_BLINK,1);
-
-
-    while(1){
-    //    Lights_Write(RIGHT_LIGHT,100);
-    //    Lights_Write(LEFT_LIGHT,50);
     }
-}*/
+}
 
 void Task_Init(void *p_arg) {
     OS_ERR err;
@@ -267,8 +234,6 @@ void Task_Init(void *p_arg) {
 }
 
 void HardFault_Handler() {
-    Status_Leds_Init();
-    Status_Leds_Write(CRUISE_IND_LED,true);
     __disable_irq();
     MotorContactor_EmergencyDisable();
     while (1) {}

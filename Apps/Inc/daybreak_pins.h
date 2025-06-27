@@ -47,9 +47,6 @@
 #define CRUISE_SET_PORT         PORTA
 #define CRUISE_SET              GPIO_Pin_7
 
-#define LEFT_BLINK_PORT         PORTA
-#define LEFT_BLINK              GPIO_Pin_8
-
 #define MOTOR_C_SENSE_PORT      PORTA
 #define MOTOR_C_SENSE           GPIO_Pin_9
 
@@ -88,9 +85,6 @@
 
 #define CRUISE_IND_PORT         PORTC
 #define CRUISE_IND              GPIO_Pin_8
-
-#define RIGHT_BLINK_PORT        PORTC
-#define RIGHT_BLINK             GPIO_Pin_9
 
 #define LEFT_IND_PORT           PORTC
 #define LEFT_IND                GPIO_Pin_10
