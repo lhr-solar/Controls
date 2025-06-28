@@ -18,7 +18,7 @@
 #include "Dashboard.h"
 #include "DebugIO.h"
 #include "StatusLeds.h"
-
+#include "Lights.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
@@ -66,13 +66,13 @@ int main(void) {
     TaskSwHook_Init();
     Status_Leds_Init();
 
-    assertOSError(err); // for OS init
 
+    assertOSError(err); // for OS init
     BPSMotorFlags_Init();
     Ignition_Init();
-    Lights_Init();
     dashboardInit();
     DebugIO_Init();
+    Lights_Init();
 
     // Initialize apps
     OSTaskCreate(
@@ -99,7 +99,9 @@ int main(void) {
     OSStart(&err);
     assertOSError(err);
 
-    while (1);
+    while (1){
+
+    }
 }
 
 void Task_Init(void *p_arg) {

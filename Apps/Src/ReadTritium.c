@@ -103,12 +103,7 @@ void Task_ReadTritium(void *p_arg) {
                     if(motor_error != C_ERR_NONE){
                         assertTritiumError(motor_error);
                     }
-                    else{
-                        // TODO: delete this
-                        // This is just for testing if we recieve a motor fault
-                        Status_Leds_Write(DASH_BPS_HAZ_LED, ON);
-                    }
-
+                    
 					// If none of the bits are set, then it will display None
 					uint16_t Motor_LimitBitmap = (*((uint16_t *)(&dataBuf.data[6])) & MOTOR_LIMIT_MASK);
 					UpdateDisplay_SetMotorLimit(Motor_LimitBitmap);

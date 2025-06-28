@@ -210,6 +210,13 @@ void Task_SendTritium(void *p_arg) {
         memset(&motorSafeCmd.data, 0, sizeof(motorSafeCmd.data));
         // All bits are set
         if (err == OS_ERR_NONE) {
+            // CAN message for setpoint of bus current percent
+            memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float));
+
+            // If we're using the profinity software don't set the power here
+            #ifndef USING_PROFINITY
+                CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
+            #endif
             // Update velocitySetpoint & currentSetpoint based on gear/state
             // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
 
