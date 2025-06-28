@@ -180,6 +180,11 @@ void Task_SendTritium(void *p_arg) {
         .data = {0}
     };
 
+    // Accelerator is pulled to GND and then inverted in code so when nothing is plugged in accel defaults to 100%
+    // In order to spin the motor the accelerator needs to return to a safe value
+    static bool accelerator_reset = false;
+    uint8_t resetAccelPercent = 0;
+
     while (1) {
         #ifdef TASK_PROFILER
         DebugIO_Toggle(SEND_TRITIUM_PIN);
@@ -204,16 +209,28 @@ void Task_SendTritium(void *p_arg) {
             memcpy(&powerCmd.data[4], &busCurrentSetPoint, sizeof(float));
 
             // If we're using the profinity software don't set the power here
-            #ifndef USING_PROFINITY
+#ifndef USING_PROFINITY
                 CANbus_Send(powerCmd, CAN_BLOCKING, MOTORCAN);
-            #endif
-            // Update velocitySetpoint & currentSetpoint based on gear/state
-            // NOTE: the brakePedalPercent checks when setting currentSetpoint are for hysteresis
+#endif
+            // The accelerator at some point has been lowered to a safe value
+            if(accelerator_reset){
+                resetAccelPercent = accelPedalPercent;
+            }
+            // The accelerator is now at a safe value
+            else if(!accelerator_reset && accelPedalPercent <= ACCCEL_PEDAL_RESET_THRESHOLD){
+                accelerator_reset = true;
+                resetAccelPercent = accelPedalPercent;
+            }
+            // The accelerator has ever been set to a safe value
+            else{
+                resetAccelPercent = 0;
+            }
+
 
             switch (gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));                 
+                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));                 
                     break;
 
                 case DASH_NEU:
@@ -223,7 +240,7 @@ void Task_SendTritium(void *p_arg) {
 
                 case DASH_REV:
                     velocitySetpoint = -MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(accelPedalPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));   
+                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));   
                     break;
 
                 default:

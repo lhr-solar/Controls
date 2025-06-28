@@ -43,6 +43,8 @@
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
+#define ACCCEL_PEDAL_RESET_THRESHOLD 30
+
 // /**
 //  * Error types
 //  * 

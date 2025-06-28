@@ -71,26 +71,6 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg) {
     }
 }
 
-// IS THIS ACTUALLY UNUSED? OR NAH?
-// static bool check_MotorControllerContactor(void) {
-//     // both should be on at the same time
-//     bool HVContactorState =
-//         Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true);
-
-//     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
-//     if (!HVContactorState && motorContactorState) {
-//         // if the HV contactors are off and the motor contactor is on
-//         return false;
-//     }
-//     bool motorPrechargeContactorState =
-//         Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true);
-//     if (motorPrechargeContactorState && !motorContactorState) {
-//         // if the motor precharge contactor is on and the motor contactor is off
-//         return false;
-//     }
-//     return true;
-// }
-
 
 BPSFaultErr_e bps_err;
 
