@@ -236,6 +236,61 @@ ErrorStatus CANbus_Send_Faultstate(CANDATA_t CanData, CAN_t bus)
     return SUCCESS;
 }
 
+static ErrorStatus CANbus_Read_ValidateID(CANDATA_t* MsgContainer, uint32_t id){
+    //error check the id
+    MsgContainer->ID = (CANId_t) id;
+    if(MsgContainer->ID >= MAX_CAN_ID){
+        MsgContainer = NULL;
+        return ERROR;
+    }
+    CANLUT_T entry = CANLUT[MsgContainer->ID]; //lookup msg information in table
+    if(entry.size == 0){
+        MsgContainer = NULL;
+        return ERROR;
+    } //if they passed in an invalid id, it will be zero
+    return SUCCESS;
+}
+
+static ErrorStatus CANbus_ValidateData(CANDATA_t* MsgContainer){
+    CANLUT_T entry = CANLUT[MsgContainer->ID];
+    // Reverify valid ID and entry
+    if(entry.size == 0){
+        MsgContainer = NULL;
+        return ERROR;
+    }
+    
+    //search LUT for id to populate idx and trim data
+    if(entry.idxEn==true){
+        MsgContainer->idx = MsgContainer->data[0];
+        memmove( // Can't use memcpy, as memory regions overlap
+            MsgContainer->data,
+            &(MsgContainer->data[1]),
+            7 // max size of data (8) - size of idx byte (1)
+        );
+    }
+    return SUCCESS;
+}
+
+ErrorStatus CANbus_Read_FaultState(CANDATA_t* MsgContainer, CAN_t bus){
+
+    // Get a message from the canbus
+    uint32_t id;
+    ErrorStatus status = BSP_CAN_Read(bus, &id, MsgContainer->data);
+    // There is no message in the bus
+    if(status != SUCCESS){
+        return ERROR;
+    }
+    status = CANbus_Read_ValidateID(MsgContainer, id);
+    if(status != SUCCESS){
+        return ERROR;
+    }
+    status = CANbus_ValidateData(MsgContainer);
+    if(status != SUCCESS){
+        return ERROR;
+    }
+    return SUCCESS;
+}
+
 ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
 {
     CPU_TS timestamp;
@@ -290,27 +345,14 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
     if(status == ERROR){
         return ERROR;
     }
-
-    //error check the id
-    MsgContainer->ID = (CANId_t) id;
-    if(MsgContainer->ID >= MAX_CAN_ID){
-        MsgContainer = NULL;
+    
+    status = CANbus_Read_ValidateID(MsgContainer, id);
+    if(status != SUCCESS){
         return ERROR;
     }
-    CANLUT_T entry = CANLUT[MsgContainer->ID]; //lookup msg information in table
-    if(entry.size == 0){
-        MsgContainer = NULL;
+    status = CANbus_ValidateData(MsgContainer);
+    if(status != SUCCESS){
         return ERROR;
-    } //if they passed in an invalid id, it will be zero
-    
-    //search LUT for id to populate idx and trim data
-    if(entry.idxEn==true){
-        MsgContainer->idx = MsgContainer->data[0];
-        memmove( // Can't use memcpy, as memory regions overlap
-            MsgContainer->data,
-            &(MsgContainer->data[1]),
-            7 // max size of data (8) - size of idx byte (1)
-        );
     }
     return status;
 }
