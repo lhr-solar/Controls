@@ -38,6 +38,24 @@ controls_error_e UpdateDisplay_Init() {
     return (ret == DISPLAY_ERR_NONE) ? C_ERR_NONE : C_ERR_UPD_DRIVER;
 }
 
+static controls_error_e Update_DisplayModifyComponent(Component_t comp, uint32_t val){
+    if(display_components[comp].update_type == DISP_UPDATE_BOOL){
+        if(val != true && val != false){
+            return C_ERR_UPD_DRIVER;
+        }
+    }
+    else if(val == DISP_UPDATE_VAL){
+        display_components[comp].val = val;
+    }
+    else{
+        return C_ERR_UPD_DRIVER;
+    }
+
+    // Say the component has been modified
+    display_components[comp].modified = true;
+    return C_ERR_NONE;
+}
+
 /**
  * @brief Uses component enum to make assigning component values easier.
  * Differentiates between timers, variables, and components to assign values.

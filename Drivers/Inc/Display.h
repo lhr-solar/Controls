@@ -26,46 +26,56 @@
 
 #define FOREACH_DISPLAY_COMPONENT(DISP_COMP) \
     /* Boolean components */                 \
-    DISP_COMP(DISP_HEARTBEAT,        "hb")   \
-    DISP_COMP(DISP_PACK_CURR_SIGN,   "cs")   \
-    DISP_COMP(DISP_MC_CURR_SIGN,     "mcs")  \
-    DISP_COMP(DISP_BRAKE,            "brake")\
-    DISP_COMP(DISP_RIGHT_BLINK,      "rightblink")\
-    DISP_COMP(DISP_LEFT_BLINK,       "leftblink")\
+    DISP_COMP(DISP_HEARTBEAT, DISP_UPDATE_BOOL        ,"hb")   \
+    DISP_COMP(DISP_PACK_CURR_SIGN, DISP_UPDATE_BOOL   ,"cs")   \
+    DISP_COMP(DISP_MC_CURR_SIGN, DISP_UPDATE_BOOL     ,"mcs")  \
+    DISP_COMP(DISP_BRAKE, DISP_UPDATE_BOOL            ,"brake")\
+    DISP_COMP(DISP_RIGHT_BLINK, DISP_UPDATE_BOOL      ,"rightblink")\
+    DISP_COMP(DISP_LEFT_BLINK, DISP_UPDATE_BOOL       ,"leftblink")\
     /* Contactor-ish (still bool, but logically different) */ \
-    DISP_COMP(DISP_ARRAY_EN,         "arren")\
-    DISP_COMP(DISP_ARRAY_PC,         "arrpc")\
-    DISP_COMP(DISP_MOTOR_EN,         "moten")\
-    DISP_COMP(DISP_MOTOR_PC,         "motpc")\
+    DISP_COMP(DISP_ARRAY_EN, DISP_UPDATE_VAL        ,"arren")\
+    DISP_COMP(DISP_ARRAY_PC, DISP_UPDATE_VAL        ,"arrpc")\
+    DISP_COMP(DISP_MOTOR_EN, DISP_UPDATE_VAL       ,"moten")\
+    DISP_COMP(DISP_MOTOR_PC, DISP_UPDATE_VAL       ,"motpc")\
     /* Non-boolean components */             \
-    DISP_COMP(DISP_VELOCITY,         "vel")  \
-    DISP_COMP(DISP_ACCEL_METER,      "accel")\
-    DISP_COMP(DISP_SOC,              "soc")  \
-    DISP_COMP(DISP_SUPP_BATT,        "supp") \
-    DISP_COMP(DISP_CRUISE_ST,        "cruiseSt") \
-    DISP_COMP(DISP_REGEN_ST,         "rbsSt")\
-    DISP_COMP(DISP_PACK_VOLTAGE,     "pv")   \
-    DISP_COMP(DISP_PACK_CURRENT,     "pc")   \
-    DISP_COMP(DISP_PACK_TEMP,        "pt")   \
-    DISP_COMP(DISP_MC_BUS_VOLTAGE,   "mcv")  \
-    DISP_COMP(DISP_MC_BUS_CURRENT,   "mcc")  \
-    DISP_COMP(DISP_HEAT_SINK_TEMP,   "heatsink")\
-    DISP_COMP(DISP_GEAR,             "gear") \
-    DISP_COMP(DISP_MOT_LIMIT,        "motorlimit") \
+    DISP_COMP(DISP_VELOCITY, DISP_UPDATE_VAL         ,"vel")  \
+    DISP_COMP(DISP_ACCEL_METER, DISP_UPDATE_VAL      ,"accel")\
+    DISP_COMP(DISP_SOC, DISP_UPDATE_VAL              ,"soc")  \
+    DISP_COMP(DISP_SUPP_BATT, DISP_UPDATE_VAL        ,"supp") \
+    DISP_COMP(DISP_CRUISE_ST, DISP_UPDATE_VAL        ,"cruiseSt") \
+    DISP_COMP(DISP_REGEN_ST, DISP_UPDATE_VAL         ,"rbsSt")\
+    DISP_COMP(DISP_PACK_VOLTAGE, DISP_UPDATE_VAL     ,"pv")   \
+    DISP_COMP(DISP_PACK_CURRENT, DISP_UPDATE_VAL     ,"pc")   \
+    DISP_COMP(DISP_PACK_TEMP, DISP_UPDATE_VAL        ,"pt")   \
+    DISP_COMP(DISP_MC_BUS_VOLTAGE, DISP_UPDATE_VAL   ,"mcv")  \
+    DISP_COMP(DISP_MC_BUS_CURRENT, DISP_UPDATE_VAL   ,"mcc")  \
+    DISP_COMP(DISP_HEAT_SINK_TEMP, DISP_UPDATE_VAL   ,"heatsink")\
+    DISP_COMP(DISP_GEAR, DISP_UPDATE_VAL             ,"gear") \
+    DISP_COMP(DISP_MOT_LIMIT, DISP_UPDATE_VAL        ,"motorlimit") \
     /* Fault components */                   \
-    DISP_COMP(DISP_OS_CODE,          "oserr")\
-    DISP_COMP(DISP_FAULT_CODE,       "faulterr")\
-    DISP_COMP(DISP_EVAC_MSG,         "evac") \
-    DISP_COMP(DISP_EVAC_BPS_FAULT,   "bpsfaulterr")
+    DISP_COMP(DISP_OS_CODE, DISP_UPDATE_FAULT          ,"oserr")\
+    DISP_COMP(DISP_FAULT_CODE, DISP_UPDATE_FAULT       ,"faulterr")\
+    DISP_COMP(DISP_EVAC_MSG, DISP_UPDATE_FAULT         ,"evac") \
+    DISP_COMP(DISP_EVAC_BPS_FAULT, DISP_UPDATE_FAULT   ,"bpsfaulterr")
 
 /**
  * Enum and corresponding array for easy component selection.
  */
 typedef enum {
-    #define GENERATE_DISPLAY_ENUM(name, str) name,
+    #define GENERATE_DISPLAY_ENUM(name, type, str) name,
     FOREACH_DISPLAY_COMPONENT(GENERATE_DISPLAY_ENUM)
     DISP_NUM_COMPONENTS
 } Component_t;
+
+/**
+ * Enum corresponds to what type of component it is (a value, boolean, visibility, etc)
+ */
+typedef enum {
+    DISP_UPDATE_BOOL, // This component is either on or off
+    DISP_UPDATE_VAL, // This component recieves a value (could be a string or number)
+    DISP_UPDATE_IGNORE, // This component is unused and will not be sent onto the display
+    DISP_UPDATE_FAULT // These components will only be updated in a fault state
+} Component_Type_t;
 
 /**
  * Values corresponding to the component enum.

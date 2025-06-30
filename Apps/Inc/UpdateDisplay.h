@@ -19,6 +19,7 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
+#include "Display.h"
 
 
 
@@ -47,6 +48,19 @@ typedef enum { STATE_0 = 0, STATE_1 = 1, STATE_2 = 2 } TriState_t;
 #define DISP_NEUTRAL  STATE_0
 #define DISP_FORWARD  STATE_1
 #define DISP_REVERSE  STATE_2
+
+typedef struct {
+    bool modified;
+    Component_t component_index;
+    Component_Type_t update_type;
+    uint32_t val;
+} update_display_comp;
+
+
+update_display_comp display_components[DISP_NUM_COMPONENTS] = {
+    #define GENERATE_DISPLAY_STRUCT(name, type, val) {false, name, type, 0},
+    FOREACH_DISPLAY_COMPONENT(GENERATE_DISPLAY_STRUCT)
+}; 
 
 /**
  * @brief Initializes UpdateDisplay application
