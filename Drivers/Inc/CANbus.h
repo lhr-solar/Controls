@@ -135,6 +135,16 @@ ErrorStatus CANbus_Send_Faultstate(CANDATA_t CanData, CAN_t bus);
  */
 ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
 
+/**
+ * @brief   Reads a CAN message from the CAN hardware during a fault state without any RTOS calls
+ * @param   data 		pointer to where to store the CAN id of the received msg
+ * @param   blocking 	Whether or not this read should be a blocking read
+ * @param   bus 		The bus to use. This should either be CARCAN or MOTORCAN.
+ * @returns ERROR if read failed, SUCCESS otherwise
+ */
+ErrorStatus CANbus_Read_FaultState(CANDATA_t* MsgContainer, CAN_t bus);
+
+
 #endif
 
 

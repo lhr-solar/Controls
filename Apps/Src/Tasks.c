@@ -268,8 +268,8 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
     iostatemsg.ID = IO_STATE;
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
-
-    volatile int displayUpdateCount = 0;
+    
+    CANDATA_t dataBuf = {0};
 
     if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
         while (1) {
@@ -280,12 +280,12 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
             CANbus_Send_Faultstate(faultmsg, CARCAN);
             CANbus_Send_Faultstate(motormsg, CARCAN);
             CANbus_Send_Faultstate(iostatemsg, CARCAN);
-            displayUpdateCount++;
-            // Updates the display every ERROR_DISPLAY_UPDATE_COUNT iterations
-            // Did this due to the display sometimes browning out and resetting when voltage drops in fault
-            if(displayUpdateCount >= ERROR_DISPLAY_UPDATE_COUNT) {
-                displayUpdateCount = 0;
-                //setDisplayErrorScreen(error_code, is_evac_needed);
+            ErrorStatus status = CANbus_Read_FaultState(&dataBuf, MOTORCAN);
+
+            // There is a message on the motor canbus
+            if(status == SUCCESS){
+                // Forward messages from motorcan to carcan
+                CANbus_Send_Faultstate(dataBuf, CARCAN);
             }
         }
     }
