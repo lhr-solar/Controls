@@ -41,15 +41,17 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
 	[THREE_RAIL_VOL] 				= {NOIDX, DOUBLE},
 	[TEMPERATURE] 					= {NOIDX, DOUBLE}, /**     TEMPERATURE                     **/
 	[DSP_TEMP] 						= {NOIDX, DOUBLE},
-	[ODOMETER_AMPHOURS] 			= {NOIDX, DOUBLE}, /**     ODOMETER_AMPHOURS               **/
-	[ARRAY_CONTACTOR_STATE_CHANGE] 	= {NOIDX, BYTE  }, /**     ARRAY_CONTACTOR_STATE_CHANGE    **/
+	[ODOMETER_AMPHOURS] 			= {NOIDX, DOUBLE},
+	[ARRAY_CONTACTOR_STATE_CHANGE] 	= {NOIDX, BYTE  },
     [SLIP_SPEED]                    = {NOIDX, DOUBLE}, 
 	[CONTACTOR_SENSE]               = {NOIDX, DOUBLE},
 	[PRECHARGE_TIMEOUT]             = {NOIDX, BYTE},
-    [CONTROL_MODE]                  = {NOIDX, BYTE}, /**     CONTROL_MODE	                   **/
-	[IO_STATE] 				        = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
-    [CONTROLS_FAULT_MSG]            = {NOIDX, BYTE  },  /**    CONTROLS_FAULT_MSG              **/     
-	[MOTOR_CONTROLLER_SAFE]			= {NOIDX, BYTE} /**        MOTOR_CONTROLLER_SAFE            **/	   
+    [CONTROL_MODE]                  = {NOIDX, BYTE},
+	[IO_STATE] 				        = {NOIDX, DOUBLE},
+    [CONTROLS_FAULT_MSG]            = {NOIDX, BYTE},
+	[MOTOR_CONTROLLER_SAFE]			= {NOIDX, BYTE},
+	[PEDALS_RAW_VOLTAGE]			= {NOIDX, DOUBLE}
+
 };
 
 /**

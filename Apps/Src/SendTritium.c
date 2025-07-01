@@ -98,11 +98,20 @@ static void updateDisplayState() {
 static void readInputs() {
     brakePedalPercent = Pedals_Read(BRAKE);
     accelPedalPercent = Pedals_Read(ACCELERATOR);
+    CANDATA_t rawPedalmv = {
+        .ID = PEDALS_RAW_VOLTAGE, 
+        .idx = 0, 
+        .data = {0}
+    };
+
+    ((int16_t*)rawPedalmv.data)[0] = Pedals_rawVoltage(BRAKE);
+    ((int16_t*)rawPedalmv.data)[1] = Pedals_rawVoltage(ACCELERATOR);
+    SendCarCAN_Put(rawPedalmv);
 
     // // Brake hysteresis
-    if (brakePedalPercent >= BRAKE_UNPRESSED_THRESHOLD)
+    if (brakePedalPercent >= BRAKE_PRESSED_THRESHOLD)
         isBrakeOn = true;
-    else if (brakePedalPercent <= BRAKE_PRESSED_THRESHOLD)
+    else if (brakePedalPercent <= BRAKE_UNPRESSED_THRESHOLD)
         isBrakeOn = false;
     Lights_Write(BRAKE_LIGHT, isBrakeOn);
     gear = getGear(GEAR_USE_OS_DELAY);
@@ -230,7 +239,7 @@ void Task_SendTritium(void *p_arg) {
             switch (gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));                 
+\                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));                 
                     break;
 
                 case DASH_NEU:
