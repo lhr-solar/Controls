@@ -270,22 +270,34 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
     
     CANDATA_t dataBuf = {0};
+    CANId_t motorCanID; 
+
+    // Send the motormsg fault message 10 times at the start of fault state than never again
+    // We only have 3 Hw TX mailboxes for CarCAN, so cannot send > 3 messages on CAN at once
+    for(volatile uint8_t i = 0; i < 10; i++){
+       delay_ms(100); 
+        CANbus_Send_Faultstate(motormsg, CARCAN);
+
+    }
+    Status_Leds_Write(DASH_HEARTBEAT_LED, OFF);
 
     if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
         while (1) {
 
             delay_ms(500);
             Status_Leds_Toggle(CONTROLS_FAULT_LED);
-            Status_Leds_Toggle(DASH_HEARTBEAT_LED);
-            CANbus_Send_Faultstate(faultmsg, CARCAN);
-            CANbus_Send_Faultstate(motormsg, CARCAN);
-            CANbus_Send_Faultstate(iostatemsg, CARCAN);
+            // Status_Leds_Toggle(DASH_HEARTBEAT_LED);
+            //CANbus_Send_Faultstate(faultmsg, CARCAN);
+            //CANbus_Send_Faultstate(iostatemsg, CARCAN);
             ErrorStatus status = CANbus_Read_FaultState(&dataBuf, MOTORCAN);
 
             // There is a message on the motor canbus
             if(status == SUCCESS){
                 // Forward messages from motorcan to carcan
-                CANbus_Send_Faultstate(dataBuf, CARCAN);
+                motorCanID = dataBuf.ID;
+                if(motorCanID == MOTOR_STATUS){
+                    CANbus_Send_Faultstate(dataBuf, CARCAN);
+                }
             }
         }
     }
