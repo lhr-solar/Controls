@@ -15,13 +15,13 @@
 // Indexed using pedal_t
 // Refine in testing
 static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
-    0,   // Accelerator lower bound
-    0,   // Brake lower bound
+    990,   // Accelerator lower bound
+    1500,   // Brake lower bound
 };
 
 static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
     3200, // Accelerator upper bound
-    3200, // Brake upper bound
+    2350, // Brake upper bound
 };
 
 /**
@@ -46,17 +46,22 @@ void Pedals_Init() {
  */
 uint8_t Pedals_Read(pedal_t pedal) {
     if (pedal >= NUMBER_OF_PEDALS) return 0;
-    int16_t millivoltsPedal = (int16_t)BSP_ADC_Get_Millivoltage(pedal);
 
-    int8_t percentage = 0;
+    int16_t mv = (int16_t)BSP_ADC_Get_Millivoltage(pedal);
+    int16_t percentage = (mv - LowerBound[pedal]) * 100 / (UpperBound[pedal] - LowerBound[pedal]);
 
-    if (millivoltsPedal >= LowerBound[pedal]) {
-        percentage = (int8_t)((int32_t)(millivoltsPedal - LowerBound[pedal]) * 100 /
-                              (UpperBound[pedal] - LowerBound[pedal]));
-    }
-    
-    percentage = percentage > 100 ? 100 : percentage;
-    percentage = percentage < 0 ? 0 : percentage;
-    percentage = 100 - percentage;
-    return (uint8_t)percentage;
+    if (percentage < 0) percentage = 0;
+    if (percentage > 100) percentage = 100;
+
+    return (uint8_t)(100 - percentage);
+}
+
+/**
+ * @brief   Fetches the millivoltage value of the potentiomenter as provided
+ *          by the ADC channel of the requested pedal (Accelerator or Brake),
+ * @param   pedal_t, ACCELERATOR or BRAKE as defined in enum
+ * @return  Direct analog voltage the pedal outputs
+ */
+int16_t Pedals_rawVoltage(pedal_t pedal){
+    return (int16_t)BSP_ADC_Get_Millivoltage(pedal);
 }

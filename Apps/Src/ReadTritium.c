@@ -149,9 +149,9 @@ void Task_ReadTritium(void *p_arg) {
 }
 
 static void restartMotorController(void) {
-    CANDATA_t resetmsg = {0};
-    resetmsg.ID = MOTOR_RESET;
-    CANbus_Send(resetmsg, true, MOTORCAN);
+    //CANDATA_t resetmsg = {0};
+    //resetmsg.ID = MOTOR_RESET;
+    //CANbus_Send(resetmsg, true, MOTORCAN);
 }
 
 // Getter function for motor RPM

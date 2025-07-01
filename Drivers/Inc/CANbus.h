@@ -60,6 +60,7 @@ typedef enum {
     IO_STATE 						= 0x581,
     CONTROLS_FAULT_MSG              = 0x583,
 	MOTOR_CONTROLLER_SAFE			= 0x584,
+	PEDALS_RAW_VOLTAGE				= 0x585,
 	MAX_CAN_ID
 } CANId_t;
 

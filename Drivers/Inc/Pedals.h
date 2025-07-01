@@ -19,9 +19,6 @@
  */
 typedef enum { ACCELERATOR, BRAKE, NUMBER_OF_PEDALS } pedal_t;
 
-// Arbitrary brakelight percentage threshold to be ONLY used for the brakelight
-#define PEDAL_BRAKELIGHT_THRESHOLD 10
-
 /**
  * @brief   Initialize the pedals
  * @param   None
@@ -35,6 +32,14 @@ void Pedals_Init(void);
  * @return  distance the pedal has been pressed in percentage
  */
 uint8_t Pedals_Read(pedal_t pedal);
+
+/**
+ * @brief   Fetches the millivoltage value of the potentiomenter as provided
+ *          by the ADC channel of the requested pedal (Accelerator or Brake),
+ * @param   pedal_t, ACCELERATOR or BRAKE as defined in enum
+ * @return  Direct analog voltage the pedal outputs
+ */
+int16_t Pedals_rawVoltage(pedal_t pedal);
 
 #endif
 
