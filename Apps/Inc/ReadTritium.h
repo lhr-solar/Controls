@@ -36,6 +36,8 @@
 //     T_NONE = 0x00,
 // } tritium_error_code_t;
 
+#define MOTOR_VELOCITY_SWOC_THRESHOLD 8.0f
+
 float Motor_RPM_Get();
 float Motor_Velocity_Get();
 uint16_t Motor_Error_Get();
