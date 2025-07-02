@@ -63,11 +63,13 @@ switch_state_t getSwitchState(dash_pin_t pin){
 
         // The indicators are negative logic
         case (DASH_RIGHT_IND):
-            ret = BSP_GPIO_Read_Pin(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR) ? DASH_SW_OFF : DASH_SW_ON;
+            ret = BSP_GPIO_Read_Pin(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR) ? DASH_SW_ON : DASH_SW_OFF;
             break;
         case (DASH_LEFT_IND):
-            ret = BSP_GPIO_Read_Pin(LEFT_INDICATOR_PORT, LEFT_INDICATOR) ? DASH_SW_OFF : DASH_SW_ON;
+            ret = BSP_GPIO_Read_Pin(LEFT_INDICATOR_PORT, LEFT_INDICATOR) ? DASH_SW_ON : DASH_SW_OFF;
             break;
+        case (DASH_HZD):
+            ret = BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SW_OFF : DASH_SW_ON;
         default:
             ret = DASH_SW_ERROR;
             break;
@@ -78,7 +80,7 @@ switch_state_t getSwitchState(dash_pin_t pin){
 void dashboardInit(){
     BSP_GPIO_Init(FORWARD_PORT, FORWARD, INPUT, false);             //FWD
     BSP_GPIO_Init(REVERSE_PORT, REVERSE, INPUT, false);             //REV
-    BSP_GPIO_Init(CRUISE_SET_PORT, CRUISE_SET, INPUT, false);       //CRUZ_ST
+    BSP_GPIO_Init(CRUISE_SET_PORT, CRUISE_SET, INPUT, false);       //Used as Hazard
 
     BSP_GPIO_Init(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR, INPUT, false);
     BSP_GPIO_Init(LEFT_INDICATOR_PORT, LEFT_INDICATOR, INPUT, false);

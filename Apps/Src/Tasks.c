@@ -20,6 +20,7 @@
 #include "SendTritium.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
+#include "Lights.h"
 #include "daybreak_pins.h"
 
 /**
@@ -290,6 +291,10 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
             //CANbus_Send_Faultstate(faultmsg, CARCAN);
             //CANbus_Send_Faultstate(iostatemsg, CARCAN);
             ErrorStatus status = CANbus_Read_FaultState(&dataBuf, MOTORCAN);
+
+            // Turn on hazards   
+            Lights_Write(RIGHT_LIGHT, true);
+            Lights_Write(LEFT_LIGHT, true);
 
             // There is a message on the motor canbus
             if(status == SUCCESS){

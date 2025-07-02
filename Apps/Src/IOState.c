@@ -103,11 +103,16 @@ void Task_IOState(void *p_arg) {
             Status_Leds_Toggle(DASH_HEARTBEAT_LED); // heartbeat led on the dashboard
             ioStateCounter = 0;
         }
-        bool right_ind = getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON;
-        bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
-        UpdateDisplay_SetBlink(left_ind, right_ind);
-        Lights_Write(RIGHT_LIGHT, right_ind);
-        Lights_Write(LEFT_LIGHT, left_ind);
+        // bool right_ind = getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON;
+        // bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
+        // bool hazard = getSwitchState(DASH_HZD) == DASH_SW_ON;
+        // if(hazard){
+        //     right_ind = true;
+        //     left_ind = true;
+        // }
+        // UpdateDisplay_SetBlink(left_ind, right_ind);
+        Lights_Write(LEFT_LIGHT, false);
+        Lights_Write(RIGHT_LIGHT, false);
 
 #ifdef TASK_PROFILER
         DebugIO_Toggle(IO_STATE_PIN);

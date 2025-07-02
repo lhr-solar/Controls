@@ -31,6 +31,7 @@ typedef enum{
     DASH_CRUZ_EN,
     DASH_RIGHT_IND,
     DASH_LEFT_IND,
+    DASH_HZD,
     DASH_NUM_PINS,
 } dash_pin_t;
 
