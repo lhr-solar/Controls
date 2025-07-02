@@ -193,7 +193,6 @@ void Task_SendTritium(void *p_arg) {
     // In order to spin the motor the accelerator needs to return to a safe value
     static bool accelerator_reset = false;
     uint8_t resetAccelPercent = 0;
-
     uint8_t maxCurrentPercentage = 100;
 
     // By default assume we are below the motor swoc threshold at startup
@@ -247,7 +246,11 @@ void Task_SendTritium(void *p_arg) {
             switch (gear) {
                 case DASH_FWD:
                     velocitySetpoint = MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, maxCurrentPercentage));                 
+                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, 
+                                                                    ACCEL_PEDAL_THRESHOLD, 
+                                                                    PEDAL_MAX, 
+                                                                    CURRENT_SP_MIN, 
+                                                                    maxCurrentPercentage));                 
                     break;
 
                 case DASH_NEU:
@@ -257,7 +260,11 @@ void Task_SendTritium(void *p_arg) {
 
                 case DASH_REV:
                     velocitySetpoint = -MAX_VELOCITY;
-                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, maxCurrentPercentage));   
+                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, 
+                                                                    ACCEL_PEDAL_THRESHOLD, 
+                                                                    PEDAL_MAX, 
+                                                                    CURRENT_SP_MIN, 
+                                                                    maxCurrentPercentage));   
                     break;
 
                 default:

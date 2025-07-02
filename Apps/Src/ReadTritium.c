@@ -122,17 +122,17 @@ void Task_ReadTritium(void *p_arg) {
                     // Car Velocity (in m/s) is in bytes 4-7
                     Motor_Velocity = *((float *)(&dataBuf.data[4]));
 
-                    float Car_Velocity = Motor_Velocity * MPH_CONVERSION * 10.0f;
-
+                    float Car_Velocity = Motor_Velocity * MPH_CONVERSION; // Car vel is in mph
                     // Display can't take negative values, and reverse puts Car_Velocity in the negative
                     Car_Velocity = (Car_Velocity < 0) ? -Car_Velocity : Car_Velocity; 
 
                     // If the motor is above a certain velocity, scale the max current setpoint down
-                    MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, (Car_Velocity >= MOTOR_VELOCITY_SWOC_THRESHOLD) ? true: false , false);
+                    MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, 
+                                           (Car_Velocity >= MOTOR_VELOCITY_SWOC_THRESHOLD) ? true : false, 
+                                           false);
 
                     // Round car velocity to the nearest integer
-                    UpdateDisplay_SetVelocity((uint32_t)(Car_Velocity));
-
+                    UpdateDisplay_SetVelocity((uint32_t)(Car_Velocity * 10.0f));
                     break;
                 }
 
