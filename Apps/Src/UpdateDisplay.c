@@ -240,7 +240,7 @@ controls_error_e UpdateDisplay_SetBattTemperature(uint32_t val) {
 controls_error_e UpdateDisplay_SetBattCurrent(int32_t val) {
     bool is_neg = (val < 0);
     g_display_comp_vals[DISP_PACK_CURR_SIGN] = (uint32_t)(is_neg);
-    g_display_comp_vals[DISP_PACK_CURRENT] = (uint32_t)((is_neg ? -val : val) / 100);
+    g_display_comp_vals[DISP_PACK_CURRENT] = ((uint32_t)(is_neg ? -val : val) / 100);
     g_display_comp_modified[DISP_PACK_CURR_SIGN] = true;
     g_display_comp_modified[DISP_PACK_CURRENT] = true;
     return C_ERR_NONE;
@@ -318,6 +318,7 @@ void Task_UpdateDisplay(void *p_arg) {
         Component_t comp;
 
         /*   ALL BOOLEANS   */
+        UpdateDisplay_SetHeartbeat(g_display_comp_vals[DISP_HEARTBEAT] ? 0 : 1);
         for (comp = 0; comp <= DISP_LEFT_BLINK; comp++) {
             assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
         }
@@ -328,7 +329,7 @@ void Task_UpdateDisplay(void *p_arg) {
 
         Update_Blinkers();
 
-        OSTimeDlyHMSM(0, 0, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
 
         /*   ALL CONTACTORS   */
@@ -336,7 +337,7 @@ void Task_UpdateDisplay(void *p_arg) {
             assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
         }
 
-        OSTimeDlyHMSM(0, 0, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
 
         /*   HALF OF VAL TYPE COMPONENTS   */
@@ -344,7 +345,7 @@ void Task_UpdateDisplay(void *p_arg) {
             assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
         }
 
-        OSTimeDlyHMSM(0, 0, 0, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
 
         /*   OTHER HALF OF VAL TYPE COMPONENTS   */
