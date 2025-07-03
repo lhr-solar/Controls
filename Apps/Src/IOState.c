@@ -102,6 +102,7 @@ void Task_IOState(void *p_arg) {
             Status_Leds_Toggle(DASH_HEARTBEAT_LED); // heartbeat led on the dashboard
             ioStateCounter = 0;
         }
+
         bool right_ind = getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON;
         bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
         bool hazard = getSwitchState(DASH_CRUZ_SET) == DASH_SW_ON;

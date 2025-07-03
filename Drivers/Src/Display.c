@@ -35,6 +35,9 @@ static const char *TERMINATOR = "\xff\xff\xff";
 // Hold component values for display
 uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS] = {0};
 
+// Hold whether a component was modified
+bool g_display_comp_modified[DISP_NUM_COMPONENTS] = {0};
+
 // Strings for each component id
 const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
     #define GENERATE_DISP_COMP_STRING(name, str) str,
@@ -53,6 +56,10 @@ static char *BPSFaultErrStr[NUM_BPS_FAULT_ERRS] = {
  */
 DisplayError_t Display_Init() {
     BSP_UART_Init(DISPLAY);
+    for (uint8_t i = 0; i < DISP_NUM_COMPONENTS; i++) {
+        g_display_comp_modified[i] = true;
+    }
+    
     return Display_Reset();
 }
 

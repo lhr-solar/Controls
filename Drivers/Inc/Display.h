@@ -42,8 +42,6 @@
     DISP_COMP(DISP_ACCEL_METER,      "accel")\
     DISP_COMP(DISP_SOC,              "soc")  \
     DISP_COMP(DISP_SUPP_BATT,        "supp") \
-    DISP_COMP(DISP_CRUISE_ST,        "cruiseSt") \
-    DISP_COMP(DISP_REGEN_ST,         "rbsSt")\
     DISP_COMP(DISP_PACK_VOLTAGE,     "pv")   \
     DISP_COMP(DISP_PACK_CURRENT,     "pc")   \
     DISP_COMP(DISP_PACK_TEMP,        "pt")   \
@@ -51,8 +49,9 @@
     DISP_COMP(DISP_MC_BUS_CURRENT,   "mcc")  \
     DISP_COMP(DISP_HEAT_SINK_TEMP,   "heatsink")\
     DISP_COMP(DISP_GEAR,             "gear") \
+    /* Text components */                    \
     DISP_COMP(DISP_MOT_LIMIT,        "motorlimit") \
-    /* Fault components */                   \
+        /* Fault components */               \
     DISP_COMP(DISP_OS_CODE,          "oserr")\
     DISP_COMP(DISP_FAULT_CODE,       "faulterr")\
     DISP_COMP(DISP_EVAC_MSG,         "evac") \
@@ -71,6 +70,7 @@ typedef enum {
  * Values corresponding to the component enum.
  */
 extern uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS];
+extern bool g_display_comp_modified[DISP_NUM_COMPONENTS];
 extern const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS];
     
 /**
