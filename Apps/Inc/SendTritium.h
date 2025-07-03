@@ -39,7 +39,7 @@
 #define PEDAL_MAX 100      // percent
 #define CURRENT_SP_MIN 0   // percent
 #define CURRENT_SP_MAX 100 // percent
-#define SWOC_CURRENT_SP_MAX 60 // percent
+#define SWOC_CURRENT_SP_MAX 45 // percent
 
 #define GEAR_FAULT_THRESHOLD 3 // number of times gear fault can occur before it is considered a fault
 
