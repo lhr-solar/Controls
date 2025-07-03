@@ -38,7 +38,6 @@ void putIOState(void) {
     s |= SWITCH_BITMAP_CRUZ_EN(0);
     s |= SWITCH_BITMAP_CRUZ_ST(0);
     s |= SWITCH_BITMAP_REGEN_SW(0);
-    Status_Leds_Write(CRUISE_IND_LED, getSwitchState(DASH_CRUZ_SET) ? ON : OFF);
 
     switch (getGear(GEAR_USE_OS_DELAY)) {
         case DASH_FWD:
@@ -103,16 +102,16 @@ void Task_IOState(void *p_arg) {
             Status_Leds_Toggle(DASH_HEARTBEAT_LED); // heartbeat led on the dashboard
             ioStateCounter = 0;
         }
-        // bool right_ind = getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON;
-        // bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
-        // bool hazard = getSwitchState(DASH_HZD) == DASH_SW_ON;
-        // if(hazard){
-        //     right_ind = true;
-        //     left_ind = true;
-        // }
-        // UpdateDisplay_SetBlink(left_ind, right_ind);
-        Lights_Write(LEFT_LIGHT, false);
-        Lights_Write(RIGHT_LIGHT, false);
+        bool right_ind = getSwitchState(DASH_RIGHT_IND) == DASH_SW_ON;
+        bool left_ind = getSwitchState(DASH_LEFT_IND) == DASH_SW_ON;
+        bool hazard = getSwitchState(DASH_CRUZ_SET) == DASH_SW_ON;
+        if(hazard){
+            right_ind = true;
+            left_ind = true;
+        }
+        UpdateDisplay_SetBlink(left_ind, right_ind);
+        Lights_Write(LEFT_LIGHT, left_ind);
+        Lights_Write(RIGHT_LIGHT, right_ind);
 
 #ifdef TASK_PROFILER
         DebugIO_Toggle(IO_STATE_PIN);

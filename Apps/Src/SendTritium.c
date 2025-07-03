@@ -113,7 +113,8 @@ static void readInputs() {
         isBrakeOn = true;
     else if (brakePedalPercent <= BRAKE_UNPRESSED_THRESHOLD)
         isBrakeOn = false;
-    Lights_Write(BRAKE_LIGHT, isBrakeOn);
+    BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT_PIN, ON);
+    Lights_Write(BRAKE_LIGHT, ON);
     gear = getGear(GEAR_USE_OS_DELAY);
 
     // Check for gear fault

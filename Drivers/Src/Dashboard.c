@@ -60,8 +60,6 @@ switch_state_t getSwitchState(dash_pin_t pin){
         case(DASH_CRUZ_EN):
             ret = BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SW_ON : DASH_SW_OFF;
             break;
-
-        // The indicators are negative logic
         case (DASH_RIGHT_IND):
             ret = BSP_GPIO_Read_Pin(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR) ? DASH_SW_ON : DASH_SW_OFF;
             break;
