@@ -23,7 +23,7 @@ void Lights_Init(void){
     pwm_setup(); // Init TIM8 and TIM1 for PA8 and PC9
     BSP_GPIO_Init(RIGHT_IND_PORT, RIGHT_IND, INPUT, false);
     BSP_GPIO_Init(LEFT_IND_PORT, LEFT_IND, INPUT, false);   
-    BSP_GPIO_Init(BRAKE_LIGHT_PORT, BRAKE_LIGHT, OUTPUT, false);
+    BSP_GPIO_Init(BRAKE_LIGHT_PORT, BRAKE_LIGHT_PIN, OUTPUT, false);
 
 } 
 
@@ -44,7 +44,7 @@ void Lights_Write(lights_t led, bool state){ // tim1 = port a = left
                 pwm_timx_start(TIM1);
             break;
         case BRAKE_LIGHT:
-                BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT_PIN, ON);    
+                BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT_PIN, state);    
         default:
             break;
     }
