@@ -42,8 +42,6 @@
     DISP_COMP(DISP_ACCEL_METER,      "accel")\
     DISP_COMP(DISP_SOC,              "soc")  \
     DISP_COMP(DISP_SUPP_BATT,        "supp") \
-    DISP_COMP(DISP_CRUISE_ST,        "cruiseSt") \
-    DISP_COMP(DISP_REGEN_ST,         "rbsSt")\
     DISP_COMP(DISP_PACK_VOLTAGE,     "pv")   \
     DISP_COMP(DISP_PACK_CURRENT,     "pc")   \
     DISP_COMP(DISP_PACK_TEMP,        "pt")   \

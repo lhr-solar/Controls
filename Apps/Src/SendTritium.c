@@ -87,9 +87,6 @@ static void updateDisplayState() {
         UpdateDisplay_SetGear(DISP_NEUTRAL);
         break;
     }
-
-    UpdateDisplay_SetRegenState(DISP_DISABLED);  // Not on Daybreak
-    UpdateDisplay_SetCruiseState(DISP_DISABLED); // Probably not on Daybreak
 }
 
 /**

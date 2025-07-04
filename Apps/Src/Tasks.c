@@ -287,14 +287,10 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
 
             delay_ms(500);
             Status_Leds_Toggle(CONTROLS_FAULT_LED);
-            // Status_Leds_Toggle(DASH_HEARTBEAT_LED);
-            //CANbus_Send_Faultstate(faultmsg, CARCAN);
-            //CANbus_Send_Faultstate(iostatemsg, CARCAN);
+            Status_Leds_Toggle(DASH_HEARTBEAT_LED);
+            CANbus_Send_Faultstate(faultmsg, CARCAN);
+            CANbus_Send_Faultstate(iostatemsg, CARCAN);
             ErrorStatus status = CANbus_Read_FaultState(&dataBuf, MOTORCAN);
-
-            // Turn on hazards   
-            Lights_Write(RIGHT_LIGHT, true);
-            Lights_Write(LEFT_LIGHT, true);
 
             // There is a message on the motor canbus
             if(status == SUCCESS){

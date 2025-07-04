@@ -24,8 +24,15 @@ bool rightBlinkerOn = false;
 #define UPDATE_DISPLAY_DELAY 250
 #define BLINKER_COUNT (500)/UPDATE_DISPLAY_DELAY
 
+bool g_display_comp_modified[DISP_NUM_COMPONENTS] = { false };
+
 // For fault handling
 #define RESTART_THRESHOLD 3 // number of times to reset before displaying the fault screen
+
+static void UpdateDisplay_SetValue(Component_t comp, uint32_t val){
+    g_display_comp_vals[comp] = val;
+    g_display_comp_modified[comp] = true;
+}
 
 controls_error_e UpdateDisplay_Init() {
     OS_ERR err;
@@ -62,6 +69,10 @@ static controls_error_e UpdateDisplay_SetComponent(Component_t comp) {
     else {
         uint32_t comp_val = 0;
         if (comp > DISP_MOTOR_PC) {
+            // If we haven't modified the element then there is no need to send a display
+            if(!g_display_comp_modified[comp]){
+                return C_ERR_NONE;
+            } 
             comp_val = g_display_comp_vals[comp];
         } else {
             switch (comp) {
@@ -88,6 +99,7 @@ static controls_error_e UpdateDisplay_SetComponent(Component_t comp) {
                                .numArgs = 1,
                                .argTypes = {INT_ARG},
                                .args = {{.num = comp_val}}};
+        g_display_comp_modified[comp] = false;
         ret = Display_Send(setCmd);
     }
 
@@ -96,12 +108,11 @@ static controls_error_e UpdateDisplay_SetComponent(Component_t comp) {
 
 /* WRAPPERS */
 controls_error_e UpdateDisplay_SetSOC(uint32_t percent) { // Integer percentage from 0-100
-    if (percent > 100) {
-        g_display_comp_vals[DISP_SOC] = 123;
+    if(percent > 100){
+        UpdateDisplay_SetValue(DISP_SOC, 420);
         return C_ERR_UPD_PARSE_COMPONENT;
     }
-
-    g_display_comp_vals[DISP_SOC] = percent;
+    UpdateDisplay_SetValue(DISP_SOC, percent);
     return C_ERR_NONE;
 }
 
@@ -144,110 +155,104 @@ controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag){
 }
 
 controls_error_e UpdateDisplay_SetSBPV(uint32_t mv) {
-    g_display_comp_vals[DISP_SUPP_BATT] = (mv / 100); // mv to tenths of a volt;
+    UpdateDisplay_SetValue(DISP_SUPP_BATT, (mv / 100)); // mv to tenths of a volt
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetVelocity(uint32_t mphTenths) {
-    g_display_comp_vals[DISP_VELOCITY] = mphTenths;
+    UpdateDisplay_SetValue(DISP_VELOCITY, mphTenths);
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetAccel(uint8_t percent) {
-    g_display_comp_vals[DISP_ACCEL_METER] = (uint32_t)((percent > 100) ? 100 : percent);
+    UpdateDisplay_SetValue(DISP_ACCEL_METER, ((percent > 100) ? 100 : percent));
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetBlink(bool leftState, bool rightState) {
     leftBlinkerOn = leftState;
     rightBlinkerOn = rightState;
-
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetGear(TriState_t gear) {
-    g_display_comp_vals[DISP_GEAR] = (uint32_t)(gear);
-    return C_ERR_NONE;
-}
-
-controls_error_e UpdateDisplay_SetRegenState(TriState_t state) {
-    g_display_comp_vals[DISP_REGEN_ST] = (uint32_t)(state);
-    return C_ERR_NONE;
-}
-
-controls_error_e UpdateDisplay_SetCruiseState(TriState_t state) {
-    g_display_comp_vals[DISP_CRUISE_ST] = (uint32_t)(state);
+    UpdateDisplay_SetValue(DISP_GEAR, (uint32_t)(gear));
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetBattVoltage(uint32_t mv) {
-    g_display_comp_vals[DISP_PACK_VOLTAGE] = (mv / 100); // mv to tenths of a volt
+    UpdateDisplay_SetValue(DISP_PACK_VOLTAGE, (mv / 100)); // mv to tenths of a volt
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetBattTemperature(uint32_t val) {
-    g_display_comp_vals[DISP_PACK_TEMP] = (val / 100);
+    UpdateDisplay_SetValue(DISP_PACK_TEMP, (val / 100)); // mv to tenths of a volt
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetBattCurrent(int32_t val) {
     bool is_neg = (val < 0);
-    g_display_comp_vals[DISP_PACK_CURR_SIGN] = (uint32_t)(is_neg);
-    g_display_comp_vals[DISP_PACK_CURRENT] = (uint32_t)((is_neg ? -val : val) / 100);
+    UpdateDisplay_SetValue(DISP_PACK_CURR_SIGN, (is_neg ? 1 : 0));
+    UpdateDisplay_SetValue(DISP_PACK_CURRENT, (uint32_t)((is_neg ? -val : val) / 100));
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetMCVoltage(uint32_t volts) {
-    g_display_comp_vals[DISP_MC_BUS_VOLTAGE] = volts;
+    UpdateDisplay_SetValue(DISP_MC_BUS_VOLTAGE, (volts));
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetMCCurrent(int32_t val) {
     bool is_neg = (val < 0);
-    g_display_comp_vals[DISP_MC_CURR_SIGN] = (uint32_t)(is_neg);
+    g_display_comp_vals[DISP_MC_CURR_SIGN] = (is_neg) ? 1 : 0;
     g_display_comp_vals[DISP_MC_BUS_CURRENT] = (uint32_t)(is_neg ? -val : val);
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetBrake(bool state) {
-    g_display_comp_vals[DISP_BRAKE] = state;
+    UpdateDisplay_SetValue(DISP_BRAKE, state);
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetHeartbeat(bool val) {
-    g_display_comp_vals[DISP_HEARTBEAT] = (uint32_t)(val);
+    UpdateDisplay_SetValue(DISP_HEARTBEAT, (uint32_t)(val));
     return C_ERR_NONE;
 }
 
 controls_error_e UpdateDisplay_SetHeatSinkTemp(uint32_t val) {
-    g_display_comp_vals[DISP_HEAT_SINK_TEMP] = val;
+    UpdateDisplay_SetValue(DISP_HEAT_SINK_TEMP, val);
     return C_ERR_NONE;
 }
 
 
 static inline void Update_Blinkers(){
     static uint8_t blinkCounter = 0;
+
+    uint32_t right_blink = 0;
+    uint32_t left_blink = 0;
     
     // Blink the left and right indicators about once every second
     if(blinkCounter >= BLINKER_COUNT){
         if(rightBlinkerOn){
-            g_display_comp_vals[DISP_RIGHT_BLINK] = g_display_comp_vals[DISP_RIGHT_BLINK] ? 0 : 1;
+            right_blink = g_display_comp_vals[DISP_RIGHT_BLINK] ? 0 : 1;
         }
         else{
-            g_display_comp_vals[DISP_RIGHT_BLINK] = 0;
+            right_blink = 0;        
         }
 
         if(leftBlinkerOn){
-            g_display_comp_vals[DISP_LEFT_BLINK] = g_display_comp_vals[DISP_LEFT_BLINK] ? 0 : 1;
+            left_blink = g_display_comp_vals[DISP_LEFT_BLINK] ? 0 : 1;
         }
         else{
-            g_display_comp_vals[DISP_LEFT_BLINK] = 0;
+            left_blink = 0;
         }
         blinkCounter = 0;
     }
     else{
         blinkCounter++;
     }
+    UpdateDisplay_SetValue(DISP_RIGHT_BLINK, right_blink);
+    UpdateDisplay_SetValue(DISP_LEFT_BLINK, left_blink);
 
 }
 /**
@@ -260,9 +265,9 @@ void Task_UpdateDisplay(void *p_arg) {
         DebugIO_Toggle(UPDATE_DISPLAY_PIN);
 #endif
         for (Component_t comp = 0; comp <= DISP_MOT_LIMIT; comp++) {
-            if (comp != DISP_REGEN_ST && comp != DISP_CRUISE_ST) {
-                assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
-            }
+            // Only update components that have been modified since last time the task was run
+            assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
+            g_display_comp_modified[comp] = false;
         }
         assertUpdateDisplayError(
             UpdateDisplay_SetHeartbeat(g_display_comp_vals[DISP_HEARTBEAT] ? 0 : 1));
