@@ -44,6 +44,7 @@ void Lights_Write(lights_t led, bool state){ // tim1 = port a = left
                 pwm_timx_start(TIM1);
             break;
         case BRAKE_LIGHT:
+                BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT_PIN, state);    
                 BSP_GPIO_Write_Pin(BRAKE_LIGHT_PORT, BRAKE_LIGHT_PIN, state);
             break;
         default:

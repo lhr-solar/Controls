@@ -193,6 +193,10 @@ void Task_SendTritium(void *p_arg) {
     // In order to spin the motor the accelerator needs to return to a safe value
     static bool accelerator_reset = false;
     uint8_t resetAccelPercent = 0;
+    uint8_t maxCurrentPercentage = 100;
+
+    // By default assume we are below the motor swoc threshold at startup
+    MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, true, false);
 
     while (1) {
 #ifdef TASK_PROFILER
@@ -235,26 +239,37 @@ void Task_SendTritium(void *p_arg) {
                 resetAccelPercent = 0;
             }
 
+            err = MotorStatus_Wait(MOTOR_SWOC_THRESHOLD, !OS_FLAG_BLOCKING);
+            maxCurrentPercentage = (err == OS_ERR_NONE) ? SWOC_CURRENT_SP_MAX : CURRENT_SP_MAX;
+            // The motor is going fast enough where you want to scale the max current setpoint to prevent SWOC
 
             switch (gear) {
-            case DASH_FWD:
-                velocitySetpoint = MAX_VELOCITY;
-                currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
-                break;
+                case DASH_FWD:
+                    velocitySetpoint = MAX_VELOCITY;
+                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, 
+                                                                    ACCEL_PEDAL_THRESHOLD, 
+                                                                    PEDAL_MAX, 
+                                                                    CURRENT_SP_MIN, 
+                                                                    maxCurrentPercentage));                 
+                    break;
 
-            case DASH_NEU:
-                velocitySetpoint = 0.0f;
-                currentSetpoint = 0.0f;
-                break;
+                case DASH_NEU:
+                    velocitySetpoint = 0.0f;
+                    currentSetpoint = 0.0f;
+                    break;
 
-            case DASH_REV:
-                velocitySetpoint = -MAX_VELOCITY;
-                currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, CURRENT_SP_MAX));
-                break;
+                case DASH_REV:
+                    velocitySetpoint = -MAX_VELOCITY;
+                    currentSetpoint = isBrakeOn ? 0 : (mapToPercent(resetAccelPercent, 
+                                                                    ACCEL_PEDAL_THRESHOLD, 
+                                                                    PEDAL_MAX, 
+                                                                    CURRENT_SP_MIN, 
+                                                                    maxCurrentPercentage));   
+                    break;
 
-            default:
-                assertSendTritiumError(C_ERR_STR_GEAR_FAULT);
-                break;
+                default:
+                    assertSendTritiumError(C_ERR_STR_GEAR_FAULT);
+                    break;
             }
             motorSafeCmd.data[0] |= 0x01; // Set motor safe to run to true
         }

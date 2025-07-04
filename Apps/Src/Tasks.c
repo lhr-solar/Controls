@@ -124,7 +124,7 @@ const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
 OS_FLAG_GRP BPS_Motor_Status_Flags;
 
 // The defined bits in the flag group
-const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN;
+const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN | MOTOR_SWOC_THRESHOLD;
 
 /**
  * @brief Check and set error bits for CONTROLS_FAULT_MSG
