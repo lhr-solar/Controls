@@ -196,15 +196,14 @@ void Task_ReadCarCAN(void *p_arg) {
         // updateMotorControllerContactor(); // Update motor contactor state based on ignition and
         // HV contactors
         switch (dataBuf.ID) {
-            // No need for this when we have BPS_FAULT_STATE that gives more info
-            // case BPS_TRIP: {
-            //     // BPS has a fault and we need to enter fault state
-            //     if (dataBuf.data[0] == BPS_TRIP_MESSAGE) {
-            //         // kill motor contactor and enter a nonrecoverable fault
-            //         // assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
-            //     }
-            //     break;
-            // }
+            case BPS_TRIP: {
+                // BPS has a fault and we need to enter fault state
+                if (dataBuf.data[0] == BPS_TRIP_MESSAGE) {
+                    // kill motor contactor and enter a nonrecoverable fault
+                    //assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
+                }
+                break;
+            }
 
             case BPS_CONTACTOR: {
             #ifdef BPS_CAN_WATCHDOG
@@ -327,7 +326,7 @@ void Task_ReadCarCAN(void *p_arg) {
                 break;
             }
             case BPS_FAULT_STATE:{
-                if (dataBuf.data[0] != 0) {
+                 if (dataBuf.data[0] != 0) {
                     setBPSFault(dataBuf);
                     assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
                 }

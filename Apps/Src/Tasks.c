@@ -293,8 +293,8 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
             ErrorStatus status = CANbus_Read_FaultState(&dataBuf, MOTORCAN);
 
             // Turn on hazards   
-            Lights_Write(RIGHT_LIGHT, ON);
-            Lights_Write(LEFT_LIGHT, ON);
+            Lights_Write(RIGHT_LIGHT, true);
+            Lights_Write(LEFT_LIGHT, true);
 
             // There is a message on the motor canbus
             if(status == SUCCESS){

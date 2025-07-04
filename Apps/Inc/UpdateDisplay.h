@@ -97,19 +97,19 @@ controls_error_e UpdateDisplay_SetAccel(uint8_t percent);
  */
 controls_error_e UpdateDisplay_SetGear(TriState_t gear);
 
-// /**
-//  * @brief Sets the regenerative braking indicator state on the display
-//  * @param state DISABLED, ENABLED, or ACTIVE
-//  * @returns controls_error_e
-//  */
-// controls_error_e UpdateDisplay_SetRegenState(TriState_t state);
+/**
+ * @brief Sets the regenerative braking indicator state on the display
+ * @param state DISABLED, ENABLED, or ACTIVE
+ * @returns controls_error_e
+ */
+controls_error_e UpdateDisplay_SetRegenState(TriState_t state);
 
-// /**
-//  * @brief Sets the cruise control indicator state on the display
-//  * @param state DISABLED, ENABLED, or ACTIVE
-//  * @returns controls_error_e
-//  */
-// controls_error_e UpdateDisplay_SetCruiseState(TriState_t state);
+/**
+ * @brief Sets the cruise control indicator state on the display
+ * @param state DISABLED, ENABLED, or ACTIVE
+ * @returns controls_error_e
+ */
+controls_error_e UpdateDisplay_SetCruiseState(TriState_t state);
 
 controls_error_e UpdateDisplay_SetBattVoltage(uint32_t val);
 
