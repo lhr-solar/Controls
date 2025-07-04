@@ -70,6 +70,7 @@ void Task_ReadTritium(void *p_arg) {
     static bool watchdogCreated = false;
 
     while (1) {
+        Status_Leds_Toggle(CONTROLS_FAULT_LED);
         ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
         // An error in the can read but not an os error, signifies that the recv queue is empty
 

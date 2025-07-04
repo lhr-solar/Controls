@@ -199,6 +199,7 @@ void Task_SendTritium(void *p_arg) {
     MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, true, false);
 
     while (1) {
+        Status_Leds_Toggle(BPS_FAULT_LED);
         #ifdef TASK_PROFILER
         DebugIO_Toggle(SEND_TRITIUM_PIN);
         #endif

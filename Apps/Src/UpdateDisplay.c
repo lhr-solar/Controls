@@ -14,7 +14,7 @@
 #include "Contactors.h"
 #include "DebugIO.h"
 #include "Display.h"
-
+#include "StatusLeds.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 
@@ -256,12 +256,17 @@ static inline void Update_Blinkers(){
 void Task_UpdateDisplay(void *p_arg) {
     OS_ERR err;
     while (1) {
+
+        Status_Leds_Toggle(OS_FAULT_LED);
 #ifdef TASK_PROFILER
         DebugIO_Toggle(UPDATE_DISPLAY_PIN);
 #endif
         for (Component_t comp = 0; comp <= DISP_MOT_LIMIT; comp++) {
             if (comp != DISP_REGEN_ST && comp != DISP_CRUISE_ST) {
                 assertUpdateDisplayError(UpdateDisplay_SetComponent(comp));
+
+                // scheduling point
+                OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &err);
             }
         }
         assertUpdateDisplayError(
@@ -275,9 +280,6 @@ void Task_UpdateDisplay(void *p_arg) {
 #ifdef TASK_PROFILER
         DebugIO_Toggle(UPDATE_DISPLAY_PIN);
 #endif
-
-        // Delay of 250 ms
-        OSTimeDlyHMSM(0, 0, 0, UPDATE_DISPLAY_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
         assertOSError(err);
     }
 }
