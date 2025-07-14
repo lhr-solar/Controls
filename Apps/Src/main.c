@@ -18,11 +18,12 @@
 #include "Dashboard.h"
 #include "DebugIO.h"
 #include "StatusLeds.h"
-
+#include "Lights.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "SendCarCAN.h"
 #include "ReadCarCAN.h"
+#include "Lights.h"
 #include "daybreak_pins.h"
 
 int idle_time_ctr = 0;
@@ -65,12 +66,13 @@ int main(void) {
     TaskSwHook_Init();
     Status_Leds_Init();
 
-    assertOSError(err); // for OS init
 
+    assertOSError(err); // for OS init
     BPSMotorFlags_Init();
     Ignition_Init();
     dashboardInit();
     DebugIO_Init();
+    Lights_Init();
 
     // Initialize apps
     OSTaskCreate(
@@ -97,7 +99,9 @@ int main(void) {
     OSStart(&err);
     assertOSError(err);
 
-    while (1);
+    while (1){
+
+    }
 }
 
 void Task_Init(void *p_arg) {
@@ -113,7 +117,6 @@ void Task_Init(void *p_arg) {
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);
     Contactors_Init();
     Display_Init();
-    // Minions_Init();
 
     // Initialize applications
     UpdateDisplay_Init();
@@ -155,24 +158,6 @@ void Task_Init(void *p_arg) {
     );
     assertOSError(err);
 
-    // Initialize ReadCarCAN
-    OSTaskCreate(
-        (OS_TCB*)&ReadCarCAN_TCB,
-        (CPU_CHAR*)"ReadCarCAN",
-        (OS_TASK_PTR)Task_ReadCarCAN,
-        (void*)NULL,
-        (OS_PRIO)TASK_READ_CAR_CAN_PRIO,
-        (CPU_STK*)ReadCarCAN_Stk,
-        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
-        (CPU_STK_SIZE)TASK_READ_CAR_CAN_STACK_SIZE,
-        (OS_MSG_QTY)0,
-        (OS_TICK)0,
-        (void*)NULL,
-        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
-        (OS_ERR*)&err
-    );
-    assertOSError(err);
-
     // Initialize UpdateDisplay
     OSTaskCreate(
         (OS_TCB*)&UpdateDisplay_TCB,
@@ -183,6 +168,24 @@ void Task_Init(void *p_arg) {
         (CPU_STK*)UpdateDisplay_Stk,
         (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
         (CPU_STK_SIZE)TASK_UPDATE_DISPLAY_STACK_SIZE,
+        (OS_MSG_QTY)0,
+        (OS_TICK)0,
+        (void*)NULL,
+        (OS_OPT)(OS_OPT_TASK_STK_CLR|OS_OPT_TASK_SAVE_FP),
+        (OS_ERR*)&err
+    );
+    assertOSError(err);
+
+    // Initialize ReadCarCAN
+    OSTaskCreate(
+        (OS_TCB*)&ReadCarCAN_TCB,
+        (CPU_CHAR*)"ReadCarCAN",
+        (OS_TASK_PTR)Task_ReadCarCAN,
+        (void*)NULL,
+        (OS_PRIO)TASK_READ_CAR_CAN_PRIO,
+        (CPU_STK*)ReadCarCAN_Stk,
+        (CPU_STK_SIZE)WATERMARK_STACK_LIMIT,
+        (CPU_STK_SIZE)TASK_READ_CAR_CAN_STACK_SIZE,
         (OS_MSG_QTY)0,
         (OS_TICK)0,
         (void*)NULL,

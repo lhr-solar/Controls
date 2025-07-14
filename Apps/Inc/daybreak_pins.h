@@ -21,8 +21,22 @@
 #define ARRAY_PRCHG_BYPASS_PORT PORTA
 #define ARRAY_PRCHG_BYPASS      GPIO_Pin_1
 
-#define BRAKE_LIGHT_PORT        PORTA
-#define BRAKE_LIGHT             GPIO_Pin_4
+// Lights
+#define RIGHT_BLINK_PORT         PORTC
+#define RIGHT_BLINK              GPIO_Pin_9
+
+#define LEFT_BLINK_PORT         PORTA
+#define LEFT_BLINK              GPIO_Pin_8
+
+// don't ask me why BRAKE_LIGHT_PIN is a diff naming convention
+#define BRAKE_LIGHT_PORT        PORTC
+#define BRAKE_LIGHT_PIN         GPIO_Pin_6
+
+#define RIGHT_INDICATOR_PORT    PORTA
+#define RIGHT_INDICATOR         GPIO_Pin_15
+
+#define LEFT_INDICATOR_PORT    PORTC
+#define LEFT_INDICATOR         GPIO_Pin_10
 
 #define OS_FAULT_PORT           PORTA
 #define OS_FAULT                GPIO_Pin_5
@@ -39,6 +53,9 @@
 #define MOTOR_CONTACTOR_PORT    PORTA
 #define MOTOR_CONTACTOR         GPIO_Pin_10
 
+#define RIGHT_IND_PORT          PORTA
+#define RIGHT_IND               GPIO_Pin_15
+
 #define BPS_FAULT_PORT          PORTB
 #define BPS_FAULT               GPIO_Pin_0
 
@@ -47,12 +64,6 @@
 
 #define FORWARD_PORT            PORTB
 #define FORWARD                 GPIO_Pin_2
-
-#define ARRAY_PBC_SENSE_PORT    PORTB
-#define ARRAY_PBC_SENSE         GPIO_Pin_8
-
-#define MOTOR_PBC_SENSE_PORT    PORTB
-#define MOTOR_PBC_SENSE         GPIO_Pin_9
 
 #define IG2_PORT                PORTB
 #define IG2                     GPIO_Pin_10
@@ -69,14 +80,14 @@
 #define CRUISE_ENABLE_PORT      PORTC
 #define CRUISE_ENABLE           GPIO_Pin_5
 
-#define TIMER_CLK_PORT          PORTC
-#define TIMER_CLK               GPIO_Pin_6
-
 #define HEARTBEAT_PORT          PORTC
 #define HEARTBEAT_PIN           GPIO_Pin_7
 
 #define CRUISE_IND_PORT         PORTC
 #define CRUISE_IND              GPIO_Pin_8
+
+#define LEFT_IND_PORT           PORTC
+#define LEFT_IND                GPIO_Pin_10
 
 #define BRAKE_SW_PORT           PORTC
 #define BRAKE_SW                GPIO_Pin_15

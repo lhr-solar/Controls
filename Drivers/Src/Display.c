@@ -28,6 +28,8 @@
 #define DISP_EVAC_NONREQ_STR_LITERAL "\"V('u')V\""
 #define DISP_EVAC_REQ_STR_LITERAL    "\"REQUIRED!!!\""
 
+#define DISP_EVAC_BPS_FAULT_STR_LITERAL "\"FUCK\""
+
 static const char *TERMINATOR = "\xff\xff\xff";
 
 // Hold component values for display
@@ -35,15 +37,14 @@ uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS] = {0};
 
 // Strings for each component id
 const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS] = {
-    // Boolean components
-    "hb", "cs", "mcs", "brake", "blink",
-    // Contactors
-    "arren", "arrpc", "moten", "motpc", // technically boolean but the logic is cooked
-    // Non-boolean components
-    "vel", "accel", "soc", "supp", "cruiseSt", "rbsSt", "pv", "pc", 
-    "pt", "mcv", "mcc", "heatsink", "gear",
-    // Fault code components
-    "oserr", "faulterr", "evac"
+    #define GENERATE_DISP_COMP_STRING(name, str) str,
+    FOREACH_DISPLAY_COMPONENT(GENERATE_DISP_COMP_STRING)
+};
+
+#define GENERATE_BPS_FAULT_STRING(name, str) str,
+
+static char *BPSFaultErrStr[NUM_BPS_FAULT_ERRS] = {
+    FOREACH_BPS_FAULT_ERR(GENERATE_BPS_FAULT_STRING)
 };
 
 /**
@@ -171,9 +172,10 @@ DisplayError_t Display_SetPage(Page_t page) {
  * @param os_err_str the os error string message to display. MUST be length < 16. Pass in NULL to
  * display "N/A"
  * @param is_evac_needed whether evac is required.
+ * @param bps_err what bps fault is occuring, pass NONE if no bps fault
  * @returns DisplayError_t
  */
-DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bool is_evac_needed) {
+DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bool is_evac_needed, BPSFaultErr_e bps_err) {
     // Terminates any in progress command
     BSP_UART_Write(DISPLAY, (char *)TERMINATOR, strlen(TERMINATOR));
 
@@ -191,6 +193,21 @@ DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bo
                                         : DISP_EVAC_NONREQ_STR_LITERAL}}
     };
     Display_Send(evac_msg_cmd);
+
+    if(bps_err >= NUM_BPS_FAULT_ERRS){
+        bps_err = CAN_UNKNOWN_BPS;
+    }
+    
+    // Diplay the bps fault if there is one
+    DisplayCmd_t bps_fault_msg_cmd = {
+        .compOrCmd = (char *)DISPLAY_COMP_STR[DISP_EVAC_BPS_FAULT], // "bpsfaulterr"
+        .attr = "txt",
+        .op = "=",
+        .numArgs = 1,
+        .argTypes = {STR_ARG},
+        .args = {{.str = BPSFaultErrStr[bps_err]}}
+    };
+    Display_Send(bps_fault_msg_cmd);
 
     // Display OS error if there is one
     DisplayCmd_t os_flt_cmd = {

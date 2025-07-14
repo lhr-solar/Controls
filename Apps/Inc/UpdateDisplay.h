@@ -19,6 +19,7 @@
 #include "os.h"
 #include "common.h"
 #include "Tasks.h"
+#include "Dashboard.h"
 
 
 
@@ -54,6 +55,13 @@ typedef enum { STATE_0 = 0, STATE_1 = 1, STATE_2 = 2 } TriState_t;
  */
 
 controls_error_e UpdateDisplay_Init();
+
+/**
+ * @brief Sets the motor limit flags
+ * @returns controls_error_e
+ */
+
+controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag);
 
 /**
  * @brief Sets the state of charge value on the display
@@ -120,7 +128,7 @@ controls_error_e UpdateDisplay_SetMCCurrent(int32_t val);
 
 controls_error_e UpdateDisplay_SetBrake(bool state);
 
-controls_error_e UpdateDisplay_SetBlink(bool state);
+controls_error_e UpdateDisplay_SetBlink(bool leftState, bool rightState);
 
 /**
  * @brief Clears the display message queue and sets the message counter semaphore value to 0

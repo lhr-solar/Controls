@@ -25,12 +25,12 @@
 #define TASK_PROFILER
 
 #ifdef TASK_PROFILER
-#define IDLE_PIN           PA15
+#define IDLE_PIN           PA4
 #define IO_STATE_PIN       PB7
 #define READ_CARCAN_PIN    PC14
-#define UPDATE_DISPLAY_PIN PA8
+#define UPDATE_DISPLAY_PIN PB8
 #define SEND_CARCAN_PIN    PC12
-#define SEND_TRITIUM_PIN    PC13
+#define SEND_TRITIUM_PIN   PC13
 
 #endif
 
@@ -94,6 +94,9 @@ typedef enum {
     C_ERR_RCC_PRECHARGE_MISSED_MSG, /* Didn't receive a precharge msg in time (watchdog trip) */
     C_ERR_RCC_BPS_TRIP,             /* Recieved a BPS trip msg */
     C_ERR_RCC_ACTIVE_PRECHARGE_FLT, /* Received active precharge fault */
+    C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT,
+    C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT,
+    C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT,
     C_ERR_RCC_PRECHARGE_TMOUT_MOT,
     C_ERR_RCC_PRECHARGE_TMOUT_ARR,
     // IO state Errors
@@ -119,12 +122,22 @@ extern const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN];
  * BPS & Motor Status Event Flag Definitions
  */
 
-#define BPS_SAFE            1 << 0
-#define BPS_CHECKED         1 << 1
-#define MOTOR_SAFE_TO_RUN   1 << 2
+ // Whether or not the BPS is currently safe
+#define BPS_SAFE                       1 << 0
+// Whether or not the BPS has been checked intially for safety (good for edge case at startup but not used)
+#define BPS_CHECKED                    1 << 1
+// Whether or not the motor is safe to run basic on the motor contactor state
+#define MOTOR_SAFE_TO_RUN              1 << 2
+// Whether or not the motor direction can be swapped (should avoid at high speeds)
+#define MOTOR_SAFE_TO_SWITCH_DIR       1 << 3
+// when this flag is set, prevent the current setpoint from going above a threshold
+#define MOTOR_SWOC_THRESHOLD           1 << 4
+
 
 #define OS_FLAG_BLOCKING    true
 #define OS_FLAG_SCHED_POINT true
+
+#define EVAC_NEEDED         true
 
 // Synchronization-protected event flag group signaling BPS_SAFE, if BPS
 // has been checked, & motor ready to run status
@@ -133,6 +146,30 @@ extern OS_FLAG_GRP BPS_Motor_Status_Flags;
 OS_ERR MotorStatus_Wait(uint8_t bits, bool blocking);
 OS_FLAGS MotorStatus_GetBits();
 bool MotorStatus_ModifyBits(uint8_t bits, bool state, bool allow_sched);
+
+#define FOREACH_BPS_FAULT_ERR(BPS_ERR) \
+    BPS_ERR(CAN_NONE_BPS, "\"NONE\"") \
+    BPS_ERR(CAN_ESTOP_BPS, "\"ESTOP\"") \
+    BPS_ERR(CAN_UNDERVOLTAGE_BPS, "\"UNDERVOLTAGE\"") \
+    BPS_ERR(CAN_OVERTEMPERATURE_BPS, "\"OVERTEMPERATURE\"") \
+    BPS_ERR(CAN_OVERVOLTAGE_BPS, "\"OVERVOLTAGE\"") \
+    BPS_ERR(CAN_OVERCURRENT_BPS, "\"OVERCURRENT\"") \
+    BPS_ERR(CAN_HARDFAULT_BPS, "\"HARDFAULT\"") \
+    BPS_ERR(CAN_WIRE_BPS, "\"OPEN_WIRE\"") \
+    BPS_ERR(CAN_OS_BPS, "\"OS\"") \
+    BPS_ERR(CAN_IWDG_BPS, "\"WATCHDOG\"") \
+    BPS_ERR(CAN_CRC_BPS, "\"CRC\"") \
+    BPS_ERR(CAN_CONTACTOR_BPS, "\"CONTACTOR\"") \
+    BPS_ERR(CAN_MPPT_BPS, "\"MPPT\"") \
+    BPS_ERR(CAN_UNKNOWN_BPS, "\"UNKNOWN\"") \
+
+
+#define GENERATE_BPS_FAULT_ENUM(name, str) name,
+
+typedef enum {
+    FOREACH_BPS_FAULT_ERR(GENERATE_BPS_FAULT_ENUM)
+    NUM_BPS_FAULT_ERRS
+} BPSFaultErr_e;
 
 /**
  * Task error variable type
@@ -281,9 +318,10 @@ typedef enum { OPT_RECOV, OPT_NONRECOV } error_recovery_opt_e;
  * error is handled immediately
  * @param recovery whether or not to kill the motor, display the fault
  * screen, and enter an infinite while loop
+ * @param bps_err the enum for the BPS fault (or none if no error)
  */
 void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t error_callback,
-                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery);
+                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery, BPSFaultErr_e bps_err);
 
 /**
  * @brief   Assert Error if OS function call fails

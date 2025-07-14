@@ -20,6 +20,7 @@
 #include "SendTritium.h"
 #include "Tasks.h"
 #include "UpdateDisplay.h"
+#include "Lights.h"
 #include "daybreak_pins.h"
 
 /**
@@ -100,6 +101,12 @@ const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
     [C_ERR_RCC_PRECHARGE_MISSED_MSG] = "\"PRECHG_MISS\"",   /* Didn't receive prechrg msg in time */
     [C_ERR_RCC_BPS_TRIP]             = "\"BPS_TRIP\"",      /* Recieved a BPS trip msg */
     [C_ERR_RCC_ACTIVE_PRECHARGE_FLT] = "\"ACT_PRECH_FLT\"", /* Received active precharge fault */
+    [C_ERR_RCC_PRECHARGE_TMOUT_MOT]  = "\"PRECH_MTOUT\"",   /* Received active precharge timeout fault for motor */
+    [C_ERR_RCC_PRECHARGE_TMOUT_ARR]  = "\"PRECH_ARTOUT\"",  /* Received active precharge timeout fault for array */
+    [C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT] = "\"PRECH_MSENSE\"", /* Received precharge motor sense fault */
+    [C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT] = "\"PRECH_ASENSE\"", /* Received precharge array pre sense fault */
+    [C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT] = "\"PRECH_MPSENSE\"", /* Received precharge motor pre sense fault */
+
     // IO state Errors
     [C_ERR_IOS_GENERIC]              = "\"IOS_GENERIC\"",   /* Generic placeholder error */
     [C_ERR_IOS_IGN_FAULT]            = "\"IOS_IGN_FLT\"",   /* Ignition unstable for too long */
@@ -117,7 +124,7 @@ const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
 OS_FLAG_GRP BPS_Motor_Status_Flags;
 
 // The defined bits in the flag group
-const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN;
+const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN | MOTOR_SWOC_THRESHOLD;
 
 /**
  * @brief Check and set error bits for CONTROLS_FAULT_MSG
@@ -165,7 +172,7 @@ void _assertOSError(OS_ERR err) {
         snprintf(os_err_msg, ERRMSG_MAX_LEN, "%08X", err);
 
         MotorContactor_EmergencyDisable(); // Turn off all contactors
-        Display_Error(ERROR_MSGS[C_ERR_NONE], os_err_msg, false);
+        Display_Error(ERROR_MSGS[C_ERR_NONE], os_err_msg, false, CAN_NONE_BPS);
 
         CANDATA_t faultmsg = {0};
         faultmsg.ID = CONTROLS_FAULT_MSG;
@@ -183,6 +190,20 @@ void _assertOSError(OS_ERR err) {
     }
 }
 
+static void setDisplayErrorScreen(controls_error_e error_code, bool is_evac_needed, BPSFaultErr_e bps_err) {
+    if (error_code == C_ERR_RTR_MULTIPLE) {
+        char err_msg_multiple[ERRMSG_MAX_LEN] = {0};
+        snprintf(err_msg_multiple, ERRMSG_MAX_LEN, "\"MOCO_%03X\"",
+                    Motor_Error_Get() & 0xFFF);
+        Display_Error(err_msg_multiple, ERROR_MSGS[OS_ERR_NONE], is_evac_needed, bps_err);
+    } else {
+        Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed, bps_err);
+    }
+}
+
+#define ERROR_CAN_DELAY_MS 500
+#define ERROR_DISPLAY_UPDATE_COUNT (1000 / ERROR_CAN_DELAY_MS)
+
 /**
  * @brief Assert a task error by setting the location variable and optionally
  * locking the scheduler, displaying a fault screen (if nonrecoverable), jumping
@@ -199,16 +220,15 @@ void _assertOSError(OS_ERR err) {
  * screen, and enter an infinite while loop
  */
 void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t error_callback,
-                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery) {
+                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery, BPSFaultErr_e bps_err) {
 
     if (error_code == C_ERR_NONE) return;
 
-    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING, false);
+    // Set the motor safe to run bit to false and don't make it a scheduling point
+    // This avoids context switching while we're in an error
+    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, !OS_FLAG_SCHED_POINT);
 
     OS_ERR err;
-    // // OS_OPT_POST_NO_SCHED option is passed to make not scheduling point uwu
-    // OSFlagPost(&BPS_Motor_Status_Flags, MOTOR_SAFE_TO_RUN, OS_OPT_POST_FLAG_CLR | OS_OPT_POST_NO_SCHED, &err);
-    // assertOSError(err);
 
     Status_Leds_Write(CONTROLS_FAULT_LED, ON);
 
@@ -222,16 +242,7 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
 
     if (recovery == OPT_NONRECOV) {
         MotorContactor_EmergencyDisable();
-        // Needs to happen before callback so that tasks can change the screen
-        // (ex: readCarCAN and evac screen for BPS trip)
-        if (error_code == C_ERR_RTR_MULTIPLE) {
-            char err_msg_multiple[ERRMSG_MAX_LEN] = {0};
-            snprintf(err_msg_multiple, ERRMSG_MAX_LEN, "\"MOCO_%03X\"",
-                     Motor_Error_Get() & 0xFFF);
-            Display_Error(err_msg_multiple, ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
-        } else {
-            Display_Error(ERROR_MSGS[error_code], ERROR_MSGS[OS_ERR_NONE], is_evac_needed);
-        }
+        setDisplayErrorScreen(error_code, is_evac_needed, bps_err);
     }
 
     // Run a handler for this error if specified
@@ -258,6 +269,22 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
     iostatemsg.ID = IO_STATE;
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
     iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
+    
+    CANDATA_t dataBuf = {0};
+    CANId_t motorCanID; 
+
+    // Send the motormsg fault message 10 times at the start of fault state than never again
+    // We only have 3 Hw TX mailboxes for CarCAN, so cannot send > 3 messages on CAN at once
+    for(volatile uint8_t i = 0; i < 10; i++){
+       delay_ms(100); 
+        CANbus_Send_Faultstate(motormsg, CARCAN);
+
+    }
+    Status_Leds_Write(DASH_HEARTBEAT_LED, OFF);
+
+    // Turn on left and right lights
+    Lights_Write(RIGHT_LIGHT, ON);
+    Lights_Write(LEFT_LIGHT, ON);
 
     if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
         while (1) {
@@ -266,19 +293,31 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
             Status_Leds_Toggle(CONTROLS_FAULT_LED);
             Status_Leds_Toggle(DASH_HEARTBEAT_LED);
             CANbus_Send_Faultstate(faultmsg, CARCAN);
-            CANbus_Send_Faultstate(motormsg, CARCAN);
             CANbus_Send_Faultstate(iostatemsg, CARCAN);
+            ErrorStatus status = CANbus_Read_FaultState(&dataBuf, MOTORCAN);
+
+            // There is a message on the motor canbus
+            if(status == SUCCESS){
+                // Forward messages from motorcan to carcan
+                motorCanID = dataBuf.ID;
+                if(motorCanID == MOTOR_STATUS){
+                    CANbus_Send_Faultstate(dataBuf, CARCAN);
+                }
+            }
         }
     }
+    else{
 
-    // only reaches here is fault is recoverable
-    if (lock_scheduler == OPT_LOCK_SCHED) {
         Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
-        OSSchedUnlock(&err);
-        // Don't err out if scheduler is still locked because of a timer
-        // callback; but we don't plan to lock more than one level deep
-        if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) {
-            assertOSError(err);
+
+        // Only unlock the scheduler if we locked it
+        if(lock_scheduler == OPT_LOCK_SCHED){
+            OSSchedUnlock(&err);
+            // Don't err out if scheduler is still locked because of a timer
+            // callback; but we don't plan to lock more than one level deep
+            if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) {
+                assertOSError(err);
+            }
         }
     }
 }

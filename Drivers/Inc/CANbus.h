@@ -35,9 +35,11 @@ typedef enum {
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
     VOLTAGE_SUMMARY                 = 0x10D,
     TEMPERATURE_SUMMARY             = 0x10E,
+	BPS_FAULT_STATE					= 0x10F,
 	MOTOR_DRIVE 					= 0x221,
 	MOTOR_POWER						= 0x222,
-	MOTOR_RESET 					= 0x223,
+	MOTOR_RESET 					= 0x223,	
+	MOTOR_IDENTIFICATION			= 0x240,
 	MOTOR_STATUS 					= 0x241,
 	MC_BUS 							= 0x242,
 	VELOCITY 						= 0x243,
@@ -45,7 +47,10 @@ typedef enum {
 	VOLTAGE_VEC 					= 0x245,
 	CURRENT_VEC 					= 0x246,
 	BACKEMF 						= 0x247,
+	FIFTEN_RAIL_VOL					= 0x248,
+	THREE_RAIL_VOL					= 0x249,
 	TEMPERATURE 					= 0x24B,
+	DSP_TEMP						= 0x24C,
 	ODOMETER_AMPHOURS 				= 0x24E,
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
     SLIP_SPEED                      = 0x257,
@@ -55,6 +60,7 @@ typedef enum {
     IO_STATE 						= 0x581,
     CONTROLS_FAULT_MSG              = 0x583,
 	MOTOR_CONTROLLER_SAFE			= 0x584,
+	PEDALS_RAW_VOLTAGE				= 0x585,
 	MAX_CAN_ID
 } CANId_t;
 
@@ -128,6 +134,16 @@ ErrorStatus CANbus_Send_Faultstate(CANDATA_t CanData, CAN_t bus);
  * @returns ERROR if read failed, SUCCESS otherwise
  */
 ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
+
+/**
+ * @brief   Reads a CAN message from the CAN hardware during a fault state without any RTOS calls
+ * @param   data 		pointer to where to store the CAN id of the received msg
+ * @param   blocking 	Whether or not this read should be a blocking read
+ * @param   bus 		The bus to use. This should either be CARCAN or MOTORCAN.
+ * @returns ERROR if read failed, SUCCESS otherwise
+ */
+ErrorStatus CANbus_Read_FaultState(CANDATA_t* MsgContainer, CAN_t bus);
+
 
 #endif
 

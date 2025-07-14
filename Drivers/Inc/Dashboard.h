@@ -5,7 +5,7 @@
 #include "BSP_GPIO.h"
 
 #define NEUTRAL_DEBOUNCE_COUNT 5
-#define NEUTRAL_DEBOUNCE_DLY_MS 10
+#define NEUTRAL_DEBOUNCE_DLY_MS 5
 
 #define FOREACH_Gear(GEAR) \
         GEAR(DASH_NEU), \
@@ -27,20 +27,23 @@ typedef enum{
 } switch_state_t;
 
 typedef enum{
-    //BPS = 0,
-    //BRAKE_LED,
-    // GEAR = 0,
-    //HBT,
     DASH_CRUZ_SET,
     DASH_CRUZ_EN,
+    DASH_RIGHT_IND,
+    DASH_LEFT_IND,
+    DASH_HZD,
     DASH_NUM_PINS,
 } dash_pin_t;
 
+#define GEAR_USE_OS_DELAY true
+
+
 /**
  * @brief Retrieves the current gear of the car
+ * @param useOSDelay If true, uses OS delay for debouncing; otherwise, uses assembly delay
  * @return Returns the current car gear
  */
-gear_t getGear(void);
+gear_t getGear(bool useOSDelay);
 
 /**
  * @return switch_state Dashboard pin state

@@ -25,30 +25,33 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
     [CURRENT_DATA]                  = {NOIDX, DOUBLE},
     [VOLTAGE_SUMMARY]               = {NOIDX, DOUBLE},
     [TEMPERATURE_SUMMARY]           = {NOIDX, DOUBLE},
+	[BPS_FAULT_STATE]				= {NOIDX, DOUBLE}, /**     BPS_FAULT_STATE                 **/
 	[MOTOR_DRIVE] 					= {NOIDX, DOUBLE}, /**     MOTOR_DRIVE                     **/
 	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
 	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
 	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
+	[MOTOR_IDENTIFICATION] 			= {NOIDX, DOUBLE},
 	[MC_BUS] 						= {NOIDX, DOUBLE}, /**     MC_BUS                          **/
 	[VELOCITY] 						= {NOIDX, DOUBLE}, /**     VELOCITY                        **/
 	[MC_PHASE_CURRENT] 				= {NOIDX, DOUBLE}, /**     MC_PHASE_CURRENT                **/
 	[VOLTAGE_VEC] 					= {NOIDX, DOUBLE}, /**     VOLTAGE_VEC                     **/
 	[CURRENT_VEC] 					= {NOIDX, DOUBLE}, /**     CURRENT_VEC                     **/
 	[BACKEMF] 						= {NOIDX, DOUBLE}, /**     BACKEMF                         **/
+	[FIFTEN_RAIL_VOL] 				= {NOIDX, DOUBLE},
+	[THREE_RAIL_VOL] 				= {NOIDX, DOUBLE},
 	[TEMPERATURE] 					= {NOIDX, DOUBLE}, /**     TEMPERATURE                     **/
-	[ODOMETER_AMPHOURS] 			= {NOIDX, DOUBLE}, /**     ODOMETER_AMPHOURS               **/
-	[ARRAY_CONTACTOR_STATE_CHANGE] 	= {NOIDX, BYTE  }, /**     ARRAY_CONTACTOR_STATE_CHANGE    **/
-    [SLIP_SPEED]                    = {NOIDX, DOUBLE},
-	[MOTOR_DRIVE] 					= {NOIDX, DOUBLE}, /**     MOTOR_DRIVE                     **/
-	[MOTOR_POWER]					= {NOIDX, DOUBLE}, /**     MOTOR_POWER                     **/
-	[MOTOR_RESET] 					= {NOIDX, DOUBLE}, /**     MOTOR_RESET                     **/
-	[MOTOR_STATUS] 					= {NOIDX, DOUBLE}, /**     MOTOR_STATUS                    **/
+	[DSP_TEMP] 						= {NOIDX, DOUBLE},
+	[ODOMETER_AMPHOURS] 			= {NOIDX, DOUBLE},
+	[ARRAY_CONTACTOR_STATE_CHANGE] 	= {NOIDX, BYTE  },
+    [SLIP_SPEED]                    = {NOIDX, DOUBLE}, 
 	[CONTACTOR_SENSE]               = {NOIDX, DOUBLE},
 	[PRECHARGE_TIMEOUT]             = {NOIDX, BYTE},
-    [CONTROL_MODE]                  = {NOIDX, BYTE  }, /**     CONTROL_MODE	                   **/
-	[IO_STATE] 				        = {NOIDX, DOUBLE}, /**     IO_STATE			               **/
-    [CONTROLS_FAULT_MSG]            = {NOIDX, BYTE  },  /**    CONTROLS_FAULT_MSG              **/     
-	[MOTOR_CONTROLLER_SAFE]			= {NOIDX, BYTE} /**        MOTOR_CONTROLLER_SAFE            **/	   
+    [CONTROL_MODE]                  = {NOIDX, BYTE},
+	[IO_STATE] 				        = {NOIDX, DOUBLE},
+    [CONTROLS_FAULT_MSG]            = {NOIDX, BYTE},
+	[MOTOR_CONTROLLER_SAFE]			= {NOIDX, BYTE},
+	[PEDALS_RAW_VOLTAGE]			= {NOIDX, DOUBLE}
+
 };
 
 /**
@@ -64,15 +67,18 @@ CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
     TEMPERATURE_SUMMARY,
     CURRENT_DATA,
     CONTACTOR_SENSE,
-    PRECHARGE_TIMEOUT
+    PRECHARGE_TIMEOUT,
+	BPS_FAULT_STATE
 };
 
 CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {
+	MOTOR_STATUS,
     MC_BUS,
     VELOCITY,
+	MC_PHASE_CURRENT,
     BACKEMF,
     TEMPERATURE,
+	DSP_TEMP,
     ODOMETER_AMPHOURS,
-    SLIP_SPEED,
-    MOTOR_STATUS
+    SLIP_SPEED
 };

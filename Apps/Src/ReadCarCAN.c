@@ -17,6 +17,7 @@
 #include "Tasks.h"
 #include "UpdateDisplay.h"
 #include "daybreak_pins.h"
+#include "Lights.h"
 
 // #define BPS_CAN_WATCHDOG
 // #define PRECHARGE_CAN_WATCHDOG
@@ -70,35 +71,18 @@ static void callbackCANWatchdog(void *p_tmr, void *p_arg) {
     }
 }
 
-// IS THIS ACTUALLY UNUSED? OR NAH?
-// static bool check_MotorControllerContactor(void) {
-//     // both should be on at the same time
-//     bool HVContactorState =
-//         Contactors_Get(HV_MINUS_CONTACTOR, true) && Contactors_Get(HV_PLUS_CONTACTOR, true);
 
-//     bool motorContactorState = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, true);
-//     if (!HVContactorState && motorContactorState) {
-//         // if the HV contactors are off and the motor contactor is on
-//         return false;
-//     }
-//     bool motorPrechargeContactorState =
-//         Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true);
-//     if (motorPrechargeContactorState && !motorContactorState) {
-//         // if the motor precharge contactor is on and the motor contactor is off
-//         return false;
-//     }
-//     return true;
-// }
+BPSFaultErr_e bps_err;
 
 /**
  * @brief error handler function to display the evac screen if we get a BPS trip message.
  * Callbacks happen after displaying the fault, so this screen won't get overwritten
  */
-static void handler_ReadCarCAN_BPSTrip(void) {
-    // OS_ERR err;
-    MotorContactor_EmergencyDisable();
+static void handler_ReadCarCAN_BPSTrip(void) {    
+
     Status_Leds_Write(BPS_FAULT_LED, ON);    // Turn on BPS fault LED
     Status_Leds_Write(DASH_BPS_HAZ_LED, ON); // Turn on Dashboard BPS Fault LED
+
 }
 
 static void setMotorControllerContactor(bool state, bool blocking) {
@@ -112,7 +96,58 @@ static void setMotorControllerContactor(bool state, bool blocking) {
     // Hence we do not set the MOTOR safe bit only based on motor contactor state
 }
 
+static void setBPSFault(CANDATA_t dataBuf){
+    if(dataBuf.ID != BPS_FAULT_STATE){
+        bps_err = CAN_UNKNOWN_BPS;
+    }
+    switch (dataBuf.data[0]) {
+        case 0:
+            bps_err = CAN_NONE_BPS;
+            break;    
+        case 1:
+            bps_err = CAN_UNDERVOLTAGE_BPS;
+            break;
+        case 2:
+            bps_err = CAN_OVERVOLTAGE_BPS;
+            break;
+        case 3:
+            bps_err = CAN_OVERTEMPERATURE_BPS;
+            break;
+        case 4:
+            bps_err = CAN_OVERCURRENT_BPS;
+            break;
+        case 5:
+            bps_err = CAN_WIRE_BPS;
+            break;
+        case 6:
+            bps_err = CAN_HARDFAULT_BPS;
+            break;
+        case 7:
+            bps_err = CAN_OS_BPS;
+            break;
+        case 8:
+            bps_err = CAN_IWDG_BPS;
+            break;
+        case 9:
+            bps_err = CAN_CRC_BPS;
+            break;
+        case 10:
+            bps_err = CAN_ESTOP_BPS;
+            break;
+        case 11:
+            bps_err = CAN_CONTACTOR_BPS;
+            break;
+        case 12:
+            bps_err = CAN_MPPT_BPS;
+            break;
+        default:
+            bps_err = CAN_UNKNOWN_BPS;
+            break;
+        }
+}
+
 void Task_ReadCarCAN(void *p_arg) {
+    bps_err = CAN_NONE_BPS;
     OS_ERR err;
 
     // data struct for CAN message
@@ -162,7 +197,7 @@ void Task_ReadCarCAN(void *p_arg) {
                 // BPS has a fault and we need to enter fault state
                 if (dataBuf.data[0] == BPS_TRIP_MESSAGE) {
                     // kill motor contactor and enter a nonrecoverable fault
-                    assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
+                    //assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
                 }
                 break;
             }
@@ -246,6 +281,17 @@ void Task_ReadCarCAN(void *p_arg) {
                 // Update Motor Precharge sense state
                 Contactors_Set(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR,
                                MOTOR_PRECHARGE_ACTUAL_VALUE(dataBuf.data), true);
+
+                // If Precharge notices a fault in any of the Contactor's sense pins
+                if(MOTOR_SENSE_FAULT(dataBuf.data)) {
+                    assertReadCarCANError(C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT);
+                }
+                if(MOTOR_PRECHARGE_SENSE_FAULT(dataBuf.data)) {
+                    assertReadCarCANError(C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT);
+                }
+                if(ARRAY_PRECHARGE_SENSE_FAULT(dataBuf.data)) {
+                    assertReadCarCANError(C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT);
+                }
                 
                 bool motorContactorsOn = Contactors_Get(MOTOR_CONTROLLER_CONTACTOR, false) && Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false);
                 bool bps_state = (Contactors_Get(HV_MINUS_CONTACTOR, false) && Contactors_Get(HV_PLUS_CONTACTOR, false));
@@ -267,11 +313,21 @@ void Task_ReadCarCAN(void *p_arg) {
                 }
             }
             case TEMPERATURE_SUMMARY: { // uint24_t
-                UpdateDisplay_SetBattTemperature((*((int32_t *)dataBuf.data)) & ~0xFF000000);
+                // UpdateDisplay_SetBattTemperature((*((int32_t *)dataBuf.data)) & ~0xFF000000);
+                int32_t avg_temp = (*((int32_t *)dataBuf.data)) & ~0xFF000000; 
+                UpdateDisplay_SetBattTemperature((uint32_t)(avg_temp));
                 break;
             }
             case CURRENT_DATA: { // int32_t
                 UpdateDisplay_SetBattCurrent((*(int32_t *)dataBuf.data));
+                break;
+            }
+            case BPS_FAULT_STATE:{
+                 if (dataBuf.data[0] != 0) {
+                    setBPSFault(dataBuf);
+                    assertReadCarCANError(C_ERR_RCC_BPS_TRIP);
+                }
+
                 break;
             }
 
@@ -302,19 +358,30 @@ void assertReadCarCANError(controls_error_e rcc_err) {
         case C_ERR_RCC_GENERIC:
         case C_ERR_RCC_BPS_MISSED_MSG:
         case C_ERR_RCC_PRECHARGE_MISSED_MSG:
+        case C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+            break;
+        case C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+            break;
+        case C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+            break;
         case C_ERR_RCC_ACTIVE_PRECHARGE_FLT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+            break;
         case C_ERR_RCC_PRECHARGE_TMOUT_MOT:
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+            break;
         case C_ERR_RCC_PRECHARGE_TMOUT_ARR:
-            throwTaskError(rcc_err, true, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
             break;
-
         case C_ERR_RCC_BPS_TRIP:
-            throwTaskError(rcc_err, true, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(rcc_err, EVAC_NEEDED, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
             break;
-
         default:
             // Critical failure, we have a non readcarcan error in readcarcan somehow
-            throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
+            throwTaskError(C_ERR_ILLEGAL_ERROR, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
             break;
     }
 }

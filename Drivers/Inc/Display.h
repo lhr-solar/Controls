@@ -15,45 +15,53 @@
 #define __DISPLAY_H
 
 #include "common.h"
+#include "Tasks.h"
 
 // #define DISP_OUT DISPLAY
 #define MAX_MSG_LEN 32
-#define MAX_ARG_LEN 16
+#define MAX_ARG_LEN 17
 
 #define MAX_ARGS    2 // maximum # of arguments in a command packet
+
+
+#define FOREACH_DISPLAY_COMPONENT(DISP_COMP) \
+    /* Boolean components */                 \
+    DISP_COMP(DISP_HEARTBEAT,        "hb")   \
+    DISP_COMP(DISP_PACK_CURR_SIGN,   "cs")   \
+    DISP_COMP(DISP_MC_CURR_SIGN,     "mcs")  \
+    DISP_COMP(DISP_BRAKE,            "brake")\
+    DISP_COMP(DISP_RIGHT_BLINK,      "rightblink")\
+    DISP_COMP(DISP_LEFT_BLINK,       "leftblink")\
+    /* Contactor-ish (still bool, but logically different) */ \
+    DISP_COMP(DISP_ARRAY_EN,         "arren")\
+    DISP_COMP(DISP_ARRAY_PC,         "arrpc")\
+    DISP_COMP(DISP_MOTOR_EN,         "moten")\
+    DISP_COMP(DISP_MOTOR_PC,         "motpc")\
+    /* Non-boolean components */             \
+    DISP_COMP(DISP_VELOCITY,         "vel")  \
+    DISP_COMP(DISP_ACCEL_METER,      "accel")\
+    DISP_COMP(DISP_SOC,              "soc")  \
+    DISP_COMP(DISP_SUPP_BATT,        "supp") \
+    DISP_COMP(DISP_PACK_VOLTAGE,     "pv")   \
+    DISP_COMP(DISP_PACK_CURRENT,     "pc")   \
+    DISP_COMP(DISP_PACK_TEMP,        "pt")   \
+    DISP_COMP(DISP_MC_BUS_VOLTAGE,   "mcv")  \
+    DISP_COMP(DISP_MC_BUS_CURRENT,   "mcc")  \
+    DISP_COMP(DISP_HEAT_SINK_TEMP,   "heatsink")\
+    DISP_COMP(DISP_GEAR,             "gear") \
+    DISP_COMP(DISP_MOT_LIMIT,        "motorlimit") \
+    /* Fault components */                   \
+    DISP_COMP(DISP_OS_CODE,          "oserr")\
+    DISP_COMP(DISP_FAULT_CODE,       "faulterr")\
+    DISP_COMP(DISP_EVAC_MSG,         "evac") \
+    DISP_COMP(DISP_EVAC_BPS_FAULT,   "bpsfaulterr")
 
 /**
  * Enum and corresponding array for easy component selection.
  */
 typedef enum {
-    // Boolean components
-    DISP_HEARTBEAT = 0,
-    DISP_PACK_CURR_SIGN,
-    DISP_MC_CURR_SIGN,
-    DISP_BRAKE,
-    DISP_BLINK,
-    // Non-boolean components
-    DISP_ARRAY_EN,
-    DISP_ARRAY_PC,
-    DISP_MOTOR_EN,
-    DISP_MOTOR_PC,
-    DISP_VELOCITY,
-    DISP_ACCEL_METER,
-    DISP_SOC,
-    DISP_SUPP_BATT,
-    DISP_CRUISE_ST,
-    DISP_REGEN_ST,
-    DISP_PACK_VOLTAGE,
-    DISP_PACK_CURRENT,
-    DISP_PACK_TEMP,
-    DISP_MC_BUS_VOLTAGE,
-    DISP_MC_BUS_CURRENT,
-    DISP_HEAT_SINK_TEMP,
-    DISP_GEAR,
-    // Fault code components
-    DISP_OS_CODE,
-    DISP_FAULT_CODE,
-    DISP_EVAC_MSG,
+    #define GENERATE_DISPLAY_ENUM(name, str) name,
+    FOREACH_DISPLAY_COMPONENT(GENERATE_DISPLAY_ENUM)
     DISP_NUM_COMPONENTS
 } Component_t;
 
@@ -62,7 +70,7 @@ typedef enum {
  */
 extern uint32_t g_display_comp_vals[DISP_NUM_COMPONENTS];
 extern const char *DISPLAY_COMP_STR[DISP_NUM_COMPONENTS];
-
+    
 /**
  * Error types
  */
@@ -140,7 +148,11 @@ DisplayError_t Display_Reset(void);
  * @param is_evac_needed whether evac is required.
  * @returns DisplayError_t
  */
-DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bool is_evac_needed);
+DisplayError_t Display_Error(const char *app_err_str, const char *os_err_str, bool is_evac_needed, BPSFaultErr_e bps_err);
+
+/**
+ * 
+ */
 
 /**
  * @brief Overwrites any processing commands and triggers the evacuation screen

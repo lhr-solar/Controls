@@ -4,7 +4,7 @@
 // Boolean used to ensure that if car turns on in non-neutral, it'll be overriden to neutral 
 // until the switch is moved to neutral; then, it'll follow the specified gear state afterward.
 
-gear_t getGear(void) {
+gear_t getGear(bool useOSDelay) {
     static bool neutralReset = true;
     bool fwd;
     bool rev;
@@ -22,7 +22,14 @@ gear_t getGear(void) {
             neu = false;
             break;
         }
-        delay_ms(NEUTRAL_DEBOUNCE_DLY_MS);
+        if(useOSDelay == GEAR_USE_OS_DELAY){
+            OS_ERR err;
+            OSTimeDlyHMSM(0, 0, 0, NEUTRAL_DEBOUNCE_DLY_MS, OS_OPT_TIME_HMSM_STRICT, &err);
+            assertOSError(err);
+        }
+        else{
+            delay_ms(NEUTRAL_DEBOUNCE_DLY_MS);
+        }
     }
 
     // Until we've actually seen neutral, manually override to neutral
@@ -44,25 +51,36 @@ gear_t getGear(void) {
     }
 }
 
-// NOTE: Uncomment when we're using cruise
 switch_state_t getSwitchState(dash_pin_t pin){
+    switch_state_t ret = DASH_SW_ERROR;
     switch(pin){
         case(DASH_CRUZ_SET):
-            return BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SW_ON : DASH_SW_OFF;
+            ret = BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SW_ON : DASH_SW_OFF;
             break;
         case(DASH_CRUZ_EN):
-            return BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SW_ON : DASH_SW_OFF;
+            ret = BSP_GPIO_Read_Pin(CRUISE_ENABLE_PORT, CRUISE_ENABLE) ? DASH_SW_ON : DASH_SW_OFF;
             break;
+        case (DASH_RIGHT_IND):
+            ret = BSP_GPIO_Read_Pin(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR) ? DASH_SW_ON : DASH_SW_OFF;
+            break;
+        case (DASH_LEFT_IND):
+            ret = BSP_GPIO_Read_Pin(LEFT_INDICATOR_PORT, LEFT_INDICATOR) ? DASH_SW_ON : DASH_SW_OFF;
+            break;
+        case (DASH_HZD):
+            ret = BSP_GPIO_Read_Pin(CRUISE_SET_PORT, CRUISE_SET) ? DASH_SW_OFF : DASH_SW_ON;
         default:
-            return DASH_SW_ERROR;
+            ret = DASH_SW_ERROR;
             break;
     }
+    return ret;
 }
 
 void dashboardInit(){
-    BSP_GPIO_Init(BRAKE_LIGHT_PORT, BRAKE_LIGHT, OUTPUT, false);    //BRAKE
     BSP_GPIO_Init(FORWARD_PORT, FORWARD, INPUT, false);             //FWD
     BSP_GPIO_Init(REVERSE_PORT, REVERSE, INPUT, false);             //REV
-    BSP_GPIO_Init(CRUISE_SET_PORT, CRUISE_SET, INPUT, false);       //CRUZ_ST
-    //Dash LEDs initialized in StatusLeds.c
+    BSP_GPIO_Init(CRUISE_SET_PORT, CRUISE_SET, INPUT, false);       //Used as Hazard
+
+    BSP_GPIO_Init(RIGHT_INDICATOR_PORT, RIGHT_INDICATOR, INPUT, false);
+    BSP_GPIO_Init(LEFT_INDICATOR_PORT, LEFT_INDICATOR, INPUT, false);
+
 }
