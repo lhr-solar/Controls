@@ -58,27 +58,6 @@ const CANLUT_T CANLUT[MAX_CAN_ID] = {
  * @brief Lists of CAN IDs that we want to receive. Used to initialize the CAN filters for CarCAN and MotorCAN.
  * Must change NUM_CARCAN_FILTERS or NUM_MOTORCAN_FILTERS in CANConfig.h if you add or remove CAN IDs in either filter.
 */
-CANId_t carCANFilterList[NUM_CARCAN_FILTERS] = {
-    BPS_TRIP, 
-	BPS_CONTACTOR,			// Bit 1 and 0 contain BPS HV Plus/Minus (associated Motor Controller) Contactor and BPS HV Array Contactor, respectively
-    STATE_OF_CHARGE,	
-    SUPPLEMENTAL_VOLTAGE,
-    VOLTAGE_SUMMARY,
-    TEMPERATURE_SUMMARY,
-    CURRENT_DATA,
-    CONTACTOR_SENSE,
-    PRECHARGE_TIMEOUT,
-	BPS_FAULT_STATE
-};
 
-CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS] = {
-	MOTOR_STATUS,
-    MC_BUS,
-    VELOCITY,
-	MC_PHASE_CURRENT,
-    BACKEMF,
-    TEMPERATURE,
-	DSP_TEMP,
-    ODOMETER_AMPHOURS,
-    SLIP_SPEED
-};
+CANId_t carCANFilterList[] = { CARCAN_FILTER_IDS };
+CANId_t motorCANFilterList[] = { MOTORCAN_FILTER_IDS };

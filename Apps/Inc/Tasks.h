@@ -235,6 +235,8 @@ void Task_CommandLine(void *p_arg);
 
 void Task_IOState(void *p_arg);
 
+void Task_ReadCAN(void *p_arg) {
+
 /**
  * TCBs
  */

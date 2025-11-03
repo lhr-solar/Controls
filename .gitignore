@@ -7,3 +7,7 @@ __pycache__
 
 !.vscode/LHR.code-workspace
 !.vscode/c_cpp_properties.json
+
+.venv/
+
+.DS_Store
