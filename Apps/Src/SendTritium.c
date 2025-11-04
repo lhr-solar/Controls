@@ -162,6 +162,8 @@ float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
     }
 }
 
+#define SWOC_LIMIT
+
 // Task (main loop)
 
 /**
@@ -240,8 +242,13 @@ void Task_SendTritium(void *p_arg) {
             }
 
             err = MotorStatus_Wait(MOTOR_SWOC_THRESHOLD, !OS_FLAG_BLOCKING);
-            maxCurrentPercentage = (err == OS_ERR_NONE) ? SWOC_CURRENT_SP_MAX : CURRENT_SP_MAX;
+#ifdef SWOC_LIMIT
             // The motor is going fast enough where you want to scale the max current setpoint to prevent SWOC
+            maxCurrentPercentage = (err == OS_ERR_NONE) ? SWOC_CURRENT_SP_MAX : CURRENT_SP_MAX;
+#elif
+            maxCurrentPercentage = CURRENT_SP_MAX;
+#endif
+
 
             switch (gear) {
                 case DASH_FWD:
