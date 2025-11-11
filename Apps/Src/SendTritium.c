@@ -176,8 +176,7 @@ static const swoc_threshold_t swoc_thresholds[] = {
     {20.0f, 60}
 };
 
-static uint8_t swoc_get_max_percent_for_speed(float speed_mph)
-{
+static uint8_t swoc_get_max_percent_for_speed(float speed_mph){
     uint8_t cap = CURRENT_SP_MAX;
     size_t i;
     for (i = 0; i < (sizeof(swoc_thresholds) / sizeof(swoc_thresholds[0])); ++i) {
@@ -270,7 +269,6 @@ void Task_SendTritium(void *p_arg) {
 #else
             maxCurrentPercentage = swoc_get_max_percent_for_speed(fabsf(Motor_Velocity_Get() * 2.236936f));
 #endif
-
 
             switch (gear) {
                 case DASH_FWD:
