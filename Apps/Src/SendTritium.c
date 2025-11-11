@@ -35,6 +35,8 @@
 
  // #define USING_PROFINITY
 
+#include <math.h>
+
  // Inputs
 static uint8_t brakePedalPercent = 0;
 static uint8_t accelPedalPercent = 0;
@@ -164,6 +166,28 @@ float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
 
 #define SWOC_LIMIT
 
+typedef struct {
+    float speed_mph;
+    uint8_t max_percent;
+} swoc_threshold_t;
+
+static const swoc_threshold_t swoc_thresholds[] = {
+    {12.5f, 80},
+    {20.0f, 60}
+};
+
+static uint8_t swoc_get_max_percent_for_speed(float speed_mph)
+{
+    uint8_t cap = CURRENT_SP_MAX;
+    size_t i;
+    for (i = 0; i < (sizeof(swoc_thresholds) / sizeof(swoc_thresholds[0])); ++i) {
+        if (speed_mph >= swoc_thresholds[i].speed_mph) {
+            cap = swoc_thresholds[i].max_percent;
+        }
+    }
+    return cap;
+}
+
 // Task (main loop)
 
 /**
@@ -198,7 +222,7 @@ void Task_SendTritium(void *p_arg) {
     uint8_t maxCurrentPercentage = 100;
 
     // By default assume we are below the motor swoc threshold at startup
-    MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, true, false);
+    // MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, true, false);
 
     while (1) {
 #ifdef TASK_PROFILER
@@ -241,12 +265,10 @@ void Task_SendTritium(void *p_arg) {
                 resetAccelPercent = 0;
             }
 
-            err = MotorStatus_Wait(MOTOR_SWOC_THRESHOLD, !OS_FLAG_BLOCKING);
-#ifdef SWOC_LIMIT
-            // The motor is going fast enough where you want to scale the max current setpoint to prevent SWOC
-            maxCurrentPercentage = (err == OS_ERR_NONE) ? SWOC_CURRENT_SP_MAX : CURRENT_SP_MAX;
-#elif
+#ifndef SWOC_LIMIT
             maxCurrentPercentage = CURRENT_SP_MAX;
+#else
+            maxCurrentPercentage = swoc_get_max_percent_for_speed(fabsf(Motor_Velocity_Get() * 2.236936f));
 #endif
 
 
