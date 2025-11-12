@@ -172,8 +172,8 @@ typedef struct {
 } swoc_threshold_t;
 
 static const swoc_threshold_t swoc_thresholds[] = {
-    {12.5f, 80},
-    {20.0f, 60}
+    {11.0f, 80},
+    {17.0f, 60}
 };
 
 static uint8_t swoc_get_max_percent_for_speed(float speed_mph){
