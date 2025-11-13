@@ -187,15 +187,11 @@ float Motor_Velocity_Get_Safe() {
     OS_ERR err;
     float velocity;
     
-    /* Acquire mutex before reading Motor_Velocity */
     OSMutexPend(&Motor_Velocity_Mutex, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
     assertOSError(err);
-    
     velocity = Motor_Velocity;
-    
     OSMutexPost(&Motor_Velocity_Mutex, OS_OPT_POST_NONE, &err);
     assertOSError(err);
-    /* Release mutex */
     
     return velocity;
 }
