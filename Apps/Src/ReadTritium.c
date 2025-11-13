@@ -35,6 +35,9 @@ static float Motor_BusCurrent = 0;
 
 static OS_TMR MotorWatchdog;
 
+/* Mutex for thread-safe access to Motor_Velocity */
+static OS_MUTEX Motor_Velocity_Mutex;
+
 // Function prototypes
 // static void assertTritiumError(tritium_error_code_t motor_err);
 
@@ -68,6 +71,14 @@ void Task_ReadTritium(void *p_arg) {
     CANDATA_t dataBuf = {0};
 
     static bool watchdogCreated = false;
+    static bool mutexCreated = false;
+
+    /* Initialize the velocity mutex on first task run */
+    if (!mutexCreated) {
+        OSMutexCreate(&Motor_Velocity_Mutex, "Motor Velocity Mutex", &err);
+        assertOSError(err);
+        mutexCreated = true;
+    }
 
     while (1) {
         ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
@@ -114,13 +125,18 @@ void Task_ReadTritium(void *p_arg) {
                     OSTmrStart(&MotorWatchdog, &err); // Reset the watchdog
                     assertOSError(err);
                     memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+                    
+                    /* Acquire mutex before writing Motor_Velocity */
+                    OSMutexPend(&Motor_Velocity_Mutex, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
+                    assertOSError(err);
                     memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+                    Motor_Velocity = *((float *)(&dataBuf.data[4]));
+                    OSMutexPost(&Motor_Velocity_Mutex, OS_OPT_POST_NONE, &err);
+                    assertOSError(err);
+                    /* Release mutex */
 
                     // Motor RPM is in bytes 0-3
                     Motor_RPM = *((float *)(&dataBuf.data[0]));
-
-                    // Car Velocity (in m/s) is in bytes 4-7
-                    Motor_Velocity = *((float *)(&dataBuf.data[4]));
 
                     float Car_Velocity = Motor_Velocity * MPH_CONVERSION; // Car vel is in mph
                     // Display can't take negative values, and reverse puts Car_Velocity in the negative
@@ -165,6 +181,24 @@ float Motor_RPM_Get() { return Motor_RPM; }
 
 // Getter function for motor velocity
 float Motor_Velocity_Get() { return Motor_Velocity; }
+
+// Getter function for motor velocity (thread-safe version)
+float Motor_Velocity_Get_Safe() {
+    OS_ERR err;
+    float velocity;
+    
+    /* Acquire mutex before reading Motor_Velocity */
+    OSMutexPend(&Motor_Velocity_Mutex, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
+    assertOSError(err);
+    
+    velocity = Motor_Velocity;
+    
+    OSMutexPost(&Motor_Velocity_Mutex, OS_OPT_POST_NONE, &err);
+    assertOSError(err);
+    /* Release mutex */
+    
+    return velocity;
+}
 
 // Getter function for motor error
 uint16_t Motor_Error_Get() { return Motor_FaultBitmap; }

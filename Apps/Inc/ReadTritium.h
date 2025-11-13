@@ -40,6 +40,7 @@
 
 float Motor_RPM_Get();
 float Motor_Velocity_Get();
+float Motor_Velocity_Get_Safe();  // Thread-safe version
 uint16_t Motor_Error_Get();
 
 void assertTritiumError(controls_error_e motor_err);

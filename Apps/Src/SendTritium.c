@@ -267,7 +267,7 @@ void Task_SendTritium(void *p_arg) {
 #ifndef SWOC_LIMIT
             maxCurrentPercentage = CURRENT_SP_MAX;
 #else
-            maxCurrentPercentage = getSpeedDependentPower(fabsf(Motor_Velocity_Get() * 2.236936f));
+            maxCurrentPercentage = getSpeedDependentPower(fabsf(Motor_Velocity_Get_Safe() * 2.236936f));
 #endif
 
             switch (gear) {
