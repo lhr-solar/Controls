@@ -222,7 +222,7 @@ static inline void handler_ReadTritium_HallError(void) { resetMotorController();
  * @param   motor_err Bitmap with motor error codes to check
  */
 void assertTritiumError(controls_error_e m_err) {
-    static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
+    // static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
     static uint8_t motor_fault_cnt = 0;
 
     switch (m_err) {
