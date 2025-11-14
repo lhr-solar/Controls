@@ -25,6 +25,8 @@
 #define MOTOR_ERROR_MASK    0x01FF
 #define MOTOR_LIMIT_MASK 0x7F
 
+#define RESET_ON_SWOC true
+
 uint16_t Motor_FaultBitmap = 0x0000;
 float Motor_RPM = 0;
 static float Motor_Velocity = 0;
@@ -247,7 +249,7 @@ void assertTritiumError(controls_error_e m_err) {
 
         case C_ERR_RTR_SOFTWARE_OC:
             // Try to restart the motor a few times and then fail out
-            if (++motor_fault_cnt > 1) {
+            if (++motor_fault_cnt > 1 || !RESET_ON_SWOC) {
                 throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             } else {
                 resetMotorController();
