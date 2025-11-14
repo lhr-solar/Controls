@@ -175,9 +175,9 @@ static const swoc_threshold_t swoc_thresholds[] = {
     {10.0f, 80},
     {17.0f, 75},
     {20.0f, 70},
-    /*{23.0f, 65},
-    {27.0f, 60},
-    {29.0f, 55}*/
+    {23.0f, 60},
+    {25.0f, 50},
+    {28.5f, 45}
 };
 
 static uint8_t getSpeedDependentPower(float speed_mph){

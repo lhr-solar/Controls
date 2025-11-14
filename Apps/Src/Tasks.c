@@ -285,6 +285,7 @@ void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t
     // Turn on left and right lights
     Lights_Write(RIGHT_LIGHT, ON);
     Lights_Write(LEFT_LIGHT, ON);
+    Lights_Write(BRAKE_LIGHT, ON);
 
     if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
         while (1) {
