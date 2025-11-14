@@ -252,6 +252,8 @@ void assertTritiumError(controls_error_e m_err) {
             if (++motor_fault_cnt > 1 || !RESET_ON_SWOC) {
                 throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             } else {
+                // set display limit to say "SWOC Restart"
+                UpdateDisplay_SetMotorLimit(1 << 7); // set SWOC limit bit
                 resetMotorController();
             }
             break;
