@@ -170,10 +170,13 @@ void Task_ReadTritium(void *p_arg) {
     }
 }
 
-static void restartMotorController(void) {
-    //CANDATA_t resetmsg = {0};
-    //resetmsg.ID = MOTOR_RESET;
-    //CANbus_Send(resetmsg, true, MOTORCAN);
+static void resetMotorController(void) {
+    CANDATA_t resetCmd = {
+        .ID = MOTOR_RESET,
+        .idx = 0,
+        .data = {0.0f}
+    };
+    CANbus_Send(resetCmd, true, MOTORCAN);
 }
 
 // Getter function for motor RPM
@@ -208,7 +211,7 @@ uint16_t Motor_Error_Get() { return Motor_FaultBitmap; }
  * @brief A callback function to be run by the main throwTaskError function for hall sensor errors
  * restart the motor if the number of hall errors is still less than the MOTOR_RESTART_THRESHOLD.
  */
-static inline void handler_ReadTritium_HallError(void) { restartMotorController(); }
+static inline void handler_ReadTritium_HallError(void) { resetMotorController(); }
 
 /**
  * @brief   Assert a Tritium error by checking Motor_FaultBitmap
@@ -229,19 +232,28 @@ void assertTritiumError(controls_error_e m_err) {
         // Start of fallthrough
         case C_ERR_RTR_GENERIC:
         case C_ERR_RTR_HARDWARE_OC:
-        case C_ERR_RTR_SOFTWARE_OC:
         case C_ERR_RTR_DC_BUS_OV:
         case C_ERR_RTR_WDOG_LAST_RESET:
         case C_ERR_RTR_CONFIG_READ:
         case C_ERR_RTR_UNDERVOLT_LOCKOUT:
         case C_ERR_RTR_DESAT_FAULT:
         case C_ERR_RTR_MOTOR_OVERSPEED:
+        case C_ERR_RTR_HALL_SENSOR:
         case C_ERR_RTR_INIT_FAIL:
         case C_ERR_RTR_MULTIPLE:
         case C_ERR_RTR_UNKNOWN_ERROR:
             throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             break;
-        // Emd of fallthrough
+
+        case C_ERR_RTR_SOFTWARE_OC:
+            // Try to restart the motor a few times and then fail out
+            if (++motor_fault_cnt > 1) {
+                throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            } else {
+                resetMotorController();
+            }
+            break;
+        // End of fallthrough
 
         case C_ERR_RTR_MOTOR_WDOG_TRIP:
             // Try to restart the motor a few times and then fail out
@@ -251,7 +263,7 @@ void assertTritiumError(controls_error_e m_err) {
                 // throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             }
             break;
-
+        /*
         case C_ERR_RTR_HALL_SENSOR:
             // If it's purely a hall sensor error, try to restart the motor a few times and then
             // fail out
@@ -261,6 +273,7 @@ void assertTritiumError(controls_error_e m_err) {
                 throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_UNKNOWN_BPS);
             }
             break;
+            */
 
         default:
             // Critical failure, we have a non readtritium error in readtritium somehow
