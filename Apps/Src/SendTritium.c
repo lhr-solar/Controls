@@ -172,8 +172,12 @@ typedef struct {
 } swoc_threshold_t;
 
 static const swoc_threshold_t swoc_thresholds[] = {
-    {11.0f, 80},
-    {17.0f, 60}
+    {10.0f, 80},
+    {17.0f, 75},
+    {20.0f, 70},
+    /*{23.0f, 65},
+    {27.0f, 60},
+    {29.0f, 55}*/
 };
 
 static uint8_t getSpeedDependentPower(float speed_mph){
