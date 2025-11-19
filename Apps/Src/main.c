@@ -69,6 +69,7 @@ int main(void) {
 
     assertOSError(err); // for OS init
     BPSMotorFlags_Init();
+    FaultFlags_Init();
     Ignition_Init();
     dashboardInit();
     DebugIO_Init();

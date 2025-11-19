@@ -83,6 +83,24 @@ EXPOSE_GETTER(bool, isBrakeOn)
  */
 float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_min, uint8_t out_max);
 
+// Function prototypes
+static void assertSendTritiumError(controls_error_e sterr);
+
+
+
+//Making a source of truth (ts)
+
+typedef struct {
+    controls_error_e       error_code;
+    bool                   is_evac_needed;
+    callback_t             error_callback;
+    error_scheduler_opt_e  lock_scheduler;
+    error_recovery_opt_e   recovery;
+    BPSFaultErr_e          bps_err;
+} TaskErrorParams;
+
+
+
 #endif
 
 /* @} */

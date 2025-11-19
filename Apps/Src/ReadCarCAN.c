@@ -351,37 +351,44 @@ void assertReadCarCANError(controls_error_e rcc_err) {
     UpdateDisplay_SetSBPV(SBPV);
     UpdateDisplay_SetSOC(SOC);
 
-    switch (rcc_err) {
-        case C_ERR_NONE:
-            break;
+    //What do i need to do here, abstract this giant switch to the actual throw task error, since the way we react to each error is the same
+    //I can just make a struct encapsulating all of them and pray for the best...
 
-        case C_ERR_RCC_GENERIC:
-        case C_ERR_RCC_BPS_MISSED_MSG:
-        case C_ERR_RCC_PRECHARGE_MISSED_MSG:
-        case C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT:
-            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
-            break;
-        case C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT:
-            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
-            break;
-        case C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT:
-            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
-            break;
-        case C_ERR_RCC_ACTIVE_PRECHARGE_FLT:
-            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
-            break;
-        case C_ERR_RCC_PRECHARGE_TMOUT_MOT:
-            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
-            break;
-        case C_ERR_RCC_PRECHARGE_TMOUT_ARR:
-            throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
-            break;
+
+    
+    switch (rcc_err) {
+        // case C_ERR_NONE:
+        //     break;
+
+        // case C_ERR_RCC_GENERIC:
+        // case C_ERR_RCC_BPS_MISSED_MSG:
+        // case C_ERR_RCC_PRECHARGE_MISSED_MSG:
+        // case C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT:
+        //     throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+        //     break;
+        // case C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT:
+        //     throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+        //     break;
+        // case C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT:
+        //     throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+        //     break;
+        // case C_ERR_RCC_ACTIVE_PRECHARGE_FLT:
+        //     throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+        //     break;
+        // case C_ERR_RCC_PRECHARGE_TMOUT_MOT:
+        //     throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+        //     break;
+        // case C_ERR_RCC_PRECHARGE_TMOUT_ARR:
+        //     throwTaskError(rcc_err, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+        //     break;
         case C_ERR_RCC_BPS_TRIP:
-            throwTaskError(rcc_err, EVAC_NEEDED, handler_ReadCarCAN_BPSTrip, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+            throwTaskError(rcc_err, handler_ReadCarCAN_BPSTrip, bps_err);
             break;
         default:
             // Critical failure, we have a non readcarcan error in readcarcan somehow
-            throwTaskError(C_ERR_ILLEGAL_ERROR, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
+            // throwTaskError(C_ERR_ILLEGAL_ERROR, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err);
             break;
     }
+
+        throwTaskError(rcc_err);
 }

@@ -56,6 +56,10 @@ static float accelPedalPercent = 0.0f;
 static float busCurrentSetPoint = 1.0f; //This gets manipulated if the battery not ok
 
 static gear_t gear = DASH_NEU;
+
+// Gear fault counter
+static uint8_t gearFaultCnt = 0;
+
 static bool isBrakeOn = false; // Used for updating display & brakelight
 
 static uint8_t carStatus = 0; // Bitfield for car status
@@ -100,6 +104,8 @@ GETTER(float, velocitySetpoint)
 GETTER(bool, isBrakeOn)
 
 
+
+
 //Create the FSM data strcuture, make all the possible states, to do this prolly use 
 // an enum for every state and have a decision handler for each, logic will 
 // be embedded within this, alos we would have flags represented by bits for whatever we care about
@@ -118,17 +124,17 @@ typedef enum FSMStates {
 }FSMStates;
 
 //BITFIELD INPUT ENUM
-typedef enum BitfieldInputs{
-    //FAULTED_BIT = 0x80, //If the car is faulted
-    BRAKING_BIT = 0x40, //If the brake is pressed
-    REGEN_ENABLED_BIT = 0x20, //If regen is enabled
-    READY_TO_REGEN_BIT = 0x10, //If we are going slow enough to regen
-    REGEN_BUTTON_BIT = 0x08, //If the regen button is pressed
-    CRUISE_CONTROL_BUTTON_BIT = 0x04, //If the cruise control button is pressed
-    NOT_READY_BIT = 0x03, //For when the car is starting up
-    REVERSE_BIT = 0x02, //If we are trying to go reverse
-    FORWARD_BIT = 0x01, //If we are trying to go forward
-    NEUTRAL_BIT = 0x00 //If we are trying to go neutral
+typedef enum BitfieldInputs {
+    NEUTRAL_BIT             = 0x00, // If we are trying to go neutral
+    FORWARD_BIT             = 0x01, // If we are trying to go forward
+    REVERSE_BIT             = 0x02, // If we are trying to go reverse
+    NOT_READY_BITS          = 0x03, // For when the car is starting up
+    CRUISE_CONTROL_BUTTON_BIT = 0x04, // If the cruise control button is pressed
+    REGEN_BUTTON_BIT        = 0x08, // If the regen button is pressed
+    READY_TO_REGEN_BIT      = 0x10, // If we are going slow enough to regen
+    REGEN_ENABLED_BIT       = 0x20, // If regen is enabled
+    BRAKING_BIT             = 0x40, // If the brake is pressed
+    //FAULTED_BIT           = 0x80  // If the car is faulted
 } BitfieldInputs_t;
 
 OS_FLAG_GRP CarStatus_Flags; // Bitfield for car status
@@ -156,7 +162,7 @@ void runFSM(){
     OS_ERR err;
 
     // Check that motor is ready to run
-    err = MotorStatus_Wait(BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING);
+    err = checkForAllFaults();
 
     // if you return OS_ERR_PEND_WOULD_BLOCK, one of the bits are not sent, and would've blocked
     // If the error is ERR_NONE, assertOSError returns without asserting an error
@@ -232,7 +238,7 @@ void initFSM(){
                 }else{
                     FSM[i].NextStates[j] = REVERSE_DRIVE;
                 }
-            }else if ((j & 0x3) == NOT_READY_BIT){
+            }else if ((j & 0x3) == NOT_READY_BITS){
                 //Not ready
                 FSM[i].NextStates[j] = CAR_NOT_READY;
             }
@@ -273,18 +279,19 @@ void sendMotorPowerCommand(float powerSetpoint){
 }
 
 bool readyToRoll(){ //Car can escape not ready state, this is all of our checks for recoverable faults and init states, but init stats will have associated flags
-    if(accelPedalPercent < ACCEL_PEDAL_THRESHOLD){
-        accelerator_reset = true;
-    }
-
-    //Check ignition status here too prolly...
-
+    
     //Check all of our status bits here for other random faults 
-
-    return accelerator_reset && 1 && 1; //Add other checks here
+    return accelPedalPercent < ACCEL_PEDAL_THRESHOLD && 1 && 1; //Add other checks here
 }
 
-void checkForAllFaults(){
+OS_ERR checkForAllFaults(){
+    OS_ERR err = MotorStatus_Wait(BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN, !OS_FLAG_BLOCKING);
+    return err;
+}
+
+void checkWatchDogs(){
+    OS_ERR err;
+
 
 }
 
@@ -303,7 +310,6 @@ void handleFSMForwardDriveState(){
 }
 void handleFSMNeutralState(){
     sendMotorDriveCommand(0, 0);
-
     return;
 }
 
@@ -320,8 +326,8 @@ void handleFSMRegenState(){
 
 void handleFSMCruiseControlState(){
 
-    float cruiseControlVelocity = 0.0f; //Set this to some actual velocity later, when button pressed
-    sendMotorDriveCommand(MAX_VELOCITY, cruiseControlVelocity);
+    float cruiseControlPercent = accelPedalPercent; //Set this to some actual velocity later, when button pressed
+    sendMotorDriveCommand(MAX_VELOCITY, cruiseControlPercent);
     return;
 }
 
@@ -375,7 +381,7 @@ uint8_t getControlsBitfield(){
                 } else if(gear == DASH_NEU){
                     status |= NEUTRAL_BIT;
                 } else if(gear == DASH_INIT){
-                    status |= NOT_READY_BIT;
+                    status |= NOT_READY_BITS;
                 }else{
                     assertSendTritiumError(C_ERR_STR_GEAR_FAULT);
                     break;
@@ -395,10 +401,10 @@ uint8_t getControlsBitfield(){
         }
     }
 
-    if(status & BRAKING_BIT){
-        thresholdBrake = BRAKE_THRESH;
-    } else {
+    if(status & BRAKING_BIT){ //If braking, thresh for braking goes down
         thresholdBrake = BRAKE_THRESH_HYST;
+    } else {
+        thresholdBrake = BRAKE_THRESH;
     }
 
     return status;
@@ -423,7 +429,7 @@ void getAndUpdateControlStatus(FSMCANDATA_t * messages, uint8_t numMessages){ //
                 //         brakePedalPercent = ((uint8_t*)messages[i].CANMessage.data)[0];
                 //         accelPedalPercent = ((uint8_t*)messages[i].CANMessage.data)[1];
 
-                //         brakePedalPercent = mapToPercent(brakePedalPercent, BRAKE_PEDAL_MIN, BRAKE_PEDAL_MAX, 0, 100);
+                        // brakePedalPercent = mapToPercent(brakePedalPercent, BRAKE_PEDAL_MIN, BRAKE_PEDAL_MAX, 0, 100);
                 //         accelPedalPercent = mapToPercent(accelPedalPercent, ACCEL_PEDAL_MIN, ACCEL_PEDAL_MAX, 0, 100);
                 //         //Gear is bits 3 and 4 of byte 3
                 //         gear = (((uint8_t*)messages[i].CANMessage.data)[2] >> 3) & 0x03; 
@@ -442,13 +448,6 @@ void getAndUpdateControlStatus(FSMCANDATA_t * messages, uint8_t numMessages){ //
 }
 
 
-// Gear fault counter
-static uint8_t gearFaultCnt = 0;
-
-// Function prototypes
-static void assertSendTritiumError(controls_error_e sterr);
-
-// Helper Functions
 
 /**
  * @brief Update the accel, brake, & gear on the display +
@@ -472,14 +471,17 @@ static void updateDisplayState() {
         UpdateDisplay_SetGear(DISP_NEUTRAL);
         break;
     }
+
+    isBrakeOn ? Lights_Write(BRAKE_LIGHT, ON) : Lights_Write(BRAKE_LIGHT, OFF); //Lights sep from the the set brake display??
 }
 
 /**
  * @brief Reads inputs from the system
  */
 static void readInputs() {
-    brakePedalPercent = Pedals_Read(BRAKE);
-    accelPedalPercent = Pedals_Read(ACCELERATOR);
+    // brakePedalPercent = Pedals_Read(BRAKE);
+    brakePedalPercent = mapToPercent(Pedals_Read(BRAKE), ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, 100);
+    accelPedalPercent = mapToPercent(Pedals_Read(ACCELERATOR), ACCEL_PEDAL_THRESHOLD, PEDAL_MAX, CURRENT_SP_MIN, 100);
     CANDATA_t rawPedalmv = {
         .ID = PEDALS_RAW_VOLTAGE,
         .idx = 0,
@@ -565,6 +567,31 @@ void Task_SendTritium(void *p_arg) {
 
     // By default assume we are below the motor swoc threshold at startup
     MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, true, false);
+
+    //Not done yet need to update variables and make callbacks...
+
+    //This is from ADC what do I check?
+    OSTmrCreate(
+        &canWatchTimer, "Pedals Input",
+        CAN_WATCH_TMR_DLY_TMR_TS, // Initial delay equal to the period since 0 doesn't seem to work
+        CAN_WATCH_TMR_DLY_TMR_TS, OS_OPT_TMR_PERIODIC, callbackCANWatchdog, NULL, &err);
+    assertOSError(err);
+
+    // Start CAN Watchdog timer
+    OSTmrStart(&canWatchTimer, &err);
+    assertOSError(err);
+
+    //Is something else already checking this?
+    OSTmrCreate(
+        &prechargeCanWatchTimer, "BPS CAN",
+        CAN_WATCH_TMR_DLY_TMR_TS, // Initial delay equal to the period since 0 doesn't seem to work
+        CAN_WATCH_TMR_DLY_TMR_TS, OS_OPT_TMR_PERIODIC, callbackCANWatchdog, NULL, &err);
+    assertOSError(err);
+    
+
+    OSTmrStart(&prechargeCanWatchTimer, &err);
+    assertOSError(err);
+
 
     while (1) {
 #ifdef TASK_PROFILER
@@ -670,18 +697,19 @@ void Task_SendTritium(void *p_arg) {
 }
 
 static void assertSendTritiumError(controls_error_e sterr) {
-    switch (sterr) {
-    case C_ERR_NONE:
-        break;
-    case C_ERR_STR_GENERIC:
-    case C_ERR_STR_GEAR_FAULT:
-        throwTaskError(sterr, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
-        break;
-    default:
-        // Critical failure, we have a non sendtritium error in send tritium somehow
-        throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
-        break;
-    }
+    // switch (sterr) {
+    // case C_ERR_NONE:
+    //     break;
+    // case C_ERR_STR_GENERIC:
+    // case C_ERR_STR_GEAR_FAULT:
+    //     throwTaskError(sterr, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+    //     break;
+    // default:
+    //     // Critical failure, we have a non sendtritium error in send tritium somehow
+    //     throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+    //     break;
+    // }
+    throwTaskError(sterr);
 }
 
 

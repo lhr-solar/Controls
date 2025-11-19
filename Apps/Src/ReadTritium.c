@@ -190,48 +190,24 @@ void assertTritiumError(controls_error_e m_err) {
     static uint8_t motor_fault_cnt = 0;
 
     switch (m_err) {
-        case C_ERR_NONE:
-            break;
-
-        // Start of fallthrough
-        case C_ERR_RTR_GENERIC:
-        case C_ERR_RTR_HARDWARE_OC:
-        case C_ERR_RTR_SOFTWARE_OC:
-        case C_ERR_RTR_DC_BUS_OV:
-        case C_ERR_RTR_WDOG_LAST_RESET:
-        case C_ERR_RTR_CONFIG_READ:
-        case C_ERR_RTR_UNDERVOLT_LOCKOUT:
-        case C_ERR_RTR_DESAT_FAULT:
-        case C_ERR_RTR_MOTOR_OVERSPEED:
-        case C_ERR_RTR_INIT_FAIL:
-        case C_ERR_RTR_MULTIPLE:
-        case C_ERR_RTR_UNKNOWN_ERROR:
-            throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
-            break;
-        // Emd of fallthrough
-
         case C_ERR_RTR_MOTOR_WDOG_TRIP:
             // Try to restart the motor a few times and then fail out
-            if (++motor_fault_cnt > RESTART_THRESHOLD) {
-                // throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
-            } else {
-                // throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
-            }
+            if (++motor_fault_cnt <= RESTART_THRESHOLD) {
+                Raise_Fault(m_err, handler_ReadTritium_HallError);
+            } 
             break;
 
         case C_ERR_RTR_HALL_SENSOR:
             // If it's purely a hall sensor error, try to restart the motor a few times and then
             // fail out
-            if (++hall_fault_cnt > RESTART_THRESHOLD) {
-                throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
-            } else {
-                throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_UNKNOWN_BPS);
-            }
+            if (++hall_fault_cnt <= RESTART_THRESHOLD) {
+                Raise_Fault(m_err, handler_ReadTritium_HallError);
+            } 
             break;
 
         default:
-            // Critical failure, we have a non readtritium error in readtritium somehow
-            throwTaskError(C_ERR_ILLEGAL_ERROR, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             break;
     }
+
+    Raise_Fault(m_err);
 }

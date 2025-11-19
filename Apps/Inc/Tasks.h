@@ -37,7 +37,7 @@
 /**
  * Priority Definitions
  */
-
+#define TASK_FAULT_HANDLER_PRIO        1
 #define TASK_INIT_PRIO                 2
 #define TASK_READ_TRITIUM_PRIO         3
 #define TASK_SEND_TRITIUM_PRIO         4
@@ -64,6 +64,7 @@
 #define TASK_DEBUG_DUMP_STACK_SIZE     DEFAULT_STACK_SIZE
 #define TASK_COMMAND_LINE_STACK_SIZE   DEFAULT_STACK_SIZE
 #define TASK_IO_STATE_STACK_SIZE       DEFAULT_STACK_SIZE
+#define TASK_FAULT_HANDLER_STACK_SIZE  DEFAULT_STACK_SIZE
 
 /**
  * Controls wide error enum.
@@ -71,7 +72,7 @@
 typedef enum {
     C_ERR_NONE = 0,
     // Read Tritium Errors
-    C_ERR_RTR_GENERIC,
+    //C_ERR_RTR_GENERIC,
     C_ERR_RTR_HARDWARE_OC,
     C_ERR_RTR_SOFTWARE_OC,
     C_ERR_RTR_DC_BUS_OV,
@@ -83,7 +84,7 @@ typedef enum {
     C_ERR_RTR_MOTOR_OVERSPEED,
     C_ERR_RTR_INIT_FAIL,
     C_ERR_RTR_MOTOR_WDOG_TRIP,
-    C_ERR_RTR_MULTIPLE,
+    //C_ERR_RTR_MULTIPLE,
     C_ERR_RTR_UNKNOWN_ERROR,
     // Send Tritium Errors
     C_ERR_STR_GENERIC,
@@ -112,6 +113,31 @@ typedef enum {
 
     NUM_CONTROLS_ERRORS
 } controls_error_e;
+
+//Error struct def for unified faults
+/**
+ * @brief Assert a task error by setting the location variable and optionally
+ * locking the scheduler, displaying a fault screen (if nonrecoverable), jumping
+ * to a callback function, and entering an infinite loop. Called by
+ * task-specific error-assertion functions that are also responsible for setting
+ * the error variable.
+ * @param error_code the enum for the specific error that happened
+ * @param is_evac_needed whether evac is required, it will be recommended regardless.
+ * error (NULL is permissible),
+ * @param lock_scheduler whether or not to lock the scheduler to ensure the
+ * error is handled immediately
+ * @param recovery whether or not to kill the motor, display the fault
+ * screen, and enter an infinite while loop
+ */
+typedef struct {
+    controls_error_e error_code;      // The specific error enum value
+    bool is_evac_needed;              // Whether evacuation (or immediate attention) is needed for this error
+    //callback_t error_callback;        // Optional callback function to handle additional error-specific behavior
+    error_scheduler_opt_e lock_scheduler; // Scheduler option, e.g., whether to lock the error scheduler or not
+    error_recovery_opt_e recovery;    // Recovery option, e.g., whether error is recoverable or non-recoverable
+    BPSFaultErr_e bps_err;            // Associated BPS fault type (if any)
+    const char* error_msg;            // Human-readable string describing the error
+} error_action_t;
 
 // Max buffer size for the error message string (dictated by the Nextion)
 #define ERRMSG_MAX_LEN 16
@@ -234,6 +260,10 @@ void Task_DebugDump(void *p_arg);
 void Task_CommandLine(void *p_arg);
 
 void Task_IOState(void *p_arg);
+
+void FaultHandlerTask(void *p_arg);
+
+void Raise_Fault(controls_error_e faultFlag);
 
 /**
  * TCBs
