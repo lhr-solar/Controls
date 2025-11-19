@@ -25,6 +25,8 @@
 #define MOTOR_ERROR_MASK    0x01FF
 #define MOTOR_LIMIT_MASK 0x7F
 
+#define RESET_ON_SWOC true
+
 uint16_t Motor_FaultBitmap = 0x0000;
 float Motor_RPM = 0;
 static float Motor_Velocity = 0;
@@ -34,6 +36,9 @@ static float Motor_BusCurrent = 0;
 #define MPH_CONVERSION      2.236936f // mph = m/s * MPH_CONVERSION
 
 static OS_TMR MotorWatchdog;
+
+/* Mutex for thread-safe access to Motor_Velocity */
+static OS_MUTEX Motor_Velocity_Mutex;
 
 // Function prototypes
 // static void assertTritiumError(tritium_error_code_t motor_err);
@@ -68,6 +73,14 @@ void Task_ReadTritium(void *p_arg) {
     CANDATA_t dataBuf = {0};
 
     static bool watchdogCreated = false;
+    static bool mutexCreated = false;
+
+    /* Initialize the velocity mutex on first task run */
+    if (!mutexCreated) {
+        OSMutexCreate(&Motor_Velocity_Mutex, "Motor Velocity Mutex", &err);
+        assertOSError(err);
+        mutexCreated = true;
+    }
 
     while (1) {
         ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
@@ -114,22 +127,30 @@ void Task_ReadTritium(void *p_arg) {
                     OSTmrStart(&MotorWatchdog, &err); // Reset the watchdog
                     assertOSError(err);
                     memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+                    
+                    /* Acquire mutex before writing Motor_Velocity */
+                    OSMutexPend(&Motor_Velocity_Mutex, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
+                    assertOSError(err);
                     memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+                    Motor_Velocity = *((float *)(&dataBuf.data[4]));
+                    OSMutexPost(&Motor_Velocity_Mutex, OS_OPT_POST_NONE, &err);
+                    assertOSError(err);
+                    /* Release mutex */
 
                     // Motor RPM is in bytes 0-3
                     Motor_RPM = *((float *)(&dataBuf.data[0]));
-
-                    // Car Velocity (in m/s) is in bytes 4-7
-                    Motor_Velocity = *((float *)(&dataBuf.data[4]));
 
                     float Car_Velocity = Motor_Velocity * MPH_CONVERSION; // Car vel is in mph
                     // Display can't take negative values, and reverse puts Car_Velocity in the negative
                     Car_Velocity = (Car_Velocity < 0) ? -Car_Velocity : Car_Velocity; 
 
+                    /*
                     // If the motor is above a certain velocity, scale the max current setpoint down
                     MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, 
                                            (Car_Velocity >= MOTOR_VELOCITY_SWOC_THRESHOLD) ? true : false, 
                                            false);
+
+                    */
 
                     // Round car velocity to the nearest integer
                     UpdateDisplay_SetVelocity((uint32_t)(Car_Velocity * 10.0f));
@@ -151,10 +172,13 @@ void Task_ReadTritium(void *p_arg) {
     }
 }
 
-static void restartMotorController(void) {
-    //CANDATA_t resetmsg = {0};
-    //resetmsg.ID = MOTOR_RESET;
-    //CANbus_Send(resetmsg, true, MOTORCAN);
+static void resetMotorController(void) {
+    CANDATA_t resetCmd = {
+        .ID = MOTOR_RESET,
+        .idx = 0,
+        .data = {0.0f}
+    };
+    CANbus_Send(resetCmd, true, MOTORCAN);
 }
 
 // Getter function for motor RPM
@@ -162,6 +186,20 @@ float Motor_RPM_Get() { return Motor_RPM; }
 
 // Getter function for motor velocity
 float Motor_Velocity_Get() { return Motor_Velocity; }
+
+// Getter function for motor velocity (thread-safe version)
+float Motor_Velocity_Get_Safe() {
+    OS_ERR err;
+    float velocity;
+    
+    OSMutexPend(&Motor_Velocity_Mutex, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
+    assertOSError(err);
+    velocity = Motor_Velocity;
+    OSMutexPost(&Motor_Velocity_Mutex, OS_OPT_POST_NONE, &err);
+    assertOSError(err);
+    
+    return velocity;
+}
 
 // Getter function for motor error
 uint16_t Motor_Error_Get() { return Motor_FaultBitmap; }
@@ -175,7 +213,7 @@ uint16_t Motor_Error_Get() { return Motor_FaultBitmap; }
  * @brief A callback function to be run by the main throwTaskError function for hall sensor errors
  * restart the motor if the number of hall errors is still less than the MOTOR_RESTART_THRESHOLD.
  */
-static inline void handler_ReadTritium_HallError(void) { restartMotorController(); }
+static inline void handler_ReadTritium_HallError(void) { resetMotorController(); }
 
 /**
  * @brief   Assert a Tritium error by checking Motor_FaultBitmap
@@ -186,17 +224,48 @@ static inline void handler_ReadTritium_HallError(void) { restartMotorController(
  * @param   motor_err Bitmap with motor error codes to check
  */
 void assertTritiumError(controls_error_e m_err) {
-    static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
+    // static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
     static uint8_t motor_fault_cnt = 0;
 
     switch (m_err) {
+        case C_ERR_NONE:
+            break;
+
+        // Start of fallthrough
+        case C_ERR_RTR_GENERIC:
+        case C_ERR_RTR_HARDWARE_OC:
+        case C_ERR_RTR_DC_BUS_OV:
+        case C_ERR_RTR_WDOG_LAST_RESET:
+        case C_ERR_RTR_CONFIG_READ:
+        case C_ERR_RTR_UNDERVOLT_LOCKOUT:
+        case C_ERR_RTR_DESAT_FAULT:
+        case C_ERR_RTR_MOTOR_OVERSPEED:
+        case C_ERR_RTR_HALL_SENSOR:
+        case C_ERR_RTR_INIT_FAIL:
+        case C_ERR_RTR_MULTIPLE:
+        case C_ERR_RTR_UNKNOWN_ERROR:
+            throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            break;
+
+        case C_ERR_RTR_SOFTWARE_OC:
+            // Try to restart the motor a few times and then fail out
+            if (++motor_fault_cnt > 1 || !RESET_ON_SWOC) {
+                throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            } else {
+                // set display limit to say "SWOC Restart"
+                UpdateDisplay_SetMotorLimit(1 << 7); // set SWOC limit bit
+                resetMotorController();
+            }
+            break;
+        // End of fallthrough
+
         case C_ERR_RTR_MOTOR_WDOG_TRIP:
             // Try to restart the motor a few times and then fail out
             if (++motor_fault_cnt <= RESTART_THRESHOLD) {
                 Raise_Fault(m_err, handler_ReadTritium_HallError);
             } 
             break;
-
+        /*
         case C_ERR_RTR_HALL_SENSOR:
             // If it's purely a hall sensor error, try to restart the motor a few times and then
             // fail out
@@ -204,6 +273,7 @@ void assertTritiumError(controls_error_e m_err) {
                 Raise_Fault(m_err, handler_ReadTritium_HallError);
             } 
             break;
+            */
 
         default:
             break;

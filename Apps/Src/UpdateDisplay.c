@@ -148,7 +148,10 @@ controls_error_e UpdateDisplay_SetMotorLimit(uint16_t motor_limit_flag){
     }
     else if((motor_limit_flag >> 6) & 0x01){
         str = "\"TEMPERATURE\"";
+    } else if ((motor_limit_flag >> 7) & 0x01) {
+        str = "\"SWOC_RESTART\"";
     }
+    
     motor_limit_msg.args->str=str;
     Display_Send(motor_limit_msg);
     return C_ERR_NONE;

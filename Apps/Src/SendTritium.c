@@ -35,6 +35,8 @@
 
  // #define USING_PROFINITY
 
+#include <math.h>
+
  #define NEXT_STATES_LENGTH 128
 
  #define BRAKE_THRESH 42
@@ -549,6 +551,33 @@ float mapToPercent(uint8_t input, uint8_t in_min, uint8_t in_max, uint8_t out_mi
     }
 }
 
+#define SWOC_LIMIT
+
+typedef struct {
+    float speed_mph;
+    uint8_t max_percent;
+} swoc_threshold_t;
+
+static const swoc_threshold_t swoc_thresholds[] = {
+    {10.0f, 80},
+    {17.0f, 75},
+    {20.0f, 70},
+    {23.0f, 60},
+    {25.0f, 50},
+    {28.5f, 45}
+};
+
+static uint8_t getSpeedDependentPower(float speed_mph){
+    uint8_t cap = CURRENT_SP_MAX;
+    size_t i;
+    for (i = 0; i < (sizeof(swoc_thresholds) / sizeof(swoc_thresholds[0])); ++i) {
+        if (speed_mph >= swoc_thresholds[i].speed_mph) {
+            cap = swoc_thresholds[i].max_percent;
+        }
+    }
+    return cap;
+}
+
 // Task (main loop)
 
 /**
@@ -567,31 +596,6 @@ void Task_SendTritium(void *p_arg) {
 
     // By default assume we are below the motor swoc threshold at startup
     MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, true, false);
-
-    //Not done yet need to update variables and make callbacks...
-
-    //This is from ADC what do I check?
-    OSTmrCreate(
-        &canWatchTimer, "Pedals Input",
-        CAN_WATCH_TMR_DLY_TMR_TS, // Initial delay equal to the period since 0 doesn't seem to work
-        CAN_WATCH_TMR_DLY_TMR_TS, OS_OPT_TMR_PERIODIC, callbackCANWatchdog, NULL, &err);
-    assertOSError(err);
-
-    // Start CAN Watchdog timer
-    OSTmrStart(&canWatchTimer, &err);
-    assertOSError(err);
-
-    //Is something else already checking this?
-    OSTmrCreate(
-        &prechargeCanWatchTimer, "BPS CAN",
-        CAN_WATCH_TMR_DLY_TMR_TS, // Initial delay equal to the period since 0 doesn't seem to work
-        CAN_WATCH_TMR_DLY_TMR_TS, OS_OPT_TMR_PERIODIC, callbackCANWatchdog, NULL, &err);
-    assertOSError(err);
-    
-
-    OSTmrStart(&prechargeCanWatchTimer, &err);
-    assertOSError(err);
-
 
     while (1) {
 #ifdef TASK_PROFILER
@@ -633,9 +637,9 @@ void Task_SendTritium(void *p_arg) {
             //     resetAccelPercent = 0;
             // }
 
-        //     err = MotorStatus_Wait(MOTOR_SWOC_THRESHOLD, !OS_FLAG_BLOCKING);
-        //     maxCurrentPercentage = (err == OS_ERR_NONE) ? SWOC_CURRENT_SP_MAX : CURRENT_SP_MAX;
-        //     // The motor is going fast enough where you want to scale the max current setpoint to prevent SWOC
+            err = MotorStatus_Wait(MOTOR_SWOC_THRESHOLD, !OS_FLAG_BLOCKING);
+            maxCurrentPercentage = (err == OS_ERR_NONE) ? SWOC_CURRENT_SP_MAX : CURRENT_SP_MAX;
+            // The motor is going fast enough where you want to scale the max current setpoint to prevent SWOC
 
         //     switch (gear) {
         //         case DASH_FWD:
