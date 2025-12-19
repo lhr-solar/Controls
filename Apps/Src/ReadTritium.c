@@ -234,7 +234,6 @@ void assertTritiumError(controls_error_e m_err) {
         // Start of fallthrough
         case C_ERR_RTR_GENERIC:
         case C_ERR_RTR_HARDWARE_OC:
-        case C_ERR_RTR_SOFTWARE_OC:
         case C_ERR_RTR_DC_BUS_OV:
         case C_ERR_RTR_WDOG_LAST_RESET:
         case C_ERR_RTR_CONFIG_READ:
