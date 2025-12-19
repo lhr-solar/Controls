@@ -11,7 +11,6 @@
         GEAR(DASH_NEU), \
         GEAR(DASH_FWD), \
         GEAR(DASH_REV), \
-        GEAR(DASH_INIT), \
 
 typedef enum {
     DASH_GEAR_FAULT_ERROR = -1,
