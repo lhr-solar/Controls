@@ -13,8 +13,8 @@
 
 #include "BSP_CAN.h"
 
-#define CARCAN CAN_1 //convenience aliases for the CANBuses
-#define MOTORCAN CAN_3
+#define CARCAN car //convenience aliases for the CANBuses
+#define MOTORCAN motor
 
 /**
  * This enum is used to signify the ID of the message you want to send. 
@@ -35,9 +35,11 @@ typedef enum {
 	SUPPLEMENTAL_VOLTAGE 			= 0x10B,
     VOLTAGE_SUMMARY                 = 0x10D,
     TEMPERATURE_SUMMARY             = 0x10E,
+	BPS_FAULT_STATE					= 0x10F,
 	MOTOR_DRIVE 					= 0x221,
 	MOTOR_POWER						= 0x222,
-	MOTOR_RESET 					= 0x223,
+	MOTOR_RESET 					= 0x223,	
+	MOTOR_IDENTIFICATION			= 0x240,
 	MOTOR_STATUS 					= 0x241,
 	MC_BUS 							= 0x242,
 	VELOCITY 						= 0x243,
@@ -45,12 +47,20 @@ typedef enum {
 	VOLTAGE_VEC 					= 0x245,
 	CURRENT_VEC 					= 0x246,
 	BACKEMF 						= 0x247,
+	FIFTEN_RAIL_VOL					= 0x248,
+	THREE_RAIL_VOL					= 0x249,
 	TEMPERATURE 					= 0x24B,
+	DSP_TEMP						= 0x24C,
 	ODOMETER_AMPHOURS 				= 0x24E,
 	ARRAY_CONTACTOR_STATE_CHANGE 	= 0x24F,
     SLIP_SPEED                      = 0x257,
+	CONTACTOR_SENSE                 = 0x400,
+	PRECHARGE_TIMEOUT               = 0x401,
 	CONTROL_MODE                    = 0x580,
     IO_STATE 						= 0x581,
+    CONTROLS_FAULT_MSG              = 0x583,
+	MOTOR_CONTROLLER_SAFE			= 0x584,
+	PEDALS_RAW_VOLTAGE				= 0x585,
 	MAX_CAN_ID
 } CANId_t;
 
@@ -90,10 +100,10 @@ typedef struct {
 
 /**
  * @brief   Initializes the CAN system for a given bus
- * @param   bus The bus to initialize. You can either use CAN_1, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
+ * @param   bus The bus to initialize. You can either use CAN_2, CAN_3, or the convenience macros CARCAN and MOTORCAN. CAN2 will not be supported.
  * @param   idWhitelist A list of CAN IDs that we want to receive. If NULL, we will receive all messages.
  * @param   idWhitelistSize The size of the whitelist.
- * @return  ERROR if bus != CAN1 or CAN3, SUCCESS otherwise
+ * @return  ERROR if bus != CAN2 or CAN3, SUCCESS otherwise
  */
 ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize);
 
@@ -107,6 +117,16 @@ ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize
 ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
 
 /**
+ * @brief   Transmits data onto the CANbus during a fault state without using any semaphore or mutex calls. 
+ * Used when the scheduler is locked and sends continuously until it is successful.
+ * Transmits up to 8 bytes at a time. If more is necessary, please use an IDX message.
+ * @param 	CanData 	The data to be transmitted
+ * @param  	bus			The bus to transmit on. This should be either CARCAN or MOTORCAN.
+ * @return  ERROR if the data wasn't sent due to an invalid ID
+ */
+ErrorStatus CANbus_Send_Faultstate(CANDATA_t CanData, CAN_t bus);
+
+/**
  * @brief   Reads a CAN message from the CAN hardware and returns it to the provided pointers.
  * @param   data 		pointer to where to store the CAN id of the received msg
  * @param   blocking 	Whether or not this read should be a blocking read
@@ -114,6 +134,16 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus);
  * @returns ERROR if read failed, SUCCESS otherwise
  */
 ErrorStatus CANbus_Read(CANDATA_t* data, bool blocking, CAN_t bus);
+
+/**
+ * @brief   Reads a CAN message from the CAN hardware during a fault state without any RTOS calls
+ * @param   data 		pointer to where to store the CAN id of the received msg
+ * @param   blocking 	Whether or not this read should be a blocking read
+ * @param   bus 		The bus to use. This should either be CARCAN or MOTORCAN.
+ * @returns ERROR if read failed, SUCCESS otherwise
+ */
+ErrorStatus CANbus_Read_FaultState(CANDATA_t* MsgContainer, CAN_t bus);
+
 
 #endif
 

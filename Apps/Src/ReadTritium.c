@@ -5,135 +5,204 @@
  *
  */
 
-#include "ReadTritium.h"
-#include "CANbus.h"
-#include "UpdateDisplay.h"
-#include "SendCarCAN.h"
 #include "os_cfg_app.h"
-#include <string.h>
+
+#include "CANbus.h"
+
+#include "ReadTritium.h"
+#include "SendCarCAN.h"
+#include "Tasks.h"
+#include "UpdateDisplay.h"
+#include "StatusLeds.h"
 
 // status limit flag masks
-#define MASK_MOTOR_TEMP_LIMIT (1 << 6) // check if motor temperature is limiting the motor
-#define MAX_CAN_LEN 8
-#define RESTART_THRESHOLD 3	 // Number of times to restart before asserting a nonrecoverable error
-#define MOTOR_TIMEOUT_SECS 1 // Timeout for several missed motor messages
-#define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
+// #define MASK_MOTOR_TEMP_LIMIT (1 << 6) // check if motor temperature is limiting the motor
+// #define MAX_CAN_LEN           8
 
-tritium_error_code_t Motor_FaultBitmap = T_NONE; // initialized to no error, changed when the motor asserts an error
-static float Motor_RPM = 0;
+#define RESTART_THRESHOLD   3 // Number of times to restart before asserting a nonrecoverable error
+#define MOTOR_TIMEOUT_SECS  1 // Timeout for several missed motor messages
+#define MOTOR_TIMEOUT_TICKS (MOTOR_TIMEOUT_SECS * OS_CFG_TMR_TASK_RATE_HZ)
+#define MOTOR_ERROR_MASK    0x01FF
+#define MOTOR_LIMIT_MASK 0x7F
+
+#define RESET_ON_SWOC true
+
+uint16_t Motor_FaultBitmap = 0x0000;
+float Motor_RPM = 0;
 static float Motor_Velocity = 0;
 static float Motor_BusVoltage = 0;
 static float Motor_BusCurrent = 0;
 
-CANDATA_t motorstatusmsg = {0};
+#define MPH_CONVERSION      2.236936f // mph = m/s * MPH_CONVERSION
 
 static OS_TMR MotorWatchdog;
 
+/* Mutex for thread-safe access to Motor_Velocity */
+static OS_MUTEX Motor_Velocity_Mutex;
+
 // Function prototypes
-static void assertTritiumError(tritium_error_code_t motor_err);
+// static void assertTritiumError(tritium_error_code_t motor_err);
 
 // Callback for motor watchdog
-static void motorWatchdog(void *tmr, void *p_arg)
-{
-	// Attempt to restart 3 times, then fail
-	assertTritiumError(T_MOTOR_WATCHDOG_TRIP);
+static void motorWatchdog(void *tmr, void *p_arg) {
+    // Attempt to restart 3 times, then fail
+    assertTritiumError(C_ERR_RTR_MOTOR_WDOG_TRIP);
 }
 
-void Task_ReadTritium(void *p_arg)
-{
-	OS_ERR err;
-	CANDATA_t dataBuf = {0};
+static controls_error_e convert_motorfault_to_error(void) {
+    if (Motor_FaultBitmap == 0) return C_ERR_NONE;
 
-	static bool watchdogCreated = false;
+    // Check if more than 1 bit is flipped
+    if (Motor_FaultBitmap & (Motor_FaultBitmap - 1)) return C_ERR_RTR_MULTIPLE;
 
-	while (1)
-	{
-		ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
+    if (Motor_FaultBitmap & (1 << 0)) return C_ERR_RTR_HARDWARE_OC;
+    if (Motor_FaultBitmap & (1 << 1)) return C_ERR_RTR_SOFTWARE_OC;
+    if (Motor_FaultBitmap & (1 << 2)) return C_ERR_RTR_DC_BUS_OV;
+    if (Motor_FaultBitmap & (1 << 3)) return C_ERR_RTR_HALL_SENSOR;
+    if (Motor_FaultBitmap & (1 << 4)) return C_ERR_RTR_WDOG_LAST_RESET;
+    if (Motor_FaultBitmap & (1 << 5)) return C_ERR_RTR_CONFIG_READ;
+    if (Motor_FaultBitmap & (1 << 6)) return C_ERR_RTR_UNDERVOLT_LOCKOUT;
+    if (Motor_FaultBitmap & (1 << 7)) return C_ERR_RTR_DESAT_FAULT;
+    if (Motor_FaultBitmap & (1 << 8)) return C_ERR_RTR_MOTOR_OVERSPEED;
 
-		if (status == SUCCESS)
-		{
-			if (!watchdogCreated)
-			{ // Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
-				OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS, MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
-				assertOSError(err);
-
-				OSTmrStart(&MotorWatchdog, &err);
-				assertOSError(err);
-
-				watchdogCreated = true;
-			}
-
-			switch (dataBuf.ID)
-			{
-			case MC_BUS:
-			{
-				Motor_BusVoltage = *((float *)&dataBuf.data[0]);
-				Motor_BusCurrent = *((float *)&dataBuf.data[4]);
-
-				UpdateDisplay_SetMCVoltage(Motor_BusVoltage * 10);
-				UpdateDisplay_SetMCCurrent(Motor_BusCurrent * 10);
-			}
-			case MOTOR_STATUS:
-			{
-				// motor status error flags is in bytes 4-5
-				Motor_FaultBitmap = (*((uint16_t *)(&dataBuf.data[4])) & 0x1FE); // Storing error flags into Motor_FaultBitmap
-				motorstatusmsg = dataBuf;
-
-				assertTritiumError(Motor_FaultBitmap);
-				break;
-			}
-
-			case VELOCITY:
-			{
-				OSTmrStart(&MotorWatchdog, &err); // Reset the watchdog
-				assertOSError(err);
-				memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
-				memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
-
-				// Motor RPM is in bytes 0-3
-				Motor_RPM = *((float *)(&dataBuf.data[0]));
-
-				// Car Velocity (in m/s) is in bytes 4-7
-				Motor_Velocity = *((float *)(&dataBuf.data[4]));
-				float Car_Velocity = Motor_Velocity * 1000;
-
-				Car_Velocity = (Car_Velocity * 223694) / 10000000;
-
-				UpdateDisplay_SetVelocity(Car_Velocity);
-			}
-
-			case TEMPERATURE:
-			{
-				UpdateDisplay_SetHeatSinkTemp(*(float *)(&dataBuf.data[4]));
-			}
-
-			default:
-			{
-				break; // for cases not handled currently
-			}
-			}
-
-			SendCarCAN_Put(dataBuf); // Forward message on CarCAN for telemetry
-		}
-	}
+    return C_ERR_RTR_UNKNOWN_ERROR; // Current error matches no known error
 }
 
-static void restartMotorController(void)
-{
-	CANDATA_t resetmsg = {0};
-	resetmsg.ID = MOTOR_RESET;
-	CANbus_Send(resetmsg, true, MOTORCAN);
+void Task_ReadTritium(void *p_arg) {
+    OS_ERR err;
+    CANDATA_t dataBuf = {0};
+
+    static bool watchdogCreated = false;
+    static bool mutexCreated = false;
+
+    /* Initialize the velocity mutex on first task run */
+    if (!mutexCreated) {
+        OSMutexCreate(&Motor_Velocity_Mutex, "Motor Velocity Mutex", &err);
+        assertOSError(err);
+        mutexCreated = true;
+    }
+
+    while (1) {
+        ErrorStatus status = CANbus_Read(&dataBuf, true, MOTORCAN);
+        // An error in the can read but not an os error, signifies that the recv queue is empty
+
+        if (status == SUCCESS) {
+            // Timer doesn't seem to trigger without initial delay? Might be an RTOS bug
+            if (!watchdogCreated) {
+                OSTmrCreate(&MotorWatchdog, "Motor watchdog", MOTOR_TIMEOUT_TICKS,
+                            MOTOR_TIMEOUT_TICKS, OS_OPT_TMR_PERIODIC, motorWatchdog, NULL, &err);
+                assertOSError(err);
+
+                OSTmrStart(&MotorWatchdog, &err);
+                assertOSError(err);
+
+                watchdogCreated = true;
+            }
+
+            switch (dataBuf.ID) {
+                case MC_BUS: {
+                    Motor_BusVoltage = *((float *)&dataBuf.data[0]);
+                    Motor_BusCurrent = *((float *)&dataBuf.data[4]);
+
+                    UpdateDisplay_SetMCVoltage(Motor_BusVoltage * 10);
+                    UpdateDisplay_SetMCCurrent(Motor_BusCurrent * 10);
+                    break;
+                }
+                
+                case MOTOR_STATUS: {
+                    // motor status error flags is in bytes 4-5
+                    Motor_FaultBitmap = (*((uint16_t *)(&dataBuf.data[2])) & MOTOR_ERROR_MASK);
+                    controls_error_e motor_error = convert_motorfault_to_error();
+                    if(motor_error != C_ERR_NONE){
+                        assertTritiumError(motor_error);
+                    }
+                    
+					// If none of the bits are set, then it will display None
+					uint16_t Motor_LimitBitmap = (*((uint16_t *)(&dataBuf.data[0])) & MOTOR_LIMIT_MASK);
+					UpdateDisplay_SetMotorLimit(Motor_LimitBitmap);
+                    break;
+                }
+
+                case VELOCITY: {
+                    OSTmrStart(&MotorWatchdog, &err); // Reset the watchdog
+                    assertOSError(err);
+                    memcpy(&Motor_RPM, &dataBuf.data[0], sizeof(float));
+                    
+                    /* Acquire mutex before writing Motor_Velocity */
+                    OSMutexPend(&Motor_Velocity_Mutex, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
+                    assertOSError(err);
+                    memcpy(&Motor_Velocity, &dataBuf.data[4], sizeof(float));
+                    Motor_Velocity = *((float *)(&dataBuf.data[4]));
+                    OSMutexPost(&Motor_Velocity_Mutex, OS_OPT_POST_NONE, &err);
+                    assertOSError(err);
+                    /* Release mutex */
+
+                    // Motor RPM is in bytes 0-3
+                    Motor_RPM = *((float *)(&dataBuf.data[0]));
+
+                    float Car_Velocity = Motor_Velocity * MPH_CONVERSION; // Car vel is in mph
+                    // Display can't take negative values, and reverse puts Car_Velocity in the negative
+                    Car_Velocity = (Car_Velocity < 0) ? -Car_Velocity : Car_Velocity; 
+
+                    /*
+                    // If the motor is above a certain velocity, scale the max current setpoint down
+                    MotorStatus_ModifyBits(MOTOR_SWOC_THRESHOLD, 
+                                           (Car_Velocity >= MOTOR_VELOCITY_SWOC_THRESHOLD) ? true : false, 
+                                           false);
+
+                    */
+
+                    // Round car velocity to the nearest integer
+                    UpdateDisplay_SetVelocity((uint32_t)(Car_Velocity * 10.0f));
+                    break;
+                }
+
+                case TEMPERATURE: {
+                    UpdateDisplay_SetHeatSinkTemp(*(float *)(&dataBuf.data[4]));
+                    break;
+                }
+
+                default: {
+                    break; // for cases not handled currently
+                }
+            }
+
+            SendCarCAN_Put(dataBuf); // Forward message on CarCAN for telemetry
+        }
+    }
 }
 
-float Motor_RPM_Get()
-{ // getter function for motor RPM
-	return Motor_RPM;
+static void resetMotorController(void) {
+    CANDATA_t resetCmd = {
+        .ID = MOTOR_RESET,
+        .idx = 0,
+        .data = {0.0f}
+    };
+    CANbus_Send(resetCmd, true, MOTORCAN);
 }
 
-float Motor_Velocity_Get()
-{ // getter function for motor velocity
-	return Motor_Velocity;
+// Getter function for motor RPM
+float Motor_RPM_Get() { return Motor_RPM; }
+
+// Getter function for motor velocity
+float Motor_Velocity_Get() { return Motor_Velocity; }
+
+// Getter function for motor velocity (thread-safe version)
+float Motor_Velocity_Get_Safe() {
+    OS_ERR err;
+    float velocity;
+    
+    OSMutexPend(&Motor_Velocity_Mutex, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
+    assertOSError(err);
+    velocity = Motor_Velocity;
+    OSMutexPost(&Motor_Velocity_Mutex, OS_OPT_POST_NONE, &err);
+    assertOSError(err);
+    
+    return velocity;
 }
+
+// Getter function for motor error
+uint16_t Motor_Error_Get() { return Motor_FaultBitmap; }
 
 /**
  * Error handler functions
@@ -144,55 +213,75 @@ float Motor_Velocity_Get()
  * @brief A callback function to be run by the main throwTaskError function for hall sensor errors
  * restart the motor if the number of hall errors is still less than the MOTOR_RESTART_THRESHOLD.
  */
-static inline void handler_ReadTritium_HallError(void)
-{
-	restartMotorController();
-}
+static inline void handler_ReadTritium_HallError(void) { resetMotorController(); }
 
 /**
  * @brief   Assert a Tritium error by checking Motor_FaultBitmap
  * and asserting the error with its handler callback if one exists.
- *  Can result in restarting the motor (for hall sensor errors while less than MOTOR_RESTART_THRESHOLD)
- * or locking the scheduler and entering a nonrecoverable fault (all other cases)
+ *  Can result in restarting the motor (for hall sensor errors while less than
+ * MOTOR_RESTART_THRESHOLD) or locking the scheduler and entering a nonrecoverable fault (all other
+ * cases)
  * @param   motor_err Bitmap with motor error codes to check
  */
-static void assertTritiumError(tritium_error_code_t motor_err)
-{
-	static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
-	static uint8_t motor_fault_cnt = 0;
+void assertTritiumError(controls_error_e m_err) {
+    // static uint8_t hall_fault_cnt = 0; // trip counter, doesn't ever reset
+    static uint8_t motor_fault_cnt = 0;
 
-	Error_ReadTritium = (error_code_t)motor_err; // Store error codes for inspection info
-	if (motor_err == T_NONE || motor_err == T_WATCHDOG_LAST_RESET_ERR)
-		return; // No error, return
-				// NOTE: If we had >1 recoverable errors,
-				// Hall sensor error is the only recoverable error, so any other error          // make sure a combination of them wouldn't
-				// or combination of errors includes at least one that is nonrecoverable        // accidentally fall into this nonrecoverable bucket
-	if (motor_err != T_HALL_SENSOR_ERR && motor_err != T_MOTOR_WATCHDOG_TRIP)
-	{
-		// Assert a nonrecoverable error with no callback function- nonrecoverable will kill the motor and infinite loop
-		throwTaskError(Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
-		return;
-	}
+    switch (m_err) {
+        case C_ERR_NONE:
+            break;
 
-	// If it's purely a hall sensor error, try to restart the motor a few times and then fail out
+        // Start of fallthrough
+        case C_ERR_RTR_GENERIC:
+        case C_ERR_RTR_HARDWARE_OC:
+        case C_ERR_RTR_DC_BUS_OV:
+        case C_ERR_RTR_WDOG_LAST_RESET:
+        case C_ERR_RTR_CONFIG_READ:
+        case C_ERR_RTR_UNDERVOLT_LOCKOUT:
+        case C_ERR_RTR_DESAT_FAULT:
+        case C_ERR_RTR_MOTOR_OVERSPEED:
+        case C_ERR_RTR_HALL_SENSOR:
+        case C_ERR_RTR_INIT_FAIL:
+        case C_ERR_RTR_MULTIPLE:
+        case C_ERR_RTR_UNKNOWN_ERROR:
+            throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            break;
 
-	if (motor_err == T_HALL_SENSOR_ERR && ++hall_fault_cnt > RESTART_THRESHOLD)
-	{ // Threshold has been exceeded
-		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
-		throwTaskError(Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
-		return;
-	}
+        case C_ERR_RTR_SOFTWARE_OC:
+            // Try to restart the motor a few times and then fail out
+            if (++motor_fault_cnt > 1 || !RESET_ON_SWOC) {
+                throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            } else {
+                // set display limit to say "SWOC Restart"
+                UpdateDisplay_SetMotorLimit(1 << 7); // set SWOC limit bit
+                resetMotorController();
+            }
+            break;
+        // End of fallthrough
 
-	// try to restart the motor a few times and then fail out
-	if (motor_err == T_MOTOR_WATCHDOG_TRIP && ++motor_fault_cnt > RESTART_THRESHOLD)
-	{
-		// Assert a nonrecoverable error that will kill the motor, display a fault screen, and infinite loop
-		throwTaskError(Error_ReadTritium, NULL, OPT_LOCK_SCHED, OPT_NONRECOV);
-		return;
-	}
+        case C_ERR_RTR_MOTOR_WDOG_TRIP:
+            // Try to restart the motor a few times and then fail out
+            if (++motor_fault_cnt > RESTART_THRESHOLD) {
+                // throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            } else {
+                // throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            }
+            break;
+        /*
+        case C_ERR_RTR_HALL_SENSOR:
+            // If it's purely a hall sensor error, try to restart the motor a few times and then
+            // fail out
+            if (++hall_fault_cnt > RESTART_THRESHOLD) {
+                throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            } else {
+                throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_UNKNOWN_BPS);
+            }
+            break;
+            */
 
-	// Threshold hasn't been exceeded, so assert a recoverable error with the motor restart callback function
-	throwTaskError(Error_ReadTritium, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_RECOV);
-
-	Error_ReadTritium = T_NONE; // Clear the error after handling it
+        default:
+            // Critical failure, we have a non readtritium error in readtritium somehow
+            throwTaskError(C_ERR_ILLEGAL_ERROR, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            break;
+    }
 }

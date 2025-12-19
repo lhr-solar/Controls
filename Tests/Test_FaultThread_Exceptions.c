@@ -146,8 +146,8 @@ void OSErrorTask(void* arg) {
 
 // Helper function to see the state of the contactors
 static void print_Contactors() {
-    printf("\n\rMotor PBC: %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
-    printf("\n\rArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
+    printf("\n\rMotor PBC: %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false));
+    printf("\n\rArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false));
 }
 
 
@@ -288,8 +288,8 @@ void Task_ManagerTask(void* arg) {
                 OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
                 checkOSError(err);
                 printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-                printf("\n\rArray PBC %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
-                printf("\n\rMotor PBC %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                printf("\n\rArray PBC %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false));
+                printf("\n\rMotor PBC %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false));
             }
 
             print_Contactors();
@@ -314,8 +314,8 @@ void Task_ManagerTask(void* arg) {
                 OSTimeDlyHMSM(0, 0, 0, 400, OS_OPT_TIME_HMSM_STRICT, &err);
                 checkOSError(err);
                 printf("\n\rChargeEnable: %d", ChargeEnable_Get());
-                printf("\n\rArray PBC %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
-                printf("\n\rMotor PBC %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                printf("\n\rArray PBC %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false));
+                printf("\n\rMotor PBC %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false));
             } 
 
             // Check the contactors
@@ -504,7 +504,7 @@ void createOSErrorTask(void) {
 int main(void) {
 
     OS_ERR err;
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
 
     OSInit(&err);
 

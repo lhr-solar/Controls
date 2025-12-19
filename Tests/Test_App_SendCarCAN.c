@@ -280,8 +280,8 @@ void Task1(void *arg)
 
         // Print IO State
         printf("\n\r---- IO State ----");
-        printf("\n\rAccelerator: %d", Pedals_Read(ACCELERATOR));
-        printf("\n\rBrake: %d", Pedals_Read(BRAKE));
+        printf("\n\rAccelerator: %u", Pedals_Read(ACCELERATOR));
+        printf("\n\rBrake: %u", Pedals_Read(BRAKE));
         uint8_t pins = 0;
         for(pin_t pin = 0; pin < NUM_PINS; pin++){
             bool pinState = Minions_Read(pin);
@@ -290,7 +290,7 @@ void Task1(void *arg)
         printf("\n\rMinions: %x", pins);
         uint8_t contactors = 0;
         for(contactor_t contactor = 0; contactor < NUM_CONTACTORS; contactor++){
-            bool contactorState = (Contactors_Get(contactor) == ON) ? true : false;
+            bool contactorState = (Contactors_Get(contactor, false) == ON) ? true : false;
             contactors |= contactorState << contactor;
         }
         printf("\n\rContactors: %x", contactors);
@@ -308,7 +308,7 @@ int main(void)
     OS_CPU_SysTickInit(SystemCoreClock / (CPU_INT32U)OSCfg_TickRate_Hz);
 
     CPU_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     Pedals_Init();
     CANbus_Init(CARCAN, NULL, NUM_CARCAN_FILTERS);      // CarCAN filter list is normally (CANId_t*)carCANFilterList
     CANbus_Init(MOTORCAN, NULL, NUM_MOTORCAN_FILTERS);  // but for testing, we'd like to receive all messages

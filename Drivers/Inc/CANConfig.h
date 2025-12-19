@@ -14,8 +14,8 @@
 /**
  * Filter Lists for CarCAN and MotorCAN
 */
-#define NUM_CARCAN_FILTERS 7
-#define NUM_MOTORCAN_FILTERS 7
+#define NUM_CARCAN_FILTERS 10
+#define NUM_MOTORCAN_FILTERS 9
 extern  CANId_t carCANFilterList[NUM_CARCAN_FILTERS];
 extern  CANId_t motorCANFilterList[NUM_MOTORCAN_FILTERS];
 

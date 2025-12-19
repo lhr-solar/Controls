@@ -4,8 +4,12 @@
  * @brief 
  * 
  */
+
+
+
 #include "CANbus.h"
 #include "config.h"
+#include "DebugIO.h"
 #include "os.h"
 #include "Tasks.h"
 #include "CANConfig.h"
@@ -38,18 +42,18 @@ void CANbus_TxHandler(CAN_t bus)
 }
 
 //wrapper functions for the interrupt customized for each bus
-void CANbus_TxHandler_1(){
-    CANbus_TxHandler(CAN_1);
+void CANbus_TxHandler_2(){
+    CANbus_TxHandler(motor);
 }
 
-void CANbus_RxHandler_1(){
-    CANbus_RxHandler(CAN_1);
+void CANbus_RxHandler_2(){
+    CANbus_RxHandler(motor);
 }
 void CANbus_TxHandler_3(){
-    CANbus_TxHandler(CAN_3);
+    CANbus_TxHandler(car);
 }
 void CANbus_RxHandler_3(){
-    CANbus_RxHandler(CAN_3);
+    CANbus_RxHandler(car);
 }
 
 /**
@@ -70,28 +74,46 @@ static CANId_t* whitelist_validator(CANId_t* wlist, uint8_t size){
     return wlist;
 }
 
+/**
+ * @brief Check that the CAN message is valid by comparing it with the CAN lookup table
+ * @param msginfo the address of the can info struct to populate from the table
+ * @param CanData the CAN data used to index into the table
+ * @return ERROR if the ID is invalid; SUCCESS otherwise
+ */
+static ErrorStatus get_CANLUT_entry(CANLUT_T* msginfo, CANDATA_t CanData) {
+    //error check the id
+    if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+
+    *msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    
+    if(msginfo->size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
+
+    return SUCCESS;
+}
+
 ErrorStatus CANbus_Init(CAN_t bus, CANId_t* idWhitelist, uint8_t idWhitelistSize)
 {
     // initialize CAN mailbox semaphore to 3 for the 3 CAN mailboxes that we have
     // initialize tx
     OS_ERR err;
     
-    OSMutexCreate(&(CANbus_TxMutex[bus]), (bus == CAN_1 ? "CAN TX Lock 1":"CAN TX Lock 3"), &err);
+    OSMutexCreate(&(CANbus_TxMutex[bus]), (bus == motor ? "CAN TX Lock 2":"CAN TX Lock 3"), &err);
     assertOSError(err);
 
-    OSMutexCreate(&(CANbus_RxMutex[bus]), (bus == CAN_1 ? "CAN RX Lock 1":"CAN RX Lock 3"), &err);
+    OSMutexCreate(&(CANbus_RxMutex[bus]), (bus == motor ? "CAN RX Lock 2":"CAN RX Lock 3"), &err);
     assertOSError(err);
 
-    OSSemCreate(&(CANMail_Sem4[bus]), (bus == CAN_1 ? "CAN Mailbox Semaphore 1":"CAN Mailbox Semaphore 3"), 3, &err); // there's 3 hardware mailboxes on the board, so 3 software mailboxes
+    OSSemCreate(&(CANMail_Sem4[bus]), (bus == motor ? "CAN Mailbox Semaphore 2":"CAN Mailbox Semaphore 3"), 3, &err); // there's 3 hardware mailboxes on the board, so 3 software mailboxes
     assertOSError(err);
 
-    OSSemCreate(&(CANBus_ReceiveSem4[bus]), (bus == CAN_1 ? "CAN Received Msg Queue Ctr 1":"CAN Received Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
+    OSSemCreate(&(CANBus_ReceiveSem4[bus]), (bus == motor ? "CAN Received Msg Queue Ctr 2":"CAN Received Msg Queue Ctr 3"), 0, &err); // create a mailbox counter to hold the messages in as they come in
     assertOSError(err);
 
     idWhitelist = whitelist_validator(idWhitelist, idWhitelistSize);
-    if(bus==CAN_1){
-        BSP_CAN_Init(bus,&CANbus_RxHandler_1,&CANbus_TxHandler_1, (uint16_t*)idWhitelist, idWhitelistSize);
-    } else if (bus==CAN_3){
+
+    if(bus==motor){
+        BSP_CAN_Init(bus,&CANbus_RxHandler_2,&CANbus_TxHandler_2, (uint16_t*)idWhitelist, idWhitelistSize);
+    } else if (bus==car){
         BSP_CAN_Init(bus,&CANbus_RxHandler_3,&CANbus_TxHandler_3, (uint16_t*)idWhitelist, idWhitelistSize);
     } else {
         return ERROR;
@@ -105,13 +127,16 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
     CPU_TS timestamp;
     OS_ERR err;
 
-    //error check the id
-    if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+    CANLUT_T msginfo;
 
-    CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    // //error check the id
+    // if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+
+    // CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
     
-    if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
+    // if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
 
+    if (get_CANLUT_entry(&msginfo, CanData) == ERROR){return ERROR;}
 
     // make sure that Can mailbox is available
     if (blocking == CAN_BLOCKING)
@@ -179,6 +204,93 @@ ErrorStatus CANbus_Send(CANDATA_t CanData,bool blocking, CAN_t bus)
     return retval;
 }
 
+/**
+ * CANbus_Send but without the mutex calls since the scheduler is locked when
+ * in a fault state
+ */
+ErrorStatus CANbus_Send_Faultstate(CANDATA_t CanData, CAN_t bus)
+{
+    // //error check the id
+    // if(CanData.ID >= MAX_CAN_ID){return ERROR;}
+
+    // CANLUT_T msginfo = CANLUT[CanData.ID]; //lookup msg information in table
+    
+    // if(msginfo.size == 0){return ERROR;} //if they passed in an invalid id, it will be zero
+
+    CANLUT_T msginfo;
+
+    if (get_CANLUT_entry(&msginfo, CanData) == ERROR){return ERROR;}
+
+    uint8_t txdata[8];
+    if(msginfo.idxEn){ //first byte of txData should be the idx value
+        memcpy(txdata, &CanData.idx, 1);
+        memcpy(&(txdata[sizeof(CanData.idx)]), &CanData.data, msginfo.size);
+    } else { //non-idx case
+        memcpy(txdata, &CanData.data, msginfo.size);
+    }
+
+    
+    while (BSP_CAN_Write(bus, CanData.ID, txdata, 
+        (msginfo.idxEn ? msginfo.size+sizeof(CanData.idx) : msginfo.size)) == ERROR);
+
+    return SUCCESS;
+}
+
+static ErrorStatus CANbus_Read_ValidateID(CANDATA_t* MsgContainer, uint32_t id){
+    //error check the id
+    MsgContainer->ID = (CANId_t) id;
+    if(MsgContainer->ID >= MAX_CAN_ID){
+        MsgContainer = NULL;
+        return ERROR;
+    }
+    CANLUT_T entry = CANLUT[MsgContainer->ID]; //lookup msg information in table
+    if(entry.size == 0){
+        MsgContainer = NULL;
+        return ERROR;
+    } //if they passed in an invalid id, it will be zero
+    return SUCCESS;
+}
+
+static ErrorStatus CANbus_ValidateData(CANDATA_t* MsgContainer){
+    CANLUT_T entry = CANLUT[MsgContainer->ID];
+    // Reverify valid ID and entry
+    if(entry.size == 0){
+        MsgContainer = NULL;
+        return ERROR;
+    }
+    
+    //search LUT for id to populate idx and trim data
+    if(entry.idxEn==true){
+        MsgContainer->idx = MsgContainer->data[0];
+        memmove( // Can't use memcpy, as memory regions overlap
+            MsgContainer->data,
+            &(MsgContainer->data[1]),
+            7 // max size of data (8) - size of idx byte (1)
+        );
+    }
+    return SUCCESS;
+}
+
+ErrorStatus CANbus_Read_FaultState(CANDATA_t* MsgContainer, CAN_t bus){
+
+    // Get a message from the canbus
+    uint32_t id;
+    ErrorStatus status = BSP_CAN_Read(bus, &id, MsgContainer->data);
+    // There is no message in the bus
+    if(status != SUCCESS){
+        return ERROR;
+    }
+    status = CANbus_Read_ValidateID(MsgContainer, id);
+    if(status != SUCCESS){
+        return ERROR;
+    }
+    status = CANbus_ValidateData(MsgContainer);
+    if(status != SUCCESS){
+        return ERROR;
+    }
+    return SUCCESS;
+}
+
 ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
 {
     CPU_TS timestamp;
@@ -233,27 +345,14 @@ ErrorStatus CANbus_Read(CANDATA_t* MsgContainer, bool blocking, CAN_t bus)
     if(status == ERROR){
         return ERROR;
     }
-
-    //error check the id
-    MsgContainer->ID = (CANId_t) id;
-    if(MsgContainer->ID >= MAX_CAN_ID){
-        MsgContainer = NULL;
+    
+    status = CANbus_Read_ValidateID(MsgContainer, id);
+    if(status != SUCCESS){
         return ERROR;
     }
-    CANLUT_T entry = CANLUT[MsgContainer->ID]; //lookup msg information in table
-    if(entry.size == 0){
-        MsgContainer = NULL;
+    status = CANbus_ValidateData(MsgContainer);
+    if(status != SUCCESS){
         return ERROR;
-    } //if they passed in an invalid id, it will be zero
-    
-    //search LUT for id to populate idx and trim data
-    if(entry.idxEn==true){
-        MsgContainer->idx = MsgContainer->data[0];
-        memmove( // Can't use memcpy, as memory regions overlap
-            MsgContainer->data,
-            &(MsgContainer->data[1]),
-            7 // max size of data (8) - size of idx byte (1)
-        );
     }
     return status;
 }

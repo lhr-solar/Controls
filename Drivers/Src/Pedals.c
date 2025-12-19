@@ -1,63 +1,67 @@
 /**
  * @copyright Copyright (c) 2018-2023 UT Longhorn Racing Solar
  * @file Pedals.c
- * @brief 
- * 
+ * @brief
+ *
  */
 
+#include "BSP_ADC.h"
+
 #include "Pedals.h"
-#include "stm32f4xx_gpio.h"
+#include "daybreak_pins.h"
+// #include "stm32f4xx_gpio.h"
 
 // Constants used to tune the pedals
 // Indexed using pedal_t
 // Refine in testing
 static const int16_t LowerBound[NUMBER_OF_PEDALS] = {
-    500, // Accelerator lower bound
-    2100, // Brake lower bound
+    990,   // Accelerator lower bound
+    1500,   // Brake lower bound
 };
 
 static const int16_t UpperBound[NUMBER_OF_PEDALS] = {
-    1100, // Accelerator upper bound
-    3300, // Brake upper bound
+    3200, // Accelerator upper bound
+    2350, // Brake upper bound
 };
 
 /**
- * @brief   Initializes the brake and accelerator by using the 
+ * @brief   Initializes the brake and accelerator by using the
  *          BSP_ADC_Init function with parameters ACCELERATOR
- *          and BRAKE 
+ *          and BRAKE
  * @param   None
  * @return  None
  */
-void Pedals_Init(){
+void Pedals_Init() {
     BSP_ADC_Init();
-    BSP_GPIO_Init(PORTC, GPIO_Pin_15, INPUT, true);
+    BSP_GPIO_Init(BRAKE_SW_PORT, BRAKE_SW, INPUT, true);
 }
 
 /**
- * @brief   Fetches the millivoltage value of the potentiomenter as provided 
+ * @brief   Fetches the millivoltage value of the potentiomenter as provided
  *          by the ADC channel of the requested pedal (Accelerator or Brake),
- *          converts it to a percentage of the total distance pressed using 
+ *          converts it to a percentage of the total distance pressed using
  *          data from calibration testing, and returns it
  * @param   pedal_t, ACCELERATOR or BRAKE as defined in enum
  * @return  percent amount the pedal has been pressed in percentage
  */
-int8_t Pedals_Read(pedal_t pedal){
-    if (pedal == BRAKE){
-        return (BSP_GPIO_Read_Pin(PORTC, GPIO_Pin_15))?100:0;
-    }
-    
+uint8_t Pedals_Read(pedal_t pedal) {
     if (pedal >= NUMBER_OF_PEDALS) return 0;
-    int16_t millivoltsPedal = (int16_t) BSP_ADC_Get_Millivoltage(pedal);
 
-    int8_t percentage = 0;
-    
-    if (millivoltsPedal >= LowerBound[pedal]) {
-        percentage = (int8_t) ( (int32_t) (millivoltsPedal - LowerBound[pedal]) * 100 /
-         (UpperBound[pedal] - LowerBound[pedal]));
-    }
+    int16_t mv = (int16_t)BSP_ADC_Get_Millivoltage(pedal);
+    int16_t percentage = (mv - LowerBound[pedal]) * 100 / (UpperBound[pedal] - LowerBound[pedal]);
 
-    if (percentage > 100) return 100;
-    if (percentage <   0) return   0;
+    if (percentage < 0) percentage = 0;
+    if (percentage > 100) percentage = 100;
 
-    return percentage;
+    return (uint8_t)(100 - percentage);
+}
+
+/**
+ * @brief   Fetches the millivoltage value of the potentiomenter as provided
+ *          by the ADC channel of the requested pedal (Accelerator or Brake),
+ * @param   pedal_t, ACCELERATOR or BRAKE as defined in enum
+ * @return  Direct analog voltage the pedal outputs
+ */
+int16_t Pedals_rawVoltage(pedal_t pedal){
+    return (int16_t)BSP_ADC_Get_Millivoltage(pedal);
 }

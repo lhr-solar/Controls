@@ -7,7 +7,6 @@
 #include "BSP_UART.h"
 #include "CANbus.h"
 #include "Contactors.h"
-#include "Minions.h"
 #include "Pedals.h"
 
 #define MAX_BUFFER_SIZE	128	// defined from BSP_UART_Read function
@@ -28,10 +27,6 @@ static bool cmd_Contactors_Get(void);
 
 static bool cmd_Contactors_Set(void);
 
-static bool cmd_Minions_Read(void);
-
-static bool cmd_Minions_Write(void);
-
 static bool cmd_Pedals_Read(void);
 
 
@@ -41,8 +36,6 @@ const struct Command cmdline_commands[] = {
 	{.name = "CANbus_Read", .action = cmd_CANbus_Read},
 	{.name = "Contactors_Get", .action = cmd_Contactors_Get},
 	{.name = "Contactors_Set", .action = cmd_Contactors_Set},
-	{.name = "Minions_Read", .action = cmd_Minions_Read},
-	{.name = "Minions_Write", .action = cmd_Minions_Write},
 	{.name = "Pedals_Read", .action = cmd_Pedals_Read},
 	{.name = NULL, .action = NULL}
 };
@@ -67,8 +60,6 @@ char *help = {
 	"contactor\n\r"
 	"	Contactors_Disable  array_c/array_p/motor_c - Disables the determined\n\r"
 	"contactor\n\r"
-	"	Minions_Read 'input' - Reads the current status of the input\n\r"
-	"	Minions_Write `output` on/off - Sets the current state of the output\n\r"
 	"	Pedals_Read accel/brake - Reads the current status of the pedal\n\r"
 };
 
@@ -104,7 +95,7 @@ void Task_CommandLine(void* p_arg) {
 	
 	while(1){
 		printf("> ");
-		BSP_UART_Read(UART_2, input);
+		BSP_UART_Read(USB, input);
 		printf("\n\r");
 
 		if (!executeCommand(input)) { // If command failed, error
@@ -151,10 +142,10 @@ static bool cmd_CANbus_Send(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = CAN_1;
+		bus = motor;
 	}
 	else if(strcmp(busInput, "car") == 0){
-		bus = CAN_3;
+		bus = car;
 	}
 	else{
 		return false;
@@ -186,10 +177,10 @@ static bool cmd_CANbus_Read(void){
 	char *busInput = strtok_r(NULL, " ", &save);
 	CAN_t bus;
 	if(strcmp(busInput, "motor") == 0){
-		bus = CAN_1;
+		bus = motor;
 	}
 	else if(strcmp(busInput, "car") == 0){
-		bus = CAN_3;
+		bus = car;
 	}
 	else{
 		return false;
@@ -220,7 +211,7 @@ static bool cmd_Contactors_Get(void){
 		return false;
 	}
 
-	printf("%s state: %s\n\r", contactorInput, Contactors_Get(contactor) == ON ? "on" : "off");
+	printf("%s state: %s\n\r", contactorInput, Contactors_Get(contactor, false) == ON ? "on" : "off");
 	return true;
 }
 
@@ -269,68 +260,6 @@ static bool cmd_Contactors_Set(void){
 	return true;
 }
 
-static bool cmd_Minions_Read(void){
-	char *pinInput = strtok_r(NULL, " ", &save);
-	pin_t pin;
-	if(strcmp(pinInput, "ign_1") == 0){
-		pin = IGN_1;
-	}
-	else if(strcmp(pinInput, "ign_2") == 0){
-		pin = IGN_2;
-	}
-	else if(strcmp(pinInput, "regen_sw") == 0){
-		pin = REGEN_SW;
-	}
-	else if(strcmp(pinInput, "for_sw") == 0){
-		pin = FOR_SW;
-	}
-	else if(strcmp(pinInput, "rev_sw") == 0){
-		pin = REV_SW;
-	}
-	else if(strcmp(pinInput, "cruz_en") == 0){
-		pin = CRUZ_EN;
-	}
-	else if(strcmp(pinInput, "cruz_st") == 0){
-		pin = CRUZ_ST;
-	}
-	else if(strcmp(pinInput, "brakelight") == 0){
-		pin = BRAKELIGHT;
-	}
-	else{
-		return false;
-	}
-
-	printf("%s is %s\n\r", pinInput, Minions_Read(pin) ? "on" : "off");
-	return true;
-}
-
-static bool cmd_Minions_Write(void){
-	char *pinInput = strtok_r(NULL, " ", &save);
-	pin_t pin;
-	if(strcmp(pinInput, "brakelight") == 0){
-		pin = BRAKELIGHT;
-	}
-	else{
-		return false;
-	}
-
-	char *stateInput = strtok_r(NULL, " ", &save);
-	bool state;
-	if(strcmp(stateInput, "on") == 0){
-		state = true;
-	}
-	else if(strcmp(stateInput, "off") == 0){
-		state = false;
-	}
-	else{
-		return false;
-	}
-
-	Minions_Write(pin, state);
-	printf("%s set to %s\n\r", pinInput, stateInput);
-	return true;
-}
-
 static bool cmd_Pedals_Read(void){
 	char *pedalInput = strtok_r(NULL, " ", &save);
 	pedal_t pedal;
@@ -344,6 +273,6 @@ static bool cmd_Pedals_Read(void){
 		return false;
 	}
 
-	printf("%s: %d\n\r", pedalInput, Pedals_Read(pedal));
+	printf("%s: %u\n\r", pedalInput, Pedals_Read(pedal));
 	return true;
 }

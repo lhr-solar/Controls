@@ -83,13 +83,13 @@ static void infoDump(){
     truthTableCounter++;
     /*updatePrechargeContactors();*/ // To run testfile: uncomment and add the updatePrechargeContactors function in the ReadCarCAN.h file
 
-    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == ON) ? "ON" : "OFF")); 
+    printf("\r\nArray Contactor          : %s", ((Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false) == ON) ? "ON" : "OFF")); 
     // printf("\r\nArray Ignition Status    : %s", ((ArrayIgnitionStatus_Get()) ? "ON" : "OFF"));
     // printf("\r\nCharge Message Saturation: %d", HVArrayMsgSaturation_Get());
     // printf("\r\nThreshold                : %s", ((HVArrayMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
     // printf("\r\nCharge Enable            : %s", (ChargeEnable_Get() ? "TRUE" : "FALSE"));   
 
-    printf("\r\nMotor Contactor          : %s", ((Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == ON) ? "ON" : "OFF"));
+    printf("\r\nMotor Contactor          : %s", ((Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false) == ON) ? "ON" : "OFF"));
     // printf("\r\nMotor Ignition Status    : %s", ((MotorControllerIgnition_Get()) ? "ON" : "OFF"));
     // printf("\r\nCharge Message Saturation: %d", PlusMinusMsgSaturation_Get());
     // printf("\r\nThreshold                : %s", ((PlusMinusMsgSaturation_Get() >= 7.5) ? "Threshold reached" : "Threshold not reached"));
@@ -125,7 +125,7 @@ static void turnIgnitionBoth(){
 static void sendArrayEnableMsg(uint8_t isIgnitionOn){
     printf("\n\r=========== Array Enable Msg Sent ===========");
     if(isIgnitionOn == 1){
-        while(!Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR)){
+        while(!Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, true)){
             CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN); 
             }   
      }else{
@@ -137,7 +137,7 @@ static void sendArrayEnableMsg(uint8_t isIgnitionOn){
 static void sendMotorControllerEnableMsg(uint8_t isIgnitionOn){
     printf("\n\r=========== Motor Controller Enable Msg Sent ===========");
     if(isIgnitionOn == SEND_UNTIL_MOTOR_CONT_ON){
-        while(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) != true){
+        while(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true) != true){
             CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN);      
         }
     }else{
@@ -155,12 +155,12 @@ static void sendEnableMsg(int isIgnitionOn){
     printf("\n\r=========== Enable Msg Sent ===========");
 
          if (isIgnitionOn == SEND_UNTIL_ARRAY_ON){
-            while(Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR) == false){
+            while(Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, true) == false){
                 CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
             }    
         }
         if(isIgnitionOn == SEND_UNTIL_MOTOR_CONT_ON){
-            while(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR) == false){
+            while(Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, true) == false){
                 CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); 
                 }     
 
@@ -191,7 +191,7 @@ void Task1(){
     CANbus_Init(CARCAN, NULL, 0);
     Display_Init();
     UpdateDisplay_Init();
-    BSP_UART_Init(UART_2);
+    BSP_UART_Init(USB);
     
     OSTaskCreate(
         (OS_TCB*)&ReadCarCAN_TCB,
@@ -331,8 +331,8 @@ void Task1(){
             #ifdef TEST_HARDWARE_HV_ARRAY_ON
                 while(1){
                     CANbus_Send(HV_Array_Msg, CAN_BLOCKING, CARCAN); // HV Array messages
-                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
-                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false));
+                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false));
                     printf("\r\n");
                     OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
                 }
@@ -341,8 +341,8 @@ void Task1(){
             #ifdef TEST_HARDWARE_HV_PLUS_MINUS_ON
                 while(1){
                     CANbus_Send(HV_MC_Msg, CAN_BLOCKING, CARCAN); // HV Motor Controller messages
-                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
-                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false));
+                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false));
                     printf("\r\n");
                     OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
                 }
@@ -351,8 +351,8 @@ void Task1(){
             #ifdef TEST_HARDWARE_HV_CONTACTORS_BOTH_ON
                 while(1){
                     CANbus_Send(HV_Enabled_Msg, CAN_BLOCKING, CARCAN); // HV Enable messages
-                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
-                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false));
+                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false));
                     printf("\r\n");
                     OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
                 }
@@ -361,8 +361,8 @@ void Task1(){
             #ifdef TEST_HARDWARE_HV_CONTACTORS_BOTH_OFF
                 while(1){
                     CANbus_Send(HV_Disable_Msg, CAN_BLOCKING, CARCAN); // Disable messages
-                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR));
-                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR));
+                    printf("\r\nArray PBC: %d", Contactors_Get(ARRAY_PRECHARGE_BYPASS_CONTACTOR, false));
+                    printf("\r\nMC PBC:    %d", Contactors_Get(MOTOR_CONTROLLER_PRECHARGE_BYPASS_CONTACTOR, false));
                     printf("\r\n");
                     OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &err);
                 }

@@ -48,7 +48,7 @@ int main() {
     while (1){
         MotorController_Drive((rand()/500),(rand()/500));
         bool check=MotorController_Read(&MotorControllerTest);
-        printf("Accelerator: %d, Brake:%d, MotorControllerBusRead:%d, MCB msg ID:%x, MCBmsg: %x,%x\r",Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE),check,MotorControllerTest.id,MotorControllerTest.firstNum,MotorControllerTest.secondNum);
+        printf("Accelerator: %u, Brake:%u, MotorControllerBusRead:%d, MCB msg ID:%x, MCBmsg: %x,%x\r",Pedals_Read(ACCELERATOR),Pedals_Read(BRAKE),check,MotorControllerTest.id,MotorControllerTest.firstNum,MotorControllerTest.secondNum);
         packet.speed = (rand() % 500) / 10.0;
         packet.cruiseEnabled = rand() % 2;
         packet.cruiseSet = rand() % 2;
