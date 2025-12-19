@@ -128,19 +128,18 @@ void Task_IOState(void *p_arg) {
  * @param  io_err error code to specify the issue encountered
  */
 void assertIOStateError(controls_error_e io_err) {
-    // switch (io_err) {
-    //     case C_ERR_NONE:
-    //         break;
+    switch (io_err) {
+        case C_ERR_NONE:
+            break;
 
-    //     case C_ERR_IOS_GENERIC:
-    //     case C_ERR_IOS_IGN_FAULT: // Reading != 1 ign state too many times. Set IGN to OFF and fault
-    //         throwTaskError(io_err, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
-    //         break;
+        case C_ERR_IOS_GENERIC:
+        case C_ERR_IOS_IGN_FAULT: // Reading != 1 ign state too many times. Set IGN to OFF and fault
+            throwTaskError(io_err, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            break;
 
-    //     default:
-    //         // Critical failure, we have a non sendtritium error in send tritium somehow
-    //         throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
-    //         break;
-    // }
-    throwTaskError(io_err);
+        default:
+            // Critical failure, we have a non sendtritium error in send tritium somehow
+            throwTaskError(C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            break;
+    }
 }

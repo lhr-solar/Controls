@@ -234,6 +234,7 @@ void assertTritiumError(controls_error_e m_err) {
         // Start of fallthrough
         case C_ERR_RTR_GENERIC:
         case C_ERR_RTR_HARDWARE_OC:
+        case C_ERR_RTR_SOFTWARE_OC:
         case C_ERR_RTR_DC_BUS_OV:
         case C_ERR_RTR_WDOG_LAST_RESET:
         case C_ERR_RTR_CONFIG_READ:
@@ -261,23 +262,27 @@ void assertTritiumError(controls_error_e m_err) {
 
         case C_ERR_RTR_MOTOR_WDOG_TRIP:
             // Try to restart the motor a few times and then fail out
-            if (++motor_fault_cnt <= RESTART_THRESHOLD) {
-                Raise_Fault(m_err, handler_ReadTritium_HallError);
-            } 
+            if (++motor_fault_cnt > RESTART_THRESHOLD) {
+                // throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            } else {
+                // throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            }
             break;
         /*
         case C_ERR_RTR_HALL_SENSOR:
             // If it's purely a hall sensor error, try to restart the motor a few times and then
             // fail out
-            if (++hall_fault_cnt <= RESTART_THRESHOLD) {
-                Raise_Fault(m_err, handler_ReadTritium_HallError);
-            } 
+            if (++hall_fault_cnt > RESTART_THRESHOLD) {
+                throwTaskError(m_err, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
+            } else {
+                throwTaskError(m_err, !EVAC_NEEDED, handler_ReadTritium_HallError, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_UNKNOWN_BPS);
+            }
             break;
             */
 
         default:
+            // Critical failure, we have a non readtritium error in readtritium somehow
+            throwTaskError(C_ERR_ILLEGAL_ERROR, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS);
             break;
     }
-
-    Raise_Fault(m_err);
 }

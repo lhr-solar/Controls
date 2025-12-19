@@ -35,7 +35,6 @@ OS_TCB SendCarCAN_TCB;
 OS_TCB DebugDump_TCB;
 OS_TCB CommandLine_TCB;
 OS_TCB IOState_TCB;
-OS_TCB FaultHandler_TCB;
 
 task_trace_t PrevTasks;
 
@@ -51,8 +50,6 @@ CPU_STK SendCarCAN_Stk[TASK_SEND_CAR_CAN_STACK_SIZE];
 CPU_STK DebugDump_Stk[TASK_DEBUG_DUMP_STACK_SIZE];
 CPU_STK CommandLine_Stk[TASK_COMMAND_LINE_STACK_SIZE];
 CPU_STK IOState_Stk[TASK_IO_STATE_STACK_SIZE];
-CPU_STK FaultHandler_Stk[TASK_IO_STATE_STACK_SIZE];
-
 
 /* Controls Fault Message bits */
 #define ANY_CONTROLS_FAULT_BIT     0x1 << 0 // 1 if any of the other bits are true
@@ -66,150 +63,65 @@ CPU_STK FaultHandler_Stk[TASK_IO_STATE_STACK_SIZE];
 
 #define FAULT_MSG_DELAY            1000000
 
-// /**
-//  * String array holding all the error message string for all application errors in the
-//  * controls code.
-//  *
-//  * If the `controls_error_e` enum is changed, this array should also be
-//  * modified accordingly. When the respective controls error is asserted, the corresponding
-//  * string will be displayed on the fault page, with the exception of the `C_ERR_RTR_MULTIPLE`
-//  * because in that case we want to see the bitmap.
-//  */
+/**
+ * String array holding all the error message string for all application errors in the
+ * controls code.
+ *
+ * If the `controls_error_e` enum is changed, this array should also be
+ * modified accordingly. When the respective controls error is asserted, the corresponding
+ * string will be displayed on the fault page, with the exception of the `C_ERR_RTR_MULTIPLE`
+ * because in that case we want to see the bitmap.
+ */
 
-// const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
-//     // Generic errors are placeholder errors for debugging purposes and should eventually
-//     // become individual errors themselves
+const char ERROR_MSGS[NUM_CONTROLS_ERRORS][ERRMSG_MAX_LEN] = {
+    // Generic errors are placeholder errors for debugging purposes and should eventually
+    // become individual errors themselves
 
-//     [C_ERR_NONE]                     = "\"N/A\"",           /* No error :) */
-//     // Read Tritium Errors
-//     [C_ERR_RTR_GENERIC]              = "\"RTR_GENERIC\"",   /* Generic placeholder error */
-//     [C_ERR_RTR_HARDWARE_OC]          = "\"MOT_HW_OC\"",
-//     [C_ERR_RTR_SOFTWARE_OC]          = "\"MOT_SW_OC\"",
-//     [C_ERR_RTR_DC_BUS_OV]            = "\"MOT_DC_BUS_OV\"",
-//     [C_ERR_RTR_HALL_SENSOR]          = "\"MOT_HALLSENSR\"",
-//     [C_ERR_RTR_WDOG_LAST_RESET]      = "\"MOT_DOG_LREST\"",
-//     [C_ERR_RTR_CONFIG_READ]          = "\"MOT_CONFIG_RD\"",
-//     [C_ERR_RTR_UNDERVOLT_LOCKOUT]    = "\"MOT_UNDERV_LK\"",
-//     [C_ERR_RTR_DESAT_FAULT]          = "\"MOT_DESAT_FLT\"",
-//     [C_ERR_RTR_MOTOR_OVERSPEED]      = "\"MOT_OVERSPEED\"",
-//     [C_ERR_RTR_INIT_FAIL]            = "\"RTR_INIT_FAIL\"", /* TODO: WHAT IS THIS?? */
-//     [C_ERR_RTR_MOTOR_WDOG_TRIP]      = "\"RTR_WDOG_TRIP\"",
-//     [C_ERR_RTR_MULTIPLE]             = "\"RTR_MULTI_ERR\"", /* Should never actually display this */
-//     // Send Tritium Errors
-//     [C_ERR_STR_GENERIC]              = "\"STR_GENERIC\"",   /* Generic placeholder error */
-//     [C_ERR_STR_GEAR_FAULT]           = "\"STR_GEAR_FLT\"",  /* Received multiple or no gear inputs */
-//     // Read Car CAN Errors
-//     [C_ERR_RCC_GENERIC]              = "\"RCC_GENERIC\"",   /* Generic placeholder error */
-//     [C_ERR_RCC_BPS_MISSED_MSG]       = "\"BPS_MISS\"",      /* Didn't receive a BPS msg in time */
-//     [C_ERR_RCC_PRECHARGE_MISSED_MSG] = "\"PRECHG_MISS\"",   /* Didn't receive prechrg msg in time */
-//     [C_ERR_RCC_BPS_TRIP]             = "\"BPS_TRIP\"",      /* Recieved a BPS trip msg */
-//     [C_ERR_RCC_ACTIVE_PRECHARGE_FLT] = "\"ACT_PRECH_FLT\"", /* Received active precharge fault */
-//     [C_ERR_RCC_PRECHARGE_TMOUT_MOT]  = "\"PRECH_MTOUT\"",   /* Received active precharge timeout fault for motor */
-//     [C_ERR_RCC_PRECHARGE_TMOUT_ARR]  = "\"PRECH_ARTOUT\"",  /* Received active precharge timeout fault for array */
-//     [C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT] = "\"PRECH_MSENSE\"", /* Received precharge motor sense fault */
-//     [C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT] = "\"PRECH_ASENSE\"", /* Received precharge array pre sense fault */
-//     [C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT] = "\"PRECH_MPSENSE\"", /* Received precharge motor pre sense fault */
+    [C_ERR_NONE]                     = "\"N/A\"",           /* No error :) */
+    // Read Tritium Errors
+    [C_ERR_RTR_GENERIC]              = "\"RTR_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_RTR_HARDWARE_OC]          = "\"MOT_HW_OC\"",
+    [C_ERR_RTR_SOFTWARE_OC]          = "\"MOT_SW_OC\"",
+    [C_ERR_RTR_DC_BUS_OV]            = "\"MOT_DC_BUS_OV\"",
+    [C_ERR_RTR_HALL_SENSOR]          = "\"MOT_HALLSENSR\"",
+    [C_ERR_RTR_WDOG_LAST_RESET]      = "\"MOT_DOG_LREST\"",
+    [C_ERR_RTR_CONFIG_READ]          = "\"MOT_CONFIG_RD\"",
+    [C_ERR_RTR_UNDERVOLT_LOCKOUT]    = "\"MOT_UNDERV_LK\"",
+    [C_ERR_RTR_DESAT_FAULT]          = "\"MOT_DESAT_FLT\"",
+    [C_ERR_RTR_MOTOR_OVERSPEED]      = "\"MOT_OVERSPEED\"",
+    [C_ERR_RTR_INIT_FAIL]            = "\"RTR_INIT_FAIL\"", /* TODO: WHAT IS THIS?? */
+    [C_ERR_RTR_MOTOR_WDOG_TRIP]      = "\"RTR_WDOG_TRIP\"",
+    [C_ERR_RTR_MULTIPLE]             = "\"RTR_MULTI_ERR\"", /* Should never actually display this */
+    // Send Tritium Errors
+    [C_ERR_STR_GENERIC]              = "\"STR_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_STR_GEAR_FAULT]           = "\"STR_GEAR_FLT\"",  /* Received multiple or no gear inputs */
+    // Read Car CAN Errors
+    [C_ERR_RCC_GENERIC]              = "\"RCC_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_RCC_BPS_MISSED_MSG]       = "\"BPS_MISS\"",      /* Didn't receive a BPS msg in time */
+    [C_ERR_RCC_PRECHARGE_MISSED_MSG] = "\"PRECHG_MISS\"",   /* Didn't receive prechrg msg in time */
+    [C_ERR_RCC_BPS_TRIP]             = "\"BPS_TRIP\"",      /* Recieved a BPS trip msg */
+    [C_ERR_RCC_ACTIVE_PRECHARGE_FLT] = "\"ACT_PRECH_FLT\"", /* Received active precharge fault */
+    [C_ERR_RCC_PRECHARGE_TMOUT_MOT]  = "\"PRECH_MTOUT\"",   /* Received active precharge timeout fault for motor */
+    [C_ERR_RCC_PRECHARGE_TMOUT_ARR]  = "\"PRECH_ARTOUT\"",  /* Received active precharge timeout fault for array */
+    [C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT] = "\"PRECH_MSENSE\"", /* Received precharge motor sense fault */
+    [C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT] = "\"PRECH_ASENSE\"", /* Received precharge array pre sense fault */
+    [C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT] = "\"PRECH_MPSENSE\"", /* Received precharge motor pre sense fault */
 
-//     // IO state Errors
-//     [C_ERR_IOS_GENERIC]              = "\"IOS_GENERIC\"",   /* Generic placeholder error */
-//     [C_ERR_IOS_IGN_FAULT]            = "\"IOS_IGN_FLT\"",   /* Ignition unstable for too long */
-//     // Update display errors
-//     [C_ERR_UPD_GENERIC]              = "\"UPD_GENERIC\"",   /* Generic placeholder error */
-//     [C_ERR_UPD_PARSE_COMPONENT]      = "\"UPD_PARSE_COM\"", /* Error in parsing a componenet */
-//     [C_ERR_UPD_DRIVER]               = "\"UPD_DRIVR_ERR\"", /* Error propogating from driver */
-//     // Special
-//     [C_ERR_GENERIC]                  = "\"GENERIC_ERROR\"", /* Generic placeholder error */
-//     [C_ERR_ILLEGAL_ERROR]            = "\"ILLEGAL_ERR\"",   /* Error thrown in illegal context */
-// };
-
-
-
-// static const error_action_t controls_error_actions[NUM_CONTROLS_ERRORS] = {
-//     { C_ERR_NONE, false, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "N/A" },
-//     { C_ERR_RTR_GENERIC, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_GENERIC" },
-//     { C_ERR_RTR_HARDWARE_OC, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_HW_OC" },
-//     { C_ERR_RTR_SOFTWARE_OC, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_SW_OC" },
-//     { C_ERR_RTR_DC_BUS_OV, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_DC_BUS_OV" },
-//     { C_ERR_RTR_HALL_SENSOR, !EVAC_NEEDED, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_UNKNOWN_BPS, "MOT_HALLSENSR" },
-//     { C_ERR_RTR_WDOG_LAST_RESET, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_DOG_LREST" },
-//     { C_ERR_RTR_CONFIG_READ, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_CONFIG_RD" },
-//     { C_ERR_RTR_UNDERVOLT_LOCKOUT, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_UNDERV_LK" },
-//     { C_ERR_RTR_DESAT_FAULT, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_DESAT_FLT" },
-//     { C_ERR_RTR_MOTOR_OVERSPEED, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_OVERSPEED" },
-//     { C_ERR_RTR_INIT_FAIL, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_INIT_FAIL" },
-//     { C_ERR_RTR_MOTOR_WDOG_TRIP, !EVAC_NEEDED, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_WDOG_TRIP" },
-//     { C_ERR_RTR_MULTIPLE, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_MULTI_ERR" },
-//     { C_ERR_RTR_UNKNOWN_ERROR, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_UNKNOWN_ERR" },
-//     { C_ERR_STR_GENERIC, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "STR_GENERIC" },
-//     { C_ERR_STR_GEAR_FAULT, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "STR_GEAR_FLT" },
-//     { C_ERR_RCC_GENERIC, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RCC_GENERIC" },
-//     { C_ERR_RCC_BPS_MISSED_MSG, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "BPS_MISS" },
-//     { C_ERR_RCC_PRECHARGE_MISSED_MSG, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "PRECHG_MISS" },
-//     { C_ERR_RCC_BPS_TRIP, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "BPS_TRIP" },
-//     { C_ERR_RCC_ACTIVE_PRECHARGE_FLT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "ACT_PRECH_FLT" },
-//     { C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "PRECH_MSENSE" },
-//     { C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "PRECH_ASENSE" },
-//     { C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "PRECH_MPSENSE" },
-//     { C_ERR_RCC_PRECHARGE_TMOUT_MOT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "PRECH_MTOUT" },
-//     { C_ERR_RCC_PRECHARGE_TMOUT_ARR, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, bps_err, "PRECH_ARTOUT" },
-//     { C_ERR_IOS_GENERIC, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "IOS_GENERIC" },
-//     { C_ERR_IOS_IGN_FAULT, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "IOS_IGN_FLT" },
-//     { C_ERR_UPD_GENERIC, false, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "UPD_GENERIC" },
-//     { C_ERR_UPD_PARSE_COMPONENT, false, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "UPD_PARSE_COM" },
-//     { C_ERR_UPD_DRIVER, false, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "UPD_DRIVR_ERR" },
-//     { C_ERR_GENERIC, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "GENERIC_ERROR" },
-//     { C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "ILLEGAL_ERR" }
-// };
-
-static const error_action_t controls_error_actions[NUM_CONTROLS_ERRORS] = {
-    { C_ERR_NONE, false, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "N/A" },
-    //{ C_ERR_RTR_GENERIC, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_GENERIC" },
-    { C_ERR_RTR_HARDWARE_OC, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_HW_OC" },
-    { C_ERR_RTR_SOFTWARE_OC, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_SW_OC" },
-    { C_ERR_RTR_DC_BUS_OV, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_DC_BUS_OV" },
-    { C_ERR_RTR_HALL_SENSOR, !EVAC_NEEDED, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_UNKNOWN_BPS, "MOT_HALLSENSR" },
-    { C_ERR_RTR_WDOG_LAST_RESET, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_DOG_LREST" },
-    { C_ERR_RTR_CONFIG_READ, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_CONFIG_RD" },
-    { C_ERR_RTR_UNDERVOLT_LOCKOUT, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_UNDERV_LK" },
-    { C_ERR_RTR_DESAT_FAULT, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_DESAT_FLT" },
-    { C_ERR_RTR_MOTOR_OVERSPEED, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "MOT_OVERSPEED" },
-    { C_ERR_RTR_INIT_FAIL, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_INIT_FAIL" },
-    { C_ERR_RTR_MOTOR_WDOG_TRIP, !EVAC_NEEDED, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_WDOG_TRIP" },
-    //{ C_ERR_RTR_MULTIPLE, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_MULTI_ERR" },
-    { C_ERR_RTR_UNKNOWN_ERROR, !EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RTR_UNKNOWN_ERR" },
-    { C_ERR_STR_GENERIC, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "STR_GENERIC" },
-    { C_ERR_STR_GEAR_FAULT, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "STR_GEAR_FLT" },
-    { C_ERR_RCC_GENERIC, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "RCC_GENERIC" },
-    { C_ERR_RCC_BPS_MISSED_MSG, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "BPS_MISS" },
-    { C_ERR_RCC_PRECHARGE_MISSED_MSG, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "PRECHG_MISS" },
-    { C_ERR_RCC_BPS_TRIP, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "BPS_TRIP" },
-    { C_ERR_RCC_ACTIVE_PRECHARGE_FLT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "ACT_PRECH_FLT" },
-    { C_ERR_RCC_PRECHARGE_MOT_SENSE_FLT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "PRECH_MSENSE" },
-    { C_ERR_RCC_PRECHARGE_ARR_PRE_SENSE_FLT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "PRECH_ASENSE" },
-    { C_ERR_RCC_PRECHARGE_MOT_PRE_SENSE_FLT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "PRECH_MPSENSE" },
-    { C_ERR_RCC_PRECHARGE_TMOUT_MOT, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "PRECH_MTOUT" },
-    { C_ERR_RCC_PRECHARGE_TMOUT_ARR, EVAC_NEEDED, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, NULL, "PRECH_ARTOUT" },
-    { C_ERR_IOS_GENERIC, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "IOS_GENERIC" },
-    { C_ERR_IOS_IGN_FAULT, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "IOS_IGN_FLT" },
-    { C_ERR_UPD_GENERIC, false, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "UPD_GENERIC" },
-    { C_ERR_UPD_PARSE_COMPONENT, false, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "UPD_PARSE_COM" },
-    { C_ERR_UPD_DRIVER, false, NULL, OPT_NO_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "UPD_DRIVR_ERR" },
-    { C_ERR_GENERIC, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "GENERIC_ERROR" },
-    { C_ERR_ILLEGAL_ERROR, false, NULL, OPT_LOCK_SCHED, OPT_NONRECOV, CAN_NONE_BPS, "ILLEGAL_ERR" }
+    // IO state Errors
+    [C_ERR_IOS_GENERIC]              = "\"IOS_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_IOS_IGN_FAULT]            = "\"IOS_IGN_FLT\"",   /* Ignition unstable for too long */
+    // Update display errors
+    [C_ERR_UPD_GENERIC]              = "\"UPD_GENERIC\"",   /* Generic placeholder error */
+    [C_ERR_UPD_PARSE_COMPONENT]      = "\"UPD_PARSE_COM\"", /* Error in parsing a componenet */
+    [C_ERR_UPD_DRIVER]               = "\"UPD_DRIVR_ERR\"", /* Error propogating from driver */
+    // Special
+    [C_ERR_GENERIC]                  = "\"GENERIC_ERROR\"", /* Generic placeholder error */
+    [C_ERR_ILLEGAL_ERROR]            = "\"ILLEGAL_ERR\"",   /* Error thrown in illegal context */
 };
-
-
-
 
 // Synchronization-protected event flag group signaling BPS_SAFE, if BPS
 // has been checked, & motor ready to run status
 OS_FLAG_GRP BPS_Motor_Status_Flags;
-
-//Event flag for all the fault handling, will run unified fault function when any bit is set
-OS_FLAG_GRP FaultFlagGroup;
-
-//global for storing the bps_err since they may want to pass it in
-BPSFaultErr_e bps_err;
 
 // The defined bits in the flag group
 const uint8_t ALLOWED_BITS = BPS_SAFE | BPS_CHECKED | MOTOR_SAFE_TO_RUN | MOTOR_SWOC_THRESHOLD;
@@ -292,32 +204,122 @@ static void setDisplayErrorScreen(controls_error_e error_code, bool is_evac_need
 #define ERROR_CAN_DELAY_MS 500
 #define ERROR_DISPLAY_UPDATE_COUNT (1000 / ERROR_CAN_DELAY_MS)
 
+/**
+ * @brief Assert a task error by setting the location variable and optionally
+ * locking the scheduler, displaying a fault screen (if nonrecoverable), jumping
+ * to a callback function, and entering an infinite loop. Called by
+ * task-specific error-assertion functions that are also responsible for setting
+ * the error variable.
+ * @param error_code the enum for the specific error that happened
+ * @param is_evac_needed whether evac is required, it will be recommended regardless.
+ * @param error_callback a callback function to a handler for that specific
+ * error (NULL is permissible),
+ * @param lock_scheduler whether or not to lock the scheduler to ensure the
+ * error is handled immediately
+ * @param recovery whether or not to kill the motor, display the fault
+ * screen, and enter an infinite while loop
+ */
+void throwTaskError(controls_error_e error_code, bool is_evac_needed, callback_t error_callback,
+                    error_scheduler_opt_e lock_scheduler, error_recovery_opt_e recovery, BPSFaultErr_e bps_err) {
+
+    if (error_code == C_ERR_NONE) return;
+
+    // Set the motor safe to run bit to false and don't make it a scheduling point
+    // This avoids context switching while we're in an error
+    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, !OS_FLAG_SCHED_POINT);
+
+    OS_ERR err;
+
+    Status_Leds_Write(CONTROLS_FAULT_LED, ON);
 
 
- //Overloading
-void throwTaskError(controls_error_e error_code){
-    throwTaskError(error_code, NULL, NULL);
-}
+    // Prevent other tasks from interrupting the handling of important
+    // (includes all nonrecoverable) errors
+    if (lock_scheduler == OPT_LOCK_SCHED || recovery == OPT_NONRECOV) {
+        OSSchedLock(&err);
+        assertOSError(err);
+    }
 
- //Overloading
-void throwTaskError(controls_error_e error_code, callback_t error_callback){
-    throwTaskError(error_code, error_callback, NULL);
-}
+    if (recovery == OPT_NONRECOV) {
+        MotorContactor_EmergencyDisable();
+        setDisplayErrorScreen(error_code, is_evac_needed, bps_err);
+    }
 
-void throwTaskError(controls_error_e error_code, BPSFaultErr_e bps_err_given) {
-    throwTaskError(error_code, NULL, bps_err_given);
-}
-
-
-
-void throwTaskError(controls_error_e error_code, callback_t error_callback, BPSFaultErr_e bps_err_given) {
-    if(error_callback){
+    // Run a handler for this error if specified
+    if (error_callback != NULL) {
         error_callback();
     }
 
-    bps_err = bps_err_given; //Initializing the global  (couldn't think of a better way)
+    // Send Controls fault message over Car CAN
+    CANDATA_t faultmsg = {0};
+    faultmsg.ID        = CONTROLS_FAULT_MSG;
+    faultmsg.data[0]   = get_fault_bits(error_code, OS_ERR_NONE);
 
-    Raise_Fault(error_code);
+    CANDATA_t motormsg = {0};
+    motormsg.ID        = MOTOR_CONTROLLER_SAFE;
+
+    motormsg.data[0]   = 0;
+    motormsg.data[0] |= 0x2; // Bit 1 of motor message
+
+    CANbus_Send_Faultstate(faultmsg, CARCAN);
+    CANbus_Send_Faultstate(motormsg, CARCAN);
+
+    // set motor and array positions off
+    CANDATA_t iostatemsg = {0};
+    iostatemsg.ID = IO_STATE;
+    iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
+    iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
+    
+    CANDATA_t dataBuf = {0};
+    CANId_t motorCanID; 
+
+    // Send the motormsg fault message 10 times at the start of fault state than never again
+    // We only have 3 Hw TX mailboxes for CarCAN, so cannot send > 3 messages on CAN at once
+    for(volatile uint8_t i = 0; i < 10; i++){
+       delay_ms(100); 
+        CANbus_Send_Faultstate(motormsg, CARCAN);
+
+    }
+    Status_Leds_Write(DASH_HEARTBEAT_LED, OFF);
+
+    // Turn on left and right lights
+    Lights_Write(RIGHT_LIGHT, ON);
+    Lights_Write(LEFT_LIGHT, ON);
+
+    if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
+        while (1) {
+
+            delay_ms(500);
+            Status_Leds_Toggle(CONTROLS_FAULT_LED);
+            Status_Leds_Toggle(DASH_HEARTBEAT_LED);
+            CANbus_Send_Faultstate(faultmsg, CARCAN);
+            CANbus_Send_Faultstate(iostatemsg, CARCAN);
+            ErrorStatus status = CANbus_Read_FaultState(&dataBuf, MOTORCAN);
+
+            // There is a message on the motor canbus
+            if(status == SUCCESS){
+                // Forward messages from motorcan to carcan
+                motorCanID = dataBuf.ID;
+                if(motorCanID == MOTOR_STATUS){
+                    CANbus_Send_Faultstate(dataBuf, CARCAN);
+                }
+            }
+        }
+    }
+    else{
+
+        Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
+
+        // Only unlock the scheduler if we locked it
+        if(lock_scheduler == OPT_LOCK_SCHED){
+            OSSchedUnlock(&err);
+            // Don't err out if scheduler is still locked because of a timer
+            // callback; but we don't plan to lock more than one level deep
+            if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) {
+                assertOSError(err);
+            }
+        }
+    }
 }
 
 /**
@@ -353,12 +355,6 @@ void TaskSwHook_Init(void) {
 void BPSMotorFlags_Init(void) {
     OS_ERR err;
     OSFlagCreate(&BPS_Motor_Status_Flags, "BPS_Motor_Status_Flags", 0, &err);
-    assertOSError(err);
-}
-
-void FaultFlags_Init(void){
-    OS_ERR err;
-    OSFlagCreate(&FaultFlagGroup, "Fault_Status_Flags", 0, &err);
     assertOSError(err);
 }
 
@@ -432,151 +428,3 @@ bool MotorStatus_ModifyBits(uint8_t bits, bool state, bool allow_sched) {
 
     return (flags & bits) == (state ? bits : 0);
 }
-
-//Function for updating the OS flag group
-void Raise_Fault(controls_error_e faultFlag){
-    OS_ERR err;
-
-    OSFlagPost(&FaultFlagGroup,
-               FaultFlagGroup | (1 << faultFlag),
-               OS_OPT_POST_FLAG_SET,
-               &err);
-}
-
-//If we want to clear something like SWOC, probably won't be used much tho
-void Clear_Fault(controls_error_e faultFlag){
-    OS_ERR err;
-
-    OSFlagPost(&FaultFlagGroup,
-               FaultFlagGroup | (1 << faultFlag),
-               OS_OPT_POST_FLAG_CLR,
-               &err);
-}
-
-
-void FaultHandlerTask(void *p_arg)
-{
-    OS_ERR err;
-    CPU_TS ts; //timestamp, if we want to use it
-
-    OS_FLAGS tempFlags = 0;
-
-    for(int i = 0; i < min(NUM_CONTROLS_ERRORS, 32); i++){
-        tempFlags |= (1 << i);
-    }
-
-    while (1) {
-        OS_FLAGS flags = OSFlagPend(&FaultFlagGroup,
-                                    tempFlags,
-                                    0,   // no timeout
-                                    OS_OPT_PEND_FLAG_SET_ANY |
-                                    OS_OPT_PEND_BLOCKING |
-                                    OS_OPT_PEND_FLAG_CONSUME,
-                                    &ts,
-                                    &err);
-
-    error_action_t error_data = controls_error_actions[err];
-    
-    if (error_data.error_code == C_ERR_NONE) return;
-
-    // Set the motor safe to run bit to false and don't make it a scheduling point
-    // This avoids context switching while we're in an error
-    MotorStatus_ModifyBits(MOTOR_SAFE_TO_RUN, false, !OS_FLAG_SCHED_POINT);
-
-    OS_ERR err;
-
-    Status_Leds_Write(CONTROLS_FAULT_LED, ON);
-
-
-    // Prevent other tasks from interrupting the handling of important
-    // (includes all nonrecoverable) errors
-    if (error_data.lock_scheduler == OPT_LOCK_SCHED || error_data.recovery == OPT_NONRECOV) {
-        OSSchedLock(&err);
-        assertOSError(err);
-    }
-
-    if (error_data.recovery == OPT_NONRECOV) {
-        MotorContactor_EmergencyDisable();
-        setDisplayErrorScreen(error_data.error_code, error_data.is_evac_needed, bps_err);
-    }
-
-    // Run a handler for this error if specified
-    if (error_callback != NULL) {
-        error_callback();
-    }
-
-    // Send Controls fault message over Car CAN
-    CANDATA_t faultmsg = {0};
-    faultmsg.ID        = CONTROLS_FAULT_MSG;
-    faultmsg.data[0]   = get_fault_bits(error_data.error_code, OS_ERR_NONE);
-
-    CANDATA_t motormsg = {0};
-    motormsg.ID        = MOTOR_CONTROLLER_SAFE;
-
-    motormsg.data[0]   = 0;
-    motormsg.data[0] |= 0x2; // Bit 1 of motor message
-
-    CANbus_Send_Faultstate(faultmsg, CARCAN);
-    CANbus_Send_Faultstate(motormsg, CARCAN);
-
-    // set motor and array positions off
-    CANDATA_t iostatemsg = {0};
-    iostatemsg.ID = IO_STATE;
-    iostatemsg.data[0] |= SWITCH_BITMAP_IGN_1_ARRAY(0);
-    iostatemsg.data[0] |= SWITCH_BITMAP_IGN_2_MOTOR(0);
-    
-    CANDATA_t dataBuf = {0};
-    CANId_t motorCanID; 
-
-    // Send the motormsg fault message 10 times at the start of fault state than never again
-    // We only have 3 Hw TX mailboxes for CarCAN, so cannot send > 3 messages on CAN at once
-    for(volatile uint8_t i = 0; i < 10; i++){
-       delay_ms(100); 
-        CANbus_Send_Faultstate(motormsg, CARCAN);
-
-    }
-    Status_Leds_Write(DASH_HEARTBEAT_LED, OFF);
-
-    // Turn on left and right lights
-    Lights_Write(RIGHT_LIGHT, ON);
-    Lights_Write(LEFT_LIGHT, ON);
-
-    if (recovery == OPT_NONRECOV) { // Enter an infinite while loop
-        while (1) {
-
-            delay_ms(500);
-            Status_Leds_Toggle(CONTROLS_FAULT_LED);
-            Status_Leds_Toggle(DASH_HEARTBEAT_LED);
-            CANbus_Send_Faultstate(faultmsg, CARCAN);
-            CANbus_Send_Faultstate(iostatemsg, CARCAN);
-            ErrorStatus status = CANbus_Read_FaultState(&dataBuf, MOTORCAN);
-
-            // There is a message on the motor canbus
-            if(status == SUCCESS){
-                // Forward messages from motorcan to carcan
-                motorCanID = dataBuf.ID;
-                if(motorCanID == MOTOR_STATUS){
-                    CANbus_Send_Faultstate(dataBuf, CARCAN);
-                }
-            }
-        }
-    }
-    else{
-
-        Status_Leds_Write(CONTROLS_FAULT_LED, OFF);
-
-        // Only unlock the scheduler if we locked it
-        if(error_data.lock_scheduler == OPT_LOCK_SCHED){
-            OSSchedUnlock(&err);
-            // Don't err out if scheduler is still locked because of a timer
-            // callback; but we don't plan to lock more than one level deep
-            if (err != OS_ERR_SCHED_LOCKED || OSSchedLockNestingCtr > 1) {
-                assertOSError(err);
-            }
-        }
-    }
-    }
-}
-
-
-//Todo, change all the functions those classes call, attach to RTOS for faults, attach to rtos for classes, add watchdogs
